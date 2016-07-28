@@ -1,0 +1,44 @@
+<?php
+    ####################################################
+    #### Name:  getCampaigns.php                    ####
+    #### Type: API to get all campaigns	            ####
+    #### Version: 0.9                               ####
+    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
+    #### Written by: Jeremiah Sebastian V. Samatra  ####
+    #### License: AGPLv2                            ####
+    ####################################################
+    
+    include "goFunctions.php";
+    
+    $groupId = go_get_groupid($goUser);
+    
+    if (!checkIfTenant($groupId)) {
+        $ul='';
+    } else { 
+        $ul = " where user_group='$groupId'";
+    }
+                   $page   = (! $ifNotPage) ? $this->uri->segment(3) : 1;
+                if ((is_numeric($page) || $page=='ALL') && !is_null($this->uri->segment(4)) && strlen($this->uri->segment(4)) > 2) {
+                        $search   = addcslashes(mysql_real_escape_string($this->uri->segment(4)),"%");
+                        if (strlen($search)>0) {
+                                $addedSQL = "(campaign_id RLIKE '$search' OR campaign_name RLIKE '$search')";
+                        }
+                        $addedSQL = (strlen($ul) < 1) ? "WHERE $addedSQL" : "AND $addedSQL";
+                }
+                //$addedSQL = '';
+
+                //$query  = "SELECT count(*) AS cnt FROM vicidial_campaigns $ul $addedSQL;";
+                //$total  = $query->row()->cnt;
+                $limit  = 5;
+                $rp     = ($this->uri->segment(3)=='ALL') ? $total : 25;
+                if (is_null($page) || $page < 1 || !is_numeric($page))
+                        $page = 1;
+                $start  = (($page-1) * $rp);
+
+//                $return['pagelinks'] = $this->pagelinks($groupId,$page,$rp,$total,$limit);
+ 
+    $query = "SELECT campaign_id as cID,campaign_name as cName,active as cActive,dial_method as cDialMethod,auto_dial_level as cLevel FROM vicidial_campaigns $ul $addedSQL ORDER BY campaign_id limit $start,$rp;"; 
+    $rsltv = mysql_query($query, $link);
+    $fresults = mysql_fetch_assoc($rsltv);
+    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+?>

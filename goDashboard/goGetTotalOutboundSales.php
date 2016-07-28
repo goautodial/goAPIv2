@@ -1,0 +1,34 @@
+<?php
+    ####################################################
+    #### Name: getTotalOutboundSales.php            ####
+    #### Type: API to get total outbound sales      ####
+    #### Version: 0.9                               ####
+    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
+    #### Written by: Warren Ipac Briones            ####
+    #### License: AGPLv2                            ####
+    ####################################################
+    
+    include_once ("goFunctions.php");
+    
+    $groupId = go_get_groupid($goUser);
+    
+    if (!checkIfTenant($groupId)) {
+        $ul='';
+    } else { 
+        $stringv = go_getall_allowed_users($groupId);
+        $stringv .= "'j'";
+        $ul = " and vcl.campaign_id IN ($stringv) and user_level != 4";
+    }
+
+   $NOW = date("Y-m-d");
+            $query_date =  date('Y-m-d');
+            $status = "SALE";
+            $date = "call_date BETWEEN '$query_date 00:00:00' AND '$query_date 23:59:59'";
+//select sum(calls_today) as calls_today,sum(drops_today) as drops_today,sum(answers_today) as answers_today from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'
+   //$query = "select count(*) as OutboundSales from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid";
+   $query = "select count(*) as OutboundSales from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $date $ul";
+$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
+    $rsltv = mysqli_query($link,$query);
+    $fresults = mysqli_fetch_assoc($rsltv);
+    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+?>

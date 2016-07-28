@@ -1,0 +1,111 @@
+<?php
+    #######################################################
+    #### Name: goGetLeads.php     	               ####
+    #### Description: API to get Leads                 ####
+    #### Version: 0.9                                  ####
+    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
+    #### Written by: Warren Ipac Briones               ####
+    #### License: AGPLv2                               ####
+    #######################################################
+    include_once ("goFunctions.php");
+
+    function remove_empty($array) {
+    	return array_filter($array, '_remove_empty_internal');
+    }
+
+    function _remove_empty_internal($value) {
+  	return !empty($value) || $value === 0;
+    }
+                /*$groupId = go_get_groupid($goUser);
+
+                if (!checkIfTenant($groupId)) {
+                        $ul = "";
+                } else {
+                        $ul = "AND user_group='$groupId'";
+                   $addedSQL = "WHERE user_group='$groupId'";
+                }*/
+        $goVarLimit = $_REQUEST["goVarLimit"];
+	$userid = $_REQUEST["user_id"];
+	
+	if($goVarLimit > 0) {
+		$goMyLimit = "LIMIT $goVarLimit";
+	} else {
+		$goMyLimit ="";
+	}
+	
+//	if($userid == NULL){
+//		$userid = "DOVAkhiin";
+//	}
+//echo $userid;
+	//$apiresults = array("result" => "success", "userid"=>$userid);
+   		
+ //  	$query = "SELECT list_id,first_name,middle_initial,last_name,email,phone_number,alt_phone,address1,address2,address3,city,state,province,postal_code,country_code,date_of_birth,entry_date,user,gender,comments FROM vicidial_list $goMyLimit";
+   //	$rsltv = mysqli_query($link, $query);
+
+	$getAllowedCampaigns_query = "SELECT vicidial_users.user_group, vicidial_user_groups.allowed_campaigns FROM vicidial_users, vicidial_user_groups WHERE vicidial_users.user_group = vicidial_user_groups.user_group AND vicidial_users.user ='$userid'";  	
+	$allowedCampaigns_result = mysqli_query($link, $getAllowedCampaigns_query);
+	$allowedCampaignsFetch = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC);
+	$allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
+	
+	//if admin
+	if($allowedCampaigns == " -ALL-CAMPAIGNS- -"){
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number FROM vicidial_list WHERE phone_number != '' $goMyLimit";
+
+        	$returnRes = mysqli_query($link, $queryx);
+
+	} else { //if multiple allowed campaigns
+		$multiple_campaigns = explode("-", $allowedCampaigns);
+		$allowedCampaignsx = $multiple_campaigns[0];
+		$allowedCampaignsx = explode(" ",$allowedCampaignsx);	
+		$allowedCampaignsx = remove_empty($allowedCampaignsx);
+		$allowedCampaignsx = implode("','", $allowedCampaignsx);
+		$allowedCampaignsx = "'".$allowedCampaignsx."'";
+		
+		//get lists id from return campaigns
+		$getListsID_query = "select list_id from vicidial_lists where campaign_id IN($allowedCampaignsx)";
+		$listsID_result = mysqli_query($link, $getListsID_query);
+		//$listsIDFetch = mysqli_fetch_array($listsID_result, MYSQLI_ASSOC);
+		
+		while($listsID_resultx = mysqli_fetch_array($listsID_result, MYSQLI_ASSOC)){
+			$list_results .= $listsID_resultx['list_id']." ";
+		}
+		$fetchLists = explode(" ", $list_results);
+		$fetchLists = remove_empty($fetchLists);
+		$fetchLists = implode("','", $fetchLists);
+		$fetchLists = "'".$fetchLists."'";
+	
+		//get all leads from return list_id
+//		$queryx = "SELECT count(*) as xxx FROM vicidial_list WHERE list_id IN($fetchLists);";
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goMyLimit;";
+		$returnRes = mysqli_query($link, $queryx); 
+		
+	}
+
+	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
+		///$datauserid[] = $_REQUEST['user_id'];
+		$dataLeadid[] = $fresults['lead_id'];
+		$dataListid[] = $fresults['list_id'];
+		$dataFirstName[] = $fresults['first_name'];
+       		$dataMiddleInitial[] = $fresults['middle_initial'];
+                $dataLastName[] = $fresults['last_name'];
+		//$dataEmail[] = $fresults['email'];
+		$dataPhoneNumber[] = $fresults['phone_number'];
+		//$dataAltPhone[] = $fresults['alt_phone'];
+		//$dataAddress1[] = $fresults['address1'];
+		//$dataAddress2[] = $fresults['address2'];
+		//$dataAddress3[] = $fresults['address3'];
+		/*$dataCity[] = $fresults['city'];
+		$dataState[] = $fresults['state'];
+		$dataProvince[] = $fresults['province'];
+		$dataPostalCode[] = $fresults['postal_code'];
+		$dataCountryCode[] = $fresults['country_code'];
+		$dataDateofbirth[] = $fresults['date_of_birth'];
+		$dataEntryDate[] = $fresults['entry_date'];
+		$dataUser[] = $fresults['user'];
+		$dataGender[] = $fresults['gender'];
+		$dataComments[] = $fresults['comments'];*/
+   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName,/* "email" => $dataEmail,*/ "phone_number" => $dataPhoneNumber /*"alt_phone" => $dataAltPhone, "address1" => $dataAddress1, "address2" => $dataAddress2, "address3" => $dataAddress3/*, "city" => $dataCity, "state" => $dataState, "province" => $dataProvince, "postal_code" => $dataPostalCode, "country_code" => $dataCountryCode, "date_of_birth" => $dataDateofbirth, "user" => $dataUser, "gender" => $dataGender, "comments" => $dataComments*/); 
+//	$apiresults = array("result" => "success", "countmo" => $fresults['xxx']);
+	}
+
+?>
