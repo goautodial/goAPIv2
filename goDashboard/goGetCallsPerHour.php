@@ -1,6 +1,6 @@
 <?php
     ####################################################
-    #### Name: getPerHourCall.php                   ####
+    #### Name: goGetCallsPerHour.php                ####
     #### Type: API to get total calls               ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
