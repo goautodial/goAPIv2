@@ -1,6 +1,6 @@
 <?php
     ########################################################
-    #### Name: getLeadsinHopper.php                     ####
+    #### Name: goGetLeadsinHopper.php                     ####
     #### Description: API to get total leads in hopper  ####
     #### Version: 0.9                                   ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014       ####

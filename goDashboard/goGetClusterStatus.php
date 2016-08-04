@@ -1,14 +1,14 @@
 <?php
     ####################################################
-    #### Name: getAgentsOnline.php                  ####
+    #### Name: goGetClusterStatus.php               ####
     #### Type: API to get total agents online       ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Jeremiah Sebastian Samatra       ####
+    #### Written by: Jeremiah Sebastian Samatra     ####
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once ("goFunctions.php");
+    include "goFunctions.php";
 
 ###Database Time
 	$queryTime = "SELECT NOW() as dbtime, UNIX_TIMESTAMP(NOW()) as u_dbtime;";

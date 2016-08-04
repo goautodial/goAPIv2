@@ -1,6 +1,6 @@
 <?php
     ####################################################
-    #### Name: getTotalActiveLeads.php              ####
+    #### Name: goGetTotalActiveLeads.php            ####
     #### Description: API to get total active leads ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####

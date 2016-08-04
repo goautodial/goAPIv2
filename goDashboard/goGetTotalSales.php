@@ -1,6 +1,6 @@
 <?php
     ####################################################
-    #### Name: getTotalSales.php                    ####
+    #### Name: goGetTotalSales.php                  ####
     #### Type: API to get total sales               ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####

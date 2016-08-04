@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: getTotalAnsweredCalls.php               ####
+    #### Name: goGetTotalAnsweredCalls.php               ####
     #### Description: API to get total answered calls  ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
@@ -22,7 +22,7 @@
 
    $NOW = date("Y-m-d");
 
-    $query = "SELECT sum(answers_today) as answers_today from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'  $ul"; 
+    $query = "SELECT sum(answers_today) as getTotalAnsweredCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'  $ul"; 
     $rsltv = mysqli_query($link,$query);
     $fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );

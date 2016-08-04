@@ -1,6 +1,6 @@
 <?php
     ######################################################
-    #### Name: getTotalDialableLeads.php              ####
+    #### Name: goGetTotalDialableLeads.php            ####
     #### Description: API to get total dialable leads ####
     #### Version: 0.9                                 ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014     ####
