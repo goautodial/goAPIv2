@@ -1,6 +1,6 @@
 <?php
     ####################################################
-    #### Name: getAgentsOnline.php                  ####
+    #### Name: goGetTotalAgentsOnline.php           ####
     #### Type: API to get total agents online       ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
@@ -20,7 +20,7 @@
         $ul = " where user IN ($stringv) and user_level != 4";
     }
     
-    $query = "SELECT count(*) as TotalAgentsOnline FROM vicidial_live_agents $ul"; 
+    $query = "SELECT count(*) as getTotalAgentsOnline FROM vicidial_live_agents $ul"; 
     $rsltv = mysqli_query($link,$query);
     $fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
