@@ -132,7 +132,7 @@ $default_settings = array(
     'source_id' => '',
     'call_script_ID' => '',
     'vendor_lead_code' => '',
-    'script_recording_delay' => '',
+    'script_recording_delay' => 0,
     'Call_XC_a_Number' => '',
     'Call_XC_b_Number' => '',
     'Call_XC_c_Number' => '',
@@ -290,7 +290,9 @@ $default_settings = array(
     'HK_statuses_camp' => 0,
     'HKuser_level' => $HKuser_level,
     'quick_transfer_button_orig' => '',
-    'local_consult_xfers' => 1
+    'local_consult_xfers' => 1,
+    'web_form_vars' => '',
+    'web_form_vars_two' => ''
 );
 
 if ($userExist > 0) {
