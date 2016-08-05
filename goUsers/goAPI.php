@@ -48,9 +48,14 @@
 
 	$user = preg_replace("/\'|\"|\\\\|;| /", "", $goUser);
 	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
+	
+    $query_settings = "SELECT pass_hash_enabled FROM system_settings";
+    $rslt = mysqli_query($link, $query_settings);
+    $rowX = mysqli_fetch_array($rslt, MYSQLI_NUM);
+	$pass_hash_enabled = $rowX[0];
 
 	$passSQL = "pass='$pass'";
-	if ($SSpass_hash_enabled > 0) {
+	if ($pass_hash_enabled > 0) {
 		if ($bcrypt < 1) {
 			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
 			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
