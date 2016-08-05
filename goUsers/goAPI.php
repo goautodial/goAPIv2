@@ -12,8 +12,6 @@
     include_once ("../goDBgoautodial.php");
     include_once ("../goFunctions.php");
     
-    $version = file_get_contents('../version.txt');
-    
     ####### Variables #########
     
     if (isset($_GET["goAction"])) {
@@ -44,7 +42,23 @@
     $goVersion = "1.0";
     
     #### check credentials ####
-    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass'";
+	$pass_hash = '';
+	$cwd = $_SERVER['DOCUMENT_ROOT'];
+	$bcrypt = 0;
+
+	$user = preg_replace("/\'|\"|\\\\|;| /", "", $goUser);
+	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
+
+	$passSQL = "pass='$pass'";
+	if ($SSpass_hash_enabled > 0) {
+		if ($bcrypt < 1) {
+			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+		} else {$pass_hash = $pass;}
+		$passSQL = "pass_hash='$pass_hash'";
+	}
+	
+    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
     $rslt=mysqli_query($link, $query_user);
     $check_result = mysqli_num_rows($rslt);
     
