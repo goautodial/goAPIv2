@@ -81,7 +81,9 @@
 									"user_id" => $dataUserId,
 									"email" => $dataEmail,
 									"pass" => $dataPass,
-									"bcrypt" => $SSpass_hash_enabled
+									"bcrypt" => $SSpass_hash_enabled,
+									"salt" => $SSpass_key,
+									"cost" => $SSpass_cost
 							);
 		}
 	} else {
