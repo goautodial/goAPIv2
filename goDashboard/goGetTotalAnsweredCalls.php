@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: goGetTotalAnsweredCalls.php               ####
+    #### Name: goGetTotalAnsweredCalls.php             ####
     #### Description: API to get total answered calls  ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
