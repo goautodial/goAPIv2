@@ -11,6 +11,7 @@
 $is_logged_in = check_agent_login($astDB, $goUser);
 
 $agent = get_settings('user', $astDB, $goUser);
+$settings = get_settings('system', $astDB);
 $user_group = $agent->user_group;
 
 if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }
@@ -33,18 +34,18 @@ if ($is_logged_in) {
         }
     }
 	$campaignCBsql = '';
-	if ($agentonly_callback_campaign_lock > 0) {
+	if ($system->agentonly_callback_campaign_lock > 0) {
         $campaignCBsql = "AND campaign_id='{$campaign}'";
     }
-	$stmt = "SELECT count(*) FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
+	$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
     $rslt = $astDB->rawQuery($stmt);
 	$cbcount = $astDB->getRowCount();
 
-	$stmt = "SELECT count(*) FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
+	$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
     $rslt = $astDB->rawQuery($stmt);
 	$cbcount_live = $astDB->getRowCount();
 
-	$stmt = "SELECT count(*) FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
+	$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
     $rslt = $astDB->rawQuery($stmt);
 	$cbcount_today = $astDB->getRowCount();
 
