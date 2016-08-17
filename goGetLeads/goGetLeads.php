@@ -1,10 +1,11 @@
 <?php
     #######################################################
-    #### Name: goGetLeads.php     	               ####
+    #### Name: goGetLeads.php     	               	   ####
     #### Description: API to get Leads                 ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Warren Ipac Briones               ####
+    #### Written by: Warren Ipac Briones			   ####
+	#### Modified by: Alexander Jim Abenoja			   ####
     #### License: AGPLv2                               ####
     #######################################################
     include_once ("goFunctions.php");
@@ -24,8 +25,16 @@
                         $ul = "AND user_group='$groupId'";
                    $addedSQL = "WHERE user_group='$groupId'";
                 }*/
-        $goVarLimit = $_REQUEST["goVarLimit"];
+    $goVarLimit = $_REQUEST["goVarLimit"];
 	$userid = $_REQUEST["user_id"];
+	$search = mysqli_real_escape_string($link, $_REQUEST['search']);
+	$disposition_filter = mysqli_real_escape_string($link, $_REQUEST['disposition_filter']);
+	$list_filter = mysqli_real_escape_string($link, $_REQUEST['list_filter']);
+	$address_filter = mysqli_real_escape_string($link, $_REQUEST['address_filter']);
+	$city_filter = mysqli_real_escape_string($link, $_REQUEST['city_filter']);
+	$state_filter = mysqli_real_escape_string($link, $_REQUEST['state_filter']);
+	
+	$goSearch = "";
 	
 	if($goVarLimit > 0) {
 		$goMyLimit = "LIMIT $goVarLimit";
@@ -33,9 +42,24 @@
 		$goMyLimit ="";
 	}
 	
-//	if($userid == NULL){
-//		$userid = "DOVAkhiin";
-//	}
+	if(!empty($search)) {
+		$goSearch = "AND (phone_number LIKE '%$search%' OR first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR lead_id LIKE '$search')";
+	}
+	if(!empty($disposition_filter)){
+		$filterDispo = "AND status = '$disposition_filter'";
+	}
+	if(!empty($list_filter)){
+		$filterList = "AND list_id = '$list_filter'";
+	}
+	if(!empty($address_filter)){
+		$filterAddress = "AND (address1 LIKE '%$address_filter%' OR address2 LIKE '%$address_filter%')";
+	}
+	if(!empty($city_filter)){
+		$filterCity = "AND city LIKE '%$city_filter%'";
+	}
+	if(!empty($state_filter)){
+		$filterState = "AND state LIKE '%$state_filter%'";
+	}
 //echo $userid;
 	//$apiresults = array("result" => "success", "userid"=>$userid);
    		
@@ -49,7 +73,7 @@
 	
 	//if admin
 	if($allowedCampaigns == " -ALL-CAMPAIGNS- -"){
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number FROM vicidial_list WHERE phone_number != '' $goMyLimit";
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit";
 
         	$returnRes = mysqli_query($link, $queryx);
 
@@ -76,36 +100,21 @@
 	
 		//get all leads from return list_id
 //		$queryx = "SELECT count(*) as xxx FROM vicidial_list WHERE list_id IN($fetchLists);";
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goMyLimit;";
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit;";
 		$returnRes = mysqli_query($link, $queryx); 
 		
 	}
 
 	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
-		///$datauserid[] = $_REQUEST['user_id'];
 		$dataLeadid[] = $fresults['lead_id'];
 		$dataListid[] = $fresults['list_id'];
 		$dataFirstName[] = $fresults['first_name'];
-       		$dataMiddleInitial[] = $fresults['middle_initial'];
-                $dataLastName[] = $fresults['last_name'];
-		//$dataEmail[] = $fresults['email'];
+       	$dataMiddleInitial[] = $fresults['middle_initial'];
+        $dataLastName[] = $fresults['last_name'];
 		$dataPhoneNumber[] = $fresults['phone_number'];
-		//$dataAltPhone[] = $fresults['alt_phone'];
-		//$dataAddress1[] = $fresults['address1'];
-		//$dataAddress2[] = $fresults['address2'];
-		//$dataAddress3[] = $fresults['address3'];
-		/*$dataCity[] = $fresults['city'];
-		$dataState[] = $fresults['state'];
-		$dataProvince[] = $fresults['province'];
-		$dataPostalCode[] = $fresults['postal_code'];
-		$dataCountryCode[] = $fresults['country_code'];
-		$dataDateofbirth[] = $fresults['date_of_birth'];
-		$dataEntryDate[] = $fresults['entry_date'];
-		$dataUser[] = $fresults['user'];
-		$dataGender[] = $fresults['gender'];
-		$dataComments[] = $fresults['comments'];*/
-   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName,/* "email" => $dataEmail,*/ "phone_number" => $dataPhoneNumber /*"alt_phone" => $dataAltPhone, "address1" => $dataAddress1, "address2" => $dataAddress2, "address3" => $dataAddress3/*, "city" => $dataCity, "state" => $dataState, "province" => $dataProvince, "postal_code" => $dataPostalCode, "country_code" => $dataCountryCode, "date_of_birth" => $dataDateofbirth, "user" => $dataUser, "gender" => $dataGender, "comments" => $dataComments*/); 
-//	$apiresults = array("result" => "success", "countmo" => $fresults['xxx']);
+		$dataDispo[] = $fresults['status'];
+		
+   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo); 
 	}
 
 ?>

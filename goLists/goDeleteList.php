@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian Samatra        ####
     #### License: AGPLv2                               ####
     #######################################################
-    include "goFunctions.php";
+    include_once ("../goFunctions.php");
     
     ### POST or GET Variables
     $list_id = $_REQUEST['list_id'];
@@ -23,7 +23,7 @@
 		if (!checkIfTenant($groupId)) {
         		$ul = "WHERE list_id='$list_id'";
     		} else { 
-			$ul = "WHERE list_id='$list_id' AND user_group='$groupId'";  
+				$ul = "WHERE list_id='$list_id' AND user_group='$groupId'";  
 		}
 
    		$query = "SELECT list_id,list_name FROM vicidial_lists $ul order by list_id LIMIT 1";
@@ -35,7 +35,7 @@
 				$dataListID = $fresults['list_id'];
 			}
 
-			if(!$dataListID == null) {
+			if($dataListID != null) {
 				$deleteQuery = "DELETE FROM vicidial_lists WHERE list_id='$dataListID';"; 
    				$deleteResult = mysqli_query($link, $deleteQuery);
 				$deleteQueryLeads = "DELETE FROM vicidial_list WHERE list_id='$dataListID';"; 

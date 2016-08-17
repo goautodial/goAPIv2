@@ -12,8 +12,6 @@
     include_once ("goDBconnectB.php");
     include_once ("goFunctions.php");
     
-    $version = file_get_contents('../version.txt');
-    
     ####### Variables #########
     
     if (isset($_GET["goAction"])) {

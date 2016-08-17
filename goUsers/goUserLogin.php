@@ -51,7 +51,7 @@
 		//$aDB->where('pass_hash', $pass_hash);
 	}
 	
-	$query = "SELECT user_id, user, email, pass, full_name, user_level, user_group, active, pass_hash
+	$query = "SELECT user_id, user, email, pass, full_name, user_level, user_group, active, pass_hash, phone_login, phone_pass
 			  FROM vicidial_users
 			  WHERE ".$user."
 			  AND ".$passSQL."
@@ -69,6 +69,8 @@
 				$dataActive   = $fresults['active'];
 				$dataUserId = $fresults['user_id'];
 				$dataEmail = $fresults['email'];
+				$dataPhone_login = $fresults['phone_login'];
+				$dataPhone_pass = $fresults['phone_pass'];
 				$dataPass = ($SSpass_hash_enabled > 0) ? $fresults['pass_hash'] : $fresults['pass'];
 				
 				$apiresults = array(
@@ -83,7 +85,9 @@
 									"pass" => $dataPass,
 									"bcrypt" => $SSpass_hash_enabled,
 									"salt" => $SSpass_key,
-									"cost" => $SSpass_cost
+									"cost" => $SSpass_cost,
+									"phone_login" => $dataPhone_login,
+									"phone_pass" => $dataPhone_pass
 							);
 		}
 	} else {

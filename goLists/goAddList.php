@@ -8,7 +8,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include "goFunctions.php";
+    include_once ("../goFunctions.php");
  
 	### POST or GET Variables
         $list_id = $_REQUEST['list_id'];
@@ -30,7 +30,7 @@
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name) || $list_name == null){
                 $apiresults = array("result" => "Error: Special characters found in list_name and must not be empty");
         } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_description) || $list_description == null){
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $list_description) || $list_description == null){
                 $apiresults = array("result" => "Error: Special characters found in list_description and must not be empty");
         } else {
 

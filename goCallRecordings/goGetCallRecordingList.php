@@ -7,10 +7,14 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
     $limit = $_REQUEST['limit'];
-    $requestDataPhone = $_REQUEST['requestDataPhone'];   
+    $requestDataPhone = $_REQUEST['requestDataPhone'];
+	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
+	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
+	$agent_filter = mysqli_real_escape_string($link, $_REQUEST['agent_filter']);
+	
     if($limit < 1){ $limit = 20; } else { $limit = 0; }
  
     	$groupId = go_get_groupid($goUser);
@@ -40,14 +44,34 @@
 		ORDER BY cl.uniqueid DESC 
 		LIMIT ".$limit; */
 
+$goLimit = "25";
+		
 if(!empty($requestDataPhone)) {
 	$sqlPhone = "AND vl.phone_number LIKE '%$requestDataPhone%'";
+	$goLimit = "500";
+}else{
+		$sqlPhone = "";
 }
 
+if(!empty($start_filterdate) && !empty($end_filterdate)){
+		$goLimit = "1000";
+		$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
+}else{
+		$filterdate = "";
+}
+
+if(!empty($agent_filter)){
+		$goLimit = "1000";
+		$filteragent = "AND rl.user = '$agent_filter'";
+}else{
+		$filteragent = "";
+}
 
 //search via phone
 //	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id $sql2 ORDER BY cl.uniqueid DESC LIMIT 20;";
-	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id $sqlPhone  ORDER BY cl.uniqueid DESC LIMIT 50;";
+	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid
+				FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id
+				$sqlPhone $filterdate $filteragent ORDER BY rl.end_time DESC LIMIT $goLimit;";
 //	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.phone_number='g' ORDER BY cl.uniqueid DESC LIMIT 50";
 	
 //search via date

@@ -31,7 +31,13 @@
         $ct_friday_stop = $_REQUEST['ct_friday_stop'];
         $ct_saturday_start = $_REQUEST['ct_saturday_start'];
         $ct_saturday_stop = $_REQUEST['ct_saturday_stop'];
-        $user_group = ($_REQUEST['user_group'] == "ALL")? "---ALL---":$_REQUEST['user_group'];
+		if($_REQUEST['user_group'] == "ALL"){
+			$user_group = "---ALL---";
+		}else{
+			$user_group = $_REQUEST['user_group'];
+		}
+        //$user_group = ($_REQUEST['user_group'] == "ALL")? "---ALL---":$_REQUEST['user_group'];
+		
 		$ip_address = $_REQUEST['hostname'];
 		$goUser = $_REQUEST['goUser'];
 		
@@ -44,7 +50,7 @@
             $apiresults = array("result" => "Error: Set a value for Call Time ID not less than 3 characters.");
         }elseif(preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_name) || $call_time_name == null){
             $apiresults = array("result" => "Error: Special characters found in call time name and must not be empty");
-        }elseif(preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_id)){
+        }elseif(preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â]/',$call_time_id)){
             $apiresults = array("result" => "Error: Special characters found in call time ID");
         }elseif(preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_comments)){
             $apiresults = array("result" => "Error: Special characters found in call time comments");
@@ -97,7 +103,7 @@
             if($countResult > 0) {
 
                 $queryCheck = "SELECT call_time_id from vicidial_call_times where call_time_id='$call_time_id';";
-                $sqlCheck = mysqli_query($queryCheck, $link);
+                $sqlCheck = mysqli_query($link, $queryCheck);
                 $countCheck = mysqli_num_rows($sqlCheck);
                 if($countCheck <= 0){             
 

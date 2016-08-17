@@ -8,11 +8,11 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goDBasterisk.php");
-    include_once("../goDBgoautodial.php");
-    include_once("../goFunctions.php");
+    include_once ("../goDBasterisk.php");
+    include_once ("../goDBgoautodial.php");
+    include_once ("../goFunctions.php");
     
-    //$version = file_get_contents('../version.txt');
+    $version = file_get_contents('../version.txt');
     
     ####### Variables #########
     
@@ -44,14 +44,14 @@
     $goVersion = "1.0";
     
     #### check credentials ####
-    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
-    $rslt=mysqli_query($link,$query_user);
+    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass'";
+    $rslt=mysqli_query($link, $query_user);
     $check_result = mysqli_num_rows($rslt);
-    // var_dump($query_user); 
+    
     if ($check_result > 0) {
        
         if (file_exists($goAction . ".php" )) {
-            include_once($goAction . ".php");
+            include $goAction . ".php";
            #$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
     		$apiresults = array( "result" => "error", "message" => "Command Not Found" );

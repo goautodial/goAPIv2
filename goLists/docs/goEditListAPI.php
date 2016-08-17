@@ -3,26 +3,28 @@
  ####################################################
  #### Name: goEditListAPI.php                    ####
  #### Description: API to edit specific List     ####
- #### Version: 0.9                               ####
+ #### Version: 4.0                               ####
  #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
- #### Written by: Jeremiah Sebastian V. Samatra  ####
+ #### Written by: Alexander Abenoja              ####
  #### License: AGPLv2                            ####
  ####################################################
 	 
-
-
-	 $url = "https://gadcs.goautodial.com/goAPI/goLists/goAPI.php"; # URL to GoAutoDial API file
+     echo "WELCOME TO EDIT LIST API!";
+     
+	 $url = "https://webrtc.goautodial.com/goAPI/goLists/goAPI.php"; # URL to GoAutoDial API file
 	 $postfields["goUser"] = "admin"; #Username goes here. (required)
-	 $postfields["goPass"] = "kam0teque1234"; #Password goes here. (required)
+	 $postfields["goPass"] = "Yq48yHo2g0"; #Password goes here. (required)
 	 $postfields["goAction"] = "goEditList"; #action performed by the [[API:Functions]]
 	 $postfields["responsetype"] = "json"; #json (required)
 	 $postfields["limit"] = "1"; #response type by the [[API:Functions]]
-         $postfields["list_id"] = $_GET['list_id']; #Desired list id. (required) 
-         $postfields["list_name"] = $_GET['list_name']; #Desired name. (required)
-         $postfields["list_description"] = $_GET['list_description']; #Desired description. (required)
-         $postfields["campaign_id"] =$_GET['campaign_id']; #Assign to campaign. (required)
-         $postfields["active"] = $_GET['active']; #Y or N (required)
-         $postfields["hostname"] = $_SERVER['REMOTE_ADDR']; #Default value
+    
+    $postfields["list_id"] = "69276867212"; #Desired list id. (required) 
+    $postfields["list_name"] = "ListIDtest 69276867212"; #Desired name. (required)
+    $postfields["list_description"] = "TestEdit - ListID - 4-8-2016"; #Desired description. (required)
+    $postfields["campaign_id"] = "AGENTS"; #Assign to campaign. (required)
+    $postfields["active"] = "Y"; #Y or N (required)
+    
+    $postfields["hostname"] = $_SERVER['REMOTE_ADDR']; #Default value
 	 $postfields["reset_time"] = $_GET['reset_time'];  #Desired reset time (required)
 	 $postfields["xferconf_a_number"] = $_GET['xferconf_a_number']; #Desired number (required)
 	 $postfields["xferconf_b_number"] = $_GET['xferconf_b_number']; #Desired number (required)
@@ -45,8 +47,9 @@
 	 $data = curl_exec($ch);
 	 curl_close($ch);
 	 $output = json_decode($data);
-	
-
+    
+    var_dump($output);	
+    
 	if ($output->result=="success") {
 	   # Result was OK!
 		echo "Update Success";	

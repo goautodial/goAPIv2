@@ -7,12 +7,12 @@
     #### Written by: Jerico James Flores Milo       ####
     #### License: AGPLv2                            ####
     ####################################################
-    
+
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
     include_once("../goFunctions.php");
     
-    $version = file_get_contents('../version.txt');
+    //$version = file_get_contents('../version.txt');
     
     ####### Variables #########
     
@@ -72,6 +72,9 @@
     
     #### API OUTPUT ####
     ob_start();
+	header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: POST');
+    header('Access-Control-Max-Age: 1000');
     
     if (count( $apiresults )) {
     	if ($userresponsetype == "json") {

@@ -32,12 +32,13 @@
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 			        $dataListId[] =  $fresults['list_id'];
 			        $dataListName[] =  $fresults['list_name'];
+					 $dataDesc[] =  $fresults['list_description'];
 			        $dataActive[] =  $fresults['active'];
 			        $dataListLastcallDate[] =  $fresults['list_lastcalldate'];
 			        $dataTally[] =  $fresults['tally'];
 			        $dataCampaignId[] =  $fresults['campaign_id'];
 
-				        $apiresults = array( "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId);
+				        $apiresults = array( "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "list_desc" => $dataDesc, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId);
 			}
 		} else {
 			$apiresults = array("result" => "Error: List doesn't exist.");

@@ -22,7 +22,7 @@
                    $addedSQL = "WHERE user_group='$groupId'";
                 }
 
-                $query = "SELECT call_time_id,call_time_name,ct_default_start,ct_default_stop,user_group FROM vicidial_call_times WHERE call_time_id='$call_time_id' $ul $addedSQL ORDER BY call_time_id LIMIT 1;";
+                $query = "SELECT call_time_id,call_time_name, call_time_comments,ct_default_start,ct_default_stop,user_group FROM vicidial_call_times WHERE call_time_id='$call_time_id' $ul $addedSQL ORDER BY call_time_id LIMIT 1;";
                 $rsltv = mysqli_query($link,$query);
 		$exist = mysqli_num_rows($rsltv);
 		if($exist >= 1){
@@ -32,7 +32,8 @@
                         $dataCtDefStart[] = $fresults['ct_default_start'];
                         $dataCtDefStop[] = $fresults['ct_default_stop'];
                         $dataUserGroup[] = $fresults['user_group'];
-                        $apiresults = array("result" => "success", "call_time_id" => $dataCalltimeID, "call_time_name" => $dataCalltimeName, "ct_default_start" => $dataCtDefStart, "ct_default_stop" => $dataCtDefStop, "user_group" => $dataUserGroup);
+						$dataComment[] = $fresults['call_time_comments'];
+                        $apiresults = array("result" => "success", "call_time_id" => $dataCalltimeID, "call_time_name" => $dataCalltimeName, "call_time_comments" => $dataComment, "ct_default_start" => $dataCtDefStart, "ct_default_stop" => $dataCtDefStop, "user_group" => $dataUserGroup);
                 }
 	        } else {
 

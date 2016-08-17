@@ -1,45 +1,75 @@
 <?php
 
  ####################################################
- #### Name:goEditVoicemail.php                   ####
- #### Description: API to edit specific voicemail####
- #### Version: 0.9                               ####
- #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
- #### Written by: Jeremiah Sebastian Samatra	 ####
- #### License: AGPLv2                            ####
+ #### NamegoEditVoicemail.php                   ####
+ #### Description API to edit specific voicemail####
+ #### Version 0.9                               ####
+ #### Copyright GOAutoDial Ltd. (c) 2011-2015   ####
+ #### Written by Jeremiah Sebastian Samatra	 ####
+ #### License AGPLv2                            ####
  ####################################################
 	
 
 
-	 $url = "https://encrypted.goautodial.com/goAPI/goStateCallTImes/goAPI.php"; # URL to GoAutoDial API file
-	 $postfields["goUser"] = "goautodial"; #Username goes here. (required)
-         $postfields["goPass"] = "JUs7g0P455W0rD11214"; #Password goes here. (required)
-         $postfields["goAction"] = "goEditVoicemail"; #action performed by the [[API:Functions]]
+	 $url = "https://webrtc.goautodial.com/goAPI/goCalltimes/goAPI.php"; # URL to GoAutoDial API file
+	 $postfields["goUser"] = "admin"; #Username goes here. (required)
+     $postfields["goPass"] = "Yq48yHo2g0"; #Password goes here. (required)
+     $postfields["goAction"] = "goEditCalltime"; #action performed by the [[APIFunctions]]
 	 $postfields["responsetype"] = "json"; #json (required)
 	 $postfields["hostname"] = $_SERVER['REMOTE_ADDR']; #Default value
-	 $postfields["state_call_time_id"] = $_GET["state_call_time_id"]; #
-         $postfields["user_group"] = $_GET['user_group'];
-         $postfields["sct_saturday_stop"] = $_GET['sct_saturday_stop'];
-         $postfields["sct_saturday_start"] = $_GET['sct_saturday_start'];
-         $postfields["sct_friday_stop"] = $_GET['sct_friday_stop'];
-         $postfields["sct_friday_start"] = $_GET['sct_friday_start'];
-         $postfields["sct_thursday_stop"] = $_GET['sct_thursday_stop'];
-         $postfields["sct_thursday_start"] = $_GET['sct_thursday_start'];
-         $postfields["sct_wednesday_stop"] = $_GET['sct_wednesday_stop'];
-         $postfields["sct_wednesday_start"] = $_GET['sct_wednesday_start'];
-         $postfields["sct_tuesday_stop"] = $_GET['sct_tuesday_stop'];
-         $postfields["sct_tuesday_start"] = $_GET['ct_tuesday_start'];
-         $postfields["sct_monday_stop"] = $_GET['sct_monday_stop'];
-         $postfields["sct_monday_start,"] = $_GET['sct_monday_start'];
-         $postfields["sct_sunday_stop"] = $_GET['sct_sunday_stop'];
-         $postfields["sct_sunday_start"] = $_GET['sct_sunday_start'];
-         $postfields["sct_default_stop"] = $_GET['sct_default_stop'];
-         $postfields["sct_default_start"] = $_GET['sct_default_start'];
-         $postfields["user_group"] = $_GET['user_group'];
-         $postfields["state_call_time_comments"] = $_GET['state_call_time_comments'];
-         $postfields["state_call_time_name"] = $_GET['state_call_time_name'];
-         $postfields["state_call_time_state"] = $_GET['state_call_time_state'];
-         $postfields["state_call_time_id"] = $_GET['state_call_time_id'];
+     
+    $postfields["call_time_id"]       = '1am-2am'; #Desired uniqueid. (required)
+    $postfields["call_time_name"]     = 'TEST EDIT';
+    $postfields["call_time_comments"] = 'test comment edit THIS';
+    $postfields["user_group"]         = 'AGENTS';
+    
+    $start_default =  "1200";
+    $stop_default =  "1200";
+
+    $start_sunday =  "1200";
+    $stop_sunday =  "1200";
+
+    $start_monday = "1200";
+    $stop_monday = "1200";
+
+    $start_tuesday =  "1200";
+    $stop_tuesday ="1200";
+
+    $start_wednesday =  "1200";
+    $stop_wednesday = "1200";
+
+    $start_thursday = "1200";
+    $stop_thursday = "1200";
+
+    $start_friday = "1200";
+    $stop_friday = "1200";
+
+    $start_saturday = "1200";
+    $stop_saturday = "0100";
+    
+    $postfields["ct_default_start"]   = $start_default;
+    $postfields["ct_default_stop"]    = $stop_default;
+
+    $postfields["ct_sunday_start"]    = $start_sunday;
+    $postfields["ct_sunday_stop"]     = $stop_sunday;
+
+    $postfields["ct_monday_start"]    = $start_monday;
+    $postfields["ct_monday_stop"]     = $stop_monday;
+
+    $postfields["ct_tuesday_start"]   = $start_tuesday;
+    $postfields["ct_tuesday_stop"]    = $stop_tuesday;
+
+    $postfields["ct_wednesday_start"] = $start_wednesday;
+    $postfields["ct_wednesday_stop"]  = $stop_wednesday;
+
+    $postfields["ct_thursday_start"]  = $start_thursday;
+    $postfields["ct_thursday_stop"]   = $stop_thursday;
+
+    $postfields["ct_friday_start"]    = $start_friday;
+    $postfields["ct_friday_stop"]     = $stop_friday;
+
+    $postfields["ct_saturday_start"]  = $start_saturday;
+    $postfields["ct_saturday_stop"]   = $stop_saturday;
 
 
 	 $ch = curl_init();
@@ -53,6 +83,8 @@
 	 curl_close($ch);
 	 $output = json_decode($data);
 	
+    var_dump($output);
+    
 //	print_r($data);
 
 	if ($output->result=="success") {

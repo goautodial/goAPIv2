@@ -58,7 +58,8 @@
 		$list_id 						= $_REQUEST['list_id'];						
 		$country 						= $_REQUEST['country'];						
 		$check_for_duplicates 			= $_REQUEST['check_for_duplicates'];			
-		$carrier_to_use 				= $_REQUEST['carrier_to_use'];				
+		$dial_prefix 					= $_REQUEST['dial_prefix'];
+		$custom_dial_prefix				= $_REQUEST['custom_dial_prefix'];
 		$status 						= $_REQUEST['status'];						
 		$call_recordings 				= $_REQUEST['call_recordings'];				
 		$script 						= $_REQUEST['script'];						
@@ -94,7 +95,13 @@
 		### Default values 
     	$defActive = array("Y","N");
     	$defType = array("OUTBOUND", "INBOUND", "BLENDED", "SURVEY");
-
+		
+		
+		if($dial_prefix == "CUSTOM"){
+				$sippy_dial_prefix = $custom_dial_prefix;
+		}else{
+				$sippy_dial_prefix = $dial_prefix;
+		}
 
     if($campaign_id == null ||  $campaign_type == null || $campaign_name == null) {
         $apiresults = array("result" => "Error: Set a value for Campaign ID, Campaign Type or Campaign Name.");
@@ -139,11 +146,11 @@
                 		if ($campNum < 1){
                 			$local_call_time = "9am-9pm";
 
-                            if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
-                                    $sippy_dial_prefix = "8888".$goUsers;
-                            } elseif($VARSERVTYPE == "gopackages") {
-                                    $sippy_dial_prefix = "9";
-                            }
+                            //if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
+                            //        $sippy_dial_prefix = "8888".$goUsers;
+                            //} elseif($VARSERVTYPE == "gopackages") {
+                            //        $sippy_dial_prefix = "9";
+                            //}
 								
                             $queryAdd = "INSERT INTO vicidial_campaigns (
 												campaign_id, campaign_name, active,	dial_method, dial_status_a,				
@@ -225,11 +232,11 @@
 	                	$local_call_time = "9am-9pm";
 
 	                	$auth_user = $goUsers;
-						if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
-								$sippy_dial_prefix = "8888".$auth_user;
-						} elseif($VARSERVTYPE == "gopackages") {
-								$sippy_dial_prefix = "9";
-						}
+						//if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
+						//		$sippy_dial_prefix = "8888".$auth_user;
+						//} elseif($VARSERVTYPE == "gopackages") {
+						//		$sippy_dial_prefix = "9";
+						//}
 						
 						$queryAddInbound = "INSERT INTO vicidial_campaigns (
 											campaign_id, campaign_name, active, dial_method, dial_status_a,
@@ -361,11 +368,11 @@
 		                                $auth_user = $goUsers;
 		                                //$VARSERVTYPE = $this->config->item('VARSERVTYPE');
 		                                //if($VARSERVTYPE == "cloud"){
-		                                if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
-		                                        $sippy_dial_prefix = "8888".$auth_user;
-		                                } elseif($VARSERVTYPE == "gopackages") {
-		                                        $sippy_dial_prefix = "9";
-		                                }
+		                                //if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
+		                                //        $sippy_dial_prefix = "8888".$auth_user;
+		                                //} elseif($VARSERVTYPE == "gopackages") {
+		                                //        $sippy_dial_prefix = "9";
+		                                //}
 
 		                                $queryInsert = "INSERT INTO vicidial_campaigns (
 																campaign_id, campaign_name, campaign_description, active, dial_method,
@@ -546,11 +553,11 @@
                                     #Sippy
                                     $auth_user = $goUsers;
 
-                                    if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
-                                            $sippy_dial_prefix = "8888".$auth_user;
-                                    } elseif($VARSERVTYPE == "gopackages") {
-                                            $sippy_dial_prefix = "9";
-                                    }
+                                    //if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
+                                    //        $sippy_dial_prefix = "8888".$auth_user;
+                                    //} elseif($VARSERVTYPE == "gopackages") {
+                                    //        $sippy_dial_prefix = "9";
+                                    //}
 
                                     //if($VARSERVTYPE == "cloud"){  
                                     $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,

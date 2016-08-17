@@ -8,20 +8,50 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include "../goFunctions.php";
- 
-    ### POST or GET Variables
-    $goUser = $_REQUEST['goUser'];
-    $ip_address = $_REQUEST['hostname'];
-    $campaign_id = $_REQUEST['campaign_id'];
-    $campaign_name = $_REQUEST['campaign_name'];
-    $active = strtoupper($_REQUEST['active']);
-    $dial_method = strtoupper($_REQUEST['dial_method']);
-    $local_call_time = $_REQUEST['local_call_time'];
-    $campaign_recording = $_REQUEST['campaign_recording'];
-    $auto_dial_level = $_REQUEST['auto_dial_level'];
-    //$limit = $_REQUEST['limit'];
-   
+    include_once("../goFunctions.php");
+
+	### POST or GET Variables
+	$goUser 						= $_REQUEST['goUser'];
+    $ip_address 					= $_REQUEST['hostname'];
+
+	$campaign_id 					= $_REQUEST['campaign_id'];
+	$campaign_name 					= $_REQUEST['campaign_name'];
+	$campaign_desc 					= $_REQUEST['campaign_desc'];
+	$active 						= strtoupper($_REQUEST['active']);;
+	$dial_method 					= strtoupper($_REQUEST['dial_method']);
+	$auto_dial_level				= $_REQUEST['auto_dial_level'];
+	$auto_dial_level_adv 			= $_REQUEST['auto_dial_level_adv'];
+	$dial_prefix 					= $_REQUEST['dial_prefix'];
+	$custom_prefix 					= $_REQUEST['custom_prefix'];
+	$campaign_script 				= $_REQUEST['campaign_script'];
+	$campaign_cid 					= $_REQUEST['campaign_cid'];
+	$campaign_recording 			= $_REQUEST['campaign_recording'];
+	$campaign_vdad_exten 			= $_REQUEST['campaign_vdad_exten'];
+	$local_call_time 				= $_REQUEST['local_call_time'];
+	$force_reset_hopper 			= $_REQUEST['force_reset_hopper'];
+	$dial_status 					= $_REQUEST['dial_status'];
+	$lead_order 					= $_REQUEST['lead_order'];
+	$lead_filter 					= $_REQUEST['lead_filter'];
+	$dial_timeout 					= $_REQUEST['dial_timeout'];
+	$manual_dial_prefix 			= $_REQUEST['manual_dial_prefix'];
+	$get_call_launch 				= $_REQUEST['get_call_launch'];
+	$am_message_exten 				= $_REQUEST['am_message_exten'];
+	$am_message_chooser 			= $_REQUEST['am_message_chooser'];
+	$agent_pause_codes_active 		= $_REQUEST['agent_pause_codes_active'];
+	$manual_dial_filter 			= $_REQUEST['manual_dial_filter'];
+	$manual_dial_list_id 			= $_REQUEST['manual_dial_list_id'];
+	$available_only_ratio_tally 	= $_REQUEST['available_only_ratio_tally'];
+	$campaign_rec_filename 			= $_REQUEST['campaign_rec_filename'];
+	$next_agent_call 				= $_REQUEST['next_agent_call'];
+	$three_way_call_cid 			= $_REQUEST['three_way_call_cid'];
+	$three_way_dial_prefix 			= $_REQUEST['three_way_dial_prefix'];
+	$customer_3way_hangup_logging 	= $_REQUEST['customer_3way_hangup_logging'];
+	$customer_3way_hangup_seconds 	= $_REQUEST['customer_3way_hangup_seconds'];
+	$customer_3way_hangup_action 	= $_REQUEST['customer_3way_hangup_action'];
+	$inbound_man 					= $_REQUEST['inbound_man'];	
+
+   	
+
     ### Default values 
     $defActive = array("Y","N");
     $defDialMethod = array("MANUAL","RATIO","ADAPT_HARD_LIMIT","ADAPT_TAPERED","ADAPT_AVERAGE","INBOUND_MAN"); 
@@ -38,13 +68,17 @@
 				$apiresults = array("result" => "Error: Default value for dial method are MANUAL,RATIO,ADAPT_HARD_LIMIT,ADAPT_TAPERED,ADAPT_AVERAGE,INBOUND_MAN only."); 
 			} else {
  
-    				$groupId = go_get_groupid($goUser);
-   				if($limit < 1){ $limit = 20; } else { $limit = $limit; }
-
+    			$groupId = go_get_groupid($goUser);
+//   				if($limit < 1){
+//					$limit = 20;
+//				} else {
+//					$limit = $limit;
+//				}
+//
 				if (!checkIfTenant($groupId)) {
-        				$ul="WHERE campaign_id='$campaign_id'";
-    				} else { 
-					$ul = "WHERE campaign_id='$campaign_ and must not be emptyid AND user_group='$groupId'";  
+        			$ul="WHERE campaign_id='$campaign_id'";
+    			} else { 
+					$ul = "WHERE campaign_id='$campaign_id and must not be emptyid AND user_group='$groupId'";  
 				}
 
    				$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul LIMIT 1;";
@@ -52,24 +86,109 @@
 
 				while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 					$dataCampID = $fresults['campaign_id'];
-       					$dataCampName = $fresults['campaign_name'];
-                			$dataDialMethod = $fresults['dial_method'];
-                			$dataActive = $fresults['active'];
+					$dataCampName = $fresults['campaign_name'];
+					$dataDialMethod = $fresults['dial_method'];
+					$dataActive = $fresults['active'];
+				}
+
+				if( $campaign_name == null ) { $uCampaignName = $dataCampName; } else { $uCampaignName = $campaign_name; }
+				if( $dataDialMethod == null ) { $uDialMethod = $dataDialMethod;  } else { $uDialMethod = $dial_method;  } 
+				if( $active == null ) { $uActive = $dataActive; } else { $uActive = $active; }
+				
+				if($dial_prefix == "CUSTOM"){
+					$dialprefix = $custom_prefix;
+				}else{
+					$dialprefix = $dial_prefix;
 				}
 				
-				if( $campaign_name == null ) { $uCampaignName = $dataCampName; } else { $uCampaignName = $campaign_name; }
-				if( $dial_method == null ) { $uDialMethod = $dataDialMethod;  } else { $uDialMethod = $dial_method;  } 
-				if( $active == null ) { $uActive = $dataActive; } else { $uActive = $active; }  
+				switch($auto_dial_level){
+					case "OFF":
+						$autoDialLevel = 0;
+						break;
+					case "SLOW":
+						$autoDialLevel = 1;
+						break;
+					case "NORMAL":
+						$autoDialLevel = 2;
+						break;
+					case "HIGH":
+						$autoDialLevel = 4;
+						break;
+					case "MAX":
+						$autoDialLevel = 6;
+						break;
+					case "MAX_PREDICTIVE":
+						$autoDialLevel = 10;
+						break;
+					case "ADVANCE":
+						$autoDialLevel = $auto_dial_level_adv;
+						break;
+					default:
+						//DEFAULT HERE
+				}
+				
+				if(!empty($am_message_chooser)){
+					$amMessageExten = $am_message_chooser;
+				}else{
+					$amMessageExten = $am_message_exten;
+				}
 
 				if($dataCampID != null) {	
-					$updateQuery = "UPDATE vicidial_campaigns SET campaign_name='$campaign_name', dial_method='$dial_method', active='$active',auto_dial_level='$auto_dial_level', local_call_time='$local_call_time',campaign_recording='$campaign_recording' WHERE campaign_id='$campaign_id' LIMIT 1;";
+					$updateQuery = "UPDATE vicidial_campaigns SET
+										campaign_name = '$campaign_name', 
+										campaign_desc = '$campaign_name', 
+										active = '$active', 
+										dial_method = '$uDialMethod', 
+										auto_dial_level = '$autoDialLevel', 
+										dial_prefix = '$dialprefix', 
+										campaign_script = '$campaign_script', 
+										campaign_cid = '$campaign_cid', 
+										campaign_recording = '$campaign_recording', 
+										campaign_vdad_exten = '$campaign_vdad_exten', 
+										local_call_time = '$local_call_time',  
+										dial_status_a = '$dial_status', 
+										lead_order = '$lead_order', 
+										lead_filter_id = '$lead_filter_id', 
+										dial_timeout = '$dial_timeout', 
+										manual_dial_prefix = '$manual_dial_prefix', 
+										get_call_launch = '$get_call_launch', 
+										am_message_exten = '$amMessageExten', 
+										agent_pause_codes_active = '$agent_pause_codes_active', 
+										manual_dial_filter = '$manual_dial_filter', 
+										manual_dial_list_id = '$manual_dial_list_id', 
+										available_only_ratio_tally = '$available_only_ratio_tally', 
+										campaign_rec_filename = '$campaign_rec_filename', 
+										next_agent_call = '$next_agent_call', 
+										three_way_call_cid = '$three_way_call_cid', 
+										three_way_dial_prefix = '$three_way_dial_prefix', 
+										customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
+										customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
+										customer_3way_hangup_action = '$customer_3way_hangup_action' 
+									WHERE campaign_id='$campaign_id'
+									LIMIT 1;";
 					//echo $updateQuery;
 			   		$updateResult = mysqli_query($link, $updateQuery);
 
-        ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY NEW CAMPAIGN $campaign_id','UPDATE vicidial_campaigns SET campaign_name=$uCampaignName, dial_method=$uDialMethod, active=$uActive WHERE campaign_id=$dataCampID LIMIT 1;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+					### Admin logs
+					$SQLdate = date("Y-m-d H:i:s");
+					$queryLog = "INSERT INTO go_action_logs (
+									user,
+									ip_address,
+									event_date,
+									action,
+									details,
+									db_query
+								) values(
+									'$goUser',
+									'$ip_address',
+									'$SQLdate','MODIFY',
+									'MODIFY NEW CAMPAIGN $campaign_id',
+									'UPDATE vicidial_campaigns SET campaign_name=$uCampaignName,
+									dial_method=$uDialMethod,
+									active=$uActive
+									WHERE campaign_id=$dataCampID LIMIT 1;'
+								)";
+					$rsltvLog = mysqli_query($linkgo, $queryLog);
 
 					$apiresults = array("result" => "success");
 				} else {
@@ -78,25 +197,5 @@
 			}
 		}
 	}//end
-
-
-
-
-/* outbound
-UPDATE vicidial_campaigns SET campaign_name='Outbound Campaign - 2015-06-03',  dial_method='MANUAL', campaign_description='', campaign_changedate='2015-06-03 21:03:31', auto_dial_level='0',  campaign_script='', campaign_cid='5164536886',  campaign_recording='NEVER',  web_form_address='', campaign_vdad_exten='8369',  local_call_time='9am-9pm', dial_prefix='8888goautodial', active='N' WHERE campaign_id='00000000'
-*/
-
-/*inbound
-UPDATE vicidial_campaigns SET campaign_name='Test inbound me',  dial_method='RATIO', campaign_description='none', campaign_changedate='2015-06-03 21:08:40', auto_dial_level='1.0',  campaign_script='', campaign_cid='5164536886',  campaign_recording='ALLFORCE',  web_form_address='', campaign_vdad_exten='8368',  local_call_time='9am-9pm', dial_prefix='8888goautodial', active='Y' WHERE campaign_id='000AAA'
-
-/*blended
-UPDATE vicidial_campaigns SET campaign_name='Blended Campaign - test',  dial_method='RATIO', campaign_description='none', campaign_changedate='2015-06-03 21:11:56', auto_dial_level='1.0',  campaign_script='', campaign_cid='5164536886',  campaign_recording='ALLFORCE',  web_form_address='', campaign_vdad_exten='8369',  local_call_time='9am-9pm', dial_prefix='8888goautodial', active='Y' WHERE campaign_id='000AAA'
-
-*/
-
-
-
-
-
 
 ?>
