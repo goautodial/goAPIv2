@@ -32,28 +32,13 @@
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-//				$dataCampID[] = $fresults['campaign_id'];
-//	       		$dataCampName[] = $fresults['campaign_name'];
-//				$dataDialMethod[] = $fresults['dial_method'];
-//				$dataActive[] = $fresults['active'];
-//   				$apiresults = array(
-//								"result" => "success",
-//								"campaign_id" => $dataCampID,
-//								"campaign_name" => $dataCampName,
-//								"dial_method" => $dataDialMethod,
-//								"active" => $dataActive
-//							);
 				$queryGoCampaign = "SELECT campaign_type FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
 				$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 				while($typeresults = mysqli_fetch_array($rsltvGoCampaign, MYSQLI_ASSOC)){
 					$campaign_type = $typeresults['campaign_type'];
 				}
-				
-				$apiresults = array(
-								"result" => "success",
-								"data" => $fresults,
-								"campaign_type" => $campaign_type
-							);
+				//$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type);
+				$apiresults = array("result" => "success", "data" => $fresults);
 			}
 		} else {
 			$apiresults = array("result" => "Error: Campaign doesn't exist.", "COUNT:" => $countResult);
