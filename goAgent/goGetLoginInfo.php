@@ -299,10 +299,9 @@ $default_settings = array(
 if ($userExist > 0) {
     $rslt = $astDB->getOne('system_settings', 'pass_hash_enabled');
     if ($rslt['pass_hash_enabled'] == '1' && $bcrypt > 0) {
-        $astDB->where('user_id', $user_id);
+        $astDB->where('user', $user_id);
         $rslt = $astDB->getOne('vicidial_users', 'pass_hash');
         $userinfo['pass'] = $rslt['pass_hash'];
-        var_dump($rslt);
     }
     $U_scheduled_callbacks = $userinfo['scheduled_callbacks'];
     unset($userinfo['scheduled_callbacks']);
