@@ -27,9 +27,11 @@ if (isset($_GET['goExtContext'])) { $ext_context = $astDB->escape($_GET['goExtCo
     else if (isset($_POST['goExtContext'])) { $ext_context = $astDB->escape($_POST['goExtContext']); }
 if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgentLogID']); }
     else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $astDB->escape($_POST['goAgentLogID']); }
+if (isset($_GET['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_GET['goUseWebRTC']); }
+    else if (isset($_POST['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_POST['goUseWebRTC']); }
 
 ### Check if the agent's phone_login is currently connected
-$sipIsLoggedIn = check_sip_login($phone_login, $SIPserver);
+$sipIsLoggedIn = check_sip_login($phone_login, $SIPserver, $use_webrtc);
 
 if ($sipIsLoggedIn) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
