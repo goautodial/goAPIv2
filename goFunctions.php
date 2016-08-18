@@ -212,7 +212,7 @@
         return json_decode(json_encode($return), FALSE);
     }
     
-    function check_sip_login($exten, $type='kamailio', $webrtc=false) {
+    function check_sip_login($exten, $type='kamailio', $webrtc=true) {
         if (!$webrtc) {
             if ($type == 'kamailio') {
                 $cwd = getcwd();
