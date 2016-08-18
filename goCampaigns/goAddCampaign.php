@@ -162,10 +162,10 @@
 												manual_dial_list_id, drop_call_seconds
 										)
 										VALUES(
-												'$campaign_id','$campaign_desc','Y','MANUAL','NEW',
-												' N NA A AA DROP B NEW -','DOWN','Y','100','0',
+												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
+												' N NA A AA DROP B NEW -','DOWN','Y','100','$auto_dial_level',
 												'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-												'Y','DISABLED','30','8369','NEVER',
+												'Y','DISABLED','30','$answering_machine_detection','$call_recordings',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 												'${$tenant_id}0','7'
@@ -249,10 +249,10 @@
 											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action
 										)
 										VALUES(
-											'$campaign_id','$campaign_desc','Y','MANUAL','$dial_status',
-											' N NA A AA DROP B NEW -','DOWN','Y','100','0',
+											'$campaign_id','$campaign_desc','Y','$dial_method','$dial_status',
+											' N NA A AA DROP B NEW -','DOWN','Y','100','$auto_dial_level',
 											'$next_agent_call','$call_time','$sippy_dial_prefix','$call_launch','$SQLdate',
-											'Y','$list_order','$dial_timeout','8369','NEVER',
+											'Y','$list_order','$dial_timeout','$answering_machine_detection','$call_recordings',
 											'$recording_filename','Y','BLINK_RED','Y','Y',
 											'Y','$availability_only_tally','5164536886','$manual_dial_filter','$tenant_id',
 											'$manual_dial_list_id','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
@@ -386,12 +386,12 @@
 																manual_dial_filter, user_group, manual_dial_list_id, drop_call_seconds $manualDialPrefix
 														)
 														VALUES (
-																'$campaign_id','$campaign_desc','','Y','RATIO',
+																'$campaign_id','$campaign_desc','','Y','$dial_method',
 																'NEW',' N NA A AA DROP B NEW -','DOWN','','',
-																'','Y','100','1.0','Y',
+																'','Y','100','$auto_dial_level','Y',
 																'oldest_call_finish','$local_call_time','$sippy_dial_prefix','','',
 																'','$SQLdate','Y','DISABLED','',
-																'','','30','8369','ALLFORCE',
+																'','','30','$answering_machine_detection','$call_recordings',
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED',
 																'ENABLED','Y','Y','Y','5164536886',
 																'DNC_ONLY','$tenant_id','{$tenant_id}0','7' $manualDialPrefixVal
@@ -570,10 +570,10 @@
                                                                                     campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
                                                                                     no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
                                                                                     use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file)
-                                                                                    VALUES('$campaign_id','$campaign_desc','','N','RATIO','NEW',
-                                                                                    ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1.0',
+                                                                                    VALUES('$campaign_id','$campaign_desc','','N','$dial_method','NEW',
+                                                                                    ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','$auto_dial_level',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
-                                                                                    '30','$routingExten','NEVER','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
+                                                                                    '30','$routingExten','$call_recordings','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
                                                                                     'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 

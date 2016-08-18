@@ -37,8 +37,8 @@
 				while($typeresults = mysqli_fetch_array($rsltvGoCampaign, MYSQLI_ASSOC)){
 					$campaign_type = $typeresults['campaign_type'];
 				}
-				//$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type);
-				$apiresults = array("result" => "success", "data" => $fresults);
+				$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type);
+				//$apiresults = array("result" => "success", "data" => $fresults);
 			}
 		} else {
 			$apiresults = array("result" => "Error: Campaign doesn't exist.", "COUNT:" => $countResult);
