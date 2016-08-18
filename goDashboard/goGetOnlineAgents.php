@@ -30,8 +30,9 @@
                 array_push($data, $fresults);
             }
             $apiresults = array("result" => "success", "data" => $data);
-    } else {
-            $apiresults = array("result" => "Error: Can't retrieve data", "COUNT:" => $countResult);
     } 
+    //else {
+            //$apiresults = array("result" => "Error: Can't retrieve data", "COUNT:" => $countResult);
+    //} 
     
 ?>
