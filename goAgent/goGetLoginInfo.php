@@ -302,6 +302,7 @@ if ($userExist > 0) {
         $astDB->where('user_id', $user_id);
         $rslt = $astDB->getOne('vicidial_users', 'pass_hash');
         $userinfo['pass'] = $rslt['pass_hash'];
+        var_dump($rslt);
     }
     $U_scheduled_callbacks = $userinfo['scheduled_callbacks'];
     unset($userinfo['scheduled_callbacks']);
