@@ -32,6 +32,10 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $system_settings = get_settings('system', $astDB);
     $usergroup = get_settings('usergroup', $astDB, $VU_user_group);
     
+    if ($system_settings->pass_hash_enabled == '1' && $bcrypt > 0) {
+        $user_settings->pass = $user_settings->pass_hash;
+    }
+    
     $astDB->where('server_ip', $phone_settings->server_ip);
     $query = $astDB->getOne('servers', 'asterisk_version');
     $asterisk_version = $query['asterisk_version'];
