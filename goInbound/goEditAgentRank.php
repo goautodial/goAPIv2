@@ -1,7 +1,8 @@
 <?php
+
     #######################################################
-    #### Name:  goGetAllAgentRank.php	               ####
-    #### Description: API to get all agent assign      ####
+    #### Name:  goEditAgentRank.php		               ####
+    #### Description: API to update ingroup agents     ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Ltd. (c) 2011-2016      ####
     #### Written by: Jerico James F. Milo 	           ####
@@ -10,106 +11,111 @@
     
     include_once ("goFunctions.php");
     
-//    $goUser 	= $_REQUEST['user_id'];
-//    $goVarLimit = $_REQUEST['goVarLimit'];
-    $goGroupID 	= $_REQUEST['group_id'];
-    
-/*    if($goUser == null ) {  $apiresults = array(  "result" => "Error: Set a value for user_id");
-	}elseif($goGroupID == null ) { $apiresults = array(  "result" => "Error: Set a value for group_id"); 
-    } else {
+	$goItemRank	= $_REQUEST['itemrank'];
+	$goidIDgroup 	= $_REQUEST['idgroup'];
 	
-		if($goVarLimit < 1){ $goVarLimit = ""; 	} else { $goVarLimit = "limit $goVarLimit"; }
-		if (checkIfTenant($goUser)) { $addedSQL = "AND user_group='$user_group'"; }
-		if (!is_null($find_user)) {	$findSQL = "AND user RLIKE '$find_user'"; }
+	if($goidIDgroup == null ) {
+		$apiresults = array(  "result" => "Error: Set a value for group_id");
+	} else {
+		$itemsumitexplode = explode('&', $goItemRank);
+		$group_id = $goidIDgroup;
+		
+		for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
+				$itemsumitsplit = split('=', $itemsumitexplode[$i]);
+		 		$showval = htmlspecialchars(urldecode($itemsumitsplit[0]));
+				$datavals = htmlspecialchars(urldecode($itemsumitsplit[1]));
+				$finalvalues = $showval."||".$datavals.""; 
 	
-		$query = "SELECT user,full_name,closer_campaigns,user_group from vicidial_users where user NOT IN ('VDAD','VDCL') and user_level != '4' $addedSQL $findSQL order by user $goVarLimit";
-		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
-	
-		if($countResult > 0) {
-	
-			while($fresults = mysqli_fetch_assoc($rsltv)){
-			$isChecked = '';
-				if (preg_match("/ $goGroupID /",$fresults['closer_campaigns'])) {$isChecked = ' CHECKED';}
-	
-			$stmtx="SELECT group_rank,group_grade,calls_today from vicidial_inbound_group_agents where group_id='$goGroupID' and user='{$fresults['user']}';";
-			$rsltx = mysqli_query($link, $stmtx);
-			$viga_to_print = mysqli_num_rows($rsltx);
-	
-				if ($viga_to_print > 0) {
-						while($rowx = mysqli_fetch_assoc($rsltx)){
-	
-							$ARIG_rank  = $rowx['group_rank'];
-							$ARIG_grade = $rowx['group_grade'];
-							$ARIG_calls = $rowx['calls_today'];
-	
-							if($ARIG_calls==null){ $ARIG_calls="0";	}
-	
-						}
-	
-				} else {
-	
-					$stmtD="INSERT INTO vicidial_inbound_group_agents set calls_today='0',group_rank='0',group_weight='0',user='{$fresults['user']}',group_id='$goGroupID';";
-					$rsltxy = mysqli_query($link, $stmtD);
-					$ARIG_rank =        '0';
-					$ARIG_grade =       '0';
-					$ARIG_calls =       '0';
-	
+				if(preg_match("/CHECK/i", "$itemsumitexplode[$i]")) {
+					
+					if (preg_match("/YES/i", "$itemsumitexplode[$i]")) {
+						$checked = $itemsumitexplode[$i]."\n";	
+						$repcheck = str_replace("CHECK_", "", $itemsumitexplode[$i]);
+						$user = str_replace("=YES", "", $repcheck);
+						
+						//$query = $this->asteriskDB->query("SELECT closer_campaigns FROM vicidial_users WHERE user='$user'");
+						$query = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
+						$rsltv = mysqli_query($link,$query);
+						$fresults = mysqli_fetch_assoc($rsltv);
+						//$closer_campaigns = $query->row()->closer_campaigns;
+						$closer_campaigns = $fresults['closer_campaigns'];
+						$closer_campaigns = rtrim($closer_campaigns,"-");
+						$closer_campaigns = str_replace(" $group_id", "", $closer_campaigns);
+						$closer_campaigns = trim($closer_campaigns);
+						if (strlen($closer_campaigns) > 1)
+							$closer_campaigns = " $closer_campaigns";
+						$NEWcloser_campaigns = " $group_id{$closer_campaigns} -";
+					} else {
+						$checked = $itemsumitexplode[$i]."\n";	
+						$repcheck = str_replace("CHECK_", "", $itemsumitexplode[$i]);
+						$user = str_replace("=NO", "", $repcheck);
+						
+						//$query = $this->asteriskDB->query("SELECT closer_campaigns FROM vicidial_users WHERE user='$user'");
+						//$closer_campaigns = $query->row()->closer_campaigns;
+						$query2 = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
+						$rsltv2 = mysqli_query($link,$query2);
+						$fresults2 = mysqli_fetch_assoc($rsltv2);
+						$closer_campaigns = $fresults2['closer_campaigns'];
+						$closer_campaigns = rtrim($closer_campaigns,"-");
+						$closer_campaigns = str_replace(" $group_id", "", $closer_campaigns);
+						$closer_campaigns = trim($closer_campaigns);
+						$NEWcloser_campaigns = "{$closer_campaigns} -";
+					}
+					
+					//$query = $this->asteriskDB->query("UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';");
+					//$query_log .= "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';\n";
+					//echo "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';";
+					$query3 = "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';";
+					$rsltv3 = mysqli_query($link,$query3);
+					//$apiresults = array("result" => "success");
 				}
-	
-			$checkbox_field = "CHECK_{$fresults['user']}";
-			$rank_field     = "RANK_{$fresults['user']}";
-			$grade_field    = "GRADE_{$fresults['user']}";
-			$checkbox_list .= "|$checkbox_field";
-	
-			// start return data 
-			$dataUser[]      = $fresults['user'];
-			$dataFullName[]  = $fresults['full_name'];
-			$dataUserGroup[] = $fresults['user_group'];
-	
-			//checkbox values and names & id
-			//$users_output .= "<input type=checkbox name=\"$checkbox_field\" id=\"$checkbox_field\" value=\"YES\"$isChecked>";
-			$dataCheckboxField[] = $checkbox_field;
-			$dataIsChecked[]     = $isChecked;
-	
-			//rank dropdown name or id,def value,values from db ::
-			//-> CI $users_output .= form_dropdown("$rank_field",$rankArray,$ARIG_rank,"style='font-size:10px;'");
-			// <select name="$rank_field" id=rank_field"> <option value="$ARIG_rank" selected>$ARIG_rank</option> <option value="$rankArray">$rankArray</option>"
-			$rankArray 		  	= array('9'=>'9','8'=>'8','7'=>'7','6'=>'6','5'=>'5','4'=>'4','3'=>'3','2'=>'2','1'=>'1','0'=>'0','-1'=>'-1','-2'=>'-2','-3'=>'-3','-4'=>'-4','-5'=>'-5','-6'=>'-6','-7'=>'-7','-8'=>'-8','-9'=>'-9');
-			$dataRankFields[] 	= $rank_field;
-			$dataArigRank[]   	= $ARIG_rank;
-			$dataRankArray   	= $rankArray;
-				  
-			//grade dropdown name or id, def value, values from db :: 
-			//-> CI $users_output .= form_dropdown("$grade_field",$gradeArray,$ARIG_grade,"style='font-size:10px;'");
-			// <select name="$grade_field" id="$grade_field"> <option value="$ARIG_grade" selected>$ARIG_grade</option> <option value="$gradeArray">$gradeArray</option>"
-			$gradeArray 		= array('10'=>'10','9'=>'9','8'=>'8','7'=>'7','6'=>'6','5'=>'5','4'=>'4','3'=>'3','2'=>'2','1'=>'1','0'=>'0');
-			$dataGradeField[] 	= $grade_field;
-			$dataArigGrade[]  	= $ARIG_grade;
-			$dataArigCalls[] 	= $ARIG_calls;
-			$dataGradeArray   	= $gradeArray;
-			
-			
-			$apiresults = array("result" => "success", 
-								"user" => $dataUser, 
-								"full_name" => $dataFullName, 
-								"user_group" => $dataUserGroup, 
-								"checkbox_fields" => $dataCheckboxField, 
-								"checkbox_ischecked" => $dataIsChecked,
-								"rank_fields" => $dataRankFields,
-								"values_rank" => $dataArigRank,
-								"dropdown_rankdefvalues" => $dataRankArray,
-								"grade_fields" => $dataGradeField,
-								"values_grade" => $dataArigGrade,
-								"dropdown_gradedefvalues" => $dataGradeArray,
-								"call_today" => $dataArigCalls); 
-			}
-	
-		}  else {
-	
-					$apiresults = array("result" => "Error: No data to show.");
-	
-	   }
-   }
-*/
+				
+				if(preg_match("/RANK/i", "$itemsumitexplode[$i]")) {
+					$itemsumitsplit1 = split('=', $itemsumitexplode[$i]);
+					$datavals1 = htmlspecialchars(urldecode($itemsumitsplit1[1]));
+					
+					$itemsexplode = explode("_",$itemsumitsplit1[0]);
+					//$query = $this->asteriskDB->query("UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';");
+					$query4 = "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+					$rsltv4 = mysqli_query($link,$query4);
+					//$apiresults = array("result" => "success");
+					//echo "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+					//$query_log .= "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';\n";
+					if($datavals1 != 0){
+						$ranknotzero .= $itemsumitexplode[$i]."\n";
+					}
+				}
+				
+				if(preg_match("/GRADE/i", "$itemsumitexplode[$i]")) {
+					$itemsumitsplit1 = split('=', $itemsumitexplode[$i]);
+					$datavals1 = htmlspecialchars(urldecode($itemsumitsplit1[1]));
+					
+					$itemsexplode = explode("_",$itemsumitsplit1[0]);
+					//$query = $this->asteriskDB->query("UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';");
+					$query5 = "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+					$rsltv5 = mysqli_query($link,$query5);
+					//$apiresults = array("result" => "success");
+					//echo "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+					//$query_log .= "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';\n";
+				}
+				$apiresults = array("result" => "success");
+		}
+	}
+		//echo $checked."\n".$ranknotzero."\n";
+		//$this->commonhelper->auditadmin('MODIFY',"Modified Agent Rank(s)","$query_log");
+		
+
+		
+		/*$reprank = str_replace("RANK_", "", $ranknotzero);
+		
+		$itemsumitexplode = explode('=', $reprank);
+
+		for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
+		
+		}
+		$time = $reprank;
+		$length = strlen($$reprank);
+		$characters = 2;
+		$start = $length - $characters;
+		$xreprank = substr($time , $start ,$characters);*/
 ?>
