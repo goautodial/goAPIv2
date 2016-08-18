@@ -1228,7 +1228,7 @@
             $auth_key = "BAD|{$stmt}";
             //$stmt="SELECT failed_login_count,UNIX_TIMESTAMP(last_login_date) from vicidial_users where user='$user';";
             $aDB->where('user', $user);
-            $rslt = $aDB->getOne('vicidial_users', 'failed_login_count,UNIX_TIMESTAMP(last_login_date)');
+            $rslt = $aDB->getOne('vicidial_users', 'failed_login_count,UNIX_TIMESTAMP(last_login_date) AS last_login_date');
             $cl_user_ct = $aDB->getRowCount();
             if ($cl_user_ct > 0) {
                 $failed_login_count =   $rslt['failed_login_count'];
