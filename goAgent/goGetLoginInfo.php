@@ -292,16 +292,20 @@ $default_settings = array(
     'quick_transfer_button_orig' => '',
     'local_consult_xfers' => 1,
     'web_form_vars' => '',
-    'web_form_vars_two' => ''
+    'web_form_vars_two' => '',
+    'scheduled_callbacks' => 0
 );
 
 if ($userExist > 0) {
     $rslt = $astDB->getOne('system_settings', 'pass_hash_enabled');
-    if ($rslt['pass_hash_enabled'] == '1' && $bcrypt > 0) {
+    if ($rslt['pass_hash_enabled'] == '1' && ($bcrypt > 0 || strlen($userinfo['pass']) < 1)) {
         $astDB->where('user_id', $user_id);
         $rslt = $astDB->getOne('vicidial_users', 'pass_hash');
         $userinfo['pass'] = $rslt['pass_hash'];
     }
+    $U_scheduled_callbacks = $userinfo['scheduled_callbacks'];
+    unset($userinfo['scheduled_callbacks']);
+    
     $data = array_merge($data, array( 'user_info' => $userinfo ));
     
     $usergroup = get_settings('usergroup', $astDB, $userinfo['user_group']);
@@ -599,6 +603,9 @@ if ($userExist > 0) {
     if (preg_match("/Y/", $campinfo['pause_after_each_call']))
         {$default_settings['dispo_check_all_pause'] = 1;}
     
+    $C_scheduled_callbacks = $campinfo['scheduled_callbacks'];
+    unset($campinfo['scheduled_callbacks']);
+    
     $data = array_merge($data, array( 'camp_info' => $campinfo ));
     
     $default_settings['quick_transfer_button_enabled'] = $quick_transfer_button_enabled;
@@ -656,6 +663,10 @@ if ($userExist > 0) {
     
     if ($usergroup->agent_status_view_time == 'Y')
         {$default_settings['agent_status_view_time'] = 1;}
+    
+    if ($C_scheduled_callbacks == 'Y' && $U_scheduled_callbacks == '1') {
+        $default_settings['scheduled_callbacks'] = 1;
+    }
     
     $data = array_merge($data, array( 'default_settings' => $default_settings ));
     
