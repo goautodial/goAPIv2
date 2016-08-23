@@ -8,7 +8,7 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
 
 ###Database Time
 	$queryTime = "SELECT NOW() as dbtime, UNIX_TIMESTAMP(NOW()) as u_dbtime;";

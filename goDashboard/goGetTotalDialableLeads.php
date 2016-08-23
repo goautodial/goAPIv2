@@ -8,7 +8,7 @@
     #### License: AGPLv2                              ####
     ######################################################
     
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
     
     $groupId = go_get_groupid($goUser);
     

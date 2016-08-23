@@ -8,7 +8,7 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
     
     $groupId = go_get_groupid($goUser);
     
@@ -23,6 +23,8 @@
     $NOW = date("Y-m-d");
 
     $query = "SELECT sum(drops_today) as getTotalDroppedCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'  $ul"; 
+    //$query = "SELECT sum(drops_today) as getTotalDroppedCalls from vicidial_campaign_stats where calls_today > -1 and  $ul"; 
+    
     $rsltv = mysqli_query($link,$query);
     $fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );

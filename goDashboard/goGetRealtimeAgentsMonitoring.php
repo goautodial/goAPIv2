@@ -1,6 +1,6 @@
 <?php
     ####################################################
-    #### Name: goGetAgentsMonitoring.php            ####
+    #### Name: goGetRealtimeAgentsMonitoring.php    ####
     #### Type: API to get total agents onCall       ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
