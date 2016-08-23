@@ -34,7 +34,7 @@
                 $dataUserLevel[] = $fresults['user_level'];
                 $dataUserGroup[] = $fresults['user_group'];
 		$dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "userno" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
+                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
         }
 	} else {
 		$apiresults = array("result" => "Error: No data to show.");
