@@ -15,26 +15,42 @@
     if (!checkIfTenant($groupId)) {
         $ul='';
     } else { 
-	$ul = "AND user_group='$groupId'";  
+		$ul = "AND user_group='$groupId'";  
     }
     if ($groupId != 'ADMIN') {
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
 
 #	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' ORDER BY user ASC;";
-   	$rsltv = mysqli_query($link, $query);
+	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $notAdminSQL ORDER BY user ASC;";
+   	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $notAdminSQL ORDER BY user ASC;";
+	
+	$queryCount = mysqli_query($link, $getLastCount);
+	
+	$max = mysqli_num_rows($queryCount);
+	for($i=0; $i < $max; $i++){
+		$userRow = mysqli_fetch_array($queryCount);
+		if(preg_match("/^agent/i", $userRow['user'])){
+			$get_last = preg_replace("/^agent/i", "", $userRow['user']);
+			$last_num[] = intval($get_last);
+		}
+	}
+
+	$get_last = max($last_num);
+	$agent_num = $get_last + 1;
+	
+	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
 
         if($countResult > 0) {
         while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
                 $dataUserID[] = $fresults['user_id'];
-		$dataUser[] = $fresults['user'];
+				$dataUser[] = $fresults['user'];
                 $dataFullName[] = $fresults['full_name'];
                 $dataUserLevel[] = $fresults['user_level'];
                 $dataUserGroup[] = $fresults['user_group'];
 		$dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
+                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive, "last_count" => $agent_num);
         }
 	} else {
 		$apiresults = array("result" => "Error: No data to show.");
