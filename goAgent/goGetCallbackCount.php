@@ -8,16 +8,20 @@
 #### License: AGPLv2                            ####
 ####################################################
 
-$is_logged_in = check_agent_login($astDB, $goUser);
-
-$agent = get_settings('user', $astDB, $goUser);
-$settings = get_settings('system', $astDB);
-$user_group = $agent->user_group;
+//$is_logged_in = check_agent_login($astDB, $goUser);
+//
+//$agent = get_settings('user', $astDB, $goUser);
+//$settings = get_settings('system', $astDB);
+//$user_group = $agent->user_group;
 
 if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }
     else if (isset($_POST['goServerIP'])) { $server_ip = $astDB->escape($_POST['goServerIP']); }
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
+if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
+    else if (isset($_POST['goUserID'])) { $user_id = $astDB->escape($_POST['goUserID']); }
+
+$user = (strlen($user_id) > 0) ? $user_id : $goUser;
 
 $campaignCBhoursSQL = '';
 //$stmt = "SELECT callback_hours_block from vicidial_campaigns where campaign_id='$campaign';";
@@ -36,7 +40,7 @@ $campaignCBsql = '';
 if ($system->agentonly_callback_campaign_lock > 0) {
 	$campaignCBsql = "AND campaign_id='{$campaign}'";
 }
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$goUser' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount = $astDB->getRowCount();
 if ($cbcount) {
@@ -48,7 +52,7 @@ if ($cbcount) {
 	}
 }
 
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$goUser' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_live = $astDB->getRowCount();
 if ($cbcount_live) {
@@ -60,7 +64,7 @@ if ($cbcount_live) {
 	}
 }
 
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$goUser' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_today = $astDB->getRowCount();
 if ($cbcount_today) {
@@ -69,7 +73,8 @@ if ($cbcount_today) {
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
 		$row['phone_number'] = $xrslt['phone_number'];
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
-		$row['callback_time'] = relativeTime($row['callback_time']);
+		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
+		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$cb_today[$x] = $row;
 	}
 }
@@ -95,13 +100,13 @@ function relativeTime($mysqltime, $maxdepth = 1) {
 
     if ($secondsLeft == 0) return "now";
 
-    for($i=6;$i>-1;$i--) {
+    for($i=6; $i>-1; $i--) {
 		$w[$i] = intval($secondsLeft/$d[$i][0]);
 		$secondsLeft -= ($w[$i]*$d[$i][0]);
-		if($w[$i]!=0) {
-		   $return.= abs($w[$i]) . " " . $d[$i][1] . (($w[$i]>1)?'s':'') ." ";
-		   $depth += 1;
-		   if ($depth >= $maxdepth) break;
+		if($w[$i] != 0) {
+			$return .= abs($w[$i]) . " " . $d[$i][1] . ((abs($w[$i]) > 1) ? 's' : '') ." ";
+			$depth  += 1;
+			if ($depth >= $maxdepth) break;
 		}
     }
 
