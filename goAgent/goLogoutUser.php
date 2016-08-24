@@ -101,12 +101,16 @@ if ($sipIsLoggedIn) {
 			$vc_remove = $astDB->getRowCount();
         }
 
-		##### Delete the web_client_sessions
+		##### Delete the web_client_sessions and go_agent_sessions
 		//$stmt="DELETE from web_client_sessions where server_ip='$server_ip' and session_name ='$session_name';";
         $astDB->where('server_ip', $server_ip);
         $astDB->where('session_name', $session_name);
         $rslt = $astDB->delete('web_client_sessions');
 		$wcs_delete = $astDB->getRowCount();
+		
+		$astDB->where('sess_agent_user', $user);
+		$rslt = $astDB->delete('go_agent_sessions');
+		$gas_delete = $astDB->getRowCount();
         
         ##### Hangup the client phone
         $astDB->where('server_ip', $server_ip);

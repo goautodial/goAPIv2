@@ -141,7 +141,7 @@ if (isset($goAction) && $goAction != "") {
             $rslt = $astDB->getOne('vicidial_users', 'vdc_agent_api_access');
             $allowedAPIAccess = $rslt['vdc_agent_api_access'];
             if ($allowedAPIAccess) {
-                if (!preg_match("/goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect/", $goAction) && (!isset($campaign) || $campaign == '')) {
+                if (!preg_match("/goCheckIfLoggedIn|goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect/", $goAction) && (!isset($campaign) || $campaign == '')) {
                     $APIResult = array( "result" => "error", "message" => "Please select a campaign" );
                 } else {
                     include("{$goAction}.php");

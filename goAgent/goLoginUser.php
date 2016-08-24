@@ -75,6 +75,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
     
     $query = $astDB->insert('web_client_sessions', array('extension' => $extension, 'server_ip' => $phone_settings->server_ip, 'program' => 'vicidial', 'start_time' => $NOW_TIME, 'session_name' => $session_name));
     
+    $query = $astDB->insert('go_agent_sessions', array('sess_agent_user' => $user ,'sess_agent_phone' => $phone_login ,'sess_agent_status' => 'INUSE'));
+    
     $astDB->where('campaign_id', $campaign);
     $query = $astDB->getOne('vicidial_hopper', 'count(*) AS cnt');
     $campaign_leads_to_call = $query['cnt'];
