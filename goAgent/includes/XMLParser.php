@@ -16,9 +16,15 @@ function array_to_xml( $data, &$xml_data ) {
     foreach( $data as $key => $value ) {
         if( is_array($value) ) {
             if( is_numeric($key) ) {
-                $key = "{$type}_{$key}"; // XML Naming Rules: Names cannot start with a number or punctuation character
+                $getKey = get_node_type($xml_data->getName());
+                $newKey = (isset($getKey)) ? $getKey : 'item';
+                $oldKey = $key;
+                $key = "{$newKey}"; // XML Naming Rules: Names cannot start with a number or punctuation character
             }
             $subnode = $xml_data->addChild($key);
+            if ($getKey != null) {
+                $subnode->addAttribute('key', $oldKey);
+            }
             array_to_xml($value, $subnode);
         } else {
             $getKey = get_node_type($xml_data->getName());
@@ -50,6 +56,11 @@ function get_node_type( $type ) {
         case "xfer_group_names":
         case "inbound_groups":
             $node = 'group';
+            break;
+        case "all_callbacks":
+        case "live_callbacks":
+        case "today_callbacks":
+            $node = 'callback';
             break;
         default:
             $node = null;
