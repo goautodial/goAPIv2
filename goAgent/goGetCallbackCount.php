@@ -43,6 +43,7 @@ if ($system->agentonly_callback_campaign_lock > 0) {
 $stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount = $astDB->getRowCount();
+$cb_all = [];
 if ($cbcount) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
@@ -55,6 +56,7 @@ if ($cbcount) {
 $stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_live = $astDB->getRowCount();
+$cb_live = [];
 if ($cbcount_live) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
@@ -67,6 +69,7 @@ if ($cbcount_live) {
 $stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_today = $astDB->getRowCount();
+$cb_today = [];
 if ($cbcount_today) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
