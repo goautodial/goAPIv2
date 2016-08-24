@@ -17,7 +17,7 @@
         $pass = $_REQUEST['pass'];
         $full_name = $_REQUEST['full_name'];
         $phone_login = $_REQUEST['phone_login'];
-        $phone_pass = $_REQUEST['phone_pass'];
+        $phone_pass = $_REQUEST['pass'];
         $user_group = $_REQUEST['user_group'];
         $active = strtoupper($_REQUEST['active']);
         $seats = $_REQUEST['seats'];
@@ -95,12 +95,9 @@
 		$cwd = $_SERVER['DOCUMENT_ROOT'];
  		$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
                 $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
-		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash) VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash');";
+		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash)
+						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash');";
 		$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
-
-
-
-
 
 	### Admin logs
 		$SQLdate = date("Y-m-d H:i:s");
@@ -108,10 +105,11 @@
 		$rsltvLog = mysqli_query($linkgo, $queryLog);
 
 		$queryUserCheckAgain = "SELECT user  FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ulUser ORDER BY user ASC LIMIT 1;";
+//		$queryUserCheckAgain = "SELECT user  FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' AND user='agent093' ORDER BY user ASC LIMIT 1;";
 		$rsltvCheckAgain = mysqli_query($link, $queryUserCheckAgain);
 		$countCheckResultAgain = mysqli_num_rows($rsltvCheckAgain);
-
-                if($countCheckResultAgain > 0) {
+                
+		if($countCheckResultAgain > 0) {
 
 
 
@@ -121,6 +119,7 @@
 
 			$kamialioq = "INSERT INTO subscriber (username, domain, password) VALUES ('$phone_login','goautodial.com','$phone_pass');";
 			$resultkam = mysqli_query($linkgokam, $kamialioq);
+
 
 			$apiresults = array("result" => "success");
 		} else {
