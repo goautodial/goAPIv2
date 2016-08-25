@@ -23,20 +23,23 @@
                 if($countCheckResult2 > 0) {
                     $apiresults = array("result" => "success");
                 }else{
-                    $apiresults = array("result" => "fail", "phone_login" => "There is no phone that match your input.");
+                    $apiresults = array("result" => "fail", "phone_login" => "There is no phone that matches your input.");
                 }
         }
         
         // User Duplicate Check
-        $queryUserCheck = "SELECT user FROM vicidial_users WHERE user = '$user';";
-        $rsltvCheck1 = mysqli_query($link, $queryUserCheck);
-        $countCheckResult1 = mysqli_num_rows($rsltvCheck1);
+        if($user != NULL){
+            $queryUserCheck = "SELECT user FROM vicidial_users WHERE user = '$user';";
+            $rsltvCheck1 = mysqli_query($link, $queryUserCheck);
+            $countCheckResult1 = mysqli_num_rows($rsltvCheck1);
+            
+                if($countCheckResult1 > 0) {
+                    $validate1 = $validate1 + 1;
+                    $apiresults = array("result" => "user", "user" => "There are 1 or more users with that User ID.");
+                }else{
+                    $apiresults = array("result" => "success");
+                }
+        }
         
-            if($countCheckResult1 > 0) {
-                $validate1 = $validate1 + 1;
-                $apiresults = array("result" => "user", "user" => "There are 1 or more users with that User ID.");
-            }else{
-                $apiresults = array("result" => "success");
-            }
       
 ?>
