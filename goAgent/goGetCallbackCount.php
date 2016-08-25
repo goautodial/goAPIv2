@@ -47,8 +47,9 @@ $cb_all = array();
 if ($cbcount) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
-		$xrslt = $astDB->getOne('vicidial_list', 'phone_number');
+		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
 		$row['phone_number'] = $xrslt['phone_number'];
+		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -65,8 +66,9 @@ $cb_live = array();
 if ($cbcount_live) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
-		$xrslt = $astDB->getOne('vicidial_list', 'phone_number');
+		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
 		$row['phone_number'] = $xrslt['phone_number'];
+		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
