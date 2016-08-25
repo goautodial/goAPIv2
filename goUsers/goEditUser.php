@@ -176,11 +176,11 @@
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
 				
-				
+		/*	
         $queryPhoneUpdate = "UPDATE `phones` SET `pass` = '$pass',  `conf_secret` = '$pass' WHERE `login` = '$phone_login'";
 
 				$resultQueryPhoneUpdate = mysqli_query($link, $queryPhoneUpdate);
-
+		*/
 
         $queryJSIUpdate = "UPDATE justgovoip_sippy_info SET web_password='$phone_pass' where carrier_id='$user_group'";
 

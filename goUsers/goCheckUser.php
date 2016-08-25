@@ -13,21 +13,17 @@
     ### POST or GET Variables
         $user = mysqli_real_escape_string($link, $_REQUEST['user']);
         $phone_login = mysqli_real_escape_string($link, $_REQUEST['phone_login']);
-
-        $validate1 = 0;
-        $validate2 = 0;
         
         // Phone Login Check optional when not null
         if($phone_login != NULL){
-            $queryPhoneCheck = "SELECT user FROM vicidial_users WHERE phone_login = '$phone_login';";
+            $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
             $rsltvCheck2 = mysqli_query($link, $queryPhoneCheck);
             $countCheckResult2 = mysqli_num_rows($rsltvCheck2);
                 
                 if($countCheckResult2 > 0) {
-                    $validate2 = $validate2 + 1;
-                    $apiresults = array("result" => "phone_login", "phone_login" => "There are 1 or more users with that Phone Login.");
+                    $apiresults = array("result" => "success");
                 }else{
-                    $validate2 = 0;
+                    $apiresults = array("result" => "fail", "phone_login" => "There is no phone that match your input.");
                 }
         }
         
@@ -40,10 +36,7 @@
                 $validate1 = $validate1 + 1;
                 $apiresults = array("result" => "user", "user" => "There are 1 or more users with that User ID.");
             }else{
-                $validate1 = 0;
+                $apiresults = array("result" => "success");
             }
-        
-        if($validate1 == 0 && $validate2 == 0){
-            $apiresults = array("result" => "success");
-        }
+      
 ?>
