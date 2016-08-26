@@ -20,24 +20,23 @@
             $apiresults = array("result" => "Error: Set a value for User ID."); 
     } else {
             $groupId = go_get_groupid($goUser);
-            
-            
+                        
     if (!checkIfTenant($groupId)) {
         if($user_id != NULL){
-                $ul = "user_id='$user_id'";
+                $ul = "vicidial_users.user_id='$user_id'";
         }else if($user != NULL){
                 $ul = "vicidial_users.user='$user'";   
         }
     } else {
          if($user_id != NULL){
-                $ul = "user_id='$user_id' AND user_group='$groupId'";
+                $ul = "vicidial_users.user_id='$user_id' AND vicidial_users.user_group='$groupId'";
         }else if($user != NULL){
                 $ul = "vicidial_users.user='$user' AND vicidial_users.user_group='$groupId'";   
         }
     }
         
         if($user_id != NULL){
-                $notAdminSQL = "AND user_level != '9'";
+                $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
         }else if($user != NULL){
                 $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
         }
@@ -48,7 +47,7 @@
         $query_CallerIDsFromVAC = "SELECT callerid as 'vac_callerid',lead_id as 'vac_lead_id,phone_number as 'vac_phone_number' from vicidial_auto_calls limit 1";
         $query_OnlineAgentsNoCalls = "SELECT vicidial_live_agents.extension as 'vla_extension',vicidial_live_agents.user as 'vla_user',vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group',vicidial_users.phone_login as 'vu_phone_login',vicidial_live_agents.conf_exten as 'vla_conf_exten',vicidial_live_agents.status as 'vla_status',vicidial_live_agents.comments as 'vla_comments',vicidial_live_agents.server_ip as 'vla_server_ip',vicidial_live_agents.call_server_ip as 'vla_call_server_ip',UNIX_TIMESTAMP(last_call_time) as 'last_call_time',UNIX_TIMESTAMP(last_call_finish) as last_call_finish,vicidial_live_agents.campaign_id as 'vla_campaign_id',UNIX_TIMESTAMP(last_state_change) as 'last_state_change',vicidial_live_agents.lead_id as 'vla_lead_id',vicidial_live_agents.agent_log_id as 'vla_agent_log_id',vicidial_users.user_id as 'vu_user_id',vicidial_live_agents.callerid as 'vla_callerid' FROM vicidial_live_agents,vicidial_users WHERE vicidial_live_agents.user=vicidial_users.user AND lead_id = 0 AND vicidial_live_agents.user_level != 4 AND $ul $notAdminSQL";
         $query_OnlineAgentsInCalls = "SELECT vicidial_live_agents.extension as 'vla_extension',vicidial_live_agents.user as 'vla_user',vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group',vicidial_users.phone_login as 'vu_phone_login',vicidial_live_agents.conf_exten as 'vla_conf_exten',vicidial_live_agents.status as 'vla_status',vicidial_live_agents.comments as 'vla_comments',vicidial_live_agents.server_ip as 'vla_server_ip',vicidial_live_agents.call_server_ip as 'vla_call_server_ip',UNIX_TIMESTAMP(last_call_time) as 'last_call_time',UNIX_TIMESTAMP(last_call_finish) as last_call_finish,vicidial_live_agents.campaign_id as 'vla_campaign_id',UNIX_TIMESTAMP(last_state_change) as 'last_state_change',vicidial_live_agents.lead_id as 'vla_lead_id',vicidial_live_agents.agent_log_id as 'vla_agent_log_id',vicidial_users.user_id as 'vu_user_id',vicidial_live_agents.callerid as 'vla_callerid',vicidial_list.phone_number as vl_phone_number FROM vicidial_live_agents,vicidial_users,vicidial_list WHERE vicidial_live_agents.user=vicidial_users.user AND vicidial_list.lead_id = vicidial_live_agents.lead_id AND vicidial_live_agents.user_level != 4 AND $ul $notAdminSQL";
-        $query_GetUserInfo = "SELECT user_id, user, full_name, email, user_group, active, user_level, phone_login, phone_pass, voicemail_id FROM vicidial_users WHERE $ul;";
+        $query_GetUserInfo = "SELECT user_id, user, full_name, email, user_group, active, user_level, phone_login, phone_pass, voicemail_id FROM vicidial_users WHERE $ul";
         //echo $query_OnlineAgentsInCalls;
         
         $rsltvInCalls = mysqli_query($link,$query_OnlineAgentsInCalls);
@@ -56,11 +55,11 @@
         $rsltvParkedChannels = mysqli_query($link,$query_ParkedChannels);
         $rsltvCallerIDsFromVAC = mysqli_query($link,$query_CallerIDsFromVAC);
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
-        
+        $fresults = mysqli_fetch_assoc($rsltvGetUserInfo);
         //$countrsltvInCalls = mysqli_num_rows($rsltvInCalls);
         //$countrsltvNoCalls = mysqli_num_rows($rsltvNoCalls);
 
-        if($query_OnlineAgents != NULL) {
+        if ($user != NULL && $query_OnlineAgents != NULL){
             $dataInCalls = array();
                 while($resultsInCalls = mysqli_fetch_array($rsltvInCalls, MYSQLI_ASSOC)){               
                     array_push($dataInCalls, $resultsInCalls);
@@ -81,16 +80,11 @@
                 while($resultsCallerIDsFromVAC = mysqli_fetch_array($rsltvCallerIDsFromVAC, MYSQLI_ASSOC)){               
                     array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
                 }
-            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);            
+            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);  
+            
                 $apiresults = array("result" => "success", "data" => $data);
-        } 
-        
-        if($query_GetUserInfo != NULL){
-                $dataUserInfo = array();
-                        while($resultsUserInfo = mysqli_fetch_array($rsltvGetUserInfo)){
-                                array_push($dataUserInfo, $resultsUserInfo);
-                        }
-                $apiresults = array("result" => "success", "data" => $dataUserInfo);
+        } else if ($user_id != NULL){
+                $apiresults = array("result" => "success", "data" => $fresults);
         }
     }
   
