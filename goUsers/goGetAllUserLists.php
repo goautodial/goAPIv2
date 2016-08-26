@@ -14,12 +14,13 @@
     if (!checkIfTenant($groupId)) {
         $ul='';
     } else { 
-		$ul = "AND user_group='$groupId'";  
+        $ul = "AND user_group='$groupId'";  
     }
     if ($groupId != 'ADMIN') {
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
-
+    //var_dump($groupId);
+    //die(dd);
 	// getting agent count
 	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $notAdminSQL ORDER BY user ASC;";
 	$queryCount = mysqli_query($link, $getLastCount);
@@ -60,7 +61,7 @@
 	
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $notAdminSQL ORDER BY user ASC;";
+	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul ORDER BY user ASC;";
 	$rsltv = mysqli_query($link, $query);
     $countResult = mysqli_num_rows($rsltv);
 		
