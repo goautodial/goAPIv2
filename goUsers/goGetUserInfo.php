@@ -16,7 +16,7 @@
     $user = $_REQUEST['user'];
         
     ### Check user_id if its null or empty
-    if($user_id == null) { 
+    if($user_id == null && $user == null) { 
             $apiresults = array("result" => "Error: Set a value for User ID."); 
     } else {
             $groupId = go_get_groupid($goUser);
