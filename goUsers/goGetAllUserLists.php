@@ -21,7 +21,7 @@
     }
 
 	// getting agent count
-	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $notAdminSQL ORDER BY user ASC;";
+	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' ORDER BY user ASC;";
 	$queryCount = mysqli_query($link, $getLastCount);
 	$max = mysqli_num_rows($queryCount);
 		
