@@ -40,7 +40,7 @@ $campaignCBsql = '';
 if ($settings->agentonly_callback_campaign_lock > 0 && strlen($campaign) > 0) {
 	$campaignCBsql = "AND campaign_id='{$campaign}'";
 }
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD');";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') ORDER BY callback_time ASC;";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount = $astDB->getRowCount();
 $cb_all = array();
@@ -50,6 +50,8 @@ if ($cbcount) {
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
 		$row['phone_number'] = $xrslt['phone_number'];
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
+		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
+		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -69,6 +71,8 @@ if ($cbcount_live) {
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
 		$row['phone_number'] = $xrslt['phone_number'];
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
+		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
+		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -131,7 +135,8 @@ function relativeTime($mysqltime, $maxdepth = 1) {
     }
 
     $verb = ($diff>0) ? "" : "in ";
-    $return = $verb.$return;
+    $past = ($diff>0) ? "ago" : "";
+    $return = $verb.$return.$past;
     return $return;
 }
 

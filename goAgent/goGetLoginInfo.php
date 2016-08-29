@@ -670,6 +670,13 @@ if ($userExist > 0) {
     
     $data = array_merge($data, array( 'default_settings' => $default_settings ));
     
+    $rslt = $astDB->get('vicidial_country_iso_tld', null, 'iso3,country_name');
+    $country_code = [];
+    foreach ($rslt as $country) {
+        $country_code[$country['iso3']] = htmlentities(addslashes($country['country_name']));
+    }
+    $data = array_merge($data, array( 'country_codes' => $country_code ));
+    
     $APIResult = array( "result" => "success", "data" => $data );
 } else {
     $APIResult = array( "result" => "error", "message" => "User ID '{$user_id}' does NOT exist." );
