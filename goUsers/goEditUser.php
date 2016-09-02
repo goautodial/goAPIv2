@@ -31,16 +31,16 @@
         $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
 		$email = mysqli_real_escape_string($link, $_REQUEST['email']);
         $active = strtoupper($_REQUEST['active']);
-        $hotkeys_active = strtoupper($_REQUEST['hotkeys_active']);
+        $hotkeys_active = $_REQUEST['hotkeys_active'];
         $user_level = $_REQUEST['user_level'];
         $modify_same_user_level = strtoupper($_REQUEST['modify_same_user_level']);
         $ip_address = $_REQUEST['hostname'];
         $goUser = $_REQUEST['goUser'];
 		$voicemail = $_REQUEST['voicemail'];
+		$vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
 		
     ### Default Values
 	$defActive = array("Y","N");
-	$defhotkeys_active = array("Y","N");
 	$defmodify_same_user_level = array("Y","N");	
 
     ### Error Checking
@@ -64,10 +64,6 @@
         } else {
                 if(!in_array($active,$defActive) && $active != null) {
                         $apiresults = array("result" => "Error: Default value for active is Y or N only.");
-                } else {
-
-                if(!in_array($hotkeys_active,$defhotkeys_active) && $hotkeys_active != null) {
-                        $apiresults = array("result" => "Error: Default value for hotkeys_active is Y or N only.");
                 } else {
 
                 if(!in_array($modify_same_user_level,$defmodify_same_user_level) && $modify_same_user_level != null) {
@@ -130,12 +126,10 @@
                                 $dataUserLevel = $fresults['user_level'];
                                 $dataUserGroup = $fresults['user_group'];
                         }
-			if($hotkeys_active == "Y" || $modify_same_user_level == "Y") {
-				$hotkeys_active = 0;
-				$modify_same_user_level = 0;
-			} else {
-				$hotkeys_active = 1;
-                                $modify_same_user_level = 1;
+				if( $modify_same_user_level == "Y") {
+						$modify_same_user_level = 0;
+				} else {
+						$modify_same_user_level = 1;
 				}
 			
 
@@ -161,16 +155,20 @@
                	 	} else {
                               //  $query = "UPDATE vicidial_users SET $itemSQL WHERE user='$user';";
                               //  $resultQuery = mysqli_query($link, $query);
-
+		
+				## Password Encryption
+						$cwd = $_SERVER['DOCUMENT_ROOT'];
+						$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+						$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 
 				if($userid != NULL){
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '$pass',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', `pass_hash` = '$pass_hash',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level',
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query, `vdc_agent_api_access` = '$vdc_agent_api_access' 
 								WHERE `user_id` = '$userid';";
 				}else{
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '$pass',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
-								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', `pass_hash` = '$pass_hash',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
 								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query
 								WHERE `user` = '$user';";
 				}
@@ -189,7 +187,8 @@
 
 	### Admin logs
                                         $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=$hotkeys_active,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
+                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=
+										,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
                                         $rsltvLog = mysqli_query($link, $queryLog);
 
 
@@ -207,7 +206,7 @@
 			}
 			}
 			}
-			}
+			
 			}
 
 		}
