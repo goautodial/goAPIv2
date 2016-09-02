@@ -50,7 +50,7 @@
 	$customer_3way_hangup_action 	= $_REQUEST['customer_3way_hangup_action'];
 	$inbound_man 					= $_REQUEST['inbound_man'];	
 
-   	
+   	//$apiresults = array("data" => $_REQUEST); 
 
     ### Default values 
     $defActive = array("Y","N");
@@ -67,33 +67,6 @@
 			if(!in_array($dial_method,$defDialMethod) && $dial_method != null) { 
 				$apiresults = array("result" => "Error: Default value for dial method are MANUAL,RATIO,ADAPT_HARD_LIMIT,ADAPT_TAPERED,ADAPT_AVERAGE,INBOUND_MAN only."); 
 			} else {
- 
-    			$groupId = go_get_groupid($goUser);
-//   				if($limit < 1){
-//					$limit = 20;
-//				} else {
-//					$limit = $limit;
-//				}
-//
-				if (!checkIfTenant($groupId)) {
-        			$ul="WHERE campaign_id='$campaign_id'";
-    			} else { 
-					$ul = "WHERE campaign_id='$campaign_id and must not be emptyid AND user_group='$groupId'";  
-				}
-
-   				$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul LIMIT 1;";
-   				$rsltv = mysqli_query($link, $query);
-
-				while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-					$dataCampID = $fresults['campaign_id'];
-					$dataCampName = $fresults['campaign_name'];
-					$dataDialMethod = $fresults['dial_method'];
-					$dataActive = $fresults['active'];
-				}
-
-				if( $campaign_name == null ) { $uCampaignName = $dataCampName; } else { $uCampaignName = $campaign_name; }
-				if( $dataDialMethod == null ) { $uDialMethod = $dataDialMethod;  } else { $uDialMethod = $dial_method;  } 
-				if( $active == null ) { $uActive = $dataActive; } else { $uActive = $active; }
 				
 				if($dial_prefix == "CUSTOM"){
 					$dialprefix = $custom_prefix;
@@ -101,7 +74,18 @@
 					$dialprefix = $dial_prefix;
 				}
 				
-				switch($auto_dial_level){
+				if(!empty($am_message_chooser)){
+					$amMessageExten = $am_message_chooser;
+				}else{
+					$amMessageExten = $am_message_exten;
+				}
+				
+				if($dial_method == "MANUAL"){
+					$autoDialLevel = 0;
+				}elseif($dial_method == "ADAPT_TAPERED"){
+					$autoDialLevel = 1;
+				}else{
+					switch($auto_dial_level){
 					case "OFF":
 						$autoDialLevel = 0;
 						break;
@@ -126,21 +110,15 @@
 					default:
 						//DEFAULT HERE
 				}
-				
-				if(!empty($am_message_chooser)){
-					$amMessageExten = $am_message_chooser;
-				}else{
-					$amMessageExten = $am_message_exten;
 				}
 
-				if($dataCampID != null) {	
+				if($campaign_id != null) {	
 					$updateQuery = "UPDATE vicidial_campaigns SET
 										campaign_name = '$campaign_name', 
-										campaign_desc = '$campaign_name', 
 										active = '$active', 
-										dial_method = '$uDialMethod', 
+										dial_method = '$dial_method', 
 										auto_dial_level = '$autoDialLevel', 
-										dial_prefix = '$dialprefix', 
+										dial_prefix = '$dial_prefix', 
 										campaign_script = '$campaign_script', 
 										campaign_cid = '$campaign_cid', 
 										campaign_recording = '$campaign_recording', 
@@ -168,7 +146,6 @@
 									LIMIT 1;";
 					//echo $updateQuery;
 			   		$updateResult = mysqli_query($link, $updateQuery);
-
 					### Admin logs
 					$SQLdate = date("Y-m-d H:i:s");
 					$queryLog = "INSERT INTO go_action_logs (
@@ -189,7 +166,7 @@
 									WHERE campaign_id=$dataCampID LIMIT 1;'
 								)";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
-
+					
 					$apiresults = array("result" => "success");
 				} else {
 					$apiresults = array("result" => "Error: Campaign doens't exist.");

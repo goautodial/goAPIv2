@@ -11,22 +11,23 @@
     include_once ("goFunctions.php");
  
 	### POST or GET Variables
-    $audiofiles = $_REQUEST['audiofile'];
+    /*$audiofiles = $_REQUEST['files']*/;
     $stage = $_REQUEST['stage'];
-
+						
 
 
     ### Default values 
     
     ### Check campaign_id if its null or empty
-            $audiofile_name= $_REQUEST['audiofile_name'];
-            $WeBServeRRooT = '/var/lib/asterisk';
-            $sounds_web_directory = 'sounds';
-            $audiofile= $_REQUEST['audiofile'];
-            $audiofile_orig = $_REQUEST['audiofile_orig'];
-            $audiofile_dir = $_REQUEST['audiofile_dir'];
-            $server_name = $_REQUEST['server_name'];
-            $web_server_ip = $_REQUEST['web_server_ip'];
+$audiofile_name=$_FILES["files"]['name'];
+$WeBServeRRooT = '/var/lib/asterisk';
+$sounds_web_directory = 'sounds';
+$audiofile=$_FILES["files"];
+$audiofile_orig = $_FILES['files']['name'];
+$audiofile_dir = $_FILES['files']['tmp_name'];
+$server_name = getenv("SERVER_NAME");
+$web_server_ip = getenv("SERVER_ADDR");
+
              
 //        if($stage == null) {
   //              $apiresults = array("result" => "Error: Set a value for stage.");
@@ -45,8 +46,8 @@
                 $audiofile_name = preg_replace("/ /",'',"$prefix".$audiofile_name);
                 $audiofile_name = preg_replace("/@/",'',$audiofile_name);
                 
-                copy($audiofile_dir, "$WeBServeRRooT/$sounds_web_directory/$audiofile_name");
-                chmod("$WeBServeRRooT/$sounds_web_directory/$audiofile_name", 0766);
+               copy($audiofile_dir, "$WeBServeRRooT/$sounds_web_directory/$audiofile_name");
+						chmod("$WeBServeRRooT/$sounds_web_directory/$audiofile_name", 0766);
 
         ### Admin logs
                                         $SQLdate = date("Y-m-d H:i:s");
@@ -73,15 +74,15 @@
                 }
                 
                 //$this->commonhelper->auditadmin('UPLOAD',"Uploaded a WAV file: $audiofile_name");
-		$apiresults = array("result" => "success");
-                $stmtUpdate = "UPDATE servers SET sounds_update='Y';";
-                $rsltUpdate = mysqli_query($link, $stmtUpdate);
+						$apiresults = array("result" => "success");
+						$stmtUpdate = "UPDATE servers SET sounds_update='Y';";
+						$rsltUpdate = mysqli_query($link, $stmtUpdate);
 
 
 
                 } else {
                         //$data['uploadfail'] = "{$this->lang->line("go_file_type_wav")}";
-		$apiresults = array("result" => "Error: Upload Failed.");
+						$apiresults = array("result" => "Error: Upload Failed.");
 
                 }
             }
