@@ -160,14 +160,20 @@
 						$cwd = $_SERVER['DOCUMENT_ROOT'];
 						$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
 						$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+						
+						if($pass != NULL){
+								$pass_query = "`pass_hash` = '$pass_hash',";
+						}else{
+								$pass_query = "";
+						}
 
 				if($userid != NULL){
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', `pass_hash` = '$pass_hash',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level',
 								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query, `vdc_agent_api_access` = '$vdc_agent_api_access' 
 								WHERE `user_id` = '$userid';";
 				}else{
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', `pass_hash` = '$pass_hash',  `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
 								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query
 								WHERE `user` = '$user';";
