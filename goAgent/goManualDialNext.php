@@ -1657,7 +1657,7 @@ if ($sipIsLoggedIn) {
             $comments = preg_replace("/\n/i", '!N', $comments);
             
             $LeaD_InfO = array(
-                'MqueryCID' => $MqueryCID,
+                'MqueryCID' => (isset($MqueryCID)) ? $MqueryCID : "",
                 'lead_id' => $lead_id,
                 'status' => $dispo,
                 'user' => $tsr,
@@ -1696,11 +1696,11 @@ if ($sipIsLoggedIn) {
                 'owner' => $owner,
                 'Call_Script_ID' => '',
                 'script_recording_delay' => $script_recording_delay,
-                'xferconf_a_number' => $VDCL_xferconf_a_number,
-                'xferconf_b_number' => $VDCL_xferconf_b_number,
-                'xferconf_c_number' => $VDCL_xferconf_c_number,
-                'xferconf_d_number' => $VDCL_xferconf_d_number,
-                'xferconf_e_number' => $VDCL_xferconf_e_number,
+                'xferconf_a_number' => (isset($VDCL_xferconf_a_number)) ? $VDCL_xferconf_a_number : "",
+                'xferconf_b_number' => (isset($VDCL_xferconf_b_number)) ? $VDCL_xferconf_b_number : "",
+                'xferconf_c_number' => (isset($VDCL_xferconf_c_number)) ? $VDCL_xferconf_c_number : "",
+                'xferconf_d_number' => (isset($VDCL_xferconf_d_number)) ? $VDCL_xferconf_d_number : "",
+                'xferconf_e_number' => (isset($VDCL_xferconf_e_number)) ? $VDCL_xferconf_e_number : "",
                 'entry_list_id' => $entry_list_id,
                 'custom_field_names' => $custom_field_names,
                 'custom_field_values' => $custom_field_values,

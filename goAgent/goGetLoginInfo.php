@@ -293,7 +293,8 @@ $default_settings = array(
     'local_consult_xfers' => 1,
     'web_form_vars' => '',
     'web_form_vars_two' => '',
-    'scheduled_callbacks' => 0
+    'scheduled_callbacks' => 0,
+    'LastCallCID' => ''
 );
 
 if ($userExist > 0) {
