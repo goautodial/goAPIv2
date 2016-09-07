@@ -76,8 +76,8 @@ if(!empty($agent_filter)){
 	
 //search via date
 //	$query = "SELECT vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.last_local_call_time LIKE '%$searchString%' ORDER BY cl.uniqueid DESC";
-		
-    $apiresults = array("result" => $start_filterdate);
+   	
+	$rsltv = mysqli_query($link, $query);
 		
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataLeadId[] = $fresults['lead_id'];
