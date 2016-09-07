@@ -52,6 +52,8 @@ if ($cbcount) {
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
+		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
+		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -73,6 +75,8 @@ if ($cbcount_live) {
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
+		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
+		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -94,6 +98,8 @@ if ($cbcount_today) {
 		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
+		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
+		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -134,8 +140,8 @@ function relativeTime($mysqltime, $maxdepth = 1) {
 		}
     }
 
-    $verb = ($diff>0) ? "" : "in ";
-    $past = ($diff>0) ? "ago" : "";
+    $verb = ($diff > 0) ? "" : "in ";
+    $past = ($diff > 0) ? "ago" : "";
     $return = $verb.$return.$past;
     return $return;
 }

@@ -60,8 +60,7 @@
 		$check_for_duplicates 			= $_REQUEST['check_for_duplicates'];			
 		$dial_prefix 					= $_REQUEST['dial_prefix'];
 		$custom_dial_prefix				= $_REQUEST['custom_dial_prefix'];
-		$status 						= $_REQUEST['status'];						
-		$call_recordings 				= $_REQUEST['call_recordings'];				
+		$status 						= $_REQUEST['status'];									
 		$script 						= $_REQUEST['script'];						
 		$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];	
 		$caller_id 						= $_REQUEST['caller_id']; 					
@@ -165,7 +164,7 @@
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
 												' N NA A AA DROP B NEW -','DOWN','Y','100','$auto_dial_level',
 												'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-												'Y','DISABLED','30','$answering_machine_detection','$call_recordings',
+												'Y','DISABLED','30','$answering_machine_detection','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 												'${$tenant_id}0','7'
@@ -252,7 +251,7 @@
 											'$campaign_id','$campaign_desc','Y','$dial_method','$dial_status',
 											' N NA A AA DROP B NEW -','DOWN','Y','100','$auto_dial_level',
 											'$next_agent_call','$call_time','$sippy_dial_prefix','$call_launch','$SQLdate',
-											'Y','$list_order','$dial_timeout','$answering_machine_detection','$call_recordings',
+											'Y','$list_order','$dial_timeout','$answering_machine_detection','$campaign_recording',
 											'$recording_filename','Y','BLINK_RED','Y','Y',
 											'Y','$availability_only_tally','5164536886','$manual_dial_filter','$tenant_id',
 											'$manual_dial_list_id','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
@@ -391,7 +390,7 @@
 																'','Y','100','$auto_dial_level','Y',
 																'oldest_call_finish','$local_call_time','$sippy_dial_prefix','','',
 																'','$SQLdate','Y','DISABLED','',
-																'','','30','$answering_machine_detection','$call_recordings',
+																'','','30','$answering_machine_detection','$campaign_recording',
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED',
 																'ENABLED','Y','Y','Y','5164536886',
 																'DNC_ONLY','$tenant_id','{$tenant_id}0','7' $manualDialPrefixVal
@@ -573,7 +572,7 @@
                                                                                     VALUES('$campaign_id','$campaign_desc','','N','$dial_method','NEW',
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','$auto_dial_level',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
-                                                                                    '30','$routingExten','$call_recordings','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
+                                                                                    '30','$routingExten','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
                                                                                     'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
