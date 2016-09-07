@@ -23,7 +23,7 @@
     $NOW = date("Y-m-d");
     $queue_seconds = "queue_seconds <= 20";
     
-    $query = "SELECT user_group, sum(term_reason in ('ABANDON','AFTERHOURS')) as abandon, sum(queue_seconds <= 20) as callsansweredlessthan20sec, sum(term_reason not in ('ABANDON','AFTERHOURS')) as answered, count(*) as calls_today, (sum($queue_seconds <= 20)/count(*))*100 as SLA, (sum(length_in_sec)/sum(user not in ('NULL','','VDCL')))/60 as AHT from vicidial_closer_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
+    $query = "SELECT user_group, sum(term_reason in ('ABANDON','AFTERHOURS')) as abandon, sum(queue_seconds <= 20) as callsansweredlessthan20sec, sum(term_reason not in ('ABANDON','AFTERHOURS')) as answered, count(*) as calls_today, round((sum($queue_seconds <= 20)/count(*))*100) as SLA, round((sum(length_in_sec)/sum(user not in ('NULL','','VDCL')))/60,2) as AHT from vicidial_closer_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
     //$query = "SELECT concat(round((sum($queue_seconds)/count(*))))*100 as SLA from vicidial_closer_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
 
     $rsltv = mysqli_query($link, $query);
