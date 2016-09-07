@@ -95,8 +95,8 @@
 		$cwd = $_SERVER['DOCUMENT_ROOT'];
  		$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
                 $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
-		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash)
-						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash');";
+		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups)
+						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0');";
 		$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
 
 	### Admin logs

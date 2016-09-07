@@ -53,7 +53,7 @@ if(!empty($requestDataPhone)) {
 		$sqlPhone = "";
 }
 
-if(!empty($start_filterdate) && !empty($end_filterdate)){
+if($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
 		$goLimit = "1000";
 		$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
 }else{
@@ -76,9 +76,9 @@ if(!empty($agent_filter)){
 	
 //search via date
 //	$query = "SELECT vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.last_local_call_time LIKE '%$searchString%' ORDER BY cl.uniqueid DESC";
-   	
-	$rsltv = mysqli_query($link, $query);
-
+		
+    $apiresults = array("result" => $start_filterdate);
+		
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataLeadId[] = $fresults['lead_id'];
 		$dataUniqueid[] = $fresults['uniqueid'];

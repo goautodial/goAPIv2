@@ -38,6 +38,7 @@
         $goUser = $_REQUEST['goUser'];
 		$voicemail = $_REQUEST['voicemail'];
 		$vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
+		$agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
 		
     ### Default Values
 	$defActive = array("Y","N");
@@ -169,13 +170,13 @@
 
 				if($userid != NULL){
 						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
-								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level',
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query, `vdc_agent_api_access` = '$vdc_agent_api_access' 
+								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups', 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
 								WHERE `user_id` = '$userid';";
 				}else{
 						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
-								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query
+								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups', 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
 								WHERE `user` = '$user';";
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
@@ -199,7 +200,7 @@
 
 
 				if($resultQueryUser == false){
-				$apiresults = array("result" => "Error: Update failed. Check your details");
+				$apiresults = array("result" => $queryUpdateUser);
 				} else {	
 				$apiresults = array("result" => "success");
 				} 
