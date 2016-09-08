@@ -80,23 +80,22 @@
 		$server_ip = $rServerIP['server_ip'];
 
 			if($user_group == "ADMIN" || $user_group == "admin"){
-                                $user_level = 9;
-                                $phone_pass = "";
+                $user_level = 9;
+                $phone_pass = "";
 				$phone_login = "";
 				$agentcall_manual = 1;
 				$agentonly_callbacks = 1;
-                         } else {
+            } else {
 				$user_level = 1;
 				$agentcall_manual = 1;
 				$agentonly_callbacks = 1;
-				
-                         }
+            }
 
 		$cwd = $_SERVER['DOCUMENT_ROOT'];
  		$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
                 $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
-		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, agentonly_callbacks, scheduled_callbacks, agentcall_manual)
-						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0', '1', '1', '1', '1', '1', '1');";
+		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, scheduled_callbacks)
+						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0', '1', '1', '1', '1');";
 		$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
 
 	### Admin logs
@@ -111,8 +110,6 @@
                 
 		if($countCheckResultAgain > 0) {
 
-
-
 			$queryInsertUser = "INSERT INTO `phones` (`extension`,  `dialplan_number`,  `voicemail_id`,  `phone_ip`,  `computer_ip`,  `server_ip`,  `login`,  `pass`,  `status`,  `active`,  `phone_type`,  `fullname`,  `company`,  `picture`,  `protocol`,  `local_gmt`,  `outbound_cid`,  `template_id`,  `conf_override`,  `user_group`,  `conf_secret`,  `messages`,  `old_messages`) VALUES ('$phone_login',  '9999$phone_login',  '$phone_login',  '',  '', '$server_ip',  '$phone_login',  '$phone_pass',  'ACTIVE',  '$active',  '',  '$full_name',  '$user_group',  '',  'EXTERNAL',  '-5',  '0000000000',  '--NONE--',  '$conf_override',  '$user_group',  '$phone_pass',  '0',  '0');";
 			$resultQueryUser = mysqli_query($link, $queryInsertUser);
 
@@ -123,7 +120,7 @@
 
 			$apiresults = array("result" => "success");
 		} else {
-			$apiresults = array("result" => "Error: Please Check your details and try again");
+			$apiresults = array("result" => $queryUserAdd);
 		}
 
 		
