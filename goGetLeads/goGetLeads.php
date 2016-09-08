@@ -39,7 +39,7 @@
 	if($goVarLimit > 0) {
 		$goMyLimit = "LIMIT $goVarLimit";
 	} else {
-		$goMyLimit ="";
+		$goMyLimit = "LIMIT 10000";
 	}
 	
 	if(!empty($search)) {
