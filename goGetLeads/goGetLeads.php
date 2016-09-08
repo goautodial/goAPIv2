@@ -8,7 +8,7 @@
 	#### Modified by: Alexander Jim Abenoja			   ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
 
     function remove_empty($array) {
     	return array_filter($array, '_remove_empty_internal');
@@ -72,11 +72,10 @@
 	$allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
 	
 	//if admin
-	if($allowedCampaigns == " -ALL-CAMPAIGNS- -"){
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit";
+	if(preg_match("/ALL-CAMPAIGNS/", $allowedCampaigns)){
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit";
 
-        	$returnRes = mysqli_query($link, $queryx);
-
+        $returnRes = mysqli_query($link, $queryx);
 	} else { //if multiple allowed campaigns
 		$multiple_campaigns = explode("-", $allowedCampaigns);
 		$allowedCampaignsx = $multiple_campaigns[0];
@@ -113,8 +112,7 @@
         $dataLastName[] = $fresults['last_name'];
 		$dataPhoneNumber[] = $fresults['phone_number'];
 		$dataDispo[] = $fresults['status'];
-		
-   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo); 
 	}
-
+	
+   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo);
 ?>
