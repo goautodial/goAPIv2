@@ -13,6 +13,7 @@
 		$campSQL = "";
 		$select = $_REQUEST['select'];
 		$camp = $_REQUEST['campaign_id'];
+		$customRequest = $_REQUEST['custom_request'];
 		
                 if ($select=="Y")
 						$selectSQL = "WHERE selectable='Y'";
@@ -39,7 +40,7 @@
 						$addedSQL = "WHERE user_group='$groupId'";
 				}
 		
-		if($camp != NULL){
+		if($camp != NULL || $customRequest != NULL){
 				$query = "SELECT status,status_name,campaign_id FROM vicidial_campaign_statuses $selectSQL  ORDER BY campaign_id";
 		}else{
 				$query = "SELECT status, status_name FROM vicidial_campaign_statuses UNION  SELECT status, status_name FROM vicidial_statuses ORDER BY status;";
@@ -60,10 +61,10 @@
 			$dataStat[] = $fresult['status'];			
 			$dataStatName[] = $fresult['status_name'];
 			
-			if($camp != NULL)
+			if($camp != NULL || $customRequest != NULL)
 				$dataCampID[] = $fresult['campaign_id'];			
 
-				if($camp != NULL){
+				if($camp != NULL || $customRequest != NULL){
 						$apiresults = array("result" => "success", "query" => $query, "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat);
 				}else{
 						$apiresults = array("result" => "success", "query" => $query, "status" => $dataStat, "status_name" => $dataStatName);
