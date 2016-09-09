@@ -24,6 +24,7 @@
 	$dial_prefix 					= $_REQUEST['dial_prefix'];
 	$custom_prefix 					= $_REQUEST['custom_prefix'];
 	$campaign_script 				= $_REQUEST['campaign_script'];
+	$webform						= $_REQUEST['web_form_address'];
 	$campaign_cid 					= $_REQUEST['campaign_cid'];
 	$campaign_recording 			= $_REQUEST['campaign_recording'];
 	$campaign_vdad_exten 			= $_REQUEST['campaign_vdad_exten'];
@@ -118,7 +119,8 @@
 										active = '$active', 
 										dial_method = '$dial_method', 
 										auto_dial_level = '$autoDialLevel', 
-										dial_prefix = '$dial_prefix', 
+										dial_prefix = '$dial_prefix',
+										web_form_address = '$webform', 
 										campaign_script = '$campaign_script', 
 										campaign_cid = '$campaign_cid', 
 										campaign_recording = '$campaign_recording', 
