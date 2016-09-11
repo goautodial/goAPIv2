@@ -23,8 +23,7 @@
     $NOW = date("Y-m-d");
 
     $query = "select sum(calls_today) as getTotalCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    $drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $rsltv = mysqli_query($link, $query);
+    $data = mysqli_fetch_assoc($rsltv);
+    $apiresults = array("result" => "success", "data" => $data);
 ?>
