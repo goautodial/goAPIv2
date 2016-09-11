@@ -27,5 +27,6 @@
     
     $rsltv = mysqli_query($link, $query);
     $data = mysqli_fetch_assoc($rsltv);
+    
     $apiresults = array("result" => "success", "data" => $data);
 ?>
