@@ -90,7 +90,21 @@
 				$agentcall_manual = 1;
 				$agentonly_callbacks = 1;
             }
-
+		
+		# generate random phone login
+			$x = 0;
+			$y = 0;
+			while($x == $y){
+				$random_digit = mt_rand(1000000000, 9999999999);
+				$check_existing_phonelogins_query = "SELECT phone_login FROM vicidial_users WHERE phone_login = '$random_digit';";
+				$check_existing_phonelogins_exec_query = mysqli_query($link, $check_existing_phonelogins_query);
+		
+				if($check_existing_phonelogins_exec_query == true){
+					$y = 1;
+					$phone_login = $random_digit;
+				}
+			}
+		
 		$cwd = $_SERVER['DOCUMENT_ROOT'];
  		$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
                 $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
