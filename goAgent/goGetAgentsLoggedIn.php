@@ -29,8 +29,10 @@ if (isset($_GET['goComments'])) { $comments = $astDB->escape($_GET['goComments']
     else if (isset($_POST['goComments'])) { $comments = $astDB->escape($_POST['goComments']); }
 if (isset($_GET['goUserGroup'])) { $user_group = $astDB->escape($_GET['goUserGroup']); }
     else if (isset($_POST['goUserGroup'])) { $user_group = $astDB->escape($_POST['goUserGroup']); }
+if (isset($_GET['goUserRole'])) { $user_role = $astDB->escape($_GET['goUserRole']); }
+    else if (isset($_POST['goUserRole'])) { $user_role = $astDB->escape($_POST['goUserRole']); }
 
-if ($is_logged_in) {
+if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '')) {
 	$agent_status_viewable_groupsSQL = '';
 	### Gather timeclock and shift enforcement restriction settings
 	//$stmt="SELECT agent_status_viewable_groups,agent_status_view_time from vicidial_user_groups where user_group='$VU_user_group';";
@@ -49,7 +51,7 @@ if ($is_logged_in) {
 	if ($rslt['agent_status_view_time'] == 'Y')
 		{$agent_status_view_time = 1;}
 	$andSQL = '';
-	if (!preg_match("/ALL-GROUPS/", $agent_status_viewable_groups)) {
+	if (!preg_match("/ALL-GROUPS/", $agent_status_viewable_groups) && strlen($campaign) > 0) {
 		//$AGENTviewSQL = "($agent_status_viewable_groupsSQL)";
 		//
 		//if (preg_match("/CAMPAIGN-AGENTS/",$agent_status_viewable_groups))
@@ -231,7 +233,7 @@ if ($is_logged_in) {
 		//{echo "<font style=\"background-color:#FFFFFF;\"> &nbsp; &nbsp;</font>-LOGGED-OUT &nbsp;\n";}
 	
 	//echo "</font>\n";
-    $APIResult = array( "result" => "success", "data" => array( "agents" => $agentsList ) );
+    $APIResult = array( "result" => "success", "data" => array( "agents" => $agentsList ), "debug" => $debugging );
 } else {
     $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
 }
