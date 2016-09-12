@@ -26,7 +26,15 @@
     //$query = "SELECT sum(drops_today) as getTotalDroppedCalls from vicidial_campaign_stats where calls_today > -1 and  $ul"; 
     
     $rsltv = mysqli_query($link,$query);
-    $countrows = mysqli_num_rows($rsltv);
-    $fresults = mysqli_fetch_assoc($rsltv);    
-    $apiresults = array_merge( array( "result" => "success" ), $fresults, $countrows );
+    $countResult = mysqli_num_rows($rsltv);
+    //echo "<pre>";
+    //var_dump($rsltv);   
+        
+    if($countResult > 0) {
+        $data = array();
+            while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){       
+                array_push($data, $fresults);
+            }
+            $apiresults = array("result" => "success", "data" => $data);
+    }
 ?>

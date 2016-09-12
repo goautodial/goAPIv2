@@ -3,8 +3,9 @@
     #### Name: goGetTotalAgentsWaitCalls.php        ####
     #### Type: API to get total agents onWaitCalls  ####
     #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
+    #### Copyright: GOAutoDial Inc. (c) 2011-2016   ####
     #### Written by: Jerico James Flores Milo       ####
+    ####             Demian Lizandro A. Biscocho    ####
     #### License: AGPLv2                            ####
     ####################################################
     
@@ -21,7 +22,7 @@
     }
     
     $query = "SELECT count(*) as getTotalAgentsWaitCalls FROM vicidial_live_agents WHERE status IN ('READY','CLOSER') $ul"; 
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $rsltv = mysqli_query($link, $query);
+    $data = mysqli_fetch_assoc($rsltv);
+    $apiresults = array("result" => "success", "data" => $data);
 ?>
