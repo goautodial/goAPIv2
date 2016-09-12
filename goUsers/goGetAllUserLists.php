@@ -44,19 +44,28 @@
 	$max_phonelogins = mysqli_num_rows($queryPhoneLoginCount);
 	
 		// condition
-		while($get_last_phonelogin = mysqli_fetch_array($queryPhoneLoginCount)){
-			if(preg_match("/^Agent/i", $get_last_phonelogin['phone_login'])){
-				$get_last_count = preg_replace("/^Agent/i", "", $get_last_phonelogin['phone_login']);
-				$last_pl[] = intval($get_last_count);
-			}else{
-				$get_last_count = $get_last_phonelogin['phone_login'];
-				$last_pl[] = intval($get_last_count);
+		if($max_phonelogins > 0){
+			while($get_last_phonelogin = mysqli_fetch_array($queryPhoneLoginCount)){
+				if(preg_match("/^Agent/i", $get_last_phonelogin['phone_login'])){
+					$get_last_count = preg_replace("/^Agent/i", "", $get_last_phonelogin['phone_login']);
+					$last_pl[] = intval($get_last_count);
+				}else{
+					$get_last_count = $get_last_phonelogin['phone_login'];
+					$last_pl[] = intval($get_last_count);
+				}
 			}
+			
+			// return data
+			$phonelogin_num = max($last_pl);
+			$phonelogin_num = $phonelogin_num + 1;
+			
+		}else{
+			// return data
+			$phonelogin_num = "0000001";
 		}
 		
-		// return data
-		$phonelogin_num = max($last_pl);
-		$phonelogin_num = $phonelogin_num + 1;
+		
+		
 	
 	
 	// getting all users

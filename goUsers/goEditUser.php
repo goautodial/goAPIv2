@@ -173,15 +173,21 @@
 						}else{
 								$pass_query = "";
 						}
+						
+						if($phone_login != NULL){
+								$phonelogin_query = "`phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',";
+						}else{
+								$phonelogin_query = "";
+						}
 
 				if($userid != NULL){
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
 								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
 								WHERE `user_id` = '$userid';";
 				}else{
-						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  `phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',  `user_group` = '$user_group',  `active` = '$active',
+						$queryUpdateUser = "UPDATE `vicidial_users` SET `pass` = '', $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
 								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
