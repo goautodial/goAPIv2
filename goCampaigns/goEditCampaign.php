@@ -119,7 +119,7 @@
 										active = '$active', 
 										dial_method = '$dial_method', 
 										auto_dial_level = '$autoDialLevel', 
-										dial_prefix = '$dial_prefix',
+										dial_prefix = '$dialprefix',
 										web_form_address = '$webform', 
 										campaign_script = '$campaign_script', 
 										campaign_cid = '$campaign_cid', 
