@@ -39,7 +39,7 @@
                 $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "userno" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
     }*/
     //2016-07-01 00:00:00 to 2016-07-08 23:59:59
-    $goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59','82247255','daily','admin','usergroup',$link);
+    $goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59',$campaignID,'daily','admin','usergroup',$link);
 	
 	//$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link);
 	
@@ -624,7 +624,7 @@
 								$pfUSERcodePAUSE_MS =	sprintf("%10s", $USERcodePAUSE_MS);
 	
 								$SstatusesFILE .= ",$USERcodePAUSE_MS";
-								$Sstatuses[$m] .= "<td><div align=\"right\" class=\"style4\">&nbsp; $USERcodePAUSE_MS &nbsp;</div></td>";
+								$Sstatuses[$m] .= "<td> $USERcodePAUSE_MS </td>";
 								$status_found++;
 								}
 							$i++;
@@ -632,7 +632,7 @@
 						if ($status_found < 1)
 							{
 							$SstatusesFILE .= ",0:00";
-							$Sstatuses[$m] .= "<td><div align=\"right\" class=\"style4\">&nbsp; 0:00 &nbsp;</div></td>";
+							$Sstatuses[$m] .= "<td> 0:00 </td>";
 							}
 						### END loop through each stat line ###
 						$n++;
@@ -659,22 +659,22 @@
 						$bgcolor = "#EFFBEF";
 						$x=0;
 					}
-			//				<td><div align=\"right\" class=\"style4\">&nbsp; $StimeTC[$m]$TCuserAUTOLOGOUT &nbsp;</div></td>
+			//				<td> $StimeTC[$m]$TCuserAUTOLOGOUT </td>
 					$Toutput = "  <tr>
-							<td><div align=\"left\" class=\"style4\">&nbsp; $Sname[$m] &nbsp;</div></td>
-							<td><div align=\"left\" class=\"style4\">&nbsp; $Suser[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Scalls[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Stime[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Swait[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Stalk[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Sdispo[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Spause[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Sdead[$m] &nbsp;</div></td>
-							<td><div align=\"right\" class=\"style4\">&nbsp; $Scustomer[$m] &nbsp;</div></td>
+							<td> $Sname[$m] </td>
+							<td> $Suser[$m] </td>
+							<td> $Scalls[$m] </td>
+							<td> $Stime[$m] </td>
+							<td> $Swait[$m] </td>
+							<td> $Stalk[$m] </td>
+							<td> $Sdispo[$m] </td>
+							<td> $Spause[$m] </td>
+							<td> $Sdead[$m] </td>
+							<td> $Scustomer[$m] </td>
 							</tr>";
 			
 					$Boutput = "  <tr>
-							<td><div align=\"left\" class=\"style4\">&nbsp; $Sname[$m] &nbsp;</div></td>
+							<td> $Sname[$m] </td>
 							$Sstatuses[$m]
 							</tr>";
 			
@@ -751,7 +751,7 @@
 					### END loop through each stat line ###
 					if ($status_found < 1)
 						{
-						$SUMstatuses .= "<td><div align=\"right\" class=\"style4\">&nbsp; 0:00 &nbsp;</div></td>";
+						$SUMstatuses .= "<td> 0:00 </td>";
 						}
 					else
 						{
@@ -761,7 +761,7 @@
 						$pfUSERsumstatPAUSE_MS =	sprintf("%11s", $USERsumstatPAUSE_MS);
 	
 						$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
-						$SUMstatuses .= "<td><div align=\"right\" class=\"style4\">&nbsp; $USERsumstatPAUSE_MS &nbsp;</div></td>";
+						$SUMstatuses .= "<td> $USERsumstatPAUSE_MS </td>";
 						}
 					$n++;
 					}
@@ -954,7 +954,7 @@
 								$Sdead_sec =	($Sdead_sec + $dead_sec[$i]);
 								$Scustomer_sec =	($Scustomer_sec + $customer_sec[$i]);
 								$SstatusesFILE .= ",$calls[$i]";
-								$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $calls[$i] &nbsp;</div></td>";
+								$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $calls[$i] </td>";
 								$status_found++;
 								}
 							$i++;
@@ -962,7 +962,7 @@
 						if ($status_found < 1)
 							{
 							$SstatusesFILE .= ",0";
-							$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; 0 &nbsp;</div></td>";
+							$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; 0 </td>";
 							}
 						### END loop through each stat line ###
 						$n++;
@@ -1023,26 +1023,26 @@
 					}
 					
 					$Toutput = "<tr>
-							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name &nbsp;</div></td>
-							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Suser &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $Scalls &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtime_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotPAUSE_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgPAUSE_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotWAIT_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgWAIT_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotTALK_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgTALK_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDISPO_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDISPO_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDEAD_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDEAD_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotCUSTOMER_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgCUSTOMER_MS &nbsp;</div></td>
+							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name </td>
+							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Suser </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $Scalls </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtime_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotPAUSE_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgPAUSE_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotWAIT_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgWAIT_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotTALK_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgTALK_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDISPO_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDISPO_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDEAD_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDEAD_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotCUSTOMER_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgCUSTOMER_MS </td>
 							</tr>";
 				
 					$Moutput = "<tr>
-							<td><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name &nbsp;</div></td>
+							<td><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name </td>
 							$SstatusesMID[$m]
 							</tr>";
 				
@@ -1106,12 +1106,12 @@
 					if ($status_found < 1)
 						{
 						$SUMstatusesFILE .= ",0";
-						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0 &nbsp;</div></td>";
+						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0 </td>";
 						}
 					else
 						{
 						$SUMstatusesFILE .= ",$Scalls";
-						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $Scalls &nbsp;</div></td>";
+						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $Scalls </td>";
 						}
 					$n++;
 					}
@@ -1266,7 +1266,7 @@
 								$pfUSERcodePAUSE_MS =	sprintf("%6s", $USERcodePAUSE_MS);
 				
 								$Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
-								$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERcodePAUSE_MS &nbsp;</div></td>";
+								$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERcodePAUSE_MS </td>";
 								$status_found++;
 								}
 							$i++;
@@ -1274,7 +1274,7 @@
 						if ($status_found < 1)
 							{
 							$Ssub_statusesFILE .= ",0";
-							$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 &nbsp;</div></td>";
+							$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 </td>";
 							}
 						### END loop through each stat line ###
 						$n++;
@@ -1302,11 +1302,11 @@
 					}
 					
 					$Boutput = "<tr>
-							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Sfull_name &nbsp;</div></td>
-							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Suser &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotTOTAL_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotNONPAUSE_MS &nbsp;</div></td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotPAUSE_MS &nbsp;</div></td>
+							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Sfull_name </td>
+							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Suser </td>
+							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotTOTAL_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotNONPAUSE_MS </td>
+							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotPAUSE_MS </td>
 							</tr>";
 				
 					$BOTsorted_output[$m] = $Boutput;
@@ -1359,7 +1359,7 @@
 					if ($status_found < 1)
 						{
 						$SUMsub_statusesFILE .= ",0";
-						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 &nbsp;</div></td>";
+						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 </td>";
 						}
 					else
 						{
@@ -1368,7 +1368,7 @@
 						$USERsumstatPAUSE_MS =		go_sec_convert($Scalls,'H'); 
 				
 						$SUMsub_statusesFILE .= ",$USERsumstatPAUSE_MS";
-						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERsumstatPAUSE_MS &nbsp;</div></td>";
+						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERsumstatPAUSE_MS </td>";
 						}
 					$n++;
 					}
@@ -1475,7 +1475,6 @@
                 $total_all=($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
                 
 				if (isset($list_ids) && $list_ids[0] == "ALL") {
-				die("d1");
                 	$query = mysqli_query($link, "SELECT list_id FROM vicidial_lists WHERE campaign_id='$campaignID' ORDER BY list_id");
 	
 					/*foreach ($query->result() as $i => $row) {
@@ -1579,46 +1578,39 @@
                 	
 		
 				$TOPsorted_output = "<center>\n";
-				$TOPsorted_output .= "<TABLE align=center cellpadding=1 cellspacing=1 style=\"width:50%;border:#D0D0D0 solid 1px; -moz-border-radius:5px; -khtml-border-radius:5px; -webkit-border-radius:5px; border-radius:5px;\">\n";
-				$TOPsorted_output .= "<tr style=\"background-color:#FFFFFF\"><td align=center class=\"style3\"><strong>STATUS</strong></td><td align=center class=\"style3\"><strong>Status Name</strong></td>";
+				$TOPsorted_output .= "
+				<TABLE class='table table-striped table-bordered table-hover'>\n";
+				$TOPsorted_output .= "
+					<thead>
+					<tr>
+					<th>STATUS</th>
+					<th>Status Name</th>";
 				$first = $all_called_first;
 				while ($first <= $all_called_last)
 					{
-					if (eregi("1$|3$|5$|7$|9$", $first)) {$AB='style="background-color:#FFF"';} 
-					else{$AB='style="background-color:#FFF"';}
 					if ($first >= 10) {$Fplus="+";}
 					else {$Fplus='';}
-					$TOPsorted_output .= "<td align=center class=\"style3\" $AB><strong>&nbsp;$first$Fplus&nbsp;</strong></td>";
+					$TOPsorted_output .= "<th> $first$Fplus </th>";
 					$first++;
 					}
-				$TOPsorted_output .= "<td align=center class=\"style3\" nowrap><strong>&nbsp;SUB-TOTAL&nbsp;</strong></td></tr>\n";
+				$TOPsorted_output .= "<th> SUB-TOTAL </th>
+				
+				</tr></thead><tbody>\n";
 		
 				$sts=0;
 				$statuses_called_to_print = count($status);
 				while ($statuses_called_to_print > $sts) 
 					{
 					$Pstatus = $status[$sts];
-					if (eregi("1$|3$|5$|7$|9$", $sts))
-						{$bgcolor='style="background-color:#E0F8E0;border-top:#D0D0D0 dashed 1px;"';   $AB='style="background-color:#EFFBEF;border-top:#D0D0D0 dashed 1px;"';} 
-					else
-						{$bgcolor='style="background-color:#EFFBEF;border-top:#D0D0D0 dashed 1px;"';   $AB='style="background-color:#E0F8E0;border-top:#D0D0D0 dashed 1px;"';}
-						
-						$TOPsorted_output .= "<tr><td class=\"style3\" align=center $bgcolor>&nbsp;$Pstatus&nbsp;</td><td nowrap class=\"style3\" align=center $bgcolor>&nbsp;$statuses_list[$Pstatus]&nbsp;</td>";
+					
+						$TOPsorted_output .= "<tr>
+							<td> ".$Pstatus." </td>
+							<td> ".$statuses_list[$Pstatus]." </td>";
 			
 						$first = $all_called_first;
 						while ($first <= $all_called_last)
 							{
-							if (eregi("1$|3$|5$|7$|9$", $sts))
-								{
-								if (eregi("1$|3$|5$|7$|9$", $first)) {$AB='style="background-color:#E0F8E0;border-top:#D0D0D0 dashed 1px;"';} 
-								else{$AB='style="background-color:#E0F8E0;border-top:#D0D0D0 dashed 1px;"';}
-								}
-							else
-								{
-								if (eregi("0$|2$|4$|6$|8$", $first)) {$AB='style="background-color:#EFFBEF;border-top:#D0D0D0 dashed 1px;"';} 
-								else{$AB='style="background-color:#EFFBEF;border-top:#D0D0D0 dashed 1px;"';}
-								}
-			
+								
 							$called_printed=0;
 							$o=0;
 							while ($status_called_to_print > $o) 
@@ -1626,46 +1618,50 @@
 								if ( ($count_statuses[$o] == "$Pstatus") and ($count_called[$o] == "$first") )
 									{
 									$called_printed++;
-									$TOPsorted_output .= "<td $AB align=center>&nbsp;$count_count[$o]&nbsp;</td>";
+									$TOPsorted_output .= "<td> ".$count_count[$o]." </td>";
 									}
 			
 								$o++;
 								}
 							if (!$called_printed) 
-								{$TOPsorted_output .= "<td $AB align=center>&nbsp;0&nbsp;</td>";}
+								{$TOPsorted_output .= "<td> 0 </td>";}
 							$first++;
 							}
-						$TOPsorted_output .= "<td class=\"style3\" align=center $AB>$leads_in_sts[$sts]</td></tr>\n\n";
-			
+						$TOPsorted_output .= "<td> ".$leads_in_sts[$sts]." </td></tr>\n\n";
 						$sts++;
-	//					}
 					}
 		
-				$TOPsorted_output .= "<tr><td align=center colspan=2 align=center class=\"style3\" nowrap style=\"border-top:#D0D0D0 dashed 1px;\">&nbsp;<b>Total For ".$total_all."&nbsp;</td>";
+				$TOPsorted_output .= "
+				</tbody>
+				<tfoot><tr>
+				<th colspan=2> Total For <i><u>".$total_all."</u></i> </th>";
 				$first = $all_called_first;
 				while ($first <= $all_called_last)
 					{
-					if (eregi("1$|3$|5$|7$|9$", $first)) {$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';} 
-					else{$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';}
+					/*if (eregi("1$|3$|5$|7$|9$", $first)) {$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';} 
+					else{$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';}*/
 					if ($all_called_count[$first]) {
-						$TOPsorted_output .= "<td align=center $AB class=\"style3\"><b>$all_called_count[$first]</td>";
+						$TOPsorted_output .= "
+						<th> $all_called_count[$first] </th>";
 					} else {
-						$TOPsorted_output .= "<td $AB class=\"style3\" align=center>&nbsp;0&nbsp;</td>";
+						$TOPsorted_output .= "
+						<td> 0 </td>";
 					}
 					$first++;
 					}
-				$TOPsorted_output .= "<td align=center class=\"style3\" style=\"border-top:#D0D0D0 dashed 1px;\"><b>$leads_in_list</td></tr>\n";
-				//$TOPsorted_output .= "</table><br /><small style='color:red;'>{$this->lang->line("go_note_sel_camp")}</small></center>\n";
-				$TOPsorted_output .= "</table><br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
+				$TOPsorted_output .= "<th>$leads_in_list</th></tr>\n";
+				
+				$TOPsorted_output .= "
+				</tfoot></table>
+				
+				<br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
                 
 				$return['TOPsorted_output']		= $TOPsorted_output;
 				$return['SUMstatuses']			= $sts;
                 
-                //var_dump($sts);
-                //var_dump($TOPsorted_output);
-                //die("dd");
                 $apiresults = array("result" => "success", "SUMstatuses" => $sts, "TOPsorted_output" => $TOPsorted_output);
-                //milo3 
+                
+				return $apiresults;
 			}
 			
 			if ($pageTitle == "sales_agent") {
@@ -1703,9 +1699,9 @@
 					
 						$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
 						$TOPsorted_output .= "<tr>";
-						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div class=\"style4\">&nbsp;".$row->full_name."&nbsp;</div></td>";
-						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->user."&nbsp;</div></td>";
-						$TOPsorted_output .= "<td nowrap width=\"120\" style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->sale."&nbsp;</div></td>";
+						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div class=\"style4\">&nbsp;".$row->full_name."</td>";
+						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->user."</td>";
+						$TOPsorted_output .= "<td nowrap width=\"120\" style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->sale."</td>";
 						$TOPsorted_output .= "</tr>";
 						$total_out_sales=$total_out_sales+$row->sale;
 					}
@@ -1760,9 +1756,9 @@
 					
 						$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
 						$BOTsorted_output .= "<tr>";
-						$BOTsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div class=\"style4\">&nbsp;".$row->full_name."&nbsp;</div></td>";
-						$BOTsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->user."&nbsp;</div></td>";
-						$BOTsorted_output .= "<td nowrap width=\"120\" style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->sale."&nbsp;</div></td>";
+						$BOTsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div class=\"style4\">&nbsp;".$row->full_name."</td>";
+						$BOTsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->user."</td>";
+						$BOTsorted_output .= "<td nowrap width=\"120\" style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->sale."</td>";
 						$BOTsorted_output .= "</tr>";
 						$total_in_sales=$total_in_sales+$row->sale;
 					}
@@ -2328,7 +2324,7 @@
 				foreach ($query->result() as $i => $row)
 				{
 					$Dstatus[$row->status] = $row->status;
-					$TOPsorted_output .= "<td nowrap style=\"text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->status."&nbsp;</div></td>";
+					$TOPsorted_output .= "<td nowrap style=\"text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->status."</td>";
 				}
 				$TOPsorted_output .= "<td nowrap><div align=\"center\" class=\"style3\"><strong>&nbsp;{$this->lang->line("go_sub_total_caps")}&nbsp;</strong></td></tr>";
 	
@@ -2346,18 +2342,18 @@
 							$c = 1;
 						}
 	
-						$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style3 toolTip\" title=\"".$user_info->user."\">&nbsp;<strong>".$user_info->full_name."</strong>&nbsp;</div></td>";
+						$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style3 toolTip\" title=\"".$user_info->user."\">&nbsp;<strong>".$user_info->full_name."</strong></td>";
 						
 						$t = 0;
 						foreach ($Dstatus as $s)
 						{
 							$call_cnt = ($agent[$user_info->user][$s]>0) ? $agent[$user_info->user][$s] : 0;
-							$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$call_cnt."&nbsp;</div></td>";
+							$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$call_cnt."</td>";
 							$sub_total[$user_info->user] = $sub_total[$user_info->user] + $agent[$user_info->user][$s];
 							$t++;
 						}
 	
-						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style3\">&nbsp;".$sub_total[$user_info->user]."&nbsp;</div></td></tr>";
+						$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style3\">&nbsp;".$sub_total[$user_info->user]."</td></tr>";
 						$total_all = $total_all + $sub_total[$user_info->user];
 					}
 				}
@@ -2373,11 +2369,11 @@
 	// 					$c = 1;
 	// 				}
 	// 				
-	// 				$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$statuses_name[$row->status]." (".$row->status.")&nbsp;</div></td>";
+	// 				$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$statuses_name[$row->status]." (".$row->status.")</td>";
 	// 				
 	// 				foreach ($agent as $o => $user)
 	// 				{
-	// 					$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$user[$row->status]."&nbsp;</div></td>";
+	// 					$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$user[$row->status]."</td>";
 	// 					$sub_total[$o][$row->status] = $sub_total[$o][$row->status] + $user[$row->status];
 	// 				}
 	// 			}
