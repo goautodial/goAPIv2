@@ -10,7 +10,9 @@
     
     include_once("goFunctions.php");
     include_once("goReportsFunctions.php");	
-
+	
+	// need function go_sec_convert();
+	
 	//$pageTitle = call_export_report, inbound_report, stats, agent_detail, agent_pdetail, dispo, sales_agent, sales_tracker, call_export_report, dashboard
 	//$request = daily, weekly, monthly, outbound, inbound
     //https://webrtc.goautodial.com/goAPI/goJamesReports/goAPI.php?goUser=admin&goPass=G02x16&goAction=goGetReports&responsetype=json
@@ -23,7 +25,8 @@
     $request            = $_REQUEST['request'];
     $userID             = $_REQUEST['userID'];
     $userGroup          = $_REQUEST['userGroup'];
-
+	
+	$returns = $pageTitle.' / '.$fromDate.' / '.$toDate.' / '.$campaignID;
     
     /*$query = mysqli_query($link, "select campaign_name from vicidial_campaigns;");
     $resultu = mysqli_num_rows($query);
@@ -39,7 +42,9 @@
                 $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "userno" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
     }*/
     //2016-07-01 00:00:00 to 2016-07-08 23:59:59
-    $goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59',$campaignID,'daily','admin','usergroup',$link);
+    //$goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59','82247255','daily','admin','usergroup',$link);
+	
+	$goReportsReturn = go_get_reports($pageTitle,$fromDate,$toDate,$campaignID,'daily','admin','usergroup',$link);
 	
 	//$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link);
 	
@@ -824,7 +829,6 @@
 			// end agent_detail
             
 			// Agent Performance Detail
-            // milo2
 			if ($pageTitle == "agent_pdetail") {
                 $statusesFILE='';
 				$statuses='-';
@@ -836,12 +840,11 @@
 				$k=0;
 				if (inner_checkIfTenant($userGroup))
 				    $userGroupSQL = "and vicidial_users.user_group='$userGroup'";
-				
                 
 				$query = mysqli_query($link, "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000");
+				
 				$rows_to_print = mysqli_num_rows($query);
-	
-                
+				
 				/* foreach($query->result() as $i => $row)
 					{
 					$calls[$i] =		$row->calls;
@@ -896,7 +899,7 @@
 						$statuses .= "$status[$i]-";
 						$SUMstatuses .= "$status[$i] ";
 						$statusesARY[$j] = $status[$i];
-						$SstatusesTOP .= "<td nowrap><div align=\"center\" class=\"style4\"><strong>&nbsp; $status[$i] &nbsp;</strong></div></td>";
+						$SstatusesTOP .= "<th> $status[$i] </th>";
 						$j++;
 						}
 					if (!eregi("-$user[$i]-", $users))
@@ -954,7 +957,7 @@
 								$Sdead_sec =	($Sdead_sec + $dead_sec[$i]);
 								$Scustomer_sec =	($Scustomer_sec + $customer_sec[$i]);
 								$SstatusesFILE .= ",$calls[$i]";
-								$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $calls[$i] </td>";
+								$SstatusesMID[$m] .= "<td> $calls[$i] </td>";
 								$status_found++;
 								}
 							$i++;
@@ -962,7 +965,7 @@
 						if ($status_found < 1)
 							{
 							$SstatusesFILE .= ",0";
-							$SstatusesMID[$m] .= "<td nowrap><div align=\"right\" class=\"style4\">&nbsp; 0 </td>";
+							$SstatusesMID[$m] .= "<td> 0 </td>";
 							}
 						### END loop through each stat line ###
 						$n++;
@@ -1023,26 +1026,26 @@
 					}
 					
 					$Toutput = "<tr>
-							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name </td>
-							<td nowrap><div align=\"left\" class=\"style4\">&nbsp; $Suser </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $Scalls </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtime_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotPAUSE_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgPAUSE_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotWAIT_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgWAIT_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotTALK_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgTALK_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDISPO_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDISPO_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotDEAD_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgDEAD_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERtotCUSTOMER_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\">&nbsp; $pfUSERavgCUSTOMER_MS </td>
+							<td> $Sfull_name </td>
+							<td> $Suser </td>
+							<td> $Scalls </td>
+							<td> $pfUSERtime_MS </td>
+							<td> $pfUSERtotPAUSE_MS </td>
+							<td> $pfUSERavgPAUSE_MS </td>
+							<td> $pfUSERtotWAIT_MS </td>
+							<td> $pfUSERavgWAIT_MS </td>
+							<td> $pfUSERtotTALK_MS </td>
+							<td> $pfUSERavgTALK_MS </td>
+							<td> $pfUSERtotDISPO_MS </td>
+							<td> $pfUSERavgDISPO_MS </td>
+							<td> $pfUSERtotDEAD_MS </td>
+							<td> $pfUSERavgDEAD_MS </td>
+							<td> $pfUSERtotCUSTOMER_MS </td>
+							<td> $pfUSERavgCUSTOMER_MS </td>
 							</tr>";
 				
 					$Moutput = "<tr>
-							<td><div align=\"left\" class=\"style4\">&nbsp; $Sfull_name </td>
+							<td> $Sfull_name </td>
 							$SstatusesMID[$m]
 							</tr>";
 				
@@ -1106,12 +1109,12 @@
 					if ($status_found < 1)
 						{
 						$SUMstatusesFILE .= ",0";
-						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0 </td>";
+						$SstatusesSUM .= "<th> 0 </th>";
 						}
 					else
 						{
 						$SUMstatusesFILE .= ",$Scalls";
-						$SstatusesSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $Scalls </td>";
+						$SstatusesSUM .= "<th> $Scalls </th>";
 						}
 					$n++;
 					}
@@ -1131,19 +1134,20 @@
 				if ($TOTtotCUSTOMER < 1) {$TOTavgCUSTOMER = '0';}
 				else {$TOTavgCUSTOMER = ($TOTtotCUSTOMER / $TOTcalls);}
 				
-				$TOTtime_MS =		go_sec_convert($TOTtime,'H'); 
-				$TOTtotTALK_MS =	go_sec_convert($TOTtotTALK,'H'); 
-				$TOTtotDISPO_MS =	go_sec_convert($TOTtotDISPO,'H'); 
-				$TOTtotDEAD_MS =	go_sec_convert($TOTtotDEAD,'H'); 
-				$TOTtotPAUSE_MS =	go_sec_convert($TOTtotPAUSE,'H'); 
-				$TOTtotWAIT_MS =	go_sec_convert($TOTtotWAIT,'H'); 
-				$TOTtotCUSTOMER_MS =	go_sec_convert($TOTtotCUSTOMER,'H'); 
-				$TOTavgTALK_MS =	go_sec_convert($TOTavgTALK,'M'); 
-				$TOTavgDISPO_MS =	go_sec_convert($TOTavgDISPO,'H'); 
-				$TOTavgDEAD_MS =	go_sec_convert($TOTavgDEAD,'H'); 
-				$TOTavgPAUSE_MS =	go_sec_convert($TOTavgPAUSE,'H'); 
-				$TOTavgWAIT_MS =	go_sec_convert($TOTavgWAIT,'H'); 
-				$TOTavgCUSTOMER_MS =	go_sec_convert($TOTavgCUSTOMER,'H'); 
+				$TOTcalls = '<th nowrap>'.$TOTcalls.'</th>';
+				$TOTtime_MS = '<th nowrap>'.go_sec_convert($TOTtime,'H').'</th>'; 
+				$TOTtotTALK_MS = '<th nowrap>'.go_sec_convert($TOTtotTALK,'H').'</th>'; 
+				$TOTtotDISPO_MS = '<th nowrap>'.go_sec_convert($TOTtotDISPO,'H').'</th>'; 
+				$TOTtotDEAD_MS = '<th nowrap>'.go_sec_convert($TOTtotDEAD,'H').'</th>'; 
+				$TOTtotPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
+				$TOTtotWAIT_MS = '<th nowrap>'.go_sec_convert($TOTtotWAIT,'H').'</th>'; 
+				$TOTtotCUSTOMER_MS = '<th nowrap>'.go_sec_convert($TOTtotCUSTOMER,'H').'</th>'; 
+				$TOTavgTALK_MS = '<th nowrap>'.go_sec_convert($TOTavgTALK,'M').'</th>'; 
+				$TOTavgDISPO_MS = '<th nowrap>'.go_sec_convert($TOTavgDISPO,'H').'</th>'; 
+				$TOTavgDEAD_MS = '<th nowrap>'.go_sec_convert($TOTavgDEAD,'H').'</th>'; 
+				$TOTavgPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTavgPAUSE,'H').'</th>'; 
+				$TOTavgWAIT_MS = '<th nowrap>'.go_sec_convert($TOTavgWAIT,'H').'</th>'; 
+				$TOTavgCUSTOMER_MS = '<th nowrap>'.go_sec_convert($TOTavgCUSTOMER,'H').'</th>'; 
 				
 				if ($file_download > 0)
 					{
@@ -1205,7 +1209,7 @@
 						$sub_statuses .= "$sub_status[$i]-";
 						$sub_statusesFILE .= ",$sub_status[$i]";
 						$sub_statusesARY[$j] = $sub_status[$i];
-						$SstatusesBOT .= "<td nowrap><div align=\"center\" class=\"style4\"><strong>&nbsp; $sub_status[$i] &nbsp;</strong></div></td>";
+						$SstatusesBOT .= "<th> $sub_status[$i] </th>";
 						$j++;
 						}
 					if (!eregi("-$PCuser[$i]-", $PCusers))
@@ -1266,7 +1270,7 @@
 								$pfUSERcodePAUSE_MS =	sprintf("%6s", $USERcodePAUSE_MS);
 				
 								$Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
-								$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERcodePAUSE_MS </td>";
+								$SstatusesBOTR[$m] .= "<td> $USERcodePAUSE_MS </td>";
 								$status_found++;
 								}
 							$i++;
@@ -1274,7 +1278,7 @@
 						if ($status_found < 1)
 							{
 							$Ssub_statusesFILE .= ",0";
-							$SstatusesBOTR[$m] .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 </td>";
+							$SstatusesBOTR[$m] .= "<td> 0:00 </td>";
 							}
 						### END loop through each stat line ###
 						$n++;
@@ -1302,11 +1306,11 @@
 					}
 					
 					$Boutput = "<tr>
-							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Sfull_name </td>
-							<td nowrap><div align=\"left\" class=\"style4\" >&nbsp; $Suser </td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotTOTAL_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotNONPAUSE_MS </td>
-							<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $pfUSERtotPAUSE_MS </td>
+							<td> $Sfull_name </td>
+							<td> $Suser </td>
+							<td> $pfUSERtotTOTAL_MS </td>
+							<td> $pfUSERtotNONPAUSE_MS </td>
+							<td> $pfUSERtotPAUSE_MS </td>
 							</tr>";
 				
 					$BOTsorted_output[$m] = $Boutput;
@@ -1359,7 +1363,7 @@
 					if ($status_found < 1)
 						{
 						$SUMsub_statusesFILE .= ",0";
-						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; 0:00 </td>";
+						$SstatusesBSUM .= "<td> 0:00 </td>";
 						}
 					else
 						{
@@ -1368,16 +1372,16 @@
 						$USERsumstatPAUSE_MS =		go_sec_convert($Scalls,'H'); 
 				
 						$SUMsub_statusesFILE .= ",$USERsumstatPAUSE_MS";
-						$SstatusesBSUM .= "<td nowrap><div align=\"right\" class=\"style4\" >&nbsp; $USERsumstatPAUSE_MS </td>";
+						$SstatusesBSUM .= "<th> $USERsumstatPAUSE_MS </th>";
 						}
 					$n++;
 					}
 				### END loop through each status ###
-					$TOT_AGENTS = $m;
+					$TOT_AGENTS = '<th>: '.$m.'</th>';
 				
-					$TOTtotPAUSEB_MS =		go_sec_convert($TOTtotPAUSE,'H'); 
-					$TOTtotNONPAUSE_MS =	go_sec_convert($TOTtotNONPAUSE,'H'); 
-					$TOTtotTOTAL_MS =		go_sec_convert($TOTtotTOTAL,'H'); 
+					$TOTtotPAUSEB_MS = '<th>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
+					$TOTtotNONPAUSE_MS = '<th>'.go_sec_convert($TOTtotNONPAUSE,'H').'</th>'; 
+					$TOTtotTOTAL_MS = '<th>'.go_sec_convert($TOTtotTOTAL,'H').'</th>'; 
 				
 					if ($file_download > 0) {
 						$file_output .= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
@@ -1604,8 +1608,8 @@
 					$Pstatus = $status[$sts];
 					
 						$TOPsorted_output .= "<tr>
-							<td> ".$Pstatus." </td>
-							<td> ".$statuses_list[$Pstatus]." </td>";
+							<td nowrap> ".$Pstatus." </td>
+							<td nowrap> ".$statuses_list[$Pstatus]." </td>";
 			
 						$first = $all_called_first;
 						while ($first <= $all_called_last)
@@ -1618,23 +1622,23 @@
 								if ( ($count_statuses[$o] == "$Pstatus") and ($count_called[$o] == "$first") )
 									{
 									$called_printed++;
-									$TOPsorted_output .= "<td> ".$count_count[$o]." </td>";
+									$TOPsorted_output .= "<td nowrap> ".$count_count[$o]." </td>";
 									}
 			
 								$o++;
 								}
 							if (!$called_printed) 
-								{$TOPsorted_output .= "<td> 0 </td>";}
+								{$TOPsorted_output .= "<td nowrap> 0 </td>";}
 							$first++;
 							}
-						$TOPsorted_output .= "<td> ".$leads_in_sts[$sts]." </td></tr>\n\n";
+						$TOPsorted_output .= "<td nowrap> ".$leads_in_sts[$sts]." </td></tr>\n\n";
 						$sts++;
 					}
 		
 				$TOPsorted_output .= "
 				</tbody>
-				<tfoot><tr>
-				<th colspan=2> Total For <i><u>".$total_all."</u></i> </th>";
+				<tfoot><tr class='warning'>
+				<th nowrap colspan='2'> Total For <i>".$total_all."</i> </th>";
 				$first = $all_called_first;
 				while ($first <= $all_called_last)
 					{
@@ -1652,9 +1656,9 @@
 				$TOPsorted_output .= "<th>$leads_in_list</th></tr>\n";
 				
 				$TOPsorted_output .= "
-				</tfoot></table>
+				</tfoot></table>";
 				
-				<br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
+				//<br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
                 
 				$return['TOPsorted_output']		= $TOPsorted_output;
 				$return['SUMstatuses']			= $sts;
