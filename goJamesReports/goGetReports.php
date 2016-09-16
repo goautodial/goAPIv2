@@ -331,7 +331,7 @@
 						$sub_statusesFILE .= ",$sub_status[$i]";
 						$sub_statuses .= "$sub_status[$i]-";
 						$sub_statusesARY[$sub_status_count] = $sub_status[$i];
-						$sub_statusesTOP .= "<td><div align=\"center\" class=\"style4\" nowrap><strong> &nbsp;$sub_status[$i]&nbsp; </strong></div></td>";
+						$sub_statusesTOP .= "<th nowrap> $sub_status[$i] </th>";
 						$sub_status_count++;
 						}
 					if (!eregi("-$PCuser[$i]-", $PCusers))
@@ -699,7 +699,7 @@
 				##### END loop through each user formatting data for output
 			
 			
-				$TOT_AGENTS = $m;
+				$TOT_AGENTS = '<th>AGENTS: '.$m.'</th>';
 			// 	### BEGIN sort through output to display properly ###
 				if ( ($TOT_AGENTS > 0) and (ereg("NAME|ID|TIME|LEADS|TCLOCK",$stage)) )
 					{
@@ -756,7 +756,7 @@
 					### END loop through each stat line ###
 					if ($status_found < 1)
 						{
-						$SUMstatuses .= "<td> 0:00 </td>";
+						$SUMstatuses .= "<th> 0:00 </th>";
 						}
 					else
 						{
@@ -766,21 +766,21 @@
 						$pfUSERsumstatPAUSE_MS =	sprintf("%11s", $USERsumstatPAUSE_MS);
 	
 						$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
-						$SUMstatuses .= "<td> $USERsumstatPAUSE_MS </td>";
+						$SUMstatuses .= "<th nowrap> $USERsumstatPAUSE_MS </th>";
 						}
 					$n++;
 					}
 				### END loop through each status ###
 			
 				### call function to calculate and print dialable leads
-				$TOTwait = go_sec_convert($TOTwait,'H');
-				$TOTtalk = go_sec_convert($TOTtalk,'H');
-				$TOTdispo = go_sec_convert($TOTdispo,'H');
-				$TOTpause = go_sec_convert($TOTpause,'H');
-				$TOTdead = go_sec_convert($TOTdead,'H');
-				$TOTcustomer = go_sec_convert($TOTcustomer,'H');
-				$TOTALtime = go_sec_convert($TOTALtime,'H');
-				$TOTtimeTC = go_sec_convert($TOTtimeTC,'H');
+				$TOTwait = '<th nowrap>'.go_sec_convert($TOTwait,'H').'</th>';
+				$TOTtalk = '<th nowrap>'.go_sec_convert($TOTtalk,'H').'</th>';
+				$TOTdispo = '<th nowrap>'.go_sec_convert($TOTdispo,'H').'</th>';
+				$TOTpause = '<th nowrap>'.go_sec_convert($TOTpause,'H').'</th>';
+				$TOTdead = '<th nowrap>'.go_sec_convert($TOTdead,'H').'</th>';
+				$TOTcustomer = '<th nowrap>'.go_sec_convert($TOTcustomer,'H').'</th>';
+				$TOTALtime = '<th nowrap>'.go_sec_convert($TOTALtime,'H').'</th>';
+				$TOTtimeTC = '<th nowrap>'.go_sec_convert($TOTtimeTC,'H').'</th>';
                 
 	
 				if ($file_download > 0)
@@ -807,7 +807,7 @@
 				$return['TOT_AGENTS']			= $TOT_AGENTS;
 				$return['TOTcalls']				= $TOTcalls;
 				$return['file_output']			= $file_output;
-                
+                				
                 $apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOPsorted_outputFILE" => $TOPsorted_outputFILE, 
                 "TOTwait" => $TOTwait,
                 "TOTtalk" => $TOTtalk,
@@ -1119,7 +1119,7 @@
 					$n++;
 					}
 				### END loop through each status ###
-				$TOT_AGENTS = $m;
+				$TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
 				
 				if ($TOTtotTALK < 1) {$TOTavgTALK = '0';}
 				else {$TOTavgTALK = ($TOTtotTALK / $TOTcalls);}
@@ -1363,7 +1363,7 @@
 					if ($status_found < 1)
 						{
 						$SUMsub_statusesFILE .= ",0";
-						$SstatusesBSUM .= "<td> 0:00 </td>";
+						$SstatusesBSUM .= "<th nowrap> 0:00 </th>";
 						}
 					else
 						{
@@ -1372,16 +1372,16 @@
 						$USERsumstatPAUSE_MS =		go_sec_convert($Scalls,'H'); 
 				
 						$SUMsub_statusesFILE .= ",$USERsumstatPAUSE_MS";
-						$SstatusesBSUM .= "<th> $USERsumstatPAUSE_MS </th>";
+						$SstatusesBSUM .= "<th nowrap> $USERsumstatPAUSE_MS </th>";
 						}
 					$n++;
 					}
 				### END loop through each status ###
-					$TOT_AGENTS = '<th>: '.$m.'</th>';
+					$TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
 				
-					$TOTtotPAUSEB_MS = '<th>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
-					$TOTtotNONPAUSE_MS = '<th>'.go_sec_convert($TOTtotNONPAUSE,'H').'</th>'; 
-					$TOTtotTOTAL_MS = '<th>'.go_sec_convert($TOTtotTOTAL,'H').'</th>'; 
+					$TOTtotPAUSEB_MS = '<th nowrap>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
+					$TOTtotNONPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTtotNONPAUSE,'H').'</th>'; 
+					$TOTtotTOTAL_MS = '<th nowrap>'.go_sec_convert($TOTtotTOTAL,'H').'</th>'; 
 				
 					if ($file_download > 0) {
 						$file_output .= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
@@ -1583,7 +1583,7 @@
 		
 				$TOPsorted_output = "<center>\n";
 				$TOPsorted_output .= "
-				<TABLE class='table table-striped table-bordered table-hover'>\n";
+				<TABLE class='table table-striped table-bordered table-hover' id='dispo'>\n";
 				$TOPsorted_output .= "
 					<thead>
 					<tr>
@@ -1597,7 +1597,7 @@
 					$TOPsorted_output .= "<th> $first$Fplus </th>";
 					$first++;
 					}
-				$TOPsorted_output .= "<th> SUB-TOTAL </th>
+				$TOPsorted_output .= "<th nowrap> SUB-TOTAL </th>
 				
 				</tr></thead><tbody>\n";
 		
