@@ -159,7 +159,34 @@
 					// Total Calls Made
 					//$query = mysqli_query($link, "select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and call_date between '$fromDate 00:00:00' and '$toDate 23:59:59'");
 					$query = mysqli_query($link, "select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d') between '$fromDate' and '$toDate' $ul group by cdate $MunionSQL) t group by cdate;");
-					$data_calls = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$cdate[] = $row['cdate'];
+						$hour0[] = $row['Hour0'];
+						$hour1[] = $row['Hour1'];
+						$hour2[] = $row['Hour2'];
+						$hour3[] = $row['Hour3'];
+						$hour4[] = $row['Hour4'];
+						$hour5[] = $row['Hour5'];
+						$hour6[] = $row['Hour6'];
+						$hour7[] = $row['Hour7'];
+						$hour8[] = $row['Hour8'];
+						$hour9[] = $row['Hour9'];
+						$hour10[] = $row['Hour10'];
+						$hour11[] = $row['Hour11'];
+						$hour12[] = $row['Hour12'];
+						$hour13[] = $row['Hour13'];
+						$hour14[] = $row['Hour14'];
+						$hour15[] = $row['Hour15'];
+						$hour16[] = $row['Hour16'];
+						$hour17[] = $row['Hour17'];
+						$hour18[] = $row['Hour18'];
+						$hour19[] = $row['Hour19'];
+						$hour20[] = $row['Hour20'];
+						$hour21[] = $row['Hour21'];
+						$hour22[] = $row['Hour22'];
+						$hour23[] = $row['Hour23'];
+					}
+					$data_calls = array("cdate" => $cdate, "hour0" => $hour0, "hour1" => $hour1, "hour2" => $hour2, "hour3" => $hour3, "hour4" => $hour4, "hour5" => $hour5, "hour6" => $hour6, "hour7" => $hour7, "hour8" => $hour8, "hour9" => $hour9, "hour10" => $hour10, "hour11" => $hour11, "hour12" => $hour12, "hour13" => $hour13, "hour14" => $hour14, "hour15" => $hour15, "hour16" => $hour16, "hour17" => $hour17, "hour18" => $hour18, "hour19" => $hour19, "hour20" => $hour20, "hour21" => $hour21, "hour22" => $hour22, "hour23" => $hour23);
 					
 					$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d') between '$fromDate' and '$toDate' $ul $TunionSQL");
 					$total_calls = mysqli_num_rows($query);
@@ -186,7 +213,7 @@
 				}
 				
 				if ($return['request']=='weekly') {
-					$stringv = go_getall_closer_campaigns($campaignID);
+					$stringv = go_getall_closer_campaigns($campaignID, $link);
 					$closerCampaigns = " and campaign_id IN ('$stringv') ";
 					$vcloserCampaigns = " and vclog.campaign_id IN ('$stringv') ";
 
@@ -224,7 +251,7 @@
 				}
 				
 				if ($return['request']=='monthly') {
-					$stringv = go_getall_closer_campaigns($campaignID);
+					$stringv = go_getall_closer_campaigns($campaignID, $link);
 					$closerCampaigns = " and campaign_id IN ('$stringv') ";
 					$vcloserCampaigns = " and vclog.campaign_id IN ('$stringv') ";
 
