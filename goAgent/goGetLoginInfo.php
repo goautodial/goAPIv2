@@ -307,6 +307,9 @@ if ($userExist > 0) {
     $U_scheduled_callbacks = $userinfo['scheduled_callbacks'];
     unset($userinfo['scheduled_callbacks']);
     
+    $userinfo['user_closer_campaigns'] = $userinfo['closer_campaigns'];
+    unset($userinfo['closer_campaigns']);
+    
     $data = array_merge($data, array( 'user_info' => $userinfo ));
     
     $usergroup = get_settings('usergroup', $astDB, $userinfo['user_group']);
