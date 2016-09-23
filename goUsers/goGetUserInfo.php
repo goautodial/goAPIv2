@@ -61,8 +61,8 @@
         
         ### USER PROFILE (array, multi-lines)
         ### Get phone call details for both inbound and outbound
-        $query_InboundCallsAgent = "SELECT vlist.first_name, vlist.last_name, vcl.phone_number, vcl.lead_id,vcl.list_id,campaign_id,call_date,length_in_sec,vcl.status from vicidial_closer_log as vcl, vicidial_users as vu, vicidial_list as vlist where vu.user=vcl.user and vcl.lead_id=vlist.lead_id and $vul limit 100";
-        $query_OutboundCallsAgent = "SELECT vlist.first_name, vlist.last_name, vl.phone_number,vl.lead_id,vl.list_id,campaign_id,call_date,length_in_sec,vl.status,vl.called_count from vicidial_log as vl, vicidial_users as vu, vicidial_list as vlist where vu.user=vl.user and vl.lead_id=vlist.lead_id and $vul limit 100";
+        $query_InboundCallsAgent = "SELECT vlist.first_name, vlist.last_name, vcl.phone_number, vcl.lead_id,vcl.list_id,campaign_id,call_date,length_in_sec,vcl.status from vicidial_closer_log as vcl, vicidial_users as vu, vicidial_list as vlist where vu.user=vcl.user and vcl.lead_id=vlist.lead_id and $vul ORDER BY call_date DESC limit 100";
+        $query_OutboundCallsAgent = "SELECT vlist.first_name, vlist.last_name, vl.phone_number,vl.lead_id,vl.list_id,campaign_id,call_date,length_in_sec,vl.status,vl.called_count from vicidial_log as vl, vicidial_users as vu, vicidial_list as vlist where vu.user=vl.user and vl.lead_id=vlist.lead_id and $vul ORDER BY call_date DESC limit 100";
 
         $rsltvInCallsAgent = mysqli_query($link,$query_InboundCallsAgent);
         $rsltvOutCallsAgent = mysqli_query($link,$query_OutboundCallsAgent);
