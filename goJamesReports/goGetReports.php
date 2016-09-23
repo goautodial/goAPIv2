@@ -7,7 +7,10 @@
     #### Written by: Jerico James Milo              ####
     #### License: AGPLv2                            ####
     ####################################################
-    
+/*ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);*/
+
     include_once("../goFunctions.php");
     include_once("goReportsFunctions.php");	
 	
@@ -26,7 +29,7 @@
     $userID             = $_REQUEST['userID'];
     $userGroup          = $_REQUEST['userGroup'];
 	
-	$returns = $pageTitle.' / '.$fromDate.' / '.$toDate.' / '.$campaignID;
+	//$returns = $pageTitle.' / '.$fromDate.' / '.$toDate.' / '.$campaignID;
     
     /*$query = mysqli_query($link, "select campaign_name from vicidial_campaigns;");
     $resultu = mysqli_num_rows($query);
@@ -42,9 +45,9 @@
                 $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "userno" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
     }*/
 	
-    //$goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59','82247255','daily','admin','usergroup',$link);
+    //$goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59','82247255','weekly','admin','usergroup',$link);
 	
-	$goReportsReturn = go_get_reports($pageTitle,$fromDate,$toDate,$campaignID,'daily','admin','usergroup',$link);
+	$goReportsReturn = go_get_reports($pageTitle,$fromDate,$toDate,$campaignID,$request,'admin','ADMIN',$link);
 	
 	//$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link);
 	
@@ -72,72 +75,75 @@
 				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$return['groupId']."'");
 			}
             
-            $resultu = mysqli_fetch_array($query, MYSQLI_ASSOC);
-            
-            $return['campaign_name'] = $resultu['campaign_name'];
-            
-			$ul = "and campaign_id='$campaignID'";
-			if (!isset($request) || $request=='') {
-				$return['request'] = 'daily';
-			} else {
-				$return['request'] = $request;
-			}
-			
-			$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'");
-			
-            while($Qstatus = mysqli_fetch_array($query, MYSQLI_ASSOC)){
-                $goTempStatVal = $Qstatus['status'];
-                $sstatuses[$Qstatus['status']] = $Qstatus['status'];
-                $sstatusRX	.= "{$goTempStatVal}|";
-            }    
-            
-            $sstatuses = implode("','",$sstatuses);
-            
-            /*foreach ($query->result() as $Qstatus)
-			{
-			   $sstatuses[$Qstatus->status] = $Qstatus->status;
-			   $sstatusRX	.= "{$Qstatus->status}|";
-			}
-			$sstatuses = implode("','",$sstatuses);*/
-			//81098424
-			$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'");
-			
-            while($Qstatus = mysqli_fetch_array($query, MYSQLI_ASSOC)){
-                $goTempStatVal = $Qstatus['status'];
-                $cstatuses[$Qstatus['status']] = $Qstatus['status'];
-                $cstatusRX	.= "{$goTempStatVal}|";
-            }		 
-            
-            $cstatuses = implode("','",$cstatuses);
-            
-            if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
-			{
-			   $statuses = "{$sstatuses}','{$cstatuses}";
-			   $statusRX = "{$sstatusRX}{$cstatusRX}";
-			} else {
-			   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
-			   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
-			}
-			$statusRX = trim($statusRX, "|");
-            
-            /*
-            foreach ($query->result() as $Qstatus)
-			{
-			   $cstatuses[$Qstatus->status] = $Qstatus->status;
-			   $cstatusRX	.= "{$Qstatus->status}|";
-			}
-			$cstatuses = implode("','",$cstatuses);
-			if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
-			{
-			   $statuses = "{$sstatuses}','{$cstatuses}";
-			   $statusRX = "{$sstatusRX}{$cstatusRX}";
-			} else {
-			   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
-			   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
-			}
-			$statusRX = trim($statusRX, "|");
-            */
-			//End initialize
+				$resultu = mysqli_fetch_array($query, MYSQLI_ASSOC);
+				
+				$return['campaign_name'] = $resultu['campaign_name'];
+				
+				$ul = "and campaign_id='$campaignID'";
+				if (!isset($request) || $request=='') {
+					$return['request'] = 'daily';
+				} else {
+					$return['request'] = $request;
+				}
+				
+				$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'");
+				$sstatusRX = "";
+				
+				while($Qstatus = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+					$goTempStatVal = $Qstatus['status'];
+					$sstatuses[$Qstatus['status']] = $Qstatus['status'];
+					$sstatusRX	.= "{$goTempStatVal}|";
+				}    
+				
+				$sstatuses = implode("','",$sstatuses);
+				
+				/*foreach ($query->result() as $Qstatus)
+				{
+				   $sstatuses[$Qstatus->status] = $Qstatus->status;
+				   $sstatusRX	.= "{$Qstatus->status}|";
+				}
+				$sstatuses = implode("','",$sstatuses);*/
+				
+				$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'");
+				$cstatuses = "";
+				$cstatusRX = "";
+				
+				while($Qstatus = mysqli_fetch_array($query2, MYSQLI_ASSOC)){
+					$goTempStatVal = $Qstatus['status'];
+					$cstatuses[$Qstatus['status']] = $Qstatus['status'];
+					$cstatusRX	.= "{$goTempStatVal}|";
+				}		 
+				
+				$cstatuses = implode("','",$cstatuses);
+				
+				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+				{
+				   $statuses = "{$sstatuses}','{$cstatuses}";
+				   $statusRX = "{$sstatusRX}{$cstatusRX}";
+				} else {
+				   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				}
+				$statusRX = trim($statusRX, "|");
+				
+				/*
+				foreach ($query->result() as $Qstatus)
+				{
+				   $cstatuses[$Qstatus->status] = $Qstatus->status;
+				   $cstatusRX	.= "{$Qstatus->status}|";
+				}
+				$cstatuses = implode("','",$cstatuses);
+				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+				{
+				   $statuses = "{$sstatuses}','{$cstatuses}";
+				   $statusRX = "{$sstatusRX}{$cstatusRX}";
+				} else {
+				   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				}
+				$statusRX = trim($statusRX, "|");
+				*/
+				//End initialize
             
             //Start Report
 			// Agent Statistics
@@ -252,7 +258,17 @@
 					// Total Calls Made
 					//$query = mysqli_query($link, "select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and call_date between '$fromDate 00:00:00' and '$toDate 23:59:59'");
 					$query = mysqli_query($link, "select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $ul group by weekno $MunionSQL) t group by weekno;");
-					$data_calls = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$weekno[] = "Week ".$row['weekno'];
+						$day0[] = $row['Day0'];
+						$day1[] = $row['Day1'];
+						$day2[] = $row['Day2'];
+						$day3[] = $row['Day3'];
+						$day4[] = $row['Day4'];
+						$day5[] = $row['Day5'];
+						$day6[] = $row['Day6'];
+					}
+					$data_calls = array("weekno" => $weekno, "Day0" => $day0, "Day1" => $day1, "Day2" => $day2, "Day3" => $day3, "Day4" => $day4, "Day5" => $day5, "Day6" => $day6);
 					
 					$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
 					$total_calls = mysqli_num_rows($query);
@@ -268,12 +284,38 @@
 					// Total Agents Logged In
 					$query = mysqli_query($link, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d') between '$fromDate' and '$toDate' group by cuser");
 					$total_agents = mysqli_num_rows($query);
-					$data_agents = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$cdate[] = $row['cdate'];
+						$cuser[] = $row['cuser'];
+					}
+					$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 					
 					// Disposition of Calls
 					$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
 					$total_status = mysqli_num_rows($query);
-					$data_status = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$status[] = $row['status'];
+						$ccount[] = $row['ccount'];
+						
+						#getting status name
+						$var_status = $row['status'];
+						
+							# in default statuses
+							$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+							if($query_default_statusname){
+								$fetch_statusname = mysqli_fetch_array($query_default_statusname);
+							}
+							
+							if(!isset($fetch_statusname) || $fetch_statusname == NULL){
+							# in custom statuses
+							$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
+							}
+						
+						$status_name[] = $fetch_statusname['status_name'];
+						//$status_name[] = $query_statusname;
+					}
+					$data_status = array("status" => $status, "status_name" => $status_name, "ccount" => $ccount);
 				}
 				
 				if ($return['request']=='monthly') {
@@ -290,7 +332,22 @@
 
 					// Total Calls Made
 					$query = mysqli_query($link, "select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by monthname $MunionSQL) t group by monthname;");
-					$data_calls = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$monthname[] = $row['monthname'];
+						$month0[] = $row['Month1'];
+						$month1[] = $row['Month2'];
+						$month2[] = $row['Month3'];
+						$month3[] = $row['Month4'];
+						$month4[] = $row['Month5'];
+						$month5[] = $row['Month6'];
+						$month6[] = $row['Month7'];
+						$month7[] = $row['Month8'];
+						$month8[] = $row['Month9'];
+						$month9[] = $row['Month10'];
+						$month10[] = $row['Month11'];
+						$month11[] = $row['Month12'];
+					}
+					$data_calls = array("monthname" => $monthname, "Month1" => $month0, "Month2" => $month1, "Month3" => $month2, "Month4" => $month3, "Month5" => $month4, "Month6" => $month5, "Month7" => $month6, "Month8" => $month7, "Month9" => $month8, "Month10" => $month9, "Month11" => $month10, "Month12" => $month11);
 					
 					$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
 					$total_calls = mysqli_num_rows($query);
@@ -306,18 +363,45 @@
 					// Total Agents Logged In
 					$query = mysqli_query($link, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and MONTH(event_time) between MONTH('$fromDate') and MONTH('$toDate') group by cuser");
 					$total_agents = mysqli_num_rows($query);
-					$data_agents = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$cdate[] = $row['cdate'];
+						$cuser[] = $row['cuser'];
+					}
+					$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 					
 					// Disposition of Calls
 					$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
 					$total_status = mysqli_num_rows($query);
-					$data_status = mysqli_fetch_array($query, MYSQLI_ASSOC);
+					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$status[] = $row['status'];
+						$ccount[] = $row['ccount'];
+						
+						#getting status name
+						$var_status = $row['status'];
+						
+							# in default statuses
+							$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+							if($query_default_statusname){
+								$fetch_statusname = mysqli_fetch_array($query_default_statusname);
+							}
+							
+							if(!isset($fetch_statusname) || $fetch_statusname == NULL){
+							# in custom statuses
+							$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
+							}
+						
+						$status_name[] = $fetch_statusname['status_name'];
+						//$status_name[] = $query_statusname;
+					}
+					$data_status = array("status" => $status, "status_name" => $status_name, "ccount" => $ccount);
 				}
 				
 				$apiresults = array("call_time" => $call_time, "data_calls" => $data_calls, "data_status" => $data_status, "data_agents" => $data_agents, "total_calls" => $total_calls, "total_leads" => $total_leads, "total_new" => $total_new, "total_status" => $total_status);
 				
 				return $apiresults;
 			}
+			
 			
 			// Agent Time Detail
 			if ($pageTitle=="agent_detail") {
@@ -430,7 +514,6 @@
 				$k=0;
 				$uc=0;
                 while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
-                    
 				    $user =			$row['user'];
 					$wait =			$row['wait_sec'];
 					$talk =			$row['talk_sec'];
@@ -1526,9 +1609,7 @@
                 return $apiresults;
 			}
 			
-            //milo3
             //Dial Statuses Summary
-            
 			if ($pageTitle=="dispo") {
 				$list_ids[0] = "ALL";
 				//$total_all=($list_ids[0] == "{$this->lang->line("go_all")}") ? ''.$this->lang->line("go_all_list_ids").' '.$campaignID : ''.$this->lang->line("go_list_ids").': '.implode(',',$list_ids);
@@ -1724,30 +1805,26 @@
 				return $apiresults;
 			}
 			
+			
+			
+			// SALES PER AGENT
 			if ($pageTitle == "sales_agent") {
 				//$list_ids = "{$this->lang->line("go_all")}";
 				//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
 				
-				// Outbound Sales
-				$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user,
-						SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale
-						from vicidial_users as us, vicidial_log as vlog, vicidial_list as vl 
-						where us.user=vlog.user 
-						and vl.phone_number=vlog.phone_number 
-						and vl.lead_id=vlog.lead_id 
-						and vlog.length_in_sec>'0'
-						and vlog.status in ('$statuses') 
-						and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'
-						and vlog.campaign_id='$campaignID'
-						group by us.full_name");
-				$numO = mysqli_num_rows($query);
+				### Outbound Sales ###
+				$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' group by us.full_name");
+				
+				$TOPsorted_output = "";
+				$total_out_sales = "";
 				
 				/*
 				$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
 				$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
 				$file_output .= "{$this->lang->line("go_outbound_sales_an_aid_sc")}";*/
-				if ($numO) {
+				if ($query) {
 					$total_sales=0;
+					
 					/*
 					foreach($query->result() as $row) {
 					
@@ -1761,7 +1838,7 @@
 					*/
 					
 					while($row = mysqli_fetch_array($query)) {
-						$file_output .= $row['full_name'].",".$row['user'].",".$row['sale']."\n";
+						//$file_output .= $row['full_name'].",".$row['user'].",".$row['sale']."\n";
 						$TOPsorted_output .= "<tr>";
 						$TOPsorted_output .= "<td nowrap>".$row['full_name']."</td>";
 						$TOPsorted_output .= "<td nowrap>".$row['user']."</td>";
@@ -1770,15 +1847,16 @@
 						$total_out_sales = $total_out_sales+$row['sale'];
 					}
 				}
+				/*
 				if ($total_out_sales < 1) {
 					$file_output .= "{$this->lang->line("go_no_records_found")}";
 				} else {
 					$file_output .= "{$this->lang->line("go_total")},,$total_out_sales\n\n";
-				}
+				}*/
 				
-				// Inbound Sales
+				### Inbound Sales ###
 				$query = mysqli_query($link, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='".$campaignID."' ORDER BY campaign_id");
-				$row = mysql_fetch_array($query);
+				$row = mysqli_fetch_array($query);
 				$closer_camp_array=explode(" ",$row['closer_campaigns']);
 				$num=count($closer_camp_array);
 			
@@ -1791,32 +1869,17 @@
 				}
 				$campaign_inb_query="vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 				
-				$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user,
-						SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale
-						from vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl 
-						where us.user=vlog.user 
-						and vl.phone_number=vlog.phone_number 
-						and vl.lead_id=vlog.lead_id 
-						and vlog.length_in_sec>'0' 
-						and vlog.status in ('$statuses') 
-						and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'
-						and $campaign_inb_query
-						group by us.full_name");
-				$numI = mysqli_num_rows($query);
+				$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query group by us.full_name");
+				
+				$BOTsorted_output = "";
+				$total_in_sales = "";
 				
 				//$file_output .= "{$this->lang->line("go_inbound_sales_an_ai_sc")}";
-				if ($numI) {
+				if ($query) {
 					$total_sales=0;
-	
+					
 					//foreach($query->result() as $row) {
 					while($row = mysqli_fetch_array($query)){
-						if ($x==1) {
-							$bgcolor = "#E0F8E0";
-							$x=0;
-						} else {
-							$bgcolor = "#EFFBEF";
-							$x=1;
-						}          
 					
 						//$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
 						$BOTsorted_output .= "<tr>";
@@ -1834,51 +1897,45 @@
 					$file_output .= "{$this->lang->line("go_total")},,$total_in_sales";
 				}*/
 				
-				$return['TOPsorted_output']		= $TOPsorted_output;
-				$return['BOTsorted_output']		= $BOTsorted_output;
-				$return['TOToutbound']			= $total_out_sales;
-				$return['TOTinbound']			= $total_in_sales;
-				$return['file_output']			= $file_output;
+				//$return['TOPsorted_output']		= $TOPsorted_output;
+				//$return['BOTsorted_output']		= $BOTsorted_output;
+				//$return['TOToutbound']			= $total_out_sales;
+				//$return['TOTinbound']			= $total_in_sales;
+				//$return['file_output']			= $file_output;
 				
-				return $return;
+				$apiresults = array("TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOToutbound" => $total_out_sales, "TOTinbound" => $total_in_sales);
+				
+				return $apiresults;
 			}
 			
+			
+			
+			// SALES TRACKER
 			if ($pageTitle == "sales_tracker") {
-				$list_ids = "{$this->lang->line("go_all")}";
-				$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
+				//$list_ids = "{$this->lang->line("go_all")}";
+				//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
 				
 				if ($return['request']=='outbound') {
-					$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent,
-							vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state,
-							vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id
-							from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us 
-							where us.user=vlo.user 
-							and vl.phone_number=vlo.phone_number 
-							and vl.lead_id=vlo.lead_id 
-							and vlo.length_in_sec>'0' 
-							and vlo.status in ('$statuses') 
-							and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'
-							and vlo.campaign_id='$campaignID' 
-							$list_id_query
-							order by vlo.call_date ASC limit 2000");
-					$TOPsorted_output = $query->result();
+					$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent, 		vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user 	and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' order by vlo.call_date ASC limit 2000");
+					$TOPsorted_output_outbound = mysqli_fetch_array($query);
 					
+					/*
 					if ($file_download > 0) {
 						$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
 						$file_output .= "{$this->lang->line("go_date_range")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
 						$file_output .= "{$this->lang->line("go_outbound_sales_cdt_a_pn_f_l_a_c_s_p_e_an_c")}";
-						
+					
 						foreach ($TOPsorted_output as $row) {
 							$file_output .=$row->call_date.",".$row->agent.",".$row->phone_number.",".$row->first_name.",".$row->last_name.",".$row->address.",".$row->city.",".$row->state.",".$row->postal.",".$row->email.",".$row->alt_phone.",".$row->comments."\n";
 						}
-					}
+					}*/
 				}
 			
 				if ($return['request']=='inbound') {
 					$query = mysqli_query($link, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='$campaignID' ORDER BY campaign_id");
-					$row = $query->row();
-					$closer_camp_array=explode(" ",$row->closer_campaigns);
-					$num=count($closer_camp_array);
+					$row = mysqli_fetch_array($query);
+					$closer_camp_array = explode(" ",$row['closer_campaigns']);
+					$num = count($closer_camp_array);
 				
 					$x=0;
 					while($x<$num) {
@@ -1887,22 +1944,13 @@
 						}
 						$x++;
 					}
+					
 					$campaign_inb_query="vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 				
-					$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent,
-							vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state,
-							vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id
-							from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us 
-							where us.user=vl.user 
-							and vl.phone_number=vlo.phone_number 
-							and vl.lead_id=vlo.lead_id 
-							and vlo.length_in_sec>'0' 
-							and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'
-							and $campaign_inb_query 
-							and vlo.status in ('$statuses')
-							order by vlo.call_date ASC limit 2000");
-					$TOPsorted_output = $query->result();
+					$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') order by vlo.call_date ASC limit 2000");
+					$TOPsorted_output_inbound = mysqli_fetch_array($query);
 					
+					/*
 					if ($file_download > 0) {
 						$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
 						$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
@@ -1911,17 +1959,24 @@
 						foreach ($TOPsorted_output as $row) {
 							$file_output .=$row->call_date.",".$row->agent.",".$row->phone_number.",".$row->first_name.",".$row->last_name.",".$row->address.",".$row->city.",".$row->state.",".$row->postal.",".$row->email.",".$row->alt_phone.",".$row->comments."\n";
 						}
-					}
+					}*/
 				}
 				
-				$return['TOPsorted_output']		= $TOPsorted_output;
-				$return['file_output']			= $file_output;
+				//$return['TOPsorted_output']		= $TOPsorted_output;
+				//$return['file_output']			= $file_output;
+				$apiresults = array("TOPsorted_output_outbound" => $TOPsorted_output_outbound, "TOPsorted_output_inbound" => $TOPsorted_output_inbound);
+				
+				return $apiresults;
 			}
 			
+			
+			
+			// INBOUND CALL REPORT
 			if ($pageTitle == "inbound_report") {
 				$query = mysqli_query($link, "SELECT * FROM vicidial_closer_log WHERE campaign_id = '$campaignID' AND date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'");
-				$TOPsorted_output = $query->result();
-				
+				$TOPsorted_output = mysqli_fetch_array($query);
+				$apiresults = array("TOPsorted_output" => $TOPsorted_output);
+				/*
 				if ($file_download > 0) {
 					$file_output  = "{$this->lang->line("go_inbound_camp")},$campaignID - ".$resultu->campaign_name."\n";
 					$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
@@ -1937,8 +1992,13 @@
 				
 				$return['TOPsorted_output']		= $TOPsorted_output;
 				$return['file_output']			= $file_output;
+				*/
+				
+				return $apiresults;
 			}
 			
+			
+			// CALL EXPORT REPORT
 			if ($pageTitle == "call_export_report") {
 				//$return['allowed_campaigns']	= $this->go_getall_allowed_campaigns();
 			    $groupId = go_get_groupid($userID);
@@ -2375,10 +2435,13 @@
 				$return['file_output']			= $file_output;
 			}
 			
+			
+			
 			// Dashboard
 			if ($pageTitle=="dashboard") {
 				$sub_total = array();
-				list($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code) = $this->go_get_statuses($campaignID, $link);
+				list($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code) = go_get_statuses($campaignID, $link);
+				$TOPsorted_output = "";
 				
 				// and (val.sub_status NOT LIKE 'LOGIN%' OR val.sub_status IS NULL) 
 				$query = mysqli_query($link, "select us.user,us.full_name,val.status,count(*) as calls from vicidial_users as us,vicidial_agent_log as val where date_format(val.event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and us.user=val.user and val.status<>'' and val.campaign_id='$campaignID' group by us.user,us.full_name,val.status order by us.full_name,us.user,val.status desc limit 500000");
@@ -2423,11 +2486,13 @@
 							$c = 1;
 						}*/
 	
-						$TOPsorted_output .= "<tr><td nowrap title=\"".$user_info['user']."\"> <strong>".$user_info['full_name']."</strong></td>";
+						$TOPsorted_output .= "<tr><td nowrap> <strong>".$user_info['full_name']."</strong></td>";
 						
 						$t = 0;
+						$call_cnt = "";
 						foreach ($Dstatus as $s)
 						{
+							
 							$call_cnt = ($agent[$user_info['user']][$s] > 0) ? $agent[$user_info['user']][$s] : 0;
 							$TOPsorted_output .= "<td nowrap> ".$call_cnt." </td>";
 							$sub_total[$user_info['user']] = $sub_total[$user_info['user']] + $agent[$user_info['user']][$s];
@@ -2509,7 +2574,7 @@
 				$total_dead_hours = $total_hours['dead_sec'];
 				$total_login_hours = ($total_hours['talk_sec'] + $total_hours['pause_sec'] + $total_hours['wait_sec'] + $total_hours['dispo_sec'] + $total_hours['dead_sec']);
 				
-				$inbound_campaigns = $this->go_get_inbound_groups();
+				$inbound_campaigns = go_get_inbound_groups($userID, $link);
 				foreach ($inbound_campaigns as $i => $item)
 				{
 					$inb_camp[$i] = $item->group_id;
@@ -2585,8 +2650,9 @@
 				$return['total_login_hours']= $total_login_hours;
 				$return['total_dialer_calls_output']= $total_dialer_calls_output;
 				$return['total_dialer_calls']= $total_dialer_calls;
-	//			var_dump($statuses_code);
-	//			var_dump("select sum(talk_sec),sum(pause_sec),sum(wait_sec),sum(dispo_sec),sum(dead_sec) from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user and $dac_agents_query2 talk_sec<36000 and wait_sec<36000 and talk_sec<36000 and dispo_sec<36000 and campaign_id='$campaignID' limit 500000;");
+				
+				$apiresults = array("TOPsorted_output" => $TOPsorted_output, "SstatusesTOP" => $SstatusesARY, "SUMstatuses" => $SUMstatuses, "total_calls" => $total_calls, "total_contacts" => $total_contacts, "total_noncontacts" => $total_noncontacts, "total_sales" => $total_sales, "total_xfer" => $total_xfer, "total_notinterested" => $total_notinterested, "total_callbacks" => $total_callbacks, "total_talk_hours" => $total_talk_hours, "total_pause_hours" => $total_pause_hours, "total_wait_hours" => $total_wait_hours, "total_dispo_hours" => $total_dispo_hours, "total_dead_hours" => $total_dead_hours, "total_login_hours" => $total_login_hours, "total_dialer_calls_output" => $total_dialer_calls_output, "total_dialer_calls" => $total_dialer_calls);
+				return $apiresults;
 			}
 		}
 
@@ -2693,10 +2759,10 @@
 		return $apiresults;
 	}
 	/*
-	function go_get_inbound_groups($userID) {
-		$groupId = go_get_groupid($userID);
+	function go_get_inbound_groups($userID, $link) {
+		$groupId = go_get_groupid($userID, $link);
 		if($groupId != NULL)
-		$groupSQL = "where user_group='$groupId'"
+		$groupSQL = "where user_group='$groupId'";
 		
 		else
 		$groupSQL = "";
@@ -2708,9 +2774,9 @@
 		
 		return $inboundgroups;
 	}
-	
-	function go_get_groupid($userID) {
-		$query = mysqli_query($link, "select user_group from vicidial_users where user='$userID'");
+	/*
+	function go_get_groupid($userID, $link) {
+		$query = mysqli_query($link, "select user_group from vicidial_users where user='$userID';");
 		$resultsu = mysqli_fetch_array($query);
 		$groupid = $resultsu['user_group'];
 		
