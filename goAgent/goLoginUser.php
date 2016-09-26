@@ -25,6 +25,8 @@ if (isset($_GET['goIngroups'])) { $ingroups = $astDB->escape($_GET['goIngroups']
 if (isset($_GET['goCloserBlended'])) { $closer_blended = $astDB->escape($_GET['goCloserBlended']); }
     else if (isset($_POST['goCloserBlended'])) { $closer_blended = $astDB->escape($_POST['goCloserBlended']); }
 
+$closer_blended = (isset($closer_blended)) ? (int) $closer_blended : 0;
+
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($phone_login);
 
@@ -255,7 +257,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $astDB->where('shift_override_flag', '1');
         $query = $astDB->update('vicidial_users', array('shift_override_flag' => '0'));
         
-        $closer_choice = (isset($ingroups)) ? " " . implode(" ", $ingroups) . " -" : "";
+        $closer_choice = (isset($ingroups)) ? " " . str_replace("|", " ", $ingroups) . " -" : "-";
         ////$query = $db->query("UPDATE vicidial_live_agents SET closer_campaigns='$closer_choice' WHERE user='$user' AND server_ip='{$phone_settings->server_ip}';");
         $astDB->where('user', $user);
         $astDB->where('server_ip', $phone_settings->server_ip);
@@ -266,7 +268,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
 			{$vla_autodial = 'Y';}
 		else
 			{$vla_autodial = 'N';}
-		if (preg_match('/INBOUND_MAN|MANUAL/',$campaign_settings->dial_method))
+		if (preg_match('/INBOUND_MAN|MANUAL/', $campaign_settings->dial_method))
 			{$vla_autodial = 'N';}
 
 		if (preg_match("/MGRLOCK/", $closer_choice)) {
@@ -298,6 +300,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
 			//$stmt="UPDATE vicidial_users set closer_campaigns='$closer_choice' where user='$user';";
             $astDB->where('user', $user);
             $query = $astDB->update('vicidial_users', array('closer_campaigns' => $closer_choice));
+            $user_settings->closer_campaigns = $closer_choice;
         }
 
 		//$stmt="INSERT INTO vicidial_user_closer_log set user='$user',campaign_id='$campaign',event_date='$NOW_TIME',blended='$closer_blended',closer_campaigns='$closer_choice';";
@@ -315,9 +318,9 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $query = $astDB->delete('vicidial_live_inbound_agents');
 
 		$in_groups_pre = preg_replace('/-$/', '', $closer_choice);
-		$in_groups = explode(" ", $in_groups_pre);
+		$in_groups = explode(" ", trim($in_groups_pre));
 		$in_groups_ct = count($in_groups);
-		$k = 1;
+		$k = 0;
 		while ($k < $in_groups_ct) {
 			if (strlen($in_groups[$k]) > 1) {
 				//$stmt="SELECT group_weight,calls_today,group_grade FROM vicidial_inbound_group_agents where user='$user' and group_id='$in_groups[$k]';";
@@ -452,6 +455,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'asterisk_version' => $asterisk_version,
         'SIP' => $SIP_user,
         'qm_extension' => $qm_extension,
+        'closer_blended' => $closer_blended,
         'statuses_count' => $statuses_ct,
         'statuses' => $statuses,
         'callback_statuses_list' => $VARCBstatusesLIST,

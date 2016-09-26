@@ -294,7 +294,8 @@ $default_settings = array(
     'web_form_vars' => '',
     'web_form_vars_two' => '',
     'scheduled_callbacks' => 0,
-    'LastCallCID' => ''
+    'LastCallCID' => '',
+    'closer_blended' => 0
 );
 
 if ($userExist > 0) {
