@@ -55,6 +55,8 @@ function get_node_type( $type ) {
         case "xfer_groups":
         case "xfer_group_names":
         case "inbound_groups":
+        case "email_groups":
+        case "phone_groups":
             $node = 'group';
             break;
         case "all_callbacks":

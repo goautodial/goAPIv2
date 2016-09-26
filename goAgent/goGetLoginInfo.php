@@ -38,7 +38,6 @@ $default_settings = array(
     'vtiger_callback_id' => 0,
     'qm_extension' => '',
     'nocall_dial_flag' => '',
-    'INgroupCOUNT' => 0,
     'CallCID' => '',
     'uniqueid' => '',
     'xfername' => '',
@@ -481,6 +480,43 @@ if ($userExist > 0) {
     }
     $VARCBstatusesLIST .= " ";
     
+    $VARingroups = array();
+    $VARingroup_handlers = array();
+    $VARphonegroups = array();
+    $VARemailgroups = array();
+    if ( ($campinfo['campaign_allow_inbound'] == 'Y') && ($campinfo['dial_method'] != 'MANUAL') ) {
+        $closer_campaigns = preg_replace("/^ | -$/", "", $campinfo['closer_campaigns']);
+        $closer_campaigns = explode(" ", $closer_campaigns);
+        
+        //$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
+        $astDB->where('active', 'Y');
+        $astDB->where('group_id', $closer_campaigns, 'IN');
+        $astDB->orderBy('group_id');
+        $rslt = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_handling');
+
+        $closer_ct = $astDB->getRowCount();
+        $INgrpCT = 0;
+        $EMAILgrpCT = 0;
+        $PHONEgrpCT = 0;
+        while ($INgrpCT < $closer_ct) {
+            $row = $rslt[$INgrpCT];
+            $VARingroups[$row['group_id']] = $row['group_id'];
+            $VARingroup_handlers[$row['group_handling']] = $row['group_id']; // PHONE OR EMAIL - this is important
+            if ($row['group_handling']=="EMAIL") { // Make a list of ingroups for email handling groups and one for phones, so there is no overlap
+                $VARemailgroups[$row['group_id']] = $VARingroups[$row['group_id']];
+                $EMAILgrpCT++;
+            } else {
+                $VARphonegroups[$row['group_id']] = $VARingroups[$row['group_id']];
+                $PHONEgrpCT++;
+            }
+            ksort($VARingroups);
+            asort($VARingroup_handlers);
+            ksort($VARemailgroups);
+            ksort($VARphonegroups);
+            $INgrpCT++;
+        }
+    }
+    
     $xfer_groups = preg_replace("/^ | -$/", "", $campinfo['xfer_groups']);
     $xfer_groups = explode(" ", $xfer_groups);
     ////$xfer_groups = preg_replace("/ /", "','", $xfer_groups);
@@ -637,6 +673,13 @@ if ($userExist > 0) {
     $default_settings['xfer_group_count'] = $XFgrpCT;
     $default_settings['xfer_groups'] = $VARxferGroups;
     $default_settings['xfer_group_names'] = $VARxferGroupsNames;
+    $default_settings['inbound_group_count'] = $INgrpCT;
+    $default_settings['inbound_groups'] = $VARingroups;
+    $default_settings['inbound_group_handlers'] = $VARingroup_handlers;
+    //$default_settings['email_group_count'] = $EMAILgrpCT;
+    //$default_settings['email_groups'] = $VARemailgroups;
+    //$default_settings['phone_group_count'] = $PHONEgrpCT;
+    //$default_settings['phone_groups'] = $VARphonegroups;
     $default_settings['webform_session'] = "&session_name={$session_name}";
     $default_settings['status_display_CALLID'] = $status_display_CALLID;
     $default_settings['status_display_LEADID'] = $status_display_LEADID;
