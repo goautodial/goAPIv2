@@ -484,6 +484,9 @@ if ($userExist > 0) {
     $VARingroup_handlers = array();
     $VARphonegroups = array();
     $VARemailgroups = array();
+    $INgrpCT = 0;
+    $EMAILgrpCT = 0;
+    $PHONEgrpCT = 0;
     if ( ($campinfo['campaign_allow_inbound'] == 'Y') && ($campinfo['dial_method'] != 'MANUAL') ) {
         $closer_campaigns = preg_replace("/^ | -$/", "", $campinfo['closer_campaigns']);
         $closer_campaigns = explode(" ", $closer_campaigns);
@@ -495,9 +498,6 @@ if ($userExist > 0) {
         $rslt = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_handling');
 
         $closer_ct = $astDB->getRowCount();
-        $INgrpCT = 0;
-        $EMAILgrpCT = 0;
-        $PHONEgrpCT = 0;
         while ($INgrpCT < $closer_ct) {
             $row = $rslt[$INgrpCT];
             $VARingroups[$row['group_id']] = $row['group_id'];
