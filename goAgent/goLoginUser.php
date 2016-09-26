@@ -22,6 +22,8 @@ if (isset($_GET['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_GET['goUseWebR
     else if (isset($_POST['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_POST['goUseWebRTC']); }
 if (isset($_GET['goIngroups'])) { $ingroups = $astDB->escape($_GET['goIngroups']); }
     else if (isset($_POST['goIngroups'])) { $ingroups = $astDB->escape($_POST['goIngroups']); }
+if (isset($_GET['goCloserBlended'])) { $closer_blended = $astDB->escape($_GET['goCloserBlended']); }
+    else if (isset($_POST['goCloserBlended'])) { $closer_blended = $astDB->escape($_POST['goCloserBlended']); }
 
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($phone_login);
@@ -227,15 +229,15 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $query = $astDB->insert('vicidial_live_agents', $insertData);
         
         $insertData = array(
-            user => $user,
-            server_ip => $phone_settings->server_ip,
-            event_time => $NOW_TIME,
-            campaign_id => $campaign,
-            pause_epoch => $StarTtimE,
-            pause_sec => '0',
-            wait_epoch => $StarTtimE,
-            user_group => $user_settings->user_group,
-            sub_status => 'LOGIN'
+            'user' => $user,
+            'server_ip' => $phone_settings->server_ip,
+            'event_time' => $NOW_TIME,
+            'campaign_id' => $campaign,
+            'pause_epoch' => $StarTtimE,
+            'pause_sec' => '0',
+            'wait_epoch' => $StarTtimE,
+            'user_group' => $user_settings->user_group,
+            'sub_status' => 'LOGIN'
         );
         $query = $astDB->insert('vicidial_agent_log', $insertData);
         $agent_log_id = $astDB->getInsertId();
@@ -253,11 +255,101 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $astDB->where('shift_override_flag', '1');
         $query = $astDB->update('vicidial_users', array('shift_override_flag' => '0'));
         
-        $closer_campaigns = (isset($ingroups)) ? " " . implode(" ", $ingroups) . " -" : "";
-        ////$query = $db->query("UPDATE vicidial_live_agents SET closer_campaigns='$closer_campaigns' WHERE user='$user' AND server_ip='{$phone_settings->server_ip}';");
+        $closer_choice = (isset($ingroups)) ? " " . implode(" ", $ingroups) . " -" : "";
+        ////$query = $db->query("UPDATE vicidial_live_agents SET closer_campaigns='$closer_choice' WHERE user='$user' AND server_ip='{$phone_settings->server_ip}';");
         $astDB->where('user', $user);
         $astDB->where('server_ip', $phone_settings->server_ip);
-        $query = $astDB->update('vicidial_live_agents', array('closer_campaigns' => $closer_campaigns));
+        $query = $astDB->update('vicidial_live_agents', array('closer_campaigns' => $closer_choice));
+        
+        // Inbound Closers
+        if ($closer_blended > 0)
+			{$vla_autodial = 'Y';}
+		else
+			{$vla_autodial = 'N';}
+		if (preg_match('/INBOUND_MAN|MANUAL/',$campaign_settings->dial_method))
+			{$vla_autodial = 'N';}
+
+		if (preg_match("/MGRLOCK/", $closer_choice)) {
+			//$stmt="SELECT closer_campaigns FROM vicidial_users where user='$user' LIMIT 1;";
+            $astDB->where('user', $user);
+            $query = $astDB->getOne('vicidial_users', 'closer_campaigns');
+            $closer_choice = $query['closer_campaigns'];
+
+			//$stmt="UPDATE vicidial_live_agents set closer_campaigns='$closer_choice',last_state_change='$NOW_TIME',outbound_autodial='$vla_autodial' where user='$user' and server_ip='$server_ip';";
+            $updateData = array(
+                'closer_campaigns' => $closer_choice,
+                'last_state_change' => $NOW_TIME,
+                'outbound_autodial' => $vla_autodial
+            );
+            $astDB->where('user', $user);
+            $astDB->where('server_ip', $phone_settings->server_ip);
+            $query = $astDB->update('vicidial_live_agents', $updateData);
+		} else {
+			//$stmt="UPDATE vicidial_live_agents set closer_campaigns='$closer_choice',last_state_change='$NOW_TIME',outbound_autodial='$vla_autodial' where user='$user' and server_ip='$server_ip';";
+            $updateData = array(
+                'closer_campaigns' => $closer_choice,
+                'last_state_change' => $NOW_TIME,
+                'outbound_autodial' => $vla_autodial
+            );
+            $astDB->where('user', $user);
+            $astDB->where('server_ip', $phone_settings->server_ip);
+            $query = $astDB->update('vicidial_live_agents', $updateData);
+
+			//$stmt="UPDATE vicidial_users set closer_campaigns='$closer_choice' where user='$user';";
+            $astDB->where('user', $user);
+            $query = $astDB->update('vicidial_users', array('closer_campaigns' => $closer_choice));
+        }
+
+		//$stmt="INSERT INTO vicidial_user_closer_log set user='$user',campaign_id='$campaign',event_date='$NOW_TIME',blended='$closer_blended',closer_campaigns='$closer_choice';";
+        $insertData = array(
+            'user' => $user,
+            'campaign_id' => $campaign,
+            'event_date' => $NOW_TIME,
+            'blended' => $closer_blended,
+            'closer_campaigns' => $closer_choice
+        );
+        $query = $astDB->insert('vicidial_user_closer_log', $insertData);
+
+		//$stmt="DELETE FROM vicidial_live_inbound_agents where user='$user';";
+        $astDB->where('user', $user);
+        $query = $astDB->delete('vicidial_live_inbound_agents');
+
+		$in_groups_pre = preg_replace('/-$/', '', $closer_choice);
+		$in_groups = explode(" ", $in_groups_pre);
+		$in_groups_ct = count($in_groups);
+		$k = 1;
+		while ($k < $in_groups_ct) {
+			if (strlen($in_groups[$k]) > 1) {
+				//$stmt="SELECT group_weight,calls_today,group_grade FROM vicidial_inbound_group_agents where user='$user' and group_id='$in_groups[$k]';";
+                $astDB->where('user', $user);
+                $astDB->where('group_id', $in_groups[$k]);
+                $query = $astDB->get('vicidial_inbound_group_agents', null, 'group_weight,calls_today,group_grade');
+				$viga_ct = $astDB->getRowCount();
+				if ($viga_ct > 0) {
+					$row = $query[0];
+					$group_weight =	$row['group_weight'];
+					$calls_today =	$row['calls_today'];
+					$group_grade =	$row['group_grade'];
+				} else {
+					$group_weight = 0;
+					$calls_today =	0;
+					$group_grade =  1;
+				}
+                
+				//$stmt="INSERT INTO vicidial_live_inbound_agents set user='$user',group_id='$in_groups[$k]',group_weight='$group_weight',calls_today='$calls_today',last_call_time='$NOW_TIME',last_call_finish='$NOW_TIME',group_grade='$group_grade';";
+                $insertData = array(
+                    'user' => $user,
+                    'group_id' => $in_groups[$k],
+                    'group_weight' => $group_weight,
+                    'calls_today' => $calls_today,
+                    'last_call_time' => $NOW_TIME,
+                    'last_call_finish' => $NOW_TIME,
+                    'group_grade' => $group_grade
+                );
+                $query = $astDB->insert('vicidial_live_inbound_agents', $insertData);
+            }
+			$k++;
+        }
     }
     
     $VARCBstatusesLIST = '';
