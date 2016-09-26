@@ -314,8 +314,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $query = $astDB->insert('vicidial_user_closer_log', $insertData);
 
 		//$stmt="DELETE FROM vicidial_live_inbound_agents where user='$user';";
-        $astDB->where('user', $user);
-        $query = $astDB->delete('vicidial_live_inbound_agents');
+        //$astDB->where('user', $user);
+        //$query = $astDB->delete('vicidial_live_inbound_agents');
 
 		$in_groups_pre = preg_replace('/-$/', '', $closer_choice);
 		$in_groups = explode(" ", trim($in_groups_pre));
