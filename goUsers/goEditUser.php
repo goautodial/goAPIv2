@@ -169,7 +169,16 @@
 						$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 						
 						if($pass != NULL){
-								$pass_query = "`pass_hash` = '$pass_hash',";
+								$query_passhash = "select pass_hash_enabled from system_settings";
+								$exec_query = mysqli_query($link, $query_passhash);
+								$fetch_pass_hash_enabled = mysqli_fetch_array($exec_query);
+								
+								if($fetch_pass_hash_enabled['pass_hash_enabled'] == "1"){
+										$pass_query = "`pass_hash` = '$pass_hash',";		
+								}else{
+										$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass',";
+								}
+								
 						}else{
 								$pass_query = "";
 						}
