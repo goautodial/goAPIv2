@@ -22,7 +22,7 @@
     //var_dump($groupId);
     //die(dd);
 	// getting agent count
-	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' ORDER BY user ASC;";
+	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC;";
 	$queryCount = mysqli_query($link, $getLastCount);
 	$max = mysqli_num_rows($queryCount);
 		
@@ -39,7 +39,7 @@
 		$agent_num = $get_last + 1;
 		
 	// getting phone login count
-	$getLastPhoneLogin = "SELECT phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' AND phone_login != '' $notAdminSQL ORDER BY phone_login DESC;";
+	$getLastPhoneLogin = "SELECT phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' AND phone_login != '' $notAdminSQL ORDER BY phone_login DESC;";
 	$queryPhoneLoginCount = mysqli_query($link, $getLastPhoneLogin);
 	$max_phonelogins = mysqli_num_rows($queryPhoneLoginCount);
 	
@@ -70,7 +70,7 @@
 	
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul ORDER BY user ASC;";
+	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' $ul ORDER BY user ASC;";
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
 		
