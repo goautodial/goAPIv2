@@ -17,11 +17,16 @@
         // Check exisiting status
         if(!empty($_REQUEST['status'])){
             $status = mysqli_real_escape_string($link, $_REQUEST['status']);
+            
+            $queryDefaultStatusCheck = "SELECT status FROM vicidial_statuses WHERE status = '$status';";
+            $rsltvCheck2 = mysqli_query($link, $queryDefaultStatusCheck);
+            $countCheckResult2 = mysqli_num_rows($rsltvCheck2);
+            
             $queryStatusCheck = "SELECT status FROM vicidial_campaign_statuses WHERE status = '$status' AND campaign_id = '$campaign_id';";
             $rsltvCheck1 = mysqli_query($link, $queryStatusCheck);
             $countCheckResult1 = mysqli_num_rows($rsltvCheck1);
                 
-            if($countCheckResult1 > 0) {
+            if($countCheckResult1 > 0 || $countCheckResult2 > 0) {
                 $apiresults = array("result" => "fail", "status" => "There are 1 or more statuses with that specific input.");
             }else{
                 $apiresults = array("result" => "success");
