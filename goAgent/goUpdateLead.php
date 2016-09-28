@@ -62,6 +62,9 @@ if (isset($_GET['goEmail'])) { $email = $astDB->escape($_GET['goEmail']); }
 if (isset($_GET['goSecurity'])) { $security_phrase = $astDB->escape($_GET['goSecurity']); }
     else if (isset($_POST['goSecurity'])) { $security_phrase = $astDB->escape($_POST['goSecurity']); }
 
+if (isset($_GET['goCustomFields'])) { $custom_fields = $astDB->escape($_GET['goCustomFields']); }
+    else if (isset($_POST['goCustomFields'])) { $custom_fields = $astDB->escape($_POST['goCustomFields']); }
+
 $MT[0] = '';
 $errormsg = 0;
 $DO_NOT_UPDATE = 0;
@@ -149,7 +152,51 @@ if ($is_logged_in) {
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update('vicidial_list', $updateData);
 		}
-
+		
+		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && strlen($custom_fields) > 0)) {
+			$custom_fields = explode(',', $custom_fields);
+			$fields = array();
+			$custom_fields_SQL = '';
+			foreach($custom_fields as $label) {
+				if (isset($_GET[$label])) { $fields[$label] = $astDB->escape($_GET[$label]); }
+					else if (isset($_POST[$label])) { $fields[$label] = $astDB->escape($_POST[$label]); }
+				
+				$fields[$label] = preg_replace("/\r/i", '', $fields[$label]);
+				$fields[$label] = preg_replace("/\n/i", '!N', $fields[$label]);
+				$fields[$label] = preg_replace("/--AMP--/i", '&', $fields[$label]);
+				$fields[$label] = preg_replace("/--QUES--/i", '?', $fields[$label]);
+				$fields[$label] = preg_replace("/--POUND--/i", '#', $fields[$label]);
+				
+				if (strlen($fields[$label]) > 0) {
+					$custom_fields_SQL .= "$label,";
+				}
+			}
+			$custom_fields_SQL = trim($custom_fields_SQL, ",");
+			
+			$astDB->where('lead_id', $lead_id);
+			$rslt = $astDB->getOne('vicidial_list', 'list_id');
+			$list_id = $rslt['list_id'];
+			$custom_listid = "custom_{$list_id}";
+			
+			if ($astDB->has($custom_listid)) {
+				$astDB->where('lead_id', $lead_id);
+				$rslt = $astDB->getOne($custom_listid);
+				$lead_exist = $astDB->getRowCount();
+				
+				if ($lead_exist) {
+					$astDB->where('lead_id', $lead_id);
+					$astDB->update($custom_listid, $fields);
+					
+					$update_success = $astDB->getRowCount();
+				} else {
+					$fields['lead_id'] = $lead_id;
+					
+					$astDB->insert($custom_listid, $fields);
+					$insert_success = $astDB->getRowCount();
+				}
+			}
+		}
+		
 		$random = (rand(1000000, 9999999) + 10000000);
 		//$stmt="UPDATE vicidial_live_agents set random_id='$random' where user='$user' and server_ip='$server_ip';";
         $astDB->where('user', $user);
