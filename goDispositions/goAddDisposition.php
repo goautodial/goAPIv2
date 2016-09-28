@@ -89,11 +89,11 @@
 										if($countCheck <= 0){	
 										
 												if($campaign_id == "ALL"){
-														$getAllowedCampaigns_query = "SELECT vicidial_users.user_group, vicidial_user_groups.allowed_campaigns FROM vicidial_users, vicidial_user_groups WHERE vicidial_users.user_group = vicidial_user_groups.user_group AND vicidial_users.user ='$userid'";  	
+														$getAllowedCampaigns_query = "SELECT vicidial_users.user_group, vicidial_user_groups.allowed_campaigns FROM vicidial_users, vicidial_user_groups WHERE vicidial_users.user_group = vicidial_user_groups.user_group AND vicidial_users.user_id ='$userid'";  	
 														$allowedCampaigns_result = mysqli_query($link, $getAllowedCampaigns_query);
 														$allowedCampaignsFetch = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC);
 														$allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
-														
+																																								
 														//if admin
 														if(preg_match("/ALL-CAMPAIGNS/", $allowedCampaigns)){
 																$queryx = "SELECT campaign_id FROM vicidial_campaigns;";
@@ -108,10 +108,20 @@
 																}
 																
 														}else{
-																while($row = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC)){
-																		$campaign_id = $row['allowed_campaigns'];
-																		$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback');";
-																		$rsltv = mysqli_query($link, $newQuery);
+																
+																$multiple_campaigns = explode("-", $allowedCampaigns);
+																$allowedCampaignsx = $multiple_campaigns[0];
+																$campsWithSpaces = explode(" ",$allowedCampaignsx);
+																
+																for($i=0; $i< count($campsWithSpaces); $i++){
+																		$campaign_id = $campsWithSpaces[$i];
+																		
+																		if($campaign_id != ''){
+																				$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback');";
+																				
+																				$rsltv = mysqli_query($link, $newQuery);
+																		}
+																		
 																}
 																
 														}
@@ -120,7 +130,6 @@
 														$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback')";
 														$rsltv = mysqli_query($link, $newQuery);
 												}
-												
 												
 												### Admin logs
 														$SQLdate = date("Y-m-d H:i:s");
