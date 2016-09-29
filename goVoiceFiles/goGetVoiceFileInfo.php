@@ -67,7 +67,7 @@
                         while (false !== ($file = readdir($dh)))
                                 {
                                 # Do not list subdirectories
-                                if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.wav$/', $file)) )
+                                if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.(wav|mp3)$/', $file)) )
                                         {
                                         if ((!is_null($search) && strlen($search) > 0)) {^M
                                              if (!preg_match("/$search/", $file))^M
@@ -79,7 +79,7 @@
                                                 $stage = "date";
 
                                                 $file_names[$i] = $file;
-                                                $file_namesPROMPT[$i] = preg_replace("/\.wav$|\.gsm$/","",$file);
+                                                $file_namesPROMPT[$i] = preg_replace("/\.wav$|\.gsm$|\.mp3$/","",$file);
                                                 $file_epoch[$i] = filemtime("$dirpath/$file");
                                                 $file_dates[$i] = date ("Y-m-d H:i:s", filemtime("$dirpath/$file"));
                                                 $file_sizes[$i] = filesize("$dirpath/$file");

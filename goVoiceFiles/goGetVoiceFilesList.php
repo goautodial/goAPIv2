@@ -65,12 +65,12 @@
                                 # Do not list subdirectories
 								$groupId = go_get_groupid($goUser);
                                                                 $prefix = (checkIfTenant($groupId)) ? "go_".$groupId."_" : "go_";
-                                if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.wav$|\.gsm$/', $file)) and (preg_match("/^$prefix/", $file)) )
+                                if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.wav$|\.gsm$|\.mp3$/', $file)) and (preg_match("/^$prefix/", $file)) )
                                         {
                                         if (file_exists("$dirpath/$file"))
                                                 {
                                                 $file_names[$i] = $file;
-                                                $file_namesPROMPT[$i] = preg_replace("/\.wav$|\.gsm$/","",$file);
+                                                $file_namesPROMPT[$i] = preg_replace("/\.wav$|\.gsm$|\.mp3$/","",$file);
                                                 $file_epoch[$i] = filemtime("$dirpath/$file");
                                                 $file_dates[$i] = date ("Y-m-d H:i:s.", filemtime("$dirpath/$file"));
                                                 $file_sizes[$i] = filesize("$dirpath/$file");

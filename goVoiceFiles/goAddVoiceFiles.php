@@ -39,7 +39,7 @@ $web_server_ip = getenv("SERVER_ADDR");
                         $groupId = go_get_groupid($goUser);
                         $prefix = (checkIfTenant($groupId)) ? "go_".$groupId."_" : "go_";
                 
-                if (preg_match("/\.wav$/i",$audiofile_orig)) {
+                if (preg_match("/\.(wav|mp3)$/i",$audiofile_orig)) {
                         
                 $audiofile_dir = preg_replace("/ /",'\ ',$audiofile_dir);
                 $audiofile_dir = preg_replace("/@/",'\@',$audiofile_dir);
