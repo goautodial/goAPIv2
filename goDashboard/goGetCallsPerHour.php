@@ -56,5 +56,5 @@
 
     //$apiresults = array_merge( array( "result" => "success" ,"THISss" => $query ), $fresults, $dresults, $oresults);
     //$apiresults = array_merge( array( "result" => "success" ), $fresults, $dresults, $oresults);
-    $apiresults = array_merge( array( "result" => "success" , "inboundcph" => $fresults, "outboundcph" => $oresults, "droppedcph" => $dresults));
+    $apiresults = array( "result" => "success" , "inboundcph" => $fresults, "outboundcph" => $oresults, "droppedcph" => $dresults);
 ?>
