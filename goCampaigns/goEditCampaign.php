@@ -114,27 +114,7 @@
 						default:
 							//DEFAULT HERE
 					}
-				}
-				
-				if(is_array($closer_campaigns)){
-					$closerCampaigns = "";
-					foreach($closer_campaigns as $closercamp){
-						$closerCampaigns .= $closercamp." - ";
-					}
-					$closerCampaigns = rtrim($closerCampaigns, " - ");
-				}else{
-					$closerCampaigns = $closer_campaigns;
-				}
-				
-				if(is_array($xfer_groups)){
-					$xfergroups = "";
-					foreach($xfer_groups as $xfergrp){
-						$xfergroups .= $xfergrp." - ";
-					}
-					$xfergroups = rtrim($xfergroups, " - ");
-				}else{
-					$xfergroups = $xfer_groups;
-				}
+				}         
 
 				if($campaign_id != null) {	
 					$updateQuery = "UPDATE vicidial_campaigns SET
@@ -168,8 +148,8 @@
 										customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
 										customer_3way_hangup_action = '$customer_3way_hangup_action',
 										campaign_allow_inbound = '$campaign_allow_inbound',
-										closer_campaigns = '$closerCampaigns',
-										xfer_groups = '$xfergroups'
+										closer_campaigns = '$closer_campaigns',
+										xfer_groups = '$xfer_groups'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;
