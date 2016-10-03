@@ -49,7 +49,10 @@
 	$customer_3way_hangup_logging 	= $_REQUEST['customer_3way_hangup_logging'];
 	$customer_3way_hangup_seconds 	= $_REQUEST['customer_3way_hangup_seconds'];
 	$customer_3way_hangup_action 	= $_REQUEST['customer_3way_hangup_action'];
-	$inbound_man 					= $_REQUEST['inbound_man'];	
+	$inbound_man 					= $_REQUEST['inbound_man'];
+	$campaign_allow_inbound			= $_REQUEST['campaign_allow_inbound'];
+	$closer_campaigns				= $_REQUEST['closer_campaigns'];
+	$xfer_groups					= $_REQUEST['xfer_groups'];
 
    	//$apiresults = array("data" => $_REQUEST); 
 
@@ -87,30 +90,50 @@
 					$autoDialLevel = 1;
 				}else{
 					switch($auto_dial_level){
-					case "OFF":
-						$autoDialLevel = 0;
-						break;
-					case "SLOW":
-						$autoDialLevel = 1;
-						break;
-					case "NORMAL":
-						$autoDialLevel = 2;
-						break;
-					case "HIGH":
-						$autoDialLevel = 4;
-						break;
-					case "MAX":
-						$autoDialLevel = 6;
-						break;
-					case "MAX_PREDICTIVE":
-						$autoDialLevel = 10;
-						break;
-					case "ADVANCE":
-						$autoDialLevel = $auto_dial_level_adv;
-						break;
-					default:
-						//DEFAULT HERE
+						case "OFF":
+							$autoDialLevel = 0;
+							break;
+						case "SLOW":
+							$autoDialLevel = 1;
+							break;
+						case "NORMAL":
+							$autoDialLevel = 2;
+							break;
+						case "HIGH":
+							$autoDialLevel = 4;
+							break;
+						case "MAX":
+							$autoDialLevel = 6;
+							break;
+						case "MAX_PREDICTIVE":
+							$autoDialLevel = 10;
+							break;
+						case "ADVANCE":
+							$autoDialLevel = $auto_dial_level_adv;
+							break;
+						default:
+							//DEFAULT HERE
+					}
 				}
+				
+				if(is_array($closer_campaigns)){
+					$closerCampaigns = "";
+					foreach($closer_campaigns as $closercamp){
+						$closerCampaigns .= $closercamp." - ";
+					}
+					$closerCampaigns = rtrim($closerCampaigns, " - ");
+				}else{
+					$closerCampaigns = $closer_campaigns;
+				}
+				
+				if(is_array($xfer_groups)){
+					$xfergroups = "";
+					foreach($xfer_groups as $xfergrp){
+						$xfergroups .= $xfergrp." - ";
+					}
+					$xfergroups = rtrim($xfergroups, " - ");
+				}else{
+					$xfergroups = $xfer_groups;
 				}
 
 				if($campaign_id != null) {	
@@ -143,7 +166,10 @@
 										three_way_dial_prefix = '$three_way_dial_prefix', 
 										customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
 										customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
-										customer_3way_hangup_action = '$customer_3way_hangup_action' 
+										customer_3way_hangup_action = '$customer_3way_hangup_action',
+										campaign_allow_inbound = '$campaign_allow_inbound',
+										closer_campaigns = '$closerCampaigns',
+										xfer_groups = '$xfergroups'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;

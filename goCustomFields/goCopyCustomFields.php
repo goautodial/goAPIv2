@@ -46,12 +46,20 @@
             $multi_position    = $fresults['multi_position'];
             $name_position     = $fresults['name_position'];
             $field_order       = $fresults['field_order'];
-            
+            $apiresults = array("result" => $fresults);
             $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_to' and field_label='$field_label';";
             $counterresult = mysqli_query($link, $counterquery);
     
             if($counterresult){
-                $field_sql = "ALTER TABLE custom_$list_id ADD $field_label ";
+                $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
+                $queryCheckTable = mysqli_query($link, $checkTable);
+                
+                if($queryCheckTable){
+                    $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
+                }else{
+                    $field_sql = "CREATE TABLE custom_$list_to(lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                }
+
                
                 if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
                     $field_options_array = explode("\n",$field_options);
@@ -114,7 +122,7 @@
                     $field_cost = 8;
                 }
                 
-                if ( (!empty($field_default) ) and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+                if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
                     if($fieldcatch == "") {
                         $field_sql .= "default '$field_default'";
                     } else {
@@ -129,7 +137,7 @@
                 $field_sql .= ";";
                 $stmtCUSTOM="$field_sql";
                 $rslt = mysqli_query($link, $stmtCUSTOM);
-                
+
                 $insert = "INSERT INTO vicidial_lists_fields
                             set field_label='$field_label',
                                 field_name='$field_name',
@@ -155,13 +163,13 @@
                                 values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
                     $rsltvLog = mysqli_query($linkgo, $queryLog);
                    
-                    $fullData[] = "success";
+                    $output[] = "success";
                 }else{
-                    $fullData[] = "error";
+                    $output[] = "error";
                 }
             }
         }
-        
+
         if(in_array("error", $output)){
             $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
         }else{
@@ -214,7 +222,15 @@
                     $counterresult = mysqli_query($link, $counterquery);
             
                     if($counterresult){
-                        $field_sql = "ALTER TABLE custom_$list_id ADD $field_label ";
+                        $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
+                        $queryCheckTable = mysqli_query($link, $checkTable);
+                        
+                        if($queryCheckTable){
+                            $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
+                        }else{
+                            $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                        }
+                        
                        
                         if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
                             $field_options_array = explode("\n",$field_options);
@@ -277,7 +293,7 @@
                             $field_cost = 8;
                         }
                         
-                        if ( (!empty($field_default) ) and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+                        if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
                             if($fieldcatch == "") {
                                 $field_sql .= "default '$field_default'";
                             } else {
