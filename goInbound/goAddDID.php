@@ -145,7 +145,7 @@
 			
 				
 				if ($rowdf > 0) {
-						$apiresults = array("result" => "<br>DID NOT ADDED - DID already exist.\n");
+						$apiresults = array("result" => "DID NOT ADDED - DID already exist.\n");
 						
 				} else {
 						

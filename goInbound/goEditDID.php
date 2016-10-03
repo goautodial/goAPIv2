@@ -8,7 +8,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
  
     ### POST or GET Variables
     	// $values = $_REQUEST['items'];
@@ -18,7 +18,7 @@
         $did_route = strtoupper($_REQUEST['did_route']);
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
-
+		$filter_clean_cid_number = mysqli_real_escape_string($link, $_REQUEST['filter_clean_cid_number']);
 
         ### Agent
         $user = $_REQUEST['user'];
@@ -52,8 +52,6 @@
         if($did_id == null) {
                 $apiresults = array("result" => "Error: Set a value for DID ID.");
         } else {
-
-
 
                   $stmtdf="SELECT did_id, did_pattern from vicidial_inbound_dids where did_id='$did_id';";
                   $querydf = mysqli_query($link, $stmtdf);
@@ -150,7 +148,7 @@
 			    if($did_description == null) { $did_description = $datadid_description;} else {$did_description = $did_description;}
 			    if($did_active == null) {$did_active = $datadid_active;} else {$did_active = $did_active;}
 			    if($did_route == null) {$did_route = $datadid_route;} else { $did_route = $did_route;}
-                                $query = "UPDATE vicidial_inbound_dids SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active', did_route = '$did_route' WHERE did_id='$did_id';";
+                                $query = "UPDATE vicidial_inbound_dids SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active', did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' WHERE did_id='$did_id';";
                                 $resultQuery = mysqli_query($link, $query);
 
         ### Admin logs

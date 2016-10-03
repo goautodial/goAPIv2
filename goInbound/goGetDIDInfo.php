@@ -24,21 +24,15 @@
 			$ul = "WHERE did_id='$did_id' AND user_group='$groupId'";  
 		}
 
-   		$query = "SELECT did_id,did_pattern,did_description,did_active,did_route,record_call from vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
+   		$query = "SELECT did_id,did_pattern,did_description,did_active,did_route,record_call,filter_clean_cid_number from vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
-
+		
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-        $dataDidID[] = $fresults['did_id'];
-	$dataDidPattern[] =  $fresults['did_pattern'];
-        $dataDidDescription[] =  $fresults['did_description'];
-        $dataActive[] =  $fresults['did_active'];
-        $dataDidRoute[] =  $fresults['did_route'];
+			$fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+       
+			$apiresults = array( "result" => "success", "data" => $fresults);
 
-        $apiresults = array( "result" => "success", "did_id" => $dataDidID, "did_pattern" => $dataDidPattern, "did_description" => $dataDidDescription, "active" => $dataActive, "did_route" => $dataDidRoute);
-
-			}
 		} else {
 			$apiresults = array("result" => "Error: DID doesn't exist.");
 		}

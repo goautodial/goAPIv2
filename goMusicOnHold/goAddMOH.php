@@ -45,7 +45,7 @@
                 } else {
 
                 $groupId = go_get_groupid($goUser);
-
+				
                 if (!checkIfTenant($groupId)) {
                         $ul = "WHERE user_group='$user_group'";
                         $group_type = "Multi-tenant";
@@ -57,7 +57,11 @@
                 $query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
                 $rsltv = mysqli_query($link,$query);
                 $countResult = mysqli_num_rows($rsltv);
-
+				
+				if($user_group == "---ALL---"){  // temporary
+						$countResult = 1;
+				}
+				
                 if($countResult > 0) {
                 /*
                                         $items = $values;
@@ -93,9 +97,9 @@
                                                 $updateQuery = "UPDATE servers SET rebuild_conf_files='Y',rebuild_music_on_hold='Y',sounds_update='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
                                           $apiresults = array("result" => "success");
 					}
-                   } else {
+                } else {
                         $apiresults = array("result" => "Error: Invalid User Group");
-		   }
+				}
                                         }
                                       
 }
