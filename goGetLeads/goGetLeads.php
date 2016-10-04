@@ -1,11 +1,11 @@
 <?php
     #######################################################
-    #### Name: goGetLeads.php     	               	   ####
+    #### Name: goGetLeads.php     	               ####
     #### Description: API to get Leads                 ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Warren Ipac Briones			   ####
-	#### Modified by: Alexander Jim Abenoja			   ####
+    #### Written by: Warren Ipac Briones               ####
+    #### Modified by: Alexander Jim Abenoja	       ####
     #### License: AGPLv2                               ####
     #######################################################
     include_once ("../goFunctions.php");
@@ -103,8 +103,11 @@
 		$returnRes = mysqli_query($link, $queryx); 
 		
 	}
-
+        
+        $data = array();
+        
 	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
+                array_push($data, $fresults);
 		$dataLeadid[] = $fresults['lead_id'];
 		$dataListid[] = $fresults['list_id'];
 		$dataFirstName[] = $fresults['first_name'];
@@ -114,5 +117,5 @@
 		$dataDispo[] = $fresults['status'];
 	}
 	
-   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo);
+   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo, "data" => $data);
 ?>
