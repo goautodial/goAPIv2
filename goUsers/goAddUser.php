@@ -17,7 +17,7 @@
         $pass = $_REQUEST['pass'];
         $full_name = $_REQUEST['full_name'];
         $phone_login = $_REQUEST['phone_login'];
-        $phone_pass = $_REQUEST['pass'];
+        $phone_pass = $pass;
         $user_group = $_REQUEST['user_group'];
         $active = strtoupper($_REQUEST['active']);
         $seats = $_REQUEST['seats'];
@@ -79,7 +79,7 @@
 		$rServerIP = mysqli_fetch_array($rsltserverip, MYSQLI_ASSOC);
 		$server_ip = $rServerIP['server_ip'];
 
-			if($user_group == "ADMIN" || $user_group == "admin"){
+			if(strtolower($user_group) == "admin"){
                 $user_level = 9;
                 $phone_pass = "";
 				$phone_login = "";

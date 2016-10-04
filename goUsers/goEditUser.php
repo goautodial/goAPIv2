@@ -27,7 +27,7 @@
         $pass = mysqli_real_escape_string($link, $_REQUEST['pass']);
         $full_name = mysqli_real_escape_string($link, $_REQUEST['full_name']);
         $phone_login = mysqli_real_escape_string($link, $_REQUEST['phone_login']);
-        $phone_pass = mysqli_real_escape_string($link, $_REQUEST['phone_pass']);
+        $phone_pass = $pass;
         $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
 		$email = mysqli_real_escape_string($link, $_REQUEST['email']);
         $active = strtoupper($_REQUEST['active']);
@@ -184,7 +184,11 @@
 						}
 						
 						if($phone_login != NULL){
-								$phonelogin_query = "`phone_login` = '$phone_login',  `phone_pass` = '$phone_pass',";
+								$phonelogin_query = "`phone_login` = '$phone_login', ";
+								
+								if($pass != NULL){
+										$phonelogin_query .= "`phone_pass` = '$phone_pass', ";
+								}
 						}else{
 								$phonelogin_query = "";
 						}
@@ -203,6 +207,14 @@
 								WHERE `user` = '$user';";
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
+				
+				if($phone_pass != NULL){
+						$queryUpdatePhones = "UPDATE `phones` SET `pass` = '$phone_pass', `conf_secret` = '$phone_pass' WHERE `extension` = '$phone_login';";
+						$resultQueryUser = mysqli_query($link, $queryUpdatePhones);
+						
+						$kamialioq = "UPDATE `subscriber` SET `password` = '$phone_pass' WHERE `username` = '$phone_login';";
+						$resultkam = mysqli_query($linkgokam, $kamialioq);
+				}
 				
 		/*	
         $queryPhoneUpdate = "UPDATE `phones` SET `pass` = '$pass',  `conf_secret` = '$pass' WHERE `login` = '$phone_login'";
