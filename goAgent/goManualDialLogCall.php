@@ -218,6 +218,7 @@ if ($is_logged_in) {
                     $astDB->where('call_date', $four_hours_ago, '>');
                     $astDB->orderBy('closecallid', 'desc');
                     $VDIDselect = "VDCL_LID $lead_id $phone_number $user $four_hours_ago";
+                    $rslt = $astDB->getOne('vicidial_closer_log', 'start_epoch,term_reason,closecallid AS vicidial_id,campaign_id,status');
                 } else {
                     ##### look for the start epoch in the vicidial_log table
                     //$stmt="SELECT start_epoch,term_reason,uniqueid,campaign_id,status FROM vicidial_log where uniqueid='$uniqueid' and lead_id='$lead_id' order by call_date desc limit 1;";
@@ -225,14 +226,14 @@ if ($is_logged_in) {
                     $astDB->where('lead_id', $lead_id);
                     $astDB->orderBy('call_date', 'desc');
                     $VDIDselect = "VDL_UIDLID $uniqueid $lead_id";
+                    $rslt = $astDB->getOne('vicidial_log', 'start_epoch,term_reason,uniqueid AS vicidial_id,campaign_id,status');
                 }
-                $rslt = $astDB->getOne('vicidial_closer_log', 'start_epoch,term_reason,closecallid,campaign_id,status');
                 $VM_mancall_ct = $astDB->getRowCount();
                 if ($VM_mancall_ct > 0) {
                     $row = $rslt;
                     $start_epoch =		$row['start_epoch'];
                     $VDterm_reason =	$row['term_reason'];
-                    $VDvicidial_id =	$row['closecallid'];
+                    $VDvicidial_id =	$row['vicidial_id'];
                     $VDcampaign_id =	$row['campaign_id'];
                     $VDstatus =			$row['status'];
                     $length_in_sec = ($StarTtimE - $start_epoch);
@@ -240,7 +241,7 @@ if ($is_logged_in) {
                     $length_in_sec = 0;
                 }
     
-                if ( ($length_in_sec < 1) and ($VLA_inOUT == 'INBOUND') ) {    
+                if ( ($length_in_sec < 1) && ($VLA_inOUT == 'INBOUND') ) {
                     ##### start epoch in the vicidial_log table, couldn't find one in vicidial_closer_log
                     //$stmt="SELECT start_epoch,term_reason,campaign_id,status FROM vicidial_log where uniqueid='$uniqueid' and lead_id='$lead_id' order by call_date desc limit 1;";
                     $astDB->where('uniqueid', $uniqueid);
@@ -285,19 +286,17 @@ if ($is_logged_in) {
                 $rslt = $astDB->update('vicidial_closer_log', $updateData, 1);
                 $affected_rows = $astDB->getRowCount();
                 if ($affected_rows > 0) {
-                    $outputData = "$uniqueid\n$channel\n";
+                    $message .= "$uniqueid\n$channel\n";
     
                 #	$fp = fopen ("./vicidial_debug.txt", "a");
                 #	fwrite ($fp, "$NOW_TIME|INBND_LOG_4|$VDstatus|$uniqueid|$lead_id|$user|$inOUT|$length_in_sec|$VDterm_reason|$VDvicidial_id|$start_epoch|$stmt|\n");
                 #	fclose($fp);
-                    }
-                else
-                    {
+                } else {
                 #   $fp = fopen ("./vicidial_debug.txt", "a");
                 #   fwrite ($fp, "$NOW_TIME|INBND_LOG_2|$uniqueid|$lead_id|$user|$inOUT|$length_in_sec|$VDterm_reason|$VDvicidial_id|$start_epoch|\n");
                 #   fclose($fp);
-                    }
                 }
+            }
     
             #############################################
             ##### START QUEUEMETRICS LOGGING LOOKUP #####
@@ -961,9 +960,20 @@ if ($is_logged_in) {
                 }
     
                 ##### update the duration and end time in the vicidial_log table
-                if ($VDstatus == 'INCALL') {$vl_statusSQL = ",status='$status_dispo'";}
-                $stmt="UPDATE vicidial_log set $SQLterm end_epoch='$StarTtimE', length_in_sec='$length_in_sec' $vl_statusSQL where uniqueid='$uniqueid' and lead_id='$lead_id' and user='$user' order by call_date desc limit 1;";
-                $rslt = $astDB->rawQuery($stmt);
+                $updateData = array(
+                    'end_epoch' => $StarTtimE,
+                    'length_in_sec' => $length_in_sec
+                );
+                if ($VDstatus == 'INCALL') {
+                    //$vl_statusSQL = ",status='$status_dispo'";
+                    $updateData['status'] = $status_dispo;
+                }
+                //$stmt="UPDATE vicidial_log set $SQLterm end_epoch='$StarTtimE', length_in_sec='$length_in_sec' $vl_statusSQL where uniqueid='$uniqueid' and lead_id='$lead_id' and user='$user' order by call_date desc limit 1;";
+                $astDB->where('uniqueid', $uniqueid);
+                $astDB->where('lead_id', $lead_id);
+                $astDB->where('user', $user);
+                $astDB->orderBy('call_date', 'desc');
+                $rslt = $astDB->update('vicidial_log', $updateData, 1);
                 $affected_rows = $astDB->getRowCount();
     
                 if ($affected_rows > 0) {
@@ -1127,12 +1137,12 @@ if ($is_logged_in) {
             $rec_list = $astDB->getRowCount();
             while ($rec_list > $loop_count) {
                 $row = $rslt[$loop_count];
-                if (preg_match("/Local\/$conf_silent_prefix$conf_exten\@/i",$row['channel'])) {
+                if (preg_match("/Local\/$conf_silent_prefix$conf_exten\@/i", $row['channel'])) {
                     $rec_channels[$total_rec] = "{$row['channel']}";
                     $total_rec++;
                 } else {
             #		if (preg_match("/$agentchannel/i",$row[0]))
-                    if ( ($agentchannel == "{$row['channel']}") or (preg_match('/ASTblind/', $row['channel'])) ) {
+                    if ( ($agentchannel == "{$row['channel']}") || (preg_match('/ASTblind/', $row['channel'])) ) {
                         $donothing = 1;
                     } else {
                         $hangup_channels[$total_hangup] = "{$row['channel']}";
@@ -1151,8 +1161,29 @@ if ($is_logged_in) {
                     if (strlen($hangup_channels[$loop_count]) > 5) {
                         $variable = "Variable: ctuserserverconfleadphone=$loop_count$US$user$US$server_ip$US$conf_exten$US$lead_id$US$phone_number";
     
-                        $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','CH12346$StarTtimE$loop_count','Channel: $hangup_channels[$loop_count]','$variable','','','','','','','','');";
-                        $rslt = $astDB->rawQuery($stmt);
+                        //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','CH12346$StarTtimE$loop_count','Channel: $hangup_channels[$loop_count]','$variable','','','','','','','','');";
+                        $insertData = array(
+                            'man_id' => '',
+                            'uniqueid' => '',
+                            'entry_date' => $NOW_TIME,
+                            'status' => 'NEW',
+                            'response' => 'N',
+                            'server_ip' => $server_ip,
+                            'channel' => '',
+                            'action' => 'Hangup',
+                            'callerid' => "CH12346$StarTtimE$loop_count",
+                            'cmd_line_b' => "Channel: $hangup_channels[$loop_count]",
+                            'cmd_line_c' => "$variable",
+                            'cmd_line_d' => "",
+                            'cmd_line_e' => '',
+                            'cmd_line_f' => "",
+                            'cmd_line_g' => "",
+                            'cmd_line_h' => '',
+                            'cmd_line_i' => '',
+                            'cmd_line_j' => '',
+                            'cmd_line_k' => ''
+                        );
+                        $rslt = $astDB->insert('vicidial_manager', $insertData);
                     }
                     $loop_count++;
                 }
@@ -1179,8 +1210,29 @@ if ($is_logged_in) {
             $loop_count = 0;
             while($loop_count < $total_rec) {
                 if (strlen($rec_channels[$loop_count]) > 5) {
-                    $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','RH12345$StarTtimE$loop_count','Channel: $rec_channels[$loop_count]','','','','','','','','','');";
-                    $rslt = $astDB->rawQuery($stmt);
+                    //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','RH12345$StarTtimE$loop_count','Channel: $rec_channels[$loop_count]','','','','','','','','','');";
+                    $insertData = array(
+                        'man_id' => '',
+                        'uniqueid' => '',
+                        'entry_date' => $NOW_TIME,
+                        'status' => 'NEW',
+                        'response' => 'N',
+                        'server_ip' => $server_ip,
+                        'channel' => '',
+                        'action' => 'Hangup',
+                        'callerid' => "RH12345$StarTtimE$loop_count",
+                        'cmd_line_b' => "Channel: $rec_channels[$loop_count]",
+                        'cmd_line_c' => "",
+                        'cmd_line_d' => "",
+                        'cmd_line_e' => '',
+                        'cmd_line_f' => "",
+                        'cmd_line_g' => "",
+                        'cmd_line_h' => '',
+                        'cmd_line_i' => '',
+                        'cmd_line_j' => '',
+                        'cmd_line_k' => ''
+                    );
+                    $rslt = $astDB->insert('vicidial_manager', $insertData);
     
                     $message .= "REC_STOP|$rec_channels[$loop_count]|$filename[$loop_count]|";
                     if (strlen($filename[$loop_count]) > 2) {
