@@ -178,7 +178,9 @@ if ($is_logged_in) {
 			$list_id = $rslt['list_id'];
 			$custom_listid = "custom_{$list_id}";
 			
-			if ($astDB->has($custom_listid)) {
+			$astDB->has($custom_listid);
+			$lastError = $astDB->getLastError();
+			if (strlen($lastError) < 1) {
 				$astDB->where('lead_id', $lead_id);
 				$rslt = $astDB->getOne($custom_listid);
 				$lead_exist = $astDB->getRowCount();
