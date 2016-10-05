@@ -1491,7 +1491,7 @@ if ($sipIsLoggedIn) {
                     if ($enable_queuemetrics_logging > 0) {
                         $data4SQL = '';
                         $data4SS = '';
-                        $stmt="SELECT queuemetrics_phone_environment FROM vicidial_campaigns where campaign_id='$campaign' and queuemetrics_phone_environment!='';";
+                        //$stmt="SELECT queuemetrics_phone_environment FROM vicidial_campaigns where campaign_id='$campaign' and queuemetrics_phone_environment!='';";
                         $astDB->where('campaign_id', $campaign);
                         $astDB->where('queuemetrics_phone_environment', '', '!=');
                         $rslt = $astDB->get('vicidial_campaigns', null, 'queuemetrics_phone_environment');
