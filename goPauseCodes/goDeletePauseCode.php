@@ -34,8 +34,8 @@
 		$countResult = mysqli_num_rows($rsltvOne);
 
 		if($countResult > 0) {
-				$deleteQuery = "DELETE FROM vicidial_pause_codes WHERE campaign_id = '$camp';"; 
-   				$deleteResult = mysqli_query($link,$deleteQuery);
+//				$deleteQuery = "DELETE FROM vicidial_pause_codes WHERE campaign_id = '$camp';"; 
+//   				$deleteResult = mysqli_query($link,$deleteQuery);
 				$deleteQueryTwo = "DELETE FROM vicidial_pause_codes WHERE campaign_id = '$camp' AND pause_code='$code';"; 
    				$deleteResultTwo = mysqli_query($link,$deleteQueryTwo);
 				//echo $deleteQuery;
