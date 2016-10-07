@@ -684,7 +684,7 @@ if ($userExist > 0) {
     $default_settings['statuses_count'] = $statuses_ct;
     $default_settings['statuses'] = $statuses;
     $default_settings['callback_statuses_list'] = $VARCBstatusesLIST;
-    $default_settings['pause_codes_ct'] = $pause_codes_ct;
+    $default_settings['pause_codes_count'] = $pause_codes_ct;
     $default_settings['pause_codes'] = $pause_codes;
     $default_settings['xfer_group_count'] = $XFgrpCT;
     $default_settings['xfer_groups'] = $VARxferGroups;

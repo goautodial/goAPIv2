@@ -388,6 +388,20 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $statuses_ct = ($statuses_ct + $statuses_camp_ct);
     $VARCBstatusesLIST .= " ";
     
+    $astDB->where('campaign_id', $campaign);
+    $astDB->orderBy('pause_code', 'asc');
+    $rslt = $astDB->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
+    $pause_codes_ct = $astDB->getRowCount();
+    foreach ($rslt as $row) {
+        $pause = $row['pause_code'];
+        $pause_name = str_replace("+", " ", $row['pause_code_name']);
+        $billable = $row['billable'];
+        $pause_codes[$pause] = "{$pause_name}";
+        //if ($billable == 'Y')
+        //    {$VARCBstatusesLIST .= " {$status}";}
+    }
+    ksort($pause_codes);
+    
     $xfer_groups = preg_replace("/^ | -$/", "", $campaign_settings->xfer_groups);
     $xfer_groups = explode(" ", $xfer_groups);
     ////$xfer_groups = preg_replace("/ /", "','", $xfer_groups);
@@ -459,6 +473,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'statuses_count' => $statuses_ct,
         'statuses' => $statuses,
         'callback_statuses_list' => $VARCBstatusesLIST,
+        'pause_codes_count' => $pause_codes_ct,
+        'pause_codes' => (array) $pause_codes,
         'xfer_group_count' => $XFgrpCT,
         'xfer_groups' => $VARxferGroups,
         'user_settings' => (array) $user_settings,
