@@ -51,12 +51,13 @@ if ($is_logged_in) {
 	} else {
 		### if this is the first pause code entry in a pause session, simply update and log to queue_log
 		if ($stage < 1) {
-			//$stmt="UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') )order by agent_log_id limit 2;";
-			$astDB->where('agent_log_id', $agent_log_id, '>=');
-			$astDB->where('user', $user);
-			$astDB->where('sub_status', array(NULL, ''), 'in');
-			$astDB->orderBy('agent_log_id', 'desc');
-			$rslt = $astDB->update('vicidial_agent_log', array('sub_status' => $status), 2);
+			$stmt="UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') )order by agent_log_id limit 2;";
+			//$astDB->where('agent_log_id', $agent_log_id, '>=');
+			//$astDB->where('user', $user);
+			//$astDB->where('sub_status', array(NULL, ''), 'in');
+			//$astDB->orderBy('agent_log_id', 'desc');
+			//$rslt = $astDB->update('vicidial_agent_log', array('sub_status' => $status), 2);
+			$rslt = $astDB->rawQuery($stmt);
 			$affected_rows = $astDB->getRowCount();
 		} else {
 			### this is not the first pause code entry, insert new vicidial_agent_log entry
