@@ -480,6 +480,20 @@ if ($userExist > 0) {
     }
     $VARCBstatusesLIST .= " ";
     
+    $astDB->where('campaign_id', $campinfo->campaign_id);
+    $astDB->orderBy('pause_code', 'asc');
+    $rslt = $astDB->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
+    $pause_codes_ct = $astDB->getRowCount();
+    foreach ($rslt as $row) {
+        $pause = $row['pause_code'];
+        $pause_name = str_replace("+", " ", $row['pause_code_name']);
+        $billable = $row['billable'];
+        $pause_codes[$pause] = "{$pause_name}";
+        //if ($billable == 'Y')
+        //    {$VARCBstatusesLIST .= " {$status}";}
+    }
+    ksort($pause_codes);
+    
     $VARingroups = array();
     $VARingroup_handlers = array();
     $VARphonegroups = array();
@@ -670,6 +684,8 @@ if ($userExist > 0) {
     $default_settings['statuses_count'] = $statuses_ct;
     $default_settings['statuses'] = $statuses;
     $default_settings['callback_statuses_list'] = $VARCBstatusesLIST;
+    $default_settings['pause_codes_ct'] = $pause_codes_ct;
+    $default_settings['pause_codes'] = $pause_codes;
     $default_settings['xfer_group_count'] = $XFgrpCT;
     $default_settings['xfer_groups'] = $VARxferGroups;
     $default_settings['xfer_group_names'] = $VARxferGroupsNames;

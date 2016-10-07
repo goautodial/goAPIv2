@@ -52,6 +52,9 @@ function get_node_type( $type ) {
         case "statuses":
             $node = 'status';
             break;
+        case "pause_codes":
+            $node = 'code';
+            break;
         case "xfer_groups":
         case "xfer_group_names":
         case "inbound_groups":
