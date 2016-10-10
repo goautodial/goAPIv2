@@ -32,12 +32,16 @@
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$queryGoCampaign = "SELECT campaign_type FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
+				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
 				$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 				while($typeresults = mysqli_fetch_array($rsltvGoCampaign, MYSQLI_ASSOC)){
 					$campaign_type = $typeresults['campaign_type'];
+					$custom_fields_launch = $typeresults['custom_fields_launch'];
+					$custom_fields_list_id = $typeresults['custom_fields_list_id'];
 				}
-				$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type);
+				$custom_fields_launch = (gettype($custom_fields_launch) != 'NULL') ? $custom_fields_launch : 'ONCALL';
+				$custom_fields_list_id = (gettype($custom_fields_list_id) != 'NULL') ? $custom_fields_list_id : '';
+				$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type, "custom_fields_launch" => $custom_fields_launch, 'custom_fields_list_id' => $custom_fields_list_id);
 				//$apiresults = array("result" => "success", "data" => $fresults);
 			}
 		} else {
