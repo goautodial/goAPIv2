@@ -480,7 +480,7 @@ if ($userExist > 0) {
     }
     $VARCBstatusesLIST .= " ";
     
-    $astDB->where('campaign_id', $campinfo->campaign_id);
+    $astDB->where('campaign_id', $campinfo['campaign_id']);
     $astDB->orderBy('pause_code', 'asc');
     $rslt = $astDB->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
     $pause_codes_ct = $astDB->getRowCount();
@@ -660,6 +660,13 @@ if ($userExist > 0) {
     
     $C_scheduled_callbacks = $campinfo['scheduled_callbacks'];
     unset($campinfo['scheduled_callbacks']);
+    
+    $goDB->where('campaign_id', $campinfo['campaign_id']);
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch');
+    $campinfo['custom_fields_launch'] = 'ONCALL';
+    if ($goDB->getRowCount() > 0) {
+        $campinfo['custom_fields_launch'] = $rslt['custom_fields_launch'];
+    }
     
     $data = array_merge($data, array( 'camp_info' => $campinfo ));
     

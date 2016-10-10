@@ -453,6 +453,13 @@ if ($sipIsLoggedIn || $use_webrtc) {
     if ($usergroup->agent_status_view_time == 'Y')
         {$agent_status_view_time = 1;}
     
+    $goDB->where('campaign_id', $campaign);
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch');
+    $custom_fields_launch = 'ONCALL';
+    if ($goDB->getRowCount() > 0) {
+        $custom_fields_launch = $rslt['custom_fields_launch'];
+    }
+    
     $return = array(
         'user' => $user,
         'agent_log_id' => $agent_log_id,
@@ -488,7 +495,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'hotkeys_content' => $hotkeysInfo,
         'HK_statuses_camp' => $HK_statuses_camp,
         'agent_status_view' => $agent_status_view,
-        'agent_status_view_time' => $agent_status_view_time
+        'agent_status_view_time' => $agent_status_view_time,
+        'custom_fields_launch' => $custom_fields_launch
     );
 
     $APIResult = array( "result" => "success", "data" => $return );
