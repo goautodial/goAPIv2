@@ -55,6 +55,7 @@
 	$xfer_groups					= $_REQUEST['xfer_groups'];
 	$custom_fields_launch			= $_REQUEST['custom_fields_launch'];
 	$campaign_type					= $_REQUEST['campaign_type'];
+	$custom_fields_list_id			= $_REQUEST['custom_fields_list_id'];
 
    	//$apiresults = array("data" => $_REQUEST); 
 
@@ -161,11 +162,11 @@
 					$rsltGO = mysqli_query($linkgo, $stmtGO);
 					$numGO = mysqli_num_rows($rsltGO);
 					if ($numGO > 0) {
-						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch' WHERE campaign_id='$campaign_id';";
+						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id' WHERE campaign_id='$campaign_id';";
 						$resultGO = mysqli_query($linkgo, $updateGO);
 					} else {
 						$campaign_type = (strlen($campaign_type) > 0) ? $campaign_type : "OUTBOUND";
-						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch');";
+						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id');";
 						$resultGO = mysqli_query($linkgo, $insertGO);
 					}
 					### Admin logs

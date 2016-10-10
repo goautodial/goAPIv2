@@ -662,10 +662,12 @@ if ($userExist > 0) {
     unset($campinfo['scheduled_callbacks']);
     
     $goDB->where('campaign_id', $campinfo['campaign_id']);
-    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch');
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id');
     $campinfo['custom_fields_launch'] = 'ONCALL';
+    $campinfo['custom_fields_list_id'] = '';
     if ($goDB->getRowCount() > 0) {
         $campinfo['custom_fields_launch'] = $rslt['custom_fields_launch'];
+        $campinfo['custom_fields_list_id'] = $rslt['custom_fields_list_id'];
     }
     
     $data = array_merge($data, array( 'camp_info' => $campinfo ));

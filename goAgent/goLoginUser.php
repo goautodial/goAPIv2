@@ -454,10 +454,12 @@ if ($sipIsLoggedIn || $use_webrtc) {
         {$agent_status_view_time = 1;}
     
     $goDB->where('campaign_id', $campaign);
-    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch');
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id');
     $custom_fields_launch = 'ONCALL';
+    $custom_fields_list_id = '';
     if ($goDB->getRowCount() > 0) {
         $custom_fields_launch = $rslt['custom_fields_launch'];
+        $custom_fields_list_id = $rslt['custom_fields_list_id'];
     }
     
     $return = array(
@@ -496,7 +498,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'HK_statuses_camp' => $HK_statuses_camp,
         'agent_status_view' => $agent_status_view,
         'agent_status_view_time' => $agent_status_view_time,
-        'custom_fields_launch' => $custom_fields_launch
+        'custom_fields_launch' => $custom_fields_launch,
+        'custom_fields_list_id' => $custom_fields_list_id
     );
 
     $APIResult = array( "result" => "success", "data" => $return );
