@@ -22,6 +22,6 @@
     
     $query = "SELECT count(*) as getTotalAgentsOnline FROM vicidial_live_agents $ul"; 
     $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $data = mysqli_fetch_assoc($rsltv);
+    $apiresults = array("result" => "success", "data" => $data);
 ?>
