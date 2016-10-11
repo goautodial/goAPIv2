@@ -2,7 +2,7 @@
 if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
 } else {
-	die ("EtRROR: 'goautodial.conf' file not found.");
+	die ("ERROR: 'goautodial.conf' file not found.");
 }
 if ( file_exists($conf_path) )
         {
