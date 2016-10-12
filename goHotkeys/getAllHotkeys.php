@@ -7,38 +7,46 @@
    #### Written by: Noel Umandap                   ####
    #### License: AGPLv2                            ####
    ####################################################
-    include_once("goFunctions.php");
+		include_once("goFunctions.php");
    
-    $groupId = go_get_groupid($goUser);
-    
-    if (!checkIfTenant($groupId)) {
-            $where='';
-        } else { 
-        $where = "WHERE user_group='$groupId'";  
-    }
-   
-    $query = "SELECT
-                campaign.campaign_id,
-                campaign.campaign_name,
-                hotkey.hotkey
-            FROM
-                vicidial_campaigns as campaign
-            $ul
-            LEFT JOIN vicidial_campaign_hotkeys as hotkey
-            ORDER BY campaign.campaign_id
-    ";
-    
-    $rsltv = mysqli_query($link, $query);
-   
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-		$dataCampID[]   = $fresults['campaign_id'];
-       	$dataCampName[] = $fresults['campaign_name'];
-		$dataHotkey[]   = $fresults['hotkey'];
-   		$apiresults = array(
-                        "result"        => "success",
-                        "campaign_id"   => $dataCampID,
-                        "campaign_name" => $dataCampName,
-                        "hotkey"        => $dataHotkey,
-                    );
-	}
+		$camp = $_REQUEST['hotkeyCampID'];
+		$groupId = go_get_groupid($goUser);
+		
+		if(empty($camp)) {
+				$apiresults = array("result" => "Error: Set a value for Campaign ID.");
+		} else {
+				if (!checkIfTenant($groupId)) {
+                        $ul = "";
+                } else {
+                        $ul = "AND user_group='$groupId'";
+                   $addedSQL = "WHERE user_group='$groupId'";
+                }
+				
+				$query = "SELECT
+								status,
+								hotkey,
+								status_name,
+								selectable,
+								campaign_id
+						FROM vicidial_campaign_hotkeys $ul
+						WHERE campaign_id ='$camp'
+						ORDER BY hotkey;";
+				$rsltv = mysqli_query($link,$query);
+
+				while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+						$dataStatus[] = $fresults['status'];
+						$dataHotkey[] = $fresults['hotkey'];
+						$dataStatusName[] = $fresults['status_name'];
+						$dataSelectable[] = $fresults['selectable'];
+						$dataCampaignID[] = $fresults['campaign_id'];
+						$apiresults = array(
+											"result" => "success",
+											"status" => $dataStatus,
+											"hotkey" => $dataHotkey,
+											"status_name" => $dataStatusName,
+											"selectable" => $dataSelectable,
+											"campaign_id" => $dataCampaignID
+										);
+				}
+		}
 ?>

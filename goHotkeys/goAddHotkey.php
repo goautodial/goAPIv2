@@ -12,14 +12,7 @@
     $campaign_id = $_REQUEST['campaign_id'];
     $hotkey = $_REQUEST['hotkey'];
     $status = $_REQUEST['status'];
-    
-    $queryStatusName = $this->db->query("SELECT status_name FROM vicidial_statuses WHERE status='$status'");
-    $status_name = $queryStatusName->row()->status_name;
-    if ($queryStatusName->num_rows() < 1)
-    {
-        $queryStatusName = $this->db->query("SELECT status_name FROM vicidial_campaign_statuses WHERE status='$status'");
-        $status_name = $queryStatusName->row()->status_name;
-    }
+    $status_name = $_REQUEST['status_name'];
     
     $query = "INSERT into vicidial_campaign_hotkeys
             (
@@ -41,7 +34,7 @@
     $rsltv = mysqli_query($link, $query);
     $countResult = mysqli_num_rows($rsltv);
     
-    if($countResult > 0) {
+    if($rsltv) {
         $apiresults = array("result" => "success");
     } else {
         $apiresults = array("result" => "Error: Failed to add campaign hotkey.");
