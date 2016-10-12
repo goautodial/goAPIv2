@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: goGetUserInfo.php	               ####
+    #### Name: goGetUserInfo.php	                   ####
     #### Description: API to get specific user	       ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
@@ -14,6 +14,8 @@
     ### POST or GET Variables
     $user_id = $_REQUEST['user_id'];
     $user = $_REQUEST['user'];
+    $filter = "default";
+    $filter = $_REQUEST['filter'];
         
     ### Check user_id if its null or empty
     if($user_id == null && $user == null) { 
@@ -72,7 +74,7 @@
         $query_InboundSalesTodayAgent = "SELECT count(*) as InboundSales from vicidial_closer_log as vcl, vicidial_agent_log as val, vicidial_users as vu where vcl.uniqueid=val.uniqueid and val.status='$status' and vu.user=vcl.user and $vul and vcl.call_date $date";     
         $query_OutboundCallsTodayAgent = "SELECT sum(called_count) as outcallstoday from vicidial_log as vl, vicidial_users as vu where vu.user=vl.user and $vul and vl.call_date $date";
         $query_OutboundSalesTodayAgent = "SELECT count(*) as OutboundSales from vicidial_log as vl, vicidial_agent_log as val, vicidial_users as vu where vl.uniqueid=val.uniqueid and val.status='$status' and vu.user=vl.user and $vul and vl.call_date $date";
-
+        
         $rsltvInCallsToday = mysqli_query($link,$query_InboundCallsTodayAgent);
         $rsltvInSalesToday = mysqli_query($link,$query_InboundSalesTodayAgent);
         $rsltvOutCallsToday = mysqli_query($link,$query_OutboundCallsTodayAgent);
@@ -125,8 +127,15 @@
                     array_push($dataOutCallsAgent, $resultsOutCallsAgent);
                 }
             
-            $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday);
-            $apiresults = array("result" => "success", "data" => $data, "agentincalls" => $dataInCallsAgent, "agentoutcalls" => $dataOutCallsAgent);
+            if($filter == "userInfo"){
+                $data = array_merge($fresults);
+                $apiresults = array("result" => "success", "data" => $data);
+            }else{
+                $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday);
+                $apiresults = array("result" => "success", "data" => $data, "agentincalls" => $dataInCallsAgent, "agentoutcalls" => $dataOutCallsAgent);
+            }
+            
+            
 
         }
     }

@@ -100,10 +100,7 @@
                 $rsltv = mysqli_query($link, $query);
                 $countResult = mysqli_num_rows($rsltv);
 
-                if($countResult > 0) {
-
-
-
+                if($countResult > 0 || $user_group == "---ALL---") {
 
   /*              if($menu_time_check < 0 || $menu_time_check > 1) {
                         $apiresults = array("result" => "Error: menu_time_check Value should be 0 or 1");

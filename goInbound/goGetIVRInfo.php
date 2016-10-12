@@ -24,22 +24,18 @@
 			$ul = "AND menu_id='$menu_id' AND user_group='$groupId'";  
 		}
 
-   		$query = "SELECT menu_id,menu_name,menu_prompt,menu_timeout,menu_timeout_prompt,menu_invalid_prompt,menu_repeat from vicidial_call_menu WHERE menu_id!='defaultlog' $ul order by menu_id LIMIT 1;";
+   		$query = "SELECT menu_id, menu_name, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, tracking_group,	call_time_id, track_in_vdac, tracking_group, user_group
+				FROM vicidial_call_menu
+				WHERE menu_id != 'defaultlog' $ul order by menu_id LIMIT 1;";
+				
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
 
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-        $dataMenuId[] =  $fresults['menu_id'];
-        $dataMenuName[] =  $fresults['menu_name'];
-        $dataMenuPrompt[] =  $fresults['menu_prompt'];
-        $dataMenuTimeout[] =  $fresults['menu_timeout'];
-	$dataMenuTimeoutPrompt[] = $fresults['menu_timeout_prompt'];
-	$dataMenuInvalidPrompt[] = $fresults['menu_invalid_prompt'];
-	$dataMenuRepeat[] = $fresults['menu_repeat'];
-
-        $apiresults = array( "result" => "success", "menu_id" => $dataMenuId, "menu_name" => $dataMenuName, "menu_prompt" => $dataMenuPrompt, "menu_timeout" => $dataMenuTimeout, "menu_timeout_prompt" => $dataMenuTimeoutPrompt, "menu_invalid_prompt" => $dataMenuInvalidPrompt, "menu_repeat" => $dataMenuRepeat);
-			}
+			$fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+			
+			$apiresults = array( "result" => "success", "data" => $fresults);
+			
 		} else {
 			$apiresults = array("result" => "Error: IVR Menu doesn't exist.");
 		}
