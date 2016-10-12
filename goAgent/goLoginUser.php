@@ -317,7 +317,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         //$astDB->where('user', $user);
         //$query = $astDB->delete('vicidial_live_inbound_agents');
 
-		$in_groups_pre = preg_replace('/-$/', '', $closer_choice);
+		$in_groups_pre = preg_replace("/^ | -$/", '', $closer_choice);
 		$in_groups = explode(" ", trim($in_groups_pre));
 		$in_groups_ct = count($in_groups);
 		$k = 0;
@@ -402,6 +402,44 @@ if ($sipIsLoggedIn || $use_webrtc) {
     }
     ksort($pause_codes);
     
+    $VARingroups = "''";
+    $VARingroup_handlers = "''";
+    $INgrpCT = 0;
+    $EMAILgrpCT = 0;
+    $PHONEgrpCT = 0;
+    if ( ($campaign_settings->campaign_allow_inbound == 'Y') && ($campaign_settings->dial_method != 'MANUAL') ) {
+        $closer_campaigns = preg_replace("/^ | -$/", "", $campaign_settings->closer_campaigns);
+        $closer_campaigns = explode(" ", $closer_campaigns);
+        
+        //$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
+        $astDB->where('active', 'Y');
+        $astDB->where('group_id', $closer_campaigns, 'IN');
+        $astDB->orderBy('group_id', 'asc');
+        $rslt = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_handling');
+
+        $closer_ct = $astDB->getRowCount();
+        $VARingroups = '';
+        $VARingroup_handlers = '';
+        while ($INgrpCT < $closer_ct) {
+            $row = $rslt[$INgrpCT];
+            //$VARingroups[$row['group_id']] = $row['group_handling'];
+            $VARingroups .= "'".$row['group_id']."',";
+            $VARingroup_handlers .= "'".$row['group_handling']."',";
+            if ($row['group_handling']=="EMAIL") { // Make a list of ingroups for email handling groups and one for phones, so there is no overlap
+                $VARemailgroups[$row['group_id']] = $row['group_handling'];
+                $EMAILgrpCT++;
+            } else {
+                $VARphonegroups[$row['group_id']] = $row['group_handling'];
+                $PHONEgrpCT++;
+            }
+            ksort($VARemailgroups);
+            ksort($VARphonegroups);
+            $INgrpCT++;
+        }
+        $VARingroups = rtrim($VARingroups, ",");
+        $VARingroup_handlers = rtrim($VARingroup_handlers, ",");
+    }
+    
     $xfer_groups = preg_replace("/^ | -$/", "", $campaign_settings->xfer_groups);
     $xfer_groups = explode(" ", $xfer_groups);
     ////$xfer_groups = preg_replace("/ /", "','", $xfer_groups);
@@ -414,17 +452,21 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $VARxferGroups = '';
         $astDB->where('active', 'Y');
         $astDB->where('group_id', $xfer_groups, 'IN');
-        $astDB->orderBy('group_id');
+        $astDB->orderBy('group_id', 'asc');
         $result = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_name');
         $xfer_ct = $astDB->getRowCount();
         $XFgrpCT = 0;
         while ($XFgrpCT < $xfer_ct) {
             $row = $result[$XFgrpCT];
-            $VARxferGroups[$row['group_id']] = $row['group_name'];
-            ksort($VARxferGroups);
+            //$VARxferGroups[$row['group_id']] = $row['group_name'];
+            $VARxferGroups .= "'".$row['group_id']."',";
+            $VARxferGroupsNames .= "'".$row['group_name']."',";
+            //ksort($VARxferGroups);
             if ($row['group_id'] == "{$campaign_settings->default_xfer_group}") {$default_xfer_group_name = $row['group_name'];}
             $XFgrpCT++;
         }
+        $VARxferGroups = rtrim($VARxferGroups, ",");
+        $VARxferGroupsNames = rtrim($VARxferGroupsNames, ",");
     }
     
     if ($campaign_settings->alt_number_dialing == 'Y') {
@@ -462,6 +504,28 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $custom_fields_list_id = $rslt['custom_fields_list_id'];
     }
     
+    $default_group_alias_cid = '';
+    $default_group_alias = $campaign_settings->default_group_alias;
+    if (strlen($default_group_alias) > 1) {
+        $astDB->where('group_alias_id', $default_group_alias);
+        $rslt = $astDB->get('group_alias', null, 'caller_id_number');
+        $VDIG_cidnum_ct = $astDB->getRowCount();
+        if ($VDIG_cidnum_ct > 0) {
+            $row = $rslt[0];
+            $default_group_alias_cid = $row['caller_id_number'];
+        }
+    }
+
+    $default_web_vars = '';
+    $astDB->where('campaign_id', $campinfo['campaign_id']);
+    $astDB->where('user', $user_name);
+    $rslt = $astDB->get('vicidial_campaign_agents', null, 'group_web_vars');
+    $VDIG_cidogwv = $astDB->getRowCount();
+    if ($VDIG_cidogwv > 0) {
+        $row = $rslt[0];
+        $default_web_vars =	$row['group_web_vars'];
+    }
+    
     $return = array(
         'user' => $user,
         'agent_log_id' => $agent_log_id,
@@ -484,8 +548,12 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'callback_statuses_list' => $VARCBstatusesLIST,
         'pause_codes_count' => $pause_codes_ct,
         'pause_codes' => (array) $pause_codes,
-        'xfer_group_count' => $XFgrpCT,
-        'xfer_groups' => $VARxferGroups,
+        'XFgroupCOUNT' => $XFgrpCT,
+        'VARxferGroups' => $VARxferGroups,
+        'VARxferGroupsNames' => $VARxferGroupsNames,
+        'INgroupCOUNT' => $INgrpCT,
+        'VARingroups' => $VARingroups,
+        'VARingroup_handlers' => $VARingroup_handlers,
         'user_settings' => (array) $user_settings,
         'phone_settings' => (array) $phone_settings,
         'campaign_settings' => (array) $campaign_settings,
@@ -499,7 +567,11 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'agent_status_view' => $agent_status_view,
         'agent_status_view_time' => $agent_status_view_time,
         'custom_fields_launch' => $custom_fields_launch,
-        'custom_fields_list_id' => $custom_fields_list_id
+        'custom_fields_list_id' => $custom_fields_list_id,
+        'default_group_alias_cid' => $default_group_alias_cid,
+        'LIVE_caller_id_number' => $default_group_alias_cid,
+        'default_web_vars' => $default_web_vars,
+        'LIVE_web_vars' => $default_web_vars
     );
 
     $APIResult = array( "result" => "success", "data" => $return );

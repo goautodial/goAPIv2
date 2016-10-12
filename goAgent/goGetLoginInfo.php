@@ -48,6 +48,7 @@ $default_settings = array(
     'lastcustserverip' => '',
     'lastxferchannel' => '',
     'custchannellive' => 0,
+    'xferchannellive' => 0,
     'customer_server_ip' => '',
     'lead_id' => 0,
     'list_id' => 0,
@@ -219,10 +220,10 @@ $default_settings = array(
     'call_notes' => '',
     'PerCallNotesContent' => '',
     'wrapup_waiting' => 0,
-    'LIVE_default_group_alias_cid' => '',
-    'LIVE_web_vars' => '',
     'default_group_alias_cid' => '',
+    'LIVE_caller_id_number' => '',
     'default_web_vars' => '',
+    'LIVE_web_vars' => '',
     'did_pattern' => '',
     'did_id' => '',
     'did_extension' => '',
@@ -294,7 +295,9 @@ $default_settings = array(
     'web_form_vars_two' => '',
     'scheduled_callbacks' => 0,
     'LastCallCID' => '',
-    'closer_blended' => 0
+    'closer_blended' => 0,
+    'threeway_end' => 0,
+    'threeway_cid' => ''
 );
 
 if ($userExist > 0) {
@@ -491,8 +494,8 @@ if ($userExist > 0) {
         $pause_codes[$pause] = "{$pause_name}";
         //if ($billable == 'Y')
         //    {$VARCBstatusesLIST .= " {$status}";}
+        ksort($pause_codes);
     }
-    ksort($pause_codes);
     
     $VARingroups = array();
     $VARingroup_handlers = array();
@@ -508,7 +511,7 @@ if ($userExist > 0) {
         //$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
         $astDB->where('active', 'Y');
         $astDB->where('group_id', $closer_campaigns, 'IN');
-        $astDB->orderBy('group_id');
+        $astDB->orderBy('group_id', 'asc');
         $rslt = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_handling');
 
         $closer_ct = $astDB->getRowCount();
@@ -542,7 +545,7 @@ if ($userExist > 0) {
     if ($campinfo['allow_closers'] == 'Y') {
         $astDB->where('active', 'Y');
         $astDB->where('group_id', $xfer_groups, 'IN');
-        $astDB->orderBy('group_id');
+        $astDB->orderBy('group_id', 'asc');
         $result = $astDB->get('vicidial_inbound_groups', 800, 'group_id,group_name');
         $xfer_ct = $astDB->getRowCount();
         
@@ -669,6 +672,32 @@ if ($userExist > 0) {
         $campinfo['custom_fields_launch'] = $rslt['custom_fields_launch'];
         $campinfo['custom_fields_list_id'] = $rslt['custom_fields_list_id'];
     }
+    
+    $default_group_alias_cid = '';
+    $default_group_alias = $campinfo['default_group_alias'];
+    if (strlen($default_group_alias) > 1) {
+        $astDB->where('group_alias_id', $default_group_alias);
+        $rslt = $astDB->get('group_alias', null, 'caller_id_number');
+        $VDIG_cidnum_ct = $astDB->getRowCount();
+        if ($VDIG_cidnum_ct > 0) {
+            $row = $rslt[0];
+            $default_group_alias_cid = $row['caller_id_number'];
+        }
+    }
+    $default_settings['default_group_alias_cid'] = $default_group_alias_cid;
+    $default_settings['LIVE_caller_id_number'] = $default_group_alias_cid;
+
+    $default_web_vars = '';
+    $astDB->where('campaign_id', $campinfo['campaign_id']);
+    $astDB->where('user', $user_name);
+    $rslt = $astDB->get('vicidial_campaign_agents', null, 'group_web_vars');
+    $VDIG_cidogwv = $astDB->getRowCount();
+    if ($VDIG_cidogwv > 0) {
+        $row = $rslt[0];
+        $default_web_vars =	$row['group_web_vars'];
+    }
+    $default_settings['default_web_vars'] = $default_web_vars;
+    $default_settings['LIVE_web_vars'] = $default_web_vars;
     
     $data = array_merge($data, array( 'camp_info' => $campinfo ));
     
