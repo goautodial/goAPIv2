@@ -567,445 +567,229 @@ if ($is_logged_in) {
         $rslt = $astDB->update('vicidial_live_agents', array( 'external_park' => '' ));
     }
     
-    
-    if ($ACTION=="RedirectName") {
-        if ( (strlen($channel)<3) or (strlen($queryCID)<15)  or (strlen($extenName)<1)  or (strlen($ext_context)<1)  or (strlen($ext_priority)<1) )
-            {
-            $channel_live=0;
-            echo "One of these variables is not valid:\n";
-            echo "Channel $channel must be greater than 2 characters\n";
-            echo "queryCID $queryCID must be greater than 14 characters\n";
-            echo "extenName $extenName must be set\n";
-            echo "ext_context $ext_context must be set\n";
-            echo "ext_priority $ext_priority must be set\n";
-            echo "\nRedirectName Action not sent\n";
-            }
-        else
-            {
-            $stmt="SELECT dialplan_number FROM phones where server_ip = '$server_ip' and extension='$extenName';";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02027',$user,$server_ip,$session_name,$one_mysql_log);}
-            $name_count = mysqli_num_rows($rslt);
-            if ($name_count>0)
-                {
-                $row=mysqli_fetch_row($rslt);
-                $exten = $row[0];
-                $ACTION="Redirect";
-                }
+    if ($ACTION == "RedirectName") {
+        if ( (strlen($channel) < 3) || (strlen($queryCID) < 15)  || (strlen($extenName) < 1)  || (strlen($ext_context) < 1)  || (strlen($ext_priority) < 1) ) {
+            $channel_live = 0;
+            $message  = "One of these variables is not valid:\n";
+            $message .= "Channel must be greater than 2 characters\n";
+            $message .= "queryCID must be greater than 14 characters\n";
+            $message .= "extenName must be set\n";
+            $message .= "ext_context must be set\n";
+            $message .= "ext_priority must be set\n";
+            $message .= "\nRedirectName Action not sent\n";
+            $APIResult = array( "result" => "error", "message" => $message );
+        } else {
+            //$stmt="SELECT dialplan_number FROM phones where server_ip = '$server_ip' and extension='$extenName';";
+            $astDB->where('server_ip', $server_ip);
+            $astDB->where('extension', $extenName);
+            $rslt = $astDB->get('phones', null, 'dialplan_number');
+            $name_count = $astDB->getRowCount();
+            if ($name_count > 0) {
+                $row = $rslt[0];
+                $exten = $row['dialplan_number'];
+                $ACTION = "Redirect";
             }
         }
+    }
     
-    if ($ACTION=="RedirectNameVmail")
-        {
-        if ( (strlen($channel)<3) or (strlen($queryCID)<15)  or (strlen($extenName)<1)  or (strlen($exten)<1)  or (strlen($ext_context)<1)  or (strlen($ext_priority)<1) )
-            {
-            $channel_live=0;
-            echo "One of these variables is not valid:\n";
-            echo "Channel $channel must be greater than 2 characters\n";
-            echo "queryCID $queryCID must be greater than 14 characters\n";
-            echo "extenName $extenName must be set\n";
-            echo "exten $exten must be set\n";
-            echo "ext_context $ext_context must be set\n";
-            echo "ext_priority $ext_priority must be set\n";
-            echo "\nRedirectNameVmail Action not sent\n";
-            }
-        else
-            {
-            $stmt="SELECT voicemail_id FROM phones where server_ip = '$server_ip' and extension='$extenName';";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02028',$user,$server_ip,$session_name,$one_mysql_log);}
-            $name_count = mysqli_num_rows($rslt);
-            if ($name_count>0)
-                {
-                $row=mysqli_fetch_row($rslt);
-                $exten = "$exten$row[0]";
-                $ACTION="Redirect";
-                }
+    if ($ACTION == "RedirectNameVmail") {
+        if ( (strlen($channel)<3) or (strlen($queryCID) < 15)  || (strlen($extenName) < 1)  || (strlen($exten) < 1)  || (strlen($ext_context) < 1)  || (strlen($ext_priority) < 1) ) {
+            $channel_live = 0;
+            $message  = "One of these variables is not valid:\n";
+            $message .= "Channel must be greater than 2 characters\n";
+            $message .= "queryCID must be greater than 14 characters\n";
+            $message .= "extenName must be set\n";
+            $message .= "exten must be set\n";
+            $message .= "ext_context must be set\n";
+            $message .= "ext_priority must be set\n";
+            $message .= "\nRedirectNameVmail Action not sent\n";
+            $APIResult = array( "result" => "error", "message" => $message );
+        } else {
+            //$stmt="SELECT voicemail_id FROM phones where server_ip = '$server_ip' and extension='$extenName';";
+            $astDB->where('server_ip', $server_ip);
+            $astDB->where('extension', $extenName);
+            $rslt = $astDB->get('phones', null, 'voicemail_id');
+            $name_count = $astDB->getRowCount();
+            if ($name_count > 0) {
+                $row = $rslt[0];
+                $voicemail_id = $row['voicemail_id'];
+                $exten = "$exten$voicemail_id";
+                $ACTION = "Redirect";
             }
         }
+    }
     
-    
-    
-    
-    
-    
-    if ($ACTION=="RedirectXtraCXNeW")
-        {
-        $DBout='';
-        $row='';   $rowx='';
-        $channel_liveX=1;
-        $channel_liveY=1;
-        if ( (strlen($channel)<3) or (strlen($queryCID)<15) or (strlen($ext_context)<1) or (strlen($ext_priority)<1) or (strlen($session_id)<3) or ( ( (strlen($extrachannel)<3) or (strlen($exten)<1) ) and (!preg_match("/NEXTAVAILABLE/",$exten)) ) )
-            {
-            $channel_liveX=0;
-            $channel_liveY=0;
-            echo "One of these variables is not valid:\n";
-            echo "Channel $channel must be greater than 2 characters\n";
-            echo "ExtraChannel $extrachannel must be greater than 2 characters\n";
-            echo "queryCID $queryCID must be greater than 14 characters\n";
-            echo "exten $exten must be set\n";
-            echo "ext_context $ext_context must be set\n";
-            echo "ext_priority $ext_priority must be set\n";
-            echo "\nRedirect Action not sent\n";
-            if (preg_match("/SECOND|FIRST|DEBUG/",$filename))
-                {
-                if ($WeBRooTWritablE > 0)
-                    {
-                    $fp = fopen ("./vicidial_debug.txt", "a");
-                    fwrite ($fp, "$NOW_TIME|RDCXC|$filename|$user|$campaign|$channel|$extrachannel|$queryCID|$exten|$ext_context|ext_priority|\n");
-                    fclose($fp);
-                    }
-                }
+    if ($ACTION == "RedirectXtraCXNeW") {
+        $DBout = '';
+        $row = '';
+        $rowx = '';
+        $channel_liveX = 1;
+        $channel_liveY = 1;
+        if ( (strlen($channel) < 3) || (strlen($queryCID) < 15) || (strlen($ext_context) < 1) or (strlen($ext_priority) < 1) || (strlen($session_id) < 3) || ( ( (strlen($extrachannel) < 3) || (strlen($exten) < 1) ) && (!preg_match("/NEXTAVAILABLE/", $exten)) ) ) {
+            $channel_liveX = 0;
+            $channel_liveY = 0;
+            $message  = "One of these variables is not valid:\n";
+            $message .= "Channel must be greater than 2 characters\n";
+            $message .= "ExtraChannel must be greater than 2 characters\n";
+            $message .= "queryCID must be greater than 14 characters\n";
+            $message .= "exten must be set\n";
+            $message .= "ext_context must be set\n";
+            $message .= "ext_priority must be set\n";
+            $message .= "\nRedirect Action not sent\n";
+            if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {
+                //if ($WeBRooTWritablE > 0) {
+                //    $fp = fopen ("./vicidial_debug.txt", "a");
+                //    fwrite ($fp, "$NOW_TIME|RDCXC|$filename|$user|$campaign|$channel|$extrachannel|$queryCID|$exten|$ext_context|ext_priority|\n");
+                //    fclose($fp);
+                //}
             }
-        else
-            {
-            if (preg_match("/NEXTAVAILABLE/",$exten))
-                {
-                $stmtA="SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                    if ($format=='debug') {echo "\n<!-- $stmtA -->";}
-                $rslt=mysqli_query($link, $stmtA);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtA,'02029',$user,$server_ip,$session_name,$one_mysql_log);}
-                $row=mysqli_fetch_row($rslt);
-                if ($row[0] > 1)
-                    {
+            $APIResult = array( "result" => "error", "message" => $message );
+        } else {
+            $exitThis = 0;
+            $message = '';
+            $result = 'error';
+            if (preg_match("/NEXTAVAILABLE/", $exten)) {
+                $stmtA="SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
+                $rslt = $astDB->rawQuery($stmtA);
+                $row_ct = $astDB->getRowCount();
+                if ($row_ct > 1) {
                     $stmtB="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                        if ($format=='debug') {echo "\n<!-- $stmtB -->";}
-                    $rslt=mysqli_query($link, $stmtB);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtB,'02030',$user,$server_ip,$session_name,$one_mysql_log);}
+                    $rslt = $astDB->rawQuery($stmtB);
     
-                    $stmtC="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
-                        if ($format=='debug') {echo "\n<!-- $stmtC -->";}
-                    $rslt=mysqli_query($link, $stmtC);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtC,'02031',$user,$server_ip,$session_name,$one_mysql_log);}
-                    $row=mysqli_fetch_row($rslt);
-                    $exten = $row[0];
+                    //$stmtC="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('extension', "$protocol/$extension$NOWnum");
+                    $astDB->where('conf_exten', $session_id, '!=');
+                    $rslt = $astDB->get('vicidial_conferences', null, 'conf_exten');
+                    $row = $rslt[0];
+                    $exten = $row['conf_exten'];
     
-                    if ( (preg_match("/^8300/i",$extension)) and ($protocol == 'Local') )
-                        {
+                    if ( (preg_match("/^8300/i", $extension)) && ($protocol == 'Local') ) {
                         $extension = "$extension$user";
-                        }
+                    }
     
-                    $stmtD="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
-                        if ($format=='debug') {echo "\n<!-- $stmtD -->";}
-                    $rslt=mysqli_query($link, $stmtD);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtD,'02032',$user,$server_ip,$session_name,$one_mysql_log);}
+                    //$stmtD="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('conf_exten', $exten);
+                    $rslt = $astDB->update('vicidial_conferences', array('extension' => "$protocol/$extension"), 1);
     
-                    $stmtE="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
-                        if ($format=='debug') {echo "\n<!-- $stmtE -->";}
-                    $rslt=mysqli_query($link, $stmtE);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtE,'02033',$user,$server_ip,$session_name,$one_mysql_log);}
+                    //$stmtE="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('conf_exten', $session_id);
+                    $rslt = $astDB->update('vicidial_conferences', array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
     
                     $queryCID = "CXAR24$NOWnum";
-                    $stmtF="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
-                        if ($format=='debug') {echo "\n<!-- $stmtF -->";}
-                    $rslt=mysqli_query($link, $stmtF);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtF,'02034',$user,$server_ip,$session_name,$one_mysql_log);}
+                    //$stmtF="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
+                    $insertData = array(
+                        'man_id' => '',
+                        'uniqueid' => '',
+                        'entry_date' => $NOW_TIME,
+                        'status' => 'NEW',
+                        'response' => 'N',
+                        'server_ip' => $server_ip,
+                        'channel' => '',
+                        'action' => 'Redirect',
+                        'callerid' => $queryCID,
+                        'cmd_line_b' => "Channel: $agentchannel",
+                        'cmd_line_c' => "Context: $ext_context",
+                        'cmd_line_d' => "Exten: $exten",
+                        'cmd_line_e' => 'Priority: 1',
+                        'cmd_line_f' => "Callerid: $queryCID",
+                        'cmd_line_g' => '',
+                        'cmd_line_h' => '',
+                        'cmd_line_i' => '',
+                        'cmd_line_j' => '',
+                        'cmd_line_k' => ''
+                    );
+                    $rslt = $astDB->insert('vicidial_manager', $insertData);
     
                     $stmtG="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
-                        if ($format=='debug') {echo "\n<!-- $stmtG -->";}
-                    $rslt=mysqli_query($link, $stmtG);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtG,'02035',$user,$server_ip,$session_name,$one_mysql_log);}
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('user', $user);
+                    $rslt = $astDB->update('vicidial_live_agents', array('conf_exten' => $exten));
     
-                    if ($auto_dial_level < 1)
-                        {
-                        $stmtH = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
-                            if ($format=='debug') {echo "\n<!-- $stmtH -->";}
-                        $rslt=mysqli_query($link, $stmtH);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmtH,'02036',$user,$server_ip,$session_name,$one_mysql_log);}
-                        }
+                    if ($auto_dial_level < 1) {
+                        //$stmtH = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
+                        $astDB->where('lead_id', $lead_id);
+                        $astDB->where('callerid', 'M%', 'like');
+                        $rslt = $astDB->delete('vicidial_auto_calls');
+                    }
     
                 //	$fp = fopen ("./vicidial_debug_3way.txt", "a");
                 //	fwrite ($fp, "$NOW_TIME|$filename|\n|$stmtA|\n|$stmtB|\n|$stmtC|\n|$stmtD|\n|$stmtE|\n|$stmtF|\n|$stmtG|\n|$stmtH|\n\n");
                 //	fclose($fp);
     
-                    echo "NeWSessioN|$exten|\n";
-                    echo "|$stmtG|\n";
+                    //echo "NeWSessioN|$exten|\n";
+                    //echo "|$stmtG|\n";
                     
-                    exit;
-                    }
-                else
-                    {
-                    $channel_liveX=0;
-                    echo "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|";
-                    if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
-                    }
-                }
-    
-            if (strlen($call_server_ip)<7) {$call_server_ip = $server_ip;}
-    
-            $stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02037',$user,$server_ip,$session_name,$one_mysql_log);}
-            $row=mysqli_fetch_row($rslt);
-            if ($row[0]==0)
-                {
-                $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$call_server_ip' and channel='$channel';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02038',$user,$server_ip,$session_name,$one_mysql_log);}
-                $rowx=mysqli_fetch_row($rslt);
-                if ($rowx[0]==0)
-                    {
-                    $channel_liveX=0;
-                    echo "Channel $channel is not live on $call_server_ip, Redirect command not inserted\n";
-                    if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
-                    }	
-                }
-            $stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02039',$user,$server_ip,$session_name,$one_mysql_log);}
-            $row=mysqli_fetch_row($rslt);
-            if ($row[0]==0)
-                {
-                $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$extrachannel';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02040',$user,$server_ip,$session_name,$one_mysql_log);}
-                $rowx=mysqli_fetch_row($rslt);
-                if ($rowx[0]==0)
-                    {
-                    $channel_liveY=0;
-                    echo "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
-                    if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $server_ip";}
-                    }	
-                }
-            if ( ($channel_liveX==1) and ($channel_liveY==1) )
-                {
-                $stmt="SELECT count(*) FROM vicidial_live_agents where lead_id='$lead_id' and user!='$user';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02041',$user,$server_ip,$session_name,$one_mysql_log);}
-                $rowx=mysqli_fetch_row($rslt);
-                if ($rowx[0] < 1)
-                    {
-                    $channel_liveY=0;
-                    echo "No Local agent to send call to, Redirect command not inserted\n";
-                    if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "No Local agent to send call to";}
-                    }	
-                else
-                    {
-                    $stmt="SELECT server_ip,conf_exten,user FROM vicidial_live_agents where lead_id='$lead_id' and user!='$user';";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02042',$user,$server_ip,$session_name,$one_mysql_log);}
-                    $rowx=mysqli_fetch_row($rslt);
-                    $dest_server_ip = $rowx[0];
-                    $dest_session_id = $rowx[1];
-                    $dest_user = $rowx[2];
-                    $S='*';
-    
-                    $D_s_ip = explode('.', $dest_server_ip);
-                    if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
-                    if (strlen($D_s_ip[0])<3) {$D_s_ip[0] = "0$D_s_ip[0]";}
-                    if (strlen($D_s_ip[1])<2) {$D_s_ip[1] = "0$D_s_ip[1]";}
-                    if (strlen($D_s_ip[1])<3) {$D_s_ip[1] = "0$D_s_ip[1]";}
-                    if (strlen($D_s_ip[2])<2) {$D_s_ip[2] = "0$D_s_ip[2]";}
-                    if (strlen($D_s_ip[2])<3) {$D_s_ip[2] = "0$D_s_ip[2]";}
-                    if (strlen($D_s_ip[3])<2) {$D_s_ip[3] = "0$D_s_ip[3]";}
-                    if (strlen($D_s_ip[3])<3) {$D_s_ip[3] = "0$D_s_ip[3]";}
-                    $dest_dialstring = "$D_s_ip[0]$S$D_s_ip[1]$S$D_s_ip[2]$S$D_s_ip[3]$S$dest_session_id$S$lead_id$S$dest_user$S$phone_code$S$phone_number$S$campaign$S";
-    
-                    $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $dest_dialstring','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02043',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                    $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','$queryCID','Channel: $extrachannel','','','','','','','','','');";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02044',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                    echo "RedirectXtraCX command sent for Channel $channel on $call_server_ip and \nHungup $extrachannel on $server_ip\n";
-                    if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel on $call_server_ip, Hungup $extrachannel on $server_ip";}
-                    }
-                }
-            else
-                {
-                if ($channel_liveX==1)
-                {$ACTION="Redirect";   $server_ip = $call_server_ip;}
-                if ($channel_liveY==1)
-                {$ACTION="Redirect";   $channel=$extrachannel;}
-                if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Changed to Redirect: $channel on $server_ip";}
-                }
-    
-            if (preg_match("/SECOND|FIRST|DEBUG/",$filename))
-                {
-                if ($WeBRooTWritablE > 0)
-                    {
-                    $fp = fopen ("./vicidial_debug.txt", "a");
-                    fwrite ($fp, "$NOW_TIME|RDCXC|$filename|$user|$campaign|$DBout|\n");
-                    fclose($fp);
-                    }
+                    $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$stmtG" );
+                    $exitThis = 1;
+                } else {
+                    $channel_liveX = 0;
+                    $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|\n";
+                    //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                 }
             }
-        }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    if ($ACTION=="RedirectXtraNeW")
-        {
-        if ($channel=="$extrachannel")
-        {$ACTION="Redirect";}
-        else
-            {
-            $row='';   $rowx='';
-            $channel_liveX=1;
-            $channel_liveY=1;
-            if ( (strlen($channel)<3) or (strlen($queryCID)<15) or (strlen($ext_context)<1) or (strlen($ext_priority)<1) or (strlen($session_id)<3) or ( ( (strlen($extrachannel)<3) or (strlen($exten)<1) ) and (!preg_match("/NEXTAVAILABLE/",$exten)) ) )
-                {
-                $channel_liveX=0;
-                $channel_liveY=0;
-                echo "One of these variables is not valid:\n";
-                echo "Channel $channel must be greater than 2 characters\n";
-                echo "ExtraChannel $extrachannel must be greater than 2 characters\n";
-                echo "queryCID $queryCID must be greater than 14 characters\n";
-                echo "exten $exten must be set\n";
-                echo "ext_context $ext_context must be set\n";
-                echo "ext_priority $ext_priority must be set\n";
-                echo "session_id $session_id must be set\n";
-                echo "\nRedirect Action not sent\n";
-                if (preg_match("/SECOND|FIRST|DEBUG/",$filename))
-                    {
-                    if ($WeBRooTWritablE > 0)
-                        {
-                        $fp = fopen ("./vicidial_debug.txt", "a");
-                        fwrite ($fp, "$NOW_TIME|RDX|$filename|$user|$campaign|$channel|$extrachannel|$queryCID|$exten|$ext_context|ext_priority|$session_id|\n");
-                        fclose($fp);
-                        }
-                    }
+            if ($exitThis < 1) {
+                if (strlen($call_server_ip) < 7) {$call_server_ip = $server_ip;}
+        
+                //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
+                $astDB->where('server_ip', $call_server_ip);
+                $astDB->where('channel', $channel);
+                $rslt = $astDB->get('live_channels');
+                $row_ct = $astDB->getRowCount();
+                if ($row_ct == 0) {
+                    //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$call_server_ip' and channel='$channel';";
+                    $astDB->where('server_ip', $call_server_ip);
+                    $astDB->where('channel', $channel);
+                    $rslt = $astDB->get('live_sip_channels');
+                    $rowx_ct = $astDB->getRowCount();
+                    if ($rowx_ct == 0) {
+                        $channel_liveX = 0;
+                        $message .= "Channel $channel is not live on $call_server_ip, Redirect command not inserted\n";
+                        //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
+                    }	
                 }
-            else
-                {
-                if (preg_match("/NEXTAVAILABLE/",$exten))
-                    {
-                    $stmt="SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02045',$user,$server_ip,$session_name,$one_mysql_log);}
-                    $row=mysqli_fetch_row($rslt);
-                    if ($row[0] > 1)
-                        {
-                        $stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02046',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        $stmt="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02047',$user,$server_ip,$session_name,$one_mysql_log);}
-                        $row=mysqli_fetch_row($rslt);
-                        $exten = $row[0];
-    
-                        $stmt="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02048',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        $stmt="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02049',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        $queryCID = "CXAR23$NOWnum";
-                        $stmtB="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmtB);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02050',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        $stmt="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02051',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        if ($auto_dial_level < 1)
-                            {
-                            $stmt = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
-                                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                            $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02052',$user,$server_ip,$session_name,$one_mysql_log);}
-                            }
-    
-                        echo "NeWSessioN|$exten|\n";
-                        echo "|$stmtB|\n";
-                        
-                        exit;
-                        }
-                    else
-                        {
-                        $channel_liveX=0;
-                        echo "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|";
-                        if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
-                        }
-                    }
-    
-                if (strlen($call_server_ip)<7) {$call_server_ip = $server_ip;}
-    
-                $stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02053',$user,$server_ip,$session_name,$one_mysql_log);}
-                $row=mysqli_fetch_row($rslt);
-                if ( ($row[0]==0) and (!preg_match("/SECOND/",$filename)) )
-                    {
-                    $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$call_server_ip' and channel='$channel';";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02054',$user,$server_ip,$session_name,$one_mysql_log);}
-                    $rowx=mysqli_fetch_row($rslt);
-                    if ($rowx[0]==0)
-                        {
-                        $channel_liveX=0;
-                        echo "Channel $channel is not live on $call_server_ip, Redirect command not inserted\n";
-                        if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
-                        }	
-                    }
-                $stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02055',$user,$server_ip,$session_name,$one_mysql_log);}
-                $row=mysqli_fetch_row($rslt);
-                if ( ($row[0]==0) and (!preg_match("/SECOND/",$filename)) )
-                    {
-                    $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$extrachannel';";
-                        if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                    $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02056',$user,$server_ip,$session_name,$one_mysql_log);}
-                    $rowx=mysqli_fetch_row($rslt);
-                    if ($rowx[0]==0)
-                        {
-                        $channel_liveY=0;
-                        echo "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
-                        if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $server_ip";}
-                        }	
-                    }
-                if ( ($channel_liveX==1) and ($channel_liveY==1) )
-                    {
-                    if ( ($server_ip=="$call_server_ip") or (strlen($call_server_ip)<7) )
-                        {
-                        $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $channel','ExtraChannel: $extrachannel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','');";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02057',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                        echo "RedirectXtra command sent for Channel $channel and \nExtraChannel $extrachannel\n to $exten on $server_ip\n";
-                        if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel and $extrachannel to $exten on $server_ip";}
-                        }
-                    else
-                        {
-                        $S='*';
-                        $D_s_ip = explode('.', $server_ip);
+                //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
+                $astDB->where('server_ip', $server_ip);
+                $astDB->where('channel', $extrachannel);
+                $rslt = $astDB->get('live_channels');
+                $row_ct = $astDB->getRowCount();
+                if ($row_ct == 0) {
+                    //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$extrachannel';";
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('channel', $extrachannel);
+                    $rslt = $astDB->get('live_sip_channels');
+                    $rowx_ct = $astDB->getRowCount();
+                    if ($rowx_ct == 0) {
+                        $channel_liveY = 0;
+                        $message .= "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
+                        //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $server_ip";}
+                    }	
+                }
+                if ( ($channel_liveX == 1) && ($channel_liveY == 1) ) {
+                    //$stmt="SELECT count(*) FROM vicidial_live_agents where lead_id='$lead_id' and user!='$user';";
+                    $astDB->where('lead_id', $lead_id);
+                    $astDB->where('user', $user, '!=');
+                    $rslt = $astDB->get('vicidial_live_agents');
+                    $rowx_ct = $astDB->getRowCount();
+                    if ($rowx_ct < 1) {
+                        $channel_liveY = 0;
+                        $message .= "No Local agent to send call to, Redirect command not inserted\n";
+                        //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "No Local agent to send call to";}
+                    } else {
+                        //$stmt="SELECT server_ip,conf_exten,user FROM vicidial_live_agents where lead_id='$lead_id' and user!='$user';";
+                        $astDB->where('lead_id', $lead_id);
+                        $astDB->where('user', $user, '!=');
+                        $rslt = $astDB->get('vicidial_live_agents', null, 'server_ip,conf_exten,user');
+                        $rowx = $rslt[0];
+                        $dest_server_ip = $rowx['server_ip'];
+                        $dest_session_id = $rowx['conf_exten'];
+                        $dest_user = $rowx['user'];
+                        $S = '*';
+        
+                        $D_s_ip = explode('.', $dest_server_ip);
                         if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
                         if (strlen($D_s_ip[0])<3) {$D_s_ip[0] = "0$D_s_ip[0]";}
                         if (strlen($D_s_ip[1])<2) {$D_s_ip[1] = "0$D_s_ip[1]";}
@@ -1014,119 +798,431 @@ if ($is_logged_in) {
                         if (strlen($D_s_ip[2])<3) {$D_s_ip[2] = "0$D_s_ip[2]";}
                         if (strlen($D_s_ip[3])<2) {$D_s_ip[3] = "0$D_s_ip[3]";}
                         if (strlen($D_s_ip[3])<3) {$D_s_ip[3] = "0$D_s_ip[3]";}
-                        $dest_dialstring = "$D_s_ip[0]$S$D_s_ip[1]$S$D_s_ip[2]$S$D_s_ip[3]$S$exten";
+                        $dest_dialstring = "$D_s_ip[0]$S$D_s_ip[1]$S$D_s_ip[2]$S$D_s_ip[3]$S$dest_session_id$S$lead_id$S$dest_user$S$phone_code$S$phone_number$S$campaign$S";
+        
+                        //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $dest_dialstring','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
+                        $insertData = array(
+                            'man_id' => '',
+                            'uniqueid' => '',
+                            'entry_date' => $NOW_TIME,
+                            'status' => 'NEW',
+                            'response' => 'N',
+                            'server_ip' => $call_server_ip,
+                            'channel' => '',
+                            'action' => 'Redirect',
+                            'callerid' => $queryCID,
+                            'cmd_line_b' => "Channel: $channel",
+                            'cmd_line_c' => "Context: $ext_context",
+                            'cmd_line_d' => "Exten: $dest_dialstring",
+                            'cmd_line_e' => "Priority: $ext_priority",
+                            'cmd_line_f' => "Callerid: $queryCID",
+                            'cmd_line_g' => '',
+                            'cmd_line_h' => '',
+                            'cmd_line_i' => '',
+                            'cmd_line_j' => '',
+                            'cmd_line_k' => ''
+                        );
+                        $rslt = $astDB->insert('vicidial_manager', $insertData);
+        
+                        //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','$queryCID','Channel: $extrachannel','','','','','','','','','');";
+                        $insertData = array(
+                            'man_id' => '',
+                            'uniqueid' => '',
+                            'entry_date' => $NOW_TIME,
+                            'status' => 'NEW',
+                            'response' => 'N',
+                            'server_ip' => $server_ip,
+                            'channel' => '',
+                            'action' => 'Hangup',
+                            'callerid' => $queryCID,
+                            'cmd_line_b' => "Channel: $extrachannel",
+                            'cmd_line_c' => "",
+                            'cmd_line_d' => "",
+                            'cmd_line_e' => '',
+                            'cmd_line_f' => "",
+                            'cmd_line_g' => '',
+                            'cmd_line_h' => '',
+                            'cmd_line_i' => '',
+                            'cmd_line_j' => '',
+                            'cmd_line_k' => ''
+                        );
+                        $rslt = $astDB->insert('vicidial_manager', $insertData);
+        
+                        $result = 'success';
+                        $message .= "RedirectXtraCX command sent for Channel $channel on $call_server_ip and \nHungup $extrachannel on $server_ip\n";
+                        //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel on $call_server_ip, Hungup $extrachannel on $server_ip";}
+                    }
+                } else {
+                    if ($channel_liveX == 1) {
+                        $ACTION = "Redirect";
+                        $server_ip = $call_server_ip;
+                    }
+                    if ($channel_liveY == 1) {
+                        $ACTION = "Redirect";
+                        $channel = $extrachannel;
+                    }
+                    //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Changed to Redirect: $channel on $server_ip";}
+                }
+        
+                if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {
+                    if ($WeBRooTWritablE > 0) {
+                        //$fp = fopen ("./vicidial_debug.txt", "a");
+                        //fwrite ($fp, "$NOW_TIME|RDCXC|$filename|$user|$campaign|$DBout|\n");
+                        //fclose($fp);
+                    }
+                }
+            }
+        }
+    }
     
-                        $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $dest_dialstring','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02058',$user,$server_ip,$session_name,$one_mysql_log);}
+    if ($ACTION == "RedirectXtraNeW") {
+        if ($channel == "$extrachannel") {
+            $ACTION = "Redirect";
+        } else {
+            $row = '';
+            $rowx = '';
+            $channel_liveX = 1;
+            $channel_liveY = 1;
+            if ( (strlen($channel) < 3) || (strlen($queryCID) < 15) || (strlen($ext_context) < 1) || (strlen($ext_priority) < 1) || (strlen($session_id) < 3) || ( ( (strlen($extrachannel) < 3) || (strlen($exten) < 1) ) && (!preg_match("/NEXTAVAILABLE/", $exten)) ) ) {
+                $channel_liveX = 0;
+                $channel_liveY = 0;
+                $message  = "One of these variables is not valid:\n";
+                $message .= "Channel must be greater than 2 characters\n";
+                $message .= "ExtraChannel must be greater than 2 characters\n";
+                $message .= "queryCID must be greater than 14 characters\n";
+                $message .= "exten must be set\n";
+                $message .= "ext_context  must be set\n";
+                $message .= "ext_priority must be set\n";
+                $message .= "session_id must be set\n";
+                $message .= "\nRedirect Action not sent\n";
+                if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {
+                    if ($WeBRooTWritablE > 0) {
+                        //$fp = fopen ("./vicidial_debug.txt", "a");
+                        //fwrite ($fp, "$NOW_TIME|RDX|$filename|$user|$campaign|$channel|$extrachannel|$queryCID|$exten|$ext_context|ext_priority|$session_id|\n");
+                        //fclose($fp);
+                    }
+                }
+                $APIResult = array( "result" => "error", "message" => $message );
+            } else {
+                $exitThis = 0;
+                $message = '';
+                $result = 'error';
+                if (preg_match("/NEXTAVAILABLE/", $exten)) {
+                    $stmt = "SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
+                    $rslt = $astDB->rawQuery("$stmt");
+                    $row_ct = $astDB->getRowCount();
+                    if ($row_ct > 1) {
+                        $stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
+                        $rslt = $astDB->rawQuery("$stmt");
     
-                        $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $extrachannel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
-                            if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                        $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02059',$user,$server_ip,$session_name,$one_mysql_log);}
+                        //$stmt="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
+                        $astDB->where('server_ip', $server_ip);
+                        $astDB->where('extension', "$protocol/$extension$NOWnum");
+                        $astDB->where('conf_exten', $session_id, '!=');
+                        $rslt = $astDB->get('vicidial_conferences', null, 'conf_exten');
+                        $row = $rslt[0];
+                        $exten = $row['conf_exten'];
     
-                        echo "RedirectXtra command sent for Channel $channel on $call_server_ip and \nExtraChannel $extrachannel\n to $exten on $server_ip\n";
-                        if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel/$call_server_ip and $extrachannel/$server_ip to $exten";}
+                        //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
+                        $astDB->where('server_ip', $server_ip);
+                        $astDB->where('conf_exten', $exten);
+                        $rslt = $astDB->update('vicidial_conferences', array('extension' => "$protocol/$extension"), 1);
+    
+                        //$stmt="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
+                        $astDB->where('server_ip', $server_ip);
+                        $astDB->where('conf_exten', $session_id);
+                        $rslt = $astDB->update('vicidial_conferences', array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
+    
+                        $queryCID = "CXAR23$NOWnum";
+                        //$stmtB="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
+                        $insertData = array(
+                            'man_id' => '',
+                            'uniqueid' => '',
+                            'entry_date' => $NOW_TIME,
+                            'status' => 'NEW',
+                            'response' => 'N',
+                            'server_ip' => $server_ip,
+                            'channel' => '',
+                            'action' => 'Redirect',
+                            'callerid' => $queryCID,
+                            'cmd_line_b' => "Channel: $extrachannel",
+                            'cmd_line_c' => "Context: $ext_context",
+                            'cmd_line_d' => "Exten: $exten",
+                            'cmd_line_e' => 'Priority: 1',
+                            'cmd_line_f' => "CallerID: $queryCID",
+                            'cmd_line_g' => '',
+                            'cmd_line_h' => '',
+                            'cmd_line_i' => '',
+                            'cmd_line_j' => '',
+                            'cmd_line_k' => ''
+                        );
+                        $rslt = $astDB->insert('vicidial_manager', $insertData);
+    
+                        //$stmt="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
+                        $astDB->where('server_ip', $server_ip);
+                        $astDB->where('user', $user);
+                        $rslt = $astDB->update('vicidial_live_agents', array('conf_exten' => $exten));
+    
+                        if ($auto_dial_level < 1) {
+                            //$stmt = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
+                            $astDB->where('lead_id', $lead_id);
+                            $astDB->where('callerid', 'M%', 'like');
+                            $rslt = $astDB->delete('vicidial_auto_calls');
+                        }
+    
+                        $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$stmtG" );
+                        $exitThis = 1;
+                    } else {
+                        $channel_liveX = 0;
+                        $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|";
+                        //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
+                    }
+                }
+    
+                if ($exitThis < 1) {
+                    if (strlen($call_server_ip) < 7) {$call_server_ip = $server_ip;}
+        
+                    //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
+                    $astDB->where('server_ip', $call_server_ip);
+                    $astDB->where('channel', $channel);
+                    $rslt = $astDB->get('live_channels');
+                    $row_ct = $astDB->getRowCount();
+                    if ( ($row_ct == 0) && (!preg_match("/SECOND/", $filename)) ) {
+                        //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$call_server_ip' and channel='$channel';";
+                        $astDB->where('server_ip', $call_server_ip);
+                        $astDB->where('channel', $channel);
+                        $rslt = $astDB->get('live_sip_channels');
+                        $rowx_ct = $astDB->getRowCount();
+                        if ($rowx_ct == 0) {
+                            $channel_liveX = 0;
+                            $message .= "Channel $channel is not live on $call_server_ip, Redirect command not inserted\n";
+                            //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
                         }
                     }
-                else
-                    {
-                    if ($channel_liveX==1)
-                    {$ACTION="Redirect";   $server_ip = $call_server_ip;}
-                    if ($channel_liveY==1)
-                    {$ACTION="Redirect";   $channel=$extrachannel;}
+                    
+                    //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
+                    $astDB->where('server_ip', $server_ip);
+                    $astDB->where('channel', $extrachannel);
+                    $rslt = $astDB->get('live_channels');
+                    $row_ct = $astDB->getRowCount();
+                    if ( ($row_ct == 0) && (!preg_match("/SECOND/", $filename)) ) {
+                        //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$extrachannel';";
+                        $astDB->where('server_ip', $server_ip);
+                        $astDB->where('channel', $extrachannel);
+                        $rslt = $astDB->get('live_sip_channels');
+                        $rowx_ct = $astDB->getRowCount();
+                        if ($rowx_ct == 0) {
+                            $channel_liveY = 0;
+                            $message .= "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
+                            //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $server_ip";}
+                        }
                     }
-    
-                if (preg_match("/SECOND|FIRST|DEBUG/",$filename))
-                    {
-                    if ($WeBRooTWritablE > 0)
-                        {
-                        $fp = fopen ("./vicidial_debug.txt", "a");
-                        fwrite ($fp, "$NOW_TIME|RDX|$filename|$user|$campaign|$DBout|\n");
-                        fclose($fp);
+                    if ( ($channel_liveX == 1) && ($channel_liveY == 1) ) {
+                        if ( ($server_ip == "$call_server_ip") || (strlen($call_server_ip) < 7) ) {
+                            //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $channel','ExtraChannel: $extrachannel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','');";
+                            $insertData = array(
+                                'man_id' => '',
+                                'uniqueid' => '',
+                                'entry_date' => $NOW_TIME,
+                                'status' => 'NEW',
+                                'response' => 'N',
+                                'server_ip' => $server_ip,
+                                'channel' => '',
+                                'action' => 'Redirect',
+                                'callerid' => $queryCID,
+                                'cmd_line_b' => "Channel: $channel",
+                                'cmd_line_c' => "ExtraChannel: $extrachannel",
+                                'cmd_line_d' => "Context: $ext_context",
+                                'cmd_line_e' => "Exten: $exten",
+                                'cmd_line_f' => "Priority: $ext_priority",
+                                'cmd_line_g' => "CallerID: $queryCID",
+                                'cmd_line_h' => '',
+                                'cmd_line_i' => '',
+                                'cmd_line_j' => '',
+                                'cmd_line_k' => ''
+                            );
+                            $rslt = $astDB->insert('vicidial_manager', $insertData);
+        
+                            $result = 'success';
+                            $message = "RedirectXtra command sent for Channel $channel and \nExtraChannel $extrachannel\n to $exten on $server_ip\n";
+                            //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel and $extrachannel to $exten on $server_ip";}
+                        } else {
+                            $S = '*';
+                            $D_s_ip = explode('.', $server_ip);
+                            if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
+                            if (strlen($D_s_ip[0])<3) {$D_s_ip[0] = "0$D_s_ip[0]";}
+                            if (strlen($D_s_ip[1])<2) {$D_s_ip[1] = "0$D_s_ip[1]";}
+                            if (strlen($D_s_ip[1])<3) {$D_s_ip[1] = "0$D_s_ip[1]";}
+                            if (strlen($D_s_ip[2])<2) {$D_s_ip[2] = "0$D_s_ip[2]";}
+                            if (strlen($D_s_ip[2])<3) {$D_s_ip[2] = "0$D_s_ip[2]";}
+                            if (strlen($D_s_ip[3])<2) {$D_s_ip[3] = "0$D_s_ip[3]";}
+                            if (strlen($D_s_ip[3])<3) {$D_s_ip[3] = "0$D_s_ip[3]";}
+                            $dest_dialstring = "$D_s_ip[0]$S$D_s_ip[1]$S$D_s_ip[2]$S$D_s_ip[3]$S$exten";
+        
+                            //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $dest_dialstring','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
+                            $insertData = array(
+                                'man_id' => '',
+                                'uniqueid' => '',
+                                'entry_date' => $NOW_TIME,
+                                'status' => 'NEW',
+                                'response' => 'N',
+                                'server_ip' => $call_server_ip,
+                                'channel' => '',
+                                'action' => 'Redirect',
+                                'callerid' => $queryCID,
+                                'cmd_line_b' => "Channel: $channel",
+                                'cmd_line_c' => "Context: $ext_context",
+                                'cmd_line_d' => "Exten: $dest_dialstring",
+                                'cmd_line_e' => "Priority: $ext_priority",
+                                'cmd_line_f' => "CallerID: $queryCID",
+                                'cmd_line_g' => "",
+                                'cmd_line_h' => '',
+                                'cmd_line_i' => '',
+                                'cmd_line_j' => '',
+                                'cmd_line_k' => ''
+                            );
+                            $rslt = $astDB->insert('vicidial_manager', $insertData);
+        
+                            //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $extrachannel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
+                            $insertData = array(
+                                'man_id' => '',
+                                'uniqueid' => '',
+                                'entry_date' => $NOW_TIME,
+                                'status' => 'NEW',
+                                'response' => 'N',
+                                'server_ip' => $server_ip,
+                                'channel' => '',
+                                'action' => 'Redirect',
+                                'callerid' => $queryCID,
+                                'cmd_line_b' => "Channel: $extrachannel",
+                                'cmd_line_c' => "Context: $ext_context",
+                                'cmd_line_d' => "Exten: $exten",
+                                'cmd_line_e' => "Priority: $ext_priority",
+                                'cmd_line_f' => "CallerID: $queryCID",
+                                'cmd_line_g' => "",
+                                'cmd_line_h' => '',
+                                'cmd_line_i' => '',
+                                'cmd_line_j' => '',
+                                'cmd_line_k' => ''
+                            );
+                            $rslt = $astDB->insert('vicidial_manager', $insertData);
+        
+                            $result = 'success';
+                            $message = "RedirectXtra command sent for Channel $channel on $call_server_ip and \nExtraChannel $extrachannel\n to $exten on $server_ip\n";
+                            //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel/$call_server_ip and $extrachannel/$server_ip to $exten";}
+                        }
+                    } else {
+                        if ($channel_liveX == 1) {
+                            $ACTION = "Redirect";
+                            $server_ip = $call_server_ip;
+                        }
+                        if ($channel_liveY == 1) {
+                            $ACTION = "Redirect";
+                            $channel = $extrachannel;
+                        }
+                    }
+        
+                    if (preg_match("/SECOND|FIRST|DEBUG/", $filename)) {
+                        if ($WeBRooTWritablE > 0) {
+                            //$fp = fopen ("./vicidial_debug.txt", "a");
+                            //fwrite ($fp, "$NOW_TIME|RDX|$filename|$user|$campaign|$DBout|\n");
+                            //fclose($fp);
                         }
                     }
                 }
             }
         }
+    }
     
-    
-    
-    
-    
-    if ($ACTION=="Redirect")
-        {
+    if ($ACTION == "Redirect") {
         ### for manual dial VICIDIAL calls send the second attempt to transfer the call
-        if ($stage=="2NDXfeR")
-            {
+        if ($stage == "2NDXfeR") {
             $local_DEF = 'Local/';
             $local_AMP = '@';
             $hangup_channel_prefix = "$local_DEF$session_id$local_AMP$ext_context";
     
-            $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$hangup_channel_prefix%\";";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02060',$user,$server_ip,$session_name,$one_mysql_log);}
-            $row=mysqli_fetch_row($rslt);
-            if ($row > 0)
-                {
-                $stmt="SELECT channel FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$hangup_channel_prefix%\";";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02061',$user,$server_ip,$session_name,$one_mysql_log);}
-                $rowx=mysqli_fetch_row($rslt);
-                $channel=$rowx[0];
-                $channel = preg_replace("/1$/i","2",$channel);
-                $queryCID = preg_replace("/^./i","Q",$queryCID);
-                }
-            }
-    
-        $row='';   $rowx='';
-        $channel_live=1;
-        if ( (strlen($channel)<3) or (strlen($queryCID)<15)  or (strlen($exten)<1)  or (strlen($ext_context)<1)  or (strlen($ext_priority)<1) )
-            {
-            $channel_live=0;
-            echo "One of these variables is not valid:\n";
-            echo "Channel $channel must be greater than 2 characters\n";
-            echo "queryCID $queryCID must be greater than 14 characters\n";
-            echo "exten $exten must be set\n";
-            echo "ext_context $ext_context must be set\n";
-            echo "ext_priority $ext_priority must be set\n";
-            echo "\nRedirect Action not sent\n";
-            }
-        else
-            {
-            if (strlen($call_server_ip)>6) {$server_ip = $call_server_ip;}
-            $stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$channel';";
-                if ($format=='debug') {echo "\n<!-- $stmt -->";}
-            $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02062',$user,$server_ip,$session_name,$one_mysql_log);}
-            $row=mysqli_fetch_row($rslt);
-            if ($row[0]==0)
-                {
-                $stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$channel';";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02063',$user,$server_ip,$session_name,$one_mysql_log);}
-                $rowx=mysqli_fetch_row($rslt);
-                if ($rowx[0]==0)
-                    {
-                    $channel_live=0;
-                    echo "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
-                    }	
-                }
-            if ($channel_live==1)
-                {
-                $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
-                    if ($format=='debug') {echo "\n<!-- $stmt -->";}
-                $rslt=mysqli_query($link, $stmt);
-                    if ($mel > 0) {mysqli_error_logging($NOW_TIME,$link,$mel,$stmt,'02064',$user,$server_ip,$session_name,$one_mysql_log);}
-    
-                echo "Redirect command sent for Channel $channel on $server_ip\n";
-                }
+            //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$hangup_channel_prefix%\";";
+            $astDB->where('server_ip', $server_ip);
+            $astDB->where('channel', "$hangup_channel_prefix%", 'like');
+            $rslt = $astDB->get('live_sip_channels');
+            $row_ct = $astDB->getRowCount();
+            if ($row_ct > 0) {
+                //$stmt="SELECT channel FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$hangup_channel_prefix%\";";
+                $astDB->where('server_ip', $server_ip);
+                $astDB->where('channel', "$hangup_channel_prefix%", 'like');
+                $rsltx = $astDB->get('live_sip_channels', null, 'channel');
+                $rowx = $rsltx[0];
+                $channel = $rowx['channel'];
+                $channel = preg_replace("/1$/i","2", $channel);
+                $queryCID = preg_replace("/^./i","Q", $queryCID);
             }
         }
+    
+        $row = '';
+        $rowx = '';
+        $channel_live = 1;
+        if ( (strlen($channel) < 3) || (strlen($queryCID) < 15) || (strlen($exten) < 1) || (strlen($ext_context) < 1) || (strlen($ext_priority) < 1) ) {
+            $channel_live = 0;
+            $message  = "One of these variables is not valid:\n";
+            $message .= "Channel $channel must be greater than 2 characters\n";
+            $message .= "queryCID $queryCID must be greater than 14 characters\n";
+            $message .= "exten $exten must be set\n";
+            $message .= "ext_context $ext_context must be set\n";
+            $message .= "ext_priority $ext_priority must be set\n";
+            $message .= "\nRedirect Action not sent\n";
+            $APIResult = array( "result" => "error", "message" => $message );
+        } else {
+            if (strlen($call_server_ip) > 6) {$server_ip = $call_server_ip;}
+            
+            //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$channel';";
+            $astDB->where('server_ip', $server_ip);
+            $astDB->where('channel', $channel);
+            $rslt = $astDB->get('live_channels');
+            $row_ct = $astDB->getRowCount();
+            if ($row_ct == 0) {
+                //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel='$channel';";
+                $astDB->where('server_ip', $server_ip);
+                $astDB->where('channel', $channel);
+                $rslt = $astDB->get('live_sip_channels');
+                $rowx_ct = $astDB->getRowCount();
+                if ($rowx_ct == 0) {
+                    $channel_live = 0;
+                    $result = 'error';
+                    $message .= "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
+                }
+            }
+            if ($channel_live == 1) {
+                //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $channel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','CallerID: $queryCID','','','','','');";
+                $insertData = array(
+                    'man_id' => '',
+                    'uniqueid' => '',
+                    'entry_date' => $NOW_TIME,
+                    'status' => 'NEW',
+                    'response' => 'N',
+                    'server_ip' => $server_ip,
+                    'channel' => '',
+                    'action' => 'Redirect',
+                    'callerid' => $queryCID,
+                    'cmd_line_b' => "Channel: $channel",
+                    'cmd_line_c' => "Context: $ext_context",
+                    'cmd_line_d' => "Exten: $exten",
+                    'cmd_line_e' => "Priority: $ext_priority",
+                    'cmd_line_f' => "CallerID: $queryCID",
+                    'cmd_line_g' => "",
+                    'cmd_line_h' => '',
+                    'cmd_line_i' => '',
+                    'cmd_line_j' => '',
+                    'cmd_line_k' => ''
+                );
+                $rslt = $astDB->insert('vicidial_manager', $insertData);
+    
+                $result = 'success';
+                $message .= "Redirect command sent for Channel $channel on $server_ip\n";
+            }
+        }
+        
+        $APIResult = array( "result" => "$result", "message" => $message );
+    }
 } else {
     $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
 }
