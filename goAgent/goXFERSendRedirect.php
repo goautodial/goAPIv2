@@ -67,6 +67,7 @@ if (isset($_GET['goPresetName'])) { $preset_name = $astDB->escape($_GET['goPrese
 if (isset($_GET['goCallCID'])) { $CallCID = $astDB->escape($_GET['goCallCID']); }
     else if (isset($_POST['goCallCID'])) { $CallCID = $astDB->escape($_POST['goCallCID']); }
 
+$NOWnum = date("YmdHis");
 
 if ($is_logged_in) {
     if ($ACTION == "RedirectVD") {
@@ -92,8 +93,8 @@ if ($is_logged_in) {
             $cai_cnt = $astDB->getRowCount();
             if ($cai_cnt > 0) {
                 $four_hours_ago = date("Y-m-d H:i:s", mktime(date("H")-4, date("i"), date("s"), date("m"), date("d"), date("Y")));
-                $stmt = "UPDATE vicidial_closer_log SET end_epoch='$StarTtimE', length_in_sec=(queue_seconds + $seconds), status='XFER' WHERE lead_id='$lead_id' AND call_date > \"$four_hours_ago\" ORDER BY start_epoch DESC LIMIT 1;";
-                $rslt = $astDB->rawQuery($stmt);
+                //$stmt = "UPDATE vicidial_closer_log SET end_epoch='$StarTtimE', length_in_sec=(queue_seconds + $seconds), status='XFER' WHERE lead_id='$lead_id' AND call_date > \"$four_hours_ago\" ORDER BY start_epoch DESC LIMIT 1;";
+                $rslt = $astDB->rawQuery("UPDATE vicidial_closer_log SET end_epoch='$StarTtimE', length_in_sec=(queue_seconds + $seconds), status='XFER' WHERE lead_id='$lead_id' AND call_date > \"$four_hours_ago\" ORDER BY start_epoch DESC LIMIT 1;");
             }
     
             //$stmt = "UPDATE vicidial_log set end_epoch='$StarTtimE', length_in_sec='$seconds',status='XFER' where uniqueid='$uniqueid';";
@@ -132,8 +133,8 @@ if ($is_logged_in) {
                 $rslt = $astDB->get('vicidial_xfer_stats');
                 $xfer_cnt = $astDB->getRowCount();
                 if ($xfer_cnt > 0) {
-                    $stmt = "UPDATE vicidial_xfer_stats SET xfer_count=(xfer_count+1) WHERE campaign_id='$campaign' AND preset_name='$preset_name';";
-                    $rslt = $astDB->rawQuery($stmt);
+                    //$stmt = "UPDATE vicidial_xfer_stats SET xfer_count=(xfer_count+1) WHERE campaign_id='$campaign' AND preset_name='$preset_name';";
+                    $rslt = $astDB->rawQuery("UPDATE vicidial_xfer_stats SET xfer_count=(xfer_count+1) WHERE campaign_id='$campaign' AND preset_name='$preset_name';");
                 } else {
                     //$stmt = "INSERT INTO vicidial_xfer_stats SET campaign_id='$campaign',preset_name='$preset_name',xfer_count='1';";
                     $insertData = array(
@@ -649,12 +650,13 @@ if ($is_logged_in) {
             $message = '';
             $result = 'error';
             if (preg_match("/NEXTAVAILABLE/", $exten)) {
-                $stmtA="SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                $rslt = $astDB->rawQuery($stmtA);
+                //$stmtA="SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
+                $rslt = $astDB->rawQuery("SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
                 $row_ct = $astDB->getRowCount();
+                $lastSQL = $astDB->getLastQuery();
                 if ($row_ct > 1) {
-                    $stmtB="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                    $rslt = $astDB->rawQuery($stmtB);
+                    //$stmtB="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
+                    $rslt = $astDB->rawQuery("UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
     
                     //$stmtC="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                     $astDB->where('server_ip', $server_ip);
@@ -703,10 +705,11 @@ if ($is_logged_in) {
                     );
                     $rslt = $astDB->insert('vicidial_manager', $insertData);
     
-                    $stmtG="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
+                    //$stmtG="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('user', $user);
                     $rslt = $astDB->update('vicidial_live_agents', array('conf_exten' => $exten));
+                    $lastSQL = $astDB->getLastQuery();
     
                     if ($auto_dial_level < 1) {
                         //$stmtH = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
@@ -722,11 +725,11 @@ if ($is_logged_in) {
                     //echo "NeWSessioN|$exten|\n";
                     //echo "|$stmtG|\n";
                     
-                    $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$stmtG" );
+                    $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$lastSQL" );
                     $exitThis = 1;
                 } else {
                     $channel_liveX = 0;
-                    $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|\n";
+                    $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$lastSQL|\n";
                     //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                 }
             }
@@ -908,12 +911,13 @@ if ($is_logged_in) {
                 $message = '';
                 $result = 'error';
                 if (preg_match("/NEXTAVAILABLE/", $exten)) {
-                    $stmt = "SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                    $rslt = $astDB->rawQuery("$stmt");
+                    //$stmt = "SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
+                    $rslt = $astDB->rawQuery("SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
                     $row_ct = $astDB->getRowCount();
+                    $lastSQL = $astDB->getLastQuery();
                     if ($row_ct > 1) {
-                        $stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                        $rslt = $astDB->rawQuery("$stmt");
+                        //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
+                        $rslt = $astDB->rawQuery("UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
     
                         //$stmt="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                         $astDB->where('server_ip', $server_ip);
@@ -945,7 +949,7 @@ if ($is_logged_in) {
                             'channel' => '',
                             'action' => 'Redirect',
                             'callerid' => $queryCID,
-                            'cmd_line_b' => "Channel: $extrachannel",
+                            'cmd_line_b' => "Channel: $agentchannel",
                             'cmd_line_c' => "Context: $ext_context",
                             'cmd_line_d' => "Exten: $exten",
                             'cmd_line_e' => 'Priority: 1',
@@ -957,6 +961,7 @@ if ($is_logged_in) {
                             'cmd_line_k' => ''
                         );
                         $rslt = $astDB->insert('vicidial_manager', $insertData);
+                        $lastSQL = $astDB->getLastQuery();
     
                         //$stmt="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
                         $astDB->where('server_ip', $server_ip);
@@ -970,11 +975,11 @@ if ($is_logged_in) {
                             $rslt = $astDB->delete('vicidial_auto_calls');
                         }
     
-                        $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$stmtG" );
+                        $APIResult = array( "result" => "success", "new_session" => $exten, 'sql' => "$lastSQL" );
                         $exitThis = 1;
                     } else {
                         $channel_liveX = 0;
-                        $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$stmt|";
+                        $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$lastSQL|";
                         //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                     }
                 }
