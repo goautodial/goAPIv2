@@ -7,7 +7,7 @@
     #### Written by: Jerico James Milo                 ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("goFunctions.php");
+    include_once("../goFunctions.php");
     
     ### POST or GET Variables
     $campaign_id = $_REQUEST['campaign_id'];
