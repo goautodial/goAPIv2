@@ -1,15 +1,15 @@
 <?php
 
     #######################################################
-    #### Name:  goEditAgentRank.php		               ####
+    #### Name:  goEditAgentRank.php		       ####
     #### Description: API to update ingroup agents     ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Ltd. (c) 2011-2016      ####
-    #### Written by: Jerico James F. Milo 	           ####
+    #### Written by: Jerico James F. Milo 	       ####
     #### License: AGPLv2                               ####
     #######################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
 	$goItemRank	= $_REQUEST['itemrank'];
 	$goidIDgroup 	= $_REQUEST['idgroup'];

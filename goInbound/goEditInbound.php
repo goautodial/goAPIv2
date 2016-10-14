@@ -8,7 +8,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     ### POST or GET Variables
         $group_id = $_REQUEST['group_id'];
         $group_name = $_REQUEST['group_name'];

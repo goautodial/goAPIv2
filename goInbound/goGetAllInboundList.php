@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 20; } else { $limit = $limit; }

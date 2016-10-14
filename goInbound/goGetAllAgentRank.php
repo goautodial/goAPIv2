@@ -4,11 +4,11 @@
     #### Description: API to get all agent assign      ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Ltd. (c) 2011-2016      ####
-    #### Written by: Jerico James F. Milo 	           ####
+    #### Written by: Jerico James F. Milo 	       ####
     #### License: AGPLv2                               ####
     #######################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
     $goUser 	= $_REQUEST['user_id'];
     $goVarLimit = $_REQUEST['goVarLimit'];
