@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: goGetUserInfo.php	                   ####
+    #### Name: goGetUserInfo.php	               ####
     #### Description: API to get specific user	       ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
