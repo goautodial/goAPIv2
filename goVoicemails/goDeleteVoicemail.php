@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
     ### POST or GET Variables
         $voicemail = mysqli_real_escape_string($link, $_REQUEST['voicemail_id']);

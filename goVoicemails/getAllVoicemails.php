@@ -8,7 +8,7 @@
     #### Modified by: Alexander Jim H. Abenoja         ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
 
 /*
 $voicemail_id = $_REQUEST["voicemail_id"];
