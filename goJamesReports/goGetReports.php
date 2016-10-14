@@ -62,7 +62,8 @@ error_reporting(E_ALL);*/
 		if ($campaignID!='null' || $pageTitle == 'call_export_report')
 		{
 		  	//$return['groupId'] = $goReportsClass->go_getUsergroup($userID);
-            $return['groupId'] = go_getUsergroup($userID,$link);
+            //$return['groupId'] = go_getUsergroup($userID,$link);
+			
             $date_diff = go_get_date_diff($fromDate, $toDate);
             $date_array = implode("','",go_get_dates($fromDate, $toDate));
 //			 $mysqli_query($link, cache_on();
@@ -73,7 +74,7 @@ error_reporting(E_ALL);*/
 //				$campaignID = '';
 				$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'");
 			} else {
-				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$return['groupId']."'");
+				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'");
 			}
             
 				$resultu = mysqli_fetch_array($query, MYSQLI_ASSOC);
@@ -1837,98 +1838,105 @@ error_reporting(E_ALL);*/
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
 					
-					### Outbound Sales ###
-					$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' group by us.full_name");
-					
-					$TOPsorted_output = "";
-					$total_out_sales = "";
-					
-					/*
-					$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
-					$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
-					$file_output .= "{$this->lang->line("go_outbound_sales_an_aid_sc")}";*/
-					if ($query) {
-						$total_sales=0;
+					if($request == "outbound"){
+						### Outbound Sales ###
+						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' group by us.full_name";
+						$query = mysqli_query($link, $outbound_query);
+						
+						$TOPsorted_output = "";
+						$total_out_sales = "";
 						
 						/*
-						foreach($query->result() as $row) {
-						
-							if ($x==1) {
-								$bgcolor = "#E0F8E0";
-								$x=0;
-							} else {
-								$bgcolor = "#EFFBEF";
-								$x=1;
+						$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
+						$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
+						$file_output .= "{$this->lang->line("go_outbound_sales_an_aid_sc")}";*/
+						if ($query) {
+							$total_sales=0;
+							
+							/*
+							foreach($query->result() as $row) {
+							
+								if ($x==1) {
+									$bgcolor = "#E0F8E0";
+									$x=0;
+								} else {
+									$bgcolor = "#EFFBEF";
+									$x=1;
+								}
+							*/
+							
+							while($row = mysqli_fetch_array($query)) {
+								//$file_output .= $row['full_name'].",".$row['user'].",".$row['sale']."\n";
+								$TOPsorted_output .= "<tr>";
+								$TOPsorted_output .= "<td nowrap>".$row['full_name']."</td>";
+								$TOPsorted_output .= "<td nowrap>".$row['user']."</td>";
+								$TOPsorted_output .= "<td nowrap>".$row['sale']."</td>";
+								$TOPsorted_output .= "</tr>";
+								$total_out_sales = $total_out_sales+$row['sale'];
+								
 							}
-						*/
-						
-						while($row = mysqli_fetch_array($query)) {
-							//$file_output .= $row['full_name'].",".$row['user'].",".$row['sale']."\n";
-							$TOPsorted_output .= "<tr>";
-							$TOPsorted_output .= "<td nowrap>".$row['full_name']."</td>";
-							$TOPsorted_output .= "<td nowrap>".$row['user']."</td>";
-							$TOPsorted_output .= "<td nowrap>".$row['sale']."</td>";
-							$TOPsorted_output .= "</tr>";
-							$total_out_sales = $total_out_sales+$row['sale'];
 						}
+						/*
+						if ($total_out_sales < 1) {
+							$file_output .= "{$this->lang->line("go_no_records_found")}";
+						} else {
+							$file_output .= "{$this->lang->line("go_total")},,$total_out_sales\n\n";
+						}*/
 					}
-					/*
-					if ($total_out_sales < 1) {
-						$file_output .= "{$this->lang->line("go_no_records_found")}";
-					} else {
-						$file_output .= "{$this->lang->line("go_total")},,$total_out_sales\n\n";
-					}*/
 					
-					### Inbound Sales ###
-					$query = mysqli_query($link, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='".$campaignID."' ORDER BY campaign_id");
-					$row = mysqli_fetch_array($query);
-					$closer_camp_array=explode(" ",$row['closer_campaigns']);
-					$num=count($closer_camp_array);
-				
-					$x=0;
-					while($x<$num) {
-						if ($closer_camp_array[$x]!="-") {
-								$closer_campaigns[$x]=$closer_camp_array[$x];
+					if($request == "inbound"){
+						### Inbound Sales ###
+						$inbound_query = "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='".$campaignID."' ORDER BY campaign_id";
+						$query = mysqli_query($link, $inbound_query);
+						$row = mysqli_fetch_array($query);
+						$closer_camp_array=explode(" ",$row['closer_campaigns']);
+						$num=count($closer_camp_array);
+					
+						$x=0;
+						while($x<$num) {
+							if ($closer_camp_array[$x]!="-") {
+									$closer_campaigns[$x]=$closer_camp_array[$x];
+							}
+							$x++;
 						}
-						$x++;
-					}
-					$campaign_inb_query="vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
-					
-					$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query group by us.full_name");
-					
-					$BOTsorted_output = "";
-					$total_in_sales = "";
-					
-					//$file_output .= "{$this->lang->line("go_inbound_sales_an_ai_sc")}";
-					if ($query) {
-						$total_sales=0;
+						$campaign_inb_query="vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 						
-						//foreach($query->result() as $row) {
-						while($row = mysqli_fetch_array($query)){
+						$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query group by us.full_name");
 						
-							//$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
-							$BOTsorted_output .= "<tr>";
-							$BOTsorted_output .= "<td nowrap> ".$row['full_name']." </td>";
-							$BOTsorted_output .= "<td nowrap> ".$row['user']." </td>";
-							$BOTsorted_output .= "<td nowrap> ".$row['sale']." </td>";
-							$BOTsorted_output .= "</tr>";
-							$total_in_sales = $total_in_sales + $row['sale'];
+						$BOTsorted_output = "";
+						$total_in_sales = "";
+						
+						//$file_output .= "{$this->lang->line("go_inbound_sales_an_ai_sc")}";
+						if ($query) {
+							$total_sales=0;
+							
+							//foreach($query->result() as $row) {
+							while($row = mysqli_fetch_array($query)){
+							
+								//$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
+								$BOTsorted_output .= "<tr>";
+								$BOTsorted_output .= "<td nowrap> ".$row['full_name']." </td>";
+								$BOTsorted_output .= "<td nowrap> ".$row['user']." </td>";
+								$BOTsorted_output .= "<td nowrap> ".$row['sale']." </td>";
+								$BOTsorted_output .= "</tr>";
+								$total_in_sales = $total_in_sales + $row['sale'];
+							}
 						}
+						/*
+						if ($total_in_sales < 1) {
+							$file_output .= "{$this->lang->line("go_no_records_found")}";
+						} else {
+							$file_output .= "{$this->lang->line("go_total")},,$total_in_sales";
+						}*/
+						
+						//$return['TOPsorted_output']		= $TOPsorted_output;
+						//$return['BOTsorted_output']		= $BOTsorted_output;
+						//$return['TOToutbound']			= $total_out_sales;
+						//$return['TOTinbound']			= $total_in_sales;
+						//$return['file_output']			= $file_output;
 					}
-					/*
-					if ($total_in_sales < 1) {
-						$file_output .= "{$this->lang->line("go_no_records_found")}";
-					} else {
-						$file_output .= "{$this->lang->line("go_total")},,$total_in_sales";
-					}*/
 					
-					//$return['TOPsorted_output']		= $TOPsorted_output;
-					//$return['BOTsorted_output']		= $BOTsorted_output;
-					//$return['TOToutbound']			= $total_out_sales;
-					//$return['TOTinbound']			= $total_in_sales;
-					//$return['file_output']			= $file_output;
-					
-					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOToutbound" => $total_out_sales, "TOTinbound" => $total_in_sales);
+					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOToutbound" => $total_out_sales, "TOTinbound" => $total_in_sales, "query" => $outbound_query);
 					
 					return $apiresults;
 				}
@@ -1941,10 +1949,27 @@ error_reporting(E_ALL);*/
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
 					
-					if ($return['request']=='outbound') {
+					if ($request == 'outbound') {
 						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent, 		vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user 	and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' order by vlo.call_date ASC limit 2000");
-						$TOPsorted_output_outbound = mysqli_fetch_array($query);
-						
+						$outbound_result = "";
+						$sale_num_value = 1;
+						while($row = mysqli_fetch_array($query)){
+							$sale_num[] = $sale_num_value;
+							$outbound_result = $row['phone_number'];
+							$call_date[] = $row['call_date'];
+							$agent[] = $row['agent'];
+							$phone_number[] = $row['phone_number'];
+							$first_name[] = $row['first_name'];
+							$last_name[] = $row['last_name'];
+							$address[] = $row['address'];
+							$city[] = $row['city'];
+							$state[] = $row['state'];
+							$postal[] = $row['postal'];
+							$email[] = $row['email'];
+							$alt_phone[] = $row['alt_phone'];
+							$comments[] = $row['comments'];
+							$sale_num_value++;
+						}
 						/*
 						if ($file_download > 0) {
 							$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
@@ -1957,7 +1982,7 @@ error_reporting(E_ALL);*/
 						}*/
 					}
 				
-					if ($return['request']=='inbound') {
+					if ($request == 'inbound') {
 						$query = mysqli_query($link, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='$campaignID' ORDER BY campaign_id");
 						$row = mysqli_fetch_array($query);
 						$closer_camp_array = explode(" ",$row['closer_campaigns']);
@@ -1974,8 +1999,25 @@ error_reporting(E_ALL);*/
 						$campaign_inb_query="vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 					
 						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number,vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') order by vlo.call_date ASC limit 2000");
-						$TOPsorted_output_inbound = mysqli_fetch_array($query);
-						
+						$inbound_result = "";
+						$sale_num_value = 1;
+						while($row = mysqli_fetch_array($query)){
+							$sale_num[] = $sale_num_value;
+							$inbound_result = $row['phone_number'];
+							$call_date[] = $row['call_date'];
+							$agent[] = $row['agent'];
+							$phone_number[] = $row['phone_number'];
+							$first_name[] = $row['first_name'];
+							$last_name[] = $row['last_name'];
+							$address[] = $row['address'];
+							$city[] = $row['city'];
+							$state[] = $row['state'];
+							$postal[] = $row['postal'];
+							$email[] = $row['email'];
+							$alt_phone[] = $row['alt_phone'];
+							$comments[] = $row['comments'];
+							$sale_num_value++;
+						}
 						/*
 						if ($file_download > 0) {
 							$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
@@ -1990,7 +2032,7 @@ error_reporting(E_ALL);*/
 					
 					//$return['TOPsorted_output']		= $TOPsorted_output;
 					//$return['file_output']			= $file_output;
-					$apiresults = array("TOPsorted_output_outbound" => $TOPsorted_output_outbound, "TOPsorted_output_inbound" => $TOPsorted_output_inbound);
+					$apiresults = array("outbound_result" => $outbound_result, "inbound_result" => $inbound_result, "sale_num" => $sale_num, "call_date" => $call_date, "agent" => $agent, "phone_number" => $phone_number, "first_name" => $first_name, "last_name" => $last_name, "address" => $address, "city" => $city, "state" => $state, "postal" => $postal, "email" => $email, "alt_phone" => $alt_phone, "comments" => $comments);
 					
 					return $apiresults;
 				}
@@ -2000,9 +2042,32 @@ error_reporting(E_ALL);*/
 				
 				// INBOUND CALL REPORT
 				if ($pageTitle == "inbound_report") {
-					$query = mysqli_query($link, "SELECT * FROM vicidial_closer_log WHERE campaign_id = '$campaignID' AND date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'");
-					$TOPsorted_output = mysqli_fetch_array($query);
-					$apiresults = array("TOPsorted_output" => $TOPsorted_output);
+					$inbound_report_query = "SELECT * FROM vicidial_closer_log WHERE campaign_id = '$campaignID' AND date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'";
+					$query = mysqli_query($link, $inbound_report_query);
+					$TOPsorted_output = "";
+					$number = 1;
+					while($row = mysqli_fetch_array($query)){
+						$TOPsorted_output[] .= '<tr>';
+						$TOPsorted_output[] .= '<td nowrap>'.$number.'</td>';
+						
+						$date = strtotime($row['call_date']);
+						$date = date("Y-m-d", $date);
+						$TOPsorted_output[] .= '<td nowrap>'.$date.'</td>';
+						
+						$TOPsorted_output[] .= '<td nowrap>'.$row['user'].'</td>';
+						$TOPsorted_output[] .= '<td nowrap>'.$row['phone_number'].'</td>';
+						
+						//$time = strtotime($row['call_date']);
+						$time = $row['end_epoch'] + $row['start_epoch'];
+						$time = date("h:i:s", $time);
+						$TOPsorted_output[] .= '<td nowrap>'.$time.'</td>';
+						
+						$TOPsorted_output[] .= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';
+						
+						$TOPsorted_output[] .= '<td nowrap>'.$row['status'].'</td>';
+						$TOPsorted_output[] .= '</tr>';
+						$number++;
+					}
 					/*
 					if ($file_download > 0) {
 						$file_output  = "{$this->lang->line("go_inbound_camp")},$campaignID - ".$resultu->campaign_name."\n";
@@ -2021,6 +2086,8 @@ error_reporting(E_ALL);*/
 					$return['file_output']			= $file_output;
 					*/
 					
+					
+					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "query" => $inbound_report_query);
 					return $apiresults;
 				}
 				
