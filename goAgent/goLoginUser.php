@@ -496,12 +496,20 @@ if ($sipIsLoggedIn || $use_webrtc) {
         {$agent_status_view_time = 1;}
     
     $goDB->where('campaign_id', $campaign);
-    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id');
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
     $custom_fields_launch = 'ONCALL';
     $custom_fields_list_id = '';
+    $url_tab_first_title = '';
+    $url_tab_first_url = '';
+    $url_tab_second_title = '';
+    $url_tab_second_url = '';
     if ($goDB->getRowCount() > 0) {
         $custom_fields_launch = $rslt['custom_fields_launch'];
         $custom_fields_list_id = $rslt['custom_fields_list_id'];
+        $url_tab_first_title = $rslt['url_tab_first_title'];
+        $url_tab_first_url = $rslt['url_tab_first_url'];
+        $url_tab_second_title = $rslt['url_tab_second_title'];
+        $url_tab_second_url = $rslt['url_tab_second_url'];
     }
     
     $default_group_alias_cid = '';
@@ -568,6 +576,10 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'agent_status_view_time' => $agent_status_view_time,
         'custom_fields_launch' => $custom_fields_launch,
         'custom_fields_list_id' => $custom_fields_list_id,
+        'url_tab_first_title' => $url_tab_first_title,
+        'url_tab_first_url' => $url_tab_first_url,
+        'url_tab_second_title' => $url_tab_second_title,
+        'url_tab_second_url' => $url_tab_second_url,
         'default_group_alias_cid' => $default_group_alias_cid,
         'LIVE_caller_id_number' => $default_group_alias_cid,
         'default_web_vars' => $default_web_vars,
