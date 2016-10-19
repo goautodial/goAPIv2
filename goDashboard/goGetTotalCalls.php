@@ -23,8 +23,23 @@
 
     $NOW = date("Y-m-d");
 
-    $query = "select sum(calls_today) as getTotalCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    $rsltv = mysqli_query($link, $query);
-    $data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data);
+    $queryTotalcalls = "select sum(calls_today) as getTotalCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
+    
+    $queryInboundcalls = "select count(call_date) as getTotalInboundCalls from vicidial_closer_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
+    
+    $queryOutboundcalls = "select count(call_date) as getTotalOutboundCalls from vicidial_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
+    
+    $rsltvTotalcalls = mysqli_query($link, $queryTotalcalls);
+    $rsltvIncalls = mysqli_query($link, $queryInboundcalls);
+    $rsltvOutcalls = mysqli_query($link, $queryOutboundcalls);
+    
+    $dataTotalCalls = mysqli_fetch_assoc($rsltvTotalcalls);
+    $dataIncalls = mysqli_fetch_assoc($rsltvIncalls);
+    $dataOutcalls = mysqli_fetch_assoc($rsltvOutcalls);
+    
+    $data = array_merge($dataTotalCalls, $dataIncalls, $dataOutcalls);
+        
+    $apiresults = array("result" => "success", "data" => $data); 
+    
+    
 ?>
