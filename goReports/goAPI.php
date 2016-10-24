@@ -7,13 +7,15 @@
     #### Written by: Jerico James Flores Milo       ####
     #### License: AGPLv2                            ####
     ####################################################
-//    ini_set("display_errors", "on");
-//	error_reporting(E_ALL);
+//    ini_set('display_errors', 'on');
+//    error_reporting(E_ALL);
+    
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
+    include_once("../goDBkamailio.php");
     include_once("../goFunctions.php");
     
-    $version = file_get_contents('../version.txt');
+    //$version = file_get_contents('../version.txt');
     
     ####### Variables #########
     
@@ -64,7 +66,7 @@
         
     }
     
-    
+    $responsetype = 'json';
     $userresponsetype = $_REQUEST["responsetype"];
     
     if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
@@ -73,6 +75,9 @@
     
     #### API OUTPUT ####
     ob_start();
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: POST');
+    header('Access-Control-Max-Age: 1000');
     
     if (count( $apiresults )) {
     	if ($userresponsetype == "json") {
@@ -81,21 +86,21 @@
     		exit();
     	} else {
     		if ($userresponsetype == "xml") {
-    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $action . "</action>\n" );
+    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $goAction . "</action>\n" );
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
     			if ($responsetype) {
     				exit( "result=error;message=This API function can only return XML response format;" );
     			}
-    
+
     			foreach ($apiresults as $k => $v) {
     				echo "" . $k . "=" . $v . ";";
     			}
     		}
     	}
     }
-    
+
     $apioutput = ob_get_contents();
     ob_end_clean();
     echo $apioutput;
