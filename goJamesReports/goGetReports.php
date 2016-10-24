@@ -543,7 +543,8 @@ error_reporting(E_ALL);*/
 						$TOTdead =	($TOTdead + $dead);
 						$TOTcustomer =	($TOTcustomer + $customer);
 						$TOTALtime = ($TOTALtime + $pause + $dispo + $talk + $wait);
-						if ( ($lead > 0) and ((!eregi("NULL",$status)) and (strlen($status) > 0)) ) {$TOTcalls++;}
+						
+						if ( ($lead > 0) and ((!preg_match("/NULL/",$status)) and (strlen($status) > 0)) ) {$TOTcalls++;}
 						
 						$user_found=0;
 						if ($uc < 1) 
@@ -564,7 +565,7 @@ error_reporting(E_ALL);*/
 								$Spause[$m] =	($Spause[$m] + $pause);
 								$Sdead[$m] =	($Sdead[$m] + $dead);
 								$Scustomer[$m] =	($Scustomer[$m] + $customer);
-								if ( ($lead > 0) and ((!eregi("NULL",$status)) and (strlen($status) > 0)) ) {$Scalls[$m]++;}
+								if ( ($lead > 0) and ((!preg_match("/NULL/",$status)) and (strlen($status) > 0)) ) {$Scalls[$m]++;}
 								}
 							$m++;
 							}
