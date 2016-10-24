@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian Samatra        ####
     #### License: AGPLv2                               ####
     #######################################################
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
     
     ### POST or GET Variables
     $exten_id = $_REQUEST['exten_id'];
