@@ -123,7 +123,7 @@ error_reporting(E_ALL);*/
 					$cstatusRX	.= "{$goTempStatVal}|";
 				}		 
 				
-				$cstatuses = implode("','",$cstatuses);
+				//$cstatuses = implode("','",$cstatuses);
 				
 				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
 				{
