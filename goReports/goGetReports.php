@@ -104,7 +104,7 @@ error_reporting(E_ALL);*/
 					$sstatusRX	.= "{$goTempStatVal}|";
 				}    
 				
-				$sstatuses = implode("','",$sstatuses);
+				//$sstatuses = implode("','",$sstatuses);
 				
 				/*foreach ($query->result() as $Qstatus)
 				{
@@ -125,13 +125,13 @@ error_reporting(E_ALL);*/
 				
 				//$cstatuses = implode("','",$cstatuses);
 				
-				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+				if (count($sstatuses) > 0 && count($cstatuses) > 0)
 				{
 				   $statuses = "{$sstatuses}','{$cstatuses}";
 				   $statusRX = "{$sstatusRX}{$cstatusRX}";
 				} else {
-				   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
-				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				   $statuses = (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
+				   $statusRX = (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
 				}
 				$statusRX = trim($statusRX, "|");
 				
