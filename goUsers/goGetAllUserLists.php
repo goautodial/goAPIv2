@@ -86,7 +86,7 @@
                 $dataUserLevel[] = $fresults['user_level'];
                 $dataUserGroup[] = $fresults['user_group'];
                 $dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num);
+                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num, "data" => $data );
                 //$apiresults = array("result" => "success", "data" => $data);
             }
 	} else {
