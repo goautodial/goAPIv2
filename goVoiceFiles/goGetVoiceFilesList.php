@@ -8,7 +8,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
  
 	### POST or GET Variables
 
@@ -24,7 +24,7 @@
 
                 $server_name = getenv("SERVER_NAME");
                 $server_port = getenv("SERVER_PORT");
-                if (eregi("443",$server_port)) {$HTTPprotocol = 'https://';}
+                if (preg_match("/443/",$server_port)) {$HTTPprotocol = 'https://';}
                   else {$HTTPprotocol = 'http://';}
                 $admDIR = "$HTTPprotocol$server_name:$server_port";
 
@@ -75,9 +75,9 @@
                                                 $file_dates[$i] = date ("Y-m-d H:i:s.", filemtime("$dirpath/$file"));
                                                 $file_sizes[$i] = filesize("$dirpath/$file");
                                                 $file_sizesPAD[$i] = sprintf("[%020s]\n",filesize("$dirpath/$file"));
-                                                if (eregi('date',$stage)) {$file_sort[$i] = $file_epoch[$i] . "----------" . $i;}
-                                                if (eregi('name',$stage)) {$file_sort[$i] = $file_names[$i] . "----------" . $i;}
-                                                if (eregi('size',$stage)) {$file_sort[$i] = $file_sizesPAD[$i] . "----------" . $i;}
+                                                if (preg_match('/date/',$stage)) {$file_sort[$i] = $file_epoch[$i] . "----------" . $i;}
+                                                if (preg_match('/name/',$stage)) {$file_sort[$i] = $file_names[$i] . "----------" . $i;}
+                                                if (preg_match('/size/',$stage)) {$file_sort[$i] = $file_sizesPAD[$i] . "----------" . $i;}
 
                                                 $i++;
                                                 }
@@ -85,9 +85,9 @@
                                 }
                         closedir($dh);
 
-                        if (eregi('date',$stage)) {rsort($file_sort);}
-                        if (eregi('name',$stage)) {sort($file_sort);}
-                        if (eregi('size',$stage)) {rsort($file_sort);}
+                        if (preg_match('/date/',$stage)) {rsort($file_sort);}
+                        if (preg_match('/name/',$stage)) {sort($file_sort);}
+                        if (preg_match('/size/',$stage)) {rsort($file_sort);}
 
                         sleep(1);
 

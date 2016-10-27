@@ -665,12 +665,20 @@ if ($userExist > 0) {
     unset($campinfo['scheduled_callbacks']);
     
     $goDB->where('campaign_id', $campinfo['campaign_id']);
-    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id');
+    $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
     $campinfo['custom_fields_launch'] = 'ONCALL';
     $campinfo['custom_fields_list_id'] = '';
+    $campinfo['url_tab_first_title'] = '';
+    $campinfo['url_tab_first_url'] = '';
+    $campinfo['url_tab_second_title'] = '';
+    $campinfo['url_tab_second_url'] = '';
     if ($goDB->getRowCount() > 0) {
         $campinfo['custom_fields_launch'] = $rslt['custom_fields_launch'];
         $campinfo['custom_fields_list_id'] = $rslt['custom_fields_list_id'];
+        $campinfo['url_tab_first_title'] = $rslt['url_tab_first_title'];
+        $campinfo['url_tab_first_url'] = $rslt['url_tab_first_url'];
+        $campinfo['url_tab_second_title'] = $rslt['url_tab_second_title'];
+        $campinfo['url_tab_second_url'] = $rslt['url_tab_second_url'];
     }
     
     $default_group_alias_cid = '';

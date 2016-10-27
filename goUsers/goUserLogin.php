@@ -62,33 +62,37 @@
 
 	if($countResult > 0) {
 		while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$dataUser = $fresults['user'];
-				$dataFullName = $fresults['full_name'];
-				$dataUserLevel = $fresults['user_level'];
-				$dataUserGroup = $fresults['user_group'];
-				$dataActive   = $fresults['active'];
-				$dataUserId = $fresults['user_id'];
-				$dataEmail = $fresults['email'];
-				$dataPhone_login = $fresults['phone_login'];
-				$dataPhone_pass = $fresults['phone_pass'];
-				$dataPass = ($SSpass_hash_enabled > 0) ? $fresults['pass_hash'] : $fresults['pass'];
-				
-				$apiresults = array(
-									"result" => "success",
-									"user_group" => $dataUserGroup,
-									"userno" => $dataUser,
-									"full_name" => $dataFullName,
-									"user_level" => $dataUserLevel,
-									"active" => $dataActive,
-									"user_id" => $dataUserId,
-									"email" => $dataEmail,
-									"pass" => $dataPass,
-									"bcrypt" => $SSpass_hash_enabled,
-									"salt" => $SSpass_key,
-									"cost" => $SSpass_cost,
-									"phone_login" => $dataPhone_login,
-									"phone_pass" => $dataPhone_pass
-							);
+			$dataUser = $fresults['user'];
+			$dataFullName = $fresults['full_name'];
+			$dataUserLevel = $fresults['user_level'];
+			$dataUserGroup = $fresults['user_group'];
+			$dataActive   = $fresults['active'];
+			$dataUserId = $fresults['user_id'];
+			$dataEmail = $fresults['email'];
+			$dataPhone_login = $fresults['phone_login'];
+			$dataPhone_pass = $fresults['phone_pass'];
+			$dataPass = ($SSpass_hash_enabled > 0) ? $fresults['pass_hash'] : $fresults['pass'];
+			
+			$rslti = mysqli_query($linkgo, "SELECT * FROM go_avatars WHERE user_id='$dataUserId';");
+			$dataAvatar = (mysqli_num_rows($rslti) > 0) ? "./php/ViewImage.php?user_id=$dataUserId" : "";
+			
+			$apiresults = array(
+				"result" => "success",
+				"user_group" => $dataUserGroup,
+				"userno" => $dataUser,
+				"full_name" => $dataFullName,
+				"user_level" => $dataUserLevel,
+				"active" => $dataActive,
+				"user_id" => $dataUserId,
+				"email" => $dataEmail,
+				"pass" => $dataPass,
+				"bcrypt" => $SSpass_hash_enabled,
+				"salt" => $SSpass_key,
+				"cost" => $SSpass_cost,
+				"phone_login" => $dataPhone_login,
+				"phone_pass" => $dataPhone_pass,
+				"avatar" => $dataAvatar
+			);
 		}
 	} else {
 		$apiresults = array("result" => "Error: Invalid login credentials please try again.");

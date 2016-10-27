@@ -56,6 +56,10 @@
 	$custom_fields_launch			= $_REQUEST['custom_fields_launch'];
 	$campaign_type					= $_REQUEST['campaign_type'];
 	$custom_fields_list_id			= $_REQUEST['custom_fields_list_id'];
+	$url_tab_first_title			= $_REQUEST['url_tab_first_title'];
+	$url_tab_first_url				= $_REQUEST['url_tab_first_url'];
+	$url_tab_second_title			= $_REQUEST['url_tab_second_title'];
+	$url_tab_second_url				= $_REQUEST['url_tab_second_url'];
 
    	//$apiresults = array("data" => $_REQUEST); 
 
@@ -161,12 +165,14 @@
 					$stmtGO = "SELECT * FROM go_campaigns WHERE campaign_id='$campaign_id'";
 					$rsltGO = mysqli_query($linkgo, $stmtGO);
 					$numGO = mysqli_num_rows($rsltGO);
+					$url_tab_first_url = str_replace("http://", "https://", $url_tab_first_url);
+					$url_tab_second_url = str_replace("http://", "https://", $url_tab_second_url);
 					if ($numGO > 0) {
-						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id' WHERE campaign_id='$campaign_id';";
+						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id',url_tab_first_title='$url_tab_first_title',url_tab_first_url='$url_tab_first_url',url_tab_second_title='$url_tab_second_title',url_tab_second_url='$url_tab_second_url' WHERE campaign_id='$campaign_id';";
 						$resultGO = mysqli_query($linkgo, $updateGO);
 					} else {
 						$campaign_type = (strlen($campaign_type) > 0) ? $campaign_type : "OUTBOUND";
-						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id');";
+						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id','$url_tab_first_title','$url_tab_first_url','$url_tab_second_title','$url_tab_second_url');";
 						$resultGO = mysqli_query($linkgo, $insertGO);
 					}
 					### Admin logs
