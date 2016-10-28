@@ -56,7 +56,7 @@ if(!empty($requestDataPhone)) {
 if($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
 		$goLimit = "1000";
 		//$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
-		$filterdate = "AND date_format(vl.last_local_call_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
+		$filterdate = "AND date_format(rl.end_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
 }else{
 		$filterdate = "";
 }
