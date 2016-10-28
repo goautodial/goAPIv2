@@ -55,7 +55,8 @@ if(!empty($requestDataPhone)) {
 
 if($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
 		$goLimit = "1000";
-		$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
+		//$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
+		$filterdate = "AND date_format(vl.last_local_call_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
 }else{
 		$filterdate = "";
 }
@@ -88,13 +89,16 @@ if(!empty($agent_filter)){
 		$dataListId[] = $fresults['uniqueid'];
 		$dataPhoneNumber[] = $fresults['phone_number'];
 		$dataFullName[] = $fresults['full_name'];
-		// $dataLastLocalCallTime[] = $fresults['last_local_call_time'];
+		$dataLastLocalCallTime[] = $fresults['last_local_call_time'];
 		$dataStartLastLocalCallTime[] = $fresults['start_time'];
 		$dataEndLastLocalCallTime[] = $fresults['end_time'];
 		$dataLocation[] = $fresults['location'];
+		
+	}
 
 	$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
 	$rsltv1 = mysqli_query($link, $query1);
+	
 	while($fresults1 = mysqli_fetch_array($rsltv1)){
 		$dataCount[] = $fresults1['cnt'];	
 	}
@@ -103,6 +107,7 @@ if(!empty($agent_filter)){
 
    		$apiresults = array(
 			"result" => "success",
+			"query" => $query,
 			"cnt" => $dataCount,
 			"lead_id" => $dataLeadId,
 			"uniqueid" => $dataUniqueid,
@@ -111,10 +116,11 @@ if(!empty($agent_filter)){
 			"list_id" => $dataListId,
 			"phone_number" => $dataPhoneNumber,
 			"full_name" => $dataFullName,
+			"last_local_call_time" => $dataLastLocalCallTime,
 			"start_last_local_call_time" => $dataStartLastLocalCallTime,
 			"end_last_local_call_time" => $dataEndLastLocalCallTime,
 			"location" => $dataLocation
 		);
-	}
+	
 
 ?>
