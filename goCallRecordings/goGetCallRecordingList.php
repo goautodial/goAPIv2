@@ -81,11 +81,11 @@ if(!empty($agent_filter)){
 		
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataLeadId[] = $fresults['lead_id'];
-		$dataUniqueid[] = $fresults['uniqueid'];
-       		$dataStatus[] = $fresults['status'];
+		//$dataUniqueid[] = $fresults['uniqueid'];
+       	$dataStatus[] = $fresults['status'];
 		$dataUser[] = $fresults['user'];
 		// $dataListId[] = $fresults['list_id'];
-		$dataListId[] = $fresults['uniqueid'];
+		//$dataListId[] = $fresults['uniqueid'];
 		$dataPhoneNumber[] = $fresults['phone_number'];
 		$dataFullName[] = $fresults['full_name'];
 		$dataLastLocalCallTime[] = $fresults['last_local_call_time'];
