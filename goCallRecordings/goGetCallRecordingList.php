@@ -70,10 +70,9 @@ if(!empty($agent_filter)){
 
 //search via phone
 //	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id $sql2 ORDER BY cl.uniqueid DESC LIMIT 20;";
-	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid
-				FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id
-				$sqlPhone $filterdate $filteragent ORDER BY rl.end_time DESC LIMIT $goLimit;";
-//	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.phone_number='g' ORDER BY cl.uniqueid DESC LIMIT 50";
+//	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id $sqlPhone $filterdate $filteragent ORDER BY rl.end_time DESC LIMIT $goLimit;";
+	
+	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, rl.start_time, rl.end_time FROM recording_log AS rl, vicidial_list vl WHERE rl.lead_id = vl.lead_id $sqlPhone $filterdate $filteragent ORDER BY rl.end_time DESC LIMIT $goLimit;";
 	
 //search via date
 //	$query = "SELECT vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.last_local_call_time LIKE '%$searchString%' ORDER BY cl.uniqueid DESC";
@@ -103,7 +102,7 @@ if(!empty($agent_filter)){
 		$dataCount[] = $fresults1['cnt'];	
 	}
 
-	$query3 = "SELECT a.phone_number FROM vicidial_list a, recording_log b WHERE a.lead_id=b.lead_id AND ";
+	//$query3 = "SELECT a.phone_number FROM vicidial_list a, recording_log b WHERE a.lead_id=b.lead_id AND ";
 
    		$apiresults = array(
 			"result" => "success",
