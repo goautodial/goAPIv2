@@ -12,24 +12,14 @@
     function go_get_groupid($goUser){
         include_once("goDBasterisk.php");
         $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
-#        $rsltv = mysqli_query($link, $query_userv);
-	
-	#if ($rsltv != false) {
-        if($rsltv = mysqli_query($link, $query_userv)) {
-	        $check_resultv = mysqli_num_rows($rsltv);
-	} else {
-		$check_resultv = 0;
-	}
-
+        $rsltv = mysqli_query($link, $query_userv);
+	$check_resultv = mysqli_num_rows($rsltv);
 
         if ($check_resultv > 0) {
             $rowc=mysqli_fetch_assoc($rsltv);
             $goUser_group = $rowc["user_group"];
             return $goUser_group;
-        } else {
-	    $nulls = "";
-	    return $nulls;
-	}
+        }
         
     }
     
