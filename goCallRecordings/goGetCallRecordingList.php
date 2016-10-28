@@ -109,7 +109,7 @@ if(!empty($agent_filter)){
 			"query" => $query,
 			"cnt" => $dataCount,
 			"lead_id" => $dataLeadId,
-			"uniqueid" => $dataUniqueid,
+			//"uniqueid" => $dataUniqueid,
 			"status" => $dataStatus,
 			"users" => $dataUser,
 			"list_id" => $dataListId,
