@@ -21,7 +21,10 @@
             $rowc=mysqli_fetch_assoc($rsltv);
             $goUser_group = $rowc["user_group"];
             return $goUser_group;
-        }
+        } else {
+	    $nulls = "";
+	    return $nulls;
+	}
         
     }
     
