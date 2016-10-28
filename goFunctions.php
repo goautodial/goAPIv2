@@ -13,8 +13,10 @@
         include_once("goDBasterisk.php");
         $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
         $rsltv = mysqli_query($link, $query_userv);
-        $check_resultv = mysqli_num_rows($rsltv);
-    
+	
+	if ($rsltv != false) {
+	        $check_resultv = mysqli_num_rows($rsltv);
+	}    
         if ($check_resultv > 0) {
             $rowc=mysqli_fetch_assoc($rsltv);
             $goUser_group = $rowc["user_group"];
@@ -28,7 +30,10 @@
         include_once("goDBgoautodial.php");
         $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
         $rslt_tenant = mysqli_query($linkgo,$query_tenant);
-        $check_result_tenant = mysqli_num_rows($rslt_tenant);
+
+	if ($rslt_tenant != false) {
+        	$check_result_tenant = mysqli_num_rows($rslt_tenant);
+	}    
     
         if ($check_result_tenant > 0) {
             return true;
