@@ -112,7 +112,7 @@ if(!empty($agent_filter)){
 			"uniqueid" => $dataUniqueid,
 			"status" => $dataStatus,
 			"users" => $dataUser,
-			"list_id" => $dataListId,
+			//"list_id" => $dataListId,
 			"phone_number" => $dataPhoneNumber,
 			"full_name" => $dataFullName,
 			"last_local_call_time" => $dataLastLocalCallTime,
