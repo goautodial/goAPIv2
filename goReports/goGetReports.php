@@ -2114,24 +2114,26 @@ error_reporting(E_ALL);*/
 				}
 				
 				
-				/* CALL EXPORT REPORT
+				/* CALL EXPORT REPORT 
 				if ($pageTitle == "call_export_report") {
 					//$return['allowed_campaigns']	= $this->go_getall_allowed_campaigns();
 					//$groupId = go_get_groupid($userID);
-					if (!$this->commonhelper->checkIfTenant($groupId)) {
+					$groupId = $userGroup;
+					if (!checkIfTenant($groupId)) {
 					  $ul = '';
 					  $user_group_SQL = '';
 					} else {
-					  $ul = "WHERE user_group='".$this->session->userdata('user_group')."'";
-					  $user_group_SQL = "and (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '".$this->session->userdata('user_group')."' ELSE 1=1 END)";
+					  $ul = "WHERE user_group='$userGroup'";
+					  $user_group_SQL = "and (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
 					}
+					
 					$query = mysqli_query($link, "SELECT campaign_id FROM vicidial_campaigns $ul");
-					foreach ($query->result() as $campid)
-					{
-						$allowed_campaigns[] = $campid->campaign_id;
+					while($row = mysqli_fetch_array($query)){
+						$allowed_campaigns[] = $row['campaign_id'];
 					}
+					
 					$return['allowed_campaigns']	= implode(",",$allowed_campaigns);
-					$return['inbound_groups']		= $this->go_get_inbound_groups();
+					$return['inbound_groups']		= get_inbound_groups($serID, $link, $userGroup);
 					
 					$filterSQL = ($this->commonhelper->checkIfTenant($groupId)) ? "WHERE campaign_id IN ('".implode("','",$allowed_campaigns)."')" : "";
 					$query = mysqli_query($link, "SELECT list_id FROM vicidial_lists $filterSQL");
@@ -2870,9 +2872,8 @@ error_reporting(E_ALL);*/
 	
 		return $apiresults;
 	}
-	/*
-	function go_get_inbound_groups($userID, $link) {
-		$groupId = go_get_groupid($userID, $link);
+	
+	function get_inbound_groups($userID, $link, $groupId) {
 		if($groupId != NULL)
 		$groupSQL = "where user_group='$groupId'";
 		
@@ -2886,7 +2887,7 @@ error_reporting(E_ALL);*/
 		
 		return $inboundgroups;
 	}
-	*/
+	
 	
 	function get_group_id($userID, $link){
 		$query = mysqli_query($link, "select user_group from vicidial_users where user='$userID';");
