@@ -5,7 +5,7 @@
     #### Copyright: GOAutoDial Inc. (c) 2016           ####
     #### Written by: Alexander Abenoja                 ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     
     ### POST or GET Variables
     $lead_id = $_REQUEST['lead_id'];

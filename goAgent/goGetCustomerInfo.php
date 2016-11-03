@@ -15,7 +15,7 @@ $system_settings = get_settings('system', $astDB);
 
 if (isset($lead_id) && $lead_id !== '') {
     $astDB->where('lead_id', $lead_id);
-    $lead_info = $astDB->getOne('vicidial_list', 'lead_id,list_id,title,first_name,middle_initial,last_name,email,phone_number,alt_phone,address1,address2,address3,city,state,province,postal_code,country_code,gender,status,user,date_of_birth');
+    $lead_info = $astDB->getOne('vicidial_list', 'lead_id,list_id,title,first_name,middle_initial,last_name,phone_number,alt_phone,email,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,status,user');
     $leadIDExist = $astDB->getRowCount();
     
     if ($system_settings->custom_fields_enabled > 0) {
