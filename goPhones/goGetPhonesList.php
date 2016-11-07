@@ -10,7 +10,7 @@
     include_once("../goFunctions.php");
     
     $limit = $_REQUEST['limit'];
-    if($limit < 1){ $limit = 20; } else { $limit = $limit; }
+    if($limit < 1){ $limit = 500; } else { $limit = $limit; }
  
     	$groupId = go_get_groupid($goUser);
     
@@ -21,11 +21,12 @@
 	}
 
    	//$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT $limit;";
-   	$query = "SELECT p.extension, p.protocol, p.server_ip, p.dialplan_number, p.voicemail_id, p.status, p.active, p.fullname, p.messages, p.old_messages, p.user_group, vu.user  FROM phones as p, vicidial_users as vu WHERE  vu.phone_login = p.extension $ul ORDER BY extension LIMIT $limit;";
+   	$query = "SELECT p.extension, p.protocol, p.server_ip, p.dialplan_number, p.voicemail_id, p.status, p.active, p.fullname, p.messages, p.old_messages, p.user_group, vu.user_id, vu.user  FROM phones as p, vicidial_users as vu WHERE  vu.phone_login = p.extension $ul ORDER BY extension LIMIT $limit;";
 	$rsltv = mysqli_query($link,$query);
 
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataExtension[] = $fresults['extension'];
+		$dataUserID[] = $fresults['user_id'];
 		$dataUser[] = $fresults['user'];
        	$dataProtocol[] = $fresults['protocol'];// .$fresults['dial_method'].$fresults['active'];
 		$dataServerIp[] = $fresults['server_ip'];
@@ -37,7 +38,7 @@
 		$dataMessages[] = $fresults['messages'];
 		$dataOldMessages[] = $fresults['old_messages'];
 		$dataUserGroup[] = $fresults['user_group'];
-   		$apiresults = array("result" => "success", "extension" => $dataExtension, "user" => $dataUser, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
+   		$apiresults = array("result" => "success", "extension" => $dataExtension, "userid" => $dataUserID, "user" => $dataUser, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
 	}
 
 ?>
