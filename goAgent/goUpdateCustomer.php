@@ -53,6 +53,7 @@ if (strlen($errorMsg) < 1) {
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update("custom_{$list_id}", $CF_array);
         } else {
+            $CF_array['lead_id'] = $lead_id;
             $rslt = $astDB->insert("custom_{$list_id}", $CF_array);
         }
         
