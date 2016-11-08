@@ -30,7 +30,7 @@
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
 		
-		$queryGL = "SELECT group_level FROM user_access_group WHERE user_group='$agent_id';";
+		$queryGL = "SELECT group_level,group_list_id FROM user_access_group WHERE user_group='$agent_id';";
 		$rsltvGL = mysqli_query($linkgo, $queryGL);
 		$fetchGL = mysqli_fetch_array($rsltvGL);
 		
@@ -41,7 +41,8 @@
                 $dataGroupType[] = $group_type;
                 $dataForced[] = $fresults['forced_timeclock_login'];
 				$dataGroupLevel[] = $fetchGL['group_level'];
-                $apiresults = array("result" => "success", "user_group" => $dataUserGroup, "group_name" => $dataGroupName, "group_type" => $dataGroupType, "forced_timeclock_login" => $dataForced, "group_level" => $dataGroupLevel);
+				$dataGroupListID[] = $fetchGL['group_list_id'];
+                $apiresults = array("result" => "success", "user_group" => $dataUserGroup, "group_name" => $dataGroupName, "group_type" => $dataGroupType, "forced_timeclock_login" => $dataForced, "group_level" => $dataGroupLevel, "group_list_id" => $dataGroupListID);
 			}
 		} else {
 			$apiresults = array("result" => "Error: User Group doesn't exist.");
