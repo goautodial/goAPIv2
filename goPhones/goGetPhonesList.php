@@ -21,7 +21,7 @@
 	}
 
    	//$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT $limit;";
-   	$query = "SELECT p.extension, p.protocol, p.server_ip, p.dialplan_number, p.voicemail_id, p.status, p.active, p.fullname, p.messages, p.old_messages, p.user_group, vu.user_id, vu.user  FROM phones as p, vicidial_users as vu WHERE  vu.phone_login = p.extension $ul ORDER BY extension LIMIT $limit;";
+   	$query = "SELECT p.extension, p.protocol, p.server_ip, p.dialplan_number, p.voicemail_id, p.status, p.active, p.fullname, p.messages, p.old_messages, p.user_group, vu.user_id, vu.user, vu.full_name  FROM phones as p, vicidial_users as vu WHERE  vu.phone_login = p.extension $ul ORDER BY extension LIMIT $limit;";
 	$rsltv = mysqli_query($link,$query);
 
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
@@ -34,7 +34,7 @@
 		$dataVoicemailId[] = $fresults['voicemail_id'];
 		$dataStatus[] = $fresults['status'];
 		$dataActive[] = $fresults['active'];
-		$dataFullname[] = $fresults['fullname'];
+		$dataFullname[] = $fresults['full_name'];
 		$dataMessages[] = $fresults['messages'];
 		$dataOldMessages[] = $fresults['old_messages'];
 		$dataUserGroup[] = $fresults['user_group'];
