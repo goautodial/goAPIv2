@@ -28,8 +28,14 @@
 
         $query = "SELECT lead_id,list_id,first_name,middle_initial,last_name,email,phone_number,alt_phone,address1,address2,address3,city,state,province,postal_code,country_code,gender,status,user,date_of_birth FROM vicidial_list where lead_id='$lead_id'";
         $rsltv = mysqli_query($link, $query);
-        $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);                    
-        $apiresults = array("result" => "success", "data" => $fresults);
+        $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+        
+        $is_customer = 0;
+        if ($rsltv) {
+            $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
+            $is_customer = mysqli_num_rows($rsltc);
+        }
+        $apiresults = array("result" => "success", "data" => $fresults, "is_customer" => $is_customer);
 
     }
 ?>
