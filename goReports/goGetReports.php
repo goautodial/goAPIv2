@@ -19,8 +19,7 @@ error_reporting(E_ALL);*/
 	//$pageTitle = call_export_report, inbound_report, stats, agent_detail, agent_pdetail, dispo, sales_agent, sales_tracker, call_export_report, dashboard
 	//$request = daily, weekly, monthly, outbound, inbound
     //https://webrtc.goautodial.com/goAPI/goJamesReports/goAPI.php?goUser=admin&goPass=G02x16&goAction=goGetReports&responsetype=json
-    
-    $call_export_report = $_REQUEST['call_export_report'];
+	
     $pageTitle          = $_REQUEST['pageTitle'];
     $fromDate           = $_REQUEST['fromDate'];
     $toDate             = $_REQUEST['toDate'];
@@ -31,40 +30,119 @@ error_reporting(E_ALL);*/
 	$dispo_stats		= $_REQUEST['statuses'];
 	
 	//$returns = $pageTitle.' == '.$fromDate.' == '.$toDate.' == '.$campaignID.' == '.$userID;
-    
-	//$campaignID = '79090225';
-	//$fromDate = '2016-10-16 00:00:00';
-	//$toDate = '2016-10-19 23:59:59';
-	//$userID = 'goAPI';
-	
-    /*$query = mysqli_query($link, "select campaign_name from vicidial_campaigns;");
-    $resultu = mysqli_num_rows($query);
-    $ggg = mysqli_fetch_array($query, MYSQLI_ASSOC);
-    $ff = $ggg['campaign_name'];
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                $dataUserID[] = $fresults['user_id'];
-		$dataUser[] = $fresults['user'];
-                $dataFullName[] = $fresults['full_name'];
-                $dataUserLevel[] = $fresults['user_level'];
-                $dataUserGroup[] = $fresults['user_group'];
-		$dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "userno" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive);
-    }*/
 	
 	$userGroup = get_group_id($userID, $link);
 	
-    //$goReportsReturn = go_get_reports($pageTitle,'2016-07-01 00:00:00','2016-07-08 23:59:59','82247255','weekly','admin','usergroup',$link);
-	
-	//$goReportsReturn = go_get_reports($pageTitle,$fromDate,$toDate,$campaignID,$request,'admin','ADMIN',$link);
-	
-	$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats);
+	if($pageTitle == "call_export_report"){
+		$campaigns = $_REQUEST['campaigns'];
+		$inbounds = $_REQUEST['inbounds'];
+		$lists = $_REQUEST['lists'];
+		$custom_fields = $_REQUEST['custom_fields'];
+		$per_call_notes = $_REQUEST['per_call_notes'];
+		
+		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $userGroup, $link);
+	}else{
+		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats);
+	}
 	
     $apiresults = array("result" => "success", "getReports" => $goReportsReturn);
-    //var_dump($goReportsReturn);
     
+	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_field, $per_call_notes, $userGroup, $link){
+		//$date_diff = go_get_date_diff($fromDate, $toDate);
+        //$date_array = implode("','",go_get_dates($fromDate, $toDate));
+		
+		$campaigns = explode(" ",$campaigns);
+		$inbounds = explode(" ",$inbounds);
+		$lists = explode(" ",$lists);
+		$statuses = explode(" ",$dispo_stats);
+		
+		if($campaigns != NULL){
+			$i=0;
+			while($i < count($campaigns)){
+				if (strlen($campaigns[$i]) > 0) {
+				   $campaign_SQL .= "'$campaigns[$i]',";
+				}
+				$i++;
+			}
+			$campaign_SQL = preg_replace("/,$/",'',$campaign_SQL);
+			$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
+		}
+		
+		if($inbounds != NULL){
+			$list_SQL = "";	
+		}
+		
+		if($lists != NULL){
+			$list_SQL = "";	
+		}
+		
+		if($dispo_stats != NULL){
+			//$i=0;
+			//$all_stats = "N";
+			//$status_SQL = "";
+			//
+			//while($i < count($statuses)){
+			//	$status_SQL .= "'$status[$i]',";
+			//	
+			//	if($status[$i] == "ALL"){
+			//		$all_stats = "Y";
+			//	}
+			//	$i++;
+			//}
+			//
+			//$status_SQL = preg_replace("/,$/",'',$status_SQL);
+			//
+			//if($all_stats == "N"){
+			//	$status_SQL = "and vl.status IN ($status_SQL)";
+			//}else{
+				$status_SQL = "";
+			//}
+			
+		}
+		//$status_SQL = "";
+		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
+		
+		$query = "SELECT vl.call_date, vl.phone_number, vl.status, vl.user, vl.campaign_id, vi.vendor_lead_code, vi.source_id, vi.list_id, vi.gmt_offset_now, vi.phone_code, vi.phone_number, vi.title, vi.first_name, vi.middle_initial, vi.last_name, vi.address1, vi.address2, vi.address3, vi.city, vi.state, vi.province, vi.postal_code, vi.country_code, vi.gender, vi.date_of_birth, vi.alt_phone, vi.email, vi.security_phrase, vi.comments, vl.length_in_sec, vl.user_group, vl.alt_dial, vi.rank, vi.owner, vi.lead_id, vl.uniqueid, vi.entry_list_id, vi.entry_date, vi.called_count, vi.last_local_call_time, vi.modify_date, vi.called_since_last_reset
+		FROM vicidial_log vl, vicidial_list vi
+		WHERE vi.lead_id=vl.lead_id $list_SQL $campaign_SQL  $status_SQL group by vl.call_date order by vl.call_date LIMIT 100;";
+		
+		//$query = "SELECT * FROM vicidial_list LIMIT 100;";
+		$result = mysqli_query($link, $query);
+		
+		$num_column = mysqli_num_fields($result);
+		
+		//$filename = $date_diff.".csv";
+		
+		while ($fieldinfo=mysqli_fetch_field($result))
+		{
+			$csv_header[] = $fieldinfo->name;
+		}
+		
+		/*
+		$csv_row = array();
+		while($row = mysqli_fetch_row($result)) {
+			for($i=0;$i < $num_column;$i++) {
+				if($i == $num_column-1){
+					$csv_row[] = $i." - ".$row[$i];
+					$csv_row[] = $i." \n";
+				}else{
+					$csv_row[] = $i." - ".$row[$i];
+				}
+			}
+		}*/
+		
+		while($row = mysqli_fetch_row($result)) {
+			$csv_row[] = $row;
+		}
+		
+		$return = array("query" => $query, "header" => $csv_header, "rows" => $csv_row);
+		
+		return $return;
+		
+	}
+	
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats){
-        //$goReportsClass = new ReportsClass();
-//mysqli_query($link, $query)
+
 		if ($campaignID!='null' || $pageTitle == 'call_export_report')
 		{
 		  	//$return['groupId'] = $goReportsClass->go_getUsergroup($userID);
