@@ -174,9 +174,9 @@
 								$fetch_pass_hash_enabled = mysqli_fetch_array($exec_query);
 								
 								if($fetch_pass_hash_enabled['pass_hash_enabled'] == "1"){
-										$pass_query = "`pass_hash` = '$pass_hash',";		
+	$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', phone_pass` = '$phone_pass', ";		
 								}else{
-										$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass',";
+									$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', phone_pass` = '$phone_pass', ";
 								}
 								
 						}else{
@@ -185,10 +185,6 @@
 						
 						if($phone_login != NULL){
 								$phonelogin_query = "`phone_login` = '$phone_login', ";
-								
-								if($pass != NULL){
-										$phonelogin_query .= "`phone_pass` = '$phone_pass', ";
-								}
 						}else{
 								$phonelogin_query = "";
 						}
