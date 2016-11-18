@@ -9,16 +9,18 @@
 	#### License: AGPLv2                            ####
 	####################################################
 	
-	ini_set('memory_limit','256M');
-	ini_set('upload_max_filesize', '200M');
+	ini_set('memory_limit','1024M');
+	ini_set('upload_max_filesize', '6000M');
+	ini_set('post_max_size', '6000M');
+	
 	#ini_set('display_errors', 'on');
     #error_reporting(E_ALL);
 	
-    include_once("../goFunctions.php");
+	include_once("../goFunctions.php");
 	include_once("goLookupGMT.php");
-
-    $thefile = $_FILES['goFileMe']['tmp_name'];
-    $theList = $_REQUEST["goListId"];
+	
+	$thefile = $_FILES['goFileMe']['tmp_name'];
+	$theList = $_REQUEST["goListId"];
 	$goDupcheck = $_REQUEST["goDupcheck"];
 	$goCountInsertedLeads = 0;
 
@@ -166,7 +168,7 @@
 													$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPCAMP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 													$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 													
-													$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+													#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 		
 												}
 												
@@ -220,7 +222,7 @@
 															$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 															$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 															
-															$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+															#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 															
 														}
 														
@@ -274,7 +276,7 @@
 											$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 											$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 											
-											$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+											#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 											
 										}
 										
@@ -295,7 +297,7 @@
 		if($goCountInsertedLeads > 0) {
 				$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 		} else {
-				$apiresults = array("result" => "success", "message" => "GG");
+				$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 		}
 		
 	}
@@ -330,16 +332,15 @@
 			$countResultrsltgoShowCustomFields = mysqli_num_rows($rsltgoShowCustomFields);
 			
 			
-					if($countResultrsltgoShowCustomFields > 1) {
+				if($countResultrsltgoShowCustomFields > 1) {
 	
-							while($fresultsShow = mysqli_fetch_array($rsltgoShowCustomFields, MYSQLI_ASSOC)){
-									$goCustomFields .= $fresultsShow['Field'].",";
-							}
-							
-							$goRetMessage = preg_replace("/,$/",'',$goCustomFields);
-							
-							
-					}
+						while($fresultsShow = mysqli_fetch_array($rsltgoShowCustomFields, MYSQLI_ASSOC)){
+								$goCustomFields .= $fresultsShow['Field'].",";
+						}
+						
+						$goRetMessage = preg_replace("/,$/",'',$goCustomFields);
+						
+				}
 		
 		}
 				
