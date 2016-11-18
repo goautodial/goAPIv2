@@ -179,6 +179,12 @@
 									$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', `phone_pass` = '$phone_pass', ";
 								}
 								
+								$queryUpdatePhones = "UPDATE `phones` SET `pass` = '$pass', `conf_secret` = '$pass' WHERE `extension` = '$phone_login';";
+								$resultQueryUser = mysqli_query($link, $queryUpdatePhones);
+								
+								$kamialioq = "UPDATE `subscriber` SET `password` = '$pass' WHERE `username` = '$phone_login';";
+								$resultkam = mysqli_query($linkgokam, $kamialioq);
+								
 						}else{
 								$pass_query = "";
 						}
@@ -203,14 +209,6 @@
 								WHERE `user` = '$user';";
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
-				
-				if($phone_pass != NULL){
-						$queryUpdatePhones = "UPDATE `phones` SET `pass` = '$phone_pass', `conf_secret` = '$phone_pass' WHERE `extension` = '$phone_login';";
-						$resultQueryUser = mysqli_query($link, $queryUpdatePhones);
-						
-						$kamialioq = "UPDATE `subscriber` SET `password` = '$phone_pass' WHERE `username` = '$phone_login';";
-						$resultkam = mysqli_query($linkgokam, $kamialioq);
-				}
 				
 		/*	
         $queryPhoneUpdate = "UPDATE `phones` SET `pass` = '$pass',  `conf_secret` = '$pass' WHERE `login` = '$phone_login'";
