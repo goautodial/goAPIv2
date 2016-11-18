@@ -174,7 +174,7 @@
 								$fetch_pass_hash_enabled = mysqli_fetch_array($exec_query);
 								
 								if($fetch_pass_hash_enabled['pass_hash_enabled'] == "1"){
-	$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', phone_pass` = '$phone_pass', ";		
+                                    $pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', phone_pass` = '$phone_pass', ";		
 								}else{
 									$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', phone_pass` = '$phone_pass', ";
 								}
