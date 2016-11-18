@@ -1,7 +1,7 @@
 <?php
     #######################################################
-    #### Name: goGetDIDInfo.php		               ####
-    #### Description: API to get specific DID	       ####
+    #### Name: goGetDIDInfo.php		    ####
+    #### Description: API to get specific DID	        ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
     #### Written by: Jeremiah Sebastian V. Samatra     ####
@@ -24,7 +24,8 @@
 			$ul = "WHERE did_id='$did_id' AND user_group='$groupId'";  
 		}
 
-   		$query = "SELECT did_id,did_pattern,did_description,did_active,did_route,record_call,filter_clean_cid_number from vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
+   		$query = "SELECT did_id,did_pattern,did_description,did_active,did_route,record_call,filter_clean_cid_number,
+		group_id, phone, server_ip, menu_id, voicemail_ext, extension, exten_context FROM vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
 		

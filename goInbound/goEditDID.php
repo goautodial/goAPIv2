@@ -26,19 +26,50 @@
 
         ### Ingroup
         $group_id = $_REQUEST['group_id'];
+		
+		if($group_id != NULL){
+			$group_id_sql = ", group_id = '$group_id' ";	
+		}else{
+			$group_id_sql = "";	
+		}
+		
         ### Phone
         $phone = $_REQUEST['phone'];
         $server_ip = $_REQUEST['server_ip'];
-
+		
+		if($phone != NULL){
+			$phone_sql = ", phone = '$phone', server_ip = '$server_ip' ";
+		}else{
+			$phone_sql = "";	
+		}
+		
         ### IVR
         $menu_id = $_REQUEST['menu_id'];
-
+		
+		if($menu_id != NULL){
+			$menu_id_sql = ", menu_id = '$menu_id' ";
+		}else{
+			$menu_id_sql = "";	
+		}
+		
         ### Voicemail
         $voicemail_ext = $_REQUEST['voicemail_ext'];
-
+		
+		if($voicemail_ext != NULL){
+			$voicemail_ext_sql = ", voicemail_ext = '$voicemail_ext' ";
+		}else{
+			$voicemail_ext_sql = "";	
+		}
+		
         ### Custon Extension
         $extension = $_REQUEST['extension'];
         $exten_context = $_REQUEST['exten_context'];
+		
+		if($extension != NULL){
+			$extension_sql = ", extension = '$extension', exten_context = '$exten_context' ";
+		}else{
+			$extension_sql = "";	
+		}
 
 
         $did_id = $_REQUEST['did_id'];
@@ -124,31 +155,16 @@
                 $apiresults = array("result" => "Error: Special characters found in exten_context");
         } else {
 
-
-
-                              /*  $items = $values;
-                                foreach (explode("&",$items) as $item)
-                                {
-                                        list($var,$val) = explode("=",$item,2);
-                                        if (strlen($val) > 0)
-                                        {
-
-                                                if ($var!="did_id")
-                                                        $itemSQL .= "$var='".str_replace('+',' ',mysql_real_escape_string($val))."', ";
-
-                                                if ($var=="did_id")
-                                                        $didid_data ="$val";
-
-                                        }
-                                }
-                                $itemSQL = rtrim($itemSQL,', ');
-			      */
-                        if($dataID != NULL){
+				if($dataID != NULL){
 			    if($did_pattern == null){ $did_pattern = $dataPattern;}
 			    if($did_description == null) { $did_description = $datadid_description;} else {$did_description = $did_description;}
 			    if($did_active == null) {$did_active = $datadid_active;} else {$did_active = $did_active;}
 			    if($did_route == null) {$did_route = $datadid_route;} else { $did_route = $did_route;}
-                                $query = "UPDATE vicidial_inbound_dids SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active', did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' WHERE did_id='$did_id';";
+                                $query = "UPDATE vicidial_inbound_dids
+								SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active',
+								did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' $group_id_sql $phone_sql
+								$menu_id_sql $voicemail_ext_sql $extension_sql 
+								WHERE did_id='$did_id';";
                                 $resultQuery = mysqli_query($link, $query);
 
         ### Admin logs
