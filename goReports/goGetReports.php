@@ -2,9 +2,9 @@
     ####################################################
     #### Name: goGetReports.php                     ####
     #### Description: API for reports               ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-    #### Written by: Jerico James Milo              ####
+    #### Version: 4.0                               ####
+    #### Copyright: GOAutoDial Ltd. (c) 2011-2016   ####
+    #### Written by: Alexander Jim H. Abenoja       ####
     #### License: AGPLv2                            ####
     ####################################################
 /*ini_set('display_errors', 1);
@@ -12,13 +12,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);*/
 
     include_once("../goFunctions.php");
-    include_once("goReportsFunctions.php");	
+	include_once("goReportsFunctions.php");	
 	
 	// need function go_sec_convert();
-	
-	//$pageTitle = call_export_report, inbound_report, stats, agent_detail, agent_pdetail, dispo, sales_agent, sales_tracker, call_export_report, dashboard
-	//$request = daily, weekly, monthly, outbound, inbound
-    //https://webrtc.goautodial.com/goAPI/goJamesReports/goAPI.php?goUser=admin&goPass=G02x16&goAction=goGetReports&responsetype=json
 	
     $pageTitle          = $_REQUEST['pageTitle'];
     $fromDate           = $_REQUEST['fromDate'];
@@ -28,8 +24,6 @@ error_reporting(E_ALL);*/
     $userID             = $_REQUEST['userID'];
     $userGroup          = $_REQUEST['userGroup'];
 	$dispo_stats		= $_REQUEST['statuses'];
-	
-	//$returns = $pageTitle.' == '.$fromDate.' == '.$toDate.' == '.$campaignID.' == '.$userID;
 	
 	$userGroup = get_group_id($userID, $link);
 	
@@ -56,55 +50,111 @@ error_reporting(E_ALL);*/
 		$lists = explode(" ",$lists);
 		$statuses = explode(" ",$dispo_stats);
 		
+		$campaign_ct = count($campaigns);
+		$group_ct = count($inbounds);
+		$list_ct = count($lists);
+		$status_ct = count($statuses);
+		$campaign_string='|';
+		$group_string='|';
+		$user_group_string='|';
+		$list_string='|';
+		$status_string='|';
+		
 		if($campaigns != NULL){
 			$i=0;
-			while($i < count($campaigns)){
-				if (strlen($campaigns[$i]) > 0) {
-				   $campaign_SQL .= "'$campaigns[$i]',";
+			while($i < $campaign_ct){
+				if (strlen($campaign[$i]) > 0) {
+				   $campaign_string .= "$campaign[$i]|";
+				   $campaign_SQL .= "'$campaign[$i]',";
 				}
 				$i++;
 			}
-			$campaign_SQL = preg_replace("/,$/",'',$campaign_SQL);
-			$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
+			if ( strlen($campaign_SQL) < 1 )
+				{
+				//$campaign_SQL = "campaign_id IN('')";
+				$campaign_SQL = "";
+				$RUNcampaign=1;
+				}
+			else
+				{
+				$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
+				$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
+				$RUNcampaign++;
+				}
 		}
 		
 		if($inbounds != NULL){
-			$list_SQL = "";	
+			$i=0;
+			while($i < $group_ct){
+				if (strlen($inbounds[$i]) > 0) {
+				  $group_string .= "$inbounds[$i]|";
+				  $group_SQL .= "'$inbounds[$i]',";
+				}
+				$i++;
+			}
+			
+			if ( (preg_match("/NONE/",$group_string) ) or ($group_ct < 1) ){
+				//$group_SQL = "campaign_id IN('')";
+				$group_SQL = "";
+				$RUNgroup=0;
+				
+			}else{
+				$group_SQL = preg_replace("/,$/i",'',$group_SQL);
+				
+				if($group_SQL!=NULL){
+					$group_SQL = "and vl.campaign_id IN($group_SQL)";
+				}else {
+					$group_SQL = "and vl.campaign_id IN('$group_SQL')";
+				}
+				
+				$RUNgroup++;
+			}
 		}
 		
 		if($lists != NULL){
-			$list_SQL = "";	
+			$list_SQL = "";
+			
+			$i=0;
+			while($i < $list_ct){
+				$list_string .= "$lists[$i]|";
+				$list_SQL .= "'$lists[$i]',";
+				$i++;
+			}
+			if ( (preg_match("/ALL/",$list_string) ) or ($list_ct < 1) ){
+				$list_SQL = "";
+			}
+			else{
+				$list_SQL = preg_replace("/,$/i",'',$list_SQL);
+				$list_SQL = "and vi.list_id IN($list_SQL)";
+			}
 		}
 		
 		if($dispo_stats != NULL){
-			//$i=0;
-			//$all_stats = "N";
-			//$status_SQL = "";
-			//
-			//while($i < count($statuses)){
-			//	$status_SQL .= "'$status[$i]',";
-			//	
-			//	if($status[$i] == "ALL"){
-			//		$all_stats = "Y";
-			//	}
-			//	$i++;
-			//}
-			//
-			//$status_SQL = preg_replace("/,$/",'',$status_SQL);
-			//
-			//if($all_stats == "N"){
-			//	$status_SQL = "and vl.status IN ($status_SQL)";
-			//}else{
+			$i=0;
+			while($i < $status_ct){
+				$status_string .= "$dispo_stats[$i]|";
+				$status_SQL .= "'$dispo_stats[$i]',";
+				$i++;
+			}
+			if ( (preg_replace("/ALL/",$status_string) ) or ($status_ct < 1) ){
 				$status_SQL = "";
-			//}
-			
+			}
+			else{
+				$status_SQL = preg_replace("/,$/i",'',$status_SQL);
+				$status_SQL = "and vl.status IN ($status_SQL)";
+			}
 		}
-		//$status_SQL = "";
 		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
+		$user_group_SQL = "";
 		
-		$query = "SELECT vl.call_date, vl.phone_number, vl.status, vl.user, vl.campaign_id, vi.vendor_lead_code, vi.source_id, vi.list_id, vi.gmt_offset_now, vi.phone_code, vi.phone_number, vi.title, vi.first_name, vi.middle_initial, vi.last_name, vi.address1, vi.address2, vi.address3, vi.city, vi.state, vi.province, vi.postal_code, vi.country_code, vi.gender, vi.date_of_birth, vi.alt_phone, vi.email, vi.security_phrase, vi.comments, vl.length_in_sec, vl.user_group, vl.alt_dial, vi.rank, vi.owner, vi.lead_id, vl.uniqueid, vi.entry_list_id, vi.entry_date, vi.called_count, vi.last_local_call_time, vi.modify_date, vi.called_since_last_reset
+		if ($RUNcampaign > 0){
+			$query = "SELECT vl.call_date, vl.phone_number, vl.status, vl.user, vl.campaign_id, vi.vendor_lead_code, vi.source_id, vi.list_id, vi.gmt_offset_now, vi.phone_code, vi.phone_number, vi.title, vi.first_name, vi.middle_initial, vi.last_name, vi.address1, vi.address2, vi.address3, vi.city, vi.state, vi.province, vi.postal_code, vi.country_code, vi.gender, vi.date_of_birth, vi.alt_phone, vi.email, vi.security_phrase, vi.comments, vl.length_in_sec, vl.user_group, vl.alt_dial, vi.rank, vi.owner, vi.lead_id, vl.uniqueid, vi.entry_list_id, vi.entry_date, vi.called_count, vi.last_local_call_time, vi.modify_date, vi.called_since_last_reset
 		FROM vicidial_log vl, vicidial_list vi
-		WHERE vi.lead_id=vl.lead_id $list_SQL $campaign_SQL  $status_SQL group by vl.call_date order by vl.call_date LIMIT 100;";
+		WHERE vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date LIMIT 100;";
+		}
+		if ($RUNgroup > 0){
+			$query = mysqli_query($link, "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.phone_number,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.closecallid,vi.entry_list_id,vl.uniqueid$export_fields_SQL from vicidial_users vu,vicidial_closer_log vl,vicidial_list vi where date_format(vl.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date limit 100000");
+		}
 		
 		//$query = "SELECT * FROM vicidial_list LIMIT 100;";
 		$result = mysqli_query($link, $query);
