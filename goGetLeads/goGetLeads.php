@@ -33,6 +33,7 @@
 	$address_filter = mysqli_real_escape_string($link, $_REQUEST['address_filter']);
 	$city_filter = mysqli_real_escape_string($link, $_REQUEST['city_filter']);
 	$state_filter = mysqli_real_escape_string($link, $_REQUEST['state_filter']);
+	$search_customers = mysqli_real_escape_string($link, $_REQUEST['search_customers']);
 	
 	$goSearch = "";
 	
@@ -107,7 +108,13 @@
         $data = array();
         
 	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
-                array_push($data, $fresults);
+		$thisLead = $fresults['lead_id'];
+		$queryc = "SELECT * FROM go_customers WHERE lead_id='$thisLead' LIMIT 1;";
+		$rsltc = mysqli_query($linkgo, $queryc);
+		$cust_cnt = mysqli_num_rows($rsltc);
+		if ($cust_cnt > 0 && !$search_customers) { continue; }
+		if ($cust_cnt < 1 && $search_customers) { continue; }
+        array_push($data, $fresults);
 		$dataLeadid[] = $fresults['lead_id'];
 		$dataListid[] = $fresults['list_id'];
 		$dataFirstName[] = $fresults['first_name'];
