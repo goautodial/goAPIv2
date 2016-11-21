@@ -19,8 +19,9 @@
     if ($groupId != 'ADMIN') {
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
-    //var_dump($groupId);
-    //die(dd);
+    
+	$user = $_REQUEST["user"];
+	
 	// getting agent count
 	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC;";
 	$queryCount = mysqli_query($link, $getLastCount);
@@ -65,12 +66,15 @@
 		}
 		
 		
-		
-	
+	// get user_level
+	$query_userlevel_sql = "SELECT user_level FROM vicidial_users WHERE user_id = '$user' LIMIT 1;";
+	$rsltv_userlevel = mysqli_query($link, $query_userlevel_sql);
+	$fetch_user_level = mysqli_fetch_array($rsltv_userlevel);
+	$user_level = $fetch_user_level["user_level"];
 	
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' $ul ORDER BY user ASC;";
+	$query = "SELECT user_id, user, full_name, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user != 'goautodial' AND user != 'goAPI' AND user_level != '4' AND user_level <= '$user_level' $ul ORDER BY user ASC;";
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
 		
