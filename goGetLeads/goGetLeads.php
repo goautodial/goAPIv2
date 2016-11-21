@@ -113,12 +113,6 @@
         $data = array();
         
 	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
-		$thisLead = $fresults['lead_id'];
-		$queryc = "SELECT * FROM go_customers WHERE lead_id='$thisLead' LIMIT 1;";
-		$rsltc = mysqli_query($linkgo, $queryc);
-		$cust_cnt = mysqli_num_rows($rsltc);
-		if ($cust_cnt > 0 && !$search_customers) { continue; }
-		if ($cust_cnt < 1 && $search_customers) { continue; }
         array_push($data, $fresults);
 		$dataLeadid[] = $fresults['lead_id'];
 		$dataListid[] = $fresults['list_id'];
