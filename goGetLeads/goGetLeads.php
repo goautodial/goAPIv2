@@ -33,6 +33,7 @@
 	$address_filter = mysqli_real_escape_string($link, $_REQUEST['address_filter']);
 	$city_filter = mysqli_real_escape_string($link, $_REQUEST['city_filter']);
 	$state_filter = mysqli_real_escape_string($link, $_REQUEST['state_filter']);
+	$search_customers = mysqli_real_escape_string($link, $_REQUEST['search_customers']);
 	
 	$goSearch = "";
 	
@@ -71,9 +72,14 @@
 	$allowedCampaignsFetch = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC);
 	$allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
 	
+	if ($search_customers) {
+		$customersOnly = "AND lead_id IN (SELECT lead_id FROM `$VARDBgo_database`.go_customers)";
+	} else {
+		$customersOnly = "AND lead_id NOT IN (SELECT lead_id FROM `$VARDBgo_database`.go_customers)";
+	}
 	//if admin
 	if(preg_match("/ALL-CAMPAIGNS/", $allowedCampaigns)){
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit";
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit";
 
         $returnRes = mysqli_query($link, $queryx);
 	} else { //if multiple allowed campaigns
@@ -99,15 +105,15 @@
 	
 		//get all leads from return list_id
 //		$queryx = "SELECT count(*) as xxx FROM vicidial_list WHERE list_id IN($fetchLists);";
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $goMyLimit;";
-		$returnRes = mysqli_query($link, $queryx); 
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit;";
+		$returnRes = mysqli_query($link, $queryx);
 		
 	}
         
         $data = array();
         
 	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
-                array_push($data, $fresults);
+        array_push($data, $fresults);
 		$dataLeadid[] = $fresults['lead_id'];
 		$dataListid[] = $fresults['list_id'];
 		$dataFirstName[] = $fresults['first_name'];
