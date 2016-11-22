@@ -52,8 +52,8 @@ ini_set('memory_limit', -1);
 		    $inbounds = explode(" ",$inbounds);
 		if($lists != "")	
 		    $lists = explode(" ",$lists);
-		if($statuses != "")	
-		    $statuses = explode(" ",$dispo_stats);
+		if($dispo_stats != "")	
+		    $dispo_stats = explode(" ",$dispo_stats);
 		
 		$campaign_SQL = "";
 		$group_SQL = "";
@@ -63,7 +63,7 @@ ini_set('memory_limit', -1);
 		$campaign_ct = count($campaigns);
 		$group_ct = count($inbounds);
 		$list_ct = count($lists);
-		$status_ct = count($statuses);
+		$status_ct = count($dispo_stats);
 		
 		if($campaigns != ""){
 			$i=0;
@@ -129,13 +129,13 @@ ini_set('memory_limit', -1);
 			}
 		}
 		
-		if($statuses != ""){
+		if($dispo_stats != ""){
 			$i=0;
 			while($i < $status_ct){
-				$status_SQL .= "'$statuses[$i]',";
+				$status_SQL .= "'$dispo_stats[$i]',";
 				$i++;
 			}
-			if ( (in_array("ALL", $statuses) ) or ($status_ct < 1) ){
+			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ){
 				$status_SQL = "";
 			}
 			else{
@@ -246,7 +246,7 @@ ini_set('memory_limit', -1);
 				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'");
 			}
             
-				$resultu = mysqli_fetch_array($query, MYSQLI_ASSOC);
+				$resultu = mysqli_fetch_array($query);
 				
 				$return['campaign_name'] = $resultu['campaign_name'];
 				
@@ -260,14 +260,18 @@ ini_set('memory_limit', -1);
 				
 				$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'");
 				$sstatusRX = "";
+				$sstatuses = array();
 				
-				while($Qstatus = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+				$a = 0;
+				while($Qstatus = mysqli_fetch_array($query)){
 					$goTempStatVal = $Qstatus['status'];
-					$sstatuses[$Qstatus['status']] = $Qstatus['status'];
+					$sstatuses[$a] = $Qstatus['status'];
 					$sstatusRX	.= "{$goTempStatVal}|";
-				}    
+					$a++;
+				}
 				
-				//$sstatuses = implode("','",$sstatuses);
+				if(!empty($sstatuses))
+				$sstatuses = implode("','",$sstatuses);
 				
 				/*foreach ($query->result() as $Qstatus)
 				{
@@ -277,16 +281,19 @@ ini_set('memory_limit', -1);
 				$sstatuses = implode("','",$sstatuses);*/
 				
 				$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'");
-				$cstatuses = "";
 				$cstatusRX = "";
+				$cstatuses = array();
 				
-				while($Qstatus = mysqli_fetch_array($query2, MYSQLI_ASSOC)){
+				$b = 0;
+				while($Qstatus = mysqli_fetch_array($query2)){
 					$goTempStatVal = $Qstatus['status'];
-					$cstatuses[$Qstatus['status']] = $Qstatus['status'];
+					$cstatuses[$b] = $Qstatus['status'];
 					$cstatusRX	.= "{$goTempStatVal}|";
-				}		 
+					$b++;
+				}
 				
-				//$cstatuses = implode("','",$cstatuses);
+				if(!empty($cstatuses))
+				$cstatuses = implode("','",$cstatuses);
 				
 				if (count($sstatuses) > 0 && count($cstatuses) > 0)
 				{
@@ -2126,7 +2133,8 @@ ini_set('memory_limit', -1);
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
 					
 					if ($request == 'outbound') {
-						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' order by vlo.call_date ASC limit 2000");
+						$outbound_query = "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' order by vlo.call_date ASC limit 2000";
+						$query = mysqli_query($link, $outbound_query);
 						$outbound_result = "";
 						$sale_num_value = 1;
 						while($row = mysqli_fetch_array($query)){
@@ -2210,7 +2218,7 @@ ini_set('memory_limit', -1);
 					
 					//$return['TOPsorted_output']		= $TOPsorted_output;
 					//$return['file_output']			= $file_output;
-					$apiresults = array("outbound_result" => $outbound_result, "inbound_result" => $inbound_result, "sale_num" => $sale_num, "call_date" => $call_date, "agent" => $agent, "phone_number" => $phone_number, "lead_id" => $lead_id, "first_name" => $first_name, "last_name" => $last_name, "address" => $address, "city" => $city, "state" => $state, "postal" => $postal, "email" => $email, "alt_phone" => $alt_phone, "comments" => $comments);
+					$apiresults = array("outbound_result" => $outbound_result, "inbound_result" => $inbound_result, "sale_num" => $sale_num, "call_date" => $call_date, "agent" => $agent, "phone_number" => $phone_number, "lead_id" => $lead_id, "first_name" => $first_name, "last_name" => $last_name, "address" => $address, "city" => $city, "state" => $state, "postal" => $postal, "email" => $email, "alt_phone" => $alt_phone, "comments" => $comments,"query" => $outbound_query);
 					
 					return $apiresults;
 				}
