@@ -44,19 +44,20 @@
             $apiresults = array("result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label);
         }else{
             $tableName = "custom_".$list_id;
-            $tableCheck="SHOW TABLES LIKE '$tableName'";
+            #$tableCheck="SHOW TABLES LIKE '$tableName'";
+            $tableCheck="DESC $tableName;";
             $tableCheckResult = mysqli_query($link, $tableCheck);
             //$countTable = mysqli_num_rows($tableCheckResult);
             
-            if (!$tableCheckResult) {
-                $field_sql = "CREATE TABLE custom_$list_id (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL);";	
+/*            if (!$tableCheckResult) {
+                $field_sql .= "CREATE TABLE custom_$list_id (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL);";	
                 $rslt = mysqli_query($link, $field_sql);		
-            }
+            } */
             
             if (!$tableCheckResult) {
-                $field_sql = "CREATE TABLE custom_$list_id (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";		
+                $field_sql .= "CREATE TABLE custom_$list_id (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";		
             }else{
-                $field_sql = "ALTER TABLE custom_$list_id ADD $field_label ";
+                $field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
             }
            
             if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
@@ -170,7 +171,7 @@
                             field_order='$field_order';";
             $insertrslt = mysqli_query($link, $insert);
             $countResultInsert = mysqli_num_rows($insertrslt);
-            
+
             if($insertrslt){
                 $SQLdate = date("Y-m-d H:i:s");
                 $queryLog = "INSERT INTO go_action_logs
