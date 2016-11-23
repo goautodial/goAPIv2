@@ -13,7 +13,7 @@
     $list_id            = mysqli_real_escape_string($link, $_REQUEST['list_id']);
     $field_id           = $_REQUEST['field_id'];
     $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
-    $field_label_old    = str_replace(" ","_",trim($_REQUEST['$field_label_old']));
+    $field_label_old    = str_replace(" ","_",trim($_REQUEST['field_label_old']));
     $field_name         = $_REQUEST['field_name'];
     $field_description  = $_REQUEST['field_description'];
     $field_rank         = $_REQUEST['field_rank'];
@@ -31,7 +31,7 @@
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
     if($field_label_old != $field_label){
-        $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label $field_label ";
+        $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
     }else{
         $field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
     }
