@@ -20,7 +20,7 @@
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
     
-	$user = $_REQUEST["user"];
+	$user = (strlen($_REQUEST["user"]) > 0) ? $_REQUEST["user"] : $goUser;
 	
 	// getting agent count
 	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC";
@@ -67,7 +67,7 @@
 		
 		
 	// get user_level
-	$query_userlevel_sql = "SELECT user_level FROM vicidial_users WHERE user = '$goUser' LIMIT 1";
+	$query_userlevel_sql = "SELECT user_level FROM vicidial_users WHERE user = '$user' LIMIT 1";
 	$rsltv_userlevel = mysqli_query($link, $query_userlevel_sql);
 	$fetch_user_level = mysqli_fetch_array($rsltv_userlevel);
 	$user_level = $fetch_user_level["user_level"];
