@@ -501,7 +501,7 @@ if ($is_logged_in) {
 				'url' => '',
 				'alarm' => '',
 				'notification_sent' => 0,
-				'color' => 'orange'
+				'color' => '#03a9f4'
 			);
 			$rslt = $goDB->insert('events', $insertData);
 		}
