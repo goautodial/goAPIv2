@@ -8,7 +8,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
  
     ### POST or GET Variables
         $user_group= $_REQUEST['user_group'];
@@ -34,8 +34,6 @@
                 /*if($group_level < 1 || $group_level > 9) {
                         $apiresults = array("result" => "Error: Group Level Value should be in between 1 and 9");
                 } else {*/
-
-
 
                 $groupId = go_get_groupid($goUser);
 

@@ -7,8 +7,9 @@
     #### Written by: Jeremiah Sebastian Samatra        ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("../goFunctions.php");
-    
+    include_once("../goFunctions.php");
+    include_once("../goDBgoautodial.php");
+	
     ### POST or GET Variables
     $agent_id = $_REQUEST['agent_id'];
     
@@ -26,26 +27,21 @@
                 	$group_type = "Default";
 		}
 
-   		$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
+   		$query = "SELECT user_group,group_name,forced_timeclock_login,shift_enforcement FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
+		$rsltv = mysqli_fetch_assoc($rsltv);
 		
-		$queryGL = "SELECT group_level,group_list_id FROM user_access_group WHERE user_group='$agent_id';";
+		$queryGL = "SELECT group_level FROM user_access_group WHERE user_group='$agent_id';";
 		$rsltvGL = mysqli_query($linkgo, $queryGL);
-		$fetchGL = mysqli_fetch_array($rsltvGL);
+		$fetchGL = mysqli_fetch_assoc($rsltvGL);
 		
-		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                $dataUserGroup[] = $fresults['user_group'];
-                $dataGroupName[] = $fresults['group_name'];// .$fresults['dial_method'].$fresults['active'];
-                $dataGroupType[] = $group_type;
-                $dataForced[] = $fresults['forced_timeclock_login'];
-				$dataGroupLevel[] = $fetchGL['group_level'];
-				$dataGroupListID[] = $fetchGL['group_list_id'];
-                $apiresults = array("result" => "success", "user_group" => $dataUserGroup, "group_name" => $dataGroupName, "group_type" => $dataGroupType, "forced_timeclock_login" => $dataForced, "group_level" => $dataGroupLevel, "group_list_id" => $dataGroupListID);
-			}
-		} else {
+		$data = array_merge($rsltv, $fetchGL);
+		
+		//if(!empty($data)) {
+            $apiresults = array("result" => "success", "data" => $data);
+		/*} else {
 			$apiresults = array("result" => "Error: User Group doesn't exist.");
-		}
+		}*/
 	}
 ?>
