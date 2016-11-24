@@ -487,6 +487,23 @@ if ($is_logged_in) {
 				'lead_status' => $CallBackLeadStatus
 			);
 			$rslt = $astDB->insert('vicidial_callbacks', $insertData);
+			
+			// Add Callback to events
+			$astDB->where('lead_id', $lead_id);
+			$rslt = $astDB->getOne('vicidial_list', 'phone_number');
+			$insertData = array(
+				'user_id' => $agent->user_id,
+				'title' => 'CALLBACK',
+				'description' => $rslt['phone_number'],
+				'all_day' => 0,
+				'start_date' => $CallBackDatETimE,
+				'end_date' => $CallBackDatETimE,
+				'url' => '',
+				'alarm' => '',
+				'notification_sent' => 0,
+				'color' => 'orange'
+			);
+			$rslt = $goDB->insert('events', $insertData);
 		}
 		
 		### BEGIN Call Notes Logging ###
