@@ -325,15 +325,16 @@ ini_set('memory_limit', -1);
 				if(!empty($cstatuses))
 				$cstatuses = implode("','",$cstatuses);
 				
-				if (count($sstatuses) > 0 && count($cstatuses) > 0)
+				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
 				{
 				   $statuses = "{$sstatuses}','{$cstatuses}";
 				   $statusRX = "{$sstatusRX}{$cstatusRX}";
 				} else {
-				   $statuses = (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
-				   $statusRX = (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
 				}
 				$statusRX = trim($statusRX, "|");
+				
 				
 				/*
 				foreach ($query->result() as $Qstatus)
@@ -2050,9 +2051,9 @@ ini_set('memory_limit', -1);
 				if ($pageTitle == "sales_agent") {
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
-					
 					if($request == "outbound"){
 						### Outbound Sales ###
+						
 						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' group by us.full_name";
 						$query = mysqli_query($link, $outbound_query);
 						
