@@ -21,12 +21,12 @@
     }
 
     $NOW = date('Y-m-d');    
-    $YESTERDAY = date('d.m.Y',strtotime('-1 days'));
+    $YESTERDAY = date('Y-m-d',strtotime('-1 days'));
     
     $status = "SALE";
     $date = "call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'";
-    $dateY = "call_date between '$YESTERDAY 00:00:00' AND '$YESTERDAY 23:59:59'";
-    $dateLW = "call_date between NOW() - INTERVAL DAYOFWEEK(NOW())+6 DAY AND NOW() - INTERVAL DAYOFWEEK(NOW())-1 DAY";
+    $dateY = "call_date BETWEEN '$YESTERDAY 00:00:00' AND '$YESTERDAY 23:59:59'";
+    $dateLW = "call_date BETWEEN NOW() - INTERVAL DAYOFWEEK(NOW())+6 DAY AND NOW() - INTERVAL DAYOFWEEK(NOW())-1 DAY";
    
     $query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $date $ul) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $date $ul) as TotalSales";
     $queryY = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul) as TotalSalesYesterday";
