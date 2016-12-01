@@ -38,6 +38,8 @@
 		$dataagent_script_override[] =  $fresults['agent_script_override'];
 		$datacampaign_cid_override[] =  $fresults['campaign_cid_override'];
 		$datadrop_inbound_group_override[] =  $fresults['drop_inbound_group_override'];
+		$datareset_time[] = $fresults['reset_time'];
+		$datalist_desc[] = $fresults['list_description'];
 		
 		$apiresults = array(
 			"result" => "success",
@@ -52,7 +54,9 @@
 			"web_form_address" => $dataweb_form_address,
 			"agent_script_override" => $dataagent_script_override,
 			"campaign_cid_override" => $datacampaign_cid_override,
-			"drop_inbound_group_override" => $datadrop_inbound_group_override
+			"drop_inbound_group_override" => $datadrop_inbound_group_override,
+			"reset_time" => $datareset_time,
+			"list_description" => $datalist_desc
 		);
 	}
 ?>
