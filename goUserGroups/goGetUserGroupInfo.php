@@ -32,7 +32,7 @@
 		$countResult = mysqli_num_rows($rsltv);
 		$rsltv = mysqli_fetch_assoc($rsltv);
 		
-		$queryGL = "SELECT group_level FROM user_access_group WHERE user_group='$agent_id';";
+		$queryGL = "SELECT group_level,permissions FROM user_access_group WHERE user_group='$agent_id';";
 		$rsltvGL = mysqli_query($linkgo, $queryGL);
 		$fetchGL = mysqli_fetch_assoc($rsltvGL);
 		
