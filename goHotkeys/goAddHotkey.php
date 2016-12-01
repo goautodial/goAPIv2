@@ -14,29 +14,37 @@
     $status = $_REQUEST['status'];
     $status_name = $_REQUEST['status_name'];
     
-    $query = "INSERT into vicidial_campaign_hotkeys
-            (
-                status,
-                hotkey,
-                status_name,
-                selectable,
-                campaign_id
-            ) 
-            VALUES(
-                '$status',
-                '$hotkey',
-                '$status_name',
-                'Y',
-                '$campaign_id'
-            )
-    ";
+    $checkHotkey = "SELECT * FROM vicidial_campaign_hotkeys WHERE campaign_id = '$campaign_id' AND hotkey = '$hotkey' OR status = '$status'";
+    $checkResult = mysqli_query($link, $checkHotkey);
+    $countCheck = mysqli_num_rows($checkResult);
     
-    $rsltv = mysqli_query($link, $query);
-    $countResult = mysqli_num_rows($rsltv);
-    
-    if($rsltv) {
-        $apiresults = array("result" => "success");
+    if($countCheck > 0) {
+        $apiresults = array("result" => "duplicate");
     } else {
-        $apiresults = array("result" => "Error: Failed to add campaign hotkey.");
+        $query = "INSERT into vicidial_campaign_hotkeys
+                (
+                    status,
+                    hotkey,
+                    status_name,
+                    selectable,
+                    campaign_id
+                ) 
+                VALUES(
+                    '$status',
+                    '$hotkey',
+                    '$status_name',
+                    'Y',
+                    '$campaign_id'
+                )
+        ";
+        
+        $rsltv = mysqli_query($link, $query);
+        $countResult = mysqli_num_rows($rsltv);
+        
+        if($rsltv) {
+            $apiresults = array("result" => "success");
+        } else {
+            $apiresults = array("result" => "Error: Failed to add campaign hotkey.");
+        }
     }
 ?>
