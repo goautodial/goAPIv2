@@ -270,11 +270,11 @@
 			
 			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string');";
 			$resultVSC = mysqli_query($link, $queryVSC);
-
+			
 				if($resultVSC) {
 				//$this->commonhelper->auditadmin('ADD',"Added New Carrier $carrier_id","INSERT INTO vicidial_server_carriers $itemSQL;");
-				//$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
-				//$resultVSC = mysqli_query($link, $queryUpdate);
+				$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
+				$resultVSC = mysqli_query($link, $queryUpdate);
 
 	### Admin logs
 					$SQLdate = date("Y-m-d H:i:s");
