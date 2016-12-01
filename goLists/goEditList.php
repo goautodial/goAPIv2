@@ -52,8 +52,6 @@ if($list_id == null) {
 	$apiresults = array("result" => "Error: Default value for reset_list is Y or N only.");
 } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name)){
 	$apiresults = array("result" => "Error: Special characters found in list_name");
-} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_description)) {
-	$apiresults = array("result" => "Error: Special characters found in list_description");
 } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $reset_time)) {
 	$apiresults = array("result" => "Error: Special characters found in reset_time");
 } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_a_number)) {
