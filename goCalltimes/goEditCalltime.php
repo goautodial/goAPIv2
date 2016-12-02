@@ -31,6 +31,14 @@
         $ct_friday_stop = $_REQUEST['ct_friday_stop'];
         $ct_saturday_start = $_REQUEST['ct_saturday_start'];
         $ct_saturday_stop = $_REQUEST['ct_saturday_stop'];
+        $default_audio = $_REQUEST['default_audio'];
+        $sunday_audio = $_REQUEST['sunday_audio'];
+        $monday_audio = $_REQUEST['monday_audio'];
+        $tuesday_audio = $_REQUEST['tuesday_audio'];
+        $wednesday_audio = $_REQUEST['wednesday_audio'];
+        $thursday_audio = $_REQUEST['thursday_audio'];
+        $friday_audio = $_REQUEST['friday_audio'];
+        $saturday_audio = $_REQUEST['saturday_audio'];
 		if($_REQUEST['user_group'] == "ALL"){
 			$user_group = "---ALL---";
 		}else{
@@ -131,7 +139,15 @@
                     ct_friday_start = '$ct_friday_start',
                     ct_friday_stop = '$ct_friday_stop',
                     ct_saturday_start = '$ct_saturday_start',
-                    ct_saturday_stop = '$ct_saturday_stop' 
+                    ct_saturday_stop = '$ct_saturday_stop',
+					default_afterhours_filename_override = '$default_audio',
+					sunday_afterhours_filename_override = '$sunday_audio',
+					monday_afterhours_filename_override = '$monday_audio',
+					tuesday_afterhours_filename_override = '$tuesday_audio',
+					wednesday_afterhours_filename_override = '$wednesday_audio',
+					thursday_afterhours_filename_override = '$thursday_audio',
+					friday_afterhours_filename_override = '$friday_audio',
+					saturday_afterhours_filename_override = '$saturday_audio' 
                     WHERE call_time_id = '$call_time_id'";
 							
                     $rsltvx = mysqli_query($link, $newQuery);
