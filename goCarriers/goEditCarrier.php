@@ -41,17 +41,11 @@
 		if(!in_array($protocol,$defProtocol) && $protocol != null) {
 				$apiresults = array("result" => "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only");
 		} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $registration_string)){
-                $apiresults = array("result" => "Error: Special characters found in registration_string");
-        } else {
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_name)){
                 $apiresults = array("result" => "Error: Special characters found in carrier_name");
         } else {
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_description)){
                 $apiresults = array("result" => "Error: Special characters found in carrier_description");
-        } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $global_string)){
-                $apiresults = array("result" => "Error: Special characters found in global_string");
         } else {
 
                 $groupId = go_get_groupid($goUser);
@@ -134,7 +128,7 @@
 				}
                         }
 
-}}}}
+}}
 
 
 #############################
