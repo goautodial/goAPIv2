@@ -7,7 +7,7 @@
     #### Written by: Jermiah Sebastian Samatra         ####
     #### License: AGPLv2                               ####
     #######################################################
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
     
     ### POST or GET Variables
     $list_id = $_REQUEST['list_id'];
@@ -19,8 +19,8 @@
     		$groupId = go_get_groupid($goUser);
     
 		if (!checkIfTenant($groupId)) {
-        		$ul = "WHERE vicidial_lists.list_id='$list_id'";
-    		} else { 
+        	$ul = "WHERE vicidial_lists.list_id='$list_id'";
+    	} else { 
 			$ul = "WHERE vicidial_lists.list_id='$list_id' AND user_group='$groupId'";  
 		}
 
@@ -54,25 +54,25 @@
 					$datadrop_inbound_group_override[] =  $fresults['drop_inbound_group_override'];
 					$datareset_time[] = $fresults['reset_time'];
 					$datalist_desc[] = $fresults['list_description'];
-					
-					$apiresults = array(
-						"result" => "success",
-						"list_id" => $dataListId,
-						"list_name" => $dataListName,
-						"active" => $dataActive,
-						"list_lastcalldate" => $dataListLastcallDate,
-						"tally" => $dataTally,
-						"cf_count" => $dataCFCount,
-						"campaign_id" => $dataCampaignId,
-						"reset_called_lead_status" => $datareset_called_lead_status,
-						"web_form_address" => $dataweb_form_address,
-						"agent_script_override" => $dataagent_script_override,
-						"campaign_cid_override" => $datacampaign_cid_override,
-						"drop_inbound_group_override" => $datadrop_inbound_group_override,
-						"reset_time" => $datareset_time,
-						"list_description" => $datalist_desc
-					);
 			}
+			
+			$apiresults = array(
+				"result" => "success",
+				"list_id" => $dataListId,
+				"list_name" => $dataListName,
+				"active" => $dataActive,
+				"list_lastcalldate" => $dataListLastcallDate,
+				"tally" => $dataTally,
+				"cf_count" => $dataCFCount,
+				"campaign_id" => $dataCampaignId,
+				"reset_called_lead_status" => $datareset_called_lead_status,
+				"web_form_address" => $dataweb_form_address,
+				"agent_script_override" => $dataagent_script_override,
+				"campaign_cid_override" => $datacampaign_cid_override,
+				"drop_inbound_group_override" => $datadrop_inbound_group_override,
+				"reset_time" => $datareset_time,
+				"list_description" => $datalist_desc
+			);
 		} else {
 			$apiresults = array("result" => "Error: List doesn't exist.");
 		}

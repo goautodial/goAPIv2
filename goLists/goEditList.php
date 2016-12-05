@@ -8,7 +8,7 @@
 #### License: AGPLv2                            ####
 ####################################################
 
-include_once ("../goFunctions.php");
+include_once("../goFunctions.php");
 
 ### POST or GET Variables
 $list_id = $_REQUEST['list_id'];
