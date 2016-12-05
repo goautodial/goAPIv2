@@ -268,7 +268,7 @@
 					$valSQL = rtrim($valSQL,",");
 					$itemSQL = "($varSQL) VALUES ($valSQL)";
 			
-			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$host', '$global_string');";
+			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string, active) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string', $active);";
 			$resultVSC = mysqli_query($link, $queryVSC);
 			
 				if($resultVSC) {
@@ -278,7 +278,7 @@
 
 	### Admin logs
 					$SQLdate = date("Y-m-d H:i:s");
-					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $host, $global_string);');";
+					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
 
 					$apiresults = array("result" => "success", "data" => $queryVSC);
