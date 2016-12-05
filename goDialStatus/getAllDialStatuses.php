@@ -10,12 +10,18 @@
     include_once("../goFunctions.php");
     
     $campaign_id = $_REQUEST['campaign_id'];
+	$get_hotkeys_only = $_REQUEST['hotkeys_only'];
+	
+	if (isset($get_hotkeys_only) && $get_hotkeys_only > 0) {
+		$where_human_answered = "WHERE human_answered='Y'";
+		$and_human_answered = "AND human_answered='Y'";
+	}
     
     $query = "SELECT status,status_name
-            FROM vicidial_statuses
+            FROM vicidial_statuses $where_human_answered
             UNION SELECT status,status_name
                 FROM vicidial_campaign_statuses
-            where campaign_id='$campaign_id' ORDER BY status";
+            WHERE campaign_id='$campaign_id' $and_human_answered ORDER BY status";
    	$rsltv = mysqli_query($link, $query);
     
     while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
