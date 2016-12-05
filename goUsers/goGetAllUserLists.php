@@ -20,7 +20,7 @@
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
     
-	$user = (isset($_REQUEST["user"])) ? $_REQUEST["user"] : $goUser;
+	//$user = (isset($_REQUEST["user"])) ? $_REQUEST["user"] : $goUser;
 	
 	// getting agent count
 	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC";
