@@ -44,6 +44,8 @@
 	$available_only_ratio_tally 	= $_REQUEST['available_only_ratio_tally'];
 	$campaign_rec_filename 			= $_REQUEST['campaign_rec_filename'];
 	$next_agent_call 				= $_REQUEST['next_agent_call'];
+	$xferconf_a_number 				= $_REQUEST["xferconf_a_number"];
+	$xferconf_b_number 				= $_REQUEST["xferconf_b_number"];
 	$three_way_call_cid 			= $_REQUEST['three_way_call_cid'];
 	$three_way_dial_prefix 			= $_REQUEST['three_way_dial_prefix'];
 	$customer_3way_hangup_logging 	= $_REQUEST['customer_3way_hangup_logging'];
@@ -149,6 +151,8 @@
 										available_only_ratio_tally = '$available_only_ratio_tally', 
 										campaign_rec_filename = '$campaign_rec_filename', 
 										next_agent_call = '$next_agent_call', 
+										xferconf_a_number = '$xferconf_a_number', 
+										xferconf_b_number = '$xferconf_b_number', 
 										three_way_call_cid = '$three_way_call_cid', 
 										three_way_dial_prefix = '$three_way_dial_prefix', 
 										customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
