@@ -41,12 +41,6 @@
 		if(!in_array($protocol,$defProtocol) && $protocol != null) {
 				$apiresults = array("result" => "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only");
 		} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_name)){
-                $apiresults = array("result" => "Error: Special characters found in carrier_name");
-        } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_description)){
-                $apiresults = array("result" => "Error: Special characters found in carrier_description");
-        } else {
 
                 $groupId = go_get_groupid($goUser);
 
@@ -108,7 +102,7 @@
                                         //var_dump("UPDATE vicidial_server_carriers SET $itemSQL WHERE carrier_id='$carrier_id';");
                                         //echo "UPDATE phones SET $itemSQL WHERE extension='$extension';";
 
-					$queryNew = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$ip_address';";
+					$queryNew = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
 					$resultNew = mysqli_query($link, $queryNew);
 
         ### Admin logs
@@ -125,8 +119,8 @@
 					$apiresults = array("result" => "Error: Carrier doesn't exist.");
 					}
 				}
-				}
-                        }
+				
+                        
 
 }}
 
