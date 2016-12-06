@@ -104,7 +104,7 @@
 				$account_entry .= "context=trunkinbound\r\n";
 				$account_entry .= "qualify=yes\r\n";
 				$account_entry .= "insecure=invite,port\r\n";
-				$account_entry .= "nat=yes\r\n";
+				$account_entry .= "nat=force_rport,comedia\r\n";
 				$account_entry .= "host=".$host."\r\n";
 				
 				if($authentication == "auth_reg"){
