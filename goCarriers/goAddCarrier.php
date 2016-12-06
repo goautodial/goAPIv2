@@ -268,7 +268,7 @@
 					$valSQL = rtrim($valSQL,",");
 					$itemSQL = "($varSQL) VALUES ($valSQL)";
 			
-			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string, active) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string', $active);";
+			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string, active) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string', '$active');";
 			$resultVSC = mysqli_query($link, $queryVSC);
 			
 				if($resultVSC) {
