@@ -16,7 +16,7 @@
 		$apiresults = array("result" => "Error: Set a value for List ID."); 
 	} else {
  
-    		$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser);
     
 		if (!checkIfTenant($groupId)) {
         	$ul = "WHERE vicidial_lists.list_id='$list_id'";

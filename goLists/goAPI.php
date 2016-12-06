@@ -12,6 +12,8 @@
     include_once("../goDBgoautodial.php");
     include_once("../goFunctions.php");
     
+    $version = file_get_contents('../version.txt');
+    
     ####### Variables #########
     
     if (isset($_GET["goAction"])) {
@@ -60,7 +62,6 @@
         $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );
         
     }
-    
     
     $userresponsetype = $_REQUEST["responsetype"];
     
