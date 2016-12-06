@@ -160,9 +160,7 @@
 			$apiresults = array("result" => "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only.");
 		} elseif((preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_id)) && $carrier_type != "justgo"){
 			$apiresults = array("result" => "Error: Special characters found in carrier_id");
-		} elseif((preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_name)) && $carrier_type != "justgo"){
-			$apiresults = array("result" => "Error: Special characters found in carrier_name");
-		} else {
+		}
 		
 			//$groupId = go_get_groupid($goUser);
 
@@ -289,7 +287,7 @@
 			} else {
 					$apiresults = array("result" => "Error: Carrier  doens't exist.", "data" => $querySelect);
 			}
-			}
+			
 			}
 #######################################
 		}
