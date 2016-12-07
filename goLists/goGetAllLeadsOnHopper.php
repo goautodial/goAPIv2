@@ -15,7 +15,7 @@
         vicidial_hopper.lead_id,
         vicidial_list.phone_number,
         vicidial_hopper.state,
-        vicidial_hopper.status,
+        vicidial_list.status,
         vicidial_list.called_count,
         vicidial_hopper.gmt_offset_now,
         vicidial_hopper.hopper_id,
@@ -26,7 +26,7 @@
     FROM vicidial_hopper
     LEFT JOIN vicidial_list
     ON vicidial_hopper.lead_id=vicidial_list.lead_id
-    WHERE vicidial_hopper.campaign_id = '$campaign_id'
+    WHERE vicidial_hopper.campaign_id = '75079959'
     ORDER BY vicidial_hopper.hopper_id";
     $rsltv = mysqli_query($link, $query);
 	$countResult = mysqli_num_rows($rsltv);
