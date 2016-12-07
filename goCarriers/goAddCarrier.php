@@ -183,7 +183,7 @@
 				$account_entry = str_replace($source_carrier,$carrier_id,$account_entry_to_be_filtered);
 				$global_string = $fetch_copy["globals_string"];
 				$dialplan_entry_to_be_filtered = $fetch_copy["dialplan_entry"];
-				$account_entry = str_replace($source_carrier,$carrier_id,$dialplan_entry_to_be_filtered);
+				$dialplan_entry = str_replace($source_carrier,$carrier_id,$dialplan_entry_to_be_filtered);
 			}
 
 			$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
