@@ -173,13 +173,18 @@
 			//}
 			
 			if($carrier_type == "copy"){
-				$query_copy = mysqli_query($link, "SELECT carrier_description, user_group, protocol, registration_string FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
+				$query_copy = mysqli_query($link, "SELECT * FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
 				$fetch_copy = mysqli_fetch_array($query_copy);
 				$user_group = $fetch_copy["user_group"]; 
 				$ulug = "WHERE user_group = '$user_group'";
 				
+				// fetch credentials of source carrier
 				$protocol = $fetch_copy["protocol"];
 				$carrier_description = $fetch_copy["carrier_description"];
+				$registration_string = $fetch_copy["registration_string"];
+				$account_entry = $fetch_copy["account_entry"];
+				$global_string = $fetch_copy["globals_string"];
+				$dialplan_entry = $fetch_copy["dialplan_entry"];
 			}
 
 			$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
@@ -194,7 +199,7 @@
 				$countCheck = mysqli_num_rows($rsltv);
 
 			if($countCheck > 0) {
-				$apiresults = array("result" => "Error: Carrier already exist.", "items0" => $codecs);
+				$apiresults = array("result" => "Error: Carrier already exist.");
 			} else {
 //                 if ($action == "add_new_carrier")
 //              {
@@ -233,19 +238,26 @@
 			//                $reg_ipSQL = "OR registration_string rlike '@".$dns['ip'].":'";
 			//        }
 			//}*/
-			$reg_string = $host;
 			
-			if ($reg_string=="208.43.27.84")
-			{
+			if($carrier_type == "manual"){
+				$reg_string = $host;
+				
+				if ($reg_string=="208.43.27.84")
+				{
 					$reg_string = "dal.justgovoip.com";
 					$reg_ipSQL = "OR registration_string rlike '@208.43.27.84:'";
+				}
+				
+				$additional_sql = "registration_string rlike '@$reg_string:' $reg_ipSQL AND ";
+			}else{
+				$additional_sql = "";
 			}
-
-			$querySelect = "select carrier_id from vicidial_server_carriers where registration_string rlike '@$reg_string:' $reg_ipSQL AND server_ip='$server_ip';";
-			$resultSelect = mysqli_query($link, $querySelect);
-
-			$isExist = mysqli_num_rows($resultSelect);
-			if (!$isExist)
+	
+				$querySelect = "select carrier_id from vicidial_server_carriers where $additional_sql server_ip='$server_ip';";
+				$resultSelect = mysqli_query($link, $querySelect);
+				$isExist = mysqli_num_rows($resultSelect);
+				
+			if (!$isExist || $carrier_type == "copy")
 			{
 					if ($reg_string=="dal.justgovoip.com" || $reg_string=="208.43.27.84")
 					{/*
