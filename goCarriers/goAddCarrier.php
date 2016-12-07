@@ -34,7 +34,6 @@
 			$carrier_id	= mysqli_real_escape_string($link, $_REQUEST['carrier_id']);
 			$carrier_name 	= mysqli_real_escape_string($link, $_REQUEST['carrier_name']);
 			$active	= $_REQUEST['active'];
-			
 		}
 		
 		if($carrier_type == "manual"){
@@ -135,7 +134,7 @@
 		}
 		
 		if($carrier_type == "copy"){
-			$server_ip	= mysqli_real_escape_string($link, $_REQUEST['copy_server_ip']);
+			$server_ip	= $_REQUEST['copy_server_ip'];
 			$source_carrier	= mysqli_real_escape_string($link, $_REQUEST['source_carrier']);
 		}
 
@@ -145,8 +144,6 @@
 
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
     $defActive = array("Y","N");
-		
-	
 		
 ########################################
 
@@ -182,9 +179,11 @@
 				$protocol = $fetch_copy["protocol"];
 				$carrier_description = $fetch_copy["carrier_description"];
 				$registration_string = $fetch_copy["registration_string"];
-				$account_entry = $fetch_copy["account_entry"];
+				$account_entry_to_be_filtered = $fetch_copy["account_entry"];
+				$account_entry = str_replace($source_carrier,$carrier_id,$account_entry_to_be_filtered);
 				$global_string = $fetch_copy["globals_string"];
-				$dialplan_entry = $fetch_copy["dialplan_entry"];
+				$dialplan_entry_to_be_filtered = $fetch_copy["dialplan_entry"];
+				$account_entry = str_replace($source_carrier,$carrier_id,$dialplan_entry_to_be_filtered);
 			}
 
 			$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
@@ -291,7 +290,7 @@
 					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
 
-					$apiresults = array("result" => "success", "data" => $queryVSC);
+					$apiresults = array("result" => "success", "data" => $queryUpdate);
 				}else{
 					$apiresults = array("result" => "Error in Saving: It appears something has occured, please consult the system administrator", "data" => $queryVSC);
 				}
