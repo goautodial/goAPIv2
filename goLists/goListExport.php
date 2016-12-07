@@ -42,13 +42,14 @@ ini_set('memory_limit', '2048M');
 					}
 				}
 				
-				$added_custom_SQL  = ", $custom_table ct";
-				$added_custom_SQL2 = "AND vl.lead_id=ct.lead_id";
-				
-				if($clcount){
+				if($clcount > 0){
+					$added_custom_SQL  = ", $custom_table ct";
+					$added_custom_SQL2 = "AND vl.lead_id=ct.lead_id";
 					$added_custom_SQL3  = "$custom_table ct";
 					$added_custom_SQL4 = "vl.lead_id=ct.lead_id";	
 				}else{
+					$added_custom_SQL  = "";
+					$added_custom_SQL2 = "";
 					$added_custom_SQL3  = "";
 					$added_custom_SQL4 = "";	
 				}
@@ -57,9 +58,9 @@ ini_set('memory_limit', '2048M');
 				$stmt = "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns}
 				FROM vicidial_list vl
 				LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4}
-				WHERE vl.list_id='{$listid}' LIMIT 20;";
+				WHERE vl.list_id='{$listid}';";
 			} else {
-				$stmt = "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl{$added_custom_SQL} WHERE list_id='$listid' $added_custom_SQL2 LIMIT 20; ";
+				$stmt = "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl{$added_custom_SQL} WHERE list_id='$listid' $added_custom_SQL2; ";
 			}
 			
 			$dllist = mysqli_query($link, $stmt);
@@ -67,7 +68,7 @@ ini_set('memory_limit', '2048M');
 			while($fetch_header = mysqli_fetch_field($dllist)){
 				$header[] = $fetch_header->name;
 			}
-			
+			/*
 			$u=0;
 			$count_header = count($header);
 			while($fetch_row = mysqli_fetch_row($dllist)){
@@ -80,8 +81,8 @@ ini_set('memory_limit', '2048M');
 				$row[] = $array_fetch;
 				$array_fetch = "";
 				$u = 0;
-			}
-			/*
+			}*/
+			
 			$u=0;
 			$x=0;
 			$count_header = count($header);
@@ -98,7 +99,7 @@ ini_set('memory_limit', '2048M');
 				$u = 0;
 				$x++;
 			}
-			 */
+			
 			
 			$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
 		}
