@@ -32,6 +32,12 @@
 	$countResult = mysqli_num_rows($rsltv);
     
     if($countResult > 0) {
+            $queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaign WHERE campaign_id = '$campaign_id' LIMIT 1";
+            $resultQuery = mysqli_query($link, $queryGetDialStatus);
+            while($resultGet = mysqli_fetch_array($resultQuery, MYSQLI_ASSOC)){
+                $dataDialStatuses = $resultGet['dial_statuses'];
+            }
+        
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
                 $dataLeadID[]       = $fresults['lead_id'];
                 $dataPhoneNO[]      = $fresults['phone_number'];
@@ -58,7 +64,8 @@
                 "alt_dial"          => $dataAltDial,
                 "list_id"           => $dataListID,
                 "priority"          => $dataPriority,
-                "source"            => $dataSource
+                "source"            => $dataSource,
+                "camp_dial_status"  => $dataDialStatuses
             );
     }else{
         $apiresults = array("result" => "Error: No record found.");
