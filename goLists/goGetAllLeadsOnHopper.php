@@ -35,7 +35,7 @@
             $queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaign WHERE campaign_id = '$campaign_id' LIMIT 1";
             $resultQuery = mysqli_query($link, $queryGetDialStatus);
             while($resultGet = mysqli_fetch_array($resultQuery, MYSQLI_ASSOC)){
-                $dataDialStatuses = $resultGet['dial_statuses'];
+                $dataDialStatuses[] = $resultGet['dial_statuses'];
             }
         
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
