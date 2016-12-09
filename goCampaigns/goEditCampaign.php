@@ -200,6 +200,11 @@
 								)";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
 					
+					if($force_reset_hopper == "Y"){
+						$queryDelete = "DELETE from vicidial_hopper where campaign_id='$campaign_id' and status IN('READY','QUEUE','DONE');";
+						$rsltvDelete = mysqli_query($link, $queryDelete);
+					}
+					
 					$apiresults = array("result" => "success");
 				} else {
 					$apiresults = array("result" => "Error: Campaign doens't exist.");
