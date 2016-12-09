@@ -96,7 +96,7 @@
 				if($dial_method == "MANUAL"){
 					$autoDialLevel = 0;
 				}elseif($dial_method == "ADAPT_TAPERED"){
-					$autoDialLevel = 1;
+					$autoDialLevel = 10;
 				}else{
 					switch($auto_dial_level){
 						case "OFF":
