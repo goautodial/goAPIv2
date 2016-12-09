@@ -957,7 +957,7 @@ if ($sipIsLoggedIn) {
             }
         }
     
-        if ($affected_rows > 0) {
+        if ($affected_rows > 0 && $errmsg < 1) {
             if (!$CBleadIDset) {
                 ##### grab the lead_id of the reserved user in vicidial_hopper
                 //$stmt="SELECT lead_id FROM vicidial_hopper where campaign_id='$campaign' and status='QUEUE' and user='$user' LIMIT 1;";
