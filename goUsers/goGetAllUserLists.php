@@ -74,7 +74,7 @@
 
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user != 'goautodial' AND user != 'goAPI' AND user_level != '4' AND user_level <= '$user_level' $ul ORDER BY user ASC";
+	$query = "SELECT user_id, user, full_name, user_group, active, avatar FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user != 'goautodial' AND user != 'goAPI' AND user_level != '4' AND user_level <= '$user_level' $ul ORDER BY user ASC";
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
 		
@@ -90,7 +90,8 @@
                 $dataUserLevel[] = $fresults['user_level'];
                 $dataUserGroup[] = $fresults['user_group'];
                 $dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num);
+                $dataAvatar[] = $fresults['avatar'];
+                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num, "avatar" => $dataAvatar);
                 //$apiresults = array("result" => "success", "data" => $data);
             }
 	} else {

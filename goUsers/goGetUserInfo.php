@@ -86,7 +86,7 @@
         $resultsoutsales = mysqli_fetch_assoc($rsltvOutSalesToday);        
         
         ### GLOBAL (array, single line)
-        $query_GetUserInfo = "SELECT user_id, user, full_name, email, user_group, active, user_level, phone_login, phone_pass, voicemail_id, hotkeys_active, vdc_agent_api_access, agent_choose_ingroups, vicidial_recording_override, vicidial_transfers, closer_default_blended, agentcall_manual, scheduled_callbacks, agentonly_callbacks FROM vicidial_users WHERE $ul";
+        $query_GetUserInfo = "SELECT user_id, user, full_name, email, user_group, active, user_level, phone_login, phone_pass, voicemail_id, hotkeys_active, vdc_agent_api_access, agent_choose_ingroups, vicidial_recording_override, vicidial_transfers, closer_default_blended, agentcall_manual, scheduled_callbacks, agentonly_callbacks, avatar FROM vicidial_users WHERE $ul";
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
         $fresults = mysqli_fetch_assoc($rsltvGetUserInfo);        
         
