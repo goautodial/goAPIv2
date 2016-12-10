@@ -31,6 +31,7 @@
                         "result" => "success",
                         "status" => $dataStatus,
                         "status_name" => $dataStatusName,
+						"test" => $query
                     );
 	}
 ?>

@@ -14,7 +14,7 @@
     $status = $_REQUEST['status'];
     $status_name = $_REQUEST['status_name'];
     
-    $checkHotkey = "SELECT * FROM vicidial_campaign_hotkeys WHERE campaign_id = '$campaign_id' AND hotkey = '$hotkey' OR status = '$status'";
+    $checkHotkey = "SELECT * FROM vicidial_campaign_hotkeys WHERE campaign_id = '$campaign_id' AND (hotkey = '$hotkey' OR status = '$status')";
     $checkResult = mysqli_query($link, $checkHotkey);
     $countCheck = mysqli_num_rows($checkResult);
     

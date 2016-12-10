@@ -105,7 +105,7 @@ if ($is_logged_in) {
         }
         $affected_rows = $astDB->getRowCount();
     }
-    if ( ($affected_rows > 0) or ($comments == 'NO_STATUS_CHANGE') ) {
+    if ( ($affected_rows > 0) || ($comments == 'NO_STATUS_CHANGE') ) {
         #############################################
         ##### START QUEUEMETRICS LOGGING LOOKUP #####
         //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id,queuemetrics_pe_phone_append FROM system_settings;";
@@ -232,7 +232,7 @@ if ($is_logged_in) {
     
         if ($stage < 1) {
             //$stmt="UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') )order by agent_log_id limit 2;";
-            $rslt = $astDB->rawQuery("UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') ) order by agent_log_id limit 2;");
+            $rslt = $astDB->rawQuery("UPDATE vicidial_agent_log set sub_status='$status' where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') ) order by agent_log_id limit 2;");
             $affected_rows = $astDB->getRowCount();
         }
     

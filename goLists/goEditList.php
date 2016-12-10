@@ -90,6 +90,9 @@ if($list_id == null) {
 		$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
 		$resultQueryDate = mysqli_query($link, $querydate);
 		
+		$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
+		$rsltvresetback = mysqli_query($link, $queryresetback);
+		
 		$apiresults = array("result" => "success");
 	}
 }

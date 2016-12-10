@@ -96,7 +96,7 @@
 				if($dial_method == "MANUAL"){
 					$autoDialLevel = 0;
 				}elseif($dial_method == "ADAPT_TAPERED"){
-					$autoDialLevel = 1;
+					$autoDialLevel = 10;
 				}else{
 					switch($auto_dial_level){
 						case "OFF":
@@ -199,6 +199,11 @@
 									WHERE campaign_id=$dataCampID LIMIT 1;'
 								)";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
+					
+					if($force_reset_hopper == "Y"){
+						$queryDelete = "DELETE from vicidial_hopper where campaign_id='$campaign_id' and status IN('READY','QUEUE','DONE');";
+						$rsltvDelete = mysqli_query($link, $queryDelete);
+					}
 					
 					$apiresults = array("result" => "success");
 				} else {

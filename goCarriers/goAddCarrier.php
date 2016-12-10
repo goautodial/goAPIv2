@@ -34,7 +34,6 @@
 			$carrier_id	= mysqli_real_escape_string($link, $_REQUEST['carrier_id']);
 			$carrier_name 	= mysqli_real_escape_string($link, $_REQUEST['carrier_name']);
 			$active	= $_REQUEST['active'];
-			
 		}
 		
 		if($carrier_type == "manual"){
@@ -104,7 +103,7 @@
 				$account_entry .= "context=trunkinbound\r\n";
 				$account_entry .= "qualify=yes\r\n";
 				$account_entry .= "insecure=invite,port\r\n";
-				$account_entry .= "nat=yes\r\n";
+				$account_entry .= "nat=force_rport,comedia\r\n";
 				$account_entry .= "host=".$host."\r\n";
 				
 				if($authentication == "auth_reg"){
@@ -135,7 +134,7 @@
 		}
 		
 		if($carrier_type == "copy"){
-			$server_ip	= mysqli_real_escape_string($link, $_REQUEST['copy_server_ip']);
+			$server_ip	= $_REQUEST['copy_server_ip'];
 			$source_carrier	= mysqli_real_escape_string($link, $_REQUEST['source_carrier']);
 		}
 
@@ -145,8 +144,6 @@
 
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
     $defActive = array("Y","N");
-		
-	
 		
 ########################################
 
@@ -160,9 +157,7 @@
 			$apiresults = array("result" => "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only.");
 		} elseif((preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_id)) && $carrier_type != "justgo"){
 			$apiresults = array("result" => "Error: Special characters found in carrier_id");
-		} elseif((preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $carrier_name)) && $carrier_type != "justgo"){
-			$apiresults = array("result" => "Error: Special characters found in carrier_name");
-		} else {
+		}
 		
 			//$groupId = go_get_groupid($goUser);
 
@@ -175,13 +170,20 @@
 			//}
 			
 			if($carrier_type == "copy"){
-				$query_copy = mysqli_query($link, "SELECT carrier_description, user_group, protocol, registration_string FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
+				$query_copy = mysqli_query($link, "SELECT * FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
 				$fetch_copy = mysqli_fetch_array($query_copy);
 				$user_group = $fetch_copy["user_group"]; 
 				$ulug = "WHERE user_group = '$user_group'";
 				
+				// fetch credentials of source carrier
 				$protocol = $fetch_copy["protocol"];
 				$carrier_description = $fetch_copy["carrier_description"];
+				$registration_string = $fetch_copy["registration_string"];
+				$account_entry_to_be_filtered = $fetch_copy["account_entry"];
+				$account_entry = str_replace($source_carrier,$carrier_id,$account_entry_to_be_filtered);
+				$global_string = $fetch_copy["globals_string"];
+				$dialplan_entry_to_be_filtered = $fetch_copy["dialplan_entry"];
+				$dialplan_entry = str_replace($source_carrier,$carrier_id,$dialplan_entry_to_be_filtered);
 			}
 
 			$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
@@ -196,7 +198,7 @@
 				$countCheck = mysqli_num_rows($rsltv);
 
 			if($countCheck > 0) {
-				$apiresults = array("result" => "Error: Carrier already exist.", "items0" => $codecs);
+				$apiresults = array("result" => "Error: Carrier already exist.");
 			} else {
 //                 if ($action == "add_new_carrier")
 //              {
@@ -235,19 +237,26 @@
 			//                $reg_ipSQL = "OR registration_string rlike '@".$dns['ip'].":'";
 			//        }
 			//}*/
-			$reg_string = $host;
 			
-			if ($reg_string=="208.43.27.84")
-			{
+			if($carrier_type == "manual"){
+				$reg_string = $host;
+				
+				if ($reg_string=="208.43.27.84")
+				{
 					$reg_string = "dal.justgovoip.com";
 					$reg_ipSQL = "OR registration_string rlike '@208.43.27.84:'";
+				}
+				
+				$additional_sql = "registration_string rlike '@$reg_string:' $reg_ipSQL AND ";
+			}else{
+				$additional_sql = "";
 			}
-
-			$querySelect = "select carrier_id from vicidial_server_carriers where registration_string rlike '@$reg_string:' $reg_ipSQL AND server_ip='$server_ip';";
-			$resultSelect = mysqli_query($link, $querySelect);
-
-			$isExist = mysqli_num_rows($resultSelect);
-			if (!$isExist)
+	
+				$querySelect = "select carrier_id from vicidial_server_carriers where $additional_sql server_ip='$server_ip';";
+				$resultSelect = mysqli_query($link, $querySelect);
+				$isExist = mysqli_num_rows($resultSelect);
+				
+			if (!$isExist || $carrier_type == "copy")
 			{
 					if ($reg_string=="dal.justgovoip.com" || $reg_string=="208.43.27.84")
 					{/*
@@ -268,7 +277,7 @@
 					$valSQL = rtrim($valSQL,",");
 					$itemSQL = "($varSQL) VALUES ($valSQL)";
 			
-			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$host', '$global_string');";
+			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string, active) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string', '$active');";
 			$resultVSC = mysqli_query($link, $queryVSC);
 			
 				if($resultVSC) {
@@ -278,10 +287,10 @@
 
 	### Admin logs
 					$SQLdate = date("Y-m-d H:i:s");
-					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $host, $global_string);');";
+					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
 					$rsltvLog = mysqli_query($linkgo, $queryLog);
 
-					$apiresults = array("result" => "success", "data" => $queryVSC);
+					$apiresults = array("result" => "success", "data" => $queryUpdate);
 				}else{
 					$apiresults = array("result" => "Error in Saving: It appears something has occured, please consult the system administrator", "data" => $queryVSC);
 				}
@@ -289,7 +298,7 @@
 			} else {
 					$apiresults = array("result" => "Error: Carrier  doens't exist.", "data" => $querySelect);
 			}
-			}
+			
 			}
 #######################################
 		}
