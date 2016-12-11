@@ -21,7 +21,7 @@
         $ul = " and user IN ($stringv) and user_level != 4";
     }
     
-    $query_OfflineActiveAgents = "SELECT vicidial_users.user as 'vu_user', vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group', vicidial_users.user_level as 'vu_user_level', vicidial_users.active as 'vu_status' from vicidial_users where vicidial_users.active='Y' AND vicidial_users.user_level !=4 AND vicidial_users.user NOT IN (SELECT vicidial_live_agents.user as 'vla_user' from vicidial_live_agents)";
+    $query_OfflineActiveAgents = "SELECT vicidial_users.user as 'vu_user', vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group', vicidial_users.user_level as 'vu_user_level', vicidial_users.active as 'vu_status', avatar from vicidial_users where vicidial_users.active='Y' AND vicidial_users.user_level !=4 AND vicidial_users.user NOT IN (SELECT vicidial_live_agents.user as 'vla_user' from vicidial_live_agents)";
      
     $rsltvOfflineAgents = mysqli_query($link,$query_OfflineActiveAgents);
 

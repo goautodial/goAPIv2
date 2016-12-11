@@ -22,29 +22,31 @@
     ### POST or GET Variables
    //     $values = $_REQUEST['items'];
 		
-		$userid = mysqli_real_escape_string($link, $_REQUEST['user_id']);
+        $userid = mysqli_real_escape_string($link, $_REQUEST['user_id']);
         $user = mysqli_real_escape_string($link, $_REQUEST['user']);
         $pass = mysqli_real_escape_string($link, $_REQUEST['pass']);
         $full_name = mysqli_real_escape_string($link, $_REQUEST['full_name']);
         $phone_login = mysqli_real_escape_string($link, $_REQUEST['phone_login']);
         $phone_pass = $pass;
         $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
-		$email = mysqli_real_escape_string($link, $_REQUEST['email']);
+        $email = mysqli_real_escape_string($link, $_REQUEST['email']);
         $active = strtoupper($_REQUEST['active']);
         $hotkeys_active = $_REQUEST['hotkeys_active'];
         $user_level = $_REQUEST['user_level'];
         $modify_same_user_level = strtoupper($_REQUEST['modify_same_user_level']);
         $ip_address = $_REQUEST['hostname'];
         $goUser = $_REQUEST['goUser'];
-		$voicemail = $_REQUEST['voicemail'];
-		$vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
-		$agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
-		$vicidial_recording_override = $_REQUEST['vicidial_recording_override'];
-		$vicidial_transfers = $_REQUEST['vicidial_transfers'];
-		$closer_default_blended = $_REQUEST['closer_default_blended'];
-		$agentcall_manual = $_REQUEST['agentcall_manual'];
-		$scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
-		$agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
+        $voicemail = $_REQUEST['voicemail'];
+        $vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
+        $agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
+        $vicidial_recording_override = $_REQUEST['vicidial_recording_override'];
+        $vicidial_transfers = $_REQUEST['vicidial_transfers'];
+        $closer_default_blended = $_REQUEST['closer_default_blended'];
+        $agentcall_manual = $_REQUEST['agentcall_manual'];
+        $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
+        $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
+        $avatar = $_REQUEST['avatar'];
+
 		
     ### Default Values
 	$defActive = array("Y","N");
@@ -199,13 +201,13 @@
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `avatar` = '$avatar' $voicemail_query 
 								WHERE `user_id` = '$userid';";
 				}else{
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email' $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `avatar` = '$avatar' $voicemail_query 
 								WHERE `user` = '$user';";
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
