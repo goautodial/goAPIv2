@@ -30,8 +30,8 @@
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name) || $list_name == null){
                 $apiresults = array("result" => "Error: Special characters found in list_name and must not be empty");
         } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $list_description) || $list_description == null){
-                $apiresults = array("result" => "Error: Special characters found in list_description and must not be empty");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $list_description)){
+                $apiresults = array("result" => "Error: Special characters found in list_description");
         } else {
 
     		### Check value compare to default values
