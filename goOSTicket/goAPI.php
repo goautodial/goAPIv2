@@ -13,7 +13,7 @@
     include_once("../goDBosticket.php");
     include_once("../goFunctions.php");
     
-    //$version = file_get_contents('../../version.txt');
+    $version = file_get_contents('../version.txt');
     
     ####### Variables #########
     

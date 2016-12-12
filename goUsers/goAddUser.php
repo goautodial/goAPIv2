@@ -21,7 +21,7 @@
         $user_group = $_REQUEST['user_group'];
         $active = strtoupper($_REQUEST['active']);
         $seats = $_REQUEST['seats'];
-
+		$avatar = $_REQUEST['avatar'];
 	$goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
 
@@ -109,8 +109,8 @@
  		$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
         $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 		
-		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, scheduled_callbacks)
-						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0', '1', '1', '1', '1');";
+		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, scheduled_callbacks, avatar)
+						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0', '1', '1', '1', '1', '$avatar');";
 		$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
 
 	### Admin logs
