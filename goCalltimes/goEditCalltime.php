@@ -109,7 +109,11 @@
             $query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='$user_group' $ul ORDER BY user_group LIMIT 1;";
             $rsltv = mysqli_query($link,$query);
             $countResult = mysqli_num_rows($rsltv);
-
+			
+			if($user_group == "---ALL---"){ // temporary
+				$countResult = 1;
+			}
+			
             if($countResult > 0) {
 
                 $queryCheck = "SELECT call_time_id from vicidial_call_times where call_time_id='$call_time_id';";

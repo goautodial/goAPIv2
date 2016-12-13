@@ -17,80 +17,79 @@
     } else {
             die ($lang['go_conf_file_not_found']);
     }
-		
+	
 	### POST or GET Variables
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
-
-	### Inbound Campaign
-        $campaign_id 					= $_REQUEST['campaign_id'];
-        $campaign_name 					= $_REQUEST['campaign_name'];
-        $campaign_type 					= strtoupper($_REQUEST['campaign_type']);
-        $active 						= $_REQUEST['active'];
-        $dial_method 					= $_REQUEST['dial_method'];
-        $dial_statuses 					= $_REQUEST['dial_statuses'];
-        $lead_order 					= $_REQUEST['lead_order'];
-        $allow_closers 					= $_REQUEST['allow_closers'];
-        $hopper_level 					= $_REQUEST['hopper_level'];
-        $auto_dial_level 				= $_REQUEST['auto_dial_level'];
-		$auto_dial_level_adv 			= $_REQUEST['auto_dial_level_adv'];
-        $dial_prefix 					= $_REQUEST['dial_prefix'];
-        $campaign_changedate 			= $_REQUEST['campaign_changedate'];
-        $campaign_stats_refresh 		= $_REQUEST['campaign_stats_refresh'];
-        $campaign_vdad_exten 			= $_REQUEST['campaign_vdad_exten'];
-        $campaign_recording 			= $_REQUEST['campaign_recording'];
-        $campaign_rec_filename 			= $_REQUEST['campaign_rec_filename'];
-        $scheduled_callbacks 			= $_REQUEST['scheduled_callbacks'];
-        $scheduled_callbacks_alert 		= $_REQUEST['scheduled_callbacks_alert'];
-        $no_hopper_leads_logins 		= $_REQUEST['no_hopper_leads_logins'];
-        $use_internal_dnc 				= $_REQUEST['use_internal_dnc'];
-        $use_campaign_dnc 				= $_REQUEST['use_campaign_dnc'];
-        $campaign_cid 					= $_REQUEST['campaign_cid'];
-        $user_group 					= $_REQUEST['user_group'];
-        $drop_call_seconds 				= $_REQUEST['drop_call_seconds'];
-        $goUsers 						= $_REQUEST['goUser'];
-		$values 						= $_REQUEST['items'];
-        $did_pattern 					= $_REQUEST['did_tfn_extension'];
-        $group_color 					= $_REQUEST['group_color'];
-        $call_route 					= $_REQUEST['call_route'];
-        $survey_type 					= $_REQUEST['survey_type'];
-        $number_channels 				= $_REQUEST['no_channels'];
-		$copy_from_campaign 			= $_REQUEST['copy_from_campaign'];			
-		$list_id 						= $_REQUEST['list_id'];						
-		$country 						= $_REQUEST['country'];						
-		$check_for_duplicates 			= $_REQUEST['check_for_duplicates'];			
-		$dial_prefix 					= $_REQUEST['dial_prefix'];
-		$custom_dial_prefix				= $_REQUEST['custom_dial_prefix'];
-		$status 						= $_REQUEST['status'];									
-		$script 						= $_REQUEST['script'];						
-		$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];	
-		$caller_id 						= $_REQUEST['caller_id']; 					
-		$force_reset_hopper 			= $_REQUEST['force_reset_hopper'];			
-		$inbound_man 					= $_REQUEST['inbound_man'];					
-		$phone_numbers 					= $_REQUEST['phone_numbers'];
-		$lead_file						= $_FILES['lead_file']['tmp_name'];
-		$leads							= $_FILES['leads']['tmp_name'];
-		
-		$call_time 						= $_REQUEST['call_time'];
-		$dial_status 					= $_REQUEST['dial_status'];
-		$list_order 					= $_REQUEST['list_order'];
-		$lead_filter 					= $_REQUEST['lead_filter'];
-		$dial_timeout 					= $_REQUEST['dial_timeout'];
-		$manual_dial_prefix 			= $_REQUEST['manual_dial_prefix'];
-		$call_launch 					= $_REQUEST['call_lunch'];
-		$answering_machine_message 		= $_REQUEST['answering_machine_message'];
-		$pause_codes 					= $_REQUEST['pause_codes'];
-		$manual_dial_filter 			= $_REQUEST['manual_dial_filter'];
-		$manual_dial_list_id 			= $_REQUEST['manual_dial_list_id'];
-		$availability_only_tally 		= $_REQUEST['availability_only_tally'];
-		$recording_filename 			= $_REQUEST['recording_filename'];
-		$next_agent_call 				= $_REQUEST['next_agent_call'];
-		$caller_id_3_way_call 			= $_REQUEST['caller_id_3_way_call'];
-		$dial_prefix_3_way_call 		= $_REQUEST['dial_prefix_3_way_call'];
-		$three_way_hangup_logging 		= $_REQUEST['three_way_hangup_logging'];
-		$three_way_hangup_seconds 		= $_REQUEST['three_way_hangup_seconds'];
-		$three_way_hangup_action 		= $_REQUEST['three_way_hangup_action'];
-		$reset_leads_on_hopper 			= $_REQUEST['reset_leads_on_hopper'];
+### Inbound Campaign
+	$campaign_id 	= $_REQUEST['campaign_id'];
+	$campaign_name 	= $_REQUEST['campaign_name'];
+	$campaign_type 	= strtoupper($_REQUEST['campaign_type']);
+	$active 	= $_REQUEST['active'];
+	$dial_method 	= $_REQUEST['dial_method'];
+	$dial_statuses 	= $_REQUEST['dial_statuses'];
+	$lead_order 	= $_REQUEST['lead_order'];
+	$allow_closers 	= $_REQUEST['allow_closers'];
+	$hopper_level 	= $_REQUEST['hopper_level'];
+	$auto_dial_level 	= $_REQUEST['auto_dial_level'];
+	$auto_dial_level_adv 	= $_REQUEST['auto_dial_level_adv'];
+	$dial_prefix 	= $_REQUEST['dial_prefix'];
+	$campaign_changedate 	= $_REQUEST['campaign_changedate'];
+	$campaign_stats_refresh 	= $_REQUEST['campaign_stats_refresh'];
+	$campaign_vdad_exten 	= $_REQUEST['campaign_vdad_exten'];
+	$campaign_recording 	= $_REQUEST['campaign_recording'];
+	$campaign_rec_filename 	= $_REQUEST['campaign_rec_filename'];
+	$scheduled_callbacks 	= $_REQUEST['scheduled_callbacks'];
+	$scheduled_callbacks_alert 	= $_REQUEST['scheduled_callbacks_alert'];
+	$no_hopper_leads_logins 	= $_REQUEST['no_hopper_leads_logins'];
+	$use_internal_dnc 	= $_REQUEST['use_internal_dnc'];
+	$use_campaign_dnc 	= $_REQUEST['use_campaign_dnc'];
+	$campaign_cid 	= $_REQUEST['campaign_cid'];
+	$user_group 	= $_REQUEST['user_group'];
+	$drop_call_seconds 	= $_REQUEST['drop_call_seconds'];
+	$goUsers 	= $_REQUEST['goUser'];
+	$values 	= $_REQUEST['items'];
+	$did_pattern 	= $_REQUEST['did_tfn_extension'];
+	$group_color 	= $_REQUEST['group_color'];
+	$call_route 	= $_REQUEST['call_route'];
+	$survey_type 	= $_REQUEST['survey_type'];
+	$number_channels 	= $_REQUEST['no_channels'];
+	$copy_from_campaign 	= $_REQUEST['copy_from_campaign'];
+	$list_id 	= $_REQUEST['list_id'];
+	$country 	= $_REQUEST['country'];
+	$check_for_duplicates 	= $_REQUEST['check_for_duplicates'];			
+	$dial_prefix 	= $_REQUEST['dial_prefix'];
+	$custom_dial_prefix	= $_REQUEST['custom_dial_prefix'];
+	$status 	= $_REQUEST['status'];									
+	$script 	= $_REQUEST['script'];						
+	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];	
+	$caller_id 	= $_REQUEST['caller_id']; 					
+	$force_reset_hopper 	= $_REQUEST['force_reset_hopper'];			
+	$inbound_man 	= $_REQUEST['inbound_man'];					
+	$phone_numbers 	= $_REQUEST['phone_numbers'];
+	$lead_file	= $_FILES['lead_file']['tmp_name'];
+	$leads	= $_FILES['leads']['tmp_name'];
+	
+	$call_time 		= $_REQUEST['call_time'];
+	$dial_status 		= $_REQUEST['dial_status'];
+	$list_order 		= $_REQUEST['list_order'];
+	$lead_filter 		= $_REQUEST['lead_filter'];
+	$dial_timeout 		= $_REQUEST['dial_timeout'];
+	$manual_dial_prefix 		= $_REQUEST['manual_dial_prefix'];
+	$call_launch 		= $_REQUEST['call_lunch'];
+	$answering_machine_message 		= $_REQUEST['answering_machine_message'];
+	$pause_codes 		= $_REQUEST['pause_codes'];
+	$manual_dial_filter 		= $_REQUEST['manual_dial_filter'];
+	$manual_dial_list_id 		= $_REQUEST['manual_dial_list_id'];
+	$availability_only_tally 		= $_REQUEST['availability_only_tally'];
+	$recording_filename 		= $_REQUEST['recording_filename'];
+	$next_agent_call 		= $_REQUEST['next_agent_call'];
+	$caller_id_3_way_call 		= $_REQUEST['caller_id_3_way_call'];
+	$dial_prefix_3_way_call 		= $_REQUEST['dial_prefix_3_way_call'];
+	$three_way_hangup_logging 		= $_REQUEST['three_way_hangup_logging'];
+	$three_way_hangup_seconds 		= $_REQUEST['three_way_hangup_seconds'];
+	$three_way_hangup_action 		= $_REQUEST['three_way_hangup_action'];
+	$reset_leads_on_hopper 		= $_REQUEST['reset_leads_on_hopper'];
 
 		### Default values 
     	$defActive = array("Y","N");
@@ -108,31 +107,31 @@
 		}elseif($dial_method == "ADAPT_TAPERED"){
 				$autoDialLevel = 1;
 		}else{
-				switch($auto_dial_level){
-					case "OFF":
-						$autoDialLevel = 0;
-						break;
-					case "SLOW":
-						$autoDialLevel = 1;
-						break;
-					case "NORMAL":
-						$autoDialLevel = 2;
-						break;
-					case "HIGH":
-						$autoDialLevel = 4;
-						break;
-					case "MAX":
-						$autoDialLevel = 6;
-						break;
-					case "MAX_PREDICTIVE":
-						$autoDialLevel = 10;
-						break;
-					case "ADVANCE":
-						$autoDialLevel = $auto_dial_level_adv;
-						break;
-					default:
-						//DEFAULT HERE
-				}
+			switch($auto_dial_level){
+				case "OFF":
+					$autoDialLevel = 0;
+					break;
+				case "SLOW":
+					$autoDialLevel = 1;
+					break;
+				case "NORMAL":
+					$autoDialLevel = 2;
+					break;
+				case "HIGH":
+					$autoDialLevel = 4;
+					break;
+				case "MAX":
+					$autoDialLevel = 6;
+					break;
+				case "MAX_PREDICTIVE":
+					$autoDialLevel = 10;
+					break;
+				case "ADVANCE":
+					$autoDialLevel = $auto_dial_level_adv;
+					break;
+				default:
+					//DEFAULT HERE
+			}
 		}   
 
     if($campaign_id == null ||  $campaign_type == null || $campaign_name == null) {
