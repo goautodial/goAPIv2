@@ -20,6 +20,6 @@
     if($countCheck <= 0){
         $apiresults = array("result" => "success");
     }else{
-        $apiresults = array("result" => "Error: Add failed, State Call Time already already exist!");
+        $apiresults = array("result" => "Error: Call Time ID already exists!");
     }
 ?>
