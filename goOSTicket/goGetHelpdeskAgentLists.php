@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: goGetCannedResponseLists.php	       ####
+    #### Name: goGetHelpdeskAgentLists.php	       ####
     #### Description: API to get all Phone	       ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
