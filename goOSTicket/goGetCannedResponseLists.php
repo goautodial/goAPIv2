@@ -17,11 +17,9 @@
             $ul = "AND p.user_group='$groupId'";  
     }
 
-    $query = "SELECT canned_id, dept_id, isenabled, title, updated from ost_canned_response ORDER by updated DESC LIMIT 2000";
-
+    //$query = "SELECT canned_id, dept_id, isenabled, title, updated from ost_canned_response ORDER by updated DESC LIMIT 2000";
+    $query = "select isenabled, title, ost_canned_response.updated, name from ost_canned_response LEFT OUTER JOIN ost_department ON ost_canned_response.dept_id=ost_department.id";
     $rsltv = mysqli_query($linkost,$query);
-    
-    //var_dump($rsltv);
     $countResult = mysqli_num_rows($rsltv);
     
     if($countResult > 0) {
