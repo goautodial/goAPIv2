@@ -135,7 +135,7 @@
 
 			$apiresults = array("result" => "success");
 		} else {
-			$apiresults = array("result" => $queryUserAdd);
+			$apiresults = array("result" => "Error: A problem occured while adding a user. Please Contact the System Administrator.", "query_user" => $queryUserAdd, "query_phone" => $queryInsertUser, "query_kamilio" => $kamialioq);
 		}
 
 		
