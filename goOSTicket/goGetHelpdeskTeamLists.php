@@ -1,6 +1,6 @@
 <?php
     #######################################################
-    #### Name: goGetHelpdeskAgentLists.php	       ####
+    #### Name: goGetHelpdeskTeamLists.php	       ####
     #### Description: API to get all Phone	       ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
@@ -17,7 +17,7 @@
             $ul = "AND p.user_group='$groupId'";  
     }
 
-    $query = "SELECT staff_id, dept_id, role_id, username, firstname, lastname, isactive, id, name as dept_name from ost_staff, ost_department WHERE dept_id=id ORDER by username DESC LIMIT 2000";
+    $query = "SELECT ost_team.team_id, ost_team.lead_id, ost_team.name, ost_team.flags, count(ost_team_member.team_id) as members FROM ost_team, ost_team_member WHERE ost_team.team_id=ost_team_member.team_id AND staff_id!=0 GROUP BY ost_team_member.team_id";
 
     $rsltv = mysqli_query($linkost,$query);
     //var_dump($rsltv);
@@ -40,5 +40,5 @@
         }
     return $out_array;
     }
-
+    
 ?>
