@@ -24,10 +24,8 @@
             $stringv .= "'j'";
             $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
         }
-        
-        $statusid = 1; //for open tickets
-    
-        $query = "SELECT count(*) as opentickets FROM ost_ticket WHERE status_id='$statusid' AND dept_id IN ($deptid)";
+            
+        $query = "SELECT count(*) as opentickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='open') AND dept_id IN ($deptid) AND isanswered=0";
 
         $rsltv = mysqli_query($linkost,$query);
         $fresults = mysqli_fetch_assoc($rsltv);
