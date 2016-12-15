@@ -1,7 +1,7 @@
 <?php
     ####################################################
     #### Name: goGetOverdueTickets.php              ####
-    #### Type: API to get total sales               ####
+    #### Type: API to get overdue tickets           ####
     #### Version: 0.9                               ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
     #### Written by: Demian Lizandro Biscocho       ####
@@ -10,23 +10,26 @@
     
     include_once("../goFunctions.php");
     
+    $deptid = $_REQUEST['deptid'];
     $groupId = go_get_groupid($goUser);
     
-    if (!checkIfTenant($groupId)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
+    if($deptid == null && $deptid == 0) { 
+            $apiresults = array("result" => "Error: Set a value for Departmet ID"); 
+    } else {    
+    
+        if (!checkIfTenant($groupId)) {
+            $ul='';
+        } else { 
+            $stringv = go_getall_allowed_users($groupId);
+            $stringv .= "'j'";
+            $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
+        }
+    
+        $query = "SELECT count(*) as overduetickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='open') AND dept_id IN ($deptid) AND isoverdue=1;";
+
+        $rsltv = mysqli_query($linkost,$query);
+        $fresults = mysqli_fetch_assoc($rsltv);
+        $apiresults = array_merge( array( "result" => "success" ), $fresults);
+        
     }
-
-    //$NOW = date('Y-m-d');    
-    //$YESTERDAY = date('Y-m-d',strtotime('-1 days'));
-   
-    $query = "select count(*) as overduetickets from ost_ticket where isoverdue='1'";
-
-    $rsltv = mysqli_query($linkost,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
-
-    $apiresults = array_merge( array( "result" => "success" ), $fresults);
 ?>

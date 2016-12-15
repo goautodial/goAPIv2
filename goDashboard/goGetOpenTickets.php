@@ -10,25 +10,28 @@
     
     include_once("../goFunctions.php");
     
+    $deptid = $_REQUEST['deptid'];
     $groupId = go_get_groupid($goUser);
     
-    if (!checkIfTenant($groupId)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
-    }
-
-    //$NOW = date('Y-m-d');    
-    //$YESTERDAY = date('Y-m-d',strtotime('-1 days'));
+    if($deptid == null && $deptid == 0) { 
+            $apiresults = array("result" => "Error: Set a value for Departmet ID"); 
+    } else {     
     
-    $status_id = "3"; //for open tickets
-   
-    $query = "select count(*) as opentickets from ost_ticket where status_id='$status_id'";
+        if (!checkIfTenant($groupId)) {
+            $ul='';
+        } else { 
+            $stringv = go_getall_allowed_users($groupId);
+            $stringv .= "'j'";
+            $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
+        }
+        
+        $statusid = 1; //for open tickets
+    
+        $query = "SELECT count(*) as opentickets FROM ost_ticket WHERE status_id='$statusid' AND dept_id IN ($deptid)";
 
-    $rsltv = mysqli_query($linkost,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
-
-    $apiresults = array_merge( array( "result" => "success" ), $fresults);
+        $rsltv = mysqli_query($linkost,$query);
+        $fresults = mysqli_fetch_assoc($rsltv);
+        $apiresults = array_merge( array( "result" => "success" ), $fresults);
+    
+    }
 ?>

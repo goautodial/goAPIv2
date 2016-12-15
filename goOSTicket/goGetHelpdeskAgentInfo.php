@@ -1,7 +1,7 @@
 <?php
     #######################################################
     #### Name: goGetHelpdeskAgentInfo.php	       ####
-    #### Description: API to get all Phone	       ####
+    #### Description: API to get agent info	       ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
     #### Written by: Demian Lizandro Biscocho          ####
