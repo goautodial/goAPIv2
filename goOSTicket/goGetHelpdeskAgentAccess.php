@@ -1,7 +1,8 @@
 <?php
     #######################################################
-    #### Name: goGetHelpdeskAgentInfo.php	       ####
-    #### Description: API to get agent info	       ####
+    #### Name: goGetHelpdeskAgentAccess.php	       ####
+    #### Description: API to get agent department      ####
+    ####              access                           ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
     #### Written by: Demian Lizandro Biscocho          ####
@@ -23,7 +24,7 @@
                 $ul = "AND p.user_group='$groupId'";  
         }
 
-        $query = "SELECT staff_id, dept_id, role_id, firstname, lastname, email, isadmin, isactive, signature FROM ost_staff WHERE staff_id='$userid'";
+        $query = "SELECT dept_id FROM ost_staff_dept_access WHERE staff_id='$userid'";
 
         $rsltv = mysqli_query($linkost,$query);
         //var_dump($rsltv);
@@ -32,20 +33,12 @@
         if($countResult > 0) {
             $data = array();
             while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                array_push($data, urlencode_array($fresults));
+                array_push($data, ($fresults));
             }
             $apiresults = array("result" => "success", "data" => $data);
         } else {
             $apiresults = array("result" => "Error: No data to show.");
         }
     }
-    
-    function urlencode_array($array){
-        $out_array = array();
-        foreach($array as $key => $value){
-        $out_array[rawurlencode($key)] = rawurlencode($value);
-        }
-    return $out_array;
-    }    
     
 ?>
