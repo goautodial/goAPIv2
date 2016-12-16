@@ -11,57 +11,56 @@
     include_once("../goFunctions.php");
 
 	### POST or GET Variables
-	$goUser 						= $_REQUEST['goUser'];
-    $ip_address 					= $_REQUEST['hostname'];
-
-	$campaign_id 					= $_REQUEST['campaign_id'];
-	$campaign_name 					= $_REQUEST['campaign_name'];
-	$campaign_desc 					= $_REQUEST['campaign_desc'];
-	$active 						= strtoupper($_REQUEST['active']);;
-	$dial_method 					= strtoupper($_REQUEST['dial_method']);
-	$auto_dial_level				= $_REQUEST['auto_dial_level'];
-	$auto_dial_level_adv 			= $_REQUEST['auto_dial_level_adv'];
-	$dial_prefix 					= $_REQUEST['dial_prefix'];
-	$custom_prefix 					= $_REQUEST['custom_prefix'];
-	$campaign_script 				= $_REQUEST['campaign_script'];
-	$webform						= $_REQUEST['web_form_address'];
-	$campaign_cid 					= $_REQUEST['campaign_cid'];
-	$campaign_recording 			= $_REQUEST['campaign_recording'];
-	$campaign_vdad_exten 			= $_REQUEST['campaign_vdad_exten'];
-	$local_call_time 				= $_REQUEST['local_call_time'];
-	$force_reset_hopper 			= $_REQUEST['force_reset_hopper'];
-	$dial_status 					= $_REQUEST['dial_status'];
-	$lead_order 					= $_REQUEST['lead_order'];
-	$lead_filter 					= $_REQUEST['lead_filter'];
-	$dial_timeout 					= $_REQUEST['dial_timeout'];
-	$manual_dial_prefix 			= $_REQUEST['manual_dial_prefix'];
-	$get_call_launch 				= $_REQUEST['get_call_launch'];
-	$am_message_exten 				= $_REQUEST['am_message_exten'];
-	$am_message_chooser 			= $_REQUEST['am_message_chooser'];
+	$goUser 		= $_REQUEST['goUser'];
+	$ip_address 		= $_REQUEST['hostname'];
+	$campaign_id 		= $_REQUEST['campaign_id'];
+	$campaign_name 		= $_REQUEST['campaign_name'];
+	$campaign_desc 		= $_REQUEST['campaign_desc'];
+	$active 		= strtoupper($_REQUEST['active']);;
+	$dial_method 		= strtoupper($_REQUEST['dial_method']);
+	$auto_dial_level		= $_REQUEST['auto_dial_level'];
+	$auto_dial_level_adv 		= $_REQUEST['auto_dial_level_adv'];
+	$dial_prefix 		= $_REQUEST['dial_prefix'];
+	$custom_prefix 		= $_REQUEST['custom_prefix'];
+	$campaign_script 		= $_REQUEST['campaign_script'];
+	$webform		= $_REQUEST['web_form_address'];
+	$campaign_cid 		= $_REQUEST['campaign_cid'];
+	$campaign_recording 		= $_REQUEST['campaign_recording'];
+	$campaign_vdad_exten 		= $_REQUEST['campaign_vdad_exten'];
+	$local_call_time 		= $_REQUEST['local_call_time'];
+	$force_reset_hopper 		= $_REQUEST['force_reset_hopper'];
+	$dial_status 		= $_REQUEST['dial_status'];
+	$lead_order 		= $_REQUEST['lead_order'];
+	$lead_filter 		= $_REQUEST['lead_filter'];
+	$dial_timeout 		= $_REQUEST['dial_timeout'];
+	$manual_dial_prefix 		= $_REQUEST['manual_dial_prefix'];
+	$get_call_launch 		= $_REQUEST['get_call_launch'];
+	$am_message_exten 		= $_REQUEST['am_message_exten'];
+	$am_message_chooser 		= $_REQUEST['am_message_chooser'];
 	$agent_pause_codes_active 		= $_REQUEST['agent_pause_codes_active'];
-	$manual_dial_filter 			= $_REQUEST['manual_dial_filter'];
-	$manual_dial_list_id 			= $_REQUEST['manual_dial_list_id'];
-	$available_only_ratio_tally 	= $_REQUEST['available_only_ratio_tally'];
-	$campaign_rec_filename 			= $_REQUEST['campaign_rec_filename'];
-	$next_agent_call 				= $_REQUEST['next_agent_call'];
-	$xferconf_a_number 				= $_REQUEST["xferconf_a_number"];
-	$xferconf_b_number 				= $_REQUEST["xferconf_b_number"];
-	$three_way_call_cid 			= $_REQUEST['three_way_call_cid'];
-	$three_way_dial_prefix 			= $_REQUEST['three_way_dial_prefix'];
-	$customer_3way_hangup_logging 	= $_REQUEST['customer_3way_hangup_logging'];
-	$customer_3way_hangup_seconds 	= $_REQUEST['customer_3way_hangup_seconds'];
-	$customer_3way_hangup_action 	= $_REQUEST['customer_3way_hangup_action'];
-	$inbound_man 					= $_REQUEST['inbound_man'];
-	$campaign_allow_inbound			= $_REQUEST['campaign_allow_inbound'];
-	$closer_campaigns				= $_REQUEST['closer_campaigns'];
-	$xfer_groups					= $_REQUEST['xfer_groups'];
-	$custom_fields_launch			= $_REQUEST['custom_fields_launch'];
-	$campaign_type					= $_REQUEST['campaign_type'];
-	$custom_fields_list_id			= $_REQUEST['custom_fields_list_id'];
-	$url_tab_first_title			= $_REQUEST['url_tab_first_title'];
-	$url_tab_first_url				= $_REQUEST['url_tab_first_url'];
-	$url_tab_second_title			= $_REQUEST['url_tab_second_title'];
-	$url_tab_second_url				= $_REQUEST['url_tab_second_url'];
+	$manual_dial_filter 		= $_REQUEST['manual_dial_filter'];
+	$manual_dial_list_id 		= $_REQUEST['manual_dial_list_id'];
+	$available_only_ratio_tally 		= $_REQUEST['available_only_ratio_tally'];
+	$campaign_rec_filename 		= $_REQUEST['campaign_rec_filename'];
+	$next_agent_call 		= $_REQUEST['next_agent_call'];
+	$xferconf_a_number 		= $_REQUEST["xferconf_a_number"];
+	$xferconf_b_number 		= $_REQUEST["xferconf_b_number"];
+	$three_way_call_cid 		= $_REQUEST['three_way_call_cid'];
+	$three_way_dial_prefix 		= $_REQUEST['three_way_dial_prefix'];
+	$customer_3way_hangup_logging 		= $_REQUEST['customer_3way_hangup_logging'];
+	$customer_3way_hangup_seconds 		= $_REQUEST['customer_3way_hangup_seconds'];
+	$customer_3way_hangup_action 		= $_REQUEST['customer_3way_hangup_action'];
+	$inbound_man 		= $_REQUEST['inbound_man'];
+	$campaign_allow_inbound		= $_REQUEST['campaign_allow_inbound'];
+	$closer_campaigns		= $_REQUEST['closer_campaigns'];
+	$xfer_groups		= $_REQUEST['xfer_groups'];
+	$custom_fields_launch		= $_REQUEST['custom_fields_launch'];
+	$campaign_type		= $_REQUEST['campaign_type'];
+	$custom_fields_list_id		= $_REQUEST['custom_fields_list_id'];
+	$url_tab_first_title		= $_REQUEST['url_tab_first_title'];
+	$url_tab_first_url		= $_REQUEST['url_tab_first_url'];
+	$url_tab_second_title		= $_REQUEST['url_tab_second_title'];
+	$url_tab_second_url		= $_REQUEST['url_tab_second_url'];
 
    	//$apiresults = array("data" => $_REQUEST); 
 
@@ -96,7 +95,7 @@
 				if($dial_method == "MANUAL"){
 					$autoDialLevel = 0;
 				}elseif($dial_method == "ADAPT_TAPERED"){
-					$autoDialLevel = 10;
+					$autoDialLevel = 1;
 				}else{
 					switch($auto_dial_level){
 						case "OFF":
@@ -123,9 +122,9 @@
 						default:
 							//DEFAULT HERE
 					}
-				}         
+				}          
 
-				if($campaign_id != null) {	
+				if($campaign_id != null) {
 					$updateQuery = "UPDATE vicidial_campaigns SET
 										campaign_name = '$campaign_name', 
 										active = '$active', 
