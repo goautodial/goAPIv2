@@ -10,11 +10,11 @@
     
     include_once("../goFunctions.php");
     
-    $deptid = $_REQUEST['deptid'];
+    $userid = $_REQUEST['userid'];
     $groupId = go_get_groupid($goUser);
     
-    if($deptid == null && $deptid == 0) { 
-            $apiresults = array("result" => "Error: Set a value for Departmet ID"); 
+    if($userid == null && $userid == 0) { 
+            $apiresults = array("result" => "Error: Set a value for User ID"); 
     } else {     
     
         if (!checkIfTenant($groupId)) {
@@ -25,7 +25,7 @@
             $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
         }
             
-        $query = "SELECT count(*) as opentickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='open') AND dept_id IN ($deptid) AND isanswered=0";
+        $query = "SELECT count(*) as opentickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='open') AND dept_id IN ((select dept_id from ost_staff where staff_id='$userid'),(SELECT dept_id FROM ost_staff_dept_access WHERE staff_id='$userid')) AND isanswered=0";
 
         $rsltv = mysqli_query($linkost,$query);
         $fresults = mysqli_fetch_assoc($rsltv);
