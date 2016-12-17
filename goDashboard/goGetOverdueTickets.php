@@ -24,8 +24,9 @@
             $stringv .= "'j'";
             $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
         }
-    
-        $query = "SELECT count(*) as overduetickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='open') AND dept_id IN ((select dept_id from ost_staff where staff_id='$userid'),(SELECT dept_id FROM ost_staff_dept_access WHERE staff_id='$userid')) AND isoverdue=1;";
+        
+        $state = "open";
+        $query = "SELECT count(*) as overduetickets FROM ost_ticket WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='$state') AND dept_id IN ((select dept_id from ost_staff where staff_id='$userid'),(SELECT dept_id FROM ost_staff_dept_access WHERE staff_id='$userid')) AND isoverdue=1";
 
         $rsltv = mysqli_query($linkost,$query);
         $fresults = mysqli_fetch_assoc($rsltv);
