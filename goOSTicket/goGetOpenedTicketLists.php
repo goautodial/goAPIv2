@@ -30,8 +30,10 @@
                 $ul = "AND p.user_group='$groupId'";  
         }
 
+        $state= "open";
+        
         //$query = "SELECT ticket_id, number, user_id, status_id, dept_id, sla_id, topic_id, staff_id, team_id, lock_id, flags, ip_address, source, source_extra, isoverdue, isanswered, duedate, est_duedate, reopened, reopened, closed, lastupdate, created, updated from ost_ticket ORDER by ticket_id DESC LIMIT $limit";
-        $query = "SELECT number, ot.updated, ot.staff_id, otc.subject, ou.name as customer, otp.priority from ost_ticket as ot, ost_ticket__cdata as otc, ost_user as ou, ost_ticket_priority as otp WHERE status_id=1 AND ot.ticket_id=otc.ticket_id AND ot.user_id=ou.id AND otc.priority=otp.priority_id AND dept_id IN ($deptid) LIMIT 2000";
+        $query = "SELECT number, ot.updated, ot.staff_id, otc.subject, ou.name as customer, otp.priority from ost_ticket as ot, ost_ticket__cdata as otc, ost_user as ou, ost_ticket_priority as otp WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='$state') AND ot.ticket_id=otc.ticket_id AND ot.user_id=ou.id AND otc.priority=otp.priority_id AND dept_id IN ($deptid) AND isanswered=0 LIMIT 2000";
 
         $rsltv = mysqli_query($linkost,$query);
         //var_dump($rsltv);
