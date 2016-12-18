@@ -9,44 +9,44 @@
     #######################################################
     include_once("../goFunctions.php");
     
-    $limit = $_REQUEST['limit'];
-    if ($limit < 1) { 
-        $limit = 'LIMIT 2000'; 
-    } else { 
-        $limit = "LIMIT $limit"; 
-    }
-     
-    $groupId = go_get_groupid($goUser);
+    $userid = $_REQUEST['userid'];
 
-    if (!checkIfTenant($groupId)) {
-            $ul='';
-    } else { 
-            $ul = "AND p.user_group='$groupId'";  
-    }
-
-    //$query = "SELECT ticket_id, number, user_id, status_id, dept_id, sla_id, topic_id, staff_id, team_id, lock_id, flags, ip_address, source, source_extra, isoverdue, isanswered, duedate, est_duedate, reopened, reopened, closed, lastupdate, created, updated from ost_ticket ORDER by ticket_id DESC LIMIT $limit";
-    $query = "SELECT ost_ticket.ticket_id as 'ot_ticket_id', number, ost_ticket.user_id as 'ot_user_id', status_id,  ost_ticket.staff_id as 'ot_staff_id', lastupdate, ost_ticket.created as 'ot_created', ost_ticket.updated as 'ot_updated', ost_staff.staff_id as 'os_staff_id', ost_ticket__cdata.ticket_id as 'otc_ticket_id', ost_ticket__cdata.priority as 'otc_priority', subject, firstname, lastname, name, ost_user.default_email_id as 'id' FROM ost_ticket, ost_staff, ost_ticket__cdata, ost_user  WHERE ost_ticket.staff_id=ost_staff.staff_id AND ost_ticket.ticket_id=ost_ticket__cdata.ticket_id and ost_user.default_email_id=ost_ticket.user_id and isoverdue=1 ORDER by number DESC LIMIT 2000";
-
-    $rsltv = mysqli_query($linkost,$query);
-    //var_dump($rsltv);
-    $countResult = mysqli_num_rows($rsltv);
-    
-    if($countResult > 0) {
-        $data = array();
-        while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-            array_push($data, urlencode_array($fresults));
-        }
-        $apiresults = array("result" => "success", "data" => $data);
+    if($userid == null && $userid == 0) { 
+            $apiresults = array("result" => "Error: Set a value for User ID"); 
     } else {
-        $apiresults = array("result" => "Error: No data to show.");
-    }
+        $groupId = go_get_groupid($goUser);
 
+        if (!checkIfTenant($groupId)) {
+                $ul='';
+        } else { 
+                $ul = "AND p.user_group='$groupId'";  
+        }
+
+        $state= "open";
+        
+        //$query = "SELECT ticket_id, number, user_id, status_id, dept_id, sla_id, topic_id, staff_id, team_id, lock_id, flags, ip_address, source, source_extra, isoverdue, isanswered, duedate, est_duedate, reopened, reopened, closed, lastupdate, created, updated from ost_ticket ORDER by ticket_id DESC LIMIT $limit";
+        $query = "SELECT number, ot.updated, ot.ticket_id, otc.subject, ou.name as customer, otp.priority from ost_ticket as ot, ost_ticket__cdata as otc, ost_user as ou, ost_ticket_priority as otp WHERE status_id IN (SELECT id AS status_id FROM ost_ticket_status WHERE state='$state') AND ot.ticket_id=otc.ticket_id AND ot.user_id=ou.id AND otc.priority=otp.priority_id AND dept_id IN ((select dept_id from ost_staff where staff_id='$userid'),(SELECT dept_id FROM ost_staff_dept_access WHERE staff_id='$userid')) AND isanswered=0 AND isoverdue=1 LIMIT 2000"; 
+
+        $rsltv = mysqli_query($linkost,$query);
+        //var_dump($rsltv);
+        $countResult = mysqli_num_rows($rsltv);
+        
+        if($countResult > 0) {
+            $data = array();
+            while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+                array_push($data, urlencode_array($fresults));
+            }
+            $apiresults = array("result" => "success", "data" => $data);
+        } else {
+            $apiresults = array("result" => "Error: No data to show.");
+        }                
+    }
+    
     function urlencode_array($array){
         $out_array = array();
         foreach($array as $key => $value){
-        $out_array[rawurlencode($key)] = rawurlencode($value);
+            $out_array[rawurlencode($key)] = rawurlencode($value);
         }
-    return $out_array;
+        return $out_array;
     }
-
 ?>

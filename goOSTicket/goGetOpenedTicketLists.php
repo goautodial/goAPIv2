@@ -10,14 +10,7 @@
     include_once("../goFunctions.php");
     
     $userid = $_REQUEST['userid'];
-    $limit = $_REQUEST['limit'];
-    
-    if ($limit < 1) { 
-        $limit = 'LIMIT 2000'; 
-    } else { 
-        $limit = "LIMIT $limit"; 
-    }
-    
+
     if($userid == null && $userid == 0) { 
             $apiresults = array("result" => "Error: Set a value for User ID"); 
     } else {
