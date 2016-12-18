@@ -77,7 +77,7 @@
 
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user ASC";
+	$query = "SELECT user_id, user, full_name, user_group, active, avatar FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user ASC";
 	$rsltv = mysqli_query($link, $query);
     $countResult = mysqli_num_rows($rsltv);
 		
