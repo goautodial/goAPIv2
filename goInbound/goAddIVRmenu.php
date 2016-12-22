@@ -27,20 +27,10 @@
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
 		
-    $option = $_REQUEST['option'];
-	$option_desc = mysqli_real_escape_string($link, $_REQUEST['option_desc']);
-	$option_menu = $_REQUEST['option_menu'];
-	$option_value = mysqli_real_escape_string($link, $_REQUEST['option_value']);
-	$option_context = mysqli_real_escape_string($link, $_REQUEST['option_context']);
+    $items = $_REQUEST['items'];
+	$exploded_items = explode("|", $items);
+	$filtered_items = array_filter($exploded_items);
 	
-	$option = explode("+", $option);
-	$option_desc = explode("+", $option_desc);
-	$option_menu = explode("+", $option_menu);
-	$option_value = explode("+", $option_value);
-	
-	if($option_context != "" || $option_context != NULL)
-	$option_context = explode("+", $option_context);
-   
     ### Default values 
 	$defmenu_time_check = array('0','1');
 	$deftrack_in_vdac = array('0','1');
@@ -148,13 +138,12 @@
 				$resultQueryDef = mysqli_query($link, $queryDef);
 				
 				#query for call menu options
-				for($i=0; $i < count($option); $i++){
-					if($option_menu[$i] != "EXTEN")
-					$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value) values('$menu_id', '$option[$i]', '$option_desc[$i]', '$option_menu[$i]', '$option_value[$i]');";
-					else
-					$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value, option_route_value_context) values('$menu_id', '$option[$i]', '$option_desc[$i]', '$option_menu[$i]', '$option_value[$i]', '$option_context[$i]');";
-					
-					$resultQueryOptions = mysqli_query($link, $query_options);
+				$return_query = "";
+				for($i=0; $i < count($filtered_items); $i++){
+					$options = explode("+", $filtered_items[$i]);
+					$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value, option_route_value_context) values('$menu_id', '$options[0]', '$options[1]', '$options[2]', '$options[3]', '$options[4]');";
+					$return_query .= $query_options."+++++";
+					$query_callmenu_entry = mysqli_query($link, $query_options);
 				}
 				
 				$queryUpdateAsterisk = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
@@ -170,7 +159,7 @@
 				  $SQLdate = date("Y-m-d H:i:s");
 				  $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New IVR $menu_id','INSERT INTO  vicidial_call_menu SET (menu_name, menu_id, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, tracking_group, user_group) VALUES ($menu_name, $menu_id, $menu_prompt, $menu_timeout, $menu_timeout_prompt, $menu_invalid_prompt, $menu_repeat, $menu_time_check, $call_time_id, $track_in_vdac, $tracking_group, $user_group);');";
 				  $rsltvLog = mysqli_query($linkgo, $queryLog);
-				  $apiresults = array("result" => "success");
+				  $apiresults = array("result" => "success", "query" => $return_query);
 				
 				} else {
 						 $apiresults = array("result" => "CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID\n"); 
