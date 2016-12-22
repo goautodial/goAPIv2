@@ -157,6 +157,9 @@
 					$resultQueryOptions = mysqli_query($link, $query_options);
 				}
 				
+				$queryUpdateAsterisk = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
+				$resultVSC = mysqli_query($link, $queryUpdateAsterisk);
+				
 				$queryCount = "SELECT menu_id from vicidial_call_menu_options where menu_id='$menu_id';";
 				$resultCount = mysqli_query($link, $queryCount);
 				$countOpt = mysqli_num_rows($resultCount);
