@@ -10,7 +10,7 @@
         $user_group = $_REQUEST['user_group'];
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
-        $record_call = "Y"; //$_REQUEST['record_call'];
+        $record_call = "N"; //$_REQUEST['record_call'];
 
 	### Agent
 		$user = $_REQUEST['user'];
