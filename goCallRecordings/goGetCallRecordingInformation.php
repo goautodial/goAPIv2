@@ -69,9 +69,9 @@
 					"result" => "success",
 					"recording_id" => $dataRecordingId,
 					"lead_id" => $dataLeadId,
-					"users" => $dataUser,
-					"location" => $dataData,
-					"mimetype" => $$dataMimetype
+					"users" => $dataUser,					
+					"mimetype" => $dataMimetype,
+					"location" => $dataData
 				);
 			}
 		}else {
