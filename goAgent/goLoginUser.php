@@ -8,7 +8,12 @@
 #### License: AGPLv2                            ####
 ####################################################
 
-$user_settings = get_settings('user', $astDB, $goUser);
+if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
+    else if (isset($_POST['goUserID'])) { $user_id = $astDB->escape($_POST['goUserID']); }
+
+$getUser = $goUser;
+if ($goUser === 'goAPI' && isset($user_id)) { $getUser = $user_id; }
+$user_settings = get_settings('user', $astDB, $getUser);
 
 $CIDdate = date("ymdHis");
 $month_old = mktime(11, 0, 0, date("m"), date("d")-2,  date("Y"));
@@ -31,6 +36,13 @@ $closer_blended = (isset($closer_blended)) ? (int) $closer_blended : 0;
 $sipIsLoggedIn = check_sip_login($phone_login);
 
 if ($sipIsLoggedIn || $use_webrtc) {
+    if (preg_match("/ADMINPORTAL/", $campaign)) {
+        $astDB->where('user_group', array('---ALL---', $VU_user_group), 'in');
+        $astDB->orderBy('campaign_id', 'desc');
+        $query = $astDB->getOne('vicidial_campaigns', 'campaign_id');
+        $campaign = $query['campaign_id'];
+    }
+    
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     $campaign_settings = get_settings('campaign', $astDB, $campaign);
     $system_settings = get_settings('system', $astDB);
