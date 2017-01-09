@@ -601,8 +601,8 @@
                                                                                     campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
                                                                                     no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
                                                                                     use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file)
-                                                                                    VALUES('$campaign_id','$campaign_desc','','N','$dial_method','NEW',
-                                                                                    ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','$autoDialLevel',
+                                                                                    VALUES('$campaign_id','$campaign_desc','','N','RATIO','NEW',
+                                                                                    ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','$routingExten','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
                                                                                     'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','')";
@@ -665,6 +665,21 @@
 								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 
+								$wavfile_name = $_FILES["files"]['name'];
+								$wavfile_orig = $_FILES['uploaded_wav']['name'];
+								$wavfile_dir = $_FILES['uploaded_wav']['tmp_name'];
+								$WeBServeRRooT = '/var/lib/asterisk';
+								$sounds_web_directory = 'sounds';
+								
+								if (preg_match("/\.(wav|mp3)$/i",$wavfile_orig)) {
+										$wavfile_dir = preg_replace("/ /",'\ ',$wavfile_dir);
+										$wavfile_dir = preg_replace("/@/",'\@',$wavfile_dir);
+										$wavfile_name = preg_replace("/ /",'',$wavfile_name);
+										$wavfile_name = preg_replace("/@/",'',$wavfile_name);
+										
+										copy($wavfile_dir, "$WeBServeRRooT/$sounds_web_directory/$wavfile_name");
+										chmod("$WeBServeRRooT/$sounds_web_directory/$wavfile_name", 0766);
+								}
 
 			                    $apiresults = array("result" => "success");
 			                } else {
