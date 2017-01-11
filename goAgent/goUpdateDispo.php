@@ -468,6 +468,7 @@ if ($is_logged_in) {
 		
 		### CALLBACK ENTRY
 		if ( ($dispo_choice == 'CBHOLD') and (strlen($CallBackDatETimE) > 10) ) {
+			$comments = urldecode($comments);
 			$comments = preg_replace('/"/i', '', $comments);
 			$comments = preg_replace("/'/i", '', $comments);
 			$comments = preg_replace('/;/i', '', $comments);
@@ -522,6 +523,7 @@ if ($is_logged_in) {
 		
 			# Insert into vicidial_call_notes
 			//$stmt="INSERT INTO vicidial_call_notes set lead_id='$lead_id',vicidial_id='$vicidial_id',call_date='$NOW_TIME',call_notes='" . mysqli_real_escape_string($call_notes) . "';";
+			$call_notes = urldecode($call_notes);
 			$insertData = array(
 				'lead_id' => $lead_id,
 				'vicidial_id' => $vicidial_id,
