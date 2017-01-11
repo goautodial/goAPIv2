@@ -13,11 +13,11 @@
     
     $query = "SELECT did_id,did_pattern,did_description,did_active,did_route
             FROM vicidial_inbound_dids
-            WHERE camapign_id = '$campaign_id'
+            WHERE campaign_id = '$campaign_id'
             ORDER BY did_pattern";
    	$rsltv = mysqli_query($link, $query);
     
-    while($fresults = mysqli_fetch_assoc($rsltv)){
+	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
         $dataDidID[] 			= $fresults['did_id'];
         $dataDidPattern[] 		=  $fresults['did_pattern'];
         $dataDidDescription[] 	=  $fresults['did_description'];
