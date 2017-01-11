@@ -23,7 +23,13 @@
         ### Agent
         $user = $_REQUEST['user'];
         $user_unavailable_action = strtoupper($_REQUEST['user_unavailable_action']);
-
+		$user_route_settings_ingroup = $_REQUEST['user_route_settings_ingroup'];
+		if($user != NULL){
+			$agent_sql = ", user = '$user', user_unavailable_action = '$user_unavailable_action', user_route_settings_ingroup = '$user_route_settings_ingroup' ";	
+		}else{
+			$agent_sql = "";	
+		}
+		
         ### Ingroup
         $group_id = $_REQUEST['group_id'];
 		
@@ -116,21 +122,18 @@
         if($did_description != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $did_description)){
                 $apiresults = array("result" => "Error: Special characters found in did_description");
         } else {
-
-                if(!in_array($user_unavailable_action,$defUUA) && $user_unavailable_action != null) {
-                        $apiresults = array("result" => "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'.");
-                } else {
-                if(!in_array($active,$defActive) && $active != null) {
-                        $apiresults = array("result" => "Error: Default value for active is Y or N only.");
-                } else {
-
-                if(!in_array($did_route,$defRoute) && $did_route != null) {
-                        $apiresults = array("result" => "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only.");
-                } else {
-                if(!in_array($record_call,$defRecordCall) && $record_call != null) {
-                        $apiresults = array("result" => "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only.");
-                } else {
-
+		if(!in_array($user_unavailable_action,$defUUA) && $user_unavailable_action != null) {
+				$apiresults = array("result" => "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'.");
+		} else {
+		if(!in_array($active,$defActive) && $active != null) {
+				$apiresults = array("result" => "Error: Default value for active is Y or N only.");
+		} else {
+		if(!in_array($did_route,$defRoute) && $did_route != null) {
+				$apiresults = array("result" => "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only.");
+		} else {
+		if(!in_array($record_call,$defRecordCall) && $record_call != null) {
+				$apiresults = array("result" => "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only.");
+		} else {
 
         if($group_id != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)){
                 $apiresults = array("result" => "Error: Special characters found in group_id");
@@ -162,7 +165,7 @@
 			    if($did_route == null) {$did_route = $datadid_route;} else { $did_route = $did_route;}
                                 $query = "UPDATE vicidial_inbound_dids
 								SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active',
-								did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' $group_id_sql $phone_sql
+								did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' $agent_sql $group_id_sql $phone_sql
 								$menu_id_sql $voicemail_ext_sql $extension_sql 
 								WHERE did_id='$did_id';";
                                 $resultQuery = mysqli_query($link, $query);
