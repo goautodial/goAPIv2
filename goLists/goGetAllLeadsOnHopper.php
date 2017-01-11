@@ -10,6 +10,7 @@
     include_once("../goFunctions.php");
     
     $campaign_id = $_REQUEST['campaign_id'];
+	$list_id = $_REQUEST['campaign_id'];
     
     $query = "SELECT
         vicidial_hopper.lead_id,
@@ -23,11 +24,11 @@
         vicidial_hopper.list_id,
         vicidial_hopper.priority,
         vicidial_hopper.source
-    FROM vicidial_hopper
-    LEFT JOIN vicidial_list
-    ON vicidial_hopper.lead_id=vicidial_list.lead_id
-    WHERE vicidial_hopper.campaign_id = '$campaign_id'
-    ORDER BY vicidial_hopper.hopper_id";
+    FROM vicidial_hopper,vicidial_list
+    WHERE vicidial_hopper.lead_id = vicidial_list.lead_id
+	AND vicidial_hopper.campaign_id = '$campaign_id'
+	ORDER BY vicidial_hopper.hopper_id
+    LIMIT 2000;";
     $rsltv = mysqli_query($link, $query);
 	$countResult = mysqli_num_rows($rsltv);
     

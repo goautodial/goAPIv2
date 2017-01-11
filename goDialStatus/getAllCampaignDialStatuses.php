@@ -8,10 +8,13 @@
     #### License: AGPLv2                               ####
     #######################################################
     include_once("../goFunctions.php");
-	
+    
+    $campaign_id = $_REQUEST['campaign_id'];
+    
     $query = "SELECT status,status_name
-            FROM vicidial_statuses
-           ORDER BY status";
+            FROM vicidial_campaign_statuses 
+            WHERE campaign_id='$campaign_id'
+            ORDER BY status";
    	$rsltv = mysqli_query($link, $query);
     
     while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
