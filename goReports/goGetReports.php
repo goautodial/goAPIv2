@@ -1868,9 +1868,9 @@ ini_set('memory_limit', -1);
 							$list_ids[$i]=$row['list_id'];
 							$i++;
 						}
-						$list_ids[$i] = "{$userGroup}0";
+						//$list_ids[$i] = "{$userGroup}0";
 					}
-			
+				$list = "'".implode("','",$list_ids)."'";
 					# grab names of global statuses and statuses in the selected campaign
 					$query = mysqli_query($link, "SELECT status,status_name from vicidial_statuses order by status");
 					//$statuses_to_print = $query->num_rows();
@@ -1885,9 +1885,10 @@ ini_set('memory_limit', -1);
 						$statuses_list[$row['status']] = $row['status_name'];
 					}
 			
-					$query = mysqli_query($link, "SELECT status,status_name from vicidial_campaign_statuses where campaign_id='$campaignID' order by status");
-					//$Cstatuses_to_print = $query->num_rows();
-					$Cstatuses_to_print = mysqli_num_rows($query);
+					$query_list = "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID'; ";
+$query = mysqli_query($link, $query_list);
+//					//$Cstatuses_to_print = $query->num_rows();
+//					$Cstatuses_to_print = mysqli_num_rows($query);
 		
 					/*foreach ($query->result() as $o => $row) 
 						{
@@ -1895,6 +1896,7 @@ ini_set('memory_limit', -1);
 						}*/
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+						$query_name = mysqli_query($link, "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID' and list_id");
 						$statuses_list[$row['status']] = $row['status_name'];
 					}
 					# end grab status names
@@ -1904,8 +1906,9 @@ ini_set('memory_limit', -1);
 					$leads_in_list = 0;
 					$leads_in_list_N = 0;
 					$leads_in_list_Y = 0;
-					$list = "'".implode("','",$list_ids)."'";
-					$query = mysqli_query($link, "SELECT status, if(called_count >= 10, 10, called_count) as called_count, count(*) as count from vicidial_list where list_id IN('".implode("','",$list_ids)."') and status NOT IN('DC','DNCC','XDROP') group by status, if(called_count >= 10, 10, called_count) order by status,called_count");
+					
+					$queryx = "SELECT status, if(called_count >= 10, 10, called_count) as called_count, count(*) as count from vicidial_list where list_id IN(".$list.") and status NOT IN('DC','DNCC','XDROP') group by status, if(called_count >= 10, 10, called_count) order by status,called_count";
+$query = mysqli_query($link, $queryx);
 					$status_called_to_print = mysqli_num_rows($query);
 					
 					$sts=0;
@@ -2039,7 +2042,7 @@ ini_set('memory_limit', -1);
 					$return['TOPsorted_output']		= $TOPsorted_output;
 					$return['SUMstatuses']			= $sts;
 					
-					$apiresults = array("result" => "success", "SUMstatuses" => $sts, "TOPsorted_output" => $TOPsorted_output);
+					$apiresults = array("result" => "success", "SUMstatuses" => $sts, "TOPsorted_output" => $TOPsorted_output, "query_list" => $query_list, "queryx" => $queryx);
 					
 					return $apiresults;
 				}
