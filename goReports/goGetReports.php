@@ -58,7 +58,7 @@ ini_set('memory_limit', -1);
 		$campaign_SQL = "";
 		$group_SQL = "";
 		$list_SQL = "";
-		$status_SQL = "";
+		$status_list = "";
 		
 		$campaign_ct = count($campaigns);
 		$group_ct = count($inbounds);
@@ -132,15 +132,15 @@ ini_set('memory_limit', -1);
 		if($dispo_stats != ""){
 			$i=0;
 			while($i < $status_ct){
-				$status_SQL .= "'$dispo_stats[$i]',";
+				$status_list .= "'$dispo_stats[$i]',";
 				$i++;
 			}
 			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ){
 				$status_SQL = "";
 			}
 			else{
-				$status_SQL = preg_replace("/,$/i",'',$status_SQL);
-				$status_SQL = "and vl.status IN ($status_SQL)";
+				$status_list_string = preg_replace("/,$/i",'',$status_list);
+				$status_SQL = "and vl.status IN ($status_list_string)";
 			}
 		}
 		
