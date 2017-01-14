@@ -43,6 +43,9 @@
 				$deleteQuery = "DELETE FROM vicidial_users WHERE user='$dataUserID' AND user != 'ADMIN'"; 
    				$deleteResult = mysqli_query($link, $deleteQuery);
 
+				$deleteQueryGo = "DELETE FROM users WHERE name='$dataUserID'"; 
+   				$deleteResultGo = mysqli_query($linkgo, $deleteQueryGo);
+   				
 				$deleteQueryA = "DELETE FROM phones WHERE extension='$dataPhoneLogin';";
              			$deleteResultA = mysqli_query($link, $deleteQueryA);
 				

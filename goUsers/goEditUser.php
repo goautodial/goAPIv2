@@ -134,6 +134,7 @@
                         while($fresults = mysqli_fetch_array($rsltvCheck, MYSQLI_ASSOC)){
                                 $dataUserLevel = $fresults['user_level'];
                                 $dataUserGroup = $fresults['user_group'];
+                                $dataUser = $fresults['user'];
                         }
 				if( $modify_same_user_level == "Y") {
 						$modify_same_user_level = 0;
@@ -201,16 +202,41 @@
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `avatar` = '$avatar' $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email'  $voicemail_query 
 								WHERE `user_id` = '$userid';";
+								
+                                                $queryUserIDGo = "SELECT userid from users WHERE userid='$userid'";
+                                                $resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
+                                                $rUserIDGo = mysqli_fetch_array($resultQueryUserIDGo, MYSQLI_ASSOC);
+                                                $countResultGo = mysqli_num_rows($resultQueryUserIDGo);
+                                                //$userIDGo = $rUserIDGo['userid'];
+                                                
+                                                if ($countResultGo > 0){
+                                                    $queryUpdateUserGo = "UPDATE users SET avatar = '$avatar' WHERE userid ='$userid'";                                                    
+                                                } else {
+                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, avatar) VALUES ('$userid', '$dataUser', '$avatar')";
+                                                }		                                                
 				}else{
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `avatar` = '$avatar' $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email'  $voicemail_query 
 								WHERE `user` = '$user';";
+								
+                                                $queryUserIDGo = "SELECT name from users WHERE name='$user'";
+                                                $resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
+                                                $rUserIDGo = mysqli_fetch_array($resultQueryUserIDGo, MYSQLI_ASSOC);
+                                                $countResultGo = mysqli_num_rows($resultQueryUserIDGo);
+                                                //$userGo = $rUserIDGo['user'];
+                                                
+                                                if ($countResultGo > 0){
+                                                    $queryUpdateUserGo = "UPDATE users SET avatar ='$avatar' WHERE name ='$user'";                                                    
+                                                } else {
+                                                    $queryUpdateUserGo = "INSERT INTO users (name, avatar) VALUES ('$user', '$avatar')";
+                                                }								                                                
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
+				$resultQueryUserGo = mysqli_query($linkgo, $queryUpdateUserGo);
 				
 		/*	
         $queryPhoneUpdate = "UPDATE `phones` SET `pass` = '$pass',  `conf_secret` = '$pass' WHERE `login` = '$phone_login'";
