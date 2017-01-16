@@ -61,6 +61,26 @@
 	$url_tab_first_url		= $_REQUEST['url_tab_first_url'];
 	$url_tab_second_title		= $_REQUEST['url_tab_second_title'];
 	$url_tab_second_url		= $_REQUEST['url_tab_second_url'];
+	
+	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
+	$survey_method = $_REQUEST['survey_method'];
+	$survey_menu_id = $_REQUEST['survey_menu_id'];
+	$survey_dtmf_digits = $_REQUEST['survey_dtmf_digits'];
+	$survey_xfer_exten = $_REQUEST['survey_xfer_exten'];
+	$survey_ni_digit = $_REQUEST['survey_ni_digit'];
+	$survey_ni_audio_file = $_REQUEST['survey_ni_audio_file'];
+	$survey_ni_status = $_REQUEST['survey_ni_status'];
+	$survey_third_digit = $_REQUEST['survey_third_digit'];
+	$survey_third_audio_file = $_REQUEST['survey_third_audio_file'];
+	$survey_third_status = $_REQUEST['survey_third_status'];
+	$survey_third_exten = $_REQUEST['survey_third_exten'];
+	$survey_fourth_digit = $_REQUEST['survey_fourth_digit'];
+	$survey_fourth_audio_file = $_REQUEST['survey_fourth_audio_file'];
+	$survey_fourth_status = $_REQUEST['survey_fourth_status'];
+	$survey_fourth_exten = $_REQUEST['survey_fourth_exten'];
+	
+	$amd_send_to_vmx = $_REQUEST['amd_send_to_vmx'];
+	$waitforsilence_options = $_REQUEST['waitforsilence_options'];
 
    	//$apiresults = array("data" => $_REQUEST); 
 
@@ -159,7 +179,25 @@
 										customer_3way_hangup_action = '$customer_3way_hangup_action',
 										campaign_allow_inbound = '$campaign_allow_inbound',
 										closer_campaigns = '$closer_campaigns',
-										xfer_groups = '$xfer_groups'
+										xfer_groups = '$xfer_groups',
+										survey_first_audio_file = '$survey_first_audio_file',
+										survey_method = '$survey_method',
+										survey_menu_id = '$survey_menu_id',
+										survey_dtmf_digits = '$survey_dtmf_digits',
+										survey_xfer_exten = '$survey_xfer_exten',
+										survey_ni_digit = '$survey_ni_digit',
+										survey_ni_audio_file = '$survey_ni_audio_file',
+										survey_ni_status = '$survey_ni_status',
+										survey_third_digit = '$survey_third_digit',
+										survey_third_audio_file = '$survey_third_audio_file',
+										survey_third_status = '$survey_third_status',
+										survey_third_exten = '$survey_third_exten',
+										survey_fourth_digit = '$survey_fourth_digit',
+										survey_fourth_audio_file = '$survey_fourth_audio_file',
+										survey_fourth_status = '$survey_fourth_status',
+										survey_fourth_exten = '$survey_fourth_exten',
+										amd_send_to_vmx = '$amd_send_to_vmx',
+										waitforsilence_options = '$waitforsilence_options'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;
@@ -202,6 +240,16 @@
 					if($force_reset_hopper == "Y"){
 						$queryDelete = "DELETE from vicidial_hopper where campaign_id='$campaign_id' and status IN('READY','QUEUE','DONE');";
 						$rsltvDelete = mysqli_query($link, $queryDelete);
+					}
+					
+					if($campaign_type == "SURVEY"){
+						if($active == "Y"){
+							$updateRemoteUserStatus = "UPDATE vicidial_remote_agents SET status = 'ACTIVE' WHERE campaign_id='$campaign_id'";
+							$rsltvVRA = mysqli_query($link, $updateRemoteUserStatus);
+						}else{
+							$updateRemoteUserStatus = "UPDATE vicidial_remote_agents SET status = 'INACTIVE' WHERE campaign_id='$campaign_id'";
+							$rsltvVRA = mysqli_query($link, $updateRemoteUserStatus);
+						}
 					}
 					
 					$apiresults = array("result" => "success");

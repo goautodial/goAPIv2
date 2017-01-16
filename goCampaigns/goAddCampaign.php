@@ -52,6 +52,7 @@
 	$did_pattern 	= $_REQUEST['did_tfn_extension'];
 	$group_color 	= $_REQUEST['group_color'];
 	$call_route 	= $_REQUEST['call_route'];
+	$call_route_text 	= $_REQUEST['call_route_text'];
 	$survey_type 	= $_REQUEST['survey_type'];
 	$number_channels 	= $_REQUEST['no_channels'];
 	$copy_from_campaign 	= $_REQUEST['copy_from_campaign'];
@@ -247,6 +248,8 @@
 
                 // Inbound Campaign here
                 if($campaign_type == "INBOUND"){
+				    $defCallRoute = array("INGROUP","IVR","AGENT","VOICEMAIL");
+					$callRoute = strtoupper($call_route);
                 	$campaign_id = mysqli_real_escape_string($link, $campaign_id);
 	                $campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
 	                $SQLdate = date("Y-m-d H:i:s");
@@ -315,6 +318,60 @@
 						$rsltv = mysqli_query($link, $query);
 						$countResult = mysqli_num_rows($rsltv);
 						if($countResult > 0) {
+								if ($callRoute != null){
+										// Call Route
+										$didDesc = "$campaign_id $campaign_type DID";
+										$didPattern = $call_route_text;
+				
+										switch ($callRoute){
+											case "INGROUP":
+												$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
+																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
+																					filter_campaign_id,group_id,server_ip,user_group)
+																					VALUES ('$didPattern','$didDesc','Y','IN_GROUP',
+																					'$group_id','$campaign_id','Y','$list_id',
+																					'$campaign_id','$group_id','10.0.0.12','$tenant_id')";
+												$rsltvING = mysqli_query($link, $queryING);
+											break;
+				
+											case "IVR":
+												$menuID = "$cntX";
+												$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
+												$rsltvVCM = mysqli_query($link, $queryVCM);
+												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
+																					filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
+																					VALUES ('$didPattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','10.0.0.12','$menuID','$tenant_id')";
+												$rsltvVID = mysqli_query($link, $queryVID);
+											break;
+				
+											case "AGENT":
+												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
+																					campaign_id,record_call,filter_list_id,filter_campaign_id,user,group_id,server_ip,user_group)
+																					VALUES ('$didPattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$emailORagent',
+																					'$group_id','10.10.10.12','$tenant_id')";
+												$rsltvVID = mysqli_query($link, $queryVID);
+											break;
+				
+											case "VOICEMAIL":
+												if ($emailORagent=='undefined')
+													$emailORagent='';
+				
+												$queryVV = "INSERT INTO vicidial_voicemail SET voicemail_id='$campaign_id',pass='$campaign_id',email='$emailORagent',fullname='$campaign_id VOICEMAIL',active='Y',user_group='$tenant_id'";
+												$rsltvVV = mysqli_query($link, $queryVV);
+				
+												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
+																					campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group)
+																					VALUES ('$didPattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$campaign_id','$tenant_id')";
+												$rsltvVID = mysqli_query($link, $queryVID);
+											break;
+										}
+				
+										$queryUpdateVC = "UPDATE vicidial_campaigns SET closer_campaigns = ' $group_id -',campaign_allow_inbound = 'Y' WHERE campaign_id = '$campaign_id'";
+										$rsltvVC = mysqli_query($link, $queryUpdateVC);
+				
+										$queryUpdateVU = "UPDATE vicidial_users set modify_inbound_dids='1' where user='$userID'";
+										$rsltvVU = mysqli_query($link, $queryUpdateVU);
+								}
 		
 						 ### Admin logs
 							$SQLdate = date("Y-m-d H:i:s");
@@ -446,6 +503,7 @@
 		                        if ($callRoute != null){
 		                        	// Call Route
 		                        	$didDesc = "$campaign_id $campaign_type DID";
+									$didPattern = $call_route_text;
 
 		                        	switch ($callRoute){
                                 		case "INGROUP":
@@ -589,6 +647,21 @@
                                     //} elseif($VARSERVTYPE == "gopackages") {
                                     //        $sippy_dial_prefix = "9";
                                     //}
+								    $wavfile_name = $_FILES["uploaded_wav"]['name'];
+									$wavfile_orig = $_FILES['uploaded_wav']['name'];
+									$wavfile_dir = $_FILES['uploaded_wav']['tmp_name'];
+									$WeBServeRRooT = '/var/lib/asterisk';
+									$sounds_web_directory = 'sounds';
+										
+									if (preg_match("/\.(wav|mp3)$/i",$wavfile_orig)) {
+										$wavfile_dir = preg_replace("/ /",'\ ',$wavfile_dir);
+										$wavfile_dir = preg_replace("/@/",'\@',$wavfile_dir);
+										$wavfile_name = preg_replace("/ /",'',"go_".$wavfile_name);
+										$wavfile_name = preg_replace("/@/",'',$wavfile_name);
+										
+										copy($wavfile_dir, "$WeBServeRRooT/$sounds_web_directory/$wavfile_name");
+										chmod("$WeBServeRRooT/$sounds_web_directory/$wavfile_name", 0766);
+									}
 
                                     //if($VARSERVTYPE == "cloud"){  
                                     $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,
@@ -600,12 +673,12 @@
                                                                                     dial_timeout,campaign_vdad_exten,campaign_recording,
                                                                                     campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
                                                                                     no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
-                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file)
+                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file)
                                                                                     VALUES('$campaign_id','$campaign_desc','','N','RATIO','NEW',
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','$routingExten','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','')";
+                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','$wavfile_name','$wavfile_name')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -664,22 +737,6 @@
 
 								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
-
-								$wavfile_name = $_FILES["files"]['name'];
-								$wavfile_orig = $_FILES['uploaded_wav']['name'];
-								$wavfile_dir = $_FILES['uploaded_wav']['tmp_name'];
-								$WeBServeRRooT = '/var/lib/asterisk';
-								$sounds_web_directory = 'sounds';
-								
-								if (preg_match("/\.(wav|mp3)$/i",$wavfile_orig)) {
-										$wavfile_dir = preg_replace("/ /",'\ ',$wavfile_dir);
-										$wavfile_dir = preg_replace("/@/",'\@',$wavfile_dir);
-										$wavfile_name = preg_replace("/ /",'',$wavfile_name);
-										$wavfile_name = preg_replace("/@/",'',$wavfile_name);
-										
-										copy($wavfile_dir, "$WeBServeRRooT/$sounds_web_directory/$wavfile_name");
-										chmod("$WeBServeRRooT/$sounds_web_directory/$wavfile_name", 0766);
-								}
 
 			                    $apiresults = array("result" => "success");
 			                } else {

@@ -13,6 +13,19 @@
     
     if (!checkIfTenant($groupId)) {
         $ul='';
+        if ($groupId != 'ADMIN') {
+            $uQuery = "SELECT tenant_id FROM go_multi_tenant;";
+            $uRslt = mysqli_query($linkgo, $uQuery);
+            if (mysqli_num_rows($uRslt) > 0) {
+                $ul = "AND user_group NOT IN (";
+                $uListGroups = "";
+                while($uResults = mysqli_fetch_array($uRslt, MYSQLI_ASSOC)) {
+                    $uListGroups = "'{$uResults['tenant_id']}',";
+                }
+                $ul .= rtrim($uListGroups, ',');
+                $ul .= ")";
+            }
+        }
     } else { 
         $ul = "AND user_group='$groupId'";  
     }
