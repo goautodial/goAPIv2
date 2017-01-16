@@ -21,7 +21,7 @@
         $ul = " and user IN ($stringv) and user_level != 4";
     }
     
-    $query_OnlineAgents = "SELECT count(*) as 'OnlineAgents' from vicidial_live_agents WHERE vicidial_live_agents.user_level != 4";
+    $query_OnlineAgents = "SELECT count(*) as 'OnlineAgents' from vicidial_live_agents WHERE (vicidial_live_agents.user_level < 7 AND vicidial_live_agents.user_level != 4)";
     //$query_ParkedChannels = "SELECT channel as 'pc_channel' from parked_channels";
     $query_ParkedChannels = "SELECT channel as 'pc_channel',server_ip as 'pc_server_ip',channel_group as 'pc_channel_group',extension as 'pc_extension',parked_by as 'pc_parked_by',UNIX_TIMESTAMP(parked_time) as 'pc_parked_time' from parked_channels";
     $query_CallerIDsFromVAC = "SELECT callerid as 'vac_callerid',lead_id as 'vac_lead_id',phone_number as 'vac_phone_number' from vicidial_auto_calls";
@@ -32,6 +32,17 @@
     $rsltvNoCalls = mysqli_query($link,$query_OnlineAgentsNoCalls);
     $rsltvParkedChannels = mysqli_query($link,$query_ParkedChannels);
     $rsltvCallerIDsFromVAC = mysqli_query($link,$query_CallerIDsFromVAC);
+    
+    $queryGo = "SELECT userid, avatar FROM users";    
+    $rsltvGo = mysqli_query($linkgo, $queryGo);
+    $countResultGo = mysqli_num_rows($rsltvGo);  
+        
+    if($countResultGo > 0) {
+        $dataGo = array();
+        while($fresultsGo = mysqli_fetch_array($rsltvGo, MYSQLI_ASSOC)){
+            array_push($dataGo, $fresultsGo);
+        }
+    }    
 
     if($query_OnlineAgents != NULL) {
     
@@ -53,7 +64,7 @@
             }                
 
         $data = array_merge($dataInCalls, $dataNoCalls);
-        $apiresults = array("result" => "success", "data" => $data, "parked" => $dataParkedChannels, "callerids" => $dataCallerIDsFromVAC);
+        $apiresults = array("result" => "success", "data" => $data, "dataGo" => $dataGo, "parked" => $dataParkedChannels, "callerids" => $dataCallerIDsFromVAC);
     
     }
    

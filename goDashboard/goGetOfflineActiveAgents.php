@@ -14,23 +14,33 @@
     $groupId = go_get_groupid($goUser);
     
     if (!checkIfTenant($groupId)) {
-        $ul=' and user_level != 4';
+        $ul=' and (user_level < 9 AND user_level != 4)';
     } else { 
         $stringv = go_getall_allowed_users($groupId);
         $stringv .= "'j'";
-        $ul = " and user IN ($stringv) and user_level != 4";
+        $ul = " and user IN ($stringv) and (user_level < 9 AND user_level != 4)";
     }
     
-    $query_OfflineActiveAgents = "SELECT vicidial_users.user as 'vu_user', vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group', vicidial_users.user_level as 'vu_user_level', vicidial_users.active as 'vu_status', avatar from vicidial_users where vicidial_users.active='Y' AND vicidial_users.user_level !=4 AND vicidial_users.user NOT IN (SELECT vicidial_live_agents.user as 'vla_user' from vicidial_live_agents)";
-     
-    $rsltvOfflineAgents = mysqli_query($link,$query_OfflineActiveAgents);
-
-    $data = array();
+    $query_OfflineActiveAgents = "SELECT vicidial_users.user_id as 'vu_user_id', vicidial_users.user as 'vu_user', vicidial_users.full_name as 'vu_full_name',vicidial_users.user_group as 'vu_user_group', vicidial_users.user_level as 'vu_user_level', vicidial_users.active as 'vu_status' from vicidial_users where vicidial_users.active='Y' AND vicidial_users.user_level !=4 AND vicidial_users.user NOT IN (SELECT vicidial_live_agents.user as 'vla_user' from vicidial_live_agents)";     
+    
+    $queryGo = "SELECT userid, avatar FROM users";    
+    $rsltvGo = mysqli_query($linkgo, $queryGo);
+    $countResultGo = mysqli_num_rows($rsltvGo);  
         
+    if($countResultGo > 0) {
+        $dataGo = array();
+        while($fresultsGo = mysqli_fetch_array($rsltvGo, MYSQLI_ASSOC)){
+            array_push($dataGo, $fresultsGo);
+        }
+    }
+    
+    $rsltvOfflineAgents = mysqli_query($link,$query_OfflineActiveAgents);
+    $data = array();        
     while($resultsOfflineAgents = mysqli_fetch_array($rsltvOfflineAgents, MYSQLI_ASSOC)){               
         array_push($data, $resultsOfflineAgents);            
     }
-            
-    $apiresults = array("result" => "success", "data" => $data);
+    
+    //$dataM = array_merge($data, $dataGo);        
+    $apiresults = array("result" => "success", "data" => $data, "dataGo" => $dataGo);
 
 ?>
