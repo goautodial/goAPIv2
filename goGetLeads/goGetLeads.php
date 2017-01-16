@@ -43,24 +43,30 @@
 		$goMyLimit = "LIMIT 10000";
 	}
 	
-	if(!empty($search)) {
+	if(!empty($search)) 
 		$goSearch = "AND (phone_number LIKE '%$search%' OR first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR lead_id LIKE '$search')";
-	}
-	if(!empty($disposition_filter)){
+	else
+		$goSearch = '';
+	if(!empty($disposition_filter))
 		$filterDispo = "AND status = '$disposition_filter'";
-	}
-	if(!empty($list_filter)){
+	else
+		$filterDispo = '';
+	if(!empty($list_filter))
 		$filterList = "AND list_id = '$list_filter'";
-	}
-	if(!empty($address_filter)){
+	else
+		$filterList = '';
+	if(!empty($address_filter))
 		$filterAddress = "AND (address1 LIKE '%$address_filter%' OR address2 LIKE '%$address_filter%')";
-	}
-	if(!empty($city_filter)){
+	else
+		$filterAddress = '';
+	if(!empty($city_filter))
 		$filterCity = "AND city LIKE '%$city_filter%'";
-	}
-	if(!empty($state_filter)){
+	else
+		$filterCity = '';
+	if(!empty($state_filter))
 		$filterState = "AND state LIKE '%$state_filter%'";
-	}
+	else
+		$filterState = '';
 //echo $userid;
 	//$apiresults = array("result" => "success", "userid"=>$userid);
    		
@@ -72,11 +78,15 @@
 	$allowedCampaignsFetch = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC);
 	$allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
 	
-	if ($search_customers) {
-		$customersOnly = "AND lead_id IN (SELECT lead_id FROM `$VARDBgo_database`.go_customers)";
-	} else {
-		$customersOnly = "AND lead_id NOT IN (SELECT lead_id FROM `$VARDBgo_database`.go_customers)";
-	}
+	
+	// GET CUSTOMER LIST
+		$customers_query = "SELECT lead_id FROM go_customers;";
+		$exec_customers_query = mysqli_query($linkgo, $customers_query);
+		$customers = array();
+		while($fetch_customers = mysqli_fetch_array($exec_customers_query)){
+			$customers[] = $fetch_customers['lead_id'];
+		}
+		
 	//if admin
 	if(preg_match("/ALL-CAMPAIGNS/", $allowedCampaigns)){
 		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit";
@@ -101,27 +111,47 @@
 		$fetchLists = explode(" ", $list_results);
 		$fetchLists = remove_empty($fetchLists);
 		$fetchLists = implode("','", $fetchLists);
-		$fetchLists = "'".$fetchLists."'";
-	
+		//$fetchLists = "'".$fetchLists."'";
+		
+		if($fetchLists != '')
+			$additional_query = "AND list_id IN('".$fetchLists."')";
+		else
+			$additional_query = '';
+		
 		//get all leads from return list_id
 //		$queryx = "SELECT count(*) as xxx FROM vicidial_list WHERE list_id IN($fetchLists);";
-		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' AND list_id IN($fetchLists) $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit;";
+		$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number, status FROM vicidial_list WHERE phone_number != '' $additional_query $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit;";
 		$returnRes = mysqli_query($link, $queryx);
 		
 	}
-        
-        $data = array();
-        
-	while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
-        array_push($data, $fresults);
-		$dataLeadid[] = $fresults['lead_id'];
-		$dataListid[] = $fresults['list_id'];
-		$dataFirstName[] = $fresults['first_name'];
-       	$dataMiddleInitial[] = $fresults['middle_initial'];
-        $dataLastName[] = $fresults['last_name'];
-		$dataPhoneNumber[] = $fresults['phone_number'];
-		$dataDispo[] = $fresults['status'];
-	}
 	
-   	$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo, "data" => $data);
+	
+	
+	$data = array();
+	while($fresults = mysqli_fetch_array($returnRes)){
+		if(in_array($fresults['lead_id'], $customers)){
+			$dataLeadid[] = $fresults['lead_id'];
+			$dataListid[] = $fresults['list_id'];
+			$dataFirstName[] = $fresults['first_name'];
+			$dataMiddleInitial[] = $fresults['middle_initial'];
+			$dataLastName[] = $fresults['last_name'];
+			$dataPhoneNumber[] = $fresults['phone_number'];
+			$dataDispo[] = $fresults['status'];
+		}else{
+			$dataLeadid2[] = $fresults['lead_id'];
+			$dataListid2[] = $fresults['list_id'];
+			$dataFirstName2[] = $fresults['first_name'];
+			$dataMiddleInitial2[] = $fresults['middle_initial'];
+			$dataLastName2[] = $fresults['last_name'];
+			$dataPhoneNumber2[] = $fresults['phone_number'];
+			$dataDispo2[] = $fresults['status'];
+		}
+		
+        array_push($data, $fresults);
+	}
+	if ($search_customers) {
+		$apiresults = array("result" => "success", "lead_id" => $dataLeadid, "list_id" => $dataListid, "first_name" => $dataFirstName, "middle_initial" => $dataMiddleInitial, "last_name" => $dataLastName, "phone_number" => $dataPhoneNumber, "status" => $dataDispo, "data" => $data, "query" => $queryx);
+	} else {
+		$apiresults = array("result" => "success", "lead_id" => $dataLeadid2, "list_id" => $dataListid2, "first_name" => $dataFirstName2, "middle_initial" => $dataMiddleInitial2, "last_name" => $dataLastName2, "phone_number" => $dataPhoneNumber2, "status" => $dataDispo2, "data" => $data, "query" => $queryx);
+	}
 ?>
