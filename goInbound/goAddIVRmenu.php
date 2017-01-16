@@ -141,9 +141,11 @@
 				$return_query = "";
 				for($i=0; $i < count($filtered_items); $i++){
 					$options = explode("+", $filtered_items[$i]);
-					$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value, option_route_value_context) values('$menu_id', '$options[0]', '$options[1]', '$options[2]', '$options[3]', '$options[4]');";
-					$return_query .= $query_options."+++++";
-					$query_callmenu_entry = mysqli_query($link, $query_options);
+					if($options[0] !== ''){
+						$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value, option_route_value_context) values('$menu_id', '$options[0]', '$options[1]', '$options[2]', '$options[3]', '$options[4]');";
+						$return_query .= $query_options."+++++";
+						$query_callmenu_entry = mysqli_query($link, $query_options);
+					}
 				}
 				
 				$queryUpdateAsterisk = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";

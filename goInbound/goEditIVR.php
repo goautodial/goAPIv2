@@ -27,7 +27,10 @@
 		
 		$goUser = $_REQUEST['goUser'];
 		$ip_address = $_REQUEST['hostname'];
-		$values = $_REQUEST['items'];
+		
+		$items = $_REQUEST['items'];
+		$exploded_items = explode("|", $items);
+		$filtered_items = array_filter($exploded_items);
    //menu_name, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, tracking_group, custom_dialplan_entry, menu_id
     ### Default values 
     $defActive = array("Y","N");
@@ -93,6 +96,20 @@
 																custom_dialplan_entry = '$custom_dialplan_entry' 
 																WHERE menu_id='$menu_id';";
 														$resultQuery = mysqli_query($link, $query);
+														
+														#query for call menu options
+														$return_query = "";
+														$delete_exoptions = "DELETE FROM vicidial_call_menu_options WHERE menu_id = '$menu_id';";
+														$delete_callmenu_entry = mysqli_query($link, $delete_exoptions);
+														
+														for($i=0; $i < count($filtered_items); $i++){
+															$options = explode("+", $filtered_items[$i]);
+															if($options[0] !== ''){
+																$query_options = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value, option_route_value_context) values('$menu_id', '$options[0]', '$options[1]', '$options[2]', '$options[3]', '$options[4]');";
+																$return_query .= $query_options."+++++";
+																$query_callmenu_entry = mysqli_query($link, $query_options);
+															}
+														}
 								
 								if($resultQuery){
 											$apiresults = array("result" => "success");
