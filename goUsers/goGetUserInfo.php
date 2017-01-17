@@ -87,11 +87,11 @@
         ### GLOBAL (array, single line)
         $query_GetUserInfo = "SELECT user_id, user, full_name, email, user_group, active, user_level, phone_login, phone_pass, voicemail_id, hotkeys_active, vdc_agent_api_access, agent_choose_ingroups, vicidial_recording_override, vicidial_transfers, closer_default_blended, agentcall_manual, scheduled_callbacks, agentonly_callbacks FROM vicidial_users WHERE $ul";
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
-        $fresults = mysqli_fetch_assoc($rsltvGetUserInfo);        
+        $fresults = mysqli_fetch_array($rsltvGetUserInfo);        
         
-        $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE userid='$user_id'";
+        $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE id='$user_id'";
         $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
-        $fresultsUserInfoGo = mysqli_fetch_assoc($rsltvUserInfoGo);           
+        $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);           
         //$countGo = mysqli_num_rows($rsltvUserInfoGo);        
         //$countrsltvInCalls = mysqli_num_rows($rsltvInCalls);
         //$countrsltvNoCalls = mysqli_num_rows($rsltvNoCalls);
@@ -131,7 +131,7 @@
                 }
             
             if($filter == "userInfo"){
-                $data = array_merge($fresults, $fresultsUserInfoGo);
+                $data = array_merge($fresults);
                 $apiresults = array("result" => "success", "data" => $data);
             }else{
                 $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday, $fresultsUserInfoGo);
