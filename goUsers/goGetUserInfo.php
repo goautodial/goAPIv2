@@ -91,7 +91,7 @@
         
         $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE id='$user_id'";
         $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
-        $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);           
+        $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo);           
         //$countGo = mysqli_num_rows($rsltvUserInfoGo);        
         //$countrsltvInCalls = mysqli_num_rows($rsltvInCalls);
         //$countrsltvNoCalls = mysqli_num_rows($rsltvNoCalls);
@@ -131,8 +131,11 @@
                 }
             
             if($filter == "userInfo"){
-                $data = array_merge($fresults);
-                $apiresults = array("result" => "success", "data" => $data);
+				if(!empty($fresultsUserInfoGo))
+                $data = array_merge($fresults, $fresultsUserInfoGo);
+				else
+				$data = $fresults;
+                $apiresults = array("result" => "success", "data" => $data, "query" => $query_GetUserInfo);
             }else{
                 $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday, $fresultsUserInfoGo);
                 $apiresults = array("result" => "success", "data" => $data, "agentincalls" => $dataInCallsAgent, "agentoutcalls" => $dataOutCallsAgent);
