@@ -110,6 +110,10 @@
 																$query_callmenu_entry = mysqli_query($link, $query_options);
 															}
 														}
+														
+														//reload asterisk
+														$queryUpdateAsterisk = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
+														$resultVSC = mysqli_query($link, $queryUpdateAsterisk);
 								
 								if($resultQuery){
 											$apiresults = array("result" => "success");
