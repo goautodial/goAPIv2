@@ -110,13 +110,13 @@
         $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 		
 		$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, scheduled_callbacks, avatar)
-						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '0', '1', '1', '1', '1', '$avatar');";
+						VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '1', '1', '1', '1', '1', '$avatar');";
 		$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
 		
 		$queryUserID = "SELECT user_id from vicidial_users WHERE user='$user'";
 		$resultQueryUserID = mysqli_query($link, $queryUserID);
 		$rUserID = mysqli_fetch_array($resultQueryUserID, MYSQLI_ASSOC);
-		$userid = $rUserID['user_id'];		
+		$userid = $rUserID['user_id'];
 		
 		$queryUserAddGo = "INSERT INTO users (userid, name, avatar) VALUES ('$userid', '$user', '$avatar')";
 		$resultQueryAddUserGo = mysqli_query($linkgo, $queryUserAddGo);
