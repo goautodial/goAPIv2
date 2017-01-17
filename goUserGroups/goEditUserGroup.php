@@ -16,6 +16,7 @@
     $user_group = $_REQUEST['user_group'];
     $group_name = $_REQUEST['group_name'];
     $group_level = $_REQUEST['group_level'];
+    $allowed_campaigns = $_REQUEST['allowed_campaigns'];
     $permissions = $_REQUEST['permissions'];
     $forced_timeclock_login = strtoupper($_REQUEST['forced_timeclock_login']);
     $shift_enforcement = strtoupper($_REQUEST['shift_enforcement']);
@@ -103,7 +104,7 @@
 									*/
 									 //user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
 									/* if($group_name == null){$group_name = $datagroup_name;} if($forced_timeclock_login == null){$forced_timeclock_login = $dataforced_timeclock_login;} if($shift_enforcement == null){$shift_enforcement = $datashift_enforcement;}*/
-						$query = "UPDATE vicidial_user_groups SET group_name='$group_name', forced_timeclock_login='$forced_timeclock_login', shift_enforcement='$shift_enforcement' WHERE user_group='$user_group';";
+						$query = "UPDATE vicidial_user_groups SET group_name='$group_name', forced_timeclock_login='$forced_timeclock_login', shift_enforcement='$shift_enforcement', allowed_campaigns='$allowed_campaigns' WHERE user_group='$user_group';";
 						$rsltvQuery = mysqli_query($link, $query);
 		
 						$queryGL = "UPDATE user_access_group SET group_level = '$group_level', permissions = '$permissions' WHERE user_group='$user_group';";

@@ -78,7 +78,7 @@
                                 $valSQL = rtrim($valSQL,",");
                                 $itemSQL = "($varSQL) VALUES ($valSQL)";
                                 */
-                                $query = "INSERT INTO vicidial_user_groups (user_group, group_name) VALUES ('$user_group', '$group_name');";
+                                $query = "INSERT INTO vicidial_user_groups (user_group, group_name, allowed_campaigns) VALUES ('$user_group', '$group_name', ' -');";
 				$rsltv = mysqli_query($link, $query);
 
 			                $queryCheck = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
