@@ -1,7 +1,7 @@
 <?php
     include_once("../goFunctions.php");
     
-    $query = "SELECT phone_number from vicidial_dnc;";
+    $query = "SELECT phone_number from vicidial_dnc LIMIT 25;";
     $rsltv = mysqli_query($link, $query);
 	$countResult = mysqli_num_rows($rsltv);
     
