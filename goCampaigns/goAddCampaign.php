@@ -195,9 +195,9 @@
 										)
 										VALUES(
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
-												' N NA A AA DROP B NEW -','DOWN','Y','100','$autoDialLevel',
+												' N NA A AA DROP B NEW -','DOWN','Y','100','0',
 												'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-												'Y','DISABLED','30','$answering_machine_detection','$campaign_recording',
+												'Y','DISABLED','30','8369','NEVER',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 												'${$tenant_id}0','7'
@@ -280,17 +280,17 @@
 											campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 											use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 											manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action
+											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound
 										)
 										VALUES(
-											'$campaign_id','$campaign_desc','Y','$dial_method','$dial_status',
-											' N NA A AA DROP B NEW -','DOWN','Y','100','$autoDialLevel',
-											'$next_agent_call','$call_time','$sippy_dial_prefix','$call_launch','$SQLdate',
-											'Y','$list_order','$dial_timeout','$answering_machine_detection','$campaign_recording',
-											'$recording_filename','Y','BLINK_RED','Y','Y',
-											'Y','$availability_only_tally','5164536886','$manual_dial_filter','$tenant_id',
-											'$manual_dial_list_id','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action'
+											'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
+											' N NA A AA DROP B NEW -','DOWN','Y','100','1.0',
+											'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
+											'Y','DISABLED','30','8369','ALLFORCE',
+											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
+											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
+											'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 										)";
 
 						$rsltvInbound = mysqli_query($link, $queryAddInbound);
@@ -328,10 +328,13 @@
 												$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
 																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
 																					filter_campaign_id,group_id,server_ip,user_group)
-																					VALUES ('$didPattern','$didDesc','Y','IN_GROUP',
+																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
 																					'$group_id','$campaign_id','Y','$list_id',
-																					'$campaign_id','$group_id','10.0.0.12','$tenant_id')";
+																					'$campaign_id','$call_route_text','$ip_address','$tenant_id')";
 												$rsltvING = mysqli_query($link, $queryING);
+												
+												$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
+												$rsltvVC = mysqli_query($link, $queryUpdateVC);
 											break;
 				
 											case "IVR":
@@ -340,15 +343,15 @@
 												$rsltvVCM = mysqli_query($link, $queryVCM);
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
 																					filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-																					VALUES ('$didPattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','10.0.0.12','$menuID','$tenant_id')";
+																					VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','$ip_address','$call_route_text','$tenant_id')";
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
 				
 											case "AGENT":
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
 																					campaign_id,record_call,filter_list_id,filter_campaign_id,user,group_id,server_ip,user_group)
-																					VALUES ('$didPattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$emailORagent',
-																					'$group_id','10.10.10.12','$tenant_id')";
+																					VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text',
+																					'$group_id','$ip_address','$tenant_id')";
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
 				
@@ -360,13 +363,13 @@
 												$rsltvVV = mysqli_query($link, $queryVV);
 				
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
-																					campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group)
-																					VALUES ('$didPattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$campaign_id','$tenant_id')";
+																					campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group,server_ip)
+																					VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
 										}
 				
-										$queryUpdateVC = "UPDATE vicidial_campaigns SET closer_campaigns = ' $group_id -',campaign_allow_inbound = 'Y' WHERE campaign_id = '$campaign_id'";
+										$queryUpdateVC = "UPDATE vicidial_campaigns SET campaign_allow_inbound = 'Y' WHERE campaign_id = '$campaign_id'";
 										$rsltvVC = mysqli_query($link, $queryUpdateVC);
 				
 										$queryUpdateVU = "UPDATE vicidial_users set modify_inbound_dids='1' where user='$userID'";
@@ -463,27 +466,25 @@
 		                                //}
 
 		                                $queryInsert = "INSERT INTO vicidial_campaigns (
-																campaign_id, campaign_name, campaign_description, active, dial_method,
-																dial_status_a, dial_statuses, lead_order, park_ext, park_file_name,
-																web_form_address, allow_closers, hopper_level, auto_dial_level, available_only_ratio_tally,
-																next_agent_call, local_call_time, dial_prefix, voicemail_ext, campaign_script,
-																get_call_launch, campaign_changedate, campaign_stats_refresh, list_order_mix, web_form_address_two,
-																start_call_url, dispo_call_url, dial_timeout, campaign_vdad_exten, campaign_recording,
-																campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, per_call_notes,
-																agent_lead_search, campaign_allow_inbound, use_internal_dnc, use_campaign_dnc, campaign_cid,
-																manual_dial_filter, user_group, manual_dial_list_id, drop_call_seconds $manualDialPrefix
-														)
-														VALUES (
-																'$campaign_id','$campaign_desc','','Y','$dial_method',
-																'NEW',' N NA A AA DROP B NEW -','DOWN','','',
-																'','Y','100','$autoDialLevel','Y',
-																'oldest_call_finish','$local_call_time','$sippy_dial_prefix','','',
-																'','$SQLdate','Y','DISABLED','',
-																'','','30','$answering_machine_detection','$campaign_recording',
-																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED',
-																'ENABLED','Y','Y','Y','5164536886',
-																'DNC_ONLY','$tenant_id','{$tenant_id}0','7' $manualDialPrefixVal
-														)";
+																campaign_id, campaign_name, active, dial_method, dial_status_a,
+																dial_statuses, lead_order, allow_closers, hopper_level, auto_dial_level,
+																next_agent_call, local_call_time, dial_prefix, get_call_launch, campaign_changedate,
+																campaign_stats_refresh, list_order_mix, dial_timeout, campaign_vdad_exten, campaign_recording,
+																campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
+																use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
+																manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
+																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound
+															)
+															VALUES(
+																'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
+																' N NA A AA DROP B NEW -','DOWN','Y','100','1.0',
+																'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
+																'Y','DISABLED','30','8369','ALLFORCE',
+																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
+																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
+																'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
+															)";
 
 										$rsltvInsert = mysqli_query($link, $queryInsert);
 										$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -510,10 +511,13 @@
                                         	$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
                                                                                 user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
                                                                                 filter_campaign_id,group_id,server_ip,user_group)
-                                                                                VALUES ('$didPattern','$didDesc','Y','IN_GROUP',
+                                                                                VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
                                                                                 '$group_id','$campaign_id','Y','$list_id',
-                                                                                '$campaign_id','$group_id','10.0.0.12','$tenant_id')";
+                                                                                '$campaign_id','$call_route_text','$ip_address','$tenant_id')";
 											$rsltvING = mysqli_query($link, $queryING);
+											
+											$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
+										    $rsltvVC = mysqli_query($link, $queryUpdateVC);
                                         break;
 
                                 		case "IVR":
@@ -522,15 +526,15 @@
 											$rsltvVCM = mysqli_query($link, $queryVCM);
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
                                                                                 filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-                                                                                VALUES ('$didPattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','10.0.0.12','$menuID','$tenant_id')";
+                                                                                VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','$ip_address','$call_route_text','$tenant_id')";
 											$rsltvVID = mysqli_query($link, $queryVID);
                                         break;
 
                                 		case "AGENT":
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
                                                                                 campaign_id,record_call,filter_list_id,filter_campaign_id,user,group_id,server_ip,user_group)
-                                                                                VALUES ('$didPattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$emailORagent',
-                                                                                '$group_id','10.10.10.12','$tenant_id')";
+                                                                                VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text',
+                                                                                '$group_id','$ip_address','$tenant_id')";
 											$rsltvVID = mysqli_query($link, $queryVID);
                                         break;
 
@@ -542,13 +546,13 @@
 											$rsltvVV = mysqli_query($link, $queryVV);
 
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
-                                                                                campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group)
-                                                                                VALUES ('$didPattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$campaign_id','$tenant_id')";
+                                                                                campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group,server_ip)
+                                                                                VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
 											$rsltvVID = mysqli_query($link, $queryVID);
                                         break;
                         			}
 
-                        			$queryUpdateVC = "UPDATE vicidial_campaigns SET closer_campaigns = ' $group_id -',campaign_allow_inbound = 'Y' WHERE campaign_id = '$campaign_id'";
+                        			$queryUpdateVC = "UPDATE vicidial_campaigns SET campaign_allow_inbound = 'Y' WHERE campaign_id = '$campaign_id'";
 									$rsltvVC = mysqli_query($link, $queryUpdateVC);
 
                         			$queryUpdateVU = "UPDATE vicidial_users set modify_inbound_dids='1' where user='$userID'";
@@ -662,7 +666,7 @@
 										copy($wavfile_dir, "$WeBServeRRooT/$sounds_web_directory/$wavfile_name");
 										chmod("$WeBServeRRooT/$sounds_web_directory/$wavfile_name", 0766);
 									}
-
+								    $wavfile_name = substr($wavfile_name, 0, -4);
                                     //if($VARSERVTYPE == "cloud"){  
                                     $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,
                                                                                     dial_status_a,dial_statuses,lead_order,park_ext,park_file_name,
@@ -678,7 +682,7 @@
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','$routingExten','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','$wavfile_name','$wavfile_name')";
+                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','','$wavfile_name')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
