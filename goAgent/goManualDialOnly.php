@@ -65,7 +65,7 @@ if ($sipIsLoggedIn) {
 	$channel_live = 1;
     $error_catcher = 0;
 	$data = array();
-	$WeBRooTWritablE = 0
+	$WeBRooTWritablE = 0;
 	if ( (strlen($conf_exten)<1) || (strlen($campaign)<1) || (strlen($ext_context)<1) || (strlen($phone_number)<1) || (strlen($lead_id)<1) ) {
 		$channel_live=0;
 		$message  = "CALL NOT PLACED: Either conf_exten, campaign or ext_context is NOT valid";
