@@ -1,13 +1,5 @@
 <?php
-   ####################################################
-   #### Name: goGetVoiceFilesList.php              ####
-   #### Description: API to view Audiofile         ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jeremiah Sebastian Samatra     ####
-   #### License: AGPLv2                            ####
-   ####################################################
-    
+
     include_once ("goFunctions.php");
  
 	### POST or GET Variables
@@ -69,9 +61,9 @@
                                 # Do not list subdirectories
                                 if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.(wav|mp3)$/', $file)) )
                                         {
-                                        if ((!is_null($search) && strlen($search) > 0)) {^M
-                                             if (!preg_match("/$search/", $file))^M
-                                                  continue;^M
+                                        if ((!is_null($search) && strlen($search) > 0)) {
+                                             if (!preg_match("/$search/", $file))
+                                                  continue;
                                         }
                                         if (file_exists("$dirpath/$file"))
                                                 {
