@@ -58,7 +58,7 @@ ini_set('memory_limit', -1);
 		$campaign_SQL = "";
 		$group_SQL = "";
 		$list_SQL = "";
-		$status_list = "";
+		$status_SQL = "";
 		
 		$campaign_ct = count($campaigns);
 		$group_ct = count($inbounds);
@@ -132,15 +132,15 @@ ini_set('memory_limit', -1);
 		if($dispo_stats != ""){
 			$i=0;
 			while($i < $status_ct){
-				$status_list .= "'$dispo_stats[$i]',";
+				$status_SQL .= "'$dispo_stats[$i]',";
 				$i++;
 			}
 			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ){
 				$status_SQL = "";
 			}
 			else{
-				$status_list_string = preg_replace("/,$/i",'',$status_list);
-				$status_SQL = "and vl.status IN ($status_list_string)";
+				$status_SQL = preg_replace("/,$/i",'',$status_SQL);
+				$status_SQL = "and vl.status IN ($status_SQL)";
 			}
 		}
 		
@@ -1197,7 +1197,8 @@ ini_set('memory_limit', -1);
 					if (inner_checkIfTenant($userGroup))
 						$userGroupSQL = "and vicidial_users.user_group='$userGroup'";
 					
-					$query = mysqli_query($link, "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000");
+					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000";
+$query = mysqli_query($link, $perfdetails_sql);
 					
 					$rows_to_print = mysqli_num_rows($query);
 					
@@ -1840,7 +1841,8 @@ ini_set('memory_limit', -1);
 					"SstatusesBOT" => $SstatusesBOT, 
 					"SstatusesBOTR"	=> $SstatusesBOTR,
 					"SstatusesBSUM"	=> $SstatusesBSUM,
-					"Legend" => $legend
+					"Legend" => $legend,
+					"query" => $perfdetails_sql
 					//$return['file_output']			= $file_output;
 					);
 					
