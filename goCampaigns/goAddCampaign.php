@@ -185,7 +185,7 @@
                             //}
 								
                             $queryAdd = "INSERT INTO vicidial_campaigns (
-												campaign_id, campaign_name, active,	dial_method, dial_status_a,				
+												campaign_id, campaign_name, active, dial_method, dial_status_a,				
 												dial_statuses, lead_order, allow_closers, hopper_level, auto_dial_level,			
 												next_agent_call, local_call_time, dial_prefix, get_call_launch, campaign_changedate,		
 												campaign_stats_refresh, list_order_mix, dial_timeout, campaign_vdad_exten, campaign_recording,			
@@ -197,7 +197,7 @@
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
 												' N NA A AA DROP B NEW -','DOWN','Y','100','0',
 												'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-												'Y','DISABLED','30','8369','NEVER',
+												'Y','DISABLED','30','8369','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 												'${$tenant_id}0','7'
