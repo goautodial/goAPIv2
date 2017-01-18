@@ -89,7 +89,7 @@
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
         $fresults = mysqli_fetch_array($rsltvGetUserInfo);        
         
-        $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE id='$user_id'";
+        $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE userid='$user_id'";
         $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
         $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo);           
         //$countGo = mysqli_num_rows($rsltvUserInfoGo);        
