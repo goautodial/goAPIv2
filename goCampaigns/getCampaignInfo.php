@@ -32,7 +32,7 @@
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
+				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url, campaign_vdad_exten FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
 				$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 				while($typeresults = mysqli_fetch_array($rsltvGoCampaign, MYSQLI_ASSOC)){
 					$campaign_type = $typeresults['campaign_type'];
