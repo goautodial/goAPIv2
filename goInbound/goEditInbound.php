@@ -32,6 +32,7 @@
 		$after_hours_action = $_REQUEST['after_hours_action'];
 		$after_hours_voicemail = $_REQUEST['after_hours_voicemail'];
 		$after_hours_exten = $_REQUEST['after_hours_exten'];
+		$after_hours_message_filename = $_REQUEST['after_hours_message_filename'];
 		//afterhours_xfer_group = $_REQUEST['afterhours_xfer_group'];
 		$get_call_launch = $_REQUEST['get_call_launch'];
 		$no_agent_no_queue = $_REQUEST['no_agent_no_queue'];
@@ -115,7 +116,7 @@
 																								
 																								### UPDATE ACTION ###
 																								$query = "UPDATE vicidial_inbound_groups
-																										SET group_id = '$group_id', group_name = '$group_name', group_color = '$group_color', active = '$active', web_form_address = '$web_form_address', next_agent_call = '$next_agent_call', fronter_display = '$fronter_display', ingroup_script = '$ingroup_script', queue_priority = '$queue_priority', drop_call_seconds = '$drop_call_seconds', drop_action = '$drop_action', drop_exten = '$drop_exten', voicemail_ext = '$voicemail_ext', drop_inbound_group = '$drop_inbound_group', drop_callmenu = '$drop_callmenu', after_hours_action = '$after_hours_action', after_hours_voicemail = '$after_hours_voicemail', after_hours_exten = '$after_hours_exten', get_call_launch = '$get_call_launch', no_agent_no_queue = '$no_agent_no_queue', no_agent_action = '$no_agent_action', $no_agent_action_value_QUERY welcome_message_filename = '$welcome_message_filename', play_welcome_message = '$play_welcome_message', moh_context = '$moh_context', onhold_prompt_filename = '$onhold_prompt_filename' WHERE group_id='$group_id';";
+																										SET group_id = '$group_id', group_name = '$group_name', group_color = '$group_color', active = '$active', web_form_address = '$web_form_address', next_agent_call = '$next_agent_call', fronter_display = '$fronter_display', ingroup_script = '$ingroup_script', queue_priority = '$queue_priority', drop_call_seconds = '$drop_call_seconds', drop_action = '$drop_action', drop_exten = '$drop_exten', voicemail_ext = '$voicemail_ext', drop_inbound_group = '$drop_inbound_group', drop_callmenu = '$drop_callmenu', after_hours_action = '$after_hours_action', after_hours_voicemail = '$after_hours_voicemail', after_hours_exten = '$after_hours_exten', get_call_launch = '$get_call_launch', no_agent_no_queue = '$no_agent_no_queue', no_agent_action = '$no_agent_action', $no_agent_action_value_QUERY welcome_message_filename = '$welcome_message_filename', play_welcome_message = '$play_welcome_message', moh_context = '$moh_context', onhold_prompt_filename = '$onhold_prompt_filename', after_hours_message_filename = '$after_hours_message_filename' WHERE group_id='$group_id';";
 																								$resultQuery = mysqli_query($link, $query);
 
 				
