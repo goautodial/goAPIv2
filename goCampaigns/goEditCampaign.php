@@ -198,7 +198,8 @@
 										survey_fourth_status = '$survey_fourth_status',
 										survey_fourth_exten = '$survey_fourth_exten',
 										amd_send_to_vmx = '$amd_send_to_vmx',
-										waitforsilence_options = '$waitforsilence_options'
+										waitforsilence_options = '$waitforsilence_options',
+										per_call_notes = '$per_call_notes'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;
@@ -210,11 +211,11 @@
 					$url_tab_first_url = str_replace("http://", "https://", $url_tab_first_url);
 					$url_tab_second_url = str_replace("http://", "https://", $url_tab_second_url);
 					if ($numGO > 0) {
-						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id',url_tab_first_title='$url_tab_first_title',url_tab_first_url='$url_tab_first_url',url_tab_second_title='$url_tab_second_title',url_tab_second_url='$url_tab_second_url',per_call_notes='$per_call_notes' WHERE campaign_id='$campaign_id';";
+						$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id',url_tab_first_title='$url_tab_first_title',url_tab_first_url='$url_tab_first_url',url_tab_second_title='$url_tab_second_title',url_tab_second_url='$url_tab_second_url' WHERE campaign_id='$campaign_id';";
 						$resultGO = mysqli_query($linkgo, $updateGO);
 					} else {
 						$campaign_type = (strlen($campaign_type) > 0) ? $campaign_type : "OUTBOUND";
-						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url,per_call_notes) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id','$url_tab_first_title','$url_tab_first_url','$url_tab_second_title','$url_tab_second_url','$per_call_notes');";
+						$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id','$url_tab_first_title','$url_tab_first_url','$url_tab_second_title','$url_tab_second_url');";
 						$resultGO = mysqli_query($linkgo, $insertGO);
 					}
 					### Admin logs
