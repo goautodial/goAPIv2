@@ -63,7 +63,8 @@
 	$custom_dial_prefix	= $_REQUEST['custom_dial_prefix'];
 	$status 	= $_REQUEST['status'];									
 	$script 	= $_REQUEST['script'];						
-	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];	
+	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];
+	if($answering_machine_detection == "")$answering_machinge_detection = '8369';
 	$caller_id 	= $_REQUEST['caller_id']; 					
 	$force_reset_hopper 	= $_REQUEST['force_reset_hopper'];			
 	$inbound_man 	= $_REQUEST['inbound_man'];					
@@ -188,19 +189,19 @@
 												campaign_id, campaign_name, active, dial_method, dial_status_a,				
 												dial_statuses, lead_order, allow_closers, hopper_level, auto_dial_level,			
 												next_agent_call, local_call_time, dial_prefix, get_call_launch, campaign_changedate,		
-												campaign_stats_refresh, list_order_mix, dial_timeout, campaign_vdad_exten, campaign_recording,			
+												campaign_stats_refresh, list_order_mix, dial_timeout, campaign_recording,			
 												campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,			
-												use_campaign_dnc, available_only_ratio_tally, campaign_cid,	manual_dial_filter,	user_group,					
-												manual_dial_list_id, drop_call_seconds
+												use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,					
+												manual_dial_list_id, drop_call_seconds, campaign_vdad_exten
 										)
 										VALUES(
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
 												' N NA A AA DROP B NEW -','DOWN','Y','100','0',
 												'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-												'Y','DISABLED','30','8369','$campaign_recording',
+												'Y','DISABLED','30','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-												'${$tenant_id}0','7'
+												'${$tenant_id}0','7', '$answering_machine_detection'
 										)";
 							$rsltvAdd = mysqli_query($link, $queryAdd);
 							$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -286,7 +287,7 @@
 											'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
 											' N NA A AA DROP B NEW -','DOWN','Y','100','1.0',
 											'oldest_call_finish','$local_call_time','$sippy_dial_prefix','NONE','$SQLdate',
-											'Y','DISABLED','30','8369','ALLFORCE',
+											'Y','DISABLED','30','$answering_machine_detection','ALLFORCE',
 											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 											'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
@@ -473,7 +474,7 @@
 																campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 																use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 																manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound
+																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, campaign_vdad_exten
 															)
 															VALUES(
 																'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -483,7 +484,7 @@
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 																'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
+																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', '$answering_machine_detection'
 															)";
 
 										$rsltvInsert = mysqli_query($link, $queryInsert);
