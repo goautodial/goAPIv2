@@ -495,8 +495,8 @@ if ($is_logged_in) {
 			$rslt = $astDB->getOne('vicidial_list', 'phone_number');
 			$insertData = array(
 				'user_id' => $agent->user_id,
-				'title' => 'CALLBACK',
-				'description' => "Call ".$rslt['phone_number']." around ".$cbtime,
+				'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
+				'description' => '',
 				'all_day' => 0,
 				'start_date' => $CallBackDatETimE,
 				'end_date' => $CallBackDatETimE,
