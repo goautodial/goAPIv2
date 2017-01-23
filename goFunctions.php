@@ -1321,6 +1321,22 @@
     }
     ##### END validate user login credentials, check for failed lock out #####
     
+	##### ACTION LOGS #####
+	function log_action($action, $user, $ip, $event_date, $details, $user_group, $db_query = '') {
+        include_once("goDBgoautodial.php");
+		$action = strtoupper($action);
+		$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
+		$result = mysqli_query($linkgo, $logSQL);
+		
+		if ($result) {
+			$log_id = mysqli_insert_id($linkgo);
+			return $log_id;
+		} else {
+			return false;
+		}
+	}
+	##### END ACTION LOGS #####
+    
     function hangup_cause_description($code) {
         global $hangup_cause_dictionary;
         if ( array_key_exists($code, $hangup_cause_dictionary)  ) { return $hangup_cause_dictionary[$code]; }
