@@ -330,7 +330,7 @@
 																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
 																					filter_campaign_id,group_id,server_ip,user_group)
 																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-																					'$group_id','$campaign_id','Y','$list_id',
+																					'$call_route_text','$campaign_id','Y','$list_id',
 																					'$campaign_id','$call_route_text','$ip_address','$tenant_id')";
 												$rsltvING = mysqli_query($link, $queryING);
 												
@@ -339,7 +339,7 @@
 											break;
 				
 											case "IVR":
-												$menuID = "$cntX";
+												$menuID = "$call_route_text";
 												$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
 												$rsltvVCM = mysqli_query($link, $queryVCM);
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
@@ -513,7 +513,7 @@
                                                                                 user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
                                                                                 filter_campaign_id,group_id,server_ip,user_group)
                                                                                 VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-                                                                                '$group_id','$campaign_id','Y','$list_id',
+                                                                                '$call_route_text','$campaign_id','Y','$list_id',
                                                                                 '$campaign_id','$call_route_text','$ip_address','$tenant_id')";
 											$rsltvING = mysqli_query($link, $queryING);
 											
@@ -522,7 +522,7 @@
                                         break;
 
                                 		case "IVR":
-                                        	$menuID = "$cntX";
+                                        	$menuID = "$call_route_text";
                                        		$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
 											$rsltvVCM = mysqli_query($link, $queryVCM);
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
