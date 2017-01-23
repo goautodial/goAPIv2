@@ -490,12 +490,13 @@ if ($is_logged_in) {
 			$rslt = $astDB->insert('vicidial_callbacks', $insertData);
 			
 			// Add Callback to events
+			$cbtime = date("h:i A", strtotime($CallBackDatETimE));
 			$astDB->where('lead_id', $lead_id);
 			$rslt = $astDB->getOne('vicidial_list', 'phone_number');
 			$insertData = array(
 				'user_id' => $agent->user_id,
 				'title' => 'CALLBACK',
-				'description' => $rslt['phone_number'],
+				'description' => "Call ".$rslt['phone_number']." around ".$cbtime,
 				'all_day' => 0,
 				'start_date' => $CallBackDatETimE,
 				'end_date' => $CallBackDatETimE,
