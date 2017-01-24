@@ -50,9 +50,9 @@
 
 		if ($cnt){
 			if ($stage == "DELETE")
-				$msg = "added";
-			else
 				$msg = "deleted";
+			else
+				$msg = "added";
 		} else {
 			if ($stage == "ADD")
 				$msg = "already exist";
