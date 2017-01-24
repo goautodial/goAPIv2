@@ -323,17 +323,38 @@
 										// Call Route
 										$didDesc = "$campaign_id $campaign_type DID";
 										$didPattern = $call_route_text;
-				
+										
+										$queryDID = "SELECT did_pattern FROM vicidial_inbound_dids WHERE did_pattern = '$did_pattern' LIMIT 1;";
+										$rsltvDID = mysqli_query($link, $queryDID);
+										$countResultDID = mysqli_num_rows($rsltvDID);
+										$serverIP = $_SERVER['REMOTE_ADDR'];
 										switch ($callRoute){
 											case "INGROUP":
-												$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
+												if($countResultDID > 0){
+														$queryING = "UPDATE vicidial_inbound_dids
+																		SET 
+																				did_description = '$didDesc',
+																				did_active = 'Y',
+																				did_route = 'IN_GROUP',
+																				user_route_settings_ingroup = '$call_route_text',
+																				campaign_id = '$campaign_id',
+																				record_call = 'N',
+																				filter_list_id = '$list_id',
+																				filter_campaign_id = '$campaign_id',
+																				group_id = '$call_route_text',
+																				server_ip = '$serverIP',
+																				user_group = '$tenant_id'
+																		WHERE
+																			did_pattern='$did_pattern';";	
+												}else{
+														$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
 																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
 																					filter_campaign_id,group_id,server_ip,user_group)
 																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-																					'$call_route_text','$campaign_id','Y','$list_id',
-																					'$campaign_id','$call_route_text','$ip_address','$tenant_id')";
+																					'$call_route_text','$campaign_id','N','$list_id',
+																					'$campaign_id','$call_route_text','$serverIP','$tenant_id')";		
+												}
 												$rsltvING = mysqli_query($link, $queryING);
-												
 												$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
 												$rsltvVC = mysqli_query($link, $queryUpdateVC);
 											break;
@@ -342,16 +363,34 @@
 												$menuID = "$call_route_text";
 												$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
 												$rsltvVCM = mysqli_query($link, $queryVCM);
-												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
-																					filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-																					VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','$ip_address','$call_route_text','$tenant_id')";
+												if($countResultDID > 0){
+														$queryVID = "UPDATE vicidial_inbound_dids
+																		SET 
+																				did_description = '$didDesc',
+																				did_active = 'Y',
+																				did_route = 'CALLMENU',
+																				campaign_id = '$campaign_id',
+																				record_call = 'N',
+																				filter_list_id = '$list_id',
+																				filter_campaign_id = '$campaign_id',
+																				server_ip = '$serverIP',
+																				menu_id = '$call_route_text',
+																				user_group = '$tenant_id'
+																		WHERE
+																			did_pattern='$did_pattern';";	
+												}else{
+														$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
+																filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
+																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','$call_route_text','$tenant_id')";	
+												}
+												
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
 				
 											case "AGENT":
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
 																					campaign_id,record_call,filter_list_id,filter_campaign_id,user,group_id,server_ip,user_group)
-																					VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text',
+																					VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','N','$list_id','$campaign_id','$call_route_text',
 																					'$group_id','$ip_address','$tenant_id')";
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
@@ -365,7 +404,7 @@
 				
 												$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
 																					campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group,server_ip)
-																					VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
+																					VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','N','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
 												$rsltvVID = mysqli_query($link, $queryVID);
 											break;
 										}
@@ -506,35 +545,74 @@
 		                        	// Call Route
 		                        	$didDesc = "$campaign_id $campaign_type DID";
 									$didPattern = $call_route_text;
-
+									
+									$queryDID = "SELECT did_pattern FROM vicidial_inbound_dids WHERE did_pattern = '$did_pattern' LIMIT 1;";
+								    $rsltvDID = mysqli_query($link, $queryDID);
+								    $countResultDID = mysqli_num_rows($rsltvDID);
+								    $serverIP = $_SERVER['REMOTE_ADDR'];
 		                        	switch ($callRoute){
                                 		case "INGROUP":
-                                        	$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
-                                                                                user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
-                                                                                filter_campaign_id,group_id,server_ip,user_group)
-                                                                                VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-                                                                                '$call_route_text','$campaign_id','Y','$list_id',
-                                                                                '$campaign_id','$call_route_text','$ip_address','$tenant_id')";
-											$rsltvING = mysqli_query($link, $queryING);
-											
-											$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
-										    $rsltvVC = mysqli_query($link, $queryUpdateVC);
-                                        break;
-
-                                		case "IVR":
-                                        	$menuID = "$call_route_text";
-                                       		$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
-											$rsltvVCM = mysqli_query($link, $queryVCM);
-                                        	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
-                                                                                filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-                                                                                VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','Y','$list_id','$campaign_id','$ip_address','$call_route_text','$tenant_id')";
-											$rsltvVID = mysqli_query($link, $queryVID);
-                                        break;
+												if($countResultDID > 0){
+														$queryING = "UPDATE vicidial_inbound_dids
+																		SET 
+																				did_description = '$didDesc',
+																				did_active = 'Y',
+																				did_route = 'IN_GROUP',
+																				user_route_settings_ingroup = '$call_route_text',
+																				campaign_id = '$campaign_id',
+																				record_call = 'N',
+																				filter_list_id = '$list_id',
+																				filter_campaign_id = '$campaign_id',
+																				group_id = '$call_route_text',
+																				server_ip = '$serverIP',
+																				user_group = '$tenant_id'
+																		WHERE
+																			did_pattern='$did_pattern';";	
+												}else{
+														$queryING = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,
+																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
+																					filter_campaign_id,group_id,server_ip,user_group)
+																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
+																					'$call_route_text','$campaign_id','N','$list_id',
+																					'$campaign_id','$call_route_text','$serverIP','$tenant_id')";		
+												}
+												$rsltvING = mysqli_query($link, $queryING);
+												$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
+												$rsltvVC = mysqli_query($link, $queryUpdateVC);
+										break;
+				
+										case "IVR":
+												$menuID = "$call_route_text";
+												$queryVCM = "INSERT INTO vicidial_call_menu (menu_id,menu_name,user_group) values('$menuID','$menuID Inbound Call Menu','$tenant_id')";
+												$rsltvVCM = mysqli_query($link, $queryVCM);
+												if($countResultDID > 0){
+														$queryVID = "UPDATE vicidial_inbound_dids
+																		SET 
+																				did_description = '$didDesc',
+																				did_active = 'Y',
+																				did_route = 'CALLMENU',
+																				campaign_id = '$campaign_id',
+																				record_call = 'N',
+																				filter_list_id = '$list_id',
+																				filter_campaign_id = '$campaign_id',
+																				server_ip = '$serverIP',
+																				menu_id = '$call_route_text',
+																				user_group = '$tenant_id'
+																		WHERE
+																			did_pattern='$did_pattern';";	
+												}else{
+														$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
+																filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
+																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','$call_route_text','$tenant_id')";	
+												}
+												
+												$rsltvVID = mysqli_query($link, $queryVID);
+										break;
 
                                 		case "AGENT":
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
                                                                                 campaign_id,record_call,filter_list_id,filter_campaign_id,user,group_id,server_ip,user_group)
-                                                                                VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text',
+                                                                                VALUES ('$did_pattern','$didDesc','Y','AGENT','$group_id','$campaign_id','N','$list_id','$campaign_id','$call_route_text',
                                                                                 '$group_id','$ip_address','$tenant_id')";
 											$rsltvVID = mysqli_query($link, $queryVID);
                                         break;
@@ -548,7 +626,7 @@
 
                                         	$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,user_route_settings_ingroup,
                                                                                 campaign_id,record_call,filter_list_id,filter_campaign_id,voicemail_ext,user_group,server_ip)
-                                                                                VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','Y','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
+                                                                                VALUES ('$did_pattern','$didDesc','Y','VOICEMAIL','$group_id','$campaign_id','N','$list_id','$campaign_id','$call_route_text','$tenant_id','$ip_address')";
 											$rsltvVID = mysqli_query($link, $queryVID);
                                         break;
                         			}

@@ -135,7 +135,7 @@
 				$apiresults = array("result" => "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only.");
 		} else {
 
-        if($group_id != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)){
+        if($group_id != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬]/', $group_id)){
                 $apiresults = array("result" => "Error: Special characters found in group_id");
         } else {
         if($phone != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $phone)){
@@ -166,13 +166,14 @@
                                 $query = "UPDATE vicidial_inbound_dids
 								SET did_pattern = '$did_pattern', did_description = '$did_description', did_active = '$active',
 								did_route = '$did_route', filter_clean_cid_number = '$filter_clean_cid_number' $agent_sql $group_id_sql $phone_sql
+								,user_route_settings_ingroup='$user_route_settings_ingroup'
 								$menu_id_sql $voicemail_ext_sql $extension_sql 
 								WHERE did_id='$did_id';";
                                 $resultQuery = mysqli_query($link, $query);
 
         ### Admin logs
                                         $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified DID ID $did_id','UPDATE vicidial_inbound_dids SET did_id=$did_id, did_active=$active, did_pattern=$did_pattern, did_route=$did_route, extension=$extension WHERE did_id=$did_id;');";
+                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified DID ID $did_id','UPDATE vicidial_inbound_dids SET did_id=$did_id, did_active=$active, did_pattern=$did_pattern, did_route=$did_route, extension=$extension, user_route_settings_ingroup=$user_route_settings_ingroup WHERE did_id=$did_id;');";
                                         $rsltvLog = mysqli_query($linkgo, $queryLog);
 
 
