@@ -18,17 +18,6 @@
 		$human_answered = "WHERE human_answered='Y'";
 	}
 	
-    $query = "SELECT status,status_name
-				FROM vicidial_statuses
-				$human_answered
-				ORDER BY status";
-   	$rsltv = mysqli_query($link, $query);
-    
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-		$dataStatus[] = $fresults['status'];
-       	$dataStatusName[] = $fresults['status_name'];
-	}
-	
 	if (strlen($human_answered) > 0 && strlen($campaign_id) > 0) {
 		$query = "SELECT status,status_name
 					FROM vicidial_campaign_statuses
@@ -41,6 +30,17 @@
 			$dataStatus[] = $fresults['status'];
 			$dataStatusName[] = $fresults['status_name'];
 		}
+	}
+	
+    $query = "SELECT status,status_name
+				FROM vicidial_statuses
+				$human_answered
+				ORDER BY status";
+   	$rsltv = mysqli_query($link, $query);
+    
+    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		$dataStatus[] = $fresults['status'];
+       	$dataStatusName[] = $fresults['status_name'];
 	}
 	
 	$apiresults = array(
