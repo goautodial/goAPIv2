@@ -351,8 +351,8 @@
 																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
 																					filter_campaign_id,group_id,server_ip,user_group)
 																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-																					'$call_route_text','$campaign_id','N','$list_id',
-																					'$campaign_id','$call_route_text','$serverIP','$tenant_id')";		
+																					'AGENTDIRECT','$campaign_id','N','$list_id',
+																					'$campaign_id','AGENTDIRECT','$serverIP','$tenant_id')";		
 												}
 												$rsltvING = mysqli_query($link, $queryING);
 												$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
@@ -381,7 +381,7 @@
 												}else{
 														$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
 																filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','$call_route_text','$tenant_id')";	
+																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','defaultlog','$tenant_id')";	
 												}
 												
 												$rsltvVID = mysqli_query($link, $queryVID);
@@ -445,7 +445,7 @@
 	                $SQLxdate = date("Y-m-d H:i:s");
 	                $NOW = date("m-d-Y");
 
-	                if($groupColor == null){
+	                if($groupColor == null && $callRoute == null){
 	                    $apiresults = array("result" => "Error: Set value for group_color");
 	                } else {
 	                	if(!in_array($callRoute,$defCallRoute) || $callRoute == null) {
@@ -573,8 +573,8 @@
 																					user_route_settings_ingroup,campaign_id,record_call,filter_list_id,
 																					filter_campaign_id,group_id,server_ip,user_group)
 																					VALUES ('$did_pattern','$didDesc','Y','IN_GROUP',
-																					'$call_route_text','$campaign_id','N','$list_id',
-																					'$campaign_id','$call_route_text','$serverIP','$tenant_id')";		
+																					'AGENTDIRECT','$campaign_id','N','$list_id',
+																					'$campaign_id','AGENTDIRECT','$serverIP','$tenant_id')";		
 												}
 												$rsltvING = mysqli_query($link, $queryING);
 												$queryUpdateVC = "UPDATE vicidial_campaigns SET xfer_groups = '$call_route_text -', closer_campaigns = '$call_route_text -' WHERE campaign_id = '$campaign_id'";
@@ -603,7 +603,7 @@
 												}else{
 														$queryVID = "INSERT INTO vicidial_inbound_dids (did_pattern,did_description,did_active,did_route,campaign_id,record_call,
 																filter_list_id,filter_campaign_id,server_ip,menu_id,user_group)
-																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','$call_route_text','$tenant_id')";	
+																VALUES ('$did_pattern','$didDesc','Y','CALLMENU','$campaign_id','N','$list_id','$campaign_id','$serverIP','defaultlog','$tenant_id')";	
 												}
 												
 												$rsltvVID = mysqli_query($link, $queryVID);
