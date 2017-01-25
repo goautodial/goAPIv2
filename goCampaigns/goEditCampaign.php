@@ -256,7 +256,7 @@
 						}
 					}
 					
-					$apiresults = array("result" => "success");
+					$apiresults = array("result" => "success", "test" => $updateQuery);
 				} else {
 					$apiresults = array("result" => "Error: Campaign doens't exist.");
 				}
