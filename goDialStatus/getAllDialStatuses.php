@@ -12,8 +12,8 @@
 	ini_set('display_errors', 1);
 	error_reporting(E_ALL);
 	
-	$hotkeys_only = $_REQUEST['hotkeys_only'];
-	$campaign_id = $_REQUEST['campaign_id'];
+	$hotkeys_only = mysqli_escape_string($link, $_REQUEST['hotkeys_only']);
+	$campaign_id = mysqli_escape_string($link, $_REQUEST['campaign_id']);
 	
 	$human_answered = '';
 	if ($hotkeys_only === "1") {
@@ -35,7 +35,7 @@
 		$query = "SELECT status,status_name
 					FROM vicidial_campaign_statuses
 					$human_answered
-					AND campaign_id='".mysqli_escape_string($campaign_id)."'
+					AND campaign_id='$campaign_id'
 					ORDER BY status";
 		$rsltv = mysqli_query($link, $query);
 		
