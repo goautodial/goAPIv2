@@ -11,9 +11,10 @@
     include_once("../goFunctions.php");
 	
 	$hotkeys_only = $_REQUEST['hotkeys_only'];
+	$campaign_id = $_REQUEST['campaign_id'];
 	
 	$human_answered = '';
-	if ($hotkeys_only == 1) {
+	if ($hotkeys_only === "1") {
 		$human_answered = "WHERE human_answered='Y'";
 	}
 	
@@ -28,10 +29,24 @@
        	$dataStatusName[] = $fresults['status_name'];
 	}
 	
+	if (strlen($human_answered) > 0) {
+		$query = "SELECT status,status_name
+					FROM vicidial_campaign_statuses
+					$human_answered
+					AND campaign_id='".mysqli_real_escape_string($campaign_id)."'
+					ORDER BY status";
+		$rsltv = mysqli_query($link, $query);
+		
+		while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+			$dataStatus[] = $fresults['status'];
+			$dataStatusName[] = $fresults['status_name'];
+		}
+	}
+	
 	$apiresults = array(
 		"result" => "success",
 		"status" => $dataStatus,
 		"status_name" => $dataStatusName,
-		"test" => $hotkeys_only
+		"test" => $query
 	);
 ?>
