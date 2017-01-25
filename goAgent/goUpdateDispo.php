@@ -378,7 +378,6 @@ if ($is_logged_in) {
 		if ($VDpr_ct > 0) {
 			$agent_log_id = $rslt['agent_log_id'];
 			$updateData = array(
-				'dispo_sec' => $dispo_sec,
 				'status' => $log_dispo_choice,
 				'uniqueid' => $uniqueid
 			);
@@ -398,7 +397,13 @@ if ($is_logged_in) {
 				$rslt['dispo_epoch'] = $rslt['talk_epoch'];
 				$updateData = array_merge($updateData, $dispo_epochSQL);
 			}
+			
 			$dispo_sec = (($StarTtime - $rslt['dispo_epoch']) + $rslt['dispo_sec']);
+			$dispo_secSQL = array(
+				'dispo_sec' => $dispo_sec
+			);
+			$updateData = array_merge($updateData, $dispo_secSQL);
+			
 			if ( (preg_match('/^M/', $MDnextCID)) and (preg_match('/INBOUND_MAN/', $dial_method)) ) {
 				if ( (preg_match("/NULL/i", $rslt['comments'])) or (strlen($rslt['comments']) < 1) ) {
 					$commentsSQL = array(
