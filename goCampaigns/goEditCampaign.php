@@ -256,7 +256,7 @@
 						}
 					}
 					
-					$apiresults = array("result" => "success", "test" => $hopper_level);
+					$apiresults = array("result" => "success");
 				} else {
 					$apiresults = array("result" => "Error: Campaign doens't exist.");
 				}
