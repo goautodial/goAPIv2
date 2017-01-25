@@ -203,7 +203,7 @@
             $counterresult = mysqli_query($link, $counterquery);
     
             if($counterresult){
-                $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
+                $checkTable = "DESC 'custom_$list_to'";
                 $queryCheckTable = mysqli_query($link, $checkTable);
                 
                 if($queryCheckTable){
@@ -286,7 +286,7 @@
                     $field_sql .="";  
                 }
                 
-                $field_sql .= ";";
+                $field_sql .= ");";
                 $stmtCUSTOM="$field_sql";
                 $rslt = mysqli_query($link, $stmtCUSTOM);
 
@@ -374,7 +374,7 @@
                     $counterresult = mysqli_query($link, $counterquery);
             
                     if($counterresult){
-                        $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
+                        $checkTable = "DESC 'custom_$list_to'";
                         $queryCheckTable = mysqli_query($link, $checkTable);
                         
                         if($queryCheckTable){
