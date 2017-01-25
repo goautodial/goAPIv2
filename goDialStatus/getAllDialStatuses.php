@@ -13,7 +13,7 @@
 	$hotkeys_only = mysqli_real_escape_string($_REQUEST['hotkeys_only']);
 	
 	$human_answered = '';
-	if ($hotkeys_only === "1") {
+	if ($hotkeys_only == 1) {
 		$human_answered = "WHERE human_answered='Y'";
 	}
 	
