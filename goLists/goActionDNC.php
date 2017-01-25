@@ -8,7 +8,7 @@
 	$ip_address = $_REQUEST['hostname'];
 	
 	$usergroup = get_usergroup($user_id, $link);
-	$allowed_campaigns = get_usergroup($usergroup, $link);
+	$allowed_campaigns = get_allowed_campaigns($usergroup, $link);
 	
 	if ($campaign_id == "INTERNAL"){
 		$dnc_numbers = explode("\r\n",$phone_numbers);
@@ -43,7 +43,10 @@
 						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 					}
-					$cnt++;
+					
+					if ($query) {
+						$cnt++;
+					}
 				}
 			}
 		}
@@ -83,7 +86,10 @@
 						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 					}
-					$cnt++;
+					
+					if ($query) {
+						$cnt++;
+					}
 				}
 			}
 		}
