@@ -9,8 +9,6 @@
     #### License: AGPLv2                               ####
     #######################################################
     include_once("../goFunctions.php");
-	ini_set('display_errors', 1);
-	error_reporting(E_ALL);
 	
 	$hotkeys_only = mysqli_escape_string($link, $_REQUEST['hotkeys_only']);
 	$campaign_id = mysqli_escape_string($link, $_REQUEST['campaign_id']);
