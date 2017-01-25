@@ -33,7 +33,7 @@
 		$query = "SELECT status,status_name
 					FROM vicidial_campaign_statuses
 					$human_answered
-					AND campaign_id='".mysqli_real_escape_string($campaign_id)."'
+					AND campaign_id='".mysqli_escape_string($campaign_id)."'
 					ORDER BY status";
 		$rsltv = mysqli_query($link, $query);
 		
