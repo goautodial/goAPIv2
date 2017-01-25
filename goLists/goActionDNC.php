@@ -78,6 +78,11 @@
 				if ($stage == "DELETE"){
 					$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='".$campaign_id."'");
 					log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc from Campaign ".$campaign_id , $usergroup, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='".$campaign_id."';");
+					
+					if ($campaign_id === '' && $idnc_exist > 0) {
+						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+					}
 					$cnt++;
 				}
 			}
@@ -89,7 +94,7 @@
 			else
 				$msg = "deleted";
 		} else {
-			if ($stage == "DELETE")
+			if ($stage == "ADD")
 				$msg = "already exist";
 			else
 				$msg = "does not exist";
