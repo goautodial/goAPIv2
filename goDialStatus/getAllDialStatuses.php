@@ -10,7 +10,7 @@
     #######################################################
     include_once("../goFunctions.php");
 	
-	$hotkeys_only = mysqli_escape_string($_REQUEST['hotkeys_only']);
+	$hotkeys_only = $_REQUEST['hotkeys_only'];
 	
 	$human_answered = '';
 	if ($hotkeys_only == 1) {
