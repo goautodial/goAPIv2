@@ -28,6 +28,7 @@
 	$campaign_recording 		= $_REQUEST['campaign_recording'];
 	$campaign_vdad_exten 		= $_REQUEST['campaign_vdad_exten'];
 	$local_call_time 		= $_REQUEST['local_call_time'];
+	$hopper_level			= $_REQUEST['hopper_level'];
 	$force_reset_hopper 		= $_REQUEST['force_reset_hopper'];
 	$dial_status 		= $_REQUEST['dial_status'];
 	$lead_order 		= $_REQUEST['lead_order'];
@@ -160,7 +161,8 @@
 										local_call_time = '$local_call_time',  
 										dial_status_a = '$dial_status', 
 										lead_order = '$lead_order', 
-										lead_filter_id = '$lead_filter_id', 
+										lead_filter_id = '$lead_filter_id',
+										hopper_level = '$hopper_level', 
 										dial_timeout = '$dial_timeout', 
 										manual_dial_prefix = '$manual_dial_prefix', 
 										get_call_launch = '$get_call_launch', 
