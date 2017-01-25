@@ -32,6 +32,6 @@
 		"result" => "success",
 		"status" => $dataStatus,
 		"status_name" => $dataStatusName,
-		"test" => $query
+		"test" => $hotkeys_only
 	);
 ?>
