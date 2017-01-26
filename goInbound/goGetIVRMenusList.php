@@ -10,7 +10,7 @@
     include_once ("../goFunctions.php");
     
     $limit = $_REQUEST['limit'];
-    if($limit < 1){ $limit = 20; } else { $limit = $limit; }
+    if($limit < 1){ $limit = 1000; } else { $limit = $limit; }
 
     $groupId = go_get_groupid($goUser);
     
