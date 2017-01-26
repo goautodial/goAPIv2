@@ -40,6 +40,8 @@
 	$am_message_chooser 		= $_REQUEST['am_message_chooser'];
 	$agent_pause_codes_active 		= $_REQUEST['agent_pause_codes_active'];
 	$manual_dial_filter 		= $_REQUEST['manual_dial_filter'];
+	$use_internal_dnc			= $_REQUEST['use_internal_dnc'];
+	$use_campaign_dnc			= $_REQUEST['use_campaign_dnc'];
 	$manual_dial_list_id 		= $_REQUEST['manual_dial_list_id'];
 	$available_only_ratio_tally 		= $_REQUEST['available_only_ratio_tally'];
 	$campaign_rec_filename 		= $_REQUEST['campaign_rec_filename'];
@@ -168,7 +170,9 @@
 										get_call_launch = '$get_call_launch', 
 										am_message_exten = '$amMessageExten', 
 										agent_pause_codes_active = '$agent_pause_codes_active', 
-										manual_dial_filter = '$manual_dial_filter', 
+										manual_dial_filter = '$manual_dial_filter',
+										use_internal_dnc = '$use_internal_dnc',
+										use_campaign_dnc = '$use_campaign_dnc', 
 										manual_dial_list_id = '$manual_dial_list_id', 
 										available_only_ratio_tally = '$available_only_ratio_tally', 
 										campaign_rec_filename = '$campaign_rec_filename', 
