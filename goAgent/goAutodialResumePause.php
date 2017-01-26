@@ -151,13 +151,13 @@ if ($is_logged_in) {
     }
     
     $pause_sec = 0;
+    $wait_sec = 0;
     //$stmt = "SELECT pause_epoch,pause_sec,wait_epoch,wait_sec,dispo_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
     $astDB->where('agent_log_id', $agent_log_id);
     $rslt = $astDB->getOne('vicidial_agent_log', 'pause_epoch,pause_sec,wait_epoch,wait_sec,dispo_epoch');
     $VDpr_ct = $astDB->getRowCount();
     if ($VDpr_ct > 0) {
         $dispo_epoch = $rslt['dispo_epoch'];
-        $wait_sec = 0;
         if ($rslt['wait_epoch'] > 0) {
             $wait_sec = (($StarTtimE - $rslt['wait_epoch']) + $rslt['wait_sec']);
         }
