@@ -1295,9 +1295,10 @@ if ($is_logged_in) {
     
         if ($log_no_enter < 1) {
             $talk_sec = 0;
-            $talk_epochSQL = '';
-            $dead_secSQL = '';
-            $lead_id_commentsSQL = '';
+            $talk_epochSQL = array();
+            $dead_secSQL = array();
+            $commentsSQL = array();
+            $lead_idSQL = array();
             $StarTtimE = date("U");
             //$stmt = "SELECT talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
@@ -1306,26 +1307,45 @@ if ($is_logged_in) {
             if ($VDpr_ct > 0) {
                 $row = $rslt[0];
                 if ( (preg_match("/NULL/i", $row['talk_epoch'])) || ($row['talk_epoch'] < 1000) ) {
-                    $talk_epochSQL=",talk_epoch='$StarTtimE'";
+                    //$talk_epochSQL=",talk_epoch='$StarTtimE'";
+                    $talk_epochSQL = array(
+                        'talk_epoch' => $StarTtimE
+                    );
                     $row['talk_epoch'] = $row['wait_epoch'];
                 }
                 if ( (!preg_match("/NULL/i", $row['dead_epoch'])) && ($row['dead_epoch'] > 1000) ) {
                     $dead_sec = ($StarTtimE - $row['dead_epoch']);
                     if ($dead_sec < 0) {$dead_sec = 0;}
-                    $dead_secSQL=",dead_sec='$dead_sec'";
+                    //$dead_secSQL=",dead_sec='$dead_sec'";
+                    $dead_secSQL = array(
+                        'dead_sec' => $dead_sec
+                    );
                 }
                 $talk_sec = (($StarTtimE - $row['talk_epoch']) + $row['talk_sec']);
                 if ( ( ($auto_dial_level < 1) || (preg_match('/^M/', $MDnextCID)) ) && (preg_match('/INBOUND_MAN/', $dial_method)) ) {
                     if ( (preg_match("/NULL/i", $row['comments'])) or (strlen($row['comments']) < 1) ) {
-                        $lead_id_commentsSQL .= ",comments='MANUAL'";
+                        //$lead_id_commentsSQL .= ",comments='MANUAL'";
+                        $commentsSQL = array(
+                            'comments' => 'MANUAL'
+                        );
                     }
                     if ( (preg_match("/NULL/i", $row['lead_id'])) || ($row['lead_id'] < 1) || (strlen($row['lead_id']) < 1) ) {
-                        $lead_id_commentsSQL .= ",lead_id='$lead_id'";
+                        //$lead_id_commentsSQL .= ",lead_id='$lead_id'";
+                        $lead_idSQL = array(
+                            'lead_id' => $lead_id
+                        );
                     }
                 }
             }
-            $stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
-            $rslt = $astDB->rawQuery($stmt);
+            $updateData = array(
+                'talk_sec' => $talk_sec,
+                'dispo_epoch' => $StarTtimE,
+                'uniqueid' => $uniqueid
+            );
+            $updateSQL = array_merge($updateData, $talk_epochSQL, $dead_epochSQL, $commentsSQL, $lead_idSQL);
+            //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
+            $astDB->where('agent_log_id', $agent_log_id);
+            $rslt = $astDB->update('vicidial_agent_log', $updateSQL);
         
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);

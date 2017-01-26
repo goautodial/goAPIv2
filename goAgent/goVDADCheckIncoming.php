@@ -965,18 +965,18 @@ if ($is_logged_in) {
         );
 
         $wait_sec = 0;
-        $StarTtime = date("U");
+        //$StarTtime = date("U");
         //$stmt = "SELECT wait_epoch,wait_sec from vicidial_agent_log where agent_log_id='$agent_log_id';";
         $astDB->where('agent_log_id', $agent_log_id);
         $rslt = $astDB->get('vicidial_agent_log', null, 'wait_epoch,wait_sec');
         $VDpr_ct = $astDB->getRowCount();
         if ($VDpr_ct > 0) {
             $row = $rslt[0];
-            $wait_sec = (($StarTtime - $row['wait_epoch']) + $row['wait_sec']);
+            $wait_sec = (($StarTtimE - $row['wait_epoch']) + $row['wait_sec']);
         }
-        //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtime',lead_id='$lead_id' where agent_log_id='$agent_log_id';";
+        //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtimE',lead_id='$lead_id' where agent_log_id='$agent_log_id';";
         $astDB->where('agent_log_id', $agent_log_id);
-        $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtime, 'lead_id' => $lead_id ));
+        $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtimE, 'lead_id' => $lead_id ));
 
         ### If a scheduled callback, change vicidial_callback record to INACTIVE
         $CBstatus = 0;
