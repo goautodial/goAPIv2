@@ -95,8 +95,6 @@
 		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
 		
-		
-		
         if($countResult > 0 || $user_group == "---ALL---") {
 
   /*              if($menu_time_check < 0 || $menu_time_check > 1) {
@@ -125,13 +123,12 @@
 			  $apiresults = array("result" => "Error: CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID");
 			  //$message = "CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID\n";
 			} else {
-	
-				$queryAddIVR = "INSERT INTO vicidial_call_menu (menu_id, menu_name, user_group, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, custom_dialplan_entry, tracking_group) values('$menu_id', '$menu_name', '$user_group', '$menu_prompt', '$menu_timeout', '$menu_timeout_prompt', '$menu_invalid_prompt', '$menu_repeat', '$menu_time_check', '24hours', '$track_in_vdac', '$custom_dialplan_entry', '$tracking_group');";
+				
+				$queryAddIVR = "
+				INSERT INTO vicidial_call_menu
+					(menu_id, menu_name, user_group, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, custom_dialplan_entry, tracking_group)
+				values('$menu_id', '$menu_name', '$user_group', '$menu_prompt', '$menu_timeout', '$menu_timeout_prompt', '$menu_invalid_prompt', '$menu_repeat', '$menu_time_check', '24hours', '$track_in_vdac', '$custom_dialplan_entry', '$tracking_group');";
 				$resultQueryAdd = mysqli_query($link, $queryAddIVR);
-		
-				$resultQueryAddCheck = "SELECT menu_id from vicidial_call_menu where menu_id='$menu_id';";
-				$resultCheck = mysqli_query($link, $resultQueryAddCheck);
-				$countAdd = mysqli_num_rows($resultCheck);
 				
 				# set default entry in vicidial_callmenu_options by Franco Hora 
 				$queryDef = "INSERT INTO vicidial_call_menu_options (menu_id,option_value,option_description,option_route,option_route_value) values('$menu_id','TIMEOUT','Hangup','HANGUP','vm-goodbye');";
@@ -151,21 +148,13 @@
 				$queryUpdateAsterisk = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
 				$resultVSC = mysqli_query($link, $queryUpdateAsterisk);
 				
-				$queryCount = "SELECT menu_id from vicidial_call_menu_options where menu_id='$menu_id';";
-				$resultCount = mysqli_query($link, $queryCount);
-				$countOpt = mysqli_num_rows($resultCount);
-	
-				if ($countOpt > 0 && $countAdd > 0) {
-		
 		### Admin logs
 				  $SQLdate = date("Y-m-d H:i:s");
 				  $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New IVR $menu_id','INSERT INTO  vicidial_call_menu SET (menu_name, menu_id, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, tracking_group, user_group) VALUES ($menu_name, $menu_id, $menu_prompt, $menu_timeout, $menu_timeout_prompt, $menu_invalid_prompt, $menu_repeat, $menu_time_check, $call_time_id, $track_in_vdac, $tracking_group, $user_group);');";
 				  $rsltvLog = mysqli_query($linkgo, $queryLog);
-				  $apiresults = array("result" => "success", "query" => $return_query);
+				  
+				  $apiresults = array("result" => "success", "query" => $queryAddIVR);
 				
-				} else {
-						 $apiresults = array("result" => "CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID\n"); 
-				}
 			}
 
 		} else {
