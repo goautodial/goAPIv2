@@ -1347,7 +1347,7 @@ if ($is_logged_in) {
             //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateSQL);
-            $testOutput = $astDB->getLastQuery();
+            $testOutput = $astDB->getLastError();
         
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
