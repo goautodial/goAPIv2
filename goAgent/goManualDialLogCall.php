@@ -93,6 +93,7 @@ $row = '';
 $rowx = '';
 $vidSQL = '';
 $VDterm_reason = '';
+$testOutput = '';
 
 if ($is_logged_in) {
     if ($stage == "start") {
@@ -1299,7 +1300,7 @@ if ($is_logged_in) {
             $dead_secSQL = array();
             $commentsSQL = array();
             $lead_idSQL = array();
-            $StarTtimE = date("U");
+            //$StarTtimE = date("U");
             //$stmt = "SELECT talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->get('vicidial_agent_log', null, 'talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch');
@@ -1346,6 +1347,7 @@ if ($is_logged_in) {
             //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateSQL);
+            $testOutput = $astDB->getLastQuery();
         
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
@@ -1371,7 +1373,7 @@ if ($is_logged_in) {
                 $affected_rows = $linkB->getRowCount();
             }
         }
-        $APIResult = array( "result" => "success", "message" => $message );
+        $APIResult = array( "result" => "success", "message" => $message, "test" => $testOutput );
 	}
 } else {
     $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
