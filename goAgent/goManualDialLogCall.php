@@ -1314,6 +1314,7 @@ if ($is_logged_in) {
                         'talk_epoch' => $StarTtimE
                     );
                     $row['talk_epoch'] = $row['wait_epoch'];
+                    $updateData = array_merge($updateData, $talk_epochSQL);
                 }
                 if ( (!preg_match("/NULL/i", $row['dead_epoch'])) && ($row['dead_epoch'] > 1000) ) {
                     $dead_sec = ($StarTtimE - $row['dead_epoch']);
@@ -1322,6 +1323,7 @@ if ($is_logged_in) {
                     $dead_secSQL = array(
                         'dead_sec' => $dead_sec
                     );
+                    $updateData = array_merge($updateData, $dead_secSQL);
                 }
                 $talk_sec = (($StarTtimE - $row['talk_epoch']) + $row['talk_sec']);
                 $updateData['talk_sec'] = $talk_sec;
@@ -1338,12 +1340,13 @@ if ($is_logged_in) {
                             'lead_id' => $lead_id
                         );
                     }
+                    $updateData = array_merge($updateData, $lead_id_commentsSQL);
                 }
             }
             //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateData);
-            $testOutput = $updateData;
+            $testOutput = $astDB->getLastQuery();
         
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
