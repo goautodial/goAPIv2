@@ -1343,7 +1343,7 @@ if ($is_logged_in) {
                 'dispo_epoch' => $StarTtimE,
                 'uniqueid' => $uniqueid
             );
-            $updateSQL = array_merge($updateData, $talk_epochSQL, $dead_epochSQL, $commentsSQL, $lead_idSQL);
+            $updateSQL = array_merge_recursive($updateData, $talk_epochSQL, $dead_epochSQL, $commentsSQL, $lead_idSQL);
             //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateSQL);
