@@ -17,8 +17,8 @@ $phone_settings = get_settings('phone', $astDB, $agent->phone_login, $agent->pho
 
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
-if (isset($_GET['goAgentLogID'])) { $agent_log_id = $_GET['goAgentLogID']; }
-    else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $_POST['goAgentLogID']; }
+if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgentLogID']); }
+    else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $astDB->escape($_POST['goAgentLogID']); }
 if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }
     else if (isset($_POST['goServerIP'])) { $server_ip = $astDB->escape($_POST['goServerIP']); }
 if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
@@ -1347,7 +1347,7 @@ if ($is_logged_in) {
             //$stmt="UPDATE vicidial_agent_log set talk_sec='$talk_sec',dispo_epoch='$StarTtimE',uniqueid='$uniqueid' $talk_epochSQL $dead_secSQL $lead_id_commentsSQL where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateSQL);
-            $testOutput = $astDB->getLastError();
+            $testOutput = $astDB->getLastQuery();
         
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
