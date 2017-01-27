@@ -17,8 +17,8 @@ $phone_settings = get_settings('phone', $astDB, $agent->phone_login, $agent->pho
 
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
-if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgentLogID']); }
-    else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $astDB->escape($_POST['goAgentLogID']); }
+if (isset($_GET['goAgentLogID'])) { $agent_log_id = $_GET['goAgentLogID']; }
+    else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $_POST['goAgentLogID']; }
 if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }
     else if (isset($_POST['goServerIP'])) { $server_ip = $astDB->escape($_POST['goServerIP']); }
 if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
