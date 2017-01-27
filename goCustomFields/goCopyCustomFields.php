@@ -203,13 +203,13 @@
             $counterresult = mysqli_query($link, $counterquery);
     
             if($counterresult){
-                $checkTable = "DESC 'custom_$list_to'";
+                $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                 $queryCheckTable = mysqli_query($link, $checkTable);
                 
                 if($queryCheckTable){
                     $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
                 }else{
-                    $field_sql = "CREATE TABLE custom_$list_to(lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                    $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
                 }
 
                
@@ -286,7 +286,11 @@
                     $field_sql .="";  
                 }
                 
-                $field_sql .= ");";
+                if ($queryCheckTable) {
+                    $field_sql .= ";";
+                } else {
+                    $field_sql .= ");";
+                }
                 $stmtCUSTOM="$field_sql";
                 $rslt = mysqli_query($link, $stmtCUSTOM);
 
@@ -374,7 +378,7 @@
                     $counterresult = mysqli_query($link, $counterquery);
             
                     if($counterresult){
-                        $checkTable = "DESC 'custom_$list_to'";
+                        $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                         $queryCheckTable = mysqli_query($link, $checkTable);
                         
                         if($queryCheckTable){
@@ -457,7 +461,11 @@
                             $field_sql .="";  
                         }
                         
-                        $field_sql .= ";";
+                        if ($queryCheckTable) {
+                            $field_sql .= ";";
+                        } else {
+                            $field_sql .= ");";
+                        }
                         $stmtCUSTOM="$field_sql";
                         $rslt = mysqli_query($link, $stmtCUSTOM);
                         
