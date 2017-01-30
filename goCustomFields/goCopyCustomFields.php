@@ -206,7 +206,7 @@
                 $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                 $queryCheckTable = mysqli_query($link, $checkTable);
                 
-                if($queryCheckTable){
+                if($queryCheckTable->num_rows){
                     $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
                 }else{
                     $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
@@ -286,7 +286,7 @@
                     $field_sql .="";  
                 }
                 
-                if ($queryCheckTable) {
+                if ($queryCheckTable->num_rows) {
                     $field_sql .= ";";
                 } else {
                     $field_sql .= ");";
@@ -381,7 +381,7 @@
                         $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                         $queryCheckTable = mysqli_query($link, $checkTable);
                         
-                        if($queryCheckTable){
+                        if($queryCheckTable->num_rows){
                             $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
                         }else{
                             $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
@@ -461,7 +461,7 @@
                             $field_sql .="";  
                         }
                         
-                        if ($queryCheckTable) {
+                        if ($queryCheckTable->num_rows) {
                             $field_sql .= ";";
                         } else {
                             $field_sql .= ");";
