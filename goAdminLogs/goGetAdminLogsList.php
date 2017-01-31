@@ -12,7 +12,10 @@
 if ($goUserGroup !== 'ADMIN') {
 	$goDB->where('user_group', $goUserGroup);
 }
-$adminLogs = $goDB->get('go_action_logs');
+if (strlen($limit) < 1 || ($limit < 1 && $limit > 1000)) {
+	$limit = 1000;
+}
+$adminLogs = $goDB->get('go_action_logs', $limit);
 
 foreach ($adminLogs as $log) {
 	$result[] = $log;

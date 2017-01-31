@@ -49,6 +49,9 @@ if (isset($_GET['goPass'])) { $goPass = $astDB->escape($_GET['goPass']); }
 if (isset($_GET['goUserGroup'])) { $goUserGroup = $astDB->escape($_GET['goUserGroup']); }
     else if (isset($_POST['goUserGroup'])) { $goUserGroup = $astDB->escape($_POST['goUserGroup']); }
 
+if (isset($_GET['limit'])) { $limit = $astDB->escape($_GET['limit']); }
+    else if (isset($_POST['limit'])) { $limit = $astDB->escape($_POST['limit']); }
+
 if (isset($_GET['bcrypt'])) { $bcrypt = $astDB->escape($_GET['bcrypt']); }
     else if (isset($_POST['bcrypt'])) { $bcrypt = $astDB->escape($_POST['bcrypt']); }
 
