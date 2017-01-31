@@ -13,6 +13,7 @@
 	$user_name = $_REQUEST['user_name'];
 	//$user_email = $_REQUEST['user_email'];
 	$user_pass = $_REQUEST['user_pass'];
+	$ip_address = $_REQUEST['ip_address'];
 	$pass_hash = '';
 	$cwd = $_SERVER['DOCUMENT_ROOT'];
 	$auth = 0;
@@ -94,6 +95,9 @@
 				"avatar" => $dataAvatar
 			);
 		}
+		
+		$SQLdate = date("Y-m-d H:i:s");
+		log_action('LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
 	} else {
 		$apiresults = array("result" => "Error: Invalid login credentials please try again.");
 	}
