@@ -21,5 +21,5 @@ foreach ($adminLogs as $log) {
 	$result[] = $log;
 }
 
-$APIResult = array( "result" => "success", "data" => $result );
+$APIResult = array( "result" => "success", "data" => $adminLogs );
 ?>
