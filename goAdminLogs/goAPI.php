@@ -7,8 +7,8 @@
 #### Written by: Christopher P. Lomuntad        ####
 #### License: AGPLv2                            ####
 ####################################################
-ini_set('display_errors', 'on');
-error_reporting(E_ALL);
+//ini_set('display_errors', 'on');
+//error_reporting(E_ALL);
 
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
 $version = file_get_contents("{$webRoot}/version.txt");
