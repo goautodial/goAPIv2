@@ -76,6 +76,9 @@
 			
 			$rslti = mysqli_query($linkgo, "SELECT * FROM go_avatars WHERE user_id='$dataUserId';");
 			$dataAvatar = (mysqli_num_rows($rslti) > 0) ? "./php/ViewImage.php?user_id=$dataUserId" : "";
+		
+			$SQLdate = date("Y-m-d H:i:s");
+			$log_id = log_action('LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
 			
 			$apiresults = array(
 				"result" => "success",
@@ -95,9 +98,6 @@
 				"avatar" => $dataAvatar
 			);
 		}
-		
-		$SQLdate = date("Y-m-d H:i:s");
-		log_action('LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
 	} else {
 		$apiresults = array("result" => "Error: Invalid login credentials please try again.");
 	}
