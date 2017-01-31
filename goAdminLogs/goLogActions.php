@@ -1,7 +1,7 @@
 <?php
 ####################################################
-#### Name: goGetLabels.php                      ####
-#### Type: API for Agent UI                     ####
+#### Name: goLogActions.php                     ####
+#### Type: API for Logging Actions              ####
 #### Version: 0.9                               ####
 #### Copyright: GOAutoDial Inc. (c) 2011-2016   ####
 #### Written by: Christopher P. Lomuntad        ####
@@ -14,8 +14,6 @@ if (isset($_GET['user'])) { $user = $astDB->escape($_GET['user']); }
     else if (isset($_POST['user'])) { $user = $astDB->escape($_POST['user']); }
 if (isset($_GET['ip_address'])) { $ip_address = $astDB->escape($_GET['ip_address']); }
     else if (isset($_POST['ip_address'])) { $ip_address = $astDB->escape($_POST['ip_address']); }
-if (isset($_GET['event_date'])) { $event_date = $astDB->escape($_GET['event_date']); }
-    else if (isset($_POST['event_date'])) { $event_date = $astDB->escape($_POST['event_date']); }
 if (isset($_GET['details'])) { $details = $astDB->escape($_GET['details']); }
     else if (isset($_POST['details'])) { $details = $astDB->escape($_POST['details']); }
 if (isset($_GET['user_group'])) { $user_group = $astDB->escape($_GET['user_group']); }
@@ -23,10 +21,11 @@ if (isset($_GET['user_group'])) { $user_group = $astDB->escape($_GET['user_group
 if (isset($_GET['db_query'])) { $db_query = $astDB->escape($_GET['db_query']); }
     else if (isset($_POST['db_query'])) { $db_query = $astDB->escape($_POST['db_query']); }
 
+
 $insertData = array(
     'user' => $user,
     'ip_address' => $ip_address,
-    'event_date' => $event_date,
+    'event_date' => $NOW_TIME,
     'action' => $action,
     'details' => $details,
     'db_query' => $db_query,
