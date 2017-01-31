@@ -20,7 +20,7 @@ $adminLogs = $goDB->get('go_action_logs', $limit);
 foreach ($adminLogs as $id => $log) {
 	$result[$id] = $log;
 	
-	$astDB->where('user', $log->user);
+	$astDB->where('user', $log['user']);
 	$user = $astDB->getOne('vicidial_users', 'full_name');
 	$result[$id]['name'] = $user['full_name'];
 }
