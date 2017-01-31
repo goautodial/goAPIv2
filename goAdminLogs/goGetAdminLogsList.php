@@ -15,6 +15,7 @@ if ($goUserGroup !== 'ADMIN') {
 if (strlen($limit) < 1 || ($limit < 1 && $limit > 1000)) {
 	$limit = 1000;
 }
+$goDB->orderBy('event_date', 'desc');
 $adminLogs = $goDB->get('go_action_logs', $limit);
 
 foreach ($adminLogs as $id => $log) {
