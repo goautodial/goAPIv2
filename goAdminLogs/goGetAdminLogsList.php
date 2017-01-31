@@ -15,11 +15,7 @@ if ($goUserGroup !== 'ADMIN') {
 if (strlen($limit) < 1 || ($limit < 1 && $limit > 1000)) {
 	$limit = 1000;
 }
-$adminLogs = $goDB->get('go_action_logs', $limit);
+$result = $goDB->get('go_action_logs', $limit);
 
-foreach ($adminLogs as $log) {
-	$result[] = $log;
-}
-
-$APIResult = array( "result" => "success", "data" => $adminLogs );
+$APIResult = array( "result" => "success", "data" => $result );
 ?>
