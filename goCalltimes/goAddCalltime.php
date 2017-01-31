@@ -47,6 +47,8 @@
         //$user_group = ($_REQUEST['user_group'] == "ALL")? "---ALL---":$_REQUEST['user_group'];
 		
 		$ip_address = $_REQUEST['hostname'];
+		$log_user = $_REQUEST['log_user'];
+		$log_group = $_REQUEST['log_group'];
 		$goUser = $_REQUEST['goUser'];
 		
 
@@ -182,8 +184,9 @@
 
                     ### Admin logs
                     $SQLdate = date("Y-m-d H:i:s");
-                    $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Call Time $call_time_id','INSERT INTO vicidial_call_times (call_time_id, call_time_name, call_time_comments, user_group, ct_default_start, ct_default_stop, ct_sunday_start, ct_sunday_stop, ct_monday_start, ct_monday_stop, ct_tuesday_start, ct_tuesday_stop, ct_wednesday_start, ct_wednesday_stop, ct_thursday_start, ct_thursday_stop, ct_friday_start, ct_friday_stop, ct_saturday_start, ct_saturday_stop) VALUES ($call_time_id, $call_time_name, $call_time_comments, $user_group, $ct_default_start, $ct_default_stop, $ct_sunday_start, $ct_sunday_stop,$ct_monday_start, $ct_monday_stop, $ct_tuesday_start, $ct_tuesday_stop, $ct_wednesday_start, $ct_wednesday_stop, $ct_thursday_start, $ct_thursday_stop, $ct_friday_start, $ct_friday_stop, $ct_saturday_start, $ct_saturday_stop);');";
-                    $rsltvLog = mysqli_query($queryLog, $linkgo);
+                    //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$log_user','$ip_address','$SQLdate','ADD','Added New Call Time $call_time_id','INSERT INTO vicidial_call_times (call_time_id, call_time_name, call_time_comments, user_group, ct_default_start, ct_default_stop, ct_sunday_start, ct_sunday_stop, ct_monday_start, ct_monday_stop, ct_tuesday_start, ct_tuesday_stop, ct_wednesday_start, ct_wednesday_stop, ct_thursday_start, ct_thursday_stop, ct_friday_start, ct_friday_stop, ct_saturday_start, ct_saturday_stop) VALUES ($call_time_id, $call_time_name, $call_time_comments, $user_group, $ct_default_start, $ct_default_stop, $ct_sunday_start, $ct_sunday_stop,$ct_monday_start, $ct_monday_stop, $ct_tuesday_start, $ct_tuesday_stop, $ct_wednesday_start, $ct_wednesday_stop, $ct_thursday_start, $ct_thursday_stop, $ct_friday_start, $ct_friday_stop, $ct_saturday_start, $ct_saturday_stop);');";
+                    //$rsltvLog = mysqli_query($queryLog, $linkgo);
+					log_action('ADD', $log_user, $ip_address, $SQLdate, "Added New Call Time: $call_time_id", $log_group, $newQuery);
 
                     if($rsltvx == false){
                         $apiresults = array("result" => "Error: Add failed, check your details");

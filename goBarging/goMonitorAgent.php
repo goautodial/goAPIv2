@@ -38,6 +38,7 @@ if ($is_logged_in) {
         $astDB->where('user', $goUser);
         $astDB->where('active', 'Y');
         $rslt = $astDB->getOne('vicidial_users', 'api_list_restrict,api_allowed_functions,user_group');
+		$user_group = $rslt['user_group'];
         
 		if ( (!preg_match("/ $function /", $rslt['api_allowed_functions'])) && (!preg_match("/ALL_FUNCTIONS/", $rslt['api_allowed_functions'])) ) {
 			$APIResult = array( "result" => "error", "message" => "User does NOT have permission to use this function" );
@@ -175,7 +176,7 @@ if ($is_logged_in) {
                             //$stmt="INSERT INTO vicidial_report_log set event_date=NOW(), user='$user', ip_address='1.1.1.1', report_name='API Blind Monitor', browser='API', referer='realtime_report.php', notes='$user, $monitor_server_ip, $dialplan_number, $session_id, $phone_login', url='REALTIME BLIND MONITOR',run_time='$TOTALrun';";
                             $insertData = array(
                                 'event_date' => 'NOW()',
-                                'user' => $user,
+                                'user' => $goUser,
                                 'ip_address' => '1.1.1.1',
                                 'report_name' => 'API Blind Monitor',
                                 'browser' => 'API',
@@ -202,6 +203,8 @@ if ($is_logged_in) {
             }
             
             if ($hasError < 1) {
+				log_action($type, $goUser, $ip_address, "{$goUser} barged in to {$agent}'s call", $user_group);
+				
                 $APIResult = array( "result" => "success", "message" => $message, "data" => $data );
             }
         }
