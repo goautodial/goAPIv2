@@ -9,7 +9,7 @@
 #### License: AGPLv2                               ####
 #######################################################
 
-if ($goUserGroup !== 'ADMIN') {
+if ($goUserGroup !== 'ADMIN' && strlen($goUserGroup) > 0) {
 	$goDB->where('user_group', $goUserGroup);
 }
 if (strlen($limit) < 1 || ($limit < 1 && $limit > 1000)) {
