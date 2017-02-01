@@ -100,6 +100,8 @@
 			);
 		}
 	} else {
+		ini_set('display_errors', 1);
+		error_reporting(E_ALL);
 		$thisUserGroup = go_get_groupid($user);
 		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisUserGroup);
 		$apiresults = array("result" => "error", "message" => "Error: Invalid login credentials please try again.");
