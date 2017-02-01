@@ -1322,8 +1322,9 @@
     ##### END validate user login credentials, check for failed lock out #####
     
 	##### ACTION LOGS #####
-	function log_action($link, $action, $user, $ip, $event_date, $details, $user_group, $db_query = '') {
+	function log_action($link, $action, $user, $ip, $details, $user_group, $db_query = '') {
 		$action = strtoupper($action);
+		$event_date = date("Y-m-d H:i:s");
 		$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
 		$result = mysqli_query($link, $logSQL);
 		

@@ -9,6 +9,9 @@
     #######################################################
     include "goFunctions.php";
     $call_time_id = $_REQUEST["call_time_id"]; 
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 
     if($call_time_id == null) {
         $apiresults = array("result" => "Error: Set a value for Calltime ID.");
@@ -16,9 +19,9 @@
 		$groupId = go_get_groupid($goUser);
 
 		if (!checkIfTenant($groupId)) {
-				$ul = "";
+			$ul = "";
 		} else {
-				$ul = "AND user_group='$groupId'";
+			$ul = "AND user_group='$groupId'";
 		   $addedSQL = "WHERE user_group='$groupId'";
 		}
 
@@ -26,6 +29,8 @@
 		$rsltv = mysqli_query($link,$query);
 		$exist = mysqli_num_rows($rsltv);
 		if($exist >= 1){
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the Calltimes info of {$call_time_id}", $log_group);
+			
             $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
 			$apiresults = array_merge(array("result" => "success"), $fresults);
 	    } else {
