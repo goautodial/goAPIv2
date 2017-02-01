@@ -100,10 +100,11 @@
 			);
 		}
 	} else {
-		ini_set('display_errors', 1);
-		error_reporting(E_ALL);
-		$thisUserGroup = go_get_groupid($user);
-		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisUserGroup);
+		$query = mysqli_query("SELECT user_group FROM vicidial_users WHERE user='$user';");
+		$rslt = mysqli_fetch_array($query, MYSQLI_ASSOC);
+		$thisGroup = (strlen($rslt['user_group']) > 0) ? $rslt['user_group'] : "";
+		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisGroup);
+		
 		$apiresults = array("result" => "error", "message" => "Error: Invalid login credentials please try again.");
 	}
 	
