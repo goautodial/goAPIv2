@@ -12,7 +12,9 @@
     
     ### POST or GET Variables
         $goUser = $_REQUEST['goUser'];
-        $ip_address = $_REQUEST['hostname'];
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
         $lead_id        = mysqli_real_escape_string($link, $_REQUEST['lead_id']);
         $first_name     = mysqli_real_escape_string($link, $_REQUEST['first_name']);
@@ -72,6 +74,9 @@
             } else {
                 $rsltc = mysqli_query($linkgo, "UPDATE go_customers SET group_list_id='$group_list_id';");
             }
+            
+            $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query);
+            
             $apiresults = array("result" => "success");
         }else{
             $apiresults = array("result" => "Error: Failed to Update");

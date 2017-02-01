@@ -25,7 +25,9 @@
         $unworkable = mysqli_real_escape_string($link, $_REQUEST['unworkable']);
         $scheduled_callback = mysqli_real_escape_string($link, $_REQUEST['scheduled_callback']);
 		
-	$ip_address = $_REQUEST['hostname'];
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$goUser = $_REQUEST['goUser'];
 
     ### Default values 
@@ -132,9 +134,10 @@
 												}
 												
 												### Admin logs
-														$SQLdate = date("Y-m-d H:i:s");
-														$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
-														$rsltvLog = mysqli_query($linkgo, $queryLog);
+														//$SQLdate = date("Y-m-d H:i:s");
+														//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
+														//$rsltvLog = mysqli_query($linkgo, $queryLog);
+														$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $newQuery);
 												
 												
 														if($rsltv == false){

@@ -12,10 +12,12 @@
     
     $list_to   = mysqli_real_escape_string($link, $_REQUEST['list_to']);
     $list_from = mysqli_real_escape_string($link, $_REQUEST['list_from']);
-    $copy_option = $_REQUEST['copy_option'];
+    $copy_option = mysqli_real_escape_string($link, $_REQUEST['copy_option']);
     
-    $goUser = $_REQUEST['goUser'];
-    $ip_address = $_REQUEST['hostname'];
+    $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+    $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
@@ -153,11 +155,12 @@
                             and field_id='$field_id';";
                 $updaterslt = mysqli_query($link, $update);
                 if($updaterslt){
-                    $SQLdate = date("Y-m-d H:i:s");
-                    $queryLog = "INSERT INTO go_action_logs
-                                    (user,ip_address,event_date,action,details,db_query)
-                                values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                    $rsltvLog = mysqli_query($linkgo, $queryLog);
+                    //$SQLdate = date("Y-m-d H:i:s");
+                    //$queryLog = "INSERT INTO go_action_logs
+                    //                (user,ip_address,event_date,action,details,db_query)
+                    //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
+                    //$rsltvLog = mysqli_query($linkgo, $queryLog);
+                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $update);
                    
                     $output[] = "success";
                 }else{
@@ -314,10 +317,11 @@
                 $insertrslt = mysqli_query($link, $insert);
                 if($insertrslt){
                     $SQLdate = date("Y-m-d H:i:s");
-                    $queryLog = "INSERT INTO go_action_logs
-                                    (user,ip_address,event_date,action,details,db_query)
-                                values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                    $rsltvLog = mysqli_query($linkgo, $queryLog);
+                    //$queryLog = "INSERT INTO go_action_logs
+                    //                (user,ip_address,event_date,action,details,db_query)
+                    //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
+                    //$rsltvLog = mysqli_query($linkgo, $queryLog);
+                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insert);
                    
                     $output[] = "success";
                 }else{
@@ -488,11 +492,12 @@
                                         field_order='$field_order';";
                         $insertrslt = mysqli_query($link, $insert);
                         if($insertrslt){
-                            $SQLdate = date("Y-m-d H:i:s");
-                            $queryLog = "INSERT INTO go_action_logs
-                                            (user,ip_address,event_date,action,details,db_query)
-                                        values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                            $rsltvLog = mysqli_query($linkgo, $queryLog);
+                            //$SQLdate = date("Y-m-d H:i:s");
+                            //$queryLog = "INSERT INTO go_action_logs
+                            //                (user,ip_address,event_date,action,details,db_query)
+                            //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
+                            //$rsltvLog = mysqli_query($linkgo, $queryLog);
+                            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insert);
                            
                             $fullData[] = "success";
                         }else{

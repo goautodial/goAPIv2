@@ -10,6 +10,10 @@
     ### POST or GET Variables
     $lead_id = $_REQUEST['lead_id'];
     
+    $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    
     ### Check user_id if its null or empty
     if($lead_id == null) { 
             $apiresults = array("result" => "Error: Set a value for Lead ID."); 
@@ -35,6 +39,9 @@
             $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
             $is_customer = mysqli_num_rows($rsltc);
         }
+        
+        $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the lead info of Lead ID: $lead_id", $log_group);
+        
         $apiresults = array("result" => "success", "data" => $fresults, "is_customer" => $is_customer);
 
     }

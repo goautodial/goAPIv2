@@ -11,6 +11,10 @@
     $camp = $_REQUEST["campaign_id"]; 
     $camp = mysqli_real_escape_string($link, $camp);
 	$status = mysqli_real_escape_string($link, $_REQUEST["status"]);
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
         if($camp == null) {
                 $apiresults = array("result" => "Error: Set a value for Campaign ID.");
         } else {
@@ -68,6 +72,7 @@
 										"scheduled_callback" => $dataScheduled_callback);
                 }
 
+				$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the dispositions of campaign $camp", $log_group);
 	        } else {
 
                 $apiresults = array("result" => "Error: Campaign disposition does not exist.");

@@ -10,7 +10,10 @@
     include_once ("../goFunctions.php");
     
     ### POST or GET Variables
-    $user_name = $_REQUEST['goUserAgent'];
+    $user_name = mysqli_real_escape_string($link, $_REQUEST['goUserAgent']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
     ### Check if user_name or user_email
     if(!empty($user_name)) 
@@ -85,6 +88,8 @@
 			$rslt5  = mysqli_query($link, $query5);
 			$query6 = "DELETE FROM go_agent_sessions WHERE sess_agent_user='".$agents['user']."' LIMIT 1;";
 			$rslt6  = mysqli_query($link, $query6);
+			
+			$log_id = log_action($linkgo, 'LOGOUT', $log_user, $ip_address, "User $log_user used emergency log out on $user_name", $log_group);
                      
 			$apiresults = array("result" => "success");
 		
@@ -97,6 +102,8 @@
 			{
 				$query8 = "DELETE FROM go_agent_sessions WHERE sess_agent_user='$user_name';";
 				$rslt8  = mysqli_query($link, $query8);
+				
+				$log_id = log_action($linkgo, 'LOGOUT', $log_user, $ip_address, "User $log_user used emergency log out on $user_name", $log_group);
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: Agent $user_name is not logged in");

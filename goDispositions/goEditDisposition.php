@@ -22,9 +22,11 @@
         $not_interested = $_REQUEST['not_interested'];
         $unworkable = $_REQUEST['unworkable'];
         $scheduled_callback = $_REQUEST['scheduled_callback'];
-        $ip_address = $_REQUEST['hostname'];
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
         $goUser = $_REQUEST['goUser'];
 
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Default values
     $defVal = array("Y","N");
@@ -134,9 +136,10 @@
 						$apiresults = array("result" => "success");
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE vicidial_voicemail SET pass=$pass,  fullname=$fullname,  email=$email,  active=$active,  delete_vm_after_email=$delete_vm_after_email WHERE voicemail_id=$voicemail_id');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE vicidial_voicemail SET pass=$pass,  fullname=$fullname,  email=$email,  active=$active,  delete_vm_after_email=$delete_vm_after_email WHERE voicemail_id=$voicemail_id');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified dispositions on campaign $campaign_id", $log_group, $queryDispo);
 
 
 					}

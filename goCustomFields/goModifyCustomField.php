@@ -27,6 +27,10 @@
     $multi_position     = $_REQUEST['multi_position'];
     $name_position      = $_REQUEST['name_position'];
     $field_order        = $_REQUEST['field_order'];
+	
+	$ip_address			= mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$log_user			= mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group			= mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
@@ -126,6 +130,8 @@
     $countResultUpdate = mysqli_num_rows($updaterslt);
     
     if($updaterslt){
+		$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $update);
+		
         $apiresults = array("result" => "success");
     }else{
         $apiresults = array("result" => "Error: List or Field does not exist.");
