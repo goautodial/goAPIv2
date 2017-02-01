@@ -10,7 +10,10 @@
     include_once ("../goFunctions.php");
     
     ### POST or GET Variables
-    $carrier_id = $_REQUEST['carrier_id'];
+    $carrier_id = mysqli_real_escape_string($link, $_REQUEST['carrier_id']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
     ### Check carrier_id if its null or empty
 	if($carrier_id == null) { 
@@ -31,6 +34,8 @@
 			$fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
 			
 			if($countResult > 0) {
+				$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of carrier id: $carrier_id", $log_group);
+				
 				$apiresults = array("result" => "success", "data" => $fresults);
 			} else {
 				$apiresults = array("result" => "Error: Carrier doesn't exist.");

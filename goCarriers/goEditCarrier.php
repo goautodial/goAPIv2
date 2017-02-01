@@ -11,18 +11,20 @@
     include_once ("../goFunctions.php");
  
     ### POST or GET Variables
-    $carrier_id = $_REQUEST['carrier_id'];
-    $carrier_name = $_REQUEST['carrier_name'];
-    $carrier_description = $_REQUEST['carrier_description'];
-    $protocol = $_REQUEST['protocol'];
-    $server_ip = $_REQUEST['server_ip'];
-    $registration_string = $_REQUEST['registration_string'];
-    $account_entry = $_REQUEST['account_entry'];
-	$dialplan_entry = $_REQUEST['dialplan_entry'];
-    $globals_string = $_REQUEST['globals_string'];
-    $active = strtoupper($_REQUEST['active']);
-    $goUser = $_REQUEST['goUser'];
-    $ip_address = $_REQUEST['hostname'];
+    $carrier_id = mysqli_real_escape_string($link, $_REQUEST['carrier_id']);
+    $carrier_name = mysqli_real_escape_string($link, $_REQUEST['carrier_name']);
+    $carrier_description = mysqli_real_escape_string($link, $_REQUEST['carrier_description']);
+    $protocol = mysqli_real_escape_string($link, $_REQUEST['protocol']);
+    $server_ip = mysqli_real_escape_string($link, $_REQUEST['server_ip']);
+    $registration_string = mysqli_real_escape_string($link, $_REQUEST['registration_string']);
+    $account_entry = mysqli_real_escape_string($link, $_REQUEST['account_entry']);
+	$dialplan_entry = mysqli_real_escape_string($link, $_REQUEST['dialplan_entry']);
+    $globals_string = mysqli_real_escape_string($link, $_REQUEST['globals_string']);
+    $active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+    $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+    $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     //$values = $_REQUEST['item'];
    
     ### Default values 
@@ -106,9 +108,10 @@
 					$resultNew = mysqli_query($link, $queryNew);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Carrier ID $carrier_id','UPDATE vicidial_server_carriers SET carrier_id=$carrier_id, carrier_name=$carrier_name, carrier_description=$carrier_description, protocol=$protocol, server_ip=$server_ip,  registration_string=$registration_string, account_entry=$account_entry, global_string=$global_string, dialplan_entry=$dialplan_entry, active=$active  WHERE carrier_id=$carrier_id;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Carrier ID $carrier_id','UPDATE vicidial_server_carriers SET carrier_id=$carrier_id, carrier_name=$carrier_name, carrier_description=$carrier_description, protocol=$protocol, server_ip=$server_ip,  registration_string=$registration_string, account_entry=$account_entry, global_string=$global_string, dialplan_entry=$dialplan_entry, active=$active  WHERE carrier_id=$carrier_id;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated the carrier settings for $carrier_id", $log_group, $query);
 
 
 						$apiresults = array("result" => "success", "query" => $query);

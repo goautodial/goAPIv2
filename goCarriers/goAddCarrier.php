@@ -140,6 +140,9 @@
 
 		$goUser = $_REQUEST['goUser'];
 		$ip_address = $_REQUEST['hostname'];
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
@@ -286,9 +289,10 @@
 				$resultVSC = mysqli_query($link, $queryUpdate);
 
 	### Admin logs
-					$SQLdate = date("Y-m-d H:i:s");
-					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
-					$rsltvLog = mysqli_query($linkgo, $queryLog);
+					//$SQLdate = date("Y-m-d H:i:s");
+					//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
+					//$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Carrier: $carrier_id", $log_group, $queryVSC);
 
 					$apiresults = array("result" => "success", "data" => $queryUpdate);
 				}else{

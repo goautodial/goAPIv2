@@ -13,6 +13,8 @@
 	### POST or GET Variables
 	$goUser 		= $_REQUEST['goUser'];
 	$ip_address 		= $_REQUEST['hostname'];
+	$log_user			= $_REQUEST['log_user'];
+	$log_group			= $_REQUEST['log_group'];
 	$campaign_id 		= $_REQUEST['campaign_id'];
 	$campaign_name 		= $_REQUEST['campaign_name'];
 	$campaign_desc 		= $_REQUEST['campaign_desc'];
@@ -226,24 +228,25 @@
 					}
 					### Admin logs
 					$SQLdate = date("Y-m-d H:i:s");
-					$queryLog = "INSERT INTO go_action_logs (
-									user,
-									ip_address,
-									event_date,
-									action,
-									details,
-									db_query
-								) values(
-									'$goUser',
-									'$ip_address',
-									'$SQLdate','MODIFY',
-									'MODIFY NEW CAMPAIGN $campaign_id',
-									'UPDATE vicidial_campaigns SET campaign_name=$uCampaignName,
-									dial_method=$uDialMethod,
-									active=$uActive
-									WHERE campaign_id=$dataCampID LIMIT 1;'
-								)";
-					$rsltvLog = mysqli_query($linkgo, $queryLog);
+					//$queryLog = "INSERT INTO go_action_logs (
+					//				user,
+					//				ip_address,
+					//				event_date,
+					//				action,
+					//				details,
+					//				db_query
+					//			) values(
+					//				'$goUser',
+					//				'$ip_address',
+					//				'$SQLdate','MODIFY',
+					//				'MODIFY NEW CAMPAIGN $campaign_id',
+					//				'UPDATE vicidial_campaigns SET campaign_name=$uCampaignName,
+					//				dial_method=$uDialMethod,
+					//				active=$uActive
+					//				WHERE campaign_id=$dataCampID LIMIT 1;'
+					//			)";
+					//$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated campaign settings for $campaign_id", $log_group, $updateQuery);
 					
 					if($force_reset_hopper == "Y"){
 						$queryDelete = "DELETE from vicidial_hopper where campaign_id='$campaign_id' and status IN('READY','QUEUE','DONE');";
