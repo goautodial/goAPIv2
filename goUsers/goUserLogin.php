@@ -7,7 +7,7 @@
     #### Written by: Noel Umandap                      ####
     #### License: AGPLv2                               ####
     #######################################################
-    //include_once ("../goFunctions.php");
+    include_once ("../goFunctions.php");
     
     ### POST or GET Variables
 	$user_name = $_REQUEST['user_name'];
@@ -78,7 +78,7 @@
 			$dataAvatar = (mysqli_num_rows($rslti) > 0) ? "./php/ViewImage.php?user_id=$dataUserId" : "";
 		
 			$SQLdate = date("Y-m-d H:i:s");
-			$log_id = log_action('LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
+			$log_id = log_action($linkgo, 'LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
 			//$logQuery = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,user_group) values('$dataUser','$ip_address','$SQLdate','LOGIN','User $dataUser logged-in','$dataUserGroup');";
 			//mysqli_query($linkgo, $logQuery);
 			
