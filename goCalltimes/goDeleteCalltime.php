@@ -14,9 +14,9 @@
         //$call_time_id = mysqli_real_escape_string($_REQUEST['call_time_id']);
         $call_time_id = $_REQUEST['call_time_id'];
         $call_time_id = mysqli_real_escape_string($link, $call_time_id);
-	$ip_address = mysqli_real_escape_string($_REQUEST['log_ip']);
-	$log_user = mysqli_real_escape_string($_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($call_time_id == null) { 
