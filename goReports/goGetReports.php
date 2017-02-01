@@ -10,7 +10,7 @@
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);*/
-ini_set('memory_limit', -1);
+ini_set('memory_limit', '2048M');
 
     include_once("../goFunctions.php");
 	include_once("goReportsFunctions.php");	
@@ -174,12 +174,14 @@ ini_set('memory_limit', -1);
 		if($custom_fields == "Y")	{
 		    for($i = 0 ; $i < count($array_list); $i++){
 				$list_id = $array_list[$i];
-				$query_CF_list = mysqli_query($link, "SELECT field_label FROM vicidial_lists_fields WHERE list_id ='$list_id';");
+				$query_CF_list = mysqli_query($link, "SELECT * FROM custom_$list_id;");
 				if($query_CF_list){
-					while($field_list = mysqli_fetch_array($query_CF_list)){
-						$exec_query_CF_list = $field_list["field_label"];
-						$active_list_fields[] = $exec_query_CF_list;
-						array_push($csv_header, $exec_query_CF_list);
+					while ($field_list=mysqli_fetch_field($query_CF_list)){
+						$exec_query_CF_list = $field_list->name;
+						if($exec_query_CF_list != "lead_id"){
+							$active_list_fields[] = $exec_query_CF_list;
+							array_push($csv_header, $exec_query_CF_list);
+						}
 					}
 					$active_list_fields[] = "|";
 				}
@@ -189,6 +191,7 @@ ini_set('memory_limit', -1);
 	//OUTPUT DATA ROW//
 		while($row = mysqli_fetch_row($result)) {
 			$lead_id = $row[35];
+			
 			if($per_call_notes == "Y"){
 				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
 				$notes_ct = mysqli_num_rows($query_callnotes);
@@ -208,6 +211,30 @@ ini_set('memory_limit', -1);
 					$active_list_fields = implode(",",$active_list_fields);
 					$active_list_fields = trim($active_list_fields, "|,");
 					$active_list_fields = explode("|,", $active_list_fields);
+					$fields = implode(",",$active_list_fields);
+					$fields_array = explode(",", $fields);
+					//$queries[] = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;";
+					$query_CF = mysqli_query($link, "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;");
+					if($query_CF){
+						$fetch_CF = mysqli_fetch_array($query_CF);
+						//while($fetch_CF = mysqli_fetch_array($query_CF)){
+						for($x=0;$x < count($fields_array);$x++){
+							$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$fields_array[$x]]);
+						}
+					}else{
+						for($x=0;$x < count($fields_array);$x++){
+							$fetch_row[] =  '';
+						}
+					}
+					
+					
+					for($a=0;$a < count($fetch_row);$a++){
+						array_push($row, $fetch_row[$a]);
+					}
+					
+					unset($fetch_row);
+					unset($fetch_CF);
+					/*
 					$x = 0;
 					while($x < count($active_list_fields)){
 						$field = $active_list_fields[$x];
@@ -229,7 +256,7 @@ ini_set('memory_limit', -1);
 						
 						$x++;
 					}
-					
+					*/
 					/*for($x=0;$x < count($active_list_fields);$x++){
 						$list_field = $active_list_fields[$x];
 						$query_CF = mysqli_query($link, "SELECT $list_field FROM $list_id WHERE lead_id ='$lead_id';");
@@ -250,7 +277,7 @@ ini_set('memory_limit', -1);
 			$csv_row[] = $row;
 		}
 		
-		$return = array("query" => $active_list_fields, "header" => $csv_header, "rows" => $csv_row);
+		$return = array("query" => $active_list_fields, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
 		
 		return $return;
 		
