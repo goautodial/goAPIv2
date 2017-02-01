@@ -46,6 +46,9 @@
 		$moh_context = $_REQUEST['moh_context'];
 		$onhold_prompt_filename = $_REQUEST['onhold_prompt_filename'];
 		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		
 	//$values = $_REQUEST['items'];
  //group_id, group_name, group_color, active, web_form_address, next_agent_call, fronter_display, ingroup_script, queue_priority
 
@@ -122,9 +125,10 @@
 
 				
 																								### Admin logs
-																										$SQLdate = date("Y-m-d H:i:s");
-																										$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY IN_GROUP $group_id','UPDATE vicidial_inbound_groups SET group_id=$group_id, group_name=$group_name, group_color=$group_color, active=$active, web_form_address=$web_form_address, next_agent_call=$next_agent_call, fronter_display=$fronter_display, ingroup_script=$ingroup_script, queue_priority=$queue_priority WHERE group_id=$groupid_data;');";
-																								$rsltvLog = mysqli_query($linkgo, $queryLog);
+																								//		$SQLdate = date("Y-m-d H:i:s");
+																								//		$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY IN_GROUP $group_id','UPDATE vicidial_inbound_groups SET group_id=$group_id, group_name=$group_name, group_color=$group_color, active=$active, web_form_address=$web_form_address, next_agent_call=$next_agent_call, fronter_display=$fronter_display, ingroup_script=$ingroup_script, queue_priority=$queue_priority WHERE group_id=$groupid_data;');";
+																								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+																								$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Inbound Group $group_id", $log_group, $query);
 		
 																								if($resultQuery){
 																										$apiresults = array("result" => "success");

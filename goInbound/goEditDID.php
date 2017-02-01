@@ -19,6 +19,9 @@
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
 		$filter_clean_cid_number = mysqli_real_escape_string($link, $_REQUEST['filter_clean_cid_number']);
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
         ### Agent
         $user = $_REQUEST['user'];
@@ -172,9 +175,10 @@
                                 $resultQuery = mysqli_query($link, $query);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified DID ID $did_id','UPDATE vicidial_inbound_dids SET did_id=$did_id, did_active=$active, did_pattern=$did_pattern, did_route=$did_route, extension=$extension, user_route_settings_ingroup=$user_route_settings_ingroup WHERE did_id=$did_id;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified DID ID $did_id','UPDATE vicidial_inbound_dids SET did_id=$did_id, did_active=$active, did_pattern=$did_pattern, did_route=$did_route, extension=$extension, user_route_settings_ingroup=$user_route_settings_ingroup WHERE did_id=$did_id;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+								$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified DID ID $did_id", $log_group, $query);
 
 
                                 $apiresults = array("result" => "success");

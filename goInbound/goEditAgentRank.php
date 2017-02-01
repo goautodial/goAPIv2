@@ -14,6 +14,10 @@
 	$goItemRank	= $_REQUEST['itemrank'];
 	$goidIDgroup 	= $_REQUEST['idgroup'];
 	
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	
 	if($goidIDgroup == null ) {
 		$apiresults = array(  "result" => "Error: Set a value for group_id");
 	} else {
@@ -98,6 +102,8 @@
 					//echo "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
 					//$query_log .= "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';\n";
 				}
+				
+				$log_id = log_action($linkgo, "MODIFY", $log_user, $ip_address, "Modified Agent Rank(s) on Group $group_id", $log_group);
 				$apiresults = array("result" => "success");
 		}
 	}

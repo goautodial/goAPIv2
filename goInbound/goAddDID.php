@@ -11,6 +11,9 @@
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
         $record_call = "N"; //$_REQUEST['record_call'];
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 	### Agent
 		$user = $_REQUEST['user'];
@@ -156,7 +159,7 @@
 								$queryAgentResult = mysqli_query($link, $queryAgent);
 						
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup) values('0000', 'Test', 'AGENT', 'N', 'ADMIN', '', 'VOICEMAIL', 'AGENTDIRECT');
-						
+							$log_query = $queryAgent;
 						}
 						
 						if($did_route == "PHONE"){
@@ -167,6 +170,7 @@
 								$queryPhoneResult = mysqli_query($link, $queryPhone);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, phone, server_ip) values('00000', 'Sample', 'PHONE', 'N', 'ADMIN', '', '');
 						
+							$log_query = $queryPhone;
 						}
 						
 							
@@ -177,6 +181,7 @@
 										$queryCMResult = mysqli_query($link, $queryCallmenu);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, menu_id) values('000000', 'test call menu', 'CALLMENU', 'N', 'ADMIN', '0000');
 						
+							$log_query = $queryCallmenu;
 						}
 						
 						
@@ -187,6 +192,7 @@
 										$queryVMResult = mysqli_query($link, $queryVM);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, voicemail_ext) values('0000000', 'vm', 'VOICEMAIL', 'N', 'ADMIN', '0000000');
 						
+							$log_query = $queryVM;
 						}
 						
 						
@@ -195,6 +201,8 @@
 												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$extension', '$exten_context');";
 										$queryExtenResult = mysqli_query($link, $queryExten);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context) values('000000000', 'ce', 'EXTEN', 'N', 'ADMIN', '9998811112', 'default');
+						
+							$log_query = $queryExten;
 						}
 						
 						if($did_route == "IN_GROUP"){
@@ -203,6 +211,8 @@
 														values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group','$group_id');";
 										$queryIGResult = mysqli_query($link, $queryIG);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context) values('000000000', 'ce', 'EXTEN', 'N', 'ADMIN', '9998811112', 'default');
+						
+							$log_query = $queryIG;
 						}
 						
 						$queryCheck = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
@@ -212,9 +222,10 @@
 								if ($result > 0) {
 
 						### Admin logs
-								$SQLdate = date("Y-m-d H:i:s");
-								$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New DID $did_pattern','INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_active, did_route, user_group, user,user_unavailable_action,group_id,phone, server_ip,voicemail_ext,record_call) VALUES ($did_pattern, $did_description, $did_active, $did_route, $user_group, $user,$user_unavailable_action,$group_id,$phone, $server_ip,$voicemail_ext,$record_call)');";
-								$rsltvLog = mysqli_query($linkgo, $queryLog);
+								//$SQLdate = date("Y-m-d H:i:s");
+								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New DID $did_pattern','INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_active, did_route, user_group, user,user_unavailable_action,group_id,phone, server_ip,voicemail_ext,record_call) VALUES ($did_pattern, $did_description, $did_active, $did_route, $user_group, $user,$user_unavailable_action,$group_id,$phone, $server_ip,$voicemail_ext,$record_call)');";
+								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+								$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New DID $did_pattern", $log_group, $log_query);
 				
 								$apiresults = array("result" => "success");
 						

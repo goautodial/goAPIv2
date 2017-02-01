@@ -26,7 +26,10 @@
     $tracking_group = $_REQUEST['tracking_group'];
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
-		
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	
     $items = $_REQUEST['items'];
 	$exploded_items = explode("|", $items);
 	$filtered_items = array_filter($exploded_items);
@@ -149,9 +152,10 @@
 				$resultVSC = mysqli_query($link, $queryUpdateAsterisk);
 				
 		### Admin logs
-				  $SQLdate = date("Y-m-d H:i:s");
-				  $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New IVR $menu_id','INSERT INTO  vicidial_call_menu SET (menu_name, menu_id, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, tracking_group, user_group) VALUES ($menu_name, $menu_id, $menu_prompt, $menu_timeout, $menu_timeout_prompt, $menu_invalid_prompt, $menu_repeat, $menu_time_check, $call_time_id, $track_in_vdac, $tracking_group, $user_group);');";
-				  $rsltvLog = mysqli_query($linkgo, $queryLog);
+				  //$SQLdate = date("Y-m-d H:i:s");
+				  //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New IVR $menu_id','INSERT INTO  vicidial_call_menu SET (menu_name, menu_id, menu_prompt, menu_timeout, menu_timeout_prompt, menu_invalid_prompt, menu_repeat, menu_time_check, call_time_id, track_in_vdac, tracking_group, user_group) VALUES ($menu_name, $menu_id, $menu_prompt, $menu_timeout, $menu_timeout_prompt, $menu_invalid_prompt, $menu_repeat, $menu_time_check, $call_time_id, $track_in_vdac, $tracking_group, $user_group);');";
+				  //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				  $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New IVR $menu_id", $log_group, $queryAddIVR);
 				  
 				  $apiresults = array("result" => "success", "query" => $queryAddIVR);
 				

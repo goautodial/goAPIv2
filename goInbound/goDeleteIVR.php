@@ -13,6 +13,9 @@
     $menu_id = $_REQUEST['menu_id'];
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
 	if($menu_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for Menu ID."); 
@@ -43,9 +46,10 @@
 				//echo $deleteQuery;
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Call Menu ID $dataMenuID','DELETE from vicidial_call_menu where menu_id=$dataMenuID limit 1;DELETE from vicidial_call_menu_options where menu_id=$dataMenuID;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Call Menu ID $dataMenuID','DELETE from vicidial_call_menu where menu_id=$dataMenuID limit 1;DELETE from vicidial_call_menu_options where menu_id=$dataMenuID;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Call Menu ID $dataMenuID", $log_group, $deleteQueryA);
 
 
 				$apiresults = array("result" => "success");

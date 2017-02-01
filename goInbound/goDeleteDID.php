@@ -13,6 +13,9 @@
     $did_id = $_REQUEST['did_id'];
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
 	if($did_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for DID ID."); 
@@ -40,9 +43,10 @@
    				$deleteResult = mysqli_query($link, $deleteQuery);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted DID ID $dataDIDID','DELETE from vicidial_inbound_dids where did_id=$dataDIDID limit 1;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted DID ID $dataDIDID','DELETE from vicidial_inbound_dids where did_id=$dataDIDID limit 1;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted DID ID $dataDIDID", $log_group, $deleteQuery);
 
 				//echo $deleteQuery;
 				$apiresults = array("result" => "success");

@@ -31,6 +31,9 @@
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
 	//$values = $_REQUEST['items'];
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 
     ### Default values 
@@ -126,9 +129,10 @@
 																										if ($countAdd1 > 0 && $countAdd > 0) {
 														
 																												### Admin logs
-																												$SQLdate = date("Y-m-d H:i:s");
-																												$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New In-group $group_id','INSERT INTO vicidial_inbound_groups (group_id, group_name, group_color, active, web_form_address, voicemail_ext, next_agent_call, fronter_display, ingroup_script, get_call_launch, web_form_address_two, start_call_url,  dispo_call_url, add_lead_url, uniqueid_status_prefix, call_time_id, user_group) VALUES ($group_id, $group_name, $group_color, $active, $web_form_address, $voicemail_ext, $next_agent_call, $fronter_display, $ingroup_script, $get_call_launch, $web_form_address_two, $start_call_url,  $dispo_call_url, $add_lead_url, $uniqueid_status_prefix, $call_time_id, $user_group)');";
-																												$rsltvLog = mysqli_query($linkgo, $queryLog);
+																												//$SQLdate = date("Y-m-d H:i:s");
+																												//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New In-group $group_id','INSERT INTO vicidial_inbound_groups (group_id, group_name, group_color, active, web_form_address, voicemail_ext, next_agent_call, fronter_display, ingroup_script, get_call_launch, web_form_address_two, start_call_url,  dispo_call_url, add_lead_url, uniqueid_status_prefix, call_time_id, user_group) VALUES ($group_id, $group_name, $group_color, $active, $web_form_address, $voicemail_ext, $next_agent_call, $fronter_display, $ingroup_script, $get_call_launch, $web_form_address_two, $start_call_url,  $dispo_call_url, $add_lead_url, $uniqueid_status_prefix, $call_time_id, $user_group)');";
+																												//$rsltvLog = mysqli_query($linkgo, $queryLog);
+																												$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Inbound Group $group_id", $log_group, $stmtInsert);
 														
 																												$apiresults = array("result" => "success");
 																										} else {

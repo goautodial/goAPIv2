@@ -13,6 +13,9 @@
     $group_id = $_REQUEST['group_id'];
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
 	if($group_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for Group ID."); 
@@ -48,9 +51,10 @@
 				//echo $deleteResultA.$deleteResultA.$deleteResultA.$deleteResultA;
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted  In-group $dataGroupID','DELETE from vicidial_inbound_groups where group_id=$dataGroupID and group_id NOT IN(AGENTDIRECT) limit 1;DELETE from vicidial_inbound_group_agents where group_id=$dataGroupID;DELETE from vicidial_live_inbound_agents where group_id=$dataGroupID;DELETE from vicidial_campaign_stats where campaign_id=$dataGroupID;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted  In-group $dataGroupID','DELETE from vicidial_inbound_groups where group_id=$dataGroupID and group_id NOT IN(AGENTDIRECT) limit 1;DELETE from vicidial_inbound_group_agents where group_id=$dataGroupID;DELETE from vicidial_live_inbound_agents where group_id=$dataGroupID;DELETE from vicidial_campaign_stats where campaign_id=$dataGroupID;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Inbound Group $dataGroupID", $log_group, $deleteQueryA);
 
 
 

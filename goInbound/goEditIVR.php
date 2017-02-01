@@ -28,6 +28,9 @@
 		$goUser = $_REQUEST['goUser'];
 		$ip_address = $_REQUEST['hostname'];
 		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		
 		$items = $_REQUEST['items'];
 		$exploded_items = explode("|", $items);
 		$filtered_items = array_filter($exploded_items);
@@ -119,9 +122,10 @@
 											$apiresults = array("result" => "success");
 											
 											### Admin logs
-												$SQLdate = date("Y-m-d H:i:s");
-												$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Call Nenu ID $menu_id','UPDATE vicidial_call_menu SET menu_name=$menu_name,  menu_prompt=$menu_prompt,  menu_timeout=$menu_timeout,  menu_timeout_prompt=$menu_timeout_prompt,  menu_invalid_prompt=$menu_invalid_prompt,  menu_repeat=$menu_repeat,  menu_time_check=$menu_time_check,  call_time_id=$call_time_id,  track_in_vdac=$track_in_vdac,  tracking_group=$tracking_group,  custom_dialplan_entry=$custom_dialplan_entry WHERE menu_id=$callmenu_data;')";
-												$rsltvLog = mysqli_query($linkgo, $queryLog);
+												//$SQLdate = date("Y-m-d H:i:s");
+												//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Call Nenu ID $menu_id','UPDATE vicidial_call_menu SET menu_name=$menu_name,  menu_prompt=$menu_prompt,  menu_timeout=$menu_timeout,  menu_timeout_prompt=$menu_timeout_prompt,  menu_invalid_prompt=$menu_invalid_prompt,  menu_repeat=$menu_repeat,  menu_time_check=$menu_time_check,  call_time_id=$call_time_id,  track_in_vdac=$track_in_vdac,  tracking_group=$tracking_group,  custom_dialplan_entry=$custom_dialplan_entry WHERE menu_id=$callmenu_data;')";
+												//$rsltvLog = mysqli_query($linkgo, $queryLog);
+											$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Call Menu ID $menu_id", $log_group, $query);
 								} else {
 											$apiresults = array("result" => "Error: Failed to update");
 								}
