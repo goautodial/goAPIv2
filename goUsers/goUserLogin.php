@@ -100,7 +100,7 @@
 			);
 		}
 	} else {
-		$query = mysqli_query("SELECT user_group FROM vicidial_users WHERE user='$user';");
+		$query = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user='$user';");
 		$rslt = mysqli_fetch_array($query, MYSQLI_ASSOC);
 		$thisGroup = (strlen($rslt['user_group']) > 0) ? $rslt['user_group'] : "";
 		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisGroup);
