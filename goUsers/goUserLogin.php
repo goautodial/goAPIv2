@@ -77,8 +77,7 @@
 			$rslti = mysqli_query($linkgo, "SELECT * FROM go_avatars WHERE user_id='$dataUserId';");
 			$dataAvatar = (mysqli_num_rows($rslti) > 0) ? "./php/ViewImage.php?user_id=$dataUserId" : "";
 		
-			$SQLdate = date("Y-m-d H:i:s");
-			$log_id = log_action($linkgo, 'LOGIN', $dataUser, $ip_address, $SQLdate, "User $dataUser logged-in", $dataUserGroup);
+			$log_id = log_action($linkgo, 'LOGIN', $dataUser, $ip_address, "User $dataUser logged-in", $dataUserGroup);
 			//$logQuery = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,user_group) values('$dataUser','$ip_address','$SQLdate','LOGIN','User $dataUser logged-in','$dataUserGroup');";
 			//mysqli_query($linkgo, $logQuery);
 			
@@ -101,6 +100,8 @@
 			);
 		}
 	} else {
+		$thisUserGroup = go_get_groupid($user);
+		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisUserGroup);
 		$apiresults = array("result" => "Error: Invalid login credentials please try again.");
 	}
 	
