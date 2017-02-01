@@ -22,10 +22,13 @@ if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP'
     else if (isset($_POST['goServerIP'])) { $server_ip = $astDB->escape($_POST['goServerIP']); }
 if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
     else if (isset($_POST['goStage'])) { $stage = $astDB->escape($_POST['goStage']); }
+if (isset($_GET['goUserIP'])) { $ip_address = $astDB->escape($_GET['goUserIP']); }
+    else if (isset($_POST['goUserIP'])) { $ip_address = $astDB->escape($_POST['goUserIP']); }
 
 $is_logged_in = check_agent_login($astDB, $agent);
 $NOW_TIME = date("Y-m-d H:i:s");
 $startMS = microtime();
+$action = $stage;
 
 if ($is_logged_in) {
 	if(strlen($source) < 2) {
@@ -108,7 +111,7 @@ if ($is_logged_in) {
     
                         $PADuser = sprintf("%08s", $goUser);
                         while (strlen($PADuser) > 8) {$PADuser = substr("$PADuser", 0, -1);}
-                        $BMquery = "BM$StarTtime$PADuser";
+                        $BMquery = "BM$StarTtimE$PADuser";
                         
                         $rslt = $astDB->getOne('system_settings', 'agent_whisper_enabled');
     
@@ -203,7 +206,7 @@ if ($is_logged_in) {
             }
             
             if ($hasError < 1) {
-				log_action($type, $goUser, $ip_address, "{$goUser} barged in to {$agent}'s call", $user_group);
+				$log_id = log_action($linkgo, $action, $goUser, $ip_address, "{$goUser} barged in to {$agent}'s call", $user_group);
 				
                 $APIResult = array( "result" => "success", "message" => $message, "data" => $data );
             }

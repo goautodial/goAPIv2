@@ -14,6 +14,9 @@
 	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
 	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
 	$agent_filter = mysqli_real_escape_string($link, $_REQUEST['agent_filter']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
     if($limit < 1){ $limit = 20; } else { $limit = 0; }
  
@@ -105,6 +108,8 @@ if(!empty($agent_filter)){
 	}
 
 	//$query3 = "SELECT a.phone_number FROM vicidial_list a, recording_log b WHERE a.lead_id=b.lead_id AND ";
+	$SQLdate = date("Y-m-d H:i:s");
+	$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, $SQLdate, "View the Call Redording List", $log_group);
 
    		$apiresults = array(
 			"result" => "success",
