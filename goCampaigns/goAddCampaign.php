@@ -21,6 +21,8 @@
 	### POST or GET Variables
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
+		  $log_user = $_REQUEST['log_user'];
+		  $log_group = $_REQUEST['log_group'];
 ### Inbound Campaign
 	$campaign_id 	= $_REQUEST['campaign_id'];
 	$campaign_name 	= $_REQUEST['campaign_name'];
@@ -231,8 +233,9 @@
 							if($countResult > 0) {
 							### Admin logs
 								$SQLdate = date("Y-m-d H:i:s");
-								$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','')";
-								$rsltvLog = mysqli_query($linkgo, $queryLog);
+								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','')";
+								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+								$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Outbound Campaign: $campaign_id", $log_group, $queryAdd);
 								
 								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
@@ -418,8 +421,9 @@
 		
 						 ### Admin logs
 							$SQLdate = date("Y-m-d H:i:s");
-							$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
-							$rsltvLog = mysqli_query($linkgo, $queryLog);
+							//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
+							//$rsltvLog = mysqli_query($linkgo, $queryLog);
+							$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $queryAddInbound);
 							
 							$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 						    $rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
@@ -653,8 +657,9 @@
 
                 			if($countResult > 0) {
                                     $SQLdate = date("Y-m-d H:i:s");
-                                    $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
-                                    $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                    //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
+                                    //$rsltvLog = mysqli_query($linkgo, $queryLog);
+												$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Blended Campaign: $campaign_id", $log_group, $queryInsert);
 										
 									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 								    $rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
@@ -815,8 +820,9 @@
 			                if($countResult > 0) {
 				        		### Admin logs
 	                            $SQLdate = date("Y-m-d H:i:s");
-	                            $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
-	                            $rsltvLog = mysqli_query($linkgo, $queryLog);
+	                            //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','');";
+	                            //$rsltvLog = mysqli_query($linkgo, $queryLog);
+										 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Survey Campaign: $campaign_id", $log_group, $queryInsert);
 
 								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
@@ -1195,8 +1201,9 @@
 							### Admin logs
 								$campType = $dataGOCampaign['campaign_type'];
 								$SQLdate = date("Y-m-d H:i:s");
-								$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','')";
-								$rsltvLog = mysqli_query($linkgo, $queryLog);
+								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Campaign $campaign_id','')";
+								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+								$log_id = log_action($linkgo, 'COPY', $log_user, $ip_address, "Copied campaign settings from $copy_from_campaign to $campaign_id", $log_group, $queryAddCopy);
 								
 								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campType')";
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
