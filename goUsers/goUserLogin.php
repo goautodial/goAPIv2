@@ -7,7 +7,7 @@
     #### Written by: Noel Umandap                      ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("../goFunctions.php");
+    //include_once ("../goFunctions.php");
     
     ### POST or GET Variables
 	$user_name = $_REQUEST['user_name'];
