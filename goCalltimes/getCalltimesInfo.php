@@ -29,7 +29,7 @@
 		$rsltv = mysqli_query($link,$query);
 		$exist = mysqli_num_rows($rsltv);
 		if($exist >= 1){
-			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the Calltimes info of {$call_time_id}", $log_group);
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the info of calltime id: {$call_time_id}", $log_group);
 			
             $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
 			$apiresults = array_merge(array("result" => "success"), $fresults);
