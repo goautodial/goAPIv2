@@ -27,8 +27,8 @@ $insertData = array(
     'ip_address' => $ip_address,
     'event_date' => $NOW_TIME,
     'action' => $action,
-    'details' => $details,
-    'db_query' => $db_query,
+    'details' => "$details",
+    'db_query' => "$db_query",
     'user_group' => $user_group
 );
 $goDB->insert('go_action_logs', $insertData);
