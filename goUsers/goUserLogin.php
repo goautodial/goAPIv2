@@ -102,7 +102,7 @@
 	} else {
 		$thisUserGroup = go_get_groupid($user);
 		$log_id = log_action($linkgo, 'LOGIN', $user, $ip_address, "User $user failed to logged-in", $thisUserGroup);
-		$apiresults = array("result" => "Error: Invalid login credentials please try again.");
+		$apiresults = array("result" => "error", "message" => "Error: Invalid login credentials please try again.");
 	}
 	
 ?>
