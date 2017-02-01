@@ -1325,6 +1325,8 @@
 	function log_action($link, $action, $user, $ip, $details, $user_group, $db_query = '') {
 		$action = strtoupper($action);
 		$event_date = date("Y-m-d H:i:s");
+		$details = mysqli_real_escape_string($link, $details);
+		$db_query = mysqli_real_escape_string($link, $db_query);
 		$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
 		$result = mysqli_query($link, $logSQL);
 		
