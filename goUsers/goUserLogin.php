@@ -105,7 +105,7 @@
 		$thisGroup = (strlen($rslt['user_group']) > 0) ? $rslt['user_group'] : "";
 		$log_id = log_action($linkgo, 'LOGIN', $user_name, $ip_address, "User $user_name failed to logged-in", $thisGroup);
 		
-		$apiresults = array("result" => "error", "message" => "Error: Invalid login credentials please try again.");
+		$apiresults = array("result" => "error", "message" => "Invalid login credentials please try again.");
 	}
 	
 ?>
