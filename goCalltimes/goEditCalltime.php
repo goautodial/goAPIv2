@@ -162,7 +162,7 @@
                     //$SQLdate = date("Y-m-d H:i:s");
                     //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','UPDATE','Updated Call Time $call_time_id','$newQuery');";
                     //$rsltvLog = mysqli_query($queryLog, $linkgo);
-					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated Call Time $call_time_id", $log_group, $newQuery);
+					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated Call Time ID: $call_time_id", $log_group, $newQuery);
 
                     if($rsltvx == false){
                         $apiresults = array("result" => "Error: Edit failed, check your details");

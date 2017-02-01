@@ -10,7 +10,10 @@
     include_once("../goFunctions.php");
     
     ### POST or GET Variables
-    $campaign_id = $_REQUEST['campaign_id'];
+    $campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
     ### Check campaign_id if its null or empty
 	if($campaign_id == null) { 
@@ -52,6 +55,8 @@
 				$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type, "custom_fields_launch" => $custom_fields_launch, 'custom_fields_list_id' => $custom_fields_list_id, 'url_tab_first_title' => $url_tab_first_title, 'url_tab_first_url' => $url_tab_first_url, 'url_tab_second_title' => $url_tab_second_title, 'url_tab_second_url' => $url_tab_second_url );
 				//$apiresults = array("result" => "success", "data" => $fresults);
 			}
+			
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
 		} else {
 			$apiresults = array("result" => "Error: Campaign doesn't exist.", "COUNT:" => $countResult);
 		}

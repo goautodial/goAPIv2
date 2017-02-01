@@ -46,7 +46,7 @@
                                         //$SQLdate = date("Y-m-d H:i:s");
                                         //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Calltime ID $call_time_id','DELETE FROM vicidial_call_times WHERE call_time_id=$call_time_id;');";
                                         //$rsltvLog = mysqli_query($linkgo, $queryLog);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID $call_time_id", $log_group, $deleteQuery);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID: $call_time_id", $log_group, $deleteQuery);
 
 
 				$apiresults = array("result" => "success");

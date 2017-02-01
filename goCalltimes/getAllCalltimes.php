@@ -24,7 +24,7 @@
 	$query = "SELECT call_time_id,call_time_name,ct_default_start,ct_default_stop,user_group FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
 	$rsltv = mysqli_query($link,$query);
 	
-	$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the Calltimes List", $log_group);
+	//$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the Calltimes List", $log_group);
 	
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataCalltimeID[] = $fresults['call_time_id'];
