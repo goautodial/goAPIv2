@@ -11,13 +11,16 @@
     include_once ("../goFunctions.php");
  
 	### POST or GET Variables
-        $list_id = $_REQUEST['list_id'];
-        $list_name = $_REQUEST['list_name'];
-        $campaign_id = $_REQUEST['campaign_id'];
-        $active = $_REQUEST['active'];
-        $list_description = $_REQUEST['list_description'];
-	$ip_address = $_REQUEST['hostname'];
-	$goUser = $_REQUEST['goUser'];
+	$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+	$list_name = mysqli_real_escape_string($link, $_REQUEST['list_name']);
+	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+	$active = mysqli_real_escape_string($link, $_REQUEST['active']);
+	$list_description = mysqli_real_escape_string($link, $_REQUEST['list_description']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 
     ### Default values 
@@ -71,9 +74,10 @@
 						$addResult = mysqli_query($link, $addQuery);
 
 	###Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New List $list_id','INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description,list_changedate) values($list_id,$list_name,$campaign_id,$active,$list_description,$SQLdate);');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New List $list_id','INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description,list_changedate) values($list_id,$list_name,$campaign_id,$active,$list_description,$SQLdate);');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New List: $list_id", $log_group, $addQuery);
 
 						if($addResult == false){
 							$apiresults = array("result" => "Error: Failed to add");

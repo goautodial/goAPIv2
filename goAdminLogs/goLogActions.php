@@ -21,6 +21,16 @@ if (isset($_GET['user_group'])) { $user_group = $astDB->escape($_GET['user_group
 if (isset($_GET['db_query'])) { $db_query = $astDB->escape($_GET['db_query']); }
     else if (isset($_POST['db_query'])) { $db_query = $astDB->escape($_POST['db_query']); }
 
+if ($user === 'sess_expired') {
+    $goDB->where('ip_address', $ip_address);
+    $goDB->where('action', 'LOGIN');
+    $goDB->orderBy('event_date', 'desc');
+    $rslt = $goDB->getOne('go_action_logs', 'user, user_group');
+    
+    $user = $rslt['user'];
+    $user_group = $rslt['user_group'];
+    $details = "Session expired on user $user";
+}
 
 $insertData = array(
     'user' => $user,

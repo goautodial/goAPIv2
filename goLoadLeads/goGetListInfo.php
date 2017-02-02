@@ -10,7 +10,10 @@
     include_once ("../goFunctions.php");
     
     ### POST or GET Variables
-    $list_id = $_REQUEST['list_id'];
+    $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($list_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for List ID."); 
@@ -30,15 +33,17 @@
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-			        $dataListId[] =  $fresults['list_id'];
-			        $dataListName[] =  $fresults['list_name'];
-			        $dataActive[] =  $fresults['active'];
-			        $dataListLastcallDate[] =  $fresults['list_lastcalldate'];
-			        $dataTally[] =  $fresults['tally'];
-			        $dataCampaignId[] =  $fresults['campaign_id'];
+				$dataListId[] =  $fresults['list_id'];
+				$dataListName[] =  $fresults['list_name'];
+				$dataActive[] =  $fresults['active'];
+				$dataListLastcallDate[] =  $fresults['list_lastcalldate'];
+				$dataTally[] =  $fresults['tally'];
+				$dataCampaignId[] =  $fresults['campaign_id'];
 
-				        $apiresults = array( "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId);
+				$apiresults = array( "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId);
 			}
+			
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of List ID: $list_id", $log_group);
 		} else {
 			$apiresults = array("result" => "Error: List doesn't exist.");
 		}

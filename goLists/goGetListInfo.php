@@ -10,7 +10,10 @@
     include_once("../goFunctions.php");
     
     ### POST or GET Variables
-    $list_id = $_REQUEST['list_id'];
+    $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($list_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for List ID."); 
@@ -62,6 +65,8 @@
 					$dataxferconf_d_number[] = $fresults['xferconf_d_number'];
 					$dataxferconf_e_number[] = $fresults['xferconf_e_number'];
 			}
+			
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of List ID: $list_id", $log_group);
 			
 			$apiresults = array(
 				"result" => "success",
