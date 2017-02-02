@@ -765,7 +765,7 @@
                                                                                     VALUES('$campaign_id','$campaign_desc','','N','RATIO','NEW',
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
-                                                                                    '30','$routingExten','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
+                                                                                    '30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
                                                                                     'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','','$wavfile_name')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
