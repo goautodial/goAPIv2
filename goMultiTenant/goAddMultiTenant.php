@@ -24,6 +24,9 @@
         $ip_address = $_REQUEST['hostname'];
        // $values = $_REQUEST['items'];
        // $list_changedate = $_REQUEST['list_changedate'];
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 //tenant_id, tenant_name, admin, pass, active
     ### Default values 
@@ -98,8 +101,8 @@
                                 }
                                 $itemSQL = rtrim($itemSQL,', ');
                                 */
-                                $query = "INSERT INTO  go_multi_tenant SET tenant_id = '$tenant_id', tenant_name = '$tenant_name', admin = '$admin', pass = '$pass', active = '$active';";
-                                $resultQuery = mysqli_query($linkgo, $query);
+                                $queryTenant = "INSERT INTO  go_multi_tenant SET tenant_id = '$tenant_id', tenant_name = '$tenant_name', admin = '$admin', pass = '$pass', active = '$active';";
+                                $resultQuery = mysqli_query($linkgo, $queryTenant);
 
 
 
@@ -144,9 +147,10 @@
 
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Tenant $tenant_id','INSERT INTO vicidial_user_groups (tenant_id, tenant_name, tenant_admin, tenant_pass, group_template, active, access_call_times, access_carriers, access_phones, access_voicemails, agent_count, phone_count, tenant_agent_pass, protocol, server_ip) VALUES($tenant_id, $tenant_name, $tenant_admin, $tenant_pass, $group_template, $active, $access_call_times, $access_carriers, $access_phones, $access_voicemails, $agent_count, $phone_count, $tenant_agent_pass,$protocol, $server_ip);');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Tenant $tenant_id','INSERT INTO vicidial_user_groups (tenant_id, tenant_name, tenant_admin, tenant_pass, group_template, active, access_call_times, access_carriers, access_phones, access_voicemails, agent_count, phone_count, tenant_agent_pass, protocol, server_ip) VALUES($tenant_id, $tenant_name, $tenant_admin, $tenant_pass, $group_template, $active, $access_call_times, $access_carriers, $access_phones, $access_voicemails, $agent_count, $phone_count, $tenant_agent_pass,$protocol, $server_ip);');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Multi-Tenant Group: $tenant_id", $log_group, $queryTenant);
 
 
 			$apiresults = array("result" => "success");

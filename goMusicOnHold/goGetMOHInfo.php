@@ -11,6 +11,10 @@
     
     ### POST or GET Variables
     $moh_id = $_REQUEST['moh_id'];
+	
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check moh_id if its null or empty
 	if($moh_id == null) { 
@@ -38,6 +42,8 @@
                 		$dataUserGroup[] = $fresults['user_group'];
                 	$apiresults = array("result" => "success", "moh_id" => $dataModId, "moh_name" => $dataMohName, "active" => $dataActive, "random" => $dataRandom, "user_group" => $dataUserGroup);
 			}
+			
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of Music On-Hold: $moh_id", $log_group);
 		} else {
 			$apiresults = array("result" => "Error: MOH doesn't exist.");
 		}

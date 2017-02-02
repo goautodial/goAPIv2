@@ -26,6 +26,10 @@ ini_set('memory_limit', '2048M');
     $userGroup          = $_REQUEST['userGroup'];
 	$dispo_stats		= $_REQUEST['statuses'];
 	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	
 	$userGroup = get_group_id($userID, $link);
 	
 	if($pageTitle == "call_export_report"){
@@ -276,6 +280,11 @@ ini_set('memory_limit', '2048M');
 			}
 			$csv_row[] = $row;
 		}
+		
+		$campFilter = (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
+		$inbFilter  = (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
+		$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
+		$log_id = log_action($linkgo, 'DOWNLOAD', $log_user, $ip_address, "Exported Call Reports starting from $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 		
 		$return = array("query" => $active_list_fields, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
 		

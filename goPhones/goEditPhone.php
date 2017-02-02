@@ -26,6 +26,9 @@
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
    // $values =	$_REQUEST['item'];   
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Default values 
         $defActive = array("Y","N");
@@ -148,9 +151,10 @@
 
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Phone $extension','UPDATE phones SET extension=$extension, server_ip=$server_ip, pass=$pass, protocol=$protocol, dialplan_number=$dialplan_number, voicemail_id=$voicemail_id, status=$status, active=$active, fullname=$fullname, messages=$messages, old_messages=$old_messages, user_group=$user_group WHERE extension=$extension');";
-                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Phone $extension','UPDATE phones SET extension=$extension, server_ip=$server_ip, pass=$pass, protocol=$protocol, dialplan_number=$dialplan_number, voicemail_id=$voicemail_id, status=$status, active=$active, fullname=$fullname, messages=$messages, old_messages=$old_messages, user_group=$user_group WHERE extension=$extension');";
+                                        //$rsltvLog = mysqli_query($linkgo,$queryLog);
+					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Phone: $extension", $log_group, $query);
 
 
 

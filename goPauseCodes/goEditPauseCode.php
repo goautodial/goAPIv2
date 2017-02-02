@@ -16,6 +16,10 @@
         $pause_code_name = $_REQUEST['pause_code_name'];
         $billable = strtoupper($_REQUEST['billable']);
 	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	
     ### Default values 
 		$defBill = array('NO','YES','HALF');
 
@@ -57,9 +61,10 @@
 								$apiresults = array("result" => "success");
 		
 								 ### Admin logs
-								$SQLdate = date("Y-m-d H:i:s");
-								$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Pause Code: $pause_code','UPDATE vicidial_pause_codes SET pasue_code=$pause_code,  pause_code_name=$pause_code_name,  campaign_id=$camp,  billable=$billable WHERE pause_code=$pause_code');";
-								$rsltvLog = mysqli_query($linkgo, $queryLog);
+								//$SQLdate = date("Y-m-d H:i:s");
+								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Pause Code: $pause_code','UPDATE vicidial_pause_codes SET pasue_code=$pause_code,  pause_code_name=$pause_code_name,  campaign_id=$camp,  billable=$billable WHERE pause_code=$pause_code');";
+								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+								$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Pause Code $pause_code under Campaign ID $camp", $log_user, $queryVM);
 							}
 				
 											   

@@ -27,6 +27,9 @@
     $user_group = $_REQUEST['user_group'];
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
    //     $values = $_REQUEST['item'];
 //extension, server_ip, pass, protocol, dialplan_number, voicemail_id, status, active, fullname, messages, old_messages, user_group
   $defStatus = array('ACTIVE','SUSPENDED','CLOSED','PENDING,ADMIN');
@@ -125,10 +128,11 @@
 					$resultNew = mysqli_query($link,$queryNew);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query)
-														values('$goUser','$ip_address','$SQLdate','ADD','Added New Phone $extension','INSERT INTO phones (extension, server_ip, pass, protocol, dialplan_number, voicemail_id, status, active, fullname, messages, old_messages, user_group) VALUES ($extension, $server_ip, $pass, $protocol, $dialplan_number, $voicemail_id, $status, $active, $fullname, $messages, $old_messages, $user_group)');";
-                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+//                                        $SQLdate = date("Y-m-d H:i:s");
+//                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query)
+//														values('$goUser','$ip_address','$SQLdate','ADD','Added New Phone $extension','INSERT INTO phones (extension, server_ip, pass, protocol, dialplan_number, voicemail_id, status, active, fullname, messages, old_messages, user_group) VALUES ($extension, $server_ip, $pass, $protocol, $dialplan_number, $voicemail_id, $status, $active, $fullname, $messages, $old_messages, $user_group)');";
+//                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Phone: $extension", $log_user, $query);
 
 
 

@@ -15,11 +15,14 @@
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
         $script_text = mysqli_real_escape_string($link, $_REQUEST['script_text']);
-        $active = $_REQUEST['active'];
+        $active = mysqli_real_escape_string($link, $_REQUEST['active']);
         //$campaign_id = $_REQUEST['campaign_id'];
-		$user = $_REQUEST['user'];
-        $ip_address = $_REQUEST['hostname'];
-        $goUser = $_REQUEST['goUser'];
+		$user = mysqli_real_escape_string($link, $_REQUEST['user']);
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+        $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Default values 
     $defActive = array("Y","N");
@@ -67,6 +70,7 @@
 								if($rsltv == false){
 										$apiresults = array("result" => "Error: Add failed, check your details");
 								} else {
+										$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Script: $script_id", $log_group, $newQuery);
 										$apiresults = array("result" => "success");
 								}
 								

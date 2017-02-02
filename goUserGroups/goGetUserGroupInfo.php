@@ -12,6 +12,10 @@
 	
     ### POST or GET Variables
     $agent_id = $_REQUEST['agent_id'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($agent_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for AGENT ID."); 
@@ -38,6 +42,7 @@
 		
 		$data = array_merge($rsltv, $fetchGL);
 		
+		$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of User Group: $agent_id", $log_group);
 		//if(!empty($data)) {
             $apiresults = array("result" => "success", "data" => $data);
 		/*} else {

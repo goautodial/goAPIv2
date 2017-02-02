@@ -12,6 +12,9 @@
     ### POST or GET Variables
         $state_call_time_id = mysqli_real_escape_string($_REQUEST['state_call_time_id']);
         $ip_address = mysqli_real_escape_string($_REQUEST['hostname']);
+		
+        $log_user = mysqli_real_escape_string($_REQUEST['log_user']);
+        $log_group = mysqli_real_escape_string($_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($state_call_time_id == null) { 
@@ -41,9 +44,10 @@ DELETE FROM vicidial_state_call_times WHERE state_call_time_id
 */
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted State Call Time ID $state_call_time_id','DELETE FROM vicidial_state_call_times WHERE state_call_time_id=$state_call_time_id;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted State Call Time ID $state_call_time_id','DELETE FROM vicidial_state_call_times WHERE state_call_time_id=$state_call_time_id;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted State Call Time: $state_call_time_id", $log_group, $deleteQuery);
 
 
 				$apiresults = array("result" => "success");

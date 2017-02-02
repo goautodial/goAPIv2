@@ -15,6 +15,10 @@
     $user = $_REQUEST['user'];
     $filter = "default";
     $filter = $_REQUEST['filter'];
+    
+    $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
         
     ### Check user_id if its null or empty
     if($user_id == null && $user == null) { 
@@ -116,7 +120,9 @@
                 while($resultsCallerIDsFromVAC = mysqli_fetch_array($rsltvCallerIDsFromVAC, MYSQLI_ASSOC)){               
                     array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
                 }
-            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);  
+            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
+            
+            $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             
             $apiresults = array("result" => "success", "data" => $data);
             

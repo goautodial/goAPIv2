@@ -46,6 +46,9 @@
         $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
         $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
         $avatar = $_REQUEST['avatar'];
+			
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 		
     ### Default Values
@@ -250,10 +253,11 @@
 
 
 	### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=
-										,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
-                                        $rsltvLog = mysqli_query($link, $queryLog);
+//                                        $SQLdate = date("Y-m-d H:i:s");
+//                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=
+//										,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
+//                                        $rsltvLog = mysqli_query($link, $queryLog);
+				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified User: $user", $log_group, $queryUpdateUser);
 
 
 				if($resultQueryUser == false){

@@ -13,6 +13,9 @@
         $voicemail = mysqli_real_escape_string($link, $_REQUEST['voicemail_id']);
         $voicemail_id = mysqli_real_escape_string($link, $_REQUEST['voicemail_id']);
         $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($voicemail_id == null) { 
@@ -47,9 +50,10 @@
 				//echo $deleteQuery;
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Voicemail ID $dataVoicemailID','DELETE FROM vicidial_voicemails WHERE voicemail_id=$dataVoicemailID;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Voicemail ID $dataVoicemailID','DELETE FROM vicidial_voicemails WHERE voicemail_id=$dataVoicemailID;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Voicemail ID: $voicemail", $log_group, $deleteQuery);
 
 
 				$apiresults = array("result" => "success");

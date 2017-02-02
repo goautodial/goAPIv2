@@ -13,7 +13,10 @@
 	### POST or GET Variables
     /*$audiofiles = $_REQUEST['files']*/;
     $stage = $_REQUEST['stage'];
-						
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
 
 
     ### Default values 
@@ -50,9 +53,10 @@ $web_server_ip = getenv("SERVER_ADDR");
 						chmod("$WeBServeRRooT/$sounds_web_directory/$audiofile_name", 0766);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','UPLOAD','Uploaded a WAV file: $audiofile_name','');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','UPLOAD','Uploaded a WAV file: $audiofile_name','');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Uploaded New Voice File: $audiofile_name", $log_group);
 
                 $stmt = "SELECT server_id,server_ip,active,server_description FROM servers";
                 $servers = mysqli_query($link, $stmt);
@@ -77,8 +81,6 @@ $web_server_ip = getenv("SERVER_ADDR");
 						$apiresults = array("result" => "success");
 						$stmtUpdate = "UPDATE servers SET sounds_update='Y';";
 						$rsltUpdate = mysqli_query($link, $stmtUpdate);
-
-
 
                 } else {
                         //$data['uploadfail'] = "{$this->lang->line("go_file_type_wav")}";

@@ -24,6 +24,9 @@
 		$avatar = $_REQUEST['avatar'];
 	$goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Default values 
         $defActive = array("Y","N");
@@ -122,9 +125,10 @@
 		$resultQueryAddUserGo = mysqli_query($linkgo, $queryUserAddGo);
 
 	### Admin logs
-		$SQLdate = date("Y-m-d H:i:s");
-		$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New User $user','INSERT INTO vicidial_users (user,pass,full_name,phone_login,phone_pass,user_group,active) VALUES ($user,$pass,$full_name,$phone_login,$phone_pass,$user_group,$active)');";
-		$rsltvLog = mysqli_query($linkgo, $queryLog);
+		//$SQLdate = date("Y-m-d H:i:s");
+		//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New User $user','INSERT INTO vicidial_users (user,pass,full_name,phone_login,phone_pass,user_group,active) VALUES ($user,$pass,$full_name,$phone_login,$phone_pass,$user_group,$active)');";
+		//$rsltvLog = mysqli_query($linkgo, $queryLog);
+		$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $queryUserAdd);
 
 		$queryUserCheckAgain = "SELECT user  FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ulUser ORDER BY user ASC LIMIT 1;";
 //		$queryUserCheckAgain = "SELECT user  FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' AND user='agent093' ORDER BY user ASC LIMIT 1;";

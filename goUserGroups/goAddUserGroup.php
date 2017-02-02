@@ -17,6 +17,9 @@
 	//$values = $_REQUEST['items'];
         $group_level = $_REQUEST['group_level'];
 	$ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Error checking
 	if($user_group == null || $user_group == "") { 
@@ -95,9 +98,10 @@
                                 $rsltvGL = mysqli_query($linkgo, $queryGL);
 
 
-					$SQLdate = date("Y-m-d H:i:s");
-					$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New User Group $user_group','INSERT INTO vicidial_user_groups (user_group,group_name) VALUES ($user_group,$group_name)');";
-					$rsltvLog = mysqli_query($linkgo, $queryLog);
+					//$SQLdate = date("Y-m-d H:i:s");
+					//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New User Group $user_group','INSERT INTO vicidial_user_groups (user_group,group_name) VALUES ($user_group,$group_name)');";
+					//$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $query);
 					
                 				if($countCheck > 0) {
 							$apiresults = array("result" => "success");

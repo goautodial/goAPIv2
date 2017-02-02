@@ -21,7 +21,11 @@
 	$ranks = $_REQUEST['rank'];   
     ### Default values 
     $defActive = array("Y","N");
-    $defRandom = array("N","Y"); 
+    $defRandom = array("N","Y");
+	
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### ERROR CHECKING ...
       if($moh_id == null) { 
@@ -147,6 +151,8 @@
 					if($rsltv1 == false){
 						$apiresults = array("result" => "Error: Try updating Moh Again");
 					} else {
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Music On-Hold: $moh_id", $log_group, $queryMOH);
+						
 						$apiresults = array("result" => "success");
 					$affected_rows++;
                                         if ($affected_rows)

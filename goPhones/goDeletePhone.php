@@ -13,6 +13,9 @@
     $extension = $_REQUEST['extension'];
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check campaign_id if its null or empty
 	if($extension == null) { 
@@ -49,9 +52,10 @@
 				*/
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted New Phone $extension','DELETE FROM phones WHERE extension = $dataExtension;');";
-                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted New Phone $extension','DELETE FROM phones WHERE extension = $dataExtension;');";
+                                        //$rsltvLog = mysqli_query($linkgo,$queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Phone $extension", $log_group, $deleteQuery);
 
 				$apiresults = array("result" => "success");
 			} else {

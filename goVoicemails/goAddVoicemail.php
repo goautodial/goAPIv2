@@ -26,6 +26,9 @@
         $email = mysqli_real_escape_string($link, $email);
         $user_group = mysqli_real_escape_string($link, $user_group);
         $active = mysqli_real_escape_string($link, $active);
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
        
     ### Default values 
     $defActive = array("Y","N");
@@ -76,9 +79,10 @@
 
 
 	### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Voicemail: $voicemail_id", $log_group, $newQuery);
 
 				        if($rsltv == false){
 						$apiresults = array("result" => "Error: Add failed, check your details");

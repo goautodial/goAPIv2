@@ -23,6 +23,10 @@
 	$theList = $_REQUEST["goListId"];
 	$goDupcheck = $_REQUEST["goDupcheck"];
 	$goCountInsertedLeads = 0;
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
 
 	// path where your CSV file is located
 	define('CSV_PATH','/tmp/');
@@ -299,6 +303,8 @@
 		} else {
 				$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 		}
+		
+		$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
 		
 	}
 	

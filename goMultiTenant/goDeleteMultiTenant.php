@@ -13,6 +13,9 @@
     $tenant_id = $_REQUEST['tenant_id'];
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check tenant_id if its null or empty
 	if($tenant_id == null) { 
@@ -131,9 +134,10 @@
 		$query30Result = mysqli_query($linkgo, $query30);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Tenant $tenant_id, its admin and all user logins under it and also deleted the Campaign and List ID','');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Tenant $tenant_id, its admin and all user logins under it and also deleted the Campaign and List ID','');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Multi-Tenant: $dataTenantID", $log_group, $query29);
 
 
 

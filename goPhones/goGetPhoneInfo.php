@@ -11,6 +11,10 @@
     
     ### POST or GET Variables
     $exten_id = $_REQUEST['exten_id'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
     ### Check moh_id if its null or empty
 	if($exten_id == null) { 
@@ -45,6 +49,8 @@
                 $apiresults = array("result" => "success", "extension" => $dataExtension, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
 
 			}
+			
+			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of Phone: $exten_id", $log_group);
 		} else {
 			$apiresults = array("result" => "Error: Phone doesn't exist.");
 		}

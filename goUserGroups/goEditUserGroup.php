@@ -21,6 +21,9 @@
     $forced_timeclock_login = strtoupper($_REQUEST['forced_timeclock_login']);
     $shift_enforcement = strtoupper($_REQUEST['shift_enforcement']);
     $values = $_REQUEST['items'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
    //user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
     ### Default values 
     $defFTL = array('Y','N','ADMIN_EXEMPT');
@@ -113,9 +116,10 @@
 						if($rsltvQuery == false){
 							$apiresults = array("result" => "Error: Failed Update, Check your details");
 						} else {
-								$SQLdate = date("Y-m-d H:i:s");
-								$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY USER GROUP $group','UPDATE vicidial_user_groups SET group_level=$group_level,group_name=$group_name,forced_timeclock_login=$forced_timeclock_login,shift_enforcement=$shift_enforcement  WHERE user_group=$group;');";
-								$rsltvLog = mysqli_query($linkgo, $queryLog);
+								//$SQLdate = date("Y-m-d H:i:s");
+								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY USER GROUP $group','UPDATE vicidial_user_groups SET group_level=$group_level,group_name=$group_name,forced_timeclock_login=$forced_timeclock_login,shift_enforcement=$shift_enforcement  WHERE user_group=$group;');";
+								//$rsltvLog = mysqli_query($linkgo, $queryLog);
+							$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $query);
 		
 							$apiresults = array("result" => "success", "query" => $query);
 						}

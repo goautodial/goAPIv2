@@ -11,6 +11,10 @@
     
     ### POST or GET Variables
     $moh_id = $_REQUEST['moh_id'];
+	
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check campaign_id if its null or empty
 	if($moh_id == null) { 
@@ -40,6 +44,9 @@
 				$deleteQueryB = "DELETE FROM vicidial_music_on_hold_files WHERE moh_id IN ('$dataMOHID')";
    				$deleteResultB = mysqli_query($link, $deleteQueryB);
 				//echo $deleteQuery;
+				
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $dataMOHID", $log_group, $deleteQueryA);
+				
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: MOH doesn't exist.");

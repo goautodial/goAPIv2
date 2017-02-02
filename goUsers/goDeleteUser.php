@@ -13,6 +13,9 @@
     $user_id = $_REQUEST['user_id'];
     $ip_address = $_REQUEST['hostname'];
     $goUser = $_REQUEST['goUser'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 	if($user_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for User ID."); 
@@ -53,9 +56,10 @@
              			$deleteResultCB = mysqli_query($linkgokam, $deleteQueryCB);
 
 ### admin lgs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted User: $dataUserID','DELETE FROM vicidial_users WHERE user=$dataUserID AND user != ADMIN');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted User: $dataUserID','DELETE FROM vicidial_users WHERE user=$dataUserID AND user != ADMIN');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User: $dataUserID", $log_group, $deleteQuery);
 
 				//kamilio
 		                //$deleteQueryB = "DELETE FROM subscriber where username='$phone_login';";

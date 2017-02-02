@@ -17,6 +17,10 @@
         $active = mysqli_real_escape_string($link, $_REQUEST['active']);
         $delete_vm_after_email = mysqli_real_escape_string($link, $_REQUEST['delete_vm_after_email']);
         $voicemail_id = mysqli_real_escape_string($link, $_REQUEST['voicemail_id']);
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
     ### Default values 
     $defActive = array("Y","N");
     $defDelVM = array("N","Y"); 
@@ -80,9 +84,10 @@
 						$apiresults = array("result" => "success");
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE vicidial_voicemail SET pass=$pass,  fullname=$fullname,  email=$email,  active=$active,  delete_vm_after_email=$delete_vm_after_email WHERE voicemail_id=$voicemail_id');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE vicidial_voicemail SET pass=$pass,  fullname=$fullname,  email=$email,  active=$active,  delete_vm_after_email=$delete_vm_after_email WHERE voicemail_id=$voicemail_id');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Voicemail ID: $voicemail_id", $log_group, $queryVM);
 
 
 					}

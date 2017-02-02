@@ -29,6 +29,9 @@
     $defaccess_carriers = array("Y","N");
     $defaccess_phones = array("Y","N");
     $defaccess_voicemails = array("Y","N");
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 ###########################
 //Error Checking
@@ -108,9 +111,10 @@
 		$result = mysqli_query($linkgo, $query);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Tenant ID $tenant_id','UPDATE go_multi_tenant SET tenant_id=$tenant_id, tenant_name=$tenant_name, admin=$admin, active=$active WHERE tenant_id=$tenant_id;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Tenant ID $tenant_id','UPDATE go_multi_tenant SET tenant_id=$tenant_id, tenant_name=$tenant_name, admin=$admin, active=$active WHERE tenant_id=$tenant_id;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Multi-Tenant: $tenant_id", $log_group, $query);
 
 
 

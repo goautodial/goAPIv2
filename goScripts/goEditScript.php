@@ -18,6 +18,9 @@
         $active = $_REQUEST['active'];
         $ip_address = $_REQUEST['hostname'];
         $goUser = $_REQUEST['goUser'];
+		
+        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### Default values
     $defActive = array("Y","N");
@@ -79,10 +82,11 @@
 										$apiresults = array("result" => "success");
 						
 						### Admin logs
-										$SQLdate = date("Y-m-d H:i:s");
-						
-										$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE `vicidial_scripts` SET script_id = $script_id,  script_name = $script_name,  script_comments = $script_comments,  active = $active,  script_text =$script_text WHERE script_id = $script_id');";
-										$rsltvLog = mysqli_query($linkgo, $queryLog);
+										//$SQLdate = date("Y-m-d H:i:s");
+										//
+										//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE `vicidial_scripts` SET script_id = $script_id,  script_name = $script_name,  script_comments = $script_comments,  active = $active,  script_text =$script_text WHERE script_id = $script_id');";
+										//$rsltvLog = mysqli_query($linkgo, $queryLog);
+										$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Script ID: $script_id", $log_group, $queryVM);
 									}
 									   
 						} else {

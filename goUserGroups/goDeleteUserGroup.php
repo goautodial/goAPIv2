@@ -11,6 +11,10 @@
     
     ### POST or GET Variables
     $user_group = $_REQUEST['user_group'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
     
     
 	if($user_group == null) { 
@@ -40,6 +44,8 @@
 				$deleteQueryA = "DELETE FROM user_access_group WHERE user_group='$dataUserGroup'";
    				$deleteResultA = mysqli_query($linkgo, $deleteQueryA);
 				$apiresults = array("result" => "success");
+				
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
 			} else {
 				$apiresults = array("result" => "Error: User Group doesn't exist.");
 			}

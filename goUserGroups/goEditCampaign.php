@@ -21,6 +21,9 @@
     $campaign_recording = $_REQUEST['campaign_recording'];
     $auto_dial_level = $_REQUEST['auto_dial_level'];
     //$limit = $_REQUEST['limit'];
+	
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
    
     ### Default values 
     $defActive = array("Y","N");
@@ -67,9 +70,10 @@
 			   		$updateResult = mysqli_query($link, $updateQuery);
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY NEW CAMPAIGN $campaign_id','UPDATE vicidial_campaigns SET campaign_name=$uCampaignName, dial_method=$uDialMethod, active=$uActive WHERE campaign_id=$dataCampID LIMIT 1;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY NEW CAMPAIGN $campaign_id','UPDATE vicidial_campaigns SET campaign_name=$uCampaignName, dial_method=$uDialMethod, active=$uActive WHERE campaign_id=$dataCampID LIMIT 1;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Campaign ID: $campaign_id", $log_group, $updateQuery);
 
 					$apiresults = array("result" => "success");
 				} else {
