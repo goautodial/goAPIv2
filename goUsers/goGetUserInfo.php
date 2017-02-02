@@ -142,6 +142,8 @@
 				else
 				$data = $fresults;
                 $apiresults = array("result" => "success", "data" => $data, "query" => $query_GetUserInfo);
+                
+                $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             }else{
                 $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday, $fresultsUserInfoGo);
                 $apiresults = array("result" => "success", "data" => $data, "agentincalls" => $dataInCallsAgent, "agentoutcalls" => $dataOutCallsAgent);
