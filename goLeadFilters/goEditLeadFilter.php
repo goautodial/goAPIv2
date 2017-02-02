@@ -16,6 +16,10 @@
         $lead_filter_comments = $_REQUEST['lead_filter_comments'];
         $lead_filter_sql = $_REQUEST['lead_filter_sql'];
         $user_group = $_REQUEST['user_group'];
+		
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 
     ### ERROR CHECKING ...
@@ -29,7 +33,7 @@
                 $apiresults = array("result" => "Error: Special characters found in lead filter comments");
         } else {
 
-	$lead_filter_id = mysqli_escape_string($lead_filter_id);
+	$lead_filter_id = mysqli_real_escape_string($link, $lead_filter_id);
 		
                 $groupId = go_get_groupid($goUser);
 
@@ -110,7 +114,7 @@
 			if($lead_filter_sql == null){$lead_filter_sql = $dataLF_sql;}
 			if($user_group == null){$user_group = $dataLF_ug;}
 
-			$queryVM ="UPDATE vicidial_lead_filters SET lead_filter_name='".mysqli_escape_string($lead_filter_name)."',  lead_filter_comments='".mysqli_escape_string($lead_filter_comments)."',  lead_filter_sql='".mysqli_escape_string($lead_filter_sql)."',  user_group='".mysqli_escape_string($user_group)."' WHERE lead_filter_id='".mysqli_escape_string($lead_filter_id)."'";
+			$queryVM ="UPDATE vicidial_lead_filters SET lead_filter_name='".mysqli_real_escape_string($link, $lead_filter_name)."',  lead_filter_comments='".mysqli_real_escape_string($link, $lead_filter_comments)."',  lead_filter_sql='".mysqli_real_escape_string($link, $lead_filter_sql)."',  user_group='".mysqli_real_escape_string($link, $user_group)."' WHERE lead_filter_id='".mysqli_real_escape_string($link, $lead_filter_id)."'";
                         $rsltv1 = mysqli_query($link, $queryVM);
                         
 
@@ -120,9 +124,10 @@
 						$apiresults = array("result" => "success");
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Lead Filter: $lead_filter_id','UPDATE vicidial_lead_filters SET lead_filter_name=$lead_filter_name,  lead_filter_comments=$lead_filter_comments,  lead_filter_sql=$lead_filter_sql,  user_group=$user_group WHERE lead_filter_id=$lead_filter_id');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Lead Filter: $lead_filter_id','UPDATE vicidial_lead_filters SET lead_filter_name=$lead_filter_name,  lead_filter_comments=$lead_filter_comments,  lead_filter_sql=$lead_filter_sql,  user_group=$user_group WHERE lead_filter_id=$lead_filter_id');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Lead Filter ID: $lead_filter_id", $log_group, $queryVM);
 
 
 					}

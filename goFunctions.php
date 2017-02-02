@@ -1323,8 +1323,11 @@
     
 	##### ACTION LOGS #####
 	function log_action($link, $action, $user, $ip, $details, $user_group, $db_query = '') {
-		$action = strtoupper($action);
+		$action = mysqli_real_escape_string($link, strtoupper($action));
 		$event_date = date("Y-m-d H:i:s");
+		$user = mysqli_real_escape_string($link, $user);
+		$ip = mysqli_real_escape_string($link, $ip);
+		$user_group = mysqli_real_escape_string($link, $user_group);
 		$details = mysqli_real_escape_string($link, $details);
 		$db_query = mysqli_real_escape_string($link, $db_query);
 		$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";

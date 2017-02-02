@@ -11,10 +11,14 @@
     include "goFunctions.php";
  
     ### POST or GET Variables
-        $camp = $_REQUEST['pauseCampID'];
-        $pause_code = $_REQUEST['pause_code'];
-        $pause_code_name = $_REQUEST['pause_code_name'];
-        $billable = strtoupper($_REQUEST['billable']);
+        $camp = mysqli_real_escape_string($link, $_REQUEST['pauseCampID']);
+        $pause_code = mysqli_real_escape_string($link, $_REQUEST['pause_code']);
+        $pause_code_name = mysqli_real_escape_string($link, $_REQUEST['pause_code_name']);
+        $billable = mysqli_real_escape_string($link, strtoupper($_REQUEST['billable']));
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
     ### Default values 
     $defBill = array('NO','YES','HALF');
@@ -60,9 +64,10 @@
 
 
 	### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Pause Code: $camp','INSERT INTO vicidial_pause_codes (pause_code,pause_code_name,campaign_id,billable) VALUES ($pause_code,$pause_code_name,$camp,$billable)');";
-                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Pause Code: $camp','INSERT INTO vicidial_pause_codes (pause_code,pause_code_name,campaign_id,billable) VALUES ($pause_code,$pause_code_name,$camp,$billable)');";
+                                        //$rsltvLog = mysqli_query($linkgo,$queryLog);
+					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Pause Code $pause_code under Campaign ID $camp", $log_group, $newQuery);
 
 				        if($rsltv == false){
 						$apiresults = array("result" => "Error: Add failed, check your details");

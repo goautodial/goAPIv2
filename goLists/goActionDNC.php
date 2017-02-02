@@ -1,11 +1,14 @@
 <?php
     include_once("../goFunctions.php");
     
-	$campaign_id = $_REQUEST['campaign_id'];
-	$phone_numbers = $_REQUEST['phone_numbers'];
-	$stage = $_REQUEST['stage'];
-	$user_id = $_REQUEST['user_id'];
-	$ip_address = $_REQUEST['hostname'];
+	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+	$phone_numbers = mysqli_real_escape_string($link, $_REQUEST['phone_numbers']);
+	$stage = mysqli_real_escape_string($link, $_REQUEST['stage']);
+	$user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
+	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+		
+	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	
 	$usergroup = get_usergroup($user_id, $link);
 	$allowed_campaigns = get_allowed_campaigns($usergroup, $link);
@@ -25,11 +28,9 @@
 					if (count($allowed_campaigns) > 1 && !in_array($allowed_campaigns,"---ALL---")) {
 						foreach ($allowed_campaigns as $camp) {
 							$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$camp');");
-							log_action ('ADD', $user_id, $ip_address, date('Y-m-d H:i:s'), "Added DNC Number $dnc to Internal DNC List", $usergroup, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$camp');");
 						}
 					} else {
 						$query = mysqli_query($link, "INSERT INTO vicidial_dnc VALUES('$dnc');");
-						log_action ('ADD', $user_id, $ip_address, date('Y-m-d H:i:s'), "Added DNC Number $dnc to Internal DNC List", $usergroup, "INSERT INTO vicidial_dnc VALUES('$dnc');");
 					}
 					$cnt++;
 				}
@@ -38,11 +39,9 @@
 					if (count($allowed_campaigns) > 1 && !in_array($allowed_campaigns,"---ALL---")) {
 						foreach ($allowed_campaigns as $camp) {
 							$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc';");
-							log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc';");
 						}
 					} else {
 						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
-						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 					}
 					
 					if ($query) {
@@ -57,6 +56,9 @@
 				$msg = "deleted";
 			else
 				$msg = "added";
+			
+			$details = ucfirst($msg) . " {$cnt} numbers " . ($msg == 'added' ? 'to' : 'from') . " Internal DNC list";
+			$log_id = log_action($linkgo, $stage, $log_user, $ip_address, $details, $log_group);
 		} else {
 			if ($stage == "ADD")
 				$msg = "already exist";
@@ -67,28 +69,25 @@
 		$dnc_numbers = explode("\r\n",$phone_numbers);
 
 		foreach ($dnc_numbers as $dnc){
-			$query = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='".$campaign_id."'");
+			$query = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
 			$cdnc_exist = mysqli_num_rows($query);
-			$query2 = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc'");
+			$query2 = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc';");
 			$idnc_exist = mysqli_num_rows($query2);
 		
 			if ($idnc_exist < 1 && $cdnc_exist < 1){
 				if ($stage == "ADD"){
-					$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','".$campaign_id."')");
-					log_action ('ADD', $user_id, $ip_address, date('Y-m-d H:i:s'), "Added DNC Number $dnc for Campaign ".$campaign_id , $usergroup, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','".$campaign_id."')");
+					$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$campaign_id');");
 					$cnt++;
 				}
 			} else {
 				if ($stage == "DELETE"){
 					if ($cdnc_exist > 0) {
-						$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='".$campaign_id."'");
-						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc from Campaign ".$campaign_id , $usergroup, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='".$campaign_id."';");
+						$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
 						$cnt++;
 					}
 					
 					if ($campaign_id === '' && $idnc_exist > 0) {
 						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
-						log_action ('DELETE', $user_id, $ip_address, date('Y-m-d H:i:s'), "Deleted DNC Number $dnc to Internal DNC List", $usergroup, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
 						$cnt++;
 					}
 				}
@@ -100,6 +99,9 @@
 				$msg = "added";
 			else
 				$msg = "deleted";
+			
+			$details = ucfirst($msg) . " {$cnt} numbers " . ($msg == 'added' ? 'to' : 'from') . " Campaign DNC list";
+			$log_id = log_action($linkgo, $stage, $log_user, $ip_address, $details, $log_group);
 		} else {
 			if ($stage == "ADD")
 				$msg = "already exist";

@@ -11,25 +11,28 @@
 include_once("../goFunctions.php");
 
 ### POST or GET Variables
-$list_id = $_REQUEST['list_id'];
+$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
 $list_name = mysqli_real_escape_string($link, $_REQUEST['list_name']);
 $list_description = mysqli_real_escape_string($link, $_REQUEST['list_description']);
-$campaign_id = $_REQUEST['campaign_id'];
-$active = strtoupper($_REQUEST['active']);
-$reset_time = $_REQUEST['reset_time'];
-$xferconf_a_number = $_REQUEST['xferconf_a_number'];
-$xferconf_b_number = $_REQUEST['xferconf_b_number'];
-$xferconf_c_number = $_REQUEST['xferconf_c_number'];
-$xferconf_d_number = $_REQUEST['xferconf_d_number'];
-$xferconf_e_number = $_REQUEST['xferconf_e_number'];
-$agent_script_override = $_REQUEST['agent_script_override'];
-$drop_inbound_group_override = $_REQUEST['drop_inbound_group_override'];
-$campaign_cid_override = $_REQUEST['campaign_cid_override'];
-$web_form_address = $_REQUEST['web_form_address'];
-$reset_list = strtoupper($_REQUEST['reset_list']);
+$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+$active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+$reset_time = mysqli_real_escape_string($link, $_REQUEST['reset_time']);
+$xferconf_a_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_a_number']);
+$xferconf_b_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_b_number']);
+$xferconf_c_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_c_number']);
+$xferconf_d_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_d_number']);
+$xferconf_e_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_e_number']);
+$agent_script_override = mysqli_real_escape_string($link, $_REQUEST['agent_script_override']);
+$drop_inbound_group_override = mysqli_real_escape_string($link, $_REQUEST['drop_inbound_group_override']);
+$campaign_cid_override = mysqli_real_escape_string($link, $_REQUEST['campaign_cid_override']);
+$web_form_address = mysqli_real_escape_string($link, $_REQUEST['web_form_address']);
+$reset_list = mysqli_real_escape_string($link, strtoupper($_REQUEST['reset_list']));
 // $values = $_REQUEST['items'];
-$ip_address = $_REQUEST['hostname'];
-$goUser = $_REQUEST['goUser'];
+$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+$goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+
+$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 ### Default values 
 $defActive = array("Y","N");
@@ -84,8 +87,9 @@ if($list_id == null) {
 	} else {
 		$SQLdate = date("Y-m-d H:i:s");
 
-		$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY List: $list_id','UPDATE vicidial_lists SET list_id=$list_id,list_name=$list_name,list_description=$list_description,campaign_id=$campaign_id,active=$active,reset_time=$reset_time, xferconf_a_number=$xferconf_a_number,xferconf_b_number=$xferconf_b_number,xferconf_c_number=$xferconf_c_number,xferconf_d_number=$xferconf_d_number,xferconf_e_number=$xferconf_e_number,agent_script_override=$agent_script_override,drop_inbound_group_override=$drop_inbound_group_override,campaign_cid_override=$campaign_cid_override,web_form_address=$web_form_address');";
-		$rsltvLog = mysqli_query($linkgo, $queryLog);
+		//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY List: $list_id','UPDATE vicidial_lists SET list_id=$list_id,list_name=$list_name,list_description=$list_description,campaign_id=$campaign_id,active=$active,reset_time=$reset_time, xferconf_a_number=$xferconf_a_number,xferconf_b_number=$xferconf_b_number,xferconf_c_number=$xferconf_c_number,xferconf_d_number=$xferconf_d_number,xferconf_e_number=$xferconf_e_number,agent_script_override=$agent_script_override,drop_inbound_group_override=$drop_inbound_group_override,campaign_cid_override=$campaign_cid_override,web_form_address=$web_form_address');";
+		//$rsltvLog = mysqli_query($linkgo, $queryLog);
+		$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the List ID: $list_id", $log_group, $query);
 
 		$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
 		$resultQueryDate = mysqli_query($link, $querydate);

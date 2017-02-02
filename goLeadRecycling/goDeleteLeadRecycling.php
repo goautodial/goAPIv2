@@ -10,9 +10,11 @@
     include "goFunctions.php";
     
     ### POST or GET Variables
-        $camp = $_REQUEST['leadRecCampID'];
-        $stat = $_REQUEST['status'];
-        $ip_address = $_REQUEST['hostname'];
+        $camp = mysqli_real_escape_string($link, $_REQUEST['leadRecCampID']);
+        $stat = mysqli_real_escape_string($link, $_REQUEST['status']);
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($camp == null || $stat == null) { 
@@ -41,9 +43,10 @@
 				//echo $deleteQuery;
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Lead Recycling $stat','DELETE FROM vicidial_lead_recycle WHERE campaign_id=$camp AND status=$stat;');";
-                                        $rsltvLog = mysqli_query($linkgo,$queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Lead Recycling $stat','DELETE FROM vicidial_lead_recycle WHERE campaign_id=$camp AND status=$stat;');";
+                                        //$rsltvLog = mysqli_query($linkgo,$queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycling Status: $stat", $log_group, $deleteQueryTwo);
 
 
 				$apiresults = array("result" => "success");

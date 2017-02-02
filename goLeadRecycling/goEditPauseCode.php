@@ -11,11 +11,15 @@
     include "goFunctions.php";
  
     ### POST or GET Variables
-        $camp = $_REQUEST['campaign_id'];
-        $status = $_REQUEST['status'];
-        $attempt_delay = $_REQUEST['attempt_delay'];
-        $attempt_maximum = $_REQUEST['attempt_maximum'];
-        $active = strtoupper($_REQUEST['active']);
+        $camp = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+        $status = mysqli_real_escape_string($link, $_REQUEST['status']);
+        $attempt_delay = mysqli_real_escape_string($link, $_REQUEST['attempt_delay']);
+        $attempt_maximum = mysqli_real_escape_string($link, $_REQUEST['attempt_maximum']);
+        $active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
     ### Default values 
     $defActive = array('N','Y');
@@ -86,9 +90,10 @@
 						$apiresults = array("result" => "success");
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Pause Code: $status','UPDATE vicidial_lead_recycle SET status=$status,  attempt_delay=$attempt_delay,  attempt_maximum=$attempt_maximum, campaign_id=$camp,  active=$active WHERE status=$status');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Pause Code: $status','UPDATE vicidial_lead_recycle SET status=$status,  attempt_delay=$attempt_delay,  attempt_maximum=$attempt_maximum, campaign_id=$camp,  active=$active WHERE status=$status');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Pause Code: $status", $log_group, $queryVM);
 
 
 					}

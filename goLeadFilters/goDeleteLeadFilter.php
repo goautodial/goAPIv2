@@ -10,8 +10,10 @@
     include_once ("goFunctions.php");
     
     ### POST or GET Variables
-        $lead_filter_id = mysqli_real_escape_string($_REQUEST['lead_filter_id']);
-        $ip_address = mysqli_real_escape_string($_REQUEST['hostname']);
+        $lead_filter_id = mysqli_real_escape_string($link, $_REQUEST['lead_filter_id']);
+        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check lead filter ID if its null or empty
 	if($lead_filter_id == null) { 
@@ -34,7 +36,7 @@
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$dataLeadFilterID = mysqli_real_escape_string($fresults['lead_filter_id']);
+				$dataLeadFilterID = mysqli_real_escape_string($link, $fresults['lead_filter_id']);
 			}
 
 			if(!$dataLeadFilterID == null) {
@@ -43,9 +45,10 @@
 				//echo $deleteQuery;
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted FIlter Lead ID $dataLeadFilterID','DELETE FROM vicidial_lead_filters WHERE lead_filter_id=$dataLeadFilterID;');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted FIlter Lead ID $dataLeadFilterID','DELETE FROM vicidial_lead_filters WHERE lead_filter_id=$dataLeadFilterID;');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Filter ID: $dataLeadFilterID", $log_group, $deleteQuery);
 
 
 				$apiresults = array("result" => "success");

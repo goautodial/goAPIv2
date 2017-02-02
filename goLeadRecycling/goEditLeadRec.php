@@ -11,11 +11,15 @@
     include "goFunctions.php";
 
     ### POST or GET Variables
-        $camp = $_REQUEST['leadRecCampID'];
-        $status = $_REQUEST['status'];
-        $attempt_delay = $_REQUEST['attempt_delay'];
-        $attempt_maximum = $_REQUEST['attempt_maximum'];
-        $active = strtoupper($_REQUEST['active']);
+        $camp = mysqli_real_escape_string($link, $_REQUEST['leadRecCampID']);
+        $status = mysqli_real_escape_string($link, $_REQUEST['status']);
+        $attempt_delay = mysqli_real_escape_string($link, $_REQUEST['attempt_delay']);
+        $attempt_maximum = mysqli_real_escape_string($link, $_REQUEST['attempt_maximum']);
+        $active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+		
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 
     ### Default values
     $defActive = array('N','Y');
@@ -24,17 +28,17 @@
         if($camp == null || strlen($camp) < 3) {
                 $apiresults = array("result" => "Error: Set a value for CAMP ID not less than 3 characters.");
         } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/'$status)){
+        if(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $status)){
                 $apiresults = array("result" => "Error: Special characters found in Status and must not be empty");
         } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/ $attempt_delay)){
+        if(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay)){
                 $apiresults = array("result" => "Error: Special characters found in Attempt Delay and must not be empty");
         } else {
-	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $atmpt_maximum)){
+	if(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
                $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
         } else {
 
-                if(!in_array($active,$defActive) && $active != null) {
+                if(!in_array($active, $defActive) && $active != null) {
                         $apiresults = array("result" => "Error: Default value for active is N for No and Y for Yes only.");
                 } else {
 
@@ -85,9 +89,10 @@
                                                 $apiresults = array("result" => "success");
 
         ### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Lead Recycling: $status','UPDATE vicidial_lead_recycle SET status=$status,  attempt_delay=$attempt_delay, attempt_maximum=$attempt_maximum,  campaign_id=$camp,  active=$active WHERE status=$status');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Lead Recycling: $status','UPDATE vicidial_lead_recycle SET status=$status,  attempt_delay=$attempt_delay, attempt_maximum=$attempt_maximum,  campaign_id=$camp,  active=$active WHERE status=$status');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+											$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Lead Recycling: $status", $log_group, $queryVM);
 
 
                                         }

@@ -18,7 +18,9 @@
         $user_group = $_REQUEST['user_group'];
 
 
-
+		$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
     ### ERROR CHECKING 
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
@@ -46,29 +48,30 @@
                    $addedSQL = "WHERE user_group='$groupId'";
                 }
 
-                $query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='".mysqli_escape_string($user_group)."' $ul ORDER BY user_group LIMIT 1;";
+                $query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='".mysqli_real_escape_string($link, $user_group)."' $ul ORDER BY user_group LIMIT 1;";
                 $rsltv = mysqli_query($link, $query);
                 $countResult = mysqli_num_rows($rsltv);
 
                 if($countResult > 0) {
 	
-			$queryCheck = "SELECT lead_filter_id from vicidial_lead_filters where lead_filter_id='".mysqli_escape_string($lead_filter_id)."';";
+			$queryCheck = "SELECT lead_filter_id from vicidial_lead_filters where lead_filter_id='".mysqli_real_escape_string($link, $lead_filter_id)."';";
 			$sqlCheck = mysqli_query($link, $queryCheck);
 			$countCheck = mysqli_num_rows($sqlCheck);
 				if($countCheck <= 0){	
 
-					$newQuery = "INSERT INTO vicidial_lead_filters (lead_filter_id, lead_filter_name, lead_filter_comments, lead_filter_sql, user_group) VALUES ('".mysqli_real_escape_string($lead_filter_id)."', '".mysqli_real_escape_string($lead_filter_name)."', '".mysqli_real_escape_string($lead_filter_comments)."', '".mysqli_real_escape_string($lead_filter_sql)."', '".mysqli_real_escape_string($user_group)."');";
+					$newQuery = "INSERT INTO vicidial_lead_filters (lead_filter_id, lead_filter_name, lead_filter_comments, lead_filter_sql, user_group) VALUES ('".mysqli_real_escape_string($link, $lead_filter_id)."', '".mysqli_real_escape_string($link, $lead_filter_name)."', '".mysqli_real_escape_string($link, $lead_filter_comments)."', '".mysqli_real_escape_string($link, $lead_filter_sql)."', '".mysqli_real_escape_string($link, $user_group)."');";
 					$rsltv = mysqli_query($link, $newQuery);
 	      
 
 
 
 	### Admin logs
-                                        $SQLdate = date("Y-m-d H:i:s");
-                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
-                                        $rsltvLog = mysqli_query($linkgo, $queryLog);
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Voicemail: $voicemail_id','INSERT INTO vicidial_voicemail (voicemail_id,pass,fullname,active,email,user_group) VALUES ($voicemail_id,$pass,$fullname,$active,$email,$user_group)');";
+                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
+						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Lead Filter: $lead_filter_id", $log_group, $newQuery);
 
-				        if($rsltv == false){
+				    if($rsltv == false){
 						$apiresults = array("result" => "Error: Add failed, check your details");
 					} else {
 
