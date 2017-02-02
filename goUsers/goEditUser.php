@@ -257,6 +257,12 @@
 //                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=
 //										,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
 //                                        $rsltvLog = mysqli_query($link, $queryLog);
+				if ($userid != NULL) {
+					$result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$userid';");
+					$userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
+					$user = $userInfo['user'];
+				}
+				
 				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified User: $user", $log_group, $queryUpdateUser);
 
 
