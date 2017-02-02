@@ -143,6 +143,9 @@
 				$data = $fresults;
                 $apiresults = array("result" => "success", "data" => $data, "query" => $query_GetUserInfo);
                 
+                $result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$user_id';");
+                $userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                $user = $userInfo['user'];
                 $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             }else{
                 $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday, $fresultsUserInfoGo);
