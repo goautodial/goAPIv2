@@ -17,6 +17,7 @@
         $active = $_REQUEST['active'];
         $asterisk_version = mysqli_real_escape_string($link, $_REQUEST['asterisk_version']);
 		$max_vicidial_trunks = mysqli_real_escape_string($link, $_REQUEST['max_vicidial_trunks']);
+		$user_group = $_REQUEST['user_group'];
 		$local_gmt = "-5.00";
         
 		$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
@@ -58,8 +59,8 @@
 										$user_group = $groupId;
 								}
 												
-								$newQuery = "INSERT INTO servers(server_id, server_description, server_ip, active, asterisk_version, max_vicidial_trunks, local_gmt)
-								VALUES('$server_id', '$server_description', '$server_ip', '$active', '$asterisk_version', '$max_vicidial_trunks', '$local_gmt');";
+								$newQuery = "INSERT INTO servers(server_id, server_description, server_ip, active, asterisk_version, max_vicidial_trunks, local_gmt, user_group)
+								VALUES('$server_id', '$server_description', '$server_ip', '$active', '$asterisk_version', '$max_vicidial_trunks', '$local_gmt', '$user_group');";
 								$rsltv = mysqli_query($link, $newQuery);
 						
 								//$apiresults = array("usergroup" => $user_group, "query" => $newQuery);

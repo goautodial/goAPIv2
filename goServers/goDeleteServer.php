@@ -1,10 +1,10 @@
 <?php
     #######################################################
-    #### Name: goDeleteScript.php	               ####
-    #### Description: API to delete specific Script ####
+    #### Name: goDeleteServer.php	  ####
+    #### Description: API to delete specific Script 	  ####
     #### Version: 0.9                                  ####
     #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Jeremiah Sebastian V. Samatra     ####
+    #### Written by: Alexander Abenoja 			      ####
     #### License: AGPLv2                               ####
     #######################################################
     include_once ("../goFunctions.php");
