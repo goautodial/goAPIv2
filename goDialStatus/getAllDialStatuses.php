@@ -13,15 +13,15 @@
 	$hotkeys_only = mysqli_escape_string($link, $_REQUEST['hotkeys_only']);
 	$campaign_id = mysqli_escape_string($link, $_REQUEST['campaign_id']);
 	
-	$human_answered = '';
+	$selectable = '';
 	if ($hotkeys_only === "1") {
-		$human_answered = "WHERE human_answered='Y'";
+		$selectable = "WHERE selectable='Y'";
 	}
 	
-	if (strlen($human_answered) > 0 && strlen($campaign_id) > 0) {
+	if (strlen($selectable) > 0 && strlen($campaign_id) > 0) {
 		$query = "SELECT status,status_name
 					FROM vicidial_campaign_statuses
-					$human_answered
+					$selectable
 					AND campaign_id='$campaign_id'
 					ORDER BY status";
 		$rsltv = mysqli_query($link, $query);
@@ -34,7 +34,7 @@
 	
     $query = "SELECT status,status_name
 				FROM vicidial_statuses
-				$human_answered
+				$selectable
 				ORDER BY status";
    	$rsltv = mysqli_query($link, $query);
     
