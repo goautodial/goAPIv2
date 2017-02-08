@@ -93,13 +93,15 @@
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
         $fresults = mysqli_fetch_array($rsltvGetUserInfo);        
         
-        $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE userid='$user_id'";
-        $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
-        $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo);           
-        //$countGo = mysqli_num_rows($rsltvUserInfoGo);        
-        //$countrsltvInCalls = mysqli_num_rows($rsltvInCalls);
-        //$countrsltvNoCalls = mysqli_num_rows($rsltvNoCalls);
-
+        if($user_id != NULL){
+            $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE userid='$user_id'";
+            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
+            $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo);           
+        } else {
+            $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE name='$user'";
+            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
+            $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo);         
+        }
         if ($user != NULL && $query_OnlineAgents != NULL){
         
             $dataInCalls = array();
@@ -124,7 +126,7 @@
             
             $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             
-            $apiresults = array("result" => "success", "data" => $data);
+            $apiresults = array("result" => "success", "data" => $data, "dataGo" => $fresultsUserInfoGo);
             
         } else if ($user_id != NULL){
             $dataInCallsAgent = array();
