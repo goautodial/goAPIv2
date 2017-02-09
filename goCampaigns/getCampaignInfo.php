@@ -46,13 +46,33 @@
 					$url_tab_second_title = $typeresults['url_tab_second_title'];
 					$url_tab_second_url = $typeresults['url_tab_second_url'];
 				}
+				
+				if($campaign_type == "SURVEY"){
+					$queryRA = "SELECT * from vicidial_remote_agents WHERE campaign_id='$campaign_id' LIMIT 1";
+					$rsltvRA = mysqli_query($link, $queryRA);
+					while($RAresults = mysqli_fetch_array($rsltvRA, MYSQLI_ASSOC)){
+						$numberoflines= $RAresults['number_of_lines'];
+					}
+				}
+				
 				$custom_fields_launch = (gettype($custom_fields_launch) != 'NULL') ? $custom_fields_launch : 'ONCALL';
 				$custom_fields_list_id = (gettype($custom_fields_list_id) != 'NULL') ? $custom_fields_list_id : '';
 				$url_tab_first_title = (gettype($url_tab_first_title) != 'NULL') ? $url_tab_first_title : '';
 				$url_tab_first_url = (gettype($url_tab_first_url) != 'NULL') ? $url_tab_first_url : '';
 				$url_tab_second_title = (gettype($url_tab_second_title) != 'NULL') ? $url_tab_second_title : '';
 				$url_tab_second_url = (gettype($url_tab_second_url) != 'NULL') ? $url_tab_second_url : '';
-				$apiresults = array("result" => "success", "data" => $fresults, "campaign_type" => $campaign_type, "custom_fields_launch" => $custom_fields_launch, 'custom_fields_list_id' => $custom_fields_list_id, 'url_tab_first_title' => $url_tab_first_title, 'url_tab_first_url' => $url_tab_first_url, 'url_tab_second_title' => $url_tab_second_title, 'url_tab_second_url' => $url_tab_second_url );
+				$apiresults = array(
+									"result" => "success",
+									"data" => $fresults,
+									"campaign_type" => $campaign_type,
+									"custom_fields_launch" => $custom_fields_launch,
+									'custom_fields_list_id' => $custom_fields_list_id,
+									'url_tab_first_title' => $url_tab_first_title,
+									'url_tab_first_url' => $url_tab_first_url,
+									'url_tab_second_title' => $url_tab_second_title,
+									'url_tab_second_url' => $url_tab_second_url,
+									'number_of_lines' => $numberoflines
+								);
 				//$apiresults = array("result" => "success", "data" => $fresults);
 			}
 			
