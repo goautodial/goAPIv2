@@ -28,7 +28,9 @@ if (!$is_logged_in) {
         $astDB->where('campaign_id', $camp_array, 'in');
     }
 } else {
-    $astDB->where('campaign_id', $campaign);
+    if ($agent_lead_search_method != 'SYSTEM') {
+        $astDB->where('campaign_id', $campaign);
+    }
 }
 $astDB->where('active', 'Y');
 $rslt = $astDB->get('vicidial_lists', null, 'list_id');
