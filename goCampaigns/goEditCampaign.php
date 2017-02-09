@@ -258,7 +258,7 @@
 					}
 					
 					if($campaign_type == "SURVEY"){
-						if($active == "Y"){
+						if($survey_method != "AGENT_XFER" && $active == 'Y'){
 							$updateRemoteUserStatus = "UPDATE vicidial_remote_agents SET status = 'ACTIVE' WHERE campaign_id='$campaign_id'";
 							$rsltvVRA = mysqli_query($link, $updateRemoteUserStatus);
 						}else{
