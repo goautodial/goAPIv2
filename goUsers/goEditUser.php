@@ -45,6 +45,7 @@
         $agentcall_manual = $_REQUEST['agentcall_manual'];
         $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
         $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
+		$agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
         $avatar = $_REQUEST['avatar'];
 			
 		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
@@ -205,7 +206,7 @@
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email'  $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
 								WHERE `user_id` = '$userid';";
 								
                                                 $queryUserIDGo = "SELECT userid from users WHERE userid='$userid'";
@@ -223,7 +224,7 @@
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
 								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email'  $voicemail_query 
+								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
 								WHERE `user` = '$user';";
 								
                                                 $queryUserIDGo = "SELECT name from users WHERE name='$user'";
