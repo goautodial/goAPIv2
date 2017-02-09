@@ -47,7 +47,7 @@ if (count($list_ids) > 0 ) {
         $leads[] = $lead;
     }
 
-    $APIResult = array( 'result' => 'success', 'leads' => $leads );
+    $APIResult = array( 'result' => 'success', 'leads' => $leads, 'test' => $astDB->getLastQuery() );
 } else {
     $APIResult = array( 'result' => 'error', 'message' => 'No leads found.' );
 }
