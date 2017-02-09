@@ -42,6 +42,7 @@ if (count($list_ids) > 0 ) {
     $astDB->where('vl.status', array('DNC', 'DNCL'), 'not in');
     $astDB->join('vicidial_lists vls', 'vls.list_id=vl.list_id', 'left');
     $astDB->groupBy('lead_id,phone_number');
+    $astDB->orderBy('last_local_call_time', 'desc');
     $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,campaign_id,status,comments,phone_code');
 
     foreach ($rslt as $lead) {
