@@ -33,6 +33,11 @@ if (!$is_logged_in) {
 } else {
     if ($agent_lead_search_method != 'SYSTEM') {
         $astDB->where('campaign_id', $campaign);
+    } else {
+        if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+            $camp_array = preg_split("/[\s,]+/", $allowed_campaigns);
+            $astDB->where('campaign_id', $camp_array, 'in');
+        }
     }
 }
 $astDB->where('active', 'Y');
