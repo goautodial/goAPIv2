@@ -14,6 +14,9 @@ $agent = get_settings('user', $astDB, $goUser);
 if (isset($_GET['goLimit'])) { $limit = $astDB->escape($_GET['goLimit']); }
     else if (isset($_POST['goLimit'])) { $limit = $astDB->escape($_POST['goLimit']); }
 
+if (isset($_GET['goLeadSearchMethod'])) { $agent_lead_search_method = $astDB->escape($_GET['goLeadSearchMethod']); }
+    else if (isset($_POST['goLeadSearchMethod'])) { $agent_lead_search_method = $astDB->escape($_POST['goLeadSearchMethod']); }
+
 if (!isset($limit) || !is_numeric($limit)) {
     $limit = 10000;
 }
