@@ -67,6 +67,8 @@
 	$url_tab_first_url		= $_REQUEST['url_tab_first_url'];
 	$url_tab_second_title		= $_REQUEST['url_tab_second_title'];
 	$url_tab_second_url		= $_REQUEST['url_tab_second_url'];
+	$agent_lead_search		= $_REQUEST['agent_lead_search'];
+	$agent_lead_search_method = $_REQUEST['agent_lead_search_method'];
 	
 	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
 	$survey_method = $_REQUEST['survey_method'];
@@ -207,7 +209,9 @@
 										survey_fourth_exten = '$survey_fourth_exten',
 										amd_send_to_vmx = '$amd_send_to_vmx',
 										waitforsilence_options = '$waitforsilence_options',
-										per_call_notes = '$per_call_notes'
+										per_call_notes = '$per_call_notes',
+										agent_lead_search = '$agent_lead_search',
+										agent_lead_search_method = '$agent_lead_search_method'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;
