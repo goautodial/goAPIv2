@@ -436,7 +436,7 @@ if ($sipIsLoggedIn) {
                         if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
                             $campaign_SQL = "vc.campaign_id IN ('$allowed_campaigns') AND";
                         }
-                        $stmt="SELECT list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
+                        $stmt="SELECT list_id,manual_dial_list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
                         $rslt = $astDB->rawQuery($stmt);
                         $Xct = $astDB->getRowCount();
                         
@@ -448,6 +448,10 @@ if ($sipIsLoggedIn) {
                             $i = 0;
                             foreach ($rslt as $Xrow) {
                                 $list_ids[$i] = $Xrow['list_id'];
+                                if (!in_array($Xrow['manual_dial_list_id'], $list_ids)) {
+                                    $i++;
+                                    $list_ids[$i] = $Xrow['manual_dial_list_id'];
+                                }
                                 $i++;
                             }
                             //$list_ids = implode("','",$list_ids);
