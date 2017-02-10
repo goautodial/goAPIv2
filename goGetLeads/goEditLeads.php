@@ -58,21 +58,23 @@
         $updateQuery = mysqli_query($link, $query);
         
         if($updateQuery > 0){
-            $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
-            $cust_cnt = mysqli_num_rows($rsltc);
-            
-            $rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';");
-            $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
-            $user_group = $fresults['user_group'];
-            
-            $rsltg = mysqli_query($linkgo, "SELECT group_list_id FROM user_access_group WHERE user_group='$user_group';");
-            $fresults = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
-            $group_list_id = $fresults['group_list_id'];
-            
-            if ($cust_cnt < 1) {
-                $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id');");
-            } else {
-                $rsltc = mysqli_query($linkgo, "UPDATE go_customers SET group_list_id='$group_list_id';");
+            if ($is_customer) {
+                $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
+                $cust_cnt = mysqli_num_rows($rsltc);
+                
+                $rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';");
+                $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+                $user_group = $fresults['user_group'];
+                
+                $rsltg = mysqli_query($linkgo, "SELECT group_list_id FROM user_access_group WHERE user_group='$user_group';");
+                $fresults = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+                $group_list_id = $fresults['group_list_id'];
+                
+                if ($cust_cnt < 1) {
+                    $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id');");
+                } else {
+                    $rsltc = mysqli_query($linkgo, "UPDATE go_customers SET group_list_id='$group_list_id';");
+                }
             }
             
             $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query);
