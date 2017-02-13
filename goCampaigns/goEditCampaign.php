@@ -86,6 +86,7 @@
 	$survey_fourth_audio_file = $_REQUEST['survey_fourth_audio_file'];
 	$survey_fourth_status = $_REQUEST['survey_fourth_status'];
 	$survey_fourth_exten = $_REQUEST['survey_fourth_exten'];
+    $no_channels = $_REQUEST['no_channels'];
 	
 	$amd_send_to_vmx = $_REQUEST['amd_send_to_vmx'];
 	$waitforsilence_options = $_REQUEST['waitforsilence_options'];
@@ -94,7 +95,15 @@
 
     ### Default values 
     $defActive = array("Y","N");
-    $defDialMethod = array("MANUAL","RATIO","ADAPT_HARD_LIMIT","ADAPT_TAPERED","ADAPT_AVERAGE","INBOUND_MAN"); 
+    $defDialMethod = array("MANUAL","RATIO","ADAPT_HARD_LIMIT","ADAPT_TAPERED","ADAPT_AVERAGE","INBOUND_MAN");
+    
+    if($campaign_type == "SURVEY"){
+        if(!empty($dial_method)){
+            $dial_method = $dial_method;
+        }else{
+            $dial_method = "RATIO";
+        }
+    }
     
     ### Check campaign_id if its null or empty
 	if($campaign_id == null) { 
@@ -265,7 +274,13 @@
 							$updateRemoteUserStatus = "UPDATE vicidial_remote_agents SET status = 'INACTIVE' WHERE campaign_id='$campaign_id'";
 							$rsltvVRA = mysqli_query($link, $updateRemoteUserStatus);
 						}
+                        
+                        if(!empty($no_channels)){
+                            $updateRemoteUserNOLINES = "UPDATE vicidial_remote_agents SET number_of_lines = '$no_channels' WHERE campaign_id='$campaign_id'";
+							$rsltvVRALines = mysqli_query($link, $updateRemoteUserNOLINES);
+                        }
 					}
+                    
 					
 					$apiresults = array("result" => "success");
 				} else {
