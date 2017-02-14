@@ -148,7 +148,9 @@
                 $result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$user_id';");
                 $userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 $user = $userInfo['user'];
-                $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
+				if($log_user == "" || $log_user == NULL)
+					$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
+				
             }else{
                 $data = array_merge($fresults, $resultsinsales, $resultsoutsales, $resultsincallstoday, $resultsoutcallstoday, $fresultsUserInfoGo);
                 $apiresults = array("result" => "success", "data" => $data, "agentincalls" => $dataInCallsAgent, "agentoutcalls" => $dataOutCallsAgent);
