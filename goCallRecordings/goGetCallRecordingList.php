@@ -83,6 +83,30 @@ if(!empty($agent_filter)){
 	$rsltv = mysqli_query($link, $query);
 		
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		$location = $fresults['location'];
+		if (strlen($location)>2) {
+			$URLserver_ip = $location;
+			$URLserver_ip = preg_replace('/http:\/\//i', '', $URLserver_ip);
+			$URLserver_ip = preg_replace('/https:\/\//i', '', $URLserver_ip);
+			$URLserver_ip = preg_replace('/\/.*/i', '', $URLserver_ip);
+			$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
+			$rsltx=mysqli_query($link, $stmt);
+			$rowx=mysqli_fetch_row($rsltx);
+			
+			if ($rowx[0] > 0) {
+				$stmt="SELECT recording_web_link,alt_server_ip,external_server_ip FROM servers WHERE server_ip='$URLserver_ip';";
+				$rsltx=mysqli_query($link, $stmt);
+				$rowx=mysqli_fetch_row($rsltx);
+				
+				if (preg_match("/ALT_IP/i",$rowx[0])) {
+					$location = preg_replace("/$URLserver_ip/i", "$rowx[1]", $location);
+				}
+				if (preg_match("/EXTERNAL_IP/i",$rowx[0])) {
+					$location = preg_replace("/$URLserver_ip/i", "$rowx[2]", $location);
+				}
+			}
+		}
+		
 		$dataLeadId[] = $fresults['lead_id'];
 		$dataUniqueid[] = $fresults['vicidial_id'];
                 $dataStatus[] = $fresults['status'];
@@ -94,7 +118,7 @@ if(!empty($agent_filter)){
 		$dataLastLocalCallTime[] = $fresults['last_local_call_time'];
 		$dataStartLastLocalCallTime[] = $fresults['start_time'];
 		$dataEndLastLocalCallTime[] = $fresults['end_time'];
-		$dataLocation[] = $fresults['location'];
+		$dataLocation[] = $location;
 		$dataRecordingID[] = $fresults['recording_id'];
 		$dataB64encoded[] = $fresults['b64encoded'];
 		
