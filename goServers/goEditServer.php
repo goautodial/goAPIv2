@@ -23,6 +23,9 @@
 		$generate_vicidial_conf = mysqli_real_escape_string($link, $_REQUEST['generate_vicidial_conf']);
 		$rebuild_conf_files = mysqli_real_escape_string($link, $_REQUEST['rebuild_conf_files']);
 		$rebuild_music_on_hold = mysqli_real_escape_string($link, $_REQUEST['rebuild_music_on_hold']);
+		$recording_web_link = mysqli_real_escape_string($link, $_REQUEST['recording_web_link']);
+		$alt_server_ip = mysqli_real_escape_string($link, $_REQUEST['alt_server_ip']);
+		$external_server_ip = mysqli_real_escape_string($link, $_REQUEST['external_server_ip']);
 		
         $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
         $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
@@ -46,7 +49,7 @@
 		$countResult = mysqli_num_rows($rsltvOne);
 
 		if($countResult > 0) {
-				$updateQuery = "UPDATE servers SET server_description = '$server_description', server_ip = '$server_ip', active = '$active', user_group = '$user_group', asterisk_version = '$asterisk_version', max_vicidial_trunks = '$max_vicidial_trunks', outbound_calls_per_second = '$outbound_calls_per_second', vicidial_balance_active = '$vicidial_balance_active', local_gmt = '$local_gmt', generate_vicidial_conf = '$generate_vicidial_conf', rebuild_conf_files = '$rebuild_conf_files', rebuild_music_on_hold = '$rebuild_music_on_hold' WHERE server_id= '$server_id';"; 
+				$updateQuery = "UPDATE servers SET server_description = '$server_description', server_ip = '$server_ip', active = '$active', user_group = '$user_group', asterisk_version = '$asterisk_version', max_vicidial_trunks = '$max_vicidial_trunks', outbound_calls_per_second = '$outbound_calls_per_second', vicidial_balance_active = '$vicidial_balance_active', local_gmt = '$local_gmt', generate_vicidial_conf = '$generate_vicidial_conf', rebuild_conf_files = '$rebuild_conf_files', rebuild_music_on_hold = '$rebuild_music_on_hold', recording_web_link = '$recording_web_link', alt_server_ip = '$alt_server_ip', external_server_ip = '$external_server_ip' WHERE server_id= '$server_id';"; 
    				$updateResult = mysqli_query($link, $updateQuery);
 				
 				$log_id = log_action($linkgo, 'UPDATE', $log_user, $ip_address, "Updated Server ID: $server_id", $log_group, $updateQuery);
