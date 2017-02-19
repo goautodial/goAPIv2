@@ -56,18 +56,16 @@
         title = '$title'
         WHERE lead_id = '$lead_id';";
         
-        $querygo = "UPDATE go_customers
-        SET avatar = '$avatar' 
-        WHERE lead_id ='$lead_id'";
+        $querygo = "SELECT '$lead_id'
+        FROM go_customers
+        WHERE lead_id ='$lead_id' 
+        LIMIT 1;";                
         
         $updateQuery = mysqli_query($link, $query);
-        //$updateQueryGo = mysqli_query($linkgo, $querygo);
+        $updateQuerygo = mysqli_query($linkgo, $querygo);
         
         if($updateQuery > 0){
-            if ($is_customer) {
-                $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
-                $cust_cnt = mysqli_num_rows($rsltc);
-                
+            if ($is_customer) {                                              
                 $rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';");
                 $fresults = mysqli_fetch_array($rsltu, MYSQLI_ASSOC);
                 $user_group = $fresults['user_group'];
@@ -76,14 +74,35 @@
                 $fresults = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
                 $group_list_id = $fresults['group_list_id'];
                 
-                if ($cust_cnt < 1) {
-                    $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id', '$avatar');");
+                $countrsltgo = mysqli_num_rows($updateQuerygo);                
+                
+                if ($countrsltgo < 1) {
+                
+                    $querygo = "INSERT
+                    INTO go_customers 
+                    VALUES (null, '$lead_id', '$group_list_id', '$avatar') 
+                    WHERE lead_id ='$lead_id';"; 
+                    
+                    $rsltgo = mysqli_query($linkgo, $querygo);
+                    $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
                 } else {
-                    $rsltc = mysqli_query($linkgo, "UPDATE go_customers SET group_list_id='$group_list_id';");
-                    //$rsltc = mysqli_query($linkgo, "UPDATE go_customers SET avatar='$avatar' WHERE lead_id='$lead_id';");
+                
+                    $querygo = "UPDATE go_customers 
+                    SET avatar = '$avatar', group_list_id='$group_list_id'
+                    WHERE lead_id ='$lead_id';";                    
+            
+                    $rsltgo = mysqli_query($linkgo, $querygo);
+                    $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
                 }
-            } else {                
-                $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id', '$avatar');");
+            } else {           
+            
+                $querygo = "INSERT
+                INTO go_customers 
+                VALUES (null, '$lead_id', '$group_list_id', '$avatar') 
+                WHERE lead_id ='$lead_id';"; 
+                
+                $rsltgo = mysqli_query($linkgo, $querygo);
+                $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
             }
             
             $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query, $querygo);
@@ -94,4 +113,3 @@
         }
     
 ?>
-
