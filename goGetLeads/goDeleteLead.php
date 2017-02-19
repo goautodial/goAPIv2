@@ -31,21 +31,23 @@
                 }
 
                 $query = "DELETE FROM vicidial_list WHERE lead_id='$lead_id'";
+                $querygo = "DELETE FROM go_customers WHERE lead_id='$lead_id'";
+                $rsltvg = mysqli_query($linkgo, $querygo);                
                 $rsltv = mysqli_query($link, $query);
-				$countResult = mysqli_num_rows($rsltv);
+                $countResult = mysqli_num_rows($rsltv);
 
-				if($rsltv != false){
-					 ### Admin logs
-							//$SQLdate = date("Y-m-d H:i:s");
-							//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Lead ID $lead_id','DELETE FROM vicidial_list WHERE lead_id=$lead_id');";
-							//	$rsltvLog = mysqli_query($linkgo, $queryLog);
-					$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead ID: $lead_id", $log_group, $query);
-		
-					$apiresults = array("result" => "success");
-				}else{
-					$apiresults = array("result" => "Error: Lead ID does not exist.");
-		
-				}
+                if($rsltv != false){
+                            ### Admin logs
+                                        //$SQLdate = date("Y-m-d H:i:s");
+                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Lead ID $lead_id','DELETE FROM vicidial_list WHERE lead_id=$lead_id');";
+                                        //	$rsltvLog = mysqli_query($linkgo, $queryLog);
+                        $log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead ID: $lead_id", $log_group, $query, $querygo);
+
+                        $apiresults = array("result" => "success");
+                }else{
+                        $apiresults = array("result" => "Error: Lead ID does not exist.");
+
+                }
 		
         }
 ?>

@@ -37,12 +37,14 @@
         $is_customer = 0;
         if ($rsltv) {
             $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
+            $fresultsc = mysqli_fetch_array($rsltc, MYSQLI_ASSOC);
             $is_customer = mysqli_num_rows($rsltc);
         }
-        
+
+        $data = empty($fresultsc) ? $fresults : array_merge($fresults, $fresultsc) ;       
         $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the lead info of Lead ID: $lead_id", $log_group);
         
-        $apiresults = array("result" => "success", "data" => $fresults, "is_customer" => $is_customer);
+        $apiresults = array("result" => "success", "data" => $data, "is_customer" => $is_customer);
 
     }
 ?>

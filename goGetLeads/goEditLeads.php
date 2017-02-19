@@ -35,6 +35,7 @@
         $title          = mysqli_real_escape_string($link, $_REQUEST['title']);
         $is_customer    = mysqli_real_escape_string($link, $_REQUEST['is_customer']);
         $user_id        = mysqli_real_escape_string($link, $_REQUEST['user_id']);
+        $avatar         = mysqli_real_escape_string($link, $_REQUEST['avatar']); //base64 encoded
         
         $query = "UPDATE vicidial_list
         SET first_name = '$first_name',
@@ -55,7 +56,12 @@
         title = '$title'
         WHERE lead_id = '$lead_id';";
         
+        $querygo = "UPDATE go_customers
+        SET avatar = '$avatar' 
+        WHERE lead_id ='$lead_id'";
+        
         $updateQuery = mysqli_query($link, $query);
+        //$updateQueryGo = mysqli_query($linkgo, $querygo);
         
         if($updateQuery > 0){
             if ($is_customer) {
@@ -63,7 +69,7 @@
                 $cust_cnt = mysqli_num_rows($rsltc);
                 
                 $rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';");
-                $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+                $fresults = mysqli_fetch_array($rsltu, MYSQLI_ASSOC);
                 $user_group = $fresults['user_group'];
                 
                 $rsltg = mysqli_query($linkgo, "SELECT group_list_id FROM user_access_group WHERE user_group='$user_group';");
@@ -71,13 +77,16 @@
                 $group_list_id = $fresults['group_list_id'];
                 
                 if ($cust_cnt < 1) {
-                    $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id');");
+                    $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id', '$avatar');");
                 } else {
                     $rsltc = mysqli_query($linkgo, "UPDATE go_customers SET group_list_id='$group_list_id';");
+                    //$rsltc = mysqli_query($linkgo, "UPDATE go_customers SET avatar='$avatar' WHERE lead_id='$lead_id';");
                 }
+            } else {                
+                $rsltc = mysqli_query($linkgo, "INSERT INTO go_customers VALUES(null, '$lead_id', '$group_list_id', '$avatar');");
             }
             
-            $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query);
+            $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query, $querygo);
             
             $apiresults = array("result" => "success");
         }else{
