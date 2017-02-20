@@ -11,8 +11,6 @@
 $is_logged_in = check_agent_login($astDB, $goUser);
 
 $agent = get_settings('user', $astDB, $goUser);
-$campaign_settings = get_settings('campaign', $astDB, $campaign);
-$system_settings = get_settings('system', $astDB);
 $phone_settings = get_settings('phone', $astDB, $agent->phone_login, $agent->phone_pass);
 
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
@@ -30,7 +28,6 @@ if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
 if (isset($_GET['goQueryCID'])) { $queryCID = $astDB->escape($_GET['goQueryCID']); }
     else if (isset($_POST['goQueryCID'])) { $queryCID = $astDB->escape($_POST['goQueryCID']); }
 
-$user = $agent->user;
 $server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
 
 if ( (strlen($exten) < 1) || (strlen($channel) < 1) || (strlen($stage) < 1) || (strlen($queryCID) < 1) ) {
