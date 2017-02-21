@@ -18,7 +18,7 @@
 		$ul = "WHERE user_group='$groupId'";  
 	}
 	
-	if (isset($user_group) && strlen($user_group) > 0 && $user_group !== 'ADMIN') {
+	if (isset($user_group) && strlen($user_group) > 0) {
 		$query = "SELECT TRIM(allowed_campaigns) AS allowed_camps FROM vicidial_user_groups WHERE user_group='$user_group';";
 		$rsltv = mysqli_query($link, $query);
 		$frslt = mysqli_fetch_assoc($rsltv);
