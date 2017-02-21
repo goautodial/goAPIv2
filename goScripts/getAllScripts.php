@@ -20,7 +20,8 @@
 		
                 $groupId = go_get_groupid($goUser);
 
-                if (!checkIfTenant($groupId)) {
+                //if (!checkIfTenant($groupId)) {
+				if ($user_group == 'ADMIN') {
                         $ul = "";
                 } else {
                         $ul = "AND user_group='$groupId'";
@@ -29,9 +30,9 @@
 
 		// getting script count
 		if($user_group != "ADMIN"){
-				$getLastScript = "SELECT script_id FROM vicidial_scripts WHERE user_group='$user_group';";
-		}else{
 				$getLastScript = "SELECT script_id FROM vicidial_scripts;";
+		}else{
+				$getLastScript = "SELECT script_id FROM vicidial_scripts WHERE user_group = 'ADMIN';";
 		}
 		
 		$queryScriptCount = mysqli_query($link, $getLastScript);
