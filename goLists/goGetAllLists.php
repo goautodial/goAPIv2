@@ -10,19 +10,41 @@
     include_once("goFunctions.php");
 
     $groupId = go_get_groupid($goUser);
+	$user_group = $_REQUEST['user_group'];
     
     if (!checkIfTenant($groupId)) {
         $ul='';
     } else { 
 	$ul = "WHERE user_group='$groupId'";  
     }
+	
+	if (isset($user_group) && strlen($user_group) > 0) {
+		$query = "SELECT TRIM(allowed_campaigns) AS allowed_camps FROM vicidial_user_groups WHERE user_group='$user_group';";
+		$rsltv = mysqli_query($link, $query);
+		$frslt = mysqli_fetch_assoc($rsltv);
+		
+		if (!preg_match("/ALL-CAMPAIGNS/", $frslt['allowed_camps'])) {
+			$allowed_camps = explode(' ', $frslt['allowed_camps']);
+			$allowed_campaigns = "";
+			if (count($allowed_camps) > 0) {
+				$allowed_campaigns = ($ul !== '') ? "AND campaign_id IN (" : "WHERE campaign_id IN (";
+				foreach ($allowed_camps as $camp) {
+					if ($camp !== "-") {
+						$allowed_campaigns .= "'{$camp}',";
+					}
+				}
+				$allowed_campaigns = rtrim($allowed_campaigns, ",");
+				$allowed_campaigns .= ")";
+			}
+		}
+	}
 
  	  $query = "SELECT
 					list_id,list_name,list_description,
 					(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,
 					(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count,
-					active,list_lastcalldate,campaign_id,reset_time
-				from vicidial_lists
+					active,list_lastcalldate,campaign_id,reset_time 
+				from vicidial_lists $allowed_campaigns 
 				order by list_id;";
    	  $rsltv = mysqli_query($link, $query);
         	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
