@@ -29,9 +29,9 @@
 
 		// getting script count
 		if($user_group != "ADMIN"){
-				$getLastScript = "SELECT script_id FROM vicidial_scripts;";
+				$getLastScript = "SELECT script_id FROM vicidial_scripts WHERE user_group='$user_group';";
 		}else{
-				$getLastScript = "SELECT script_id FROM vicidial_scripts WHERE user_group = 'ADMIN';";
+				$getLastScript = "SELECT script_id FROM vicidial_scripts;";
 		}
 		
 		$queryScriptCount = mysqli_query($link, $getLastScript);
