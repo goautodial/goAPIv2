@@ -91,7 +91,8 @@
 							"script_name" => $dataScriptName,
 							"active" => $dataActive,
 							"user_group" => $dataUserGroup,
-							"script_count" => $script_num
+							"script_count" => $script_num,
+							"test" => $query
 					);
 
 ?>
