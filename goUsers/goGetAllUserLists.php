@@ -114,7 +114,7 @@
                 //$apiresults = array("result" => "success", "data" => $data);
             }
 	} else {
-		$apiresults = array("result" => "Error: No data to show. $ul");
+		$apiresults = array("result" => "Error: No data to show. $user", "test" => go_get_groupid($user));
 	}
 
 ?>
