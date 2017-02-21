@@ -10,7 +10,7 @@
     #######################################################
     include_once ("../goFunctions.php");
 		
-		$userid = $_REQUEST['userid'];
+		$userid = mysqli_real_escape_string($link, $_REQUEST['userid']);
 		
 		## GET USER GROUP ##
 		$get_usergroup = "SELECT user_group FROM vicidial_users WHERE user = '$userid'";
@@ -24,7 +24,7 @@
 				if ($user_group == 'ADMIN') {
                         $ul = "";
                 } else {
-                        $ul = "AND user_group='$groupId'";
+                        $ul = "AND user_group='$user_group'";
                   
                 }
 

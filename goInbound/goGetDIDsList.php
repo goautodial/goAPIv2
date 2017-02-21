@@ -9,16 +9,18 @@
     #######################################################
     include_once ("../goFunctions.php");
     
-    $limit = $_REQUEST['limit'];
+    $limit = mysqli_real_escape_string($link, $_REQUEST['limit']);
+    $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
     if($limit < 1){ $limit = 20; } else { $limit = $limit; }
 
     $groupId = go_get_groupid($goUser);
     
-    if (!checkIfTenant($groupId)) {
+    //if (!checkIfTenant($groupId)) {
+	if ($user_group == 'ADMIN') {
         $ul='';
     } else { 
-	$ul = "WHERE user_group='$groupId'";  
-  	   }
+		$ul = "WHERE user_group='$user_group'";  
+  	}
 
    $query = "SELECT did_id,did_pattern,did_description,did_active,did_route from vicidial_inbound_dids $ul order by did_pattern LIMIT $limit";
    $rsltv = mysqli_query($link, $query);
