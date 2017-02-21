@@ -8,23 +8,38 @@
     #### License: AGPLv2                               ####
     #######################################################
     include_once ("../goFunctions.php");
+    
+	$user = $goUser;
+	if (isset($_REQUEST["user"]) && strlen($_REQUEST["user"]) > 0) {
+		$user = $_REQUEST["user"];
+	}
 
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($user);
+	
+	// get user_level
+	$query_userlevel_sql = "SELECT user_level FROM vicidial_users WHERE user = '$user' LIMIT 1";
+	$rsltv_userlevel = mysqli_query($link, $query_userlevel_sql);
+	$fetch_user_level = mysqli_fetch_array($rsltv_userlevel);
+	$user_level = $fetch_user_level["user_level"];
     
     if (!checkIfTenant($groupId)) {
         $ul='';
         if ($groupId != 'ADMIN') {
-            $uQuery = "SELECT tenant_id FROM go_multi_tenant;";
-            $uRslt = mysqli_query($linkgo, $uQuery);
-            if (mysqli_num_rows($uRslt) > 0) {
-                $ul = "AND user_group NOT IN (";
-                $uListGroups = "";
-                while($uResults = mysqli_fetch_array($uRslt, MYSQLI_ASSOC)) {
-                    $uListGroups = "'{$uResults['tenant_id']}',";
-                }
-                $ul .= rtrim($uListGroups, ',');
-                $ul .= ")";
-            }
+			if ($user_level > 8) {
+				$uQuery = "SELECT tenant_id FROM go_multi_tenant;";
+				$uRslt = mysqli_query($linkgo, $uQuery);
+				if (mysqli_num_rows($uRslt) > 0) {
+					$ul = "AND user_group NOT IN (";
+					$uListGroups = "";
+					while($uResults = mysqli_fetch_array($uRslt, MYSQLI_ASSOC)) {
+						$uListGroups = "'{$uResults['tenant_id']}',";
+					}
+					$ul .= rtrim($uListGroups, ',');
+					$ul .= ")";
+				}
+			} else {
+				$ul = "AND user_group='$groupId'";
+			}
         }
     } else { 
         $ul = "AND user_group='$groupId'";  
@@ -32,11 +47,6 @@
     if ($groupId != 'ADMIN') {
         $notAdminSQL = "AND user_group != 'ADMIN'";
     }
-    
-	$user = $goUser;
-	if (isset($_REQUEST["user"]) && strlen($_REQUEST["user"]) > 0) {
-		$user = $_REQUEST["user"];
-	}
 	
 	// getting agent count
 	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC";
@@ -80,13 +90,6 @@
 			// return data
 			$phonelogin_num = "0000001";
 		}
-		
-		
-	// get user_level
-	$query_userlevel_sql = "SELECT user_level FROM vicidial_users WHERE user = '$user' LIMIT 1";
-	$rsltv_userlevel = mysqli_query($link, $query_userlevel_sql);
-	$fetch_user_level = mysqli_fetch_array($rsltv_userlevel);
-	$user_level = $fetch_user_level["user_level"];
 
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
