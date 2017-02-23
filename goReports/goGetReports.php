@@ -17,14 +17,14 @@ ini_set('memory_limit', '2048M');
 	
 	// need function go_sec_convert();
 	
-    $pageTitle          = $_REQUEST['pageTitle'];
-    $fromDate           = $_REQUEST['fromDate'];
-    $toDate             = $_REQUEST['toDate'];
-    $campaignID         = $_REQUEST['campaignID'];
-    $request            = $_REQUEST['request'];
-    $userID             = $_REQUEST['userID'];
-    $userGroup          = $_REQUEST['userGroup'];
-	$dispo_stats		= $_REQUEST['statuses'];
+    $pageTitle = mysqli_real_escape_string($link, $_REQUEST['pageTitle']);
+    $fromDate = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
+    $toDate = mysqli_real_escape_string($link, $_REQUEST['toDate']);
+    $campaignID = mysqli_real_escape_string($link, $_REQUEST['campaignID']);
+    $request = mysqli_real_escape_string($link, $_REQUEST['request']);
+    $userID = mysqli_real_escape_string($link, $_REQUEST['userID']);
+    $userGroup = mysqli_real_escape_string($link, $_REQUEST['userGroup']);
+	$dispo_stats = mysqli_real_escape_string($link, $_REQUEST['statuses']);
 	
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
@@ -33,20 +33,21 @@ ini_set('memory_limit', '2048M');
 	$userGroup = get_group_id($userID, $link);
 	
 	if($pageTitle == "call_export_report"){
-		$campaigns = $_REQUEST['campaigns'];
-		$inbounds = $_REQUEST['inbounds'];
-		$lists = $_REQUEST['lists'];
-		$custom_fields = $_REQUEST['custom_fields'];
-		$per_call_notes = $_REQUEST['per_call_notes'];
+		$campaigns = mysqli_real_escape_string($link, $_REQUEST['campaigns']);
+		$inbounds = mysqli_real_escape_string($link, $_REQUEST['inbounds']);
+		$lists = mysqli_real_escape_string($link, $_REQUEST['lists']);
+		$custom_fields = mysqli_real_escape_string($link, $_REQUEST['custom_fields']);
+		$per_call_notes = mysqli_real_escape_string($link, $_REQUEST['per_call_notes']);
+		$rec_location = mysqli_real_escape_string($link, $_REQUEST['rec_location']);
 		
-		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $userGroup, $link);
+		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $userGroup, $link);
 	}else{
 		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats);
 	}
 	
     $apiresults = array("result" => "success", "getReports" => $goReportsReturn);
     
-	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $userGroup, $link){
+	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$userGroup, $link){
 		//$date_diff = go_get_date_diff($fromDate, $toDate);
         //$date_array = implode("','",go_get_dates($fromDate, $toDate));
 		
@@ -148,16 +149,26 @@ ini_set('memory_limit', '2048M');
 			}
 		}
 		
+		if($rec_location == "Y"){
+			$rec_location_fields = ", re.location as recording_location";
+			$rec_location_from = ", recording_log re";
+			$rec_location_where = "and re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id";
+		}else{
+			$rec_location_fields = "";
+			$rec_location_from = "";
+			$rec_location_where = "";
+		}
+		
 		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
 		$user_group_SQL = "";
 		$export_fields_SQL = "";
 		
 		if ($RUNcampaign > 0){
-			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.phone_number,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date limit 1000";
+			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date limit 1000";
 		}
 		
 		if ($RUNgroup > 0){
-			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.phone_number,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vl,vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date limit 1000";
+			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vl,vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date limit 1000";
 		}
 		
 		//$query = "SELECT * FROM vicidial_list LIMIT 100;";
@@ -175,6 +186,9 @@ ini_set('memory_limit', '2048M');
 		if($per_call_notes == "Y"){
 			array_push($csv_header, "call_notes");
 		}
+		//if($rec_location == "Y"){
+		//	array_push($csv_header, "recording_location");
+		//}
 		if($custom_fields == "Y")	{
 		    for($i = 0 ; $i < count($array_list); $i++){
 				$list_id = $array_list[$i];
@@ -194,7 +208,7 @@ ini_set('memory_limit', '2048M');
 		
 	//OUTPUT DATA ROW//
 		while($row = mysqli_fetch_row($result)) {
-			$lead_id = $row[35];
+			$lead_id = $row[34];
 			
 			if($per_call_notes == "Y"){
 				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
@@ -208,6 +222,17 @@ ini_set('memory_limit', '2048M');
 				}
 				array_push($row,$notes_data);
 			}
+			//if($rec_location == "Y"){
+			//	$query_rec_location = mysqli_query($link, "SELECT recording_id as recording_location from recording_log AND (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') where lead_id='$lead_id' LIMIT 1;");
+			//	$rec_location_ct = mysqli_num_rows($query_rec_location);
+			//	if ($rec_location_ct > 0){
+			//		$fetch_rec_location = mysqli_fetch_array($query_rec_location);
+			//		$rec_location_data =	$fetch_rec_location["recording_location"];
+			//	}else{
+			//		$rec_location_data = "";
+			//	}
+			//	array_push($row,$rec_location_data);
+			//}
 			if($custom_fields == "Y")	{
 			    for($i = 0 ; $i < count($array_list); $i++){
 				    $list_id = "custom_".$array_list[$i];
