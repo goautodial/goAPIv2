@@ -10,7 +10,7 @@
     include_once ("../goFunctions.php");
     
     $limit = $_REQUEST['limit'];
-    $requestDataPhone = $_REQUEST['requestDataPhone'];
+    $requestDataPhone = mysqli_real_escape_string($link, $_REQUEST['requestDataPhone']);
 	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
 	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
 	$agent_filter = mysqli_real_escape_string($link, $_REQUEST['agent_filter']);
@@ -50,7 +50,7 @@
 $goLimit = "25";
 		
 if(!empty($requestDataPhone)) {
-	$sqlPhone = "AND vl.phone_number LIKE '%$requestDataPhone%'";
+	$sqlPhone = "AND vl.phone_number LIKE '$requestDataPhone%'";
 	$goLimit = "500";
 }else{
 		$sqlPhone = "";

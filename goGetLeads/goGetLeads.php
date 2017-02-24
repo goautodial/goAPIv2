@@ -44,7 +44,7 @@
 	}
 	
 	if(!empty($search)) 
-		$goSearch = "AND (phone_number LIKE '%$search%' OR first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR lead_id LIKE '$search')";
+		$goSearch = "AND (phone_number LIKE '$search%' OR first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR lead_id LIKE '$search')";
 	else
 		$goSearch = '';
 	if(!empty($disposition_filter))
