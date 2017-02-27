@@ -69,6 +69,7 @@
 	$url_tab_second_url		= $_REQUEST['url_tab_second_url'];
 	$agent_lead_search		= $_REQUEST['agent_lead_search'];
 	$agent_lead_search_method = $_REQUEST['agent_lead_search_method'];
+    $omit_phone_code = $_REQUEST['omit_phone_code'];
 	
 	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
 	$survey_method = $_REQUEST['survey_method'];
@@ -220,7 +221,8 @@
 										waitforsilence_options = '$waitforsilence_options',
 										per_call_notes = '$per_call_notes',
 										agent_lead_search = '$agent_lead_search',
-										agent_lead_search_method = '$agent_lead_search_method'
+										agent_lead_search_method = '$agent_lead_search_method',
+                                        omit_phone_code = '$omit_phone_code'
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;

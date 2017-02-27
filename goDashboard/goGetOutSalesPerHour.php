@@ -21,11 +21,15 @@
     }
 
    $NOW = date("Y-m-d");
-            $query_date =  date('Y-m-d');
+            $query_date =  date('Y-m-d H:i');
             $status = "SALE";
-            $date = "call_date BETWEEN '$query_date 00:00:00' AND '$query_date 23:59:59'";
-            $query="select concat(round((select count(*) as qresult from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $date $ul),3),'%')/8 as getOutSalesPerHour";
+            $date = "vlog.call_date BETWEEN '$query_date:00' AND '$query_date:59'";
+            $query="select count(*) as getOutSalesPerHour
+                    FROM vicidial_log as vlog
+                    LEFT JOIN vicidial_list as vl 
+                    ON vlog.lead_id=vl.lead_Id
+                    WHERE vlog.status='$status' and $date $ul";
     $rsltv = mysqli_query($link,$query);
     $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( array( "result" => "success", "query" => $query), $fresults );
 ?>

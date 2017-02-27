@@ -203,7 +203,7 @@
 												'Y','DISABLED','30','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-												'${$tenant_id}0','7', '$answering_machine_detection'
+												'${$tenant_id}998','7', '$answering_machine_detection'
 										)";
 							$rsltvAdd = mysqli_query($link, $queryAdd);
 							$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -293,7 +293,7 @@
 											'Y','DISABLED','30','$answering_machine_detection','ALLFORCE',
 											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-											'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+											'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
 											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 										)";
 
@@ -526,7 +526,7 @@
 																'Y','DISABLED','30','8369','ALLFORCE',
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-																'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+																'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
 																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 															)";
 
@@ -766,7 +766,7 @@
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','','$wavfile_name', 'EXTENSION')";
+                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
