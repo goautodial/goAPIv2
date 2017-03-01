@@ -61,7 +61,7 @@ if ($sipIsLoggedIn) {
 		);
 		$astDB->insert('vicidial_agent_skip_log', $insertData);
 
-		$APIResult = array( "result" => "error", "message" => "LEAD REVERTED" );
+		$APIResult = array( "result" => "success", "message" => "LEAD REVERTED" );
 	}
 
 } else {
