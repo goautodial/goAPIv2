@@ -214,7 +214,7 @@ if ($is_logged_in) {
 			$retry_count++;
 		}
         
-        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "test" => $custom_listid );
+        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "test" => $lastError );
     }
 } else {
     $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
