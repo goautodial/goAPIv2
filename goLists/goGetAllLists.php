@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("goFunctions.php");
+    include_once("../goFunctions.php");
 
     $groupId = go_get_groupid($goUser);
 	$user_group = $_REQUEST['user_group'];
