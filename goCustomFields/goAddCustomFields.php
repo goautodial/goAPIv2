@@ -71,7 +71,7 @@
                     if (preg_match("/,/",$field_options_array[$te]))
                         {
                         $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= str_replace(" ","_",$field_options_value_array[0].",");
+                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
                         }
                     $te++;
                    }
@@ -93,7 +93,7 @@
                     if (preg_match("/,/",$field_options_array[$te]))
                         {
                         $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= str_replace(" ","_",$field_options_value_array[0].",");
+                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
                         }
                     $te++;
                    }
@@ -182,7 +182,7 @@
                 //$rsltvLog = mysqli_query($linkgo, $queryLog);
                 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insert);
                
-                $apiresults = array("result" => "success");
+                $apiresults = array("result" => "success", "gg" => $stmtCUSTOM);
             }else{
                 $apiresults = array("result" => "Error: Failed to add custom field.");
             }

@@ -222,6 +222,7 @@ ini_set('memory_limit', '2048M');
 				}
 				array_push($row,$notes_data);
 			}
+
 			//if($rec_location == "Y"){
 			//	$query_rec_location = mysqli_query($link, "SELECT recording_id as recording_location from recording_log AND (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') where lead_id='$lead_id' LIMIT 1;");
 			//	$rec_location_ct = mysqli_num_rows($query_rec_location);
@@ -233,6 +234,21 @@ ini_set('memory_limit', '2048M');
 			//	}
 			//	array_push($row,$rec_location_data);
 			//}
+
+                        if(!empty($row[28])) {
+                                $row[28] = preg_replace('/[ ,]+/', '-', trim($row[28]));
+                        }
+                        if(!empty($row[15])) {
+                                $row[15] = preg_replace('/[ ,]+/', '-', trim($row[15]));
+                        }
+                        if(!empty($row[16])) {
+                                $row[16] = preg_replace('/[ ,]+/', '-', trim($row[16]));
+                        }
+                        if(!empty($row[17])) {
+                                $row[17] = preg_replace('/[ ,]+/', '-', trim($row[17]));
+                        }
+
+
 			if($custom_fields == "Y")	{
 			    for($i = 0 ; $i < count($array_list); $i++){
 				    $list_id = "custom_".$array_list[$i];
@@ -251,9 +267,9 @@ ini_set('memory_limit', '2048M');
 							$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$fields_array[$x]]);
 						}
 					}else{
-						for($x=0;$x < count($fields_array);$x++){
-							$fetch_row[] =  '';
-						}
+					//	for($x=0;$x < count($fields_array);$x++){
+					//		$fetch_row[] =  '';
+					//	}
 					}
 					
 					

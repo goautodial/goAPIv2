@@ -47,7 +47,7 @@
 		$calls_query = mysqli_query($link, "SELECT uniqueid,lead_id,list_id,campaign_id,call_date,start_epoch,end_epoch,length_in_sec,status,phone_code,phone_number,user,comments,processed,user_group,term_reason,alt_dial FROM vicidial_log WHERE lead_id = '$lead_id';");
 			while($calls_fetch = mysqli_fetch_array($calls_query)){
 				$calls_call_date[] = $calls_fetch['call_date'];
-				$calls_length_in_sec[] = $calls_fetch['length_in_sec'];
+				$calls_length_in_sec[] = gmdate("H:i:s", $calls_fetch['length_in_sec']);
 				$calls_status[] = $calls_fetch['status'];
 				$calls_user[] = $calls_fetch['user'];
 				$calls_campaign_id[] = $calls_fetch['campaign_id'];
@@ -61,7 +61,7 @@
 			
 			while($closerlog_fetch = mysqli_fetch_array($closerlog_query)){
 				$closerlog_call_date[] = $closerlog_fetch['call_date'];
-				$closerlog_length_in_sec[] = $closerlog_fetch['length_in_sec'];
+				$closerlog_length_in_sec[] = gmdate("H:i:s", $closerlog_fetch['length_in_sec']);
 				$closerlog_status[] = $closerlog_fetch['status'];
 				$closerlog_user[] = $closerlog_fetch['user'];
 				$closerlog_campaign_id[] = $closerlog_fetch['campaign_id'];
@@ -91,7 +91,7 @@
 			
 			while($record_fetch = mysqli_fetch_array($record_query)){
 				$record_start_time[] = $record_fetch['start_time'];
-				$record_length_in_sec[] = $record_fetch['length_in_sec'];
+				$record_length_in_sec[] = gmdate("H:i:s", $record_fetch['length_in_sec']);
 				$record_recording_id[] = $record_fetch['recording_id'];
 				$record_filename[] = $record_fetch['filename'];
 				$record_location[] = $record_fetch['location'];

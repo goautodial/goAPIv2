@@ -37,7 +37,15 @@
     if($field_label_old != $field_label){
         $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
     }else{
-        $field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+	$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
+    	$goCheckrslt = mysqli_query($link, $goCheckSQL);
+	$countGoCheckrslt = mysqli_num_rows($goCheckrslt);
+
+	if($countGoCheckrslt > 0) {
+	     	$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+	} else {
+	     	$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+	}
     }
     
     $field_options_ENUM='';
