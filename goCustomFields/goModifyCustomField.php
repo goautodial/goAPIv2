@@ -118,15 +118,15 @@
         $field_sql .="";  
     }
     
-    //if ( ($field_type=='DISPLAY') or ($field_type=='SCRIPT') or (preg_match("/\|$field_label\|/",$vicidial_list_fields)) ) {
-    //    //  do nothing      
-    //} else {
-    //    $stmtCUSTOM="$field_sql";
-    //    $rslt = mysqli_query($link, $stmtCUSTOM);
-    //}
+    if ( ($field_type == 'DISPLAY') || ($field_type == 'SCRIPT') || (preg_match("/\|$field_label\|/", $vicidial_list_fields)) ) {
+        //  do nothing      
+    } else {
+        $stmtCUSTOM="$field_sql";
+		$rslt = mysqli_query($link, $stmtCUSTOM);
+    }
     
-    $stmtCUSTOM="$field_sql";
-    $rslt = mysqli_query($link, $stmtCUSTOM);
+    //$stmtCUSTOM="$field_sql";
+    //$rslt = mysqli_query($link, $stmtCUSTOM);
     
     $update = "UPDATE vicidial_lists_fields set
                 field_label='$field_label',field_name='$field_name',field_description='$field_description',
