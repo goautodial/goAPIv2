@@ -74,12 +74,13 @@
     
     if (count( $apiresults )) {
     	if ($userresponsetype == "json") {
+			var_dump($userresponsetype);
     		$apiresults = json_encode( $apiresults );
     		echo $apiresults;
-    		//exit();
+    		exit();
     	} else {
     		if ($userresponsetype == "xml") {
-    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $action . "</action>\n" );
+    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $goAction . "</action>\n" );
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
