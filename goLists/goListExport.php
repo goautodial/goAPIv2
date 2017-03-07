@@ -95,7 +95,7 @@ ini_set('memory_limit', '2048M');
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			if ($u == 102) {
+			if ($u == 101) {
 				var_dump($row[$x]);
 				break;
 			}
