@@ -1138,6 +1138,7 @@ if ($sipIsLoggedIn) {
                     
                     $astDB->where('callback_id', $CBack_id);
                     $astDB->where('user', $user);
+                    $astDB->where('status', 'INACTIVE', '!=');
                     $query = $astDB->update('vicidial_callbacks', array('status'=>'INACTIVE'));
                 }
             }
