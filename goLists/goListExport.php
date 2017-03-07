@@ -97,6 +97,9 @@ ini_set('memory_limit', '2048M');
 			$row[$x] = $explode_array;
 			$array_fetch = "";
 			$u = 0;
+			if ($fetch_row[0] == "52855") {
+				var_dump($row[$x]);
+			}
 			$x++;
 		}
 		
