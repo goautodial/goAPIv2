@@ -12,7 +12,7 @@
 //error_reporting(E_ALL);
 ini_set('memory_limit', '2048M');
 //ini_set('memory_limit', -1);
-    include_once ("../goFunctions.php");
+    //include_once ("../goFunctions.php");
 	
 	$listid = $_REQUEST["list_id"];
 	
