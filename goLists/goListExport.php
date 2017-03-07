@@ -17,8 +17,6 @@ ini_set('memory_limit', '2048M');
 	$listid = $_REQUEST["list_id"];
 	
 	if($listid != NULL){
-		$testQ = mysqli_query('SET CHARACTER SET utf8');
-		
 		$query = mysqli_query($link,"SELECT custom_fields_enabled FROM system_settings;");
 		$fetch = mysqli_fetch_array($query);
 		$custom_fields_enabled = $fetch["custom_fields_enabled"];
