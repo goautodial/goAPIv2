@@ -91,6 +91,7 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
+				var_dump($header[$u]);
 				$array_fetch .= "|".$fetch_row[$u];
 				$u++;
 			}
