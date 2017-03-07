@@ -90,17 +90,13 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch .= "|".$fetch_row[$u];
+				$array_fetch .= "|{$fetch_row[$u]}";
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[] = $explode_array;
 			$u = 0;
 		}
-		
-		echo "<pre>";
-		print_r($row);
-		echo "</pre>";
 		
 		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
 	}else{
