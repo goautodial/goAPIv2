@@ -87,11 +87,11 @@ ini_set('memory_limit', '2048M');
 		$u = 0;
 		$x = 0;
 		$count_header = count($header);
-		while($fetch_row = mysqli_fetch_array($dllist)){
-			$array_fetch = $fetch_row["lead_id"];
+		while($fetch_row = mysqli_fetch_row($dllist)){
+			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch .= "|".$fetch_row[$header[$u]];
+				$array_fetch .= "|".$fetch_row[$u];
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
