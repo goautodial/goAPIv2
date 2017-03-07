@@ -98,7 +98,7 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = "";
 			$u = 0;
 			if ($fetch_row[0] == "52855") {
-				var_dump(json_encode($row[$x]));
+				var_dump(json_encode($row[$x], JSON_UNESCAPED_UNICODE));
 			}
 			$x++;
 		}
