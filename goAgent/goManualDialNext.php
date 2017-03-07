@@ -1126,7 +1126,7 @@ if ($sipIsLoggedIn) {
                 //$stmt="SELECT entry_time,callback_time,user,comments FROM vicidial_callbacks where lead_id='$lead_id' order by callback_id desc LIMIT 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->orderBy('callback_id', 'desc');
-                $rslt = $astDB->getOne('vicidial_callbacks', 'entry_time,callback_time,user,comments');
+                $rslt = $astDB->getOne('vicidial_callbacks', 'entry_time,callback_time,user,comments,callback_id');
                 $cb_record_ct = $astDB->getRowCount();
                 if ($cb_record_ct > 0) {
                     $row = $rslt;
@@ -1134,6 +1134,11 @@ if ($sipIsLoggedIn) {
                     $CBcallback_time =	trim("{$row['callback_time']}");
                     $CBuser =			trim("{$row['user']}");
                     $CBcomments =		trim("{$row['comments']}");
+                    $CBack_id =		    trim("{$row['callback_id']}");
+                    
+                    $astDB->where('callback_id', $CBack_id);
+                    $astDB->where('user', $user);
+                    $query = $astDB->update('vicidial_callbacks', array('status'=>'INACTIVE'));
                 }
             }
     
