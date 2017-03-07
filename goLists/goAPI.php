@@ -83,9 +83,9 @@
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
-    			if ($responsetype) {
-    				exit( "result=error;message=This API function can only return XML response format;" );
-    			}
+    			//if ($responsetype) {
+    			//	exit( "result=error;message=This API function can only return XML response format;" );
+    			//}
     
     			foreach ($apiresults as $k => $v) {
     				echo "" . $k . "=" . $v . ";";
