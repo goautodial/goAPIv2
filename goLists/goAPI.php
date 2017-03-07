@@ -7,6 +7,8 @@
     #### Written by: Jerico James Flores Milo       ####
     #### License: AGPLv2                            ####
     ####################################################
+    ini_set('display_errors', 1);
+	error_reporting(E_ALL);
     
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
