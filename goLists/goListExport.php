@@ -15,6 +15,7 @@ ini_set('memory_limit', '2048M');
     include_once ("../goFunctions.php");
 	
 	$listid = $_REQUEST["list_id"];
+	$testLimit = (isset($_REQUEST['testLimit']) ? $_REQUEST['testLimit'] : 0);
 	
 	if($listid != NULL){
 		$query = mysqli_query($link,"SELECT custom_fields_enabled FROM system_settings;");
@@ -95,7 +96,7 @@ ini_set('memory_limit', '2048M');
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			if ($x == 102) {
+			if ($testLimit > 0 && $x == $testLimit) {
 				var_dump($row[$x]);
 				break;
 			}
