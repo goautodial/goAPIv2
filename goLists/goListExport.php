@@ -7,9 +7,9 @@
    #### Written by: Jeremiah Sebastian V. Samatra  ####
    #### License: AGPLv2                            ####
    ####################################################
-ini_set('display_errors', 1);
+//ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 ini_set('memory_limit', '2048M');
 //ini_set('memory_limit', -1);
     include_once ("../goFunctions.php");
@@ -98,7 +98,7 @@ ini_set('memory_limit', '2048M');
 			$u = 0;
 		}
 		
-		
+		var_dump($row);
 		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
 	}else{
 		$apiresults = array("result" => "Error: List ID not defined");
