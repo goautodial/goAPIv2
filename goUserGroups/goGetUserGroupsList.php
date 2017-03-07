@@ -21,7 +21,7 @@
 	}
 
 	$group_type = "Default";
-   	$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT $limit;";
+   	$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY group_name LIMIT $limit;";
    	$rsltv = mysqli_query($link, $query);
 
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
