@@ -76,16 +76,16 @@
     	if ($userresponsetype == "json") {
     		$apiresults = json_encode( $apiresults );
     		echo $apiresults;
-    		exit();
+    		//exit();
     	} else {
     		if ($userresponsetype == "xml") {
     			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $action . "</action>\n" );
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
-    			//if ($responsetype) {
-    			//	exit( "result=error;message=This API function can only return XML response format;" );
-    			//}
+    			if ($responsetype) {
+    				exit( "result=error;message=This API function can only return XML response format;" );
+    			}
     
     			foreach ($apiresults as $k => $v) {
     				echo "" . $k . "=" . $v . ";";
