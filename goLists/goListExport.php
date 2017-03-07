@@ -95,7 +95,7 @@ ini_set('memory_limit', '2048M');
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
-			$row["$x"] = $explode_array;
+			$row["list_{$x}"] = $explode_array;
 			$u = 0;
 			$x++;
 		}
