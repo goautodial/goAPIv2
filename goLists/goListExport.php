@@ -96,12 +96,11 @@ ini_set('memory_limit', '2048M');
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			var_dump($row[$x]);
 			$u = 0;
 			$x++;
 		}
 		
-		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
+		$apiresults = array("result" => "success", "header" => $header, "rows" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
 	}else{
 		$apiresults = array("result" => "Error: List ID not defined");
 	}
