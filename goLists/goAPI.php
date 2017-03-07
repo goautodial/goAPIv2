@@ -66,6 +66,7 @@
     }
     
     $userresponsetype = $_REQUEST["responsetype"];
+	$responsetype = '';
     
     if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
     	$userresponsetype = "xml";
@@ -85,7 +86,7 @@
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
-    			if (!$userresponsetype) {
+    			if ($responsetype) {
     				exit( "result=error;message=This API function can only return XML response format;" );
     			}
     
