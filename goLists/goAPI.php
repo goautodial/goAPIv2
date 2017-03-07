@@ -74,7 +74,7 @@
     
     if (count( $apiresults )) {
     	if ($userresponsetype == "json") {
-    		$apiresults = json_encode( $apiresults );
+    		$apiresults = json_encode( $apiresults, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE );
     		echo $apiresults;
     		exit();
     	} else {
