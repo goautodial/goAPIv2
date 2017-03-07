@@ -95,11 +95,12 @@ ini_set('memory_limit', '2048M');
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			$array_fetch = "";
-			$u = 0;
 			if ($x > 150) {
+				var_dump($array_fetch);
 				break;
 			}
+			$array_fetch = "";
+			$u = 0;
 			$x++;
 		}
 		
