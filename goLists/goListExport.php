@@ -93,13 +93,10 @@ ini_set('memory_limit', '2048M');
 			while($u < $count_header){
 				$thisRow = (!is_null($fetch_row[$u]) ? $fetch_row[$u] : "");
 				$array_fetch .= "|{$thisRow}";
-				if ($u > 30) {
-					break;
-				}
 				$u++;
 			}
-			$explode_array = explode("|",$array_fetch);
-			$row[$x] = $explode_array;
+			//$explode_array = explode("|",$array_fetch);
+			$row[$x] = $array_fetch;
 			$u = 0;
 			$x++;
 		}
