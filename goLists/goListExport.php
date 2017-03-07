@@ -91,7 +91,8 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch .= "|".$fetch_row[$u];
+				$thisRow = (!is_null($fetch_row[$u]) ? $fetch_row[$u] : "");
+				$array_fetch .= "|{$thisRow}";
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
