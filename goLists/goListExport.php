@@ -95,7 +95,7 @@ ini_set('memory_limit', '2048M');
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			if ($x > 110) {
+			if ($x > 100) {
 				var_dump($array_fetch);
 				break;
 			}
