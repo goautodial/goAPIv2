@@ -15,7 +15,6 @@ ini_set('memory_limit', '2048M');
     include_once ("../goFunctions.php");
 	
 	$listid = $_REQUEST["list_id"];
-	$testLimit = (isset($_REQUEST['testLimit']) ? $_REQUEST['testLimit'] : 0);
 	
 	if($listid != NULL){
 		$query = mysqli_query($link,"SELECT custom_fields_enabled FROM system_settings;");
@@ -91,24 +90,17 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch .= "|".$fetch_row[$u];
+				$array_fetch .= "|".utf8_encode($fetch_row[$u]);
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
 			$row[$x] = $explode_array;
-			if ($testLimit > 0 && $x == $testLimit) {
-				var_dump($row[$x]);
-				break;
-			}
 			$array_fetch = "";
 			$u = 0;
 			$x++;
 		}
 		
 		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
-		if ($testLimit > 0) {
-			var_dump($apiresults);
-		}
 	}else{
 		$apiresults = array("result" => "Error: List ID not defined");
 	}
