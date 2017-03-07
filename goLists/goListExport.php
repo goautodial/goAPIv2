@@ -12,7 +12,7 @@
 //error_reporting(E_ALL);
 ini_set('memory_limit', '2048M');
 //ini_set('memory_limit', -1);
-    //include_once ("../goFunctions.php");
+    include_once ("../goFunctions.php");
 	
 	$listid = $_REQUEST["list_id"];
 	
@@ -84,22 +84,22 @@ ini_set('memory_limit', '2048M');
 			$u = 0;
 		}*/
 		
-		$x=0;
+		$u = 0;
 		$count_header = count($header);
 		while($fetch_row = mysqli_fetch_row($dllist)){
 			$array_fetch = $fetch_row[0];
-			$u = 0;
-			while($u < $count_header){
+			$u = $u+1;
+			while($u <= $count_header){
 				$array_fetch .= "|".$fetch_row[$u];
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
-			$row[$x] = $explode_array;
-			$array_fetch = "";
-			$x++;
+			$row[] = $array_fetch;
+			$u = 0;
+			//$x++;
 		}
 		
-		var_dump($dllist);
+		
 		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
 	}else{
 		$apiresults = array("result" => "Error: List ID not defined");
