@@ -21,7 +21,7 @@ ini_set('memory_limit', '2048M');
 		$fetch = mysqli_fetch_array($query);
 		$custom_fields_enabled = $fetch["custom_fields_enabled"];
 	
-		if ($custom_fields_enabled > 0) {
+		if ($custom_fields_enabled > 3) {
 			$custom_table = "custom_".$listid;
 			//$cllist = mysqli_query($link,"SELECT field_label FROM vicidial_lists_fields WHERE list_id ='$listid';");
 			$cllist_query = "SHOW COLUMNS FROM $custom_table;";
@@ -85,17 +85,20 @@ ini_set('memory_limit', '2048M');
 		}*/
 		
 		$u = 0;
+		$x = 0;
 		$count_header = count($header);
 		while($fetch_row = mysqli_fetch_row($dllist)){
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
 				$array_fetch .= "|{$fetch_row[$u]}";
+				var_dump($fetch_row[$u]);
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
-			$row[] = $explode_array;
+			$row[$x] = $explode_array;
 			$u = 0;
+			$x++;
 		}
 		
 		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
