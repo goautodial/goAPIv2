@@ -20,6 +20,7 @@ ini_set('memory_limit', '2048M');
 		$query = mysqli_query($link,"SELECT custom_fields_enabled FROM system_settings;");
 		$fetch = mysqli_fetch_array($query);
 		$custom_fields_enabled = $fetch["custom_fields_enabled"];
+		var_dump($custom_fields_enabled);
 	
 		if ($custom_fields_enabled <= 1){
 			$custom_table = "custom_".$listid;
