@@ -7,8 +7,6 @@
     #### Written by: Jerico James Flores Milo       ####
     #### License: AGPLv2                            ####
     ####################################################
-    ini_set('display_errors', 1);
-	error_reporting(E_ALL);
     
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
@@ -66,7 +64,6 @@
     }
     
     $userresponsetype = $_REQUEST["responsetype"];
-	$responsetype = '';
     
     if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
     	$userresponsetype = "xml";
@@ -82,7 +79,7 @@
     		exit();
     	} else {
     		if ($userresponsetype == "xml") {
-    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $goAction . "</action>\n" );
+    			echo "<?xml version=\"1.0\" encoding=\"" . $goCharset . "\"?>\n<goautodialapi version=\"" . $goVersion . ( "\">\n<action>" . $action . "</action>\n" );
     			apiXMLOutput( $apiresults );
     			echo "</goautodialapi>";
     		} else {
