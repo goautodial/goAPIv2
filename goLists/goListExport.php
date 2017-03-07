@@ -7,9 +7,9 @@
    #### Written by: Jeremiah Sebastian V. Samatra  ####
    #### License: AGPLv2                            ####
    ####################################################
-ini_set('display_errors', 1);
+//ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 ini_set('memory_limit', '2048M');
 //ini_set('memory_limit', -1);
     include_once ("../goFunctions.php");
@@ -90,7 +90,6 @@ ini_set('memory_limit', '2048M');
 			$array_fetch = $fetch_row[0];
 			$u = 0;
 			while($u < $count_header){
-				var_dump($u . " === " . $fetch_row[$u]);
 				$array_fetch .= "|".$fetch_row[$u];
 				$u++;
 			}
