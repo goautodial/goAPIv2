@@ -88,19 +88,20 @@ ini_set('memory_limit', '2048M');
 		$x = 0;
 		$count_header = count($header);
 		while($fetch_row = mysqli_fetch_row($dllist)){
-			$array_fetch[$x] = $fetch_row[0];
+			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch[$x] .= "|".$fetch_row[$u];
+				$array_fetch .= "|".$fetch_row[$u];
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
-			//$row["$x"] = $explode_array;
+			$row["$x"] = $explode_array;
 			$u = 0;
 			$x++;
 		}
 		
-		$apiresults = array("result" => "success", "header" => $header, "row" => $array_fetch, "query" => $stmt, "query_custom_list" => $custom_table);
+		$apiresults = array("result" => "success", "header" => $header, "row" => $row, "query" => $stmt, "query_custom_list" => $custom_table);
+		var_dump($apiresults);
 	}else{
 		$apiresults = array("result" => "Error: List ID not defined");
 	}
