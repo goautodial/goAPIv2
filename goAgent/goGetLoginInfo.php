@@ -791,7 +791,7 @@ if ($userExist > 0) {
     $astDB->groupBy('country_code,country');
     $astDB->join('vicidial_country_iso_tld', 'country=iso3 or country_name=geographic_description', 'left');
     $rslt = $astDB->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
-    var_dump($astDB->getLastQuery());
+    var_dump($astDB->getLastError());
     $country_code = [];
     foreach ($rslt as $country) {
         $country_code[$country['country']]['code'] = htmlentities(addslashes($country['country_code']));
