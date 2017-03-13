@@ -122,7 +122,7 @@
                 while($resultsCallerIDsFromVAC = mysqli_fetch_array($rsltvCallerIDsFromVAC, MYSQLI_ASSOC)){               
                     array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
                 }
-            $data = array_merge($dataInCalls, $dataNoCalls, array( "parked" => $dataParkedChannels ), array( "callerids" => $dataCallerIDsFromVAC ));
+            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
             
             $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             
