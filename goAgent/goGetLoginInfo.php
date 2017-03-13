@@ -788,8 +788,8 @@ if ($userExist > 0) {
     $data = array_merge($data, array( 'default_settings' => $default_settings ));
 
     $astDB->where('tld', 'NULL', 'is not');
-    $astDB->groupBy('country_code,country');
     $astDB->join('vicidial_country_iso_tld', 'country=iso3 or country_name=geographic_description', 'left');
+    $astDB->groupBy('country_code,country');
     $rslt = $astDB->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
     var_dump($astDB->getLastError());
     $country_code = [];
