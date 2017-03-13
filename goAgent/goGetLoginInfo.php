@@ -786,11 +786,16 @@ if ($userExist > 0) {
     }
     
     $data = array_merge($data, array( 'default_settings' => $default_settings ));
-    
-    $rslt = $astDB->get('vicidial_country_iso_tld', null, 'iso3,country_name');
+
+    $astDB->where('tld', 'NULL', 'is not');
+    $astDB->groupBy('country_code,country');
+    $astDB->join('vicidial_country_iso_tld', 'country=iso3 or country_name=geographic_description', 'left');
+    $rslt = $astDB->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
     $country_code = [];
     foreach ($rslt as $country) {
-        $country_code[$country['iso3']] = htmlentities(addslashes($country['country_name']));
+        $country_code[$country['country']]['code'] = htmlentities(addslashes($country['country_code']));
+        $country_code[$country['country']]['tld'] = htmlentities(addslashes($country['tld']));
+        $country_code[$country['country']]['name'] = htmlentities(addslashes($country['country_name']));
     }
     $data = array_merge($data, array( 'country_codes' => $country_code ));
     
