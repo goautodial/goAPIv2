@@ -125,7 +125,7 @@
                 }
             
             if ($typeOf == 'single') {
-                $data = array_merge($dataInCalls, $dataNoCalls, array( "parked" => $dataParkedChannels ), array( "callerids" => $dataCallerIDsFromVAC ));
+                $data = array_merge(array( "parked" => $dataParkedChannels ), array( "callerids" => $dataCallerIDsFromVAC ), $dataInCalls, $dataNoCalls);
             } else {
                 $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
             }
