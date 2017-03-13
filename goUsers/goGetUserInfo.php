@@ -15,6 +15,7 @@
     $user = $_REQUEST['user'];
     $filter = "default";
     $filter = $_REQUEST['filter'];
+    $typeOf = mysqli_real_escape_string($link, $_REQUEST['type']);
     
     $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
@@ -122,7 +123,12 @@
                 while($resultsCallerIDsFromVAC = mysqli_fetch_array($rsltvCallerIDsFromVAC, MYSQLI_ASSOC)){               
                     array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
                 }
-            $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
+            
+            if ($typeOf == 'single') {
+                $data = array_merge( array( "call" => $dataInCalls, "nocall" => $dataNoCalls, "parked" => $dataParkedChannels, "callerids" => $dataCallerIDsFromVAC ));
+            } else {
+                $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
+            }
             
             $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             
