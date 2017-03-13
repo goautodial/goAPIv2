@@ -794,9 +794,10 @@ if ($userExist > 0) {
     
     $country_code = [];
     foreach ($rslt as $country) {
-        $country_code[$country['country']]['code'] = htmlentities(addslashes($country['country_code']));
-        $country_code[$country['country']]['tld'] = htmlentities(addslashes($country['tld']));
-        $country_code[$country['country']]['name'] = htmlentities(addslashes($country['country_name']));
+        $country_id = "{$country['country']}_{$country['country_code']}";
+        $country_code[$country_id]['code'] = htmlentities(addslashes($country['country_code']));
+        $country_code[$country_id]['tld'] = htmlentities(addslashes($country['tld']));
+        $country_code[$country_id]['name'] = htmlentities(addslashes($country['country_name']));
     }
     $data = array_merge($data, array( 'country_codes' => $country_code ));
     
