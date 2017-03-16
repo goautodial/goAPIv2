@@ -10,53 +10,68 @@
     include_once("../goFunctions.php");
     
     ### POST or GET Variables
-    $campaign_id = $_REQUEST['campaign_id'];
-        $goUser = $_REQUEST['goUser'];
-        $ip_address = $_REQUEST['hostname'];
-		$log_user = $_REQUEST['log_user'];
-		$log_group = $_REQUEST['log_group'];
+	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+	$action = mysqli_real_escape_string($link, $_REQUEST['action']);
+    $goUser = $_REQUEST['goUser'];
+    $ip_address = $_REQUEST['hostname'];
+	$log_user = $_REQUEST['log_user'];
+	$log_group = $_REQUEST['log_group'];
     
     ### Check campaign_id if its null or empty
 	if($campaign_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
- 
-    		$groupId = go_get_groupid($goUser);
-    
+		
+		$groupId = go_get_groupid($goUser);
 		if (!checkIfTenant($groupId)) {
-        		$ul = "WHERE campaign_id='$campaign_id'";
-    		} else { 
+			$ul = "WHERE campaign_id='$campaign_id'";
+		} else { 
 			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";  
 		}
-
-   		$query = "SELECT campaign_id,campaign_name FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1;";
-   		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
-
-		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$dataCampID = $fresults['campaign_id'];
+		
+		if($action == "delete_selected"){
+			$exploded = explode(",",$campaign_id);
+			$error_count = 0;
+			for($i=0;$i < count($exploded);$i++){
+				
+				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='".$exploded[$i]."';"; 
+				$deleteResult = mysqli_query($link, $deleteQuery);
+				
+				$querydel = "SELECT campaign_id FROM vicidial_campaigns $ul;";
+				$rsltvdel = mysqli_query($link, $querydel);
+				$countResult = mysqli_num_rows($rsltvdel);
+				
+				if($countResult > 0) {
+					$error_count = $error_count + 1;
+				}
+					
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
+				
 			}
-
-			if(!$dataCampID == null) {
-				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='$dataCampID';"; 
-   				$deleteResult = mysqli_query($link, $deleteQuery);
+				
+			if($error_count > 0) {
+				$apiresults = array("result" => "Error: Delete Failed");
+			} else {
+				$apiresults = array("result" => "success"); 
+			}
+		}else{
+			$querycheck = "SELECT campaign_id FROM vicidial_campaigns $ul;";
+			$first_check_query = mysqli_query($link, $querycheck);
+			$first_check = mysqli_num_rows($first_check_query);
+			
+			if($first_check > 0) {
+				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='$campaign_id';"; 
+				$deleteResult = mysqli_query($link, $deleteQuery);
 				//echo $deleteQuery;
-
-        ### Admin logs
-                                        //$SQLdate = date("Y-m-d H:i:s");
-                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Campaign $dataCampID','DELETE FROM vicidial_campaigns WHERE campaign_id=$dataCampID;');";
-                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $dataCampID", $log_group, $deleteQuery);
-
-
+				
+		### Admin logs
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
+				
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: Campaign doesn't exist.");
 			}
-
-		} else {
-			$apiresults = array("result" => "Error: Campaign doesn't exist.");
 		}
+		
 	}//end
 ?>
