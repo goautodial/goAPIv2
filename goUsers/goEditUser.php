@@ -11,50 +11,47 @@
     include_once ("../goFunctions.php");
 
     ### Check file is existed
-	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
-        	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
-	} elseif (file_exists("/etc/goautodial.conf")) {
-        	$conf_path = "/etc/goautodial.conf";
-	} else {
-		$apiresults = array("result" => "Error: File goautodial.conf not found.");
-	}
+    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
+            $conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
+    } elseif (file_exists("/etc/goautodial.conf")) {
+            $conf_path = "/etc/goautodial.conf";
+    } else {
+            $apiresults = array("result" => "Error: File goautodial.conf not found.");
+    }
  
-    ### POST or GET Variables
-   //     $values = $_REQUEST['items'];
-		
-        $userid = mysqli_real_escape_string($link, $_REQUEST['user_id']);
-        $user = mysqli_real_escape_string($link, $_REQUEST['user']);
-        $pass = mysqli_real_escape_string($link, $_REQUEST['pass']);
-        $full_name = mysqli_real_escape_string($link, $_REQUEST['full_name']);
-        $phone_login = mysqli_real_escape_string($link, $_REQUEST['phone_login']);
-        $phone_pass = $pass;
-        $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
-        $email = mysqli_real_escape_string($link, $_REQUEST['email']);
-        $active = strtoupper($_REQUEST['active']);
-        $hotkeys_active = $_REQUEST['hotkeys_active'];
-        $user_level = $_REQUEST['user_level'];
-        $modify_same_user_level = strtoupper($_REQUEST['modify_same_user_level']);
-        $ip_address = $_REQUEST['hostname'];
-        $goUser = $_REQUEST['goUser'];
-        $voicemail = $_REQUEST['voicemail'];
-        $vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
-        $agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
-        $vicidial_recording_override = $_REQUEST['vicidial_recording_override'];
-        $vicidial_transfers = $_REQUEST['vicidial_transfers'];
-        $closer_default_blended = $_REQUEST['closer_default_blended'];
-        $agentcall_manual = $_REQUEST['agentcall_manual'];
-        $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
-        $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
-		$agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
-        $avatar = $_REQUEST['avatar'];
-			
-		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-
+    ### POST or GET Variables		
+    $userid = mysqli_real_escape_string($link, $_REQUEST['user_id']);
+    $user = mysqli_real_escape_string($link, $_REQUEST['user']);
+    $pass = mysqli_real_escape_string($link, $_REQUEST['pass']);
+    $full_name = mysqli_real_escape_string($link, $_REQUEST['full_name']);
+    $phone_login = mysqli_real_escape_string($link, $_REQUEST['phone_login']);
+    $phone_pass = $pass;
+    $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
+    $email = mysqli_real_escape_string($link, $_REQUEST['email']);
+    $active = strtoupper($_REQUEST['active']);
+    $hotkeys_active = $_REQUEST['hotkeys_active'];
+    $user_level = $_REQUEST['user_level'];
+    $modify_same_user_level = strtoupper($_REQUEST['modify_same_user_level']);
+    $ip_address = $_REQUEST['hostname'];
+    $goUser = $_REQUEST['goUser'];
+    $voicemail = $_REQUEST['voicemail'];
+    $vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
+    $agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
+    $vicidial_recording_override = $_REQUEST['vicidial_recording_override'];
+    $vicidial_transfers = $_REQUEST['vicidial_transfers'];
+    $closer_default_blended = $_REQUEST['closer_default_blended'];
+    $agentcall_manual = $_REQUEST['agentcall_manual'];
+    $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
+    $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
+    $agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
+    $avatar = $_REQUEST['avatar'];
+                    
+    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 		
     ### Default Values
-	$defActive = array("Y","N");
-	$defmodify_same_user_level = array("Y","N");	
+    $defActive = array("Y","N");
+    $defmodify_same_user_level = array("Y","N");	
 
     ### Error Checking
         if($user == null && $userid == null) {
@@ -139,6 +136,8 @@
                                 $dataUserLevel = $fresults['user_level'];
                                 $dataUserGroup = $fresults['user_group'];
                                 $dataUser = $fresults['user'];
+                                //$dataFullname = $fresults['full_name'];
+                                //$dataActive = $fresults['active'];
                         }
 				if( $modify_same_user_level == "Y") {
 						$modify_same_user_level = 0;
@@ -215,10 +214,27 @@
                                                 $countResultGo = mysqli_num_rows($resultQueryUserIDGo);
                                                 //$userIDGo = $rUserIDGo['userid'];
                                                 
-                                                if ($countResultGo > 0){
-                                                    $queryUpdateUserGo = "UPDATE users SET avatar = '$avatar' WHERE userid ='$userid'";                                                    
+                                                if ($active == "N") {
+                                                    $goactive = "0";
                                                 } else {
-                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, avatar) VALUES ('$userid', '$dataUser', '$avatar')";
+                                                    $goactive = "1";
+                                                }                                                
+                                                
+                                                if ($countResultGo > 0){
+                                                    $queryUpdateUserGo = "
+                                                                        UPDATE users 
+                                                                        SET `name` = '$dataUser',
+                                                                            `fullname` = '$full_name',
+                                                                            $phonelogin_query
+                                                                            `email` = '$email',
+                                                                            `avatar` = '$avatar',
+                                                                            `user_group` = '$user_group',
+                                                                            `role` = '$user_level',
+                                                                            `status` = '$goactive'
+                                                                        WHERE userid = '$userid'
+                                                                        ;";                                                    
+                                                } else {
+                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')";
                                                 }		                                                
 				}else{
 						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
@@ -233,10 +249,27 @@
                                                 $countResultGo = mysqli_num_rows($resultQueryUserIDGo);
                                                 //$userGo = $rUserIDGo['user'];
                                                 
-                                                if ($countResultGo > 0){
-                                                    $queryUpdateUserGo = "UPDATE users SET avatar ='$avatar' WHERE name ='$user'";                                                    
+                                                if ($active == "N") {
+                                                    $goactive = "0";
                                                 } else {
-                                                    $queryUpdateUserGo = "INSERT INTO users (name, avatar) VALUES ('$user', '$avatar')";
+                                                    $goactive = "1";
+                                                }                                                
+                                                
+                                                if ($countResultGo > 0){
+                                                    $queryUpdateUserGo = "
+                                                                        UPDATE users 
+                                                                        SET `name` = '$dataUser',
+                                                                            `fullname` = '$full_name',
+                                                                            $phonelogin_query
+                                                                            `email` = '$email',
+                                                                            `avatar` = '$avatar',
+                                                                            `user_group` = '$user_group',
+                                                                            `role` = '$user_level',
+                                                                            `status` = '$goactive'
+                                                                        WHERE userid = '$userid'
+                                                                        ;";                                                    
+                                                } else {
+                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')";
                                                 }								                                                
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);

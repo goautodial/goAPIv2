@@ -158,7 +158,13 @@
 								$rUserID = mysqli_fetch_array($resultQueryUserID, MYSQLI_ASSOC);
 								$userid = $rUserID['user_id'];
 								
-								$queryUserAddGo = "INSERT INTO users (userid, name, avatar) VALUES ('$userid', '$user', '$avatar')";
+								if ($active == "N") {
+                                                                    $goactive = "0";
+								} else {
+                                                                    $goactive = "1";
+								}
+								
+								$queryUserAddGo = "INSERT INTO users (userid, name, fullname, avatar, role, status, user_group, phone) VALUES ('$userid', '$user', '$full_name', '$avatar', '$user_level', '$goactive', '$user_group', '$phone_login')";
 								$resultQueryAddUserGo = mysqli_query($linkgo, $queryUserAddGo);
 								
 							### Admin logs
