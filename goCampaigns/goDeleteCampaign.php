@@ -11,7 +11,7 @@
     
     ### POST or GET Variables
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$action = mysqli_real_escape_string($link, $_REQUEST['action']);
+	$action = strtolower(mysqli_real_escape_string($link, $_REQUEST['action']));
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
 	$log_user = $_REQUEST['log_user'];
@@ -29,7 +29,7 @@
 			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";  
 		}
 		
-		if($action == "delete_selected"){
+		if($action == strtolower("delete_selected")){
 			$exploded = explode(",",$campaign_id);
 			$error_count = 0;
 			for($i=0;$i < count($exploded);$i++){
