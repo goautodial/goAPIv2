@@ -259,7 +259,7 @@
                                                                             `role` = '$user_level',
                                                                             `status` = '$goactive'
                                                                         WHERE userid = '$userid'
-                                                                        ;";                                                    
+                                                                        ";                                                    
                                                 } else {
                                                     $queryUpdateUserGo = "
                                                                         INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
@@ -302,11 +302,11 @@
                                                                             `role` = '$user_level',
                                                                             `status` = '$goactive'
                                                                         WHERE userid = '$userid'
-                                                                        ;";                                                    
+                                                                        ";                                                    
                                                 } else {
                                                     $queryUpdateUserGo = "
                                                                         INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
-                                                                        VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')
+                                                                        VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')
                                                                         ";
                                                                         
                                                 }								                                                
