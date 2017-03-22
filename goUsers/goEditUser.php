@@ -184,7 +184,7 @@
 						if($pass != NULL){
 								$query_passhash = "select pass_hash_enabled from system_settings";
 								$exec_query = mysqli_query($link, $query_passhash);
-								$fetch_pass_hash_enabled = mysqli_fetch_array($exec_query);
+								$fetch_pass_hash_enabled = mysqli_fetch_array($exec_query, MYSQLI_ASSOC);
 								
 								if($fetch_pass_hash_enabled['pass_hash_enabled'] == "1"){
                                     $pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', `phone_pass` = '$phone_pass', ";		
