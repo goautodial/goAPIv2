@@ -251,7 +251,8 @@
                                                     $queryUpdateUserGo = "
                                                                         UPDATE users 
                                                                         SET `name` = '$dataUser',
-                                                                            `fullname` = '$full_name', $phonelogin_query
+                                                                            `fullname` = '$full_name', 
+                                                                            `phone` = '$phone_login',
                                                                             `email` = '$email',
                                                                             `avatar` = '$avatar',
                                                                             `user_group` = '$user_group',
@@ -293,7 +294,8 @@
                                                     $queryUpdateUserGo = "
                                                                         UPDATE users 
                                                                         SET `name` = '$dataUser',
-                                                                            `fullname` = '$full_name', $phonelogin_query
+                                                                            `fullname` = '$full_name', 
+                                                                            `phone` = '$phone_login',
                                                                             `email` = '$email',
                                                                             `avatar` = '$avatar',
                                                                             `user_group` = '$user_group',
