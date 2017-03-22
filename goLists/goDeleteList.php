@@ -11,6 +11,7 @@
     
     ### POST or GET Variables
     $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+	$action = strtolower(mysqli_real_escape_string($link, $_REQUEST['action']));
     $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
     $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
 		
@@ -20,47 +21,80 @@
 	if($list_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for List ID."); 
 	} else {
- 
-    		$groupId = go_get_groupid($goUser);
-    
-		if (!checkIfTenant($groupId)) {
-        		$ul = "WHERE list_id='$list_id'";
-    		} else { 
-				$ul = "WHERE list_id='$list_id' AND user_group='$groupId'";  
-		}
-
-   		$query = "SELECT list_id,list_name FROM vicidial_lists $ul order by list_id LIMIT 1";
-   		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
-
-		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$dataListID = $fresults['list_id'];
+		if($action == strtolower("delete_selected")){
+			$exploded = explode(",",$list_id);
+			$error_count = 0;
+			for($i=0;$i < count($exploded);$i++){
+				$query = "SELECT list_id,list_name FROM vicidial_lists WHERE list_id='".$exploded[$i]."' order by list_id LIMIT 1";
+				$rsltv = mysqli_query($link, $query);
+				$countResult = mysqli_num_rows($rsltv);
+				
+				if($countResult > 0) {
+					while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+						$dataListID = $fresults['list_id'];
+					}
+					if($dataListID != null) {
+						$deleteQuery = "DELETE FROM vicidial_lists WHERE list_id='$dataListID';"; 
+						$deleteResult = mysqli_query($link, $deleteQuery);
+						$deleteQueryLeads = "DELETE FROM vicidial_list WHERE list_id='$dataListID';"; 
+						$deleteResultLeads = mysqli_query($link, $deleteQueryLeads);
+						$deleteQueryStmt = "DELETE FROM vicidial_lists_fields WHERE list_id='$dataListID' LIMIT 1;"; 
+						$deleteResultStmt = mysqli_query($link, $deleteQueryStmt);
+						//echo $deleteQuery.$deleteQueryLeads.$deleteQueryStmt;
+						
+					### Admin Logs
+						$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
+						
+						$apiresults = array("result" => "success");
+					} else {
+						$error_count = $error_count + 1;
+					}
+		
+				} else {
+					$error_count = $error_count + 1;
+				}
 			}
-
-			if($dataListID != null) {
-				$deleteQuery = "DELETE FROM vicidial_lists WHERE list_id='$dataListID';"; 
-   				$deleteResult = mysqli_query($link, $deleteQuery);
-				$deleteQueryLeads = "DELETE FROM vicidial_list WHERE list_id='$dataListID';"; 
-   				$deleteResultLeads = mysqli_query($link, $deleteQueryLeads);
-				$deleteQueryStmt = "DELETE FROM vicidial_lists_fields WHERE list_id='$dataListID' LIMIT 1;"; 
-   				$deleteResultStmt = mysqli_query($link, $deleteQueryStmt);
-				//echo $deleteQuery.$deleteQueryLeads.$deleteQueryStmt;
-
-### Admin Logs
-                                        //$SQLdate = date("Y-m-d H:i:s");
-                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted $list_id','DELETE FROM vicidial_lists WHERE list_id=$dataListID;');";
-                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
-
-
-				$apiresults = array("result" => "success");
+			if($error_count > 0) {
+				$apiresults = array("result" => "( $error_count ) Errors Found: Delete Failed");
+			} else {
+				$apiresults = array("result" => "success"); 
+			}
+		}else{
+			$groupId = go_get_groupid($goUser);
+			if (!checkIfTenant($groupId)) {
+				$ul = "WHERE list_id='$list_id'";
+			} else { 
+				$ul = "WHERE list_id='$list_id' AND user_group='$groupId'";  
+			}
+			
+			$query = "SELECT list_id,list_name FROM vicidial_lists $ul order by list_id LIMIT 1";
+			$rsltv = mysqli_query($link, $query);
+			$countResult = mysqli_num_rows($rsltv);
+			
+			if($countResult > 0) {
+				while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+					$dataListID = $fresults['list_id'];
+				}
+				if($dataListID != null) {
+					$deleteQuery = "DELETE FROM vicidial_lists WHERE list_id='$dataListID';"; 
+					$deleteResult = mysqli_query($link, $deleteQuery);
+					$deleteQueryLeads = "DELETE FROM vicidial_list WHERE list_id='$dataListID';"; 
+					$deleteResultLeads = mysqli_query($link, $deleteQueryLeads);
+					$deleteQueryStmt = "DELETE FROM vicidial_lists_fields WHERE list_id='$dataListID' LIMIT 1;"; 
+					$deleteResultStmt = mysqli_query($link, $deleteQueryStmt);
+					//echo $deleteQuery.$deleteQueryLeads.$deleteQueryStmt;
+					
+				### Admin Logs
+					$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
+					
+					$apiresults = array("result" => "success");
+				} else {
+					$apiresults = array("result" => "Error: List doesn't exist.");
+				}
+	
 			} else {
 				$apiresults = array("result" => "Error: List doesn't exist.");
 			}
-
-		} else {
-			$apiresults = array("result" => "Error: List doesn't exist.");
 		}
 	}//end
 ?>
