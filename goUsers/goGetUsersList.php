@@ -49,7 +49,16 @@
         }
 	
 	// getting all users
-	$query = "SELECT userid, name, phone, email, avatar, user_group, role, status FROM users WHERE userid NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (role != '4' AND role <= '$user_level') $ul ORDER BY userid ASC";
+	$query = "
+                SELECT userid, name, fullname, phone, email, avatar, user_group, role, status 
+                FROM users 
+                WHERE userid 
+                NOT IN ('VDAD','VDCL','goAPI','goautodial') 
+                AND (role != '4' AND role <= '$user_level') $ul 
+                ORDER BY userid 
+                ASC
+                ";
+                
 	$rsltv = mysqli_query($linkgo, $query);
         $countResult = mysqli_num_rows($rsltv);
  		

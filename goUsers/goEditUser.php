@@ -126,7 +126,14 @@
                 $rsltv = mysqli_query($link, $query);
                 $countResult = mysqli_num_rows($rsltv);
 		}
-                $queryUserCheck = "SELECT user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ulUser ORDER BY user ASC LIMIT 1;";
+                $queryUserCheck = "
+                                SELECT user, full_name, user_level, user_group, active 
+                                FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') 
+                                AND user_level != '4' $ulUser 
+                                ORDER BY user 
+                                ASC LIMIT 1
+                                ";
+                                
                 $rsltvCheck = mysqli_query($link, $queryUserCheck);
                 $countCheckResult = mysqli_num_rows($rsltvCheck);
 		
@@ -185,10 +192,20 @@
 									$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', `phone_pass` = '$phone_pass', ";
 								}
 								
-								$queryUpdatePhones = "UPDATE `phones` SET `pass` = '$pass', `conf_secret` = '$pass' WHERE `extension` = '$phone_login';";
+								$queryUpdatePhones = "
+                                                                                    UPDATE `phones` 
+                                                                                    SET `pass` = '$pass', `conf_secret` = '$pass' 
+                                                                                    WHERE `extension` = '$phone_login'
+                                                                                    ";
+                                                                                    
 								$resultQueryUser = mysqli_query($link, $queryUpdatePhones);
 								
-								$kamialioq = "UPDATE `subscriber` SET `password` = '$pass' WHERE `username` = '$phone_login';";
+								$kamialioq = "
+                                                                            UPDATE `subscriber` 
+                                                                            SET `password` = '$pass' 
+                                                                            WHERE `username` = '$phone_login'
+                                                                            ";
+                                                                            
 								$resultkam = mysqli_query($linkgokam, $kamialioq);
 								
 						}else{
@@ -202,13 +219,23 @@
 						}
 
 				if($userid != NULL){
-						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
-								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
-								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
-								WHERE `user_id` = '$userid';";
+						$queryUpdateUser = "
+                                                                    UPDATE `vicidial_users` 
+                                                                    SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
+                                                                        `hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
+                                                                        `agent_choose_ingroups` = '$agent_choose_ingroups', `vicidial_recording_override` = '$vicidial_recording_override', 
+                                                                        `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', 
+                                                                        `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
+                                                                        `modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
+                                                                    WHERE `user_id` = '$userid'
+                                                                    ";
 								
-                                                $queryUserIDGo = "SELECT userid from users WHERE userid='$userid'";
+                                                $queryUserIDGo = "
+                                                                SELECT userid 
+                                                                FROM users 
+                                                                WHERE userid='$userid'
+                                                                ";
+                                                                
                                                 $resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
                                                 $rUserIDGo = mysqli_fetch_array($resultQueryUserIDGo, MYSQLI_ASSOC);
                                                 $countResultGo = mysqli_num_rows($resultQueryUserIDGo);
@@ -224,8 +251,7 @@
                                                     $queryUpdateUserGo = "
                                                                         UPDATE users 
                                                                         SET `name` = '$dataUser',
-                                                                            `fullname` = '$full_name',
-                                                                            $phonelogin_query
+                                                                            `fullname` = '$full_name', $phonelogin_query
                                                                             `email` = '$email',
                                                                             `avatar` = '$avatar',
                                                                             `user_group` = '$user_group',
@@ -234,14 +260,22 @@
                                                                         WHERE userid = '$userid'
                                                                         ;";                                                    
                                                 } else {
-                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')";
+                                                    $queryUpdateUserGo = "
+                                                                        INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
+                                                                        VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')
+                                                                        ";
                                                 }		                                                
 				}else{
-						$queryUpdateUser = "UPDATE `vicidial_users` SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
-								`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', `agent_choose_ingroups` = '$agent_choose_ingroups',
-								`vicidial_recording_override` = '$vicidial_recording_override', `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-								`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
-								WHERE `user` = '$user';";
+						$queryUpdateUser = "
+                                                                    UPDATE `vicidial_users` 
+                                                                    SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
+                                                                        `hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
+                                                                        `agent_choose_ingroups` = '$agent_choose_ingroups', `vicidial_recording_override` = '$vicidial_recording_override', 
+                                                                        `vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', 
+                                                                        `agentcall_manual` = '$agentcall_manual', `scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
+                                                                        `modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
+                                                                    WHERE `user` = '$user'
+                                                                    ";
 								
                                                 $queryUserIDGo = "SELECT name from users WHERE name='$user'";
                                                 $resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
@@ -259,8 +293,7 @@
                                                     $queryUpdateUserGo = "
                                                                         UPDATE users 
                                                                         SET `name` = '$dataUser',
-                                                                            `fullname` = '$full_name',
-                                                                            $phonelogin_query
+                                                                            `fullname` = '$full_name', $phonelogin_query
                                                                             `email` = '$email',
                                                                             `avatar` = '$avatar',
                                                                             `user_group` = '$user_group',
@@ -269,7 +302,11 @@
                                                                         WHERE userid = '$userid'
                                                                         ;";                                                    
                                                 } else {
-                                                    $queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')";
+                                                    $queryUpdateUserGo = "
+                                                                        INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
+                                                                        VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$active')
+                                                                        ";
+                                                                        
                                                 }								                                                
 				}
 				$resultQueryUser = mysqli_query($link, $queryUpdateUser);
