@@ -33,7 +33,7 @@ if ( file_exists($conf_path) )
         }
 
 $linkgo=mysqli_connect("$VARDBgo_server", "$VARDBgo_user", "$VARDBgo_pass", "$VARDBgo_database", "$VARDBgo_port");
-
+mysqli_query($linkgo,"set character_set_results='utf8'");
 if (!$linkgo)
         {
 //    die('MySQL connect ERROR: ' . mysqli_error('mysqli'));

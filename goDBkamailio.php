@@ -33,6 +33,7 @@ if ( file_exists($conf_path) )
         }
 
 $linkgokam=mysqli_connect("$VARDBgokam_server", "$VARDBgokam_user", "$VARDBgokam_pass", "$VARDBgokam_database", "$VARDBgokam_port");
+mysqli_query($linkgokam,"set character_set_results='utf8'");
 //print_r($VARDBgo_server."/".$VARDBgo_user."/".$VARDBgo_pass."/".$VARDBgo_port);
 //die;
 //$linkgo=mysqli_connect("162.254.144.92", "goautodialu", "pancit8888", "goautodial");

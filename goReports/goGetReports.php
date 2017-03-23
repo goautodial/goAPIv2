@@ -42,7 +42,7 @@ ini_set('memory_limit', '2048M');
 		
 		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $userGroup, $link);
 	}else{
-		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats);
+		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats, $linkgo);
 	}
 	
     $apiresults = array("result" => "success", "getReports" => $goReportsReturn);
@@ -333,7 +333,7 @@ ini_set('memory_limit', '2048M');
 		
 	}
 	
-	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats){
+	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats, $linkgo){
 
 		if ($campaignID!='null' || $pageTitle == 'call_export_report')
 		{
@@ -1271,7 +1271,7 @@ ini_set('memory_limit', '2048M');
 					$usersARY[0]='';
 					$user_namesARY[0]='';
 					$k=0;
-					if (inner_checkIfTenant($userGroup))
+					if (inner_checkIfTenant($userGroup, $linkgo))
 						$userGroupSQL = "and vicidial_users.user_group='$userGroup'";
 					
 					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000";

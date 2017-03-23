@@ -70,6 +70,7 @@ if ( file_exists($conf_path) )
         }
 
 $link=mysqli_connect("$VARDB_server", "$VARDB_user", "$VARDB_pass", "$VARDB_database", "$VARDB_port");
+mysqli_query($link,"set character_set_results='utf8'");
 //print_r($VARDB_server."/".$VARDB_user."/".$VARDB_pass."/".$VARDB_port);
 //die;
 //$link=mysqli_connect("162.254.144.92", "justgocloud", "justgocloud1234", "asterisk");
