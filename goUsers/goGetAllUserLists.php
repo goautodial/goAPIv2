@@ -93,12 +93,24 @@
 
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user ASC";
+	$query = "SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user_id ASC";
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
-
+        
+        $querygo = "SELECT userid, avatar FROM users ORDER BY userid ASC";
+        $rsltvgo = mysqli_query($linkgo, $querygo);
+        $countResultgo = mysqli_num_rows($rsltvgo);
+        
+        if($countResultgo > 0) {
+            $datago = array();
+            while($fresultsgo = mysqli_fetch_array($rsltvgo, MYSQLI_ASSOC)){
+                array_push($datago, $fresultsgo);
+                $dataUserIDgo[] = $fresultsgo['userid'];
+                $dataAvatar[] = $fresultsgo['avatar'];
+            }
+        }               
 		
-		// condition
+        // condition
  		
         if($countResult > 0) {
             $data = array();
@@ -110,10 +122,11 @@
                 $dataUserLevel[] = $fresults['user_level'];
                 $dataUserGroup[] = $fresults['user_group'];
                 $dataPhone[] = $fresults['phone_login'];
-                $dataActive[]	= $fresults['active'];
-                $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "phone_login" => $dataPhone, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num, "licensedSeats" => $config["licensedSeats"]);
+                $dataActive[]	= $fresults['active'];                
+                
                 //$apiresults = array("result" => "success", "data" => $data);
             }
+            $apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "phone_login" => $dataPhone, "active" => $dataActive, "last_count" => $agent_num, "last_phone_login" => $phonelogin_num, "avatar" => $dataAvatar, "useridgo" => $dataUserIDgo, "licensedSeats" => $config["licensedSeats"]);
 	} else {
 		$apiresults = array("result" => "Error: No data to show. $user", "test" => go_get_groupid($user));
 	}
