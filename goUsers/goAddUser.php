@@ -88,7 +88,7 @@
 						if($last_num_name > 0)
 						$full_name = str_replace($last_num_name,$iterate_number2,$orig_full_name);
 						else
-						$full_name = $full_name.' '.$add_num;
+						$full_name = $orig_full_name.' - '.$add_num;
 						
 						$phone_login = $phone_login + $add_num;
 						
