@@ -15,6 +15,7 @@
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
         $script_text = mysqli_real_escape_string($link, $_REQUEST['script_text']);
+        $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
         $active = $_REQUEST['active'];
         $ip_address = $_REQUEST['hostname'];
         $goUser = $_REQUEST['goUser'];
@@ -65,13 +66,15 @@
 								if($script_comments == null){ $script_comments = $datascript_comments;}
 								if($script_text == null){ $script_text = $datascript_text;}
 								if($active == null){ $active =  $dataactive; }
+								if($user_group == null){ $user_group =  $datauser_group; }
 				
 								$queryVM ="UPDATE vicidial_scripts
 										SET
 										script_name = '$script_name',
 										script_comments = '$script_comments',
 										active = '$active',
-										script_text = '$script_text'
+										script_text = '$script_text',
+										user_group = '$user_group'
 										WHERE script_id = '$script_id';";
 						
 								$rsltv1 = mysqli_query($link, $queryVM);
