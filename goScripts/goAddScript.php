@@ -18,6 +18,7 @@
         $active = mysqli_real_escape_string($link, $_REQUEST['active']);
         //$campaign_id = $_REQUEST['campaign_id'];
 		$user = mysqli_real_escape_string($link, $_REQUEST['user']);
+		$user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
         $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
         $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
 		
@@ -56,11 +57,11 @@
 								$usergroup_result = mysqli_fetch_array($init_getquery);
 								$var_usergroup = $usergroup_result['user_group'];
 								
-								if($user != NULL){
-										$user_group = $var_usergroup;
-								}else {
-										$user_group = $groupId;
-								}
+								//if($user != NULL){
+								//		$user_group = $var_usergroup;
+								//}else {
+								//		$user_group = $groupId;
+								//}
 												
 									$newQuery = "INSERT INTO vicidial_scripts(script_id, script_comments, script_name, active, user_group, script_text) VALUES('$script_id', '$script_comments', '$script_name', '$active', '$user_group', '$script_text');";
 									$rsltv = mysqli_query($link, $newQuery);
