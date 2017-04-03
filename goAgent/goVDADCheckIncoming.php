@@ -908,6 +908,10 @@ if ($is_logged_in) {
         $row = $rslt;
         $LISTweb_form_address = $row['web_form_address'];
         $LISTweb_form_address_two = $row['web_form_address_two'];
+        
+        $astDB->where('lead_id', $lead_id);
+        $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
+        $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
 
         $LeaD_InfO = array(
             'callerid' => $callerid,
@@ -961,7 +965,8 @@ if ($is_logged_in) {
             'web_form_address_two' => $LISTweb_form_address_two,
             'ACcount' => $ACcount,
             'ACcomments' => $ACcomments,
-            'converted_dial_code' => $converted_dial_code
+            'converted_dial_code' => $converted_dial_code,
+            'call_notes' => $call_notes
         );
 
         $wait_sec = 0;
