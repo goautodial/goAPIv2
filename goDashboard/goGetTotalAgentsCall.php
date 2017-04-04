@@ -10,17 +10,13 @@
     ####################################################
     
     include_once("../goFunctions.php");
-    include_once("../goDBasterisk.php");
 	
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-    $groupId = go_get_groupid($user);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
-		$stringv = '';
-        $ul_online='';
-		$ul_calls='';
+        $ul='';
     } else { 
-        $stringv = "'".getall_allowed_users($groupId, $link)."'";
+        $stringv = go_getall_allowed_users($groupId);
 		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
@@ -28,22 +24,4 @@
     $rsltv = mysqli_query($link, $query);
     $data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
-	
-	function getall_allowed_users($groupId, $link) {
-        
-        if ($groupId=='ADMIN' || $groupId=='admin') {
-			$query = "select user as userg from vicidial_users";
-			$rsltv = mysqli_query($link,$query); 
-        } else {
-			$query = "select user as userg from vicidial_users where user_group='$groupId'";
-			$rsltv = mysqli_query($link,$query); 
-        }
-        
-        while($info = mysqli_fetch_array( $rsltv )) {
-            $users[] = $info['userg'];
-        }
-		$allowed_users = implode("','", $users);
-    
-        return $allowed_users;
-    }
 ?>

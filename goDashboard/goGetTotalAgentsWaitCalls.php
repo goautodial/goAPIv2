@@ -11,11 +11,10 @@
     
     include_once("../goFunctions.php");
 	
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-    $groupId = go_get_groupid($user);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
-		$ul="user_level != '4'";
+		$ul = " and user_level != '4'";
     } else { 
         $stringv = go_getall_allowed_users($groupId);
 		$ul = " and user IN ($stringv) and user_level != '4'";
