@@ -10,19 +10,21 @@
     ####################################################
     
     include_once("../goFunctions.php");
+	
+    $user = mysqli_real_escape_string($link, $_POST['user']);
+    $groupId = go_get_groupid($user);
     
-    $groupId = go_get_groupid($goUser);
-    
-    if (!checkIfTenant($groupId)) {
-        $ul=' and user_level != 4';
+    if (checkIfTenant($groupId)) {
+		$stringv = '';
+		$ul="user_level != '4'";
     } else { 
         $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and user IN ($stringv) and user_level != 4";
+		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
     $query = "SELECT count(*) as getTotalAgentsPaused FROM vicidial_live_agents WHERE status IN ('PAUSED') $ul"; 
     $rsltv = mysqli_query($link, $query);
     $data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
+	
 ?>

@@ -9,15 +9,16 @@
     ####################################################
     
     include_once("../goFunctions.php");
+    include_once("../goDBasterisk.php");
+	
+	$user = mysqli_real_escape_string($link, $_POST['user']);
+	$groupId = go_get_groupid($user);
     
-    $groupId = go_get_groupid($goUser);
-    
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and campaign_id IN ($stringv) and user_level != 4";
+        $stringv = "'".go_getall_allowed_campaigns($groupId)."'";
+        $ul = " and campaign_id IN ($stringv)";
     }
 
     $NOW = date("Y-m-d");
@@ -36,5 +37,23 @@
                 array_push($data, $fresults);
             }
             $apiresults = array("result" => "success", "data" => $data);
+    }
+	
+	function getall_allowed_users($groupId, $link) {
+        
+        if ($groupId=='ADMIN' || $groupId=='admin') {
+			$query = "select user as userg from vicidial_users";
+			$rsltv = mysqli_query($link,$query); 
+        } else {
+			$query = "select user as userg from vicidial_users where user_group='$groupId'";
+			$rsltv = mysqli_query($link,$query); 
+        }
+        
+        while($info = mysqli_fetch_array( $rsltv )) {
+            $users[] = $info['userg'];
+        }
+		$allowed_users = implode("','", $users);
+    
+        return $allowed_users;
     }
 ?>

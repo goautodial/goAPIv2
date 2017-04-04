@@ -11,14 +11,14 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $user = mysqli_real_escape_string($link, $_POST['user']);
+	$groupId = go_get_groupid($user);
     
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and campaign_id IN ($stringv) and user_level != 4";
+        $stringv = go_getall_allowed_campaigns($groupId);
+        $ul = " and campaign_id IN ('$stringv')";
     }
 
     $NOW = date("Y-m-d");
