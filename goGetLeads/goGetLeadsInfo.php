@@ -30,7 +30,7 @@
             $notAdminSQL = "AND user_group != 'ADMIN'";
         }
 
-        $query = "SELECT lead_id,list_id,first_name,middle_initial,last_name,email,phone_number,alt_phone,address1,address2,address3,city,state,province,postal_code,country_code,gender,status,user,date_of_birth FROM vicidial_list where lead_id='$lead_id'";
+        $query = "SELECT * FROM vicidial_list where lead_id='$lead_id'";
         $rsltv = mysqli_query($link, $query);
         $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
         
