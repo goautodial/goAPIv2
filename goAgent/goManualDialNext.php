@@ -1666,6 +1666,10 @@ if ($sipIsLoggedIn) {
             $comments = preg_replace("/\r/i", '', $comments);
             $comments = preg_replace("/\n/i", '!N', $comments);
             
+            $astDB->where('lead_id', $lead_id);
+            $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
+            $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
+            
             $LeaD_InfO = array(
                 'MqueryCID' => (isset($MqueryCID)) ? $MqueryCID : "",
                 'lead_id' => $lead_id,
@@ -1719,7 +1723,8 @@ if ($sipIsLoggedIn) {
                 'web_form_address_two' => $LISTweb_form_address_two,
                 'post_phone_time_diff_alert_message' => $post_phone_time_diff_alert_message,
                 'ACcount' => $ACcount,
-                'ACcomments' => $ACcomments
+                'ACcomments' => $ACcomments,
+                'call_notes' => $call_notes
             );
     
             $APIResult = array( "result" => "success", "data" => $LeaD_InfO );
