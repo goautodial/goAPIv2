@@ -30,8 +30,8 @@ ini_set('memory_limit', '2048M');
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
-	$userGroup = get_group_id($userID, $link);
-	
+	$userGroup = go_get_groupid($session_user);
+	//2017-04-06 00:00:00    2017-04-06 07:41:00
 	if($pageTitle == "call_export_report"){
 		$campaigns = mysqli_real_escape_string($link, $_REQUEST['campaigns']);
 		$inbounds = mysqli_real_escape_string($link, $_REQUEST['inbounds']);
@@ -52,13 +52,13 @@ ini_set('memory_limit', '2048M');
         //$date_array = implode("','",go_get_dates($fromDate, $toDate));
 		
 		if($campaigns != "")
-			$campaigns = explode(" ",$campaigns);
+			$campaigns = explode(",",$campaigns);
 		if($inbounds != "")
-		    $inbounds = explode(" ",$inbounds);
+		    $inbounds = explode(",",$inbounds);
 		if($lists != "")	
-		    $lists = explode(" ",$lists);
+		    $lists = explode(",",$lists);
 		if($dispo_stats != "")	
-		    $dispo_stats = explode(" ",$dispo_stats);
+		    $dispo_stats = explode(",",$dispo_stats);
 		
 		$campaign_SQL = "";
 		$group_SQL = "";
@@ -160,7 +160,13 @@ ini_set('memory_limit', '2048M');
 		}
 		
 		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
-		$user_group_SQL = "";
+		if($userGroup !== "ADMIN"){
+			$stringv = go_getall_allowed_users($userGroup);
+			$user_group_SQL = "AND vl.user IN ($stringv)";
+		}else{
+			$user_group_SQL = "";
+		}
+		
 		$export_fields_SQL = "";
 		
 		if ($RUNcampaign > 0){
@@ -695,7 +701,10 @@ ini_set('memory_limit', '2048M');
 				
 				// Agent Time Detail
 				if ($pageTitle=="agent_detail") {
-				 
+				if($userGroup !== "ADMIN")
+				$ul = "AND user_group = '$userGroup'";
+				else
+				$ul = "";
 					### BEGIN gather user IDs and names for matching up later
 					$query = mysqli_query($link, "SELECT full_name,user FROM vicidial_users ORDER BY user LIMIT 100000");
 					$user_ct = mysqli_num_rows($query);
@@ -794,7 +803,7 @@ ini_set('memory_limit', '2048M');
 						$i++;
 						} */
 					### END gather pause code information by user IDs
-				
+					
 					##### BEGIN Gather all agent time records and parse through them in PHP to save on DB load
 					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul LIMIT 10000000");
 					$agent_time_ct = mysqli_num_rows($query);
@@ -1271,7 +1280,8 @@ ini_set('memory_limit', '2048M');
 					$usersARY[0]='';
 					$user_namesARY[0]='';
 					$k=0;
-					if (inner_checkIfTenant($userGroup, $linkgo))
+					//if (inner_checkIfTenant($userGroup, $linkgo))
+					if($userGroup !== "ADMIN")
 						$userGroupSQL = "and vicidial_users.user_group='$userGroup'";
 					
 					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000";
@@ -1980,8 +1990,6 @@ $query = mysqli_query($link, $query_list);
 					}
 					# end grab status names
 					
-					
-			
 					$leads_in_list = 0;
 					$leads_in_list_N = 0;
 					$leads_in_list_Y = 0;
@@ -2131,12 +2139,16 @@ $query = mysqli_query($link, $queryx);
 				
 				// SALES PER AGENT
 				if ($pageTitle == "sales_agent") {
+					if($userGroup !== "ADMIN")
+					$ul = "AND us.user_group = '$userGroup'";
+					else
+					$ul = "";
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
 					if($request == "outbound"){
 						### Outbound Sales ###
 						
-						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' group by us.full_name";
+						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' $ul group by us.full_name";
 						$query = mysqli_query($link, $outbound_query);
 						
 						$TOPsorted_output = "";
@@ -2197,7 +2209,7 @@ $query = mysqli_query($link, $queryx);
 						}
 						$campaign_inb_query="vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 						
-						$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query group by us.full_name");
+						$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query $ul group by us.full_name");
 						
 						$BOTsorted_output = "";
 						$total_in_sales = "";
@@ -2244,9 +2256,12 @@ $query = mysqli_query($link, $queryx);
 				if ($pageTitle == "sales_tracker") {
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
-					
+					if($userGroup !== "ADMIN")
+					$ul = "AND us.user_group = '$userGroup'";
+					else
+					$ul = "";
 					if ($request == 'outbound') {
-						$outbound_query = "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' order by vlo.call_date ASC limit 2000";
+						$outbound_query = "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' $ul order by vlo.call_date ASC limit 2000";
 						$query = mysqli_query($link, $outbound_query);
 						$outbound_result = "";
 						$sale_num_value = 1;
@@ -2296,7 +2311,7 @@ $query = mysqli_query($link, $queryx);
 						
 						$campaign_inb_query="vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 					
-						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') order by vlo.call_date ASC limit 2000");
+						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') $ul order by vlo.call_date ASC limit 2000");
 						$inbound_result = "";
 						$sale_num_value = 1;
 						while($row = mysqli_fetch_array($query)){
@@ -3172,12 +3187,4 @@ $query = mysqli_query($link, $queryx);
 		return $inboundgroups;
 	}
 	
-	
-	function get_group_id($userID, $link){
-		$query = mysqli_query($link, "select user_group from vicidial_users where user='$userID';");
-		$resultsu = mysqli_fetch_array($query);
-		$groupid = $resultsu['user_group'];
-		
-		return $groupid;
-	}
 ?>

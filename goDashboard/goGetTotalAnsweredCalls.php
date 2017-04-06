@@ -11,20 +11,22 @@
     
     include_once("../goFunctions.php");
 	
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-    $groupId = go_get_groupid($user);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_campaigns($groupId);
-        $ul = " and campaign_id IN ($stringv) and user_level != 4";
+		if($stringv !== "'ALLCAMPAIGNS'")
+			$ul = " and campaign_id IN ($stringv)";
+		else
+			$ul = "";
     }
 
     $NOW = date("Y-m-d");
 
-    $query = "SELECT sum(answers_today) as getTotalAnsweredCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'  $ul"; 
-    $rsltv = mysqli_query($link, $query);
+    $query = "SELECT sum(answers_today) as getTotalAnsweredCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul"; 
+    $rsltv = mysqli_query($link, $query)or die("Error: ".mysqli_error($link));
     $data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data);
+    $apiresults = array("result" => "success", "data" => $data, "query" => $query);
 ?>

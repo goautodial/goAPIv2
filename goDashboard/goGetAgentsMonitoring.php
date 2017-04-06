@@ -10,17 +10,15 @@
     ####################################################
     
     include_once("../goFunctions.php");
-    include_once("../goDBasterisk.php");
 	
-	$user = mysqli_real_escape_string($link, $_POST['user']);
-    $groupId = go_get_groupid($user);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
 		$stringv = '';
-        $ul_online='';
-		$ul_calls='';
+        $ul_online ='';
+		$ul_calls ='';
     } else { 
-        $stringv = "'".getall_allowed_users($groupId, $link)."'";
+        $stringv = go_getall_allowed_users($groupId);
         $ul_online = " and user IN ($stringv)";
 		$ul_calls = " and vicidial_live_agents.user IN ($stringv)";
     }
@@ -62,23 +60,5 @@
             }
         $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);            
             $apiresults = array("result" => "success", "data" => $data);
-    }
-	
-	function getall_allowed_users($groupId, $link) {
-        
-        if ($groupId=='ADMIN' || $groupId=='admin') {
-			$query = "select user as userg from vicidial_users";
-			$rsltv = mysqli_query($link,$query); 
-        } else {
-			$query = "select user as userg from vicidial_users where user_group='$groupId'";
-			$rsltv = mysqli_query($link,$query); 
-        }
-        
-        while($info = mysqli_fetch_array( $rsltv )) {
-            $users[] = $info['userg'];
-        }
-		$allowed_users = implode("','", $users);
-    
-        return $allowed_users;
     }
 ?>
