@@ -12,9 +12,9 @@
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
-	if (!checkIfTenant($groupId)) {
+	if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
 		$ul = "WHERE user_group='$groupId'";
