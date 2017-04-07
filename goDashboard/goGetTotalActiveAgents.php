@@ -10,8 +10,7 @@
     
     include_once("../goFunctions.php");
     
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-    $groupId = go_get_groupid($user);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
         $ul='';

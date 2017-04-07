@@ -10,14 +10,13 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = "and user_group not in ('','NULL','ADMIN')";
+        $ul = "AND user_group not in ('','NULL','ADMIN') AND user_group in ($stringv)";
     }
 
     $NOW = date("Y-m-d");

@@ -10,14 +10,13 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
     if (!checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and campaign_id IN ($stringv) and user_level != 4";
+        $ul = " and vu.user IN ($stringv) and vu.user_level != 4";
     }
 
    $NOW = date("Y-m-d");

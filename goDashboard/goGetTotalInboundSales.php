@@ -10,14 +10,16 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
-    } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and vcl.campaign_id IN ($stringv) and user_level != 4";
+    } else {
+		$stringv = go_getall_allowed_users($groupId);
+		if($groupId !== "ADMIN")
+			$ul = " and vcl.user IN ($stringv)";
+		else
+			$ul = "";
     }
 
    $NOW = date("Y-m-d");
@@ -31,8 +33,8 @@
         LEFT JOIN vicidial_list as vl 
         ON vcl.lead_id=vl.lead_Id
         WHERE vcl.status='$status' and $date $ul";
-$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $rsltv = mysqli_query($link,$query);
+	//$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
+    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
     $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( array( "result" => "success", "query" => $query ), $fresults );
 ?>

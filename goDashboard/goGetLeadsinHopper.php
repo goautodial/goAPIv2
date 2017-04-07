@@ -10,14 +10,16 @@
     
     include_once("../goFunctions.php");
     
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-	$groupId = go_get_groupid($user);
+	$groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_campaigns($groupId);
-        $ul = " where campaign_id IN ('$stringv')";
+		if($stringv !== "'ALLCAMPAIGNS'")
+			$ul = " where campaign_id IN ($stringv)";
+		else
+			$ul = "";
     }
     $query = "SELECT count(*) as getLeadsinHopper FROM vicidial_hopper $ul"; 
     $rsltv = mysqli_query($link,$query);

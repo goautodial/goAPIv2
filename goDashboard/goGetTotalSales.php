@@ -10,14 +10,19 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
-    if (!checkIfTenant($groupId)) {
-        $ul='';
+    if (checkIfTenant($groupId)) {
+        $ul_vcl = "";
+		$ul_vl = "";
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
+		if($groupId !== "ADMIN"){
+			$ul_vcl = "and val.user_group = '$groupId'";
+			$ul_vl = "and vl.user_group = '$groupId'";
+		}else{
+			$ul_vcl = "";
+			$ul_vl = "";
+		}
     }
 
     $NOW = date('Y-m-d');    
@@ -28,17 +33,17 @@
     $dateY = "call_date BETWEEN '$YESTERDAY 00:00:00' AND '$YESTERDAY 23:59:59'";
     $dateLW = "call_date BETWEEN NOW() - INTERVAL DAYOFWEEK(NOW())+6 DAY AND NOW() - INTERVAL DAYOFWEEK(NOW())-1 DAY";
    
-    $query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $date $ul) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $date $ul) as TotalSales";
-    $queryY = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul) as TotalSalesYesterday";
-    $queryLW = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul) as TotalSalesLastWeek";
+    $query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' $ul_vcl and $date ) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' $ul_vl and $date ) as TotalSales";
+    $queryY = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul_vcl) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul_vl) as TotalSalesYesterday";
+    $queryLW = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul_vcl) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul_vl) as TotalSalesLastWeek";
     
     //	$query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid ) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid ) as TotalSales;";
     //$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $rsltv = mysqli_query($link,$query);
-    $rsltvY =  mysqli_query($link,$queryY);
-    $rsltvLW =  mysqli_query($link,$queryLW);
+    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
+    $rsltvY =  mysqli_query($link,$queryY)or die("Error: ".mysqli_error($link));
+    $rsltvLW =  mysqli_query($link,$queryLW)or die("Error: ".mysqli_error($link));
     $fresults = mysqli_fetch_assoc($rsltv);
     $fresultsY = mysqli_fetch_assoc($rsltvY);
     $fresultsLW = mysqli_fetch_assoc($rsltvLW);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults, $fresultsY, $fresultsLW);
+    $apiresults = array_merge( array( "result" => "success", "query" => $query), $fresults, $fresultsY, $fresultsLW);
 ?>

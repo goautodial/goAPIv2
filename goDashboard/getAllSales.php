@@ -8,16 +8,17 @@
     #### License: AGPLv2                               ####
     #######################################################
     include_once("../goFunctions.php");
-	include_once("../goDBasterisk.php");
 	
-	$user = mysqli_real_escape_string($link, $_POST['user']);
 	$groupId = go_get_groupid($user);
 	
 	if (checkIfTenant($groupId)) {
 		$ul = "";
 	} else {
-		$stringv = go_getall_allowed_campaigns($user);
-		$ul = " and campaign_id IN ('$stringv') "; 
+		$stringv = go_getall_allowed_campaigns($groupId);
+		if($stringv !== "'ALLCAMPAIGNS'")
+			$ul = " and campaign_id IN ($stringv) ";
+		else
+			$ul = "";
 	}
 	
 	$query_date =  date('Y-m-d');

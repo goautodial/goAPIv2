@@ -11,20 +11,22 @@
     
     include_once("../goFunctions.php");
     
-    $user = mysqli_real_escape_string($link, $_POST['user']);
-	$groupId = go_get_groupid($user);
+	$groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_campaigns($groupId);
-        $ul = " and campaign_id IN ('$stringv')";
+		if($stringv !== "'ALLCAMPAIGNS'")
+			$ul = " and campaign_id IN ($stringv)";
+		else
+			$ul = "";
     }
 
     $NOW = date("Y-m-d");
 
     $query = "select count(*) AS getIncomingQueue from vicidial_auto_calls where status NOT IN('XFER') and call_type = 'IN' $ul";
-    $rsltv = mysqli_query($link, $query);
+    $rsltv = mysqli_query($link, $query)or die("Error: ".mysqli_error($link));
     $data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
 ?>

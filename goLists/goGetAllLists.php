@@ -39,32 +39,38 @@
 		}
 	}
 
- 	  $query = "SELECT
-					list_id,list_name,list_description,
-					(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,
-					(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count,
-					active,list_lastcalldate,campaign_id,reset_time 
-				from vicidial_lists $allowed_campaigns 
-				order by list_id;";
-   	  $rsltv = mysqli_query($link, $query);
-        	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-
-			$dataListId[] =  $fresults['list_id'];
-			$dataListName[] =  $fresults['list_name'];
-			$dataActive[] =  $fresults['active'];
-			$dataListLastcallDate[] =  $fresults['list_lastcalldate'];
-			$dataTally[] =  $fresults['tally'];
-			$dataCFCount[] =  $fresults['cf_count'];
-			$dataCampaignId[] =  $fresults['campaign_id'];
-
-				$apiresults = array(
-								"result" => "success",
-								"list_id" => $dataListId,
-								"list_name" => $dataListName,
-								"active" => $dataActive,
-								"list_lastcalldate" => $dataListLastcallDate,
-								"tally" => $dataTally,
-								"cf_count" => $dataCFCount,
-								"campaign_id" => $dataCampaignId);
+	$query = "SELECT list_id,list_name,list_description,(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, active,list_lastcalldate,campaign_id,reset_time from vicidial_lists $allowed_campaigns order by list_id;";
+	$rsltv = mysqli_query($link, $query);
+	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		$dataListId[] =  $fresults['list_id'];
+		$dataListName[] =  $fresults['list_name'];
+		$dataActive[] =  $fresults['active'];
+		$dataListLastcallDate[] =  $fresults['list_lastcalldate'];
+		$dataTally[] =  $fresults['tally'];
+		$dataCFCount[] =  $fresults['cf_count'];
+		$dataCampaignId[] =  $fresults['campaign_id'];
 	}
+	
+	#get next list id
+	$query2 = "SELECT list_id from vicidial_lists WHERE list_id NOT IN ('999', '998') order by list_id;";
+	$rsltv2 = mysqli_query($link, $query2);
+	while($fetch_lists = mysqli_fetch_array($rsltv2, MYSQLI_ASSOC)){
+		$lists[] =  $fetch_lists['list_id'];
+	}
+	
+	$max_list = max($lists);
+	$min_list = min($lists);
+	
+	if($max_list >= 99999999){
+		for($i=1;$i < $max_list;$i++){
+			if(!in_array($i, $lists['list_id'])){
+				$next_list = $i;
+				$i = $max_list;
+			}
+		}
+	}else{
+		$next_list = $max_list + 1;
+	}
+	
+	$apiresults = array("result" => "success","list_id" => $dataListId,"list_name" => $dataListName,"active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate,"tally" => $dataTally,"cf_count" => $dataCFCount,"campaign_id" => $dataCampaignId, "next_listID" => $next_list);
 ?>
