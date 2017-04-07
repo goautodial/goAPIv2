@@ -29,7 +29,7 @@
 
 		// getting script count
 		$getLastScript = "SELECT script_id FROM vicidial_scripts $ul ORDER BY script_id ASC;";
-		var_dump($getLastScript);
+	//	var_dump($getLastScript);
 		$queryScriptCount = mysqli_query($link, $getLastScript);
 		$max_script = mysqli_num_rows($queryScriptCount);
 	
