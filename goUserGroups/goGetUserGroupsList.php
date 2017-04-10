@@ -16,8 +16,11 @@
     
 	if (checkIfTenant($groupId)) {
         $ul='';
-    } else { 
+    } else {
+		if($groupId !== "ADMIN")
 		$ul = "WHERE user_group='$groupId'";
+		else
+		$ul = "";
 	}
 
 	$group_type = "Default";
