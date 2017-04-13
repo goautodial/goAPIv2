@@ -36,7 +36,7 @@
     $userid = $_REQUEST["user_id"];    
     $goMyLimit = "LIMIT $start,$length";    
 
-    $getAllowedCampaigns_query = "SELECT vicidial_users.user_group, vicidial_user_groups.allowed_campaigns FROM vicidial_users, vicidial_user_groups WHERE vicidial_users.user_group = vicidial_user_groups.user_group AND vicidial_users.user ='$userid'";  	
+    $getAllowedCampaigns_query = "SELECT vicidial_users.user_group, vicidial_user_groups.allowed_campaigns FROM vicidial_users, vicidial_user_groups WHERE vicidial_users.user_group = vicidial_user_groups.user_group AND vicidial_users.user_id ='$userid'";  	
     $allowedCampaigns_result = mysqli_query($link, $getAllowedCampaigns_query);
     $allowedCampaignsFetch = mysqli_fetch_array($allowedCampaigns_result, MYSQLI_ASSOC);
     $allowedCampaigns = $allowedCampaignsFetch['allowed_campaigns'];
@@ -87,7 +87,7 @@
         else
                 $additional_query = '';
         
-        $queryx = sprintf("SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status,last_local_call_time FROM %s WHERE phone_number != '' ORDER BY %s %s limit %d , %d ", "vicidial_list" ,$orderBy,$orderType ,$start , $length);
+        $queryx = sprintf("SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status,last_local_call_time FROM %s WHERE phone_number != '' $additional_query ORDER BY %s %s limit %d , %d ", "vicidial_list" ,$orderBy,$orderType ,$start , $length);
         $returnRes = mysqli_query($link, $queryx);	
         
         $queryY = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status,last_local_call_time FROM vicidial_list WHERE phone_number != '';";
