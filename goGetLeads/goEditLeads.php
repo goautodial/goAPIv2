@@ -33,7 +33,7 @@
         $country_code   = mysqli_real_escape_string($link, $_REQUEST['country_code']);
         $date_of_birth  = mysqli_real_escape_string($link, $_REQUEST['date_of_birth']);
         $title          = mysqli_real_escape_string($link, $_REQUEST['title']);
-		$status         = mysqli_real_escape_string($link, $_REQUEST['status']);
+        $status         = mysqli_real_escape_string($link, $_REQUEST['status']);
         $is_customer    = mysqli_real_escape_string($link, $_REQUEST['is_customer']);
         $user_id        = mysqli_real_escape_string($link, $_REQUEST['user_id']);
         $avatar         = mysqli_real_escape_string($link, $_REQUEST['avatar']); //base64 encoded
@@ -55,7 +55,7 @@
         country_code = '$country_code',
         date_of_birth = '$date_of_birth',
         title = '$title',
-		status = '$status'
+        status = '$status'
         WHERE lead_id = '$lead_id';";
         
         $querygo = "SELECT '$lead_id'
