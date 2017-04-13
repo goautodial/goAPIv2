@@ -165,7 +165,8 @@
                 // Outbound Campaign here
                 if($campaign_type == "OUTBOUND"){
 						
-                	$groupId = go_get_groupid($goUser);
+                	//$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($session_user);
 
 	                if (!checkIfTenant($groupId)) {
 	                   $tenant_id = '---ALL---';
@@ -258,8 +259,8 @@
 	                $campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
 	                $SQLdate = date("Y-m-d H:i:s");
 	                $NOW = date("Y-m-d");
-	                $groupId = go_get_groupid($goUser);
-
+	                //$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($session_user);
 	                if (!checkIfTenant($groupId)){
 	                   $tenant_id = '---ALL---';
 	                } else {
@@ -455,8 +456,8 @@
 	                	if(!in_array($callRoute,$defCallRoute) || $callRoute == null) {
 		                    $apiresults = array("result" => "Error: Default value for call route is INGROUP, IVR, AGENT and  VOICEMAIL only.");
 		                } else {
-		                	$groupId = go_get_groupid($goUser);
-
+		                	//$groupId = go_get_groupid($goUser);
+							$groupId = go_get_groupid($session_user);
 				            if (!checkIfTenant($groupId)){
 				               $tenant_id = "---ALL---";
 				            } else {
@@ -693,8 +694,8 @@
 	                	if(!in_array($numChannels,$defNumCha) && $numChannels == null) {
 	                        $apiresults = array("result" => "Error: Default value for number channel is 1,5,10,15,20 or 30 only.");
 	                	} else {
-	                		$groupId = go_get_groupid($goUser);
-
+	                		//$groupId = go_get_groupid($goUser);
+							$groupId = go_get_groupid($session_user);
 			                if (!checkIfTenant($groupId)) {
 			                    $tenant_id = "---ALL---";
 			                } else {

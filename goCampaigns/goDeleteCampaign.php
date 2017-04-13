@@ -22,7 +22,8 @@
 		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
 		
-		$groupId = go_get_groupid($goUser);
+		//$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($session_user);
 		if (!checkIfTenant($groupId)) {
 			$ul = "WHERE campaign_id='$campaign_id'";
 		} else { 
@@ -37,6 +38,9 @@
 				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='".$exploded[$i]."';"; 
 				$deleteResult = mysqli_query($link, $deleteQuery);
 				
+				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$exploded[$i]."';"; 
+				$deleteResult2 = mysqli_query($link, $deleteDispo);
+				
 				$querydel = "SELECT campaign_id FROM vicidial_campaigns $ul;";
 				$rsltvdel = mysqli_query($link, $querydel);
 				$countResult = mysqli_num_rows($rsltvdel);
@@ -46,7 +50,7 @@
 				}
 					
 				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
-				
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $deleteDispo);
 			}
 				
 			if($error_count > 0) {
