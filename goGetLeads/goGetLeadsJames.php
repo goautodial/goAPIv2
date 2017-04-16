@@ -98,11 +98,11 @@
     }
     
     $data = array();
-    while($fresults = mysqli_fetch_array($returnRes)){
+    while($fresults = mysqli_fetch_array($returnRes, MYSQLI_ASSOC)){
         array_push($data, $fresults);
     }
     if ($search_customers) {
-            $apiresults = array("draw" => intval($draw), "recordsTotal" => $recordsTotal, "recordsFiltered" => $recordsFiltered, "data" => $data, "query" => $queryx, "result" => "success");
+            $apiresults = array("draw" => intval($draw), "recordsTotal" => $recordsTotal, "recordsFiltered" => $recordsFiltered, "data" => $data, "query" => $queryx, "customer" => "yes", "result" => "success");
     } else {
             $apiresults = array("draw" => intval($draw), "recordsTotal" => $recordsTotal, "recordsFiltered" => $recordsFiltered, "data" => $data, "query" => $queryx, "result" => "success");            
     }
