@@ -1011,7 +1011,8 @@ if ($sipIsLoggedIn) {
                 $alt_phone		= trim("{$row['alt_phone']}");
                 $email			= trim("{$row['email']}");
                 $security		= trim("{$row['security_phrase']}");
-                $comments		= stripslashes(trim("{$row['comments']}"));
+                $comments       = str_replace("\n", "!N!", $row['comments']);
+                $comments		= stripslashes(trim("$comments"));
                 $called_count	= trim("{$row['called_count']}");
                 $rank			= trim("{$row['rank']}");
                 $owner			= trim("{$row['owner']}");
@@ -1664,7 +1665,7 @@ if ($sipIsLoggedIn) {
     
     
             $comments = preg_replace("/\r/i", '', $comments);
-            $comments = preg_replace("/\n/i", '!N', $comments);
+            $comments = preg_replace("/\n/i", '!N!', $comments);
             
             $astDB->where('lead_id', $lead_id);
             $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
