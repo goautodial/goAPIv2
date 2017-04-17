@@ -12,12 +12,16 @@
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
-    $groupId = go_get_groupid($session_user);
+    //$groupId = go_get_groupid($session_user);
+    $groupId = $_REQUEST['group_id'];
     
 	if (checkIfTenant($groupId)) {
         $ul='';
-    } else { 
+    } else {
+		if($groupId !== "ADMIN")
 		$ul = "WHERE user_group='$groupId'";
+		else
+		$ul = "";
 	}
 
 	$group_type = "Default";
