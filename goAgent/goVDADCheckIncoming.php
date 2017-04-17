@@ -154,8 +154,7 @@ if ($is_logged_in) {
             $alt_phone		= trim("{$row['alt_phone']}");
             $email			= trim("{$row['email']}");
             $security		= trim("{$row['security_phrase']}");
-            $comments       = preg_replace("/\n/i", "!N!", trim("{$row['comments']}"));
-            $comments		= stripslashes($comments);
+            $comments		= stripcslashes(trim("{$row['comments']}"));
             $called_count	= trim("{$row['called_count']}");
             $rank			= trim("{$row['rank']}");
             $owner			= trim("{$row['owner']}");
