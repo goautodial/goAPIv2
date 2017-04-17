@@ -1011,8 +1011,8 @@ if ($sipIsLoggedIn) {
                 $alt_phone		= trim("{$row['alt_phone']}");
                 $email			= trim("{$row['email']}");
                 $security		= trim("{$row['security_phrase']}");
-                $comments       = str_replace("\n", "!N!", $row['comments']);
-                $comments		= stripslashes(trim("$comments"));
+                $comments       = preg_replace("/\n/i", "!N!", trim("{$row['comments']}"));
+                $comments		= stripslashes($comments);
                 $called_count	= trim("{$row['called_count']}");
                 $rank			= trim("{$row['rank']}");
                 $owner			= trim("{$row['owner']}");
