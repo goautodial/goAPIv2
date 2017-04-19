@@ -73,6 +73,11 @@
 				$checker = 0;
 				if($num_users <= $config["licensedSeats"] || $config["licensedSeats"] == "0"){
 					
+					$queryPassHash = "SELECT pass_hash_enabled from system_settings";
+					$resultQueryPassHash = mysqli_query($link, $queryPassHash);
+					$rPassHash = mysqli_fetch_array($resultQueryPassHash, MYSQLI_ASSOC);
+					$pass_hash_enabled = $rPassHash['pass_hash_enabled'];
+					
 					$get_last = preg_replace("/[^0-9]/","", $orig_user);
 					$last_num_user = intval($get_last);
 					
@@ -146,9 +151,12 @@
 									}
 								}
 							
-								$cwd = $_SERVER['DOCUMENT_ROOT'];
-								$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-								$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+								$pass_hash = '';
+								if ($pass_hash_enabled > 0) {
+									$cwd = $_SERVER['DOCUMENT_ROOT'];
+									$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+									$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+								}
 								
 								$queryUserAdd = "INSERT INTO  vicidial_users (user, pass, user_group, full_name, user_level, phone_login, phone_pass, agentonly_callbacks, agentcall_manual, active, vdc_agent_api_access,pass_hash, agent_choose_ingroups, vicidial_recording, vicidial_transfers, closer_default_blended, scheduled_callbacks) VALUES ('$user', '$pass', '$user_group', '$full_name', '$user_level', '$phone_login', '$phone_pass', '$agentonly_callbacks', '$agentcall_manual', '$active', '1', '$pass_hash', '1', '1', '1', '1', '1');";
 								$resultQueryAddUser = mysqli_query($link, $queryUserAdd);
@@ -159,9 +167,9 @@
 								$userid = $rUserID['user_id'];
 								
 								if ($active == "N") {
-                                                                    $goactive = "0";
+                                    $goactive = "0";
 								} else {
-                                                                    $goactive = "1";
+                                    $goactive = "1";
 								}
 								
 								$queryUserAddGo = "INSERT INTO users (userid, name, fullname, avatar, role, status, user_group, phone) VALUES ('$userid', '$user', '$full_name', '$avatar', '$user_level', '$goactive', '$user_group', '$phone_login')";
@@ -180,14 +188,25 @@
 										
 								if($countCheckResultAgain > 0) {
 									
+									$realm = 'goautodial.com';
+									$kamha1fields = '';
+									$kamha1values = '';
+									if ($pass_hash_enabled > 0) {
+										$ha1 = md5("{$phone_login}:{$realm}:{$phone_pass}");
+										$ha1b = md5("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
+										$kamha1fields = ", ha1, ha1b";
+										$kamha1values = ", '{$ha1}', '{$ha1b}'";
+										$phone_pass = '';
+									}
+									
 									$queryInsertUser = "INSERT INTO `phones` (`extension`,  `dialplan_number`,  `voicemail_id`,  `phone_ip`,  `computer_ip`,  `server_ip`,  `login`,  `pass`,  `status`,  `active`,  `phone_type`,  `fullname`,  `company`,  `picture`,  `protocol`,  `local_gmt`,  `outbound_cid`,  `template_id`,  `conf_override`,  `user_group`,  `conf_secret`,  `messages`,  `old_messages`) VALUES ('$phone_login',  '9999$phone_login',  '$phone_login',  '',  '', '$server_ip',  '$phone_login',  '$phone_pass',  'ACTIVE',  '$active',  '',  '$full_name',  '$user_group',  '',  'EXTERNAL',  '-5',  '0000000000',  '--NONE--',  '$conf_override',  '$user_group',  '$phone_pass',  '0',  '0');";
 									$resultQueryUser = mysqli_query($link, $queryInsertUser);
 									
-									$kamialioq = "INSERT INTO subscriber (username, domain, password) VALUES ('$phone_login','goautodial.com','$phone_pass');";
-									$resultkam = mysqli_query($linkgokam, $kamialioq);
+									$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','$realm','$phone_pass'{$kamha1values});";
+									$resultkam = mysqli_query($linkgokam, $kamailioq);
 									
 								} else {
-									$apiresults = array("result" => "Error: A problem occured while adding a user. Please Contact the System Administrator.", "query_user" => $queryUserAdd, "query_phone" => $queryInsertUser, "query_kamilio" => $kamialioq);
+									$apiresults = array("result" => "Error: A problem occured while adding a user. Please Contact the System Administrator.", "query_user" => $queryUserAdd, "query_phone" => $queryInsertUser, "query_kamilio" => $kamailioq);
 								}
 								
 							} else {
