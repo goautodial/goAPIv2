@@ -163,6 +163,23 @@
 				}          
 
 				if($campaign_id != null) {
+					$addedQuery = '';
+					if ($campaign_type != 'SURVEY') {
+						$addedQuery = ",campaign_allow_inbound = '$campaign_allow_inbound', 
+									available_only_ratio_tally = '$available_only_ratio_tally', 
+									campaign_recording = '$campaign_recording', 
+									campaign_rec_filename = '$campaign_rec_filename', 
+									per_call_notes = '$per_call_notes', 
+									am_message_exten = '$amMessageExten', 
+									use_internal_dnc = '$use_internal_dnc',
+									use_campaign_dnc = '$use_campaign_dnc', 
+									agent_pause_codes_active = '$agent_pause_codes_active', 
+									manual_dial_filter = '$manual_dial_filter', 
+									three_way_call_cid = '$three_way_call_cid', 
+									customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
+									customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
+									customer_3way_hangup_action = '$customer_3way_hangup_action'";
+					}
 					$updateQuery = "UPDATE vicidial_campaigns SET
 										campaign_name = '$campaign_name', 
 										active = '$active', 
@@ -172,7 +189,6 @@
 										web_form_address = '$webform', 
 										campaign_script = '$campaign_script', 
 										campaign_cid = '$campaign_cid', 
-										campaign_recording = '$campaign_recording', 
 										campaign_vdad_exten = '$campaign_vdad_exten', 
 										local_call_time = '$local_call_time',  
 										dial_status_a = '$dial_status', 
@@ -182,23 +198,11 @@
 										dial_timeout = '$dial_timeout', 
 										manual_dial_prefix = '$manual_dial_prefix', 
 										get_call_launch = '$get_call_launch', 
-										am_message_exten = '$amMessageExten', 
-										agent_pause_codes_active = '$agent_pause_codes_active', 
-										manual_dial_filter = '$manual_dial_filter',
-										use_internal_dnc = '$use_internal_dnc',
-										use_campaign_dnc = '$use_campaign_dnc', 
 										manual_dial_list_id = '$manual_dial_list_id', 
-										available_only_ratio_tally = '$available_only_ratio_tally', 
-										campaign_rec_filename = '$campaign_rec_filename', 
 										next_agent_call = '$next_agent_call', 
 										xferconf_a_number = '$xferconf_a_number', 
 										xferconf_b_number = '$xferconf_b_number', 
-										three_way_call_cid = '$three_way_call_cid', 
 										three_way_dial_prefix = '$three_way_dial_prefix', 
-										customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
-										customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
-										customer_3way_hangup_action = '$customer_3way_hangup_action',
-										campaign_allow_inbound = '$campaign_allow_inbound',
 										closer_campaigns = '$closer_campaigns',
 										xfer_groups = '$xfer_groups',
 										survey_first_audio_file = '$survey_first_audio_file',
@@ -219,10 +223,10 @@
 										survey_fourth_exten = '$survey_fourth_exten',
 										amd_send_to_vmx = '$amd_send_to_vmx',
 										waitforsilence_options = '$waitforsilence_options',
-										per_call_notes = '$per_call_notes',
 										agent_lead_search = '$agent_lead_search',
 										agent_lead_search_method = '$agent_lead_search_method',
                                         omit_phone_code = '$omit_phone_code'
+										$addedQuery
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";
 					//echo $updateQuery;
