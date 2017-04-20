@@ -8,11 +8,16 @@
 #### License: AGPLv2                            ####
 ####################################################
 
-$is_logged_in = check_agent_login($astDB, $goUser);
 $agent = get_settings('user', $astDB, $goUser);
 
 if (isset($_GET['goLimit'])) { $limit = $astDB->escape($_GET['goLimit']); }
     else if (isset($_POST['goLimit'])) { $limit = $astDB->escape($_POST['goLimit']); }
+
+if (isset($_GET['goLeadSearchMethod'])) { $agent_lead_search_method = $astDB->escape($_GET['goLeadSearchMethod']); }
+    else if (isset($_POST['goLeadSearchMethod'])) { $agent_lead_search_method = $astDB->escape($_POST['goLeadSearchMethod']); }
+
+if (isset($_GET['goIsLoggedIn'])) { $is_logged_in = $astDB->escape($_GET['goIsLoggedIn']); }
+    else if (isset($_POST['goIsLoggedIn'])) { $is_logged_in = $astDB->escape($_POST['goIsLoggedIn']); }
 
 if (!isset($limit) || !is_numeric($limit)) {
     $limit = 10000;
@@ -28,7 +33,14 @@ if (!$is_logged_in) {
         $astDB->where('campaign_id', $camp_array, 'in');
     }
 } else {
-    $astDB->where('campaign_id', $campaign);
+    if ($agent_lead_search_method == 'CAMPLISTS_ALL') {
+        $astDB->where('campaign_id', $campaign);
+    } else {
+        if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+            $camp_array = preg_split("/[\s,]+/", $allowed_campaigns);
+            $astDB->where('campaign_id', $camp_array, 'in');
+        }
+    }
 }
 $astDB->where('active', 'Y');
 $rslt = $astDB->get('vicidial_lists', null, 'list_id');

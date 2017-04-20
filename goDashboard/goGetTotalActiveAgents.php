@@ -10,19 +10,18 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid();
+    $groupId = go_get_groupid($session_user);
     
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
-    } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = "AND user_group='$group'";
+    } else {
+        $ul = "AND user_group='$groupId'";
     }
 
-   $query = "SELECT full_name,pass FROM vicidial_users WHERE active='Y' AND (user_level<>'4' AND user_level < '7') $ul AND user NOT IN ('VDAD','VDCL') ORDER BY user";
+   $query = "SELECT full_name,pass FROM vicidial_users WHERE active='Y' AND (user_level<>'4' AND user_level < '7') $ul AND user NOT IN ('VDAD','VDCL', 'goAPI', 'goautodial') ORDER BY user";
 
     $rsltv = mysqli_query($link,$query);
     $fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
+	
 ?>

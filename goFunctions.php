@@ -8,9 +8,12 @@
     #### License: AGPLv2                            ####
     ####################################################
     
+	if (isset($_GET["session_user"])) { $session_user = $_GET["session_user"];
+    } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }    
+	
     ##### get usergroup #########
     function go_get_groupid($goUser){
-        include_once("goDBasterisk.php");
+        include("goDBasterisk.php");
         $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
         $rsltv = mysqli_query($link, $query_userv);
 	$check_resultv = mysqli_num_rows($rsltv);
@@ -25,7 +28,7 @@
     
     ##### checkiftenant ######
     function checkIfTenant($groupId){
-        include_once("goDBgoautodial.php");
+        include("goDBgoautodial.php");
         $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
         $rslt_tenant = mysqli_query($linkgo, $query_tenant);
 	$check_result_tenant = mysqli_num_rows($rslt_tenant);
@@ -39,7 +42,7 @@
     
     
     function go_getall_allowed_users($groupId) {
-        include_once("goDBasterisk.php");
+        include("goDBasterisk.php");
         if ($groupId=='ADMIN' || $groupId=='admin') {
                    $query = "select user as userg from vicidial_users";
                    $rsltv = mysqli_query($link,$query); 
@@ -47,29 +50,19 @@
                    $query = "select user as userg from vicidial_users where user_group='$groupId'";
                    $rsltv = mysqli_query($link,$query); 
         }
-                
-        $fresults=mysqli_fetch_array($rsltv);
-        $callfunc = go_total_agents_callv($groupId);
-        $v = $callfunc - 1;
-        $allowed_users='';
-        $i=0;
         
         while($info = mysqli_fetch_array( $rsltv )) {
-            $users = $info['userg'];
-                if ($i==$v) {
-                      $allowed_users .= "'" . $users. "'";
-                } else {
-                      $allowed_users .= "'" . $users. "'" . ',';
-                }
-            $i++;
+            $users[] = $info['userg'];
         }
-    
+		
+		$imploded = implode("','", $users);
+		$allowed_users = "'".$imploded."'";
         return $allowed_users;
     }
     
     
     function go_total_agents_callv($groupId) {
-        include_once("goDBasterisk.php");
+        include("goDBasterisk.php");
         if (!checkIfTenant($groupId)) {
                    $query = "select count(*) as qresult from vicidial_users";
                    $rsltv = mysqli_query($link,$query);
@@ -87,8 +80,10 @@
         
         return $fresults;
     }
-      function go_getall_allowed_campaigns($groupId)
-      {
+	
+    function go_getall_allowed_campaigns($groupId)
+    {
+		include("goDBasterisk.php");
             /*$groupId = $this->go_get_groupid();
                 if (!is_null($tenant)) {
                         $groupId = $tenant;
@@ -96,18 +91,20 @@
             $query_date =  date('Y-m-d');
             $query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
             $resultsu = mysqli_query($link,$query);
-
-            if(count($resultsu) > 0){
-                $fresults = $resultsu['qresult'];
-                $allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-
-                $allAllowedCampaigns = implode("','",$allowedCampaigns);
-
-            }else{
-                $allAllowedCampaigns = '';
-            }
+			
+			if(mysqli_num_rows($resultsu) > 0){
+				$fetch = mysqli_fetch_array($resultsu);
+				$fresults = $fetch['qresult'];
+				$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
+				
+				$allAllowedCampaigns = implode("",$allowedCampaigns);
+				$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
+			}else{
+				$allAllowedCampaigns = '';
+			}
+			
             return $allAllowedCampaigns;
-      }
+    }
 
 
 
@@ -183,7 +180,7 @@
                 //Phone Settings
                 //Removed columns: DBX_server,DBX_database,DBX_user,DBX_pass,DBX_port,DBY_server,DBY_database,DBY_user,DBY_pass,DBY_port,ASTmgrUSERNAME,ASTmgrSECRET,
                 $dbase->where('login', $param1);
-                $dbase->where('pass', $param2);
+                //$dbase->where('pass', $param2);
                 $dbase->where('active', 'Y');
                 $return = $dbase->getOne('phones', 'extension,dialplan_number,voicemail_id,phone_ip,computer_ip,server_ip,login,pass,status,active,phone_type,fullname,company,picture,messages,old_messages,protocol,local_gmt,login_user,login_pass,login_campaign,park_on_extension,conf_on_extension,VICIDIAL_park_on_extension,VICIDIAL_park_on_filename,monitor_prefix,recording_exten,voicemail_exten,voicemail_dump_exten,ext_context,dtmf_send_extension,call_out_number_group,client_browser,install_directory,local_web_callerID_URL,VICIDIAL_web_URL,AGI_call_logging_enabled,user_switching_enabled,conferencing_enabled,admin_hangup_enabled,admin_hijack_enabled,admin_monitor_enabled,call_parking_enabled,updater_check_enabled,AFLogging_enabled,QUEUE_ACTION_enabled,CallerID_popup_enabled,voicemail_button_enabled,enable_fast_refresh,fast_refresh_rate,enable_persistant_mysql,auto_dial_next_number,VDstop_rec_after_each_call,outbound_cid,enable_sipsak_messages,email,template_id,conf_override,phone_context,conf_secret,is_webphone,use_external_server_ip,codecs_list,webphone_dialpad,phone_ring_timeout,on_hook_agent,webphone_auto_answer');
                 break;

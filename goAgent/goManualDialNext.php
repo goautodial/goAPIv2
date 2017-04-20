@@ -436,7 +436,7 @@ if ($sipIsLoggedIn) {
                         if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
                             $campaign_SQL = "vc.campaign_id IN ('$allowed_campaigns') AND";
                         }
-                        $stmt="SELECT list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
+                        $stmt="SELECT list_id,manual_dial_list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
                         $rslt = $astDB->rawQuery($stmt);
                         $Xct = $astDB->getRowCount();
                         
@@ -448,6 +448,10 @@ if ($sipIsLoggedIn) {
                             $i = 0;
                             foreach ($rslt as $Xrow) {
                                 $list_ids[$i] = $Xrow['list_id'];
+                                if (!in_array($Xrow['manual_dial_list_id'], $list_ids)) {
+                                    $i++;
+                                    $list_ids[$i] = $Xrow['manual_dial_list_id'];
+                                }
                                 $i++;
                             }
                             //$list_ids = implode("','",$list_ids);
@@ -1007,7 +1011,7 @@ if ($sipIsLoggedIn) {
                 $alt_phone		= trim("{$row['alt_phone']}");
                 $email			= trim("{$row['email']}");
                 $security		= trim("{$row['security_phrase']}");
-                $comments		= stripslashes(trim("{$row['comments']}"));
+                $comments		= stripcslashes(trim("{$row['comments']}"));
                 $called_count	= trim("{$row['called_count']}");
                 $rank			= trim("{$row['rank']}");
                 $owner			= trim("{$row['owner']}");
@@ -1122,7 +1126,7 @@ if ($sipIsLoggedIn) {
                 //$stmt="SELECT entry_time,callback_time,user,comments FROM vicidial_callbacks where lead_id='$lead_id' order by callback_id desc LIMIT 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->orderBy('callback_id', 'desc');
-                $rslt = $astDB->getOne('vicidial_callbacks', 'entry_time,callback_time,user,comments');
+                $rslt = $astDB->getOne('vicidial_callbacks', 'entry_time,callback_time,user,comments,callback_id');
                 $cb_record_ct = $astDB->getRowCount();
                 if ($cb_record_ct > 0) {
                     $row = $rslt;
@@ -1130,6 +1134,12 @@ if ($sipIsLoggedIn) {
                     $CBcallback_time =	trim("{$row['callback_time']}");
                     $CBuser =			trim("{$row['user']}");
                     $CBcomments =		trim("{$row['comments']}");
+                    $CBack_id =		    trim("{$row['callback_id']}");
+                    
+                    $astDB->where('callback_id', $CBack_id);
+                    $astDB->where('user', $user);
+                    $astDB->where('status', 'INACTIVE', '!=');
+                    $query = $astDB->update('vicidial_callbacks', array('status'=>'INACTIVE'));
                 }
             }
     
@@ -1654,7 +1664,11 @@ if ($sipIsLoggedIn) {
     
     
             $comments = preg_replace("/\r/i", '', $comments);
-            $comments = preg_replace("/\n/i", '!N', $comments);
+            $comments = preg_replace("/\n/i", '!N!', $comments);
+            
+            $astDB->where('lead_id', $lead_id);
+            $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
+            $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
             
             $LeaD_InfO = array(
                 'MqueryCID' => (isset($MqueryCID)) ? $MqueryCID : "",
@@ -1709,7 +1723,8 @@ if ($sipIsLoggedIn) {
                 'web_form_address_two' => $LISTweb_form_address_two,
                 'post_phone_time_diff_alert_message' => $post_phone_time_diff_alert_message,
                 'ACcount' => $ACcount,
-                'ACcomments' => $ACcomments
+                'ACcomments' => $ACcomments,
+                'call_notes' => $call_notes
             );
     
             $APIResult = array( "result" => "success", "data" => $LeaD_InfO );

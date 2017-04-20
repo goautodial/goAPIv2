@@ -29,20 +29,23 @@
 			$ul = "WHERE carrier_id='$carrier_id' AND user_group='$groupId'";  
 		}
 
-   		$query = "SELECT carrier_id FROM vicidial_server_carriers $ul ORDER BY carrier_id LIMIT 1;";
+   		$query = "SELECT carrier_id, server_ip FROM vicidial_server_carriers $ul ORDER BY carrier_id LIMIT 1;";
    		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
 
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 				$dataCarrierID = $fresults['carrier_id'];
+				$server_ip = $fresults['server_ip'];
 			}
 
 			if(!$dataCarrierID == null) {
 				$deleteQuery = "DELETE FROM vicidial_server_carriers WHERE carrier_id = '$carrier_id';";
    				$deleteResult = mysqli_query($link, $deleteQuery);
 				//echo $deleteQuery;
-
+				
+				$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
+				$resultVSC = mysqli_query($link, $queryUpdate);
         ### Admin logs
                                         //$SQLdate = date("Y-m-d H:i:s");
                                         //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Carrier ID $dataCarrierID','DELETE FROM vicidial_server_carriers WHERE carrier_id = $carrier_id;');";

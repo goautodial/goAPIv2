@@ -33,7 +33,7 @@ if ( file_exists($conf_path) )
         }
 
 $linkost=mysqli_connect("$VARDBost_server", "$VARDBost_user", "$VARDBost_pass", "$VARDBost_database", "$VARDBost_port");
-
+mysqli_query($linkost,"set character_set_results='utf8'");
 if (!$linkost)
         {
     echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;

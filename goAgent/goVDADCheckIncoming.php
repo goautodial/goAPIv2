@@ -154,7 +154,7 @@ if ($is_logged_in) {
             $alt_phone		= trim("{$row['alt_phone']}");
             $email			= trim("{$row['email']}");
             $security		= trim("{$row['security_phrase']}");
-            $comments		= stripslashes(trim("{$row['comments']}"));
+            $comments		= stripcslashes(trim("{$row['comments']}"));
             $called_count	= trim("{$row['called_count']}");
             $rank			= trim("{$row['rank']}");
             $owner			= trim("{$row['owner']}");
@@ -890,7 +890,7 @@ if ($is_logged_in) {
 
 
         $comments = preg_replace("/\r/i", '', $comments);
-        $comments = preg_replace("/\n/i", '!N', $comments);
+        $comments = preg_replace("/\n/i", '!N!', $comments);
 
         $areacode = substr($phone_number, 0, 3);
         //$stmt="SELECT country FROM vicidial_phone_codes where country_code='$phone_code' and areacode='$areacode' LIMIT 1;";
@@ -908,6 +908,10 @@ if ($is_logged_in) {
         $row = $rslt;
         $LISTweb_form_address = $row['web_form_address'];
         $LISTweb_form_address_two = $row['web_form_address_two'];
+        
+        $astDB->where('lead_id', $lead_id);
+        $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
+        $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
 
         $LeaD_InfO = array(
             'callerid' => $callerid,
@@ -961,7 +965,8 @@ if ($is_logged_in) {
             'web_form_address_two' => $LISTweb_form_address_two,
             'ACcount' => $ACcount,
             'ACcomments' => $ACcomments,
-            'converted_dial_code' => $converted_dial_code
+            'converted_dial_code' => $converted_dial_code,
+            'call_notes' => $call_notes
         );
 
         $wait_sec = 0;

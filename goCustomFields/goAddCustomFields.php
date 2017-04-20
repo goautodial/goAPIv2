@@ -71,7 +71,7 @@
                     if (preg_match("/,/",$field_options_array[$te]))
                         {
                         $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= str_replace(" ","_",$field_options_value_array[0].",");
+                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
                         }
                     $te++;
                    }
@@ -93,7 +93,7 @@
                     if (preg_match("/,/",$field_options_array[$te]))
                         {
                         $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= str_replace(" ","_",$field_options_value_array[0].",");
+                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
                         }
                     $te++;
                    }
@@ -141,18 +141,15 @@
                 $field_sql .= ";";
             }
             
-            //if ( ($field_type=='DISPLAY') or ($field_type=='SCRIPT') or (preg_match("/\|$field_label\|/",$vicidial_list_fields)) ){
-            //    //do nothing
-            //}else{
-            //    if (strlen($copy_option) < 3){
-            //        $stmtCUSTOM="$field_sql";
-            //        //die($stmtCUSTOM);
-            //        $rslt = mysqli_query($link, $stmtCUSTOM);
-            //    }
-            //}
+            if ( ($field_type=='DISPLAY') || ($field_type=='SCRIPT') || (preg_match("/\|$field_label\|/",$vicidial_list_fields)) ){
+                //do nothing
+            }else{
+                $stmtCUSTOM="$field_sql";
+                $rslt = mysqli_query($link, $stmtCUSTOM);
+            }
            
-            $stmtCUSTOM="$field_sql";
-            $rslt = mysqli_query($link, $stmtCUSTOM);
+            //$stmtCUSTOM="$field_sql";
+            //$rslt = mysqli_query($link, $stmtCUSTOM);
             
             $insert = "INSERT INTO vicidial_lists_fields
                         set field_label='$field_label',
@@ -182,7 +179,7 @@
                 //$rsltvLog = mysqli_query($linkgo, $queryLog);
                 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insert);
                
-                $apiresults = array("result" => "success");
+                $apiresults = array("result" => "success", "gg" => $stmtCUSTOM);
             }else{
                 $apiresults = array("result" => "Error: Failed to add custom field.");
             }

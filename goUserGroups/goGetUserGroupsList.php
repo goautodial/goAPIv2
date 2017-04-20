@@ -12,16 +12,20 @@
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
-    $groupId = go_get_groupid($goUser);
+    //$groupId = go_get_groupid($session_user);
+    $groupId = $_REQUEST['group_id'];
     
-	if (!checkIfTenant($groupId)) {
+	if (checkIfTenant($groupId)) {
         $ul='';
-    } else { 
+    } else {
+		if($groupId !== "ADMIN")
 		$ul = "WHERE user_group='$groupId'";
+		else
+		$ul = "";
 	}
 
 	$group_type = "Default";
-   	$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT $limit;";
+   	$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY group_name LIMIT $limit;";
    	$rsltv = mysqli_query($link, $query);
 
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){

@@ -349,7 +349,7 @@ if ($sipIsLoggedIn) {
 				'cmd_line_j' => '',
 				'cmd_line_k' => ''
 			);
-			$rslt = $astDB->insert('vicidial_manager');
+			$rslt = $astDB->insert('vicidial_manager', $insertData);
 	
 			### log outbound call in the dial log
 			//$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$MqueryCID',lead_id='$lead_id',server_ip='$server_ip',call_date='$NOW_TIME',extension='$Ndialstring',channel='$local_DEF$conf_exten$local_AMP$ext_context$Local_persist',timeout='$Local_dial_timeout',outbound_cid='$CIDstring',context='$ext_context';";
@@ -364,7 +364,7 @@ if ($sipIsLoggedIn) {
 				'outbound_cid' => $CIDstring,
 				'context' => $ext_context
 			);
-			$rslt = $astDB->insert('vicidial_dial_log');
+			$rslt = $astDB->insert('vicidial_dial_log', $insertData);
 	
 			//$stmt = "INSERT INTO vicidial_auto_calls (server_ip,campaign_id,status,lead_id,callerid,phone_code,phone_number,call_time,call_type) values('$server_ip','$campaign','XFER','$lead_id','$MqueryCID','$phone_code','$phone_number','$NOW_TIME','OUT')";
 			$insertData = array(
@@ -378,7 +378,7 @@ if ($sipIsLoggedIn) {
 				'call_time' => $NOW_TIME,
 				'call_type' => 'OUT'
 			);
-			$rslt = $astDB->insert('vicidial_auto_calls');
+			$rslt = $astDB->insert('vicidial_auto_calls', $insertData);
 	
 			### update the agent status to INCALL in vicidial_live_agents
 			//$stmt = "UPDATE vicidial_live_agents set status='INCALL',last_call_time='$NOW_TIME',callerid='$MqueryCID',lead_id='$lead_id',comments='MANUAL',calls_today='$calls_today',external_hangup=0,external_status='',external_pause='',external_dial='',last_state_change='$NOW_TIME' where user='$user' and server_ip='$server_ip';";

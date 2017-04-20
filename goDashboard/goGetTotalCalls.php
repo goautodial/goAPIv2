@@ -9,16 +9,18 @@
     #### License: AGPLv2                                ####
     ########################################################
     
-    include_once("../goFunctions.php");
+    require_once("../goFunctions.php");
+	
+    $groupId = go_get_groupid($session_user);
     
-    $groupId = go_get_groupid($goUser);
-    
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and campaign_id IN ($stringv) and user_level != 4";
+        $stringv = go_getall_allowed_campaigns($groupId);
+		if($stringv !== "'ALLCAMPAIGNS'")
+			$ul = " AND campaign_id IN ($stringv)";
+		else
+			$ul = "";
     }
 
     $NOW = date("Y-m-d");
@@ -29,17 +31,15 @@
     
     $queryOutboundcalls = "select count(call_date) as getTotalOutboundCalls from vicidial_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
     
-    $rsltvTotalcalls = mysqli_query($link, $queryTotalcalls);
-    $rsltvIncalls = mysqli_query($link, $queryInboundcalls);
-    $rsltvOutcalls = mysqli_query($link, $queryOutboundcalls);
-    
-    $dataTotalCalls = mysqli_fetch_assoc($rsltvTotalcalls);
-    $dataIncalls = mysqli_fetch_assoc($rsltvIncalls);
-    $dataOutcalls = mysqli_fetch_assoc($rsltvOutcalls);
-    
-    $data = array_merge($dataTotalCalls, $dataIncalls, $dataOutcalls);
-        
-    $apiresults = array("result" => "success", "data" => $data); 
-    
-    
+    $rsltvTotalcalls = mysqli_query($link, $queryTotalcalls)or die("Error: ".mysqli_error($link));
+    $rsltvIncalls = mysqli_query($link, $queryInboundcalls)or die("Error: ".mysqli_error($link));
+    $rsltvOutcalls = mysqli_query($link, $queryOutboundcalls)or die("Error: ".mysqli_error($link));
+	
+	$dataTotalCalls = mysqli_fetch_array($rsltvTotalcalls,MYSQLI_ASSOC);
+	$dataIncalls = mysqli_fetch_array($rsltvIncalls,MYSQLI_ASSOC);
+	$dataOutcalls = mysqli_fetch_array($rsltvOutcalls,MYSQLI_ASSOC);
+	
+    $data = array("getTotalCalls" => $dataTotalCalls['getTotalCalls'], "getTotalInboundCalls" => $dataIncalls['getTotalInboundCalls'], "getTotalOutboundCalls" => $dataOutcalls['getTotalOutboundCalls']);
+	
+    $apiresults = array("result" => "success", "data" => $data, "query" => $queryOutboundcalls ); 
 ?>

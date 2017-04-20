@@ -9,15 +9,16 @@
     ####################################################
     
     include_once("../goFunctions.php");
+	
+    $groupId = go_get_groupid($session_user);
     
-    $groupId = go_get_groupid($goUser);
-    
-    if (!checkIfTenant($groupId)) {
-        $ul=' where user_level != 4';
+    if (checkIfTenant($groupId)) {
+		$stringv = '';
+        $ul_online='';
+		$ul_calls='';
     } else { 
         $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " where user IN ($stringv) and user_level != 4";
+		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
     $query = "SELECT count(*) as getTotalAgentsOnline FROM vicidial_live_agents $ul"; 

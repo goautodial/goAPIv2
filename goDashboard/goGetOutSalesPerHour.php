@@ -10,22 +10,25 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
 
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else {
-        $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " and vcl.campaign_id IN ($stringv) and user_level != 4";
+        if($groupId !== "ADMIN")
+			$ul = "and vlog.user_group = '$groupId'";
+		else
+			$ul = "";
     }
 
    $NOW = date("Y-m-d");
-            $query_date =  date('Y-m-d');
-            $status = "SALE";
-            $date = "call_date BETWEEN '$query_date 00:00:00' AND '$query_date 23:59:59'";
-            $query="select concat(round((select count(*) as qresult from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $date $ul),3),'%')/8 as getOutSalesPerHour";
-    $rsltv = mysqli_query($link,$query);
+	$query_date =  date('Y-m-d H');
+	$status = "SALE";
+	$date = "vlog.call_date BETWEEN '$query_date:00:00' AND '$query_date:59:59'";
+	$query="select count(*) as getOutSalesPerHour FROM vicidial_log as vlog LEFT JOIN vicidial_list as vl ON vlog.lead_id=vl.lead_id WHERE vlog.status='SALE' $ul and $date";
+    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
     $fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( array( "result" => "success", "query" => $date), $fresults );
+	
+	
 ?>

@@ -165,7 +165,8 @@
                 // Outbound Campaign here
                 if($campaign_type == "OUTBOUND"){
 						
-                	$groupId = go_get_groupid($goUser);
+                	//$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($session_user);
 
 	                if (!checkIfTenant($groupId)) {
 	                   $tenant_id = '---ALL---';
@@ -203,7 +204,7 @@
 												'Y','DISABLED','30','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-												'${$tenant_id}0','7', '$answering_machine_detection'
+												'${$tenant_id}998','7', '$answering_machine_detection'
 										)";
 							$rsltvAdd = mysqli_query($link, $queryAdd);
 							$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -258,8 +259,8 @@
 	                $campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
 	                $SQLdate = date("Y-m-d H:i:s");
 	                $NOW = date("Y-m-d");
-	                $groupId = go_get_groupid($goUser);
-
+	                //$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($session_user);
 	                if (!checkIfTenant($groupId)){
 	                   $tenant_id = '---ALL---';
 	                } else {
@@ -293,7 +294,7 @@
 											'Y','DISABLED','30','$answering_machine_detection','ALLFORCE',
 											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-											'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+											'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
 											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 										)";
 
@@ -455,8 +456,8 @@
 	                	if(!in_array($callRoute,$defCallRoute) || $callRoute == null) {
 		                    $apiresults = array("result" => "Error: Default value for call route is INGROUP, IVR, AGENT and  VOICEMAIL only.");
 		                } else {
-		                	$groupId = go_get_groupid($goUser);
-
+		                	//$groupId = go_get_groupid($goUser);
+							$groupId = go_get_groupid($session_user);
 				            if (!checkIfTenant($groupId)){
 				               $tenant_id = "---ALL---";
 				            } else {
@@ -526,7 +527,7 @@
 																'Y','DISABLED','30','8369','ALLFORCE',
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-																'{$tenant_id}0','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+																'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
 																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 															)";
 
@@ -693,8 +694,8 @@
 	                	if(!in_array($numChannels,$defNumCha) && $numChannels == null) {
 	                        $apiresults = array("result" => "Error: Default value for number channel is 1,5,10,15,20 or 30 only.");
 	                	} else {
-	                		$groupId = go_get_groupid($goUser);
-
+	                		//$groupId = go_get_groupid($goUser);
+							$groupId = go_get_groupid($session_user);
 			                if (!checkIfTenant($groupId)) {
 			                    $tenant_id = "---ALL---";
 			                } else {
@@ -761,12 +762,12 @@
                                                                                     dial_timeout,campaign_vdad_exten,campaign_recording,
                                                                                     campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
                                                                                     no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
-                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file)
-                                                                                    VALUES('$campaign_id','$campaign_desc','','N','RATIO','NEW',
+                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method)
+                                                                                    VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}0','7','','$wavfile_name')";
+                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -782,7 +783,7 @@
 									$rsltvVUG = mysqli_query($link, $queryVUG);
 
 									do {
-                                        $agvar= mt_rand(0,10);
+                                        $agvar= mt_rand();
                                         $queryVU = "SELECT user FROM vicidial_users WHERE user='$agvar';";
 										$rsltvVU = mysqli_query($link, $queryVU);
                                         $user_exist = mysqli_num_rows($rsltvVU);
@@ -790,12 +791,17 @@
                                     while ($user_exist > 0);
 
                                     $pass= substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10);
-
+									$survey_method = "EXTENSION";
+								    if($survey_method != "AGENT_XFER" && $active == 'Y'){
+										$remote_agent_status = 'Y';
+									}else{
+										$remote_agent_status = 'N';
+									}
                                     $agent_user="$agvar";
                                     $agent_name="Survey Agent - $campaign_id";
                                     $agent_phone="$agvar";
 
-                                    $queryVRA = "INSERT INTO vicidial_remote_agents (user_start,number_of_lines,server_ip,conf_exten,status,campaign_id,closer_campaigns) values('$agent_user','$numChannels','$main_server_ip','8300','INACTIVE','$campaign_id','')";
+                                    $queryVRA = "INSERT INTO vicidial_remote_agents (user_start,number_of_lines,server_ip,conf_exten,status,campaign_id,closer_campaigns) values('$agent_user','$numChannels','$main_server_ip','8300','$remote_agent_status','$campaign_id','')";
 									$rsltvVRA = mysqli_query($link, $queryVRA);
 
 									if ($countAll < 1){

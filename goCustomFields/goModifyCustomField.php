@@ -37,7 +37,15 @@
     if($field_label_old != $field_label){
         $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
     }else{
-        $field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+	$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
+    	$goCheckrslt = mysqli_query($link, $goCheckSQL);
+	$countGoCheckrslt = mysqli_num_rows($goCheckrslt);
+
+	if($countGoCheckrslt > 0) {
+	     	$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+	} else {
+	     	$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+	}
     }
     
     $field_options_ENUM='';
@@ -110,15 +118,15 @@
         $field_sql .="";  
     }
     
-    //if ( ($field_type=='DISPLAY') or ($field_type=='SCRIPT') or (preg_match("/\|$field_label\|/",$vicidial_list_fields)) ) {
-    //    //  do nothing      
-    //} else {
-    //    $stmtCUSTOM="$field_sql";
-    //    $rslt = mysqli_query($link, $stmtCUSTOM);
-    //}
+    if ( ($field_type == 'DISPLAY') || ($field_type == 'SCRIPT') || (preg_match("/\|$field_label\|/", $vicidial_list_fields)) ) {
+        //  do nothing      
+    } else {
+        $stmtCUSTOM="$field_sql";
+		$rslt = mysqli_query($link, $stmtCUSTOM);
+    }
     
-    $stmtCUSTOM="$field_sql";
-    $rslt = mysqli_query($link, $stmtCUSTOM);
+    //$stmtCUSTOM="$field_sql";
+    //$rslt = mysqli_query($link, $stmtCUSTOM);
     
     $update = "UPDATE vicidial_lists_fields set
                 field_label='$field_label',field_name='$field_name',field_description='$field_description',

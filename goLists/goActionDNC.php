@@ -2,7 +2,7 @@
     include_once("../goFunctions.php");
     
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$phone_numbers = mysqli_real_escape_string($link, $_REQUEST['phone_numbers']);
+	$phone_numbers = str_replace(" ", "\n", rawurldecode(mysqli_real_escape_string($link, $_REQUEST['phone_numbers'])));
 	$stage = mysqli_real_escape_string($link, $_REQUEST['stage']);
 	$user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);

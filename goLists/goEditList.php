@@ -55,7 +55,7 @@ if($list_id == null) {
 	$apiresults = array("result" => "Error: Default value for reset_list is Y or N only.");
 } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name)){
 	$apiresults = array("result" => "Error: Special characters found in list_name");
-} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $reset_time)) {
+} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $reset_time)) {
 	$apiresults = array("result" => "Error: Special characters found in reset_time");
 } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_a_number)) {
 	$apiresults = array("result" => "Error: Special characters found in xferconf_a_number");
@@ -79,7 +79,7 @@ if($list_id == null) {
 	$queryreset = "UPDATE vicidial_list set called_since_last_reset='$reset_list' where list_id='$list_id';";
 	$rsltvreset = mysqli_query($link, $queryreset);
 
-	$query = "UPDATE vicidial_lists set list_name = '$list_name', list_description = '$list_description', campaign_id = '$campaign_id', active = '$active', xferconf_a_number = '$xferconf_a_number', xferconf_b_number = '$xferconf_b_number', xferconf_c_number = '$xferconf_c_number', xferconf_d_number = '$xferconf_d_number', xferconf_e_number = '$xferconf_e_number',  agent_script_override = '$agent_script_override', drop_inbound_group_override = '$drop_inbound_group_override', campaign_cid_override = '$campaign_cid_override', web_form_address = '$web_form_address' WHERE list_id='$list_id';";
+	$query = "UPDATE vicidial_lists set list_name = '$list_name', list_description = '$list_description', campaign_id = '$campaign_id', active = '$active', reset_time='$reset_time', xferconf_a_number = '$xferconf_a_number', xferconf_b_number = '$xferconf_b_number', xferconf_c_number = '$xferconf_c_number', xferconf_d_number = '$xferconf_d_number', xferconf_e_number = '$xferconf_e_number',  agent_script_override = '$agent_script_override', drop_inbound_group_override = '$drop_inbound_group_override', campaign_cid_override = '$campaign_cid_override', web_form_address = '$web_form_address' WHERE list_id='$list_id';";
 	$resultQuery = mysqli_query($link, $query);
 
 	if($resultQuery == false){

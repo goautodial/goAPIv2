@@ -10,7 +10,7 @@
     #######################################################
     include_once ("../goFunctions.php");
 		
-		$userid = $_REQUEST['userid'];
+		$userid = mysqli_real_escape_string($link, $_REQUEST['userid']);
 		
 		## GET USER GROUP ##
 		$get_usergroup = "SELECT user_group FROM vicidial_users WHERE user = '$userid'";
@@ -20,20 +20,16 @@
 		
                 $groupId = go_get_groupid($goUser);
 
-                if (!checkIfTenant($groupId)) {
+                //if (!checkIfTenant($groupId)) {
+		if ($user_group === "ADMIN") {
                         $ul = "";
                 } else {
-                        $ul = "AND user_group='$groupId'";
-                  
+                        $ul = "WHERE user_group = '$user_group'"; 
                 }
 
 		// getting script count
-		if($user_group != "ADMIN"){
-				$getLastScript = "SELECT script_id FROM vicidial_scripts;";
-		}else{
-				$getLastScript = "SELECT script_id FROM vicidial_scripts WHERE user_group = 'ADMIN';";
-		}
-		
+		$getLastScript = "SELECT script_id FROM vicidial_scripts $ul ORDER BY script_id ASC;";
+	//	var_dump($getLastScript);
 		$queryScriptCount = mysqli_query($link, $getLastScript);
 		$max_script = mysqli_num_rows($queryScriptCount);
 	

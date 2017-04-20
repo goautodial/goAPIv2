@@ -194,6 +194,7 @@ if ($is_logged_in) {
 					$fields['lead_id'] = $lead_id;
 					
 					$astDB->insert($custom_listid, $fields);
+					$lastError = $astDB->getLastError();
 					$insert_success = $astDB->getRowCount();
 				}
 			}
@@ -214,7 +215,7 @@ if ($is_logged_in) {
 			$retry_count++;
 		}
         
-        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated" );
+        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError );
     }
 } else {
     $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );

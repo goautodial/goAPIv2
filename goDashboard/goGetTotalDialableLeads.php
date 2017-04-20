@@ -10,14 +10,13 @@
     
     include_once("../goFunctions.php");
     
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($session_user);
     
-    if (!checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId)) {
         $ul='';
     } else { 
         $stringv = go_getall_allowed_users($groupId);
-        $stringv .= "'j'";
-        $ul = " where campaign_id IN ($stringv) and user_level != 4";
+        $ul = " where campaign_id IN ($stringv)";
     }
    $query = "SELECT sum(dialable_leads) as getTotalDialableLeads FROM vicidial_campaign_stats $ul"; 
     $rsltv = mysqli_query($link,$query);

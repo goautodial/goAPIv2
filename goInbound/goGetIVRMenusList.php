@@ -9,16 +9,18 @@
     #######################################################
     include_once ("../goFunctions.php");
     
-    $limit = $_REQUEST['limit'];
+    $limit = mysqli_real_escape_string($link, $_REQUEST['limit']);
+    $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
     if($limit < 1){ $limit = 1000; } else { $limit = $limit; }
 
     $groupId = go_get_groupid($goUser);
     
-    if (!checkIfTenant($groupId)) {
+    //if (!checkIfTenant($groupId)) {
+	if ($user_group == 'ADMIN') {
         $ul='';
     } else { 
-	$ul = "AND user_group='$groupId'";  
-  	   }
+		$ul = "AND user_group='$user_group'";  
+  	}
 
    $query = "SELECT menu_id,menu_name,menu_prompt,menu_timeout from vicidial_call_menu WHERE menu_id!='defaultlog' $ul order by menu_id LIMIT $limit";
    $rsltv = mysqli_query($link, $query);
