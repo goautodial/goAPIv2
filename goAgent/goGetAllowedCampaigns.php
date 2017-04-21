@@ -21,6 +21,7 @@ if (!preg_match("/ALL-CAMPAIGNS/", $query['allowed_campaigns'])) {
 }
 $astDB->where('active', 'Y');
 $astDB->where('campaign_vdad_exten', array('8366', '8373'), 'not in');
+$astDB->orWhere('survey_method', 'AGENT_XFER');
 $astDB->orderBy('campaign_id');
 $result = $astDB->get('vicidial_campaigns', null, 'campaign_id,campaign_name');
 //$camp_list = "<option value=''>".$lh->translationFor('select_a_campaign')."</option>";
