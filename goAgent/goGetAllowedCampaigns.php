@@ -35,7 +35,7 @@ foreach ($result as $camp) {
 
 if (count($camp_list)) {
     ksort($camp_list);
-    $APIResult = array( "result" => "success", "data" => array("allowed_campaigns" => $camp_list) );
+    $APIResult = array( "result" => "success", "data" => array("allowed_campaigns" => $camp_list), "query" =>  $astDB->getLastQuery());
 } else {
     $APIResult = array( "result" => "error", "message" => "No allowed campaigns" );
 }
