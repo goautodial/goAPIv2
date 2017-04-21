@@ -10,10 +10,7 @@
     include_once ("../goFunctions.php");
     include_once ("../licensed-conf.php");
 	
-	$user = $goUser;
-	if (isset($_REQUEST["user"]) && strlen($_REQUEST["user"]) > 0) {
-		$user = $_REQUEST["user"];
-	}
+	$user = $session_user;
 	
 	// get user_level
 	$query_userlevel_sql = "SELECT user_level,user_group FROM vicidial_users WHERE user = '$user' LIMIT 1";
@@ -49,7 +46,7 @@
     }
 	
 	// getting agent count
-	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI', 'goautodial') AND user_level != '4' ORDER BY user ASC";
+	$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI', 'goautodial', '$user') AND user_level != '4' ORDER BY user ASC";
 	$queryCount = mysqli_query($link, $getLastCount);
 	$max = mysqli_num_rows($queryCount);
 		
@@ -93,7 +90,7 @@
 
 	// getting all users
 	#	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-	$query = "SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial', '$user') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user_id ASC";
+	$query = "SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goAPI','goautodial') AND (user_level != '4' AND user_level <= '$user_level') $ul ORDER BY user != '$user', user_id DESC";
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
         
