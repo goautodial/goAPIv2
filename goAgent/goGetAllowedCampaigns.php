@@ -35,7 +35,7 @@ foreach ($result as $camp) {
 
 if (count($camp_list)) {
     ksort($camp_list);
-    $APIResult = array( "result" => "success", "data" => array("allowed_campaigns" => $camp_list), "query" =>  "SELECT campaign_id,campaign_name FROM vicidial_campaigns WHERE $allowed_camps active='Y' AND (campaign_vdad_exten NOT IN ('8366', '8373') OR survey_method='AGENT_XFER') ORDER BY campaign_id");
+    $APIResult = array( "result" => "success", "data" => array("allowed_campaigns" => $camp_list) );
 } else {
     $APIResult = array( "result" => "error", "message" => "No allowed campaigns" );
 }
