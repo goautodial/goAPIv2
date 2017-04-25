@@ -517,7 +517,7 @@ ini_set('memory_limit', '2048M');
 						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						$total_status = mysqli_num_rows($query);
 						
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$status[] = $row['status'];
 							$ccount[] = $row['ccount'];
