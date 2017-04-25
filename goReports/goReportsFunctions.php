@@ -103,6 +103,116 @@
                         return "$Ftime";
                         }
                 }
+				
+	function inner_checkIfTenant($groupId, $linkgo){
+        $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
+        $rslt_tenant = mysqli_query($linkgo,$query_tenant);
+        $check_result_tenant = mysqli_num_rows($rslt_tenant);
+        
+
+        if ($check_result_tenant > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+	function go_getall_closer_campaigns($campaignID, $link){
+		$query_date =  date('Y-m-d');
+		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaignID' order by campaign_id";
+		$query = mysqli_query($link, $query_text);
+		$resultsu = mysqli_fetch_array($query);
+		
+		if(count($resultsu) > 0){
+			$fresults = $resultsu['qresult'];
+			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$fresults)))));
+			$allCloserCampaigns = implode("','",$closerCampaigns);
+		}else{
+			  $allCloserCampaigns = '';
+		}
+		  
+		return $allCloserCampaigns;
+	}
+	
+	function go_get_calltimes($camp, $link){
+		
+		$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$camp'";
+		$query_result = mysqli_query($link, $query);
+		$fetch_result = mysqli_fetch_array($query_result);
+		$call_time = $fetch_result['call_time'];
+
+		if (strlen($call_time) > 0){
+			$query = "SELECT ct_default_start, ct_default_stop FROM vicidial_call_times WHERE call_time_id='$call_time'";
+			$result_query = mysqli_query($link, $query);
+			$fetch_result = mysqli_fetch_array($result_query);
+			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];
+		}
+
+		return $result;
+	}
+	
+	function go_get_statuses($camp, $link){
+	# grab names of global statuses and statuses in the selected campaign
+	
+		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_statuses order by status");
+		$statuses_to_print = mysqli_num_rows($query);
+	
+		$ns = 0;
+		while($row = mysqli_fetch_array($query)){
+			if ($row['status'] != 'NEW') {
+				if (($row['selectable'] =='Y' && $row['human_answered'] =='Y') || ($row['status'] =='INCALL' || $row['status'] == 'CBHOLD')) {
+							$system_statuses[$ns] = $row['status'];
+				} else {
+							$statuses_code[$ns] = $row['status'];
+				}
+				
+				$statuses_name[$row['status']] = $row['status_name'];
+			}
+				
+				$statuses[$ns]=$row['status'];
+				$ns++;
+		}
+
+		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_campaign_statuses where campaign_id='$camp' and selectable='Y' and human_answered='Y' order by status");
+		
+		$Cstatuses_to_print = mysqli_num_rows($query);
+	
+		$o = 0;
+		while($row = mysqli_fetch_array($query)) {
+			if ($row['status'] != 'NEW') {
+				
+				if (($row['selectable'] =='Y' && $row['human_answered'] =='Y') || ($row['status'] =='INCALL' || $row['status'] == 'CBHOLD')) {
+					$campaign_statuses[$o] = $row['status'];
+				} else {
+					$statuses_code[$o] = $row['status'];
+				}
+				
+				$statuses_name[$row['status']] = $row['status_name'];
+			}
+			
+			$statuses[$o]=$row['status'];
+			$o++;
+		}
+
+		$apiresults = array($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code);
+	
+		return $apiresults;
+	}
+	
+	function get_inbound_groups($userID, $link, $groupId) {
+		if($groupId != NULL)
+		$groupSQL = "where user_group='$groupId'";
+		
+		else
+		$groupSQL = "";
+		
+		$stmt ="select group_id,group_name from vicidial_inbound_groups $groupSQL;";
+		
+		$query = mysqli_query($link, $stmt);
+		$inboundgroups = mysqli_fetch_array($query);
+		
+		return $inboundgroups;
+	}
 
  
 ?>
