@@ -39,7 +39,7 @@
 		}
 	}
 
-	$query = "SELECT list_id,list_name,list_description,(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, active,list_lastcalldate,campaign_id,reset_time from vicidial_lists $allowed_campaigns order by list_id;";
+	$query = "SELECT vicidial_lists.list_id,vicidial_lists.list_name,vicidial_lists.list_description,(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active,vicidial_lists.list_lastcalldate,vicidial_lists.campaign_id,vicidial_lists.reset_time, vicidial_campaigns.campaign_name from vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $allowed_campaigns order by list_id;";
 	$rsltv = mysqli_query($link, $query);
 	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 		$dataListId[] =  $fresults['list_id'];
@@ -49,6 +49,7 @@
 		$dataTally[] =  $fresults['tally'];
 		$dataCFCount[] =  $fresults['cf_count'];
 		$dataCampaignId[] =  $fresults['campaign_id'];
+		$dataCampaignName[] = $fresults['campaign_name'];
 	}
 	
 	#get next list id
@@ -72,5 +73,5 @@
 		$next_list = $max_list + 1;
 	}
 	
-	$apiresults = array("result" => "success","list_id" => $dataListId,"list_name" => $dataListName,"active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate,"tally" => $dataTally,"cf_count" => $dataCFCount,"campaign_id" => $dataCampaignId, "next_listID" => $next_list);
+	$apiresults = array("result" => "success","list_id" => $dataListId,"list_name" => $dataListName,"active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate,"tally" => $dataTally,"cf_count" => $dataCFCount,"campaign_id" => $dataCampaignId, "next_listID" => $next_list, "campaign_name" => $dataCampaignName);
 ?>

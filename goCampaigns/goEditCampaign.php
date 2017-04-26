@@ -165,21 +165,27 @@
 				if($campaign_id != null) {
 					$addedQuery = '';
 					if ($campaign_type != 'SURVEY') {
-						$addedQuery = ",campaign_allow_inbound = '$campaign_allow_inbound', 
+						$addedQuery .= ",campaign_allow_inbound = '$campaign_allow_inbound', 
 									available_only_ratio_tally = '$available_only_ratio_tally', 
 									campaign_recording = '$campaign_recording', 
 									campaign_rec_filename = '$campaign_rec_filename', 
 									per_call_notes = '$per_call_notes', 
 									am_message_exten = '$amMessageExten', 
-									use_internal_dnc = '$use_internal_dnc',
-									use_campaign_dnc = '$use_campaign_dnc', 
 									agent_pause_codes_active = '$agent_pause_codes_active', 
 									manual_dial_filter = '$manual_dial_filter', 
-									three_way_call_cid = '$three_way_call_cid', 
 									customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
 									customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
 									customer_3way_hangup_action = '$customer_3way_hangup_action'";
 					}
+                    
+                    if($campaign_type != 'SURVEY' && $dial_method != "INBOUND_MAN") {
+                        $addedQuery .= ",lead_order = '$lead_order',
+                                    use_internal_dnc = '$use_internal_dnc',
+									use_campaign_dnc = '$use_campaign_dnc',
+                                    three_way_call_cid = '$three_way_call_cid', 
+                                    manual_dial_list_id = '$manual_dial_list_id', 
+                                    hopper_level = '$hopper_level'"; 
+                    }
 					$updateQuery = "UPDATE vicidial_campaigns SET
 										campaign_name = '$campaign_name', 
 										active = '$active', 
@@ -192,13 +198,10 @@
 										campaign_vdad_exten = '$campaign_vdad_exten', 
 										local_call_time = '$local_call_time',  
 										dial_status_a = '$dial_status', 
-										lead_order = '$lead_order', 
 										lead_filter_id = '$lead_filter_id',
-										hopper_level = '$hopper_level', 
 										dial_timeout = '$dial_timeout', 
 										manual_dial_prefix = '$manual_dial_prefix', 
 										get_call_launch = '$get_call_launch', 
-										manual_dial_list_id = '$manual_dial_list_id', 
 										next_agent_call = '$next_agent_call', 
 										xferconf_a_number = '$xferconf_a_number', 
 										xferconf_b_number = '$xferconf_b_number', 

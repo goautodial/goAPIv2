@@ -66,7 +66,13 @@
 	$status 	= $_REQUEST['status'];									
 	$script 	= $_REQUEST['script'];						
 	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];
-	if($answering_machine_detection == "")$answering_machinge_detection = '8369';
+	if($answering_machine_detection == ""){
+		if($dial_method == "MANUAL" && $dial_method == "INBOUND_MAN"){
+			$answering_machinge_detection = '8368';
+		}else{
+			$answering_machinge_detection = '8369';	
+		}
+	}
 	$caller_id 	= $_REQUEST['caller_id']; 					
 	$force_reset_hopper 	= $_REQUEST['force_reset_hopper'];			
 	$inbound_man 	= $_REQUEST['inbound_man'];					
@@ -527,8 +533,8 @@
 																'Y','DISABLED','30','8369','ALLFORCE',
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-																'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-																'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
+																'998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
+																'CAMPAIGN','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
 															)";
 
 										$rsltvInsert = mysqli_query($link, $queryInsert);

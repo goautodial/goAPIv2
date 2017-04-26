@@ -9,7 +9,8 @@
     ####################################################
     
 	if (isset($_GET["session_user"])) { $session_user = $_GET["session_user"];
-    } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }    
+    } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }
+	else $session_user = "";
 	
     ##### get usergroup #########
     function go_get_groupid($goUser){

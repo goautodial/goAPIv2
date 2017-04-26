@@ -462,7 +462,7 @@ ini_set('memory_limit', '2048M');
 						
 						// Total Calls Made
 						//$query = mysqli_query($link, "select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and call_date between '$fromDate 00:00:00' and '$toDate 23:59:59'");
-						$query_total_calls_made = "select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where length_in_sec>'0' $ul and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul group by cdate $MunionSQL) t group by cdate;";
+						$query_total_calls_made = "select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where length_in_sec>'0' $ul and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cdate $MunionSQL) t group by cdate;";
 						$query = mysqli_query($link, $query_total_calls_made);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$cdate[] = $row['cdate'];
@@ -493,7 +493,7 @@ ini_set('memory_limit', '2048M');
 						}
 						$data_calls = array("cdate" => $cdate, "hour0" => $hour0, "hour1" => $hour1, "hour2" => $hour2, "hour3" => $hour3, "hour4" => $hour4, "hour5" => $hour5, "hour6" => $hour6, "hour7" => $hour7, "hour8" => $hour8, "hour9" => $hour9, "hour10" => $hour10, "hour11" => $hour11, "hour12" => $hour12, "hour13" => $hour13, "hour14" => $hour14, "hour15" => $hour15, "hour16" => $hour16, "hour17" => $hour17, "hour18" => $hour18, "hour19" => $hour19, "hour20" => $hour20, "hour21" => $hour21, "hour22" => $hour22, "hour23" => $hour23);
 						
-						$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
+						$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
 						$total_calls = mysqli_num_rows($query);
 						
 						// Total Number of Leads
@@ -514,10 +514,10 @@ ini_set('memory_limit', '2048M');
 						$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 						
 						// Disposition of Calls
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						$total_status = mysqli_num_rows($query);
 						
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$status[] = $row['status'];
 							$ccount[] = $row['ccount'];
@@ -698,7 +698,7 @@ ini_set('memory_limit', '2048M');
 					}
 					
 					$apiresults = array("call_time" => $call_time, "data_calls" => $data_calls, "data_status" => $data_status, "data_agents" => $data_agents, "total_calls" => $total_calls, "total_leads" => $total_leads, "total_new" => $total_new, "total_status" => $total_status);
-					
+					//print_r($query_total_calls_made);
 					return $apiresults;
 				}
 				
@@ -3079,117 +3079,4 @@ $query = mysqli_query($link, $queryx);
 		
 		//return $return;
 	}
-    
-    function inner_checkIfTenant($groupId, $linkgo){
-        $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
-        $rslt_tenant = mysqli_query($linkgo,$query_tenant);
-        $check_result_tenant = mysqli_num_rows($rslt_tenant);
-        
-
-        if ($check_result_tenant > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-	function go_getall_closer_campaigns($campaignID, $link){
-		$query_date =  date('Y-m-d');
-		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaignID' order by campaign_id";
-		$query = mysqli_query($link, $query_text);
-		$resultsu = mysqli_fetch_array($query);
-		
-		if(count($resultsu) > 0){
-			$fresults = $resultsu['qresult'];
-			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-
-			$allCloserCampaigns = implode("','",$closerCampaigns);
-
-		}else{
-			  $allCloserCampaigns = '';
-		}
-		  
-		return $allCloserCampaigns;
-	}
-	
-	function go_get_calltimes($camp, $link){
-		
-		$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$camp'";
-		$query_result = mysqli_query($link, $query);
-		$fetch_result = mysqli_fetch_array($query_result);
-		$call_time = $fetch_result['call_time'];
-
-		if (strlen($call_time) > 0){
-			$query = "SELECT ct_default_start, ct_default_stop FROM vicidial_call_times WHERE call_time_id='$call_time'";
-			$result_query = mysqli_query($link, $query);
-			$fetch_result = mysqli_fetch_array($result_query);
-			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];
-		}
-
-		return $result;
-	}
-	
-	function go_get_statuses($camp, $link){
-	# grab names of global statuses and statuses in the selected campaign
-	
-		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_statuses order by status");
-		$statuses_to_print = mysqli_num_rows($query);
-	
-		$ns = 0;
-		while($row = mysqli_fetch_array($query)){
-			if ($row['status'] != 'NEW') {
-				if (($row['selectable'] =='Y' && $row['human_answered'] =='Y') || ($row['status'] =='INCALL' || $row['status'] == 'CBHOLD')) {
-							$system_statuses[$ns] = $row['status'];
-				} else {
-							$statuses_code[$ns] = $row['status'];
-				}
-				
-				$statuses_name[$row['status']] = $row['status_name'];
-			}
-				
-				$statuses[$ns]=$row['status'];
-				$ns++;
-		}
-
-		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_campaign_statuses where campaign_id='$camp' and selectable='Y' and human_answered='Y' order by status");
-		
-		$Cstatuses_to_print = mysqli_num_rows($query);
-	
-		$o = 0;
-		while($row = mysqli_fetch_array($query)) {
-			if ($row['status'] != 'NEW') {
-				
-				if (($row['selectable'] =='Y' && $row['human_answered'] =='Y') || ($row['status'] =='INCALL' || $row['status'] == 'CBHOLD')) {
-					$campaign_statuses[$o] = $row['status'];
-				} else {
-					$statuses_code[$o] = $row['status'];
-				}
-				
-				$statuses_name[$row['status']] = $row['status_name'];
-			}
-			
-			$statuses[$o]=$row['status'];
-			$o++;
-		}
-
-		$apiresults = array($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code);
-	
-		return $apiresults;
-	}
-	
-	function get_inbound_groups($userID, $link, $groupId) {
-		if($groupId != NULL)
-		$groupSQL = "where user_group='$groupId'";
-		
-		else
-		$groupSQL = "";
-		
-		$stmt ="select group_id,group_name from vicidial_inbound_groups $groupSQL;";
-		
-		$query = mysqli_query($link, $stmt);
-		$inboundgroups = mysqli_fetch_array($query);
-		
-		return $inboundgroups;
-	}
-	
 ?>
