@@ -48,8 +48,8 @@ if ($cbcount) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
-		$row['phone_number'] = $xrslt['phone_number'];
-		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
+		$row['phone_number'] = trim($xrslt['phone_number']);
+		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
@@ -71,8 +71,8 @@ if ($cbcount_live) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
-		$row['phone_number'] = $xrslt['phone_number'];
-		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
+		$row['phone_number'] = trim($xrslt['phone_number']);
+		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
@@ -94,8 +94,8 @@ if ($cbcount_today) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
 		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
-		$row['phone_number'] = $xrslt['phone_number'];
-		$row['cust_name'] = "{$xrslt['first_name']} {$xrslt['last_name']}";
+		$row['phone_number'] = trim($xrslt['phone_number']);
+		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
