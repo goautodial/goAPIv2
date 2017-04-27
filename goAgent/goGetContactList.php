@@ -33,7 +33,7 @@ if (!$is_logged_in) {
         $astDB->where('campaign_id', $camp_array, 'in');
     }
 } else {
-    if ($agent_lead_search_method == 'CAMPLISTS_ALL') {
+    if (preg_match("/CAMPLISTS/", $agent_lead_search_method)) {
         $astDB->where('campaign_id', $campaign);
     } else {
         if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
