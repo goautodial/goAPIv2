@@ -758,7 +758,7 @@ ini_set('memory_limit', '2048M');
 					$PCuser_namesARY=$MT;
 					
 					
-					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
+					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
 					$pause_sec_ct = mysqli_num_rows($query);
 			
 					$i=0;
@@ -810,7 +810,7 @@ ini_set('memory_limit', '2048M');
 					### END gather pause code information by user IDs
 					
 					##### BEGIN Gather all agent time records and parse through them in PHP to save on DB load
-					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul LIMIT 10000000");
+					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul and campaign_id='$campaignID' LIMIT 10000000");
 					$agent_time_ct = mysqli_num_rows($query);
 					$j=0;
 					$k=0;
