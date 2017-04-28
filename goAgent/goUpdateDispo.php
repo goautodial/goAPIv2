@@ -74,6 +74,9 @@ if ($is_logged_in) {
 		$message = "Dispo Choice or Lead ID is NOT valid";
 		$errorcnt++;
 	} else {
+		if (!isset($recipient)) {
+			$recipient = 'ANYONE';
+		}
 		//$stmt = "SELECT dispo_call_url,queuemetrics_callstatus_override from vicidial_campaigns vc,vicidial_live_agents vla where vla.campaign_id=vc.campaign_id and vla.user='$user';";
 		$astDB->where('vla.user', $user);
 		$astDB->where('vla.vicidial_live_agents vla', 'vla.campaign_id=vc.campaign_id', 'LEFT');
