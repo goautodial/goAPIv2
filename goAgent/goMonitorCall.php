@@ -53,6 +53,8 @@ $row = '';
 $rowx = '';
 $vidSQL = '';
 $VDterm_reason = '';
+$ext_priority = (!isset($ext_priority)) ? 1 : $ext_priority;
+$FROMvdc = (!isset($FROMvdc)) ? 'YES' : $FROMvdc;
 
 if ($is_logged_in) {
     if ( ($ACTION=="Monitor") || ($ACTION=="StopMonitor") ) {

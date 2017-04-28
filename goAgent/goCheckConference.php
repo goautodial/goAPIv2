@@ -27,7 +27,8 @@ if (isset($_GET['goCampAgentDisp'])) { $campagentstdisp = $astDB->escape($_GET['
 
 # default optional vars if not set
 if (strlen($ACTION) < 1) {$ACTION = "refresh";}
-if (strlen($client) < 1) {$client = "agc";}
+//if (strlen($client) < 1) {$client = "agc";}
+if (strlen($client) < 1) {$client = "vdc";}
 
 $Alogin = 'N';
 $RingCalls = 'N';
