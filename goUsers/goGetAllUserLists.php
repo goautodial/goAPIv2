@@ -94,7 +94,7 @@
 	$rsltv = mysqli_query($link, $query);
         $countResult = mysqli_num_rows($rsltv);
         
-        $querygo = "SELECT userid, avatar FROM users ORDER BY userid ASC";
+        $querygo = "SELECT userid, avatar FROM users ORDER BY userid DESC";
         $rsltvgo = mysqli_query($linkgo, $querygo);
         $countResultgo = mysqli_num_rows($rsltvgo);
         
