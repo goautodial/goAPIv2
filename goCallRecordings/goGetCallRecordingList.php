@@ -9,7 +9,7 @@
     #######################################################
     include_once ("../goFunctions.php");
     
-    $limit = $_REQUEST['limit'];
+    $limit = mysqli_real_escape_string($link, $_REQUEST['limit']);
     $requestDataPhone = mysqli_real_escape_string($link, $_REQUEST['requestDataPhone']);
 	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
 	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
@@ -32,8 +32,6 @@
 			$ul = "";
 		}
 	}
-	
-   	// $query = "SELECT lead_id,status,user,list_id,phone_number,CONCAT(first_name,' ',last_name) AS full_name,last_local_call_time FROM vicidial_list LIMIT $limit";
 	
 /*	$query = "
 		SELECT
@@ -63,7 +61,6 @@ if(!empty($requestDataPhone)) {
 
 if($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
 	$goLimit = "1000";
-	//$filterdate = "AND ('$start_filterdate' <= rl.start_time and '$end_filterdate' >= rl.end_time)";
 	$filterdate = "AND date_format(rl.end_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
 }else{
 	$filterdate = "";
@@ -75,8 +72,6 @@ if(!empty($agent_filter)){
 }else{
 	$filteragent = "";
 }
-
-
 
 //search via phone
 //	$query = "SELECT CONCAT(vl.first_name,' ',vl.last_name) AS full_name, vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id $sql2 ORDER BY cl.uniqueid DESC LIMIT 20;";
@@ -116,10 +111,8 @@ if(!empty($agent_filter)){
 		
 		$dataLeadId[] = $fresults['lead_id'];
 		$dataUniqueid[] = $fresults['vicidial_id'];
-                $dataStatus[] = $fresults['status'];
+        $dataStatus[] = $fresults['status'];
 		$dataUser[] = $fresults['user'];
-		// $dataListId[] = $fresults['list_id'];
-		//$dataListId[] = $fresults['uniqueid'];
 		$dataPhoneNumber[] = $fresults['phone_number'];
 		$dataFullName[] = $fresults['full_name'];
 		$dataLastLocalCallTime[] = $fresults['last_local_call_time'];
@@ -138,7 +131,6 @@ if(!empty($agent_filter)){
 		$dataCount[] = $fresults1['cnt'];	
 	}
 
-	//$query3 = "SELECT a.phone_number FROM vicidial_list a, recording_log b WHERE a.lead_id=b.lead_id AND ";
 	$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
 
 	$apiresults = array(
@@ -149,7 +141,6 @@ if(!empty($agent_filter)){
 		"uniqueid" => $dataUniqueid,
 		"status" => $dataStatus,
 		"users" => $dataUser,
-		//"list_id" => $dataListId,
 		"phone_number" => $dataPhoneNumber,
 		"full_name" => $dataFullName,
 		"last_local_call_time" => $dataLastLocalCallTime,
