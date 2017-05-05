@@ -88,6 +88,8 @@
 	$survey_fourth_status = $_REQUEST['survey_fourth_status'];
 	$survey_fourth_exten = $_REQUEST['survey_fourth_exten'];
     $no_channels = $_REQUEST['no_channels'];
+    $disable_alter_custdata = $_REQUEST['disable_alter_custdata'];
+    $disable_alter_custphone = $_REQUEST['disable_alter_custphone'];
 	
 	$amd_send_to_vmx = $_REQUEST['amd_send_to_vmx'];
 	$waitforsilence_options = $_REQUEST['waitforsilence_options'];
@@ -228,7 +230,9 @@
 										waitforsilence_options = '$waitforsilence_options',
 										agent_lead_search = '$agent_lead_search',
 										agent_lead_search_method = '$agent_lead_search_method',
-                                        omit_phone_code = '$omit_phone_code'
+                                        omit_phone_code = '$omit_phone_code',
+                                        disable_alter_custdata = '$disable_alter_custdata',
+                                        disable_alter_custphone = '$disable_alter_custphone' 
 										$addedQuery
 									WHERE campaign_id='$campaign_id'
 									LIMIT 1;";

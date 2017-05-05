@@ -201,7 +201,7 @@
 												campaign_stats_refresh, list_order_mix, dial_timeout, campaign_recording,			
 												campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,			
 												use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,					
-												manual_dial_list_id, drop_call_seconds, campaign_vdad_exten
+												manual_dial_list_id, drop_call_seconds, campaign_vdad_exten, disable_alter_custdata, disable_alter_custphone
 										)
 										VALUES(
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -210,7 +210,7 @@
 												'Y','DISABLED','30','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-												'${$tenant_id}998','7', '$answering_machine_detection'
+												'${$tenant_id}998','7', '$answering_machine_detection', 'N', 'Y'
 										)";
 							$rsltvAdd = mysqli_query($link, $queryAdd);
 							$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -291,7 +291,7 @@
 											campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 											use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 											manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound
+											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone
 										)
 										VALUES(
 											'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -301,7 +301,7 @@
 											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 											'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
+											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y'
 										)";
 
 						$rsltvInbound = mysqli_query($link, $queryAddInbound);
@@ -524,7 +524,7 @@
 																campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 																use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 																manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound
+																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone
 															)
 															VALUES(
 																'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -534,7 +534,7 @@
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 																'998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-																'CAMPAIGN','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y'
+																'CAMPAIGN','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y'
 															)";
 
 										$rsltvInsert = mysqli_query($link, $queryInsert);
@@ -768,12 +768,12 @@
                                                                                     dial_timeout,campaign_vdad_exten,campaign_recording,
                                                                                     campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
                                                                                     no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
-                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method)
+                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method, disable_alter_custdata, disable_alter_custphone)
                                                                                     VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',
                                                                                     ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
                                                                                     'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
                                                                                     '30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION')";
+                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION', 'N', 'Y')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";

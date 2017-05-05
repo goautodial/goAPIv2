@@ -9,7 +9,9 @@
     
     ### POST or GET Variables
     $user = mysqli_real_escape_string($link, $_REQUEST['user']);
-    
+    $start_date = mysqli_real_escape_string($link, $_REQUEST['start_date']);
+	$end_date = mysqli_real_escape_string($link, $_REQUEST['end_date']);
+	
     ### Check user_id if its null or empty
     if($user === "" || $user === NULL) { 
             $apiresults = array("result" => "Error: Incomplete data passed."); 
@@ -25,8 +27,16 @@
 			if($groupId !== "ADMIN")
 				$notAdminSQL = "AND user_group != 'ADMIN'";
         }
-        
-		$query = "SELECT DISTINCT(val.agent_log_id), val.user, val.event_time, val.status, vl.phone_number, val.campaign_id, val.user_group, vl.list_id, val.lead_id, vl.term_reason FROM vicidial_agent_log val, vicidial_log vl WHERE val.lead_id = vl.lead_id AND val.user = vl.user AND val.user = '$user' ORDER BY val.event_time DESC LIMIT 10000;";
+		
+		if($start_date !== ""){
+			$start_date .= " 00:00:00";
+			$end_date .= " 23:59:59";
+			$daterange = "AND (date_format(val.event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
+		}else{
+			$daterange = "";
+		}
+		
+		$query = "SELECT DISTINCT(val.agent_log_id), val.user, val.event_time, val.status, vl.phone_number, val.campaign_id, val.user_group, vl.list_id, val.lead_id, vl.term_reason FROM vicidial_agent_log val, vicidial_log vl WHERE val.lead_id = vl.lead_id AND val.user = vl.user AND val.user = '$user' $daterange ORDER BY val.event_time DESC LIMIT 10000;";
 		$agentlog_query = mysqli_query($link, $query);
 			
 			while($agentlog_fetch = mysqli_fetch_array($agentlog_query)){
