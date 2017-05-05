@@ -50,7 +50,7 @@ if (!isset($task) && $task === '') {
         $is_online = 0;
         $goDB->where('name', $goUser);
         $rslt = $goDB->getOne('users', 'online');
-        $is_online = $rslt['online'];
+        $is_online = $rslt;
     } else if ($task == 'update') {
         $goDB->where('name', $goUser);
         $rslt = $goDB->update('users', array('online' => $is_online));
