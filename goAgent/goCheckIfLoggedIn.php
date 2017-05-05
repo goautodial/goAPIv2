@@ -13,7 +13,7 @@ if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSes
 if (isset($_GET['goCheckOnline'])) { $check_online = $astDB->escape($_GET['goCheckOnline']); }
     else if (isset($_POST['goCheckOnline'])) { $check_online = $astDB->escape($_POST['goCheckOnline']); }
 
-if (!isset($check_online) || $check_online !== 'chat') {
+if (!isset($check_online) || $check_online === '') {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     $extension = $phone_settings->extension;
     $protocol = $phone_settings->protocol;
