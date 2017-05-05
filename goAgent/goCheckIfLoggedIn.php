@@ -15,7 +15,7 @@ if (isset($_GET['goTask'])) { $task = $astDB->escape($_GET['goTask']); }
 if (isset($_GET['goUpdateStatus'])) { $is_online = $astDB->escape($_GET['goUpdateStatus']); }
     else if (isset($_POST['goUpdateStatus'])) { $is_online = $astDB->escape($_POST['goUpdateStatus']); }
 
-if (!isset($task) || $task === '') {
+if (!isset($task) && $task === '') {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     $extension = $phone_settings->extension;
     $protocol = $phone_settings->protocol;
