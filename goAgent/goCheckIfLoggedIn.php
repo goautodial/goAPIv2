@@ -32,6 +32,13 @@ $astDB->where('program', 'vicidial');
 $rslt = $astDB->getOne('web_client_sessions');
 $web_client_sessions = $astDB->getRowCount();
 
+$is_online = 0;
+$goDB->where('name', $goUser);
+$rslt = $goDB->getOne('users', 'online');
+if ($rslt) {
+    $is_online = $rslt['online'];
+}
+
 $is_logged_in = 0;
 $message = "You have been logged out from the dialer.";
 if ($go_agent_sessions > 0 && $web_client_sessions > 0) {
@@ -39,5 +46,5 @@ if ($go_agent_sessions > 0 && $web_client_sessions > 0) {
     $message = "You're currently logged in on the dialer.";
 }
 
-$APIResult = array( "result" => "success", "logged_in" => $is_logged_in, "message" => $message );
+$APIResult = array( "result" => "success", "logged_in" => $is_logged_in, "message" => $message, "is_online" => $is_online );
 ?>
