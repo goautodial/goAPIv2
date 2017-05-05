@@ -10,10 +10,12 @@
 
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
-if (isset($_GET['goCheckOnline'])) { $check_online = $astDB->escape($_GET['goCheckOnline']); }
-    else if (isset($_POST['goCheckOnline'])) { $check_online = $astDB->escape($_POST['goCheckOnline']); }
+if (isset($_GET['goTask'])) { $task = $astDB->escape($_GET['goTask']); }
+    else if (isset($_POST['goTask'])) { $task = $astDB->escape($_POST['goTask']); }
+if (isset($_GET['goUpdateStatus'])) { $is_online = $astDB->escape($_GET['goUpdateStatus']); }
+    else if (isset($_POST['goUpdateStatus'])) { $is_online = $astDB->escape($_POST['goUpdateStatus']); }
 
-if (!isset($check_online) || $check_online === '') {
+if (!isset($task) || $task === '') {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     $extension = $phone_settings->extension;
     $protocol = $phone_settings->protocol;
@@ -44,13 +46,18 @@ if (!isset($check_online) || $check_online === '') {
 
     $APIResult = array( "result" => "success", "logged_in" => $is_logged_in, "message" => $message );
 } else {
-    $is_online = 0;
-    $goDB->where('name', $goUser);
-    $rslt = $goDB->getOne('users', 'online');
-    if ($rslt) {
-        $is_online = $rslt['online'];
+    if ($task == 'check') {
+        $is_online = 0;
+        $goDB->where('name', $goUser);
+        $rslt = $goDB->getOne('users', 'online');
+        if ($rslt) {
+            $is_online = $rslt['online'];
+        }
+    } else if ($task == 'update') {
+        $goDB->where('name', $goUser);
+        $rslt = $goDB->update('users', array('online', $is_online));
     }
-
+    
     $APIResult = array( "result" => "success", "is_online" => $is_online );
 }
 ?>
