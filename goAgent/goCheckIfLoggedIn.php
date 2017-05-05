@@ -55,9 +55,9 @@ if (!isset($task) || $task === '') {
         }
     } else if ($task == 'update') {
         $goDB->where('name', $goUser);
-        $rslt = $goDB->update('users', array('online', $is_online));
+        $rslt = $goDB->update('users', array('online' => $is_online));
     }
     
-    $APIResult = array( "result" => "success", "is_online" => $is_online, "error" => $goDB->getLastError() );
+    $APIResult = array( "result" => "success", "is_online" => $is_online );
 }
 ?>
