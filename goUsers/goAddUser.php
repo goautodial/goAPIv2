@@ -189,7 +189,11 @@
 										
 								if($countCheckResultAgain > 0) {
 									
-									$realm = 'goautodial.com';
+									$queryg = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
+									$rsltg = mysqli_query($linkgo, $queryg);
+									$rowg = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+									$realm = $rowg['value'];
+									
 									$kamha1fields = '';
 									$kamha1values = '';
 									if ($pass_hash_enabled > 0) {
