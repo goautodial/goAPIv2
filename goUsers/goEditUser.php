@@ -190,7 +190,11 @@
 																$pass_query = "`pass_hash` = '$pass_hash', `pass` = '', `phone_pass` = '$pass_hash', ";
 																$phonePassQuery = "`pass` = ''";
 																
-																$realm = 'goautodial.com';
+																$queryg = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
+																$rsltg = mysqli_query($linkgo, $queryg);
+																$rowg = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+																$realm = $rowg['value'];
+																
 																$ha1 = md5("{$phone_login}:{$realm}:{$phone_pass}");
 																$ha1b = md5("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
 																$kamPassQuery = "SET `password` = '', `ha1` = '$ha1', `ha1b` = '$ha1b'";

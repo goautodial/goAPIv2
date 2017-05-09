@@ -52,6 +52,11 @@
 		//$aDB->where('pass_hash', $pass_hash);
 	}
 	
+	$query = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
+	$rsltg = mysqli_query($linkgo, $query);
+	$rowg = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+	$realm = $rowg['value'];
+	
 	$query = "SELECT user_id, user, email, pass, full_name, user_level, user_group, active, pass_hash, phone_login, phone_pass
 			  FROM vicidial_users
 			  WHERE ".$user."
@@ -96,7 +101,8 @@
 				"cost" => $SSpass_cost,
 				"phone_login" => $dataPhone_login,
 				"phone_pass" => $dataPhone_pass,
-				"avatar" => $dataAvatar
+				"avatar" => $dataAvatar,
+				"realm" => $realm
 			);
 		}
 	} else {
