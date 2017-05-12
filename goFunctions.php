@@ -32,8 +32,8 @@
         include("goDBgoautodial.php");
         $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
         $rslt_tenant = mysqli_query($linkgo, $query_tenant);
-	$check_result_tenant = mysqli_num_rows($rslt_tenant);
-    
+		$check_result_tenant = mysqli_num_rows($rslt_tenant);
+		
         if ($check_result_tenant > 0) {
             return true;
         } else {
@@ -44,6 +44,8 @@
     
     function go_getall_allowed_users($groupId) {
         include("goDBasterisk.php");
+		$allowed_users = "";
+		
         if ($groupId=='ADMIN' || $groupId=='admin') {
                    $query = "select user as userg from vicidial_users";
                    $rsltv = mysqli_query($link,$query); 
@@ -56,8 +58,11 @@
             $users[] = $info['userg'];
         }
 		
-		$imploded = implode("','", $users);
-		$allowed_users = "'".$imploded."'";
+		if(!empty($users)){
+			$imploded = implode("','", $users);
+			$allowed_users = "'".$imploded."'";
+		}
+		
         return $allowed_users;
     }
     
