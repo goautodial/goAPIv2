@@ -58,6 +58,6 @@ if (!isset($task) || (isset($task) && $task === '')) {
         $rslt = $goDB->update('users', array('online' => $is_online));
     }
     
-    $APIResult = array( "result" => "success", "is_online" => $is_online );
+    $APIResult = array( "result" => "success", "is_online" => (int)$is_online );
 }
 ?>
