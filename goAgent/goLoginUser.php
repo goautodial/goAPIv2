@@ -434,6 +434,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $closer_ct = $astDB->getRowCount();
         $VARingroups = '';
         $VARingroup_handlers = '';
+        $VARemailgroups = array();
+        $VARphonegroups = array();
         while ($INgrpCT < $closer_ct) {
             $row = $rslt[$INgrpCT];
             //$VARingroups[$row['group_id']] = $row['group_handling'];
