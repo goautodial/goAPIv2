@@ -219,7 +219,7 @@
         if (!$webrtc) {
             if ($type == 'kamailio') {
                 $cwd = getcwd();
-                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/kamctl ul show --brief"', $kamctlVars);
+                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "/usr/sbin/kamctl ul show --brief"', $kamctlVars);
                 foreach ($kamctlVars as $var) {
                     if (preg_match("/AOR/", trim($var))) {
                         $newVar = trim(preg_replace("/AOR::/","", $var));
@@ -230,7 +230,7 @@
                 }
                 return false;
             } else {
-                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/asterisk -rx \"sip show peer '.$exten.'\""', $asteriskVars);
+                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "/usr/sbin/asterisk -rx \"sip show peer '.$exten.'\""', $asteriskVars);
                 if (strlen($asteriskVars[1]) < 1) {
                     foreach ($asteriskVars as $vars) {
                         $list = explode(':', $vars);

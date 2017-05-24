@@ -70,6 +70,7 @@
 	$agent_lead_search		= $_REQUEST['agent_lead_search'];
 	$agent_lead_search_method = $_REQUEST['agent_lead_search_method'];
     $omit_phone_code = $_REQUEST['omit_phone_code'];
+	$alt_number_dialing = $_REQUEST['alt_number_dialing'];
 	
 	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
 	$survey_method = $_REQUEST['survey_method'];
@@ -177,7 +178,8 @@
 									manual_dial_filter = '$manual_dial_filter', 
 									customer_3way_hangup_logging = '$customer_3way_hangup_logging', 
 									customer_3way_hangup_seconds = '$customer_3way_hangup_seconds', 
-									customer_3way_hangup_action = '$customer_3way_hangup_action'";
+									customer_3way_hangup_action = '$customer_3way_hangup_action',
+									alt_number_dialing ='$alt_number_dialing'";
 					}
                     
                     if($campaign_type != 'SURVEY' && $dial_method != "INBOUND_MAN") {
@@ -186,7 +188,8 @@
 									use_campaign_dnc = '$use_campaign_dnc',
                                     three_way_call_cid = '$three_way_call_cid', 
                                     manual_dial_list_id = '$manual_dial_list_id', 
-                                    hopper_level = '$hopper_level'"; 
+                                    hopper_level = '$hopper_level',
+									alt_number_dialing = '$alt_number_dialing'"; 
                     }
 					$updateQuery = "UPDATE vicidial_campaigns SET
 										campaign_name = '$campaign_name', 
