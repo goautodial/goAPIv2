@@ -18,23 +18,30 @@ $goVersion = "1.0";
 include_once('./includes/MySQLiDB.php');
 @include_once('../goDBasterisk.php');
 @include_once('../goDBgoautodial.php');
+@include_once('../goDBkamailio.php');
 @include_once('../goFunctions.php');
 include_once('./includes/XMLParser.php');
 
 ### Check if DB variables are not set ###
-$VARDB_server   = (!isset($VARDB_server)) ? "162.254.144.92" : $VARDB_server;
+$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
 $VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
 $VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
 $VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
 
-$VARDBgo_server   = (!isset($VARDBgo_server)) ? "162.254.144.92" : $VARDBgo_server;
+$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
 $VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
 $VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
 $VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
+
+$VARDBgo_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
+$VARDBgo_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
+$VARDBgo_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
+$VARDBgo_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
 ### End of DB variables ###
 
 $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
 $goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
+$kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $VARDBgokam_database);
 
 ### Variables ###
 if (isset($_GET['goAction'])) { $goAction = $_GET['goAction']; }

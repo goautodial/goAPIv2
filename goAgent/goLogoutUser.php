@@ -31,7 +31,7 @@ if (isset($_GET['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_GET['goUseWebR
     else if (isset($_POST['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_POST['goUseWebRTC']); }
 
 ### Check if the agent's phone_login is currently connected
-$sipIsLoggedIn = check_sip_login($phone_login, $SIPserver, $use_webrtc);
+$sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver, $use_webrtc);
 
 if ($sipIsLoggedIn) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);

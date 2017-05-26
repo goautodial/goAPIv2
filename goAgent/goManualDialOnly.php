@@ -16,7 +16,7 @@ $phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
 $phone_pass = (isset($phone_pass)) ? $phone_pass : $agent->phone_pass;
 
 ### Check if the agent's phone_login is currently connected
-$sipIsLoggedIn = check_sip_login($phone_login, $SIPserver);
+$sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
 
 if ($sipIsLoggedIn) {
     if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }

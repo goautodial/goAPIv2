@@ -215,20 +215,23 @@
         return json_decode(json_encode($return), FALSE);
     }
     
-    function check_sip_login($exten, $type='kamailio', $webrtc=true) {
+    function check_sip_login($dbase, $exten, $type='kamailio', $webrtc=true) {
         if (!$webrtc) {
             if ($type == 'kamailio') {
-                $cwd = getcwd();
-                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/kamctl ul show --brief"', $kamctlVars);
-                foreach ($kamctlVars as $var) {
-                    if (preg_match("/AOR/", trim($var))) {
-                        $newVar = trim(preg_replace("/AOR::/","", $var));
-                        if ($exten == $newVar) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+                //$cwd = getcwd();
+                //$lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/kamctl ul show --brief"', $kamctlVars);
+                //foreach ($kamctlVars as $var) {
+                //    if (preg_match("/AOR/", trim($var))) {
+                //        $newVar = trim(preg_replace("/AOR::/","", $var));
+                //        if ($exten == $newVar) {
+                //            return true;
+                //        }
+                //    }
+                //}
+				$dbase->where('username', $exten);
+				$dbase->getOne('location');
+				$return = ($dbase->getRowCount() > 0) ? true : false;
+                return $return;
             } else {
                 $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/asterisk -rx \"sip show peer '.$exten.'\""', $asteriskVars);
                 if (strlen($asteriskVars[1]) < 1) {
