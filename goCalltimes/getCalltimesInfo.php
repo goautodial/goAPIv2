@@ -7,7 +7,7 @@
     #### Written by: Warren Ipac Briones               ####
     #### License: AGPLv2                               ####
     #######################################################
-    include "goFunctions.php";
+    include_once("../goFunctions.php");
     $call_time_id = $_REQUEST["call_time_id"]; 
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
