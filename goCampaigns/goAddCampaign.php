@@ -18,10 +18,18 @@
             die ($lang['go_conf_file_not_found']);
     }
 	
+	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
+        $astgui_path = parse_ini_file("/var/www/html/astguiclient.conf", true);
+		$path_sounds = preg_replace("/>/", "", $astgui_path['PATHsounds']);
+		$path_sounds = preg_replace("/ /", "", $path_sounds);
+    }else {
+        die ($lang['go_conf_file_not_found']);
+    }
+	
 	### POST or GET Variables
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
-		  $log_user = $_REQUEST['log_user'];
+		  $log_user = $session_user;
 		  $log_group = $_REQUEST['log_group'];
 ### Inbound Campaign
 	$campaign_id 	= $_REQUEST['campaign_id'];
@@ -745,6 +753,7 @@
 								    $wavfile_name = $_FILES["uploaded_wav"]['name'];
 									$wavfile_orig = $_FILES['uploaded_wav']['name'];
 									$wavfile_dir = $_FILES['uploaded_wav']['tmp_name'];
+									$wavfile_size = $_FILES['uploaded_wav']['size'];
 									$WeBServeRRooT = '/var/lib/asterisk';
 									$sounds_web_directory = 'sounds';
 										
@@ -753,27 +762,28 @@
 										$wavfile_dir = preg_replace("/@/",'\@',$wavfile_dir);
 										$wavfile_name = preg_replace("/ /",'',"go_".$wavfile_name);
 										$wavfile_name = preg_replace("/@/",'',$wavfile_name);
+										$wavfile_size = formatSizeUnits($wavfile_size);
 										
-										copy($wavfile_dir, "$WeBServeRRooT/$sounds_web_directory/$wavfile_name");
-										chmod("$WeBServeRRooT/$sounds_web_directory/$wavfile_name", 0766);
+										$get_sounds = "SELECT * FROM sounds WHERE goFilename = '$wavfile_name' AND goDirectory = '$path_sounds';";
+										$exec_get_sounds = mysqli_query($linkgo, $get_sounds);
+										$count_sounds = mysqli_num_rows($exec_get_sounds);
+										
+										if($count_sounds <= 0){
+											copy($wavfile_dir, "$path_sounds/$wavfile_name");
+											chmod("$path_sounds/$wavfile_name", 0766);
+											
+											$query_sounds = "INSERT INTO sounds(goFilename, goDirectory, goFileDate, goFilesize, uploaded_by) VALUES('$wavfile_name', '$path_sounds', NOW(), '$wavfile_size', '$session_user');";
+											$exec_sounds = mysqli_query($linkgo, $query_sounds);
+											
+											if(!$exec_sounds){
+												die("Upload Failed");
+											}
+										}
 									}
+									
 								    $wavfile_name = substr($wavfile_name, 0, -4);
                                     //if($VARSERVTYPE == "cloud"){  
-                                    $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,
-                                                                                    dial_status_a,dial_statuses,lead_order,park_ext,park_file_name,
-                                                                                    web_form_address,allow_closers,hopper_level,auto_dial_level,
-                                                                                    available_only_ratio_tally,next_agent_call,local_call_time,dial_prefix,voicemail_ext,
-                                                                                    campaign_script,get_call_launch,campaign_changedate,campaign_stats_refresh,
-                                                                                    list_order_mix,web_form_address_two,start_call_url,dispo_call_url,
-                                                                                    dial_timeout,campaign_vdad_exten,campaign_recording,
-                                                                                    campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,
-                                                                                    no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,
-                                                                                    use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method, disable_alter_custdata, disable_alter_custphone)
-                                                                                    VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',
-                                                                                    ' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1',
-                                                                                    'Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','',
-                                                                                    '30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y',
-                                                                                    'BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION', 'N', 'Y')";
+                                    $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,dial_status_a,dial_statuses,lead_order,park_ext,park_file_name,web_form_address,allow_closers,hopper_level,auto_dial_level,available_only_ratio_tally,next_agent_call,local_call_time,dial_prefix,voicemail_ext,campaign_script,get_call_launch,campaign_changedate,campaign_stats_refresh,list_order_mix,web_form_address_two,start_call_url,dispo_call_url,dial_timeout,campaign_vdad_exten,campaign_recording,campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method, disable_alter_custdata, disable_alter_custphone)VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1','Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','','30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION', 'N', 'Y')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
