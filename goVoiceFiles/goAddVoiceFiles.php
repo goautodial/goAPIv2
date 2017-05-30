@@ -24,6 +24,7 @@
 	$audiofile_name=$_FILES["files"]['name'];
 	$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
 	$path_sounds = preg_replace("/ /", "", $path_sounds);
+	//die($path_sounds);
 	$WeBServeRRooT = '/var/www/html';
 	$sounds_web_directory = 'sounds';
 	$audiofile=$_FILES["files"];

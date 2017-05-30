@@ -25,7 +25,6 @@
     }else {
         die ($lang['go_conf_file_not_found']);
     }
-	
 	### POST or GET Variables
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];

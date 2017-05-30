@@ -7,7 +7,7 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
+    include_once ("../goFunctions.php");
     $camp = $_REQUEST["campaign_id"]; 
     $camp = mysqli_real_escape_string($link, $camp);
 	$status = mysqli_real_escape_string($link, $_REQUEST["status"]);

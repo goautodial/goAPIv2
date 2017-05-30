@@ -9,7 +9,16 @@
    ####################################################
     
     include_once ("../goFunctions.php");
- 
+	
+	$ul= "";
+	// Parse conf
+	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
+		$conf = parse_ini_file("/var/www/html/astguiclient.conf", true);
+		$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
+		$path_sounds = preg_replace("/ /", "", $path_sounds);
+		$ul = "WHERE goDirectory = '$path_sounds'";
+	}
+	
 	### POST or GET Variables
     $stmt = "SELECT count(*) as countuser from vicidial_users where user='$session_user' and user_level > 6;";
 	$rsltv = mysqli_query($link, $stmt);
@@ -20,7 +29,7 @@
 		$result_reason = "sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST";
 		$apiresults = array("result" => "Error".$result_reason);
 	} else {
-		$query = "SELECT * FROM sounds";
+		$query = "SELECT * FROM sounds $ul";
 		$exec_query = mysqli_query($linkgo, $query);
 		$count_sounds = mysqli_num_rows($exec_query);
 		
