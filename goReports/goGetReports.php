@@ -345,8 +345,10 @@ ini_set('memory_limit', '2048M');
 		{
 		  	//$return['groupId'] = $goReportsClass->go_getUsergroup($userID);
             //$return['groupId'] = go_getUsergroup($userID,$link);
-			
-            $date_diff = go_get_date_diff($fromDate, $toDate);
+			$date1=new DateTime($fromDate);
+			$date2=new DateTime($toDate);
+			$interval = date_diff($date1,$date2);
+			$date_diff = $interval->format('%d');
             $date_array = implode("','",go_get_dates($fromDate, $toDate));
 //			 $mysqli_query($link, cache_on();
 			$file_download = 1;
@@ -1288,9 +1290,12 @@ ini_set('memory_limit', '2048M');
 					//if (inner_checkIfTenant($userGroup, $linkgo))
 					if($userGroup !== "ADMIN")
 						$userGroupSQL = "and vicidial_users.user_group='$userGroup'";
+					if($date_diff <= 0){
+						$filters = "and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 ";
+					}
 					
-					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 group by user,full_name,status order by full_name,user,status desc limit 500000";
-$query = mysqli_query($link, $perfdetails_sql);
+					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' $filters group by user,full_name,status order by full_name,user,status desc limit 500000";
+					$query = mysqli_query($link, $perfdetails_sql);
 					
 					$rows_to_print = mysqli_num_rows($query);
 					
