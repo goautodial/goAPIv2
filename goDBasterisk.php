@@ -36,9 +36,7 @@ if ( file_exists($conf_path) )
         }
 
 
-if (file_exists("/etc/astguiclient.conf")) {
-	$conf_path = "/etc/astguiclient.conf";
-} elseif (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
+if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf";
 } else {
 	die ("ERROR: 'astguiclient.conf' file not found.");
