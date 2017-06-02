@@ -99,6 +99,40 @@
 					$a = 0;
 					$query = "INSERT INTO `phones` (`extension`,  `dialplan_number`,  `voicemail_id`,  `phone_ip`,  `computer_ip`,  `server_ip`,  `login`,  `pass`,  `status`,  `active`,  `phone_type`,  `fullname`,  `company`,  `picture`,  `protocol`,  `local_gmt`,  `outbound_cid`,  `template_id`,    `user_group`,   `messages`,  `old_messages`) VALUES ('$extension',  '9999$extension',  '$extension',  '',  '', '$server_ip',  '$extension',  '$pass',  '$status',  '$active',  '',  '$fullname',  '$user_group',  '',  '$protocol',  '$gmt',  '0000000000',  '--NONE--', '$user_group', '$messages',  '$old_messages');";
 					$resultQuery = mysqli_query($link,$query);
+					
+					### ADDING IN KAMAILIO DB
+					
+					$queryPassHash = "SELECT pass_hash_enabled from system_settings";
+					$resultQueryPassHash = mysqli_query($link, $queryPassHash);
+					$rPassHash = mysqli_fetch_array($resultQueryPassHash, MYSQLI_ASSOC);
+					$pass_hash_enabled = $rPassHash['pass_hash_enabled'];
+					
+					$pass_hash = '';
+					if ($pass_hash_enabled > 0) {
+						$cwd = $_SERVER['DOCUMENT_ROOT'];
+						$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+						$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+						//$pass = '';
+					}
+					
+					$queryg = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
+					$rsltg = mysqli_query($linkgo, $queryg);
+					$rowg = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+					$realm = $rowg['value'];
+					
+					$kamha1fields = '';
+					$kamha1values = '';
+					if ($pass_hash_enabled > 0) {
+						$ha1 = md5("{$extension}:{$realm}:{$pass}");
+						$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
+						$kamha1fields = ", ha1, ha1b";
+						$kamha1values = ", '{$ha1}', '{$ha1b}'";
+						$phone_pass = '';
+					}
+					
+					$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','goautodial.com','$phone_pass'{$kamha1values});";
+					$resultkam = mysqli_query($linkgokam, $kamailioq);
+					
 					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Phone: $extension", $log_user, $query);
 					//$return_query[] = $query_check;
 				} else {
