@@ -1,7 +1,5 @@
 <?php
     include_once("../goFunctions.php");
-	include_once("../goDBgoautodial.php");
-	include_once("../goDBasterisk.php");
 	### POST or GET Variables
         $did_pattern = $_REQUEST['did_pattern'];
         $did_description = $_REQUEST['did_description'];
@@ -12,8 +10,9 @@
         $ip_address = $_REQUEST['hostname'];
         $record_call = "N"; //$_REQUEST['record_call'];
 		
-		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		$groupId = go_get_groupid($session_user);
+		$log_user = $session_user;
+		$log_group = $groupId;
 
 	### Agent
 		$user = $_REQUEST['user'];
@@ -112,7 +111,7 @@
 		if($did_route == "EXTEN" && $extension == null){
 				$apiresults = array("result" => "Error: Set Value for extension");
 		}else if($did_route == "EXTEN" && $exten_context == null){
-				$apiresults = array("result" => "Error: Set Value for exten_context");		
+				$apiresults = array("result" => "Error: Set Value for exten_context");
 		}else if($extension != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $extension)){
                 $apiresults = array("result" => "Error: Special characters found in extension");
 		}else if($exten_context != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $exten_context)){
@@ -122,10 +121,8 @@
 		if($group_id != null && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)){
                 $apiresults = array("result" => "Error: Special characters found in group_id");
 		}
-
-		$groupId = get_inner_groupid($goUser, $link);
 		
-		if (!inner_checkIfTenant($groupId, $linkgo)) {
+		if (!checkIfTenant($groupId, $linkgo)) {
 				$ul = "WHERE user_group='$user_group'";
 		} else {
 				$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
@@ -153,21 +150,16 @@
 				} else {
 						
 						if($did_route == "AGENT"){
-						
-								$queryAgent = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup)
-												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$user', '$user_unavailable_action', '$user_route_settings_ingroup');";
-								$queryAgentResult = mysqli_query($link, $queryAgent);
+							$queryAgent = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$user', '$user_unavailable_action', '$user_route_settings_ingroup');";
+							$queryAgentResult = mysqli_query($link, $queryAgent);
 						
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup) values('0000', 'Test', 'AGENT', 'N', 'ADMIN', '', 'VOICEMAIL', 'AGENTDIRECT');
 							$log_query = $queryAgent;
 						}
 						
 						if($did_route == "PHONE"){
-						
-								$queryPhone = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, phone, server_ip)
-												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$phone', '$server_ip');";
-								
-								$queryPhoneResult = mysqli_query($link, $queryPhone);
+							$queryPhone = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, phone, server_ip) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$phone', '$server_ip');";
+							$queryPhoneResult = mysqli_query($link, $queryPhone);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, phone, server_ip) values('00000', 'Sample', 'PHONE', 'N', 'ADMIN', '', '');
 						
 							$log_query = $queryPhone;
@@ -175,10 +167,8 @@
 						
 							
 						if($did_route == "CALLMENU"){
-						
-								$queryCallmenu = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, menu_id)
-												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$menu_id');";
-										$queryCMResult = mysqli_query($link, $queryCallmenu);
+							$queryCallmenu = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, menu_id) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$menu_id');";
+							$queryCMResult = mysqli_query($link, $queryCallmenu);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, menu_id) values('000000', 'test call menu', 'CALLMENU', 'N', 'ADMIN', '0000');
 						
 							$log_query = $queryCallmenu;
@@ -186,84 +176,45 @@
 						
 						
 						if($did_route == "VOICEMAIL"){
-						
-								$queryVM = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, voicemail_ext)
-												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$voicemail_ext');";
-										$queryVMResult = mysqli_query($link, $queryVM);
+							$queryVM = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, voicemail_ext) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$voicemail_ext');";
+							$queryVMResult = mysqli_query($link, $queryVM);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, voicemail_ext) values('0000000', 'vm', 'VOICEMAIL', 'N', 'ADMIN', '0000000');
 						
 							$log_query = $queryVM;
 						}
 						
-						
 						if($did_route == "EXTEN"){
-								$queryExten = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context)
-												values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$extension', '$exten_context');";
-										$queryExtenResult = mysqli_query($link, $queryExten);
+							$queryExten = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$extension', '$exten_context');";
+							$queryExtenResult = mysqli_query($link, $queryExten);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context) values('000000000', 'ce', 'EXTEN', 'N', 'ADMIN', '9998811112', 'default');
 						
 							$log_query = $queryExten;
 						}
 						
 						if($did_route == "IN_GROUP"){
-						
-										$queryIG = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, group_id)
-														values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group','$group_id');";
-										$queryIGResult = mysqli_query($link, $queryIG);
+							$queryIG = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, group_id) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group','$group_id');";
+							$queryIGResult = mysqli_query($link, $queryIG);
 						//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, extension, exten_context) values('000000000', 'ce', 'EXTEN', 'N', 'ADMIN', '9998811112', 'default');
 						
 							$log_query = $queryIG;
 						}
 						
 						$queryCheck = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
-								$result = mysqli_query($link, $queryCheck);
-								$result = mysqli_num_rows($result);
+						$result = mysqli_query($link, $queryCheck);
+						$result = mysqli_num_rows($result);
 								
-								if ($result > 0) {
-
+						if ($result > 0) {
 						### Admin logs
 								//$SQLdate = date("Y-m-d H:i:s");
 								//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New DID $did_pattern','INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_active, did_route, user_group, user,user_unavailable_action,group_id,phone, server_ip,voicemail_ext,record_call) VALUES ($did_pattern, $did_description, $did_active, $did_route, $user_group, $user,$user_unavailable_action,$group_id,$phone, $server_ip,$voicemail_ext,$record_call)');";
 								//$rsltvLog = mysqli_query($linkgo, $queryLog);
-								$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New DID $did_pattern", $log_group, $log_query);
-				
-								$apiresults = array("result" => "success");
-						
-								} else {
-								
-								$apiresults = array("result" => "DID NOT ADDED, Check your details");
-								
-								}
-						
+							$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New DID $did_pattern", $log_group, $log_query);
+							$apiresults = array("result" => "success");
+						} else {
+							$apiresults = array("result" => "DID NOT ADDED, Check your details");
+						}
 				}
-
 		} else {
 				$apiresults = array("result" => "Error: Invalid User Group");
 		}
-
-						
- ##### get usergroup #########
-function get_inner_groupid($goUser, $link){
-		$query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
-		$rsltv = mysqli_query($link, $query_userv);
-		$check_resultv = mysqli_num_rows($rsltv);
-	
-		if ($check_resultv > 0) {
-			$rowc=mysqli_fetch_assoc($rsltv);
-			$goUser_group = $rowc["user_group"];
-			return $goUser_group;
-		}
-}
-##### checkiftenant ######
-function inner_checkIfTenant($groupId, $linkgo){
-	$query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
-	$rslt_tenant = mysqli_query($linkgo,$query_tenant);
-	$check_result_tenant = mysqli_num_rows($rslt_tenant);
-
-	if ($check_result_tenant > 0) {
-		return true;
-	} else {
-		return false;
-	}
-}
 ?>
