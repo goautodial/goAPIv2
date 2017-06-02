@@ -114,7 +114,7 @@
 	);
 	
 	function get_allowed_campaigns($groupId, $link){
-		$query2 = mysql_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupId'");
+		$query2 = mysqli_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupId'");
 		$check = mysqli_num_rows($query2);
 		if($check > 0){
 			while($resultc = mysqli_fetch_array($query2)){
