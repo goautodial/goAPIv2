@@ -103,7 +103,7 @@
                 //    exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" /var/lib/asterisk/sounds/'.$audiofile_name.' root@162.216.5.164:/var/lib/asterisk/sounds"');
                 //}
         }
-	}*/
+	}
 //}
 
 ?>
