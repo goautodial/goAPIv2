@@ -39,6 +39,7 @@
         $thursday_audio = $_REQUEST['thursday_audio'];
         $friday_audio = $_REQUEST['friday_audio'];
         $saturday_audio = $_REQUEST['saturday_audio'];
+		
 		if($_REQUEST['user_group'] == "ALL"){
 			$user_group = "---ALL---";
 		}else{
@@ -157,11 +158,7 @@
                     WHERE call_time_id = '$call_time_id'";
 							
                     $rsltvx = mysqli_query($link, $newQuery);
-
-                    ### Admin logs
-                    //$SQLdate = date("Y-m-d H:i:s");
-                    //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','UPDATE','Updated Call Time $call_time_id','$newQuery');";
-                    //$rsltvLog = mysqli_query($queryLog, $linkgo);
+					
 					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated Call Time ID: $call_time_id", $log_group, $newQuery);
 
                     if($rsltvx == false){
