@@ -8,7 +8,7 @@
 	
 	$groupId = go_get_groupid($session_user);
 	$log_user = $session_user;
-	$log_group = $groupId
+	$log_group = $groupId;
 	$allowed_campaigns = get_allowed_campaigns($groupId, $link);
 	$cnt = 0;
 	
