@@ -12,6 +12,8 @@
 	// Parse conf
 	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 		$conf = parse_ini_file("/var/www/html/astguiclient.conf", true);
+		$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
+		$path_sounds = preg_replace("/ /", "", $path_sounds);
 	}
 	### POST or GET Variables
     /*$audiofiles = $_REQUEST['files']*/;
@@ -22,10 +24,7 @@
 	
     ### Default values 
 	$audiofile_name=$_FILES["files"]['name'];
-	$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
-	$path_sounds = preg_replace("/ /", "", $path_sounds);
-	//die($path_sounds);
-	$WeBServeRRooT = '/var/www/html';
+	$WeBServeRRooT = '/var/lib/asterisk/';
 	$sounds_web_directory = 'sounds';
 	$audiofile=$_FILES["files"];
 	$audiofile_orig = $_FILES['files']['name'];
@@ -34,7 +33,13 @@
 	$server_name = getenv("SERVER_NAME");
 	$web_server_ip = getenv("SERVER_ADDR");
 	
+	if($path_sounds === "" || !isset($path_sounds) || $path_sounds === NULL)
+		$path_sounds = $WeBServeRRooT.$sounds_web_directory;
+		
+	//die($path_sounds);
+	
     if ($stage == "upload") {
+		
 		//$audiofile
 		$explodefile = explode(".",strtolower($audiofile_orig));
 		$prefix = (checkIfTenant($groupId)) ? "go_".$groupId."_" : "go_";
@@ -98,7 +103,7 @@
                 //    exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" /var/lib/asterisk/sounds/'.$audiofile_name.' root@162.216.5.164:/var/lib/asterisk/sounds"');
                 //}
         }
-	}
+	}*/
 //}
 
 ?>
