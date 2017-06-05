@@ -12,6 +12,8 @@
 	// Parse conf
 	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 		$conf = parse_ini_file("/var/www/html/astguiclient.conf", true);
+		$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
+		$path_sounds = preg_replace("/ /", "", $path_sounds);
 	}
 	### POST or GET Variables
     /*$audiofiles = $_REQUEST['files']*/;
@@ -22,10 +24,7 @@
 	
     ### Default values 
 	$audiofile_name=$_FILES["files"]['name'];
-	$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
-	$path_sounds = preg_replace("/ /", "", $path_sounds);
-	//die($path_sounds);
-	$WeBServeRRooT = '/var/www/html';
+	$WeBServeRRooT = '/var/lib/asterisk/';
 	$sounds_web_directory = 'sounds';
 	$audiofile=$_FILES["files"];
 	$audiofile_orig = $_FILES['files']['name'];
@@ -34,7 +33,13 @@
 	$server_name = getenv("SERVER_NAME");
 	$web_server_ip = getenv("SERVER_ADDR");
 	
+	if($path_sounds === "" || !isset($path_sounds) || $path_sounds === NULL)
+		$path_sounds = $WeBServeRRooT.$sounds_web_directory;
+		
+	//die($path_sounds);
+	
     if ($stage == "upload") {
+		
 		//$audiofile
 		$explodefile = explode(".",strtolower($audiofile_orig));
 		$prefix = (checkIfTenant($groupId)) ? "go_".$groupId."_" : "go_";
@@ -55,37 +60,42 @@
 			
 			if($count_sounds <= 0){
 				copy($audiofile_dir, "$path_sounds/$audiofile_name");
-				chmod("$path_sounds/$audiofile_name", 0766);
-				
-				$query_sounds = "INSERT INTO sounds(goFilename, goDirectory, goFileDate, goFilesize, uploaded_by) VALUES('$audiofile_name', '$path_sounds', NOW(), '$audio_filesize', '$session_user');";
-				$exec_sounds = mysqli_query($linkgo, $query_sounds);
-	
-				//$query_go_sounds = "INSERT INTO go_sounds('type', 'data') VALUES('audio/mp3/wav', '$encoded_audio')";
-				//$exec_go_sounds = mysqli_query($linkgo, $query_go_sounds);
-				
-				// Log
-				$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Uploaded New Voice File: $audiofile_name", $log_group);
-				
-				$stmt = "SELECT server_id,server_ip,active,server_description FROM servers";
-				$servers = mysqli_query($link, $stmt);
-				while($fresults = mysqli_fetch_array($servers, MYSQLI_ASSOC)){
-					$server_ip[] = $fresults['server_ip'];
-					$active[] = $fresults['active'];
-					$server_description[] = $fresults['server_description'];
-					#if(!preg_match('/dialer/i',$server_description) && $active == "Y"){
-					if($active == "Y"){
-						//exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" /var/lib/asterisk/sounds/'.$audiofile_name.' root@'.$server_ip.':/var/lib/asterisk/sounds"');
-						exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" '.$path_sounds.'/'.$audiofile_name.' root@'.$server_ip.':'.$path_sounds.'"');
+				chmod("$path_sounds/$audiofile_name", 0644);
+				if (file_exists("$path_sounds/$audiofile_name")) {
+					$query_sounds = "INSERT INTO sounds(goFilename, goDirectory, goFileDate, goFilesize, uploaded_by) VALUES('$audiofile_name', '$path_sounds', NOW(), '$audio_filesize', '$session_user');";
+					$exec_sounds = mysqli_query($linkgo, $query_sounds);
+					
+					//$query_go_sounds = "INSERT INTO go_sounds('type', 'data') VALUES('audio/mp3/wav', '$encoded_audio')";
+					//$exec_go_sounds = mysqli_query($linkgo, $query_go_sounds);
+					
+					// Log
+					$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Uploaded New Voice File: $audiofile_name", $log_group);
+					
+					$stmt = "SELECT server_id,server_ip,active,server_description FROM servers";
+					$servers = mysqli_query($link, $stmt);
+					while($fresults = mysqli_fetch_array($servers, MYSQLI_ASSOC)){
+						$server_ip[] = $fresults['server_ip'];
+						$active[] = $fresults['active'];
+						$server_description[] = $fresults['server_description'];
+						#if(!preg_match('/dialer/i',$server_description) && $active == "Y"){
+						if($active == "Y"){
+							//exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" /var/lib/asterisk/sounds/'.$audiofile_name.' root@'.$server_ip.':/var/lib/asterisk/sounds"');
+							exec('/usr/share/goautodial/goautodialc.pl "rsync -avz -e \"ssh -p222\" '.$path_sounds.'/'.$audiofile_name.' root@'.$server_ip.':'.$path_sounds.'"');
+						}
 					}
-				}
-				if($exec_sounds){
-					$apiresults = array("result" => "success");
-					$stmtUpdate = "UPDATE servers SET sounds_update='Y';";
-					$rsltUpdate = mysqli_query($link, $stmtUpdate);
-				} else {
+					if($exec_sounds){
+						$apiresults = array("result" => "success");
+						$stmtUpdate = "UPDATE servers SET sounds_update='Y';";
+						$rsltUpdate = mysqli_query($link, $stmtUpdate);
+					} else {
+						//$data['uploadfail'] = "{$this->lang->line("go_file_type_wav")}";
+						$apiresults = array("result" => "error");
+					}
+				}else{
 					//$data['uploadfail'] = "{$this->lang->line("go_file_type_wav")}";
 					$apiresults = array("result" => "error");
 				}
+				
 			}else{
 				$apiresults = array("result" => "exists");
 			}

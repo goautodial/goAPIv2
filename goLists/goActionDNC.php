@@ -4,14 +4,12 @@
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
 	$phone_numbers = str_replace(" ", "\n", rawurldecode(mysqli_real_escape_string($link, $_REQUEST['phone_numbers'])));
 	$stage = mysqli_real_escape_string($link, $_REQUEST['stage']);
-	$user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-		
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	
-	$usergroup = get_usergroup($user_id, $link);
-	$allowed_campaigns = get_allowed_campaigns($usergroup, $link);
+	$groupId = go_get_groupid($session_user);
+	$log_user = $session_user;
+	$log_group = $groupId;
+	$allowed_campaigns = get_allowed_campaigns($groupId, $link);
 	$cnt = 0;
 	
 	if ($campaign_id == "INTERNAL"){
@@ -115,14 +113,8 @@
 		"msg"      => $msg
 	);
 	
-	function get_usergroup($user_id, $link){
-		$query = mysqli_query($link, "select user_group from vicidial_users where user_id='$user_id';");
-		$resultsu = mysqli_fetch_array($query);
-		$groupid = $resultsu['user_group'];
-		return $groupid;
-	}
-	function get_allowed_campaigns($groupid, $link){
-		$query2 = mysql_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupid'");
+	function get_allowed_campaigns($groupId, $link){
+		$query2 = mysqli_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupId'");
 		$check = mysqli_num_rows($query2);
 		if($check > 0){
 			while($resultc = mysqli_fetch_array($query2)){
