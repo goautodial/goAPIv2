@@ -24,8 +24,8 @@ if ((isset($sender) && $sender !== '') && (isset($recipient) && $recipient !== '
 		'entry_date' => date("Y-m-d H:i:s")
 	);
     
-    $rslt = $astDB->insert('go_chat_history', $insertData);
+    $rslt = $goDB->insert('go_chat_history', $insertData);
     
-    $APIResult = array( "result" => "success", "chat_id" => $astDB->getInsertId() );
+    $APIResult = array( "result" => "success", "chat_id" => $goDB->getInsertId() );
 }
 ?>
