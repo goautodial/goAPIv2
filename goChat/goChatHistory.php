@@ -14,7 +14,7 @@ if (isset($_GET['goLimit'])) { $limit = $astDB->escape($_GET['goLimit']); }
     else if (isset($_POST['goLimit'])) { $limit = $astDB->escape($_POST['goLimit']); }
 
 if (!is_numeric($limit) || $limit === '') { $limit = 50; }
-if (($user === '' && $goUser !== 'goAPI')) { $user = $goUser; }
+if ((($user === '' || is_null($user)) && $goUser !== 'goAPI')) { $user = $goUser; }
 
 
 if (isset($user) && $user !== '') {
