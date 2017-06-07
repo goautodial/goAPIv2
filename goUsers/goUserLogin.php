@@ -52,7 +52,7 @@
 		//$aDB->where('pass_hash', $pass_hash);
 	}
 	
-	$query = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
+	$query = "SELECT value FROM settings WHERE setting='GO_agent_domain';";
 	$rsltg = mysqli_query($linkgo, $query);
 	$rowg = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
 	$realm = $rowg['value'];
