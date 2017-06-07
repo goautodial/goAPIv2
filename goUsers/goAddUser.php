@@ -204,10 +204,15 @@
 										$phone_pass = '';
 									}
 									
+									$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";
+									$rsltd = mysqli_query($linkgo, $queryd);
+									$rowd = mysqli_fetch_array($rsltd, MYSQLI_ASSOC);
+									$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
+									
 									$queryInsertUser = "INSERT INTO `phones` (`extension`,  `dialplan_number`,  `voicemail_id`,  `phone_ip`,  `computer_ip`,  `server_ip`,  `login`,  `pass`,  `status`,  `active`,  `phone_type`,  `fullname`,  `company`,  `picture`,  `protocol`,  `local_gmt`,  `outbound_cid`,  `template_id`,  `conf_override`,  `user_group`,  `conf_secret`,  `messages`,  `old_messages`) VALUES ('$phone_login',  '9999$phone_login',  '$phone_login',  '',  '', '$server_ip',  '$phone_login',  '$phone_pass',  'ACTIVE',  '$active',  '',  '$full_name',  '$user_group',  '',  'EXTERNAL',  '-5',  '0000000000',  '--NONE--',  '$conf_override',  '$user_group',  '$phone_pass',  '0',  '0');";
 									$resultQueryUser = mysqli_query($link, $queryInsertUser);
 									
-									$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','goautodial.com','$phone_pass'{$kamha1values});";
+									$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','$domain','$phone_pass'{$kamha1values});";
 									$resultkam = mysqli_query($linkgokam, $kamailioq);
 									
 								} else {
