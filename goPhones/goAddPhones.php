@@ -127,7 +127,7 @@
 						$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
 						$kamha1fields = ", ha1, ha1b";
 						$kamha1values = ", '{$ha1}', '{$ha1b}'";
-						$phone_pass = '';
+						$pass = '';
 					}
 					
 					$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";
@@ -135,7 +135,7 @@
 					$rowd = mysqli_fetch_array($rsltd, MYSQLI_ASSOC);
 					$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 					
-					$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','$domain','$phone_pass'{$kamha1values});";
+					$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$extension','$domain','$pass'{$kamha1values});";
 					$resultkam = mysqli_query($linkgokam, $kamailioq);
 					
 					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Phone: $extension", $log_user, $query);
