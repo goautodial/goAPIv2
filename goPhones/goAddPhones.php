@@ -8,7 +8,8 @@
    #### License: AGPLv2                            ####
    ####################################################
     include_once ("../goFunctions.php");
- 
+	include_once ("../goDBkamailio.php");
+	
 	### POST or GET Variables
     $extension = $_REQUEST['extension'];
     $server_ip = $_REQUEST['server_ip'];
@@ -127,7 +128,7 @@
 						$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
 						$kamha1fields = ", ha1, ha1b";
 						$kamha1values = ", '{$ha1}', '{$ha1b}'";
-						$phone_pass = '';
+						$pass = '';
 					}
 					
 					$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";
@@ -135,8 +136,14 @@
 					$rowd = mysqli_fetch_array($rsltd, MYSQLI_ASSOC);
 					$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 					
-					$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','$domain','$phone_pass'{$kamha1values});";
-					$resultkam = mysqli_query($linkgokam, $kamailioq);
+					$queryk = "SELECT value FROM settings WHERE setting='GO_agent_sip_server';";
+					$rsltk = mysqli_query($linkgo, $queryk);
+					$rowk = mysqli_fetch_array($rsltk, MYSQLI_ASSOC);
+					
+					if($rowk['value'] === "kamailio"){
+						$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$extension','$domain','$pass'{$kamha1values});";
+						$resultkam = mysqli_query($linkgokam, $kamailioq);
+					}
 					
 					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Phone: $extension", $log_user, $query);
 					//$return_query[] = $query_check;
