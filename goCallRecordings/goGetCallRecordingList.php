@@ -14,7 +14,7 @@
 	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
 	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
 	$agent_filter = mysqli_real_escape_string($link, $_REQUEST['agent_filter']);
-	$session_user = mysqli_real_escape_string($link, $_REQUEST['session_user']);
+	//$session_user = mysqli_real_escape_string($link, $_REQUEST['session_user']);
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
