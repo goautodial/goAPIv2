@@ -16,16 +16,16 @@
     if($user === "" || $user === NULL) { 
             $apiresults = array("result" => "Error: Incomplete data passed."); 
     } else {
-		if($user === null)
-        $groupId = go_get_groupid($user);
+        $groupId = go_get_groupid($session_user);
 		$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 		
         if (checkIfTenant($groupId)) {
-            $ul = "AND user='$user'";
-        } else { 
-            $ul = "AND user='$user' AND user_group='$groupId'";
+            $ul = "AND vl.user='$user'";
+        } else {
 			if($groupId !== "ADMIN")
-				$notAdminSQL = "AND user_group != 'ADMIN'";
+				$ul = "AND vl.user='$user' AND vl.user_group='$groupId'";
+			else
+				$ul = "AND vl.user='$user'";
         }
 		
 		if($start_date !== ""){
@@ -36,7 +36,7 @@
 			$daterange = "";
 		}
 		
-		$query = "SELECT DISTINCT(val.agent_log_id), val.user, val.event_time, val.status, vl.phone_number, val.campaign_id, val.user_group, vl.list_id, val.lead_id, vl.term_reason FROM vicidial_agent_log val, vicidial_log vl WHERE val.lead_id = vl.lead_id AND val.user = vl.user AND val.user = '$user' $daterange ORDER BY val.event_time DESC LIMIT 10000;";
+		$query = "SELECT DISTINCT(val.agent_log_id), val.user, val.event_time, val.status, vl.phone_number, val.campaign_id, val.user_group, vl.list_id, val.lead_id, vl.term_reason FROM vicidial_agent_log val, vicidial_log vl WHERE val.lead_id = vl.lead_id AND val.user = vl.user $ul $daterange ORDER BY val.event_time DESC LIMIT 100;";
 		$agentlog_query = mysqli_query($link, $query);
 			
 			while($agentlog_fetch = mysqli_fetch_array($agentlog_query)){

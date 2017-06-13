@@ -21,7 +21,7 @@
 		$addedSQL = "WHERE user_group='$groupId'";
 	}
 
-	$query = "SELECT call_time_id,call_time_name,ct_default_start,ct_default_stop,user_group FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
+	$query = "SELECT * FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
 	$rsltv = mysqli_query($link,$query);
 	
 	//$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the Calltimes List", $log_group);
@@ -31,7 +31,21 @@
 		$dataCalltimeName[] = $fresults['call_time_name'];
 		$dataCtDefStart[] = $fresults['ct_default_start'];
 		$dataCtDefStop[] = $fresults['ct_default_stop'];
+		$dataCtSunStart[] = $fresults['ct_sunday_start'];
+		$dataCtSunStop[] = $fresults['ct_sunday_stop'];
+		$dataCtMonStart[] = $fresults['ct_monday_start'];
+		$dataCtMonStop[] = $fresults['ct_monday_stop'];
+		$dataCtTueStart[] = $fresults['ct_tuesday_start'];
+		$dataCtTueStop[] = $fresults['ct_tuesday_stop'];
+		$dataCtWedStart[] = $fresults['ct_wednesday_start'];
+		$dataCtWedStop[] = $fresults['ct_wednesday_stop'];
+		$dataCtThuStart[] = $fresults['ct_thursday_start'];
+		$dataCtThuStop[] = $fresults['ct_thursday_stop'];
+		$dataCtFriStart[] = $fresults['ct_friday_start'];
+		$dataCtFriStop[] = $fresults['ct_friday_stop'];
+		$dataCtSatStart[] = $fresults['ct_saturday_start'];
+		$dataCtSatStop[] = $fresults['ct_saturday_stop'];
 		$dataUserGroup[] = $fresults['user_group'];
-		$apiresults = array("result" => "success", "call_time_id" => $dataCalltimeID, "call_time_name" => $dataCalltimeName, "ct_default_start" => $dataCtDefStart, "ct_default_stop" => $dataCtDefStop, "user_group" => $dataUserGroup);
 	}
+	$apiresults = array("result" => "success", "call_time_id" => $dataCalltimeID, "call_time_name" => $dataCalltimeName, "ct_default_start" => $dataCtDefStart, "ct_default_stop" => $dataCtDefStop, "ct_sunday_start" => $dataCtSunStart, "ct_sunday_stop" => $dataCtSunStop, "ct_monday_start" => $dataCtMonStart, "ct_monday_stop" => $dataCtMonStop, "ct_tuesday_start" => $dataCtTueStart, "ct_tuesday_stop" => $dataCtTueStop, "ct_wednesday_start" => $dataCtWedStart, "ct_wednesday_stop" => $dataCtWedStop, "ct_thursday_start" => $dataCtThuStart, "ct_thursday_stop" => $dataCtThuStop, "ct_friday_start" => $dataCtFriStart, "ct_friday_stop" => $dataCtFriStop, "ct_saturday_start" => $dataCtSatStart, "ct_saturday_stop" => $dataCtSatStop, "user_group" => $dataUserGroup);
 ?>
