@@ -105,6 +105,7 @@
 					$country_code = preg_replace($field_regx, "", $col[14]);
 					$gender = preg_replace($field_regx, "", $col[15]);
 					$date_of_birth = preg_replace($field_regx, "", $col[16]);
+					$date_of_birth = date("Y-m-d", strtotime($date_of_birth));
 					$alt_phone = preg_replace($field_regx, "", $col[17]);
 					$email = preg_replace($field_regx, "", $col[18]);
 					$security_phrase = preg_replace($field_regx, "", $col[19]);
