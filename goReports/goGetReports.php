@@ -983,13 +983,13 @@ ini_set('memory_limit', '2048M');
 						$RAWcalls = $Scalls[$m];
 						$RAWtimeSEC = $Stime[$m];
 				
-						$Swait[$m]=		go_sec_convert($Swait[$m],'H'); 
-						$Stalk[$m]=		go_sec_convert($Stalk[$m],'H'); 
-						$Sdispo[$m]=	go_sec_convert($Sdispo[$m],'H'); 
-						$Spause[$m]=	go_sec_convert($Spause[$m],'H'); 
-						$Sdead[$m]=		go_sec_convert($Sdead[$m],'H'); 
-						$Scustomer[$m]=	go_sec_convert($Scustomer[$m],'H'); 
-						$Stime[$m]=		go_sec_convert($Stime[$m],'H'); 
+						$Swait[$m]=		gmdate('H:i:s', $Swait[$m]); 
+						$Stalk[$m]=		gmdate('H:i:s', $Stalk[$m]); 
+						$Sdispo[$m]=	gmdate('H:i:s', $Sdispo[$m]); 
+						$Spause[$m]=	gmdate('H:i:s', $Spause[$m]); 
+						$Sdead[$m]=		gmdate('H:i:s', $Sdead[$m]); 
+						$Scustomer[$m]=	gmdate('H:i:s', $Scustomer[$m]); 
+						$Stime[$m]=		gmdate('H:i:s', $Stime[$m]); 
 				
 						$RAWtime = $Stime[$m];
 						$RAWwait = $Swait[$m];
@@ -1027,7 +1027,7 @@ ini_set('memory_limit', '2048M');
 								$punches_found++;
 								$RAWtimeTCsec =		$TCtime[$n];
 								$TOTtimeTC =		($TOTtimeTC + $TCtime[$n]);
-								$StimeTC[$m]=		go_sec_convert($TCtime[$n],'H'); 
+								$StimeTC[$m]=		gmdate('H:i:s', $TCtime[$n]); 
 								$RAWtimeTC =		$StimeTC[$m];
 								$StimeTC[$m] =		sprintf("%10s", $StimeTC[$m]);
 								}
@@ -1070,7 +1070,7 @@ ini_set('memory_limit', '2048M');
 							while ( ($i < $pause_sec_ct) and ($status_found < 1) ){
 								if ( ($Suser[$m] == $PCuser[$i]) and ($Sstatus == $sub_status[$i]) )
 									{
-									$USERcodePAUSE_MS =		go_sec_convert($PCpause_sec[$i],'H');
+									$USERcodePAUSE_MS =		gmdate('H:i:s', $PCpause_sec[$i]);
 									if (strlen($USERcodePAUSE_MS)<1) {$USERcodePAUSE_MS='0';}
 									$pfUSERcodePAUSE_MS =	sprintf("%10s", $USERcodePAUSE_MS);
 		
@@ -1212,7 +1212,7 @@ ini_set('memory_limit', '2048M');
 							{
 							$TOTtotPAUSE = ($TOTtotPAUSE + $Scalls);
 				
-							$USERsumstatPAUSE_MS =		go_sec_convert($Scalls,'H'); 
+							$USERsumstatPAUSE_MS =		gmdate('H:i:s', $Scalls); 
 							$pfUSERsumstatPAUSE_MS =	sprintf("%11s", $USERsumstatPAUSE_MS);
 		
 							$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
@@ -1223,14 +1223,14 @@ ini_set('memory_limit', '2048M');
 					### END loop through each status ###
 				
 					### call function to calculate and print dialable leads
-					$TOTwait = '<th nowrap>'.go_sec_convert($TOTwait,'H').'</th>';
-					$TOTtalk = '<th nowrap>'.go_sec_convert($TOTtalk,'H').'</th>';
-					$TOTdispo = '<th nowrap>'.go_sec_convert($TOTdispo,'H').'</th>';
-					$TOTpause = '<th nowrap>'.go_sec_convert($TOTpause,'H').'</th>';
-					$TOTdead = '<th nowrap>'.go_sec_convert($TOTdead,'H').'</th>';
-					$TOTcustomer = '<th nowrap>'.go_sec_convert($TOTcustomer,'H').'</th>';
-					$TOTALtime = '<th nowrap>'.go_sec_convert($TOTALtime,'H').'</th>';
-					$TOTtimeTC = '<th nowrap>'.go_sec_convert($TOTtimeTC,'H').'</th>';
+					$TOTwait = '<th nowrap>'.gmdate('H:i:s', $TOTwait).'</th>';
+					$TOTtalk = '<th nowrap>'.gmdate('H:i:s', $TOTtalk).'</th>';
+					$TOTdispo = '<th nowrap>'.gmdate('H:i:s', $TOTdispo).'</th>';
+					$TOTpause = '<th nowrap>'.gmdate('H:i:s', $TOTpause).'</th>';
+					$TOTdead = '<th nowrap>'.gmdate('H:i:s', $TOTdead).'</th>';
+					$TOTcustomer = '<th nowrap>'.gmdate('H:i:s', $TOTcustomer).'</th>';
+					$TOTALtime = '<th nowrap>'.gmdate('H:i:s', $TOTALtime).'</th>';
+					$TOTtimeTC = '<th nowrap>'.gmdate('H:i:s', $TOTtimeTC).'</th>';
 					
 		
 					if ($file_download > 0)
@@ -1294,7 +1294,7 @@ ini_set('memory_limit', '2048M');
 						$filters = "and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 ";
 					}
 					
-					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' $filters group by user,full_name,status order by full_name,user,status desc limit 500000";
+					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' group by user,full_name,status order by full_name,user,status desc limit 500000";
 					$query = mysqli_query($link, $perfdetails_sql);
 					
 					$rows_to_print = mysqli_num_rows($query);
@@ -1471,19 +1471,19 @@ ini_set('memory_limit', '2048M');
 						$RAWuser = $Suser;
 						$RAWcalls = $Scalls;
 					
-						$pfUSERtime_MS =		go_sec_convert($Stime,'H'); 
-						$pfUSERtotTALK_MS =		go_sec_convert($Stalk_sec,'H'); 
-						$pfUSERavgTALK_MS =		go_sec_convert($Stalk_avg,'M'); 
-						$pfUSERtotPAUSE_MS =	go_sec_convert($Spause_sec,'H'); 
-						$pfUSERavgPAUSE_MS =	go_sec_convert($Spause_avg,'M'); 
-						$pfUSERtotWAIT_MS =		go_sec_convert($Swait_sec,'H'); 
-						$pfUSERavgWAIT_MS =		go_sec_convert($Swait_avg,'M'); 
-						$pfUSERtotDISPO_MS =	go_sec_convert($Sdispo_sec,'H'); 
-						$pfUSERavgDISPO_MS =	go_sec_convert($Sdispo_avg,'M'); 
-						$pfUSERtotDEAD_MS =		go_sec_convert($Sdead_sec,'H'); 
-						$pfUSERavgDEAD_MS =		go_sec_convert($Sdead_avg,'M'); 
-						$pfUSERtotCUSTOMER_MS =	go_sec_convert($Scustomer_sec,'H'); 
-						$pfUSERavgCUSTOMER_MS =	go_sec_convert($Scustomer_avg,'M'); 
+						$pfUSERtime_MS =		gmdate('H:i:s', $Stime); 
+						$pfUSERtotTALK_MS =		gmdate('H:i:s', $Stalk_sec); 
+						$pfUSERavgTALK_MS =		gmdate('H:i:s', $Stalk_avg);
+						$pfUSERtotPAUSE_MS =	gmdate('H:i:s', $Spause_sec);
+						$pfUSERavgPAUSE_MS =	gmdate('H:i:s', $Spause_avg);
+						$pfUSERtotWAIT_MS =		gmdate('H:i:s', $Swait_sec); 
+						$pfUSERavgWAIT_MS =		gmdate('H:i:s', $Swait_avg); 
+						$pfUSERtotDISPO_MS =	gmdate('H:i:s', $Sdispo_sec); 
+						$pfUSERavgDISPO_MS =	gmdate('H:i:s', $Sdispo_avg); 
+						$pfUSERtotDEAD_MS =		gmdate('H:i:s', $Sdead_sec); 
+						$pfUSERavgDEAD_MS =		gmdate('H:i:s', $Sdead_avg); 
+						$pfUSERtotCUSTOMER_MS =	gmdate('H:i:s', $Scustomer_sec); 
+						$pfUSERavgCUSTOMER_MS =	gmdate('H:i:s', $Scustomer_avg); 
 					
 						$PAUSEtotal[$m] = $pfUSERtotPAUSE_MS;
 					
@@ -1609,19 +1609,19 @@ ini_set('memory_limit', '2048M');
 					else {$TOTavgCUSTOMER = ($TOTtotCUSTOMER / $TOTcalls);}
 					
 					$TOTcalls = '<th nowrap>'.$TOTcalls.'</th>';
-					$TOTtime_MS = '<th nowrap>'.go_sec_convert($TOTtime,'H').'</th>'; 
-					$TOTtotTALK_MS = '<th nowrap>'.go_sec_convert($TOTtotTALK,'H').'</th>'; 
-					$TOTtotDISPO_MS = '<th nowrap>'.go_sec_convert($TOTtotDISPO,'H').'</th>'; 
-					$TOTtotDEAD_MS = '<th nowrap>'.go_sec_convert($TOTtotDEAD,'H').'</th>'; 
-					$TOTtotPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
-					$TOTtotWAIT_MS = '<th nowrap>'.go_sec_convert($TOTtotWAIT,'H').'</th>'; 
-					$TOTtotCUSTOMER_MS = '<th nowrap>'.go_sec_convert($TOTtotCUSTOMER,'H').'</th>'; 
-					$TOTavgTALK_MS = '<th nowrap>'.go_sec_convert($TOTavgTALK,'M').'</th>'; 
-					$TOTavgDISPO_MS = '<th nowrap>'.go_sec_convert($TOTavgDISPO,'H').'</th>'; 
-					$TOTavgDEAD_MS = '<th nowrap>'.go_sec_convert($TOTavgDEAD,'H').'</th>'; 
-					$TOTavgPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTavgPAUSE,'H').'</th>'; 
-					$TOTavgWAIT_MS = '<th nowrap>'.go_sec_convert($TOTavgWAIT,'H').'</th>'; 
-					$TOTavgCUSTOMER_MS = '<th nowrap>'.go_sec_convert($TOTavgCUSTOMER,'H').'</th>'; 
+					$TOTtime_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtime).'</th>'; 
+					$TOTtotTALK_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotTALK).'</th>'; 
+					$TOTtotDISPO_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotDISPO).'</th>'; 
+					$TOTtotDEAD_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotDEAD).'</th>'; 
+					$TOTtotPAUSE_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotPAUSE).'</th>'; 
+					$TOTtotWAIT_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotWAIT).'</th>'; 
+					$TOTtotCUSTOMER_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotCUSTOMER).'</th>'; 
+					$TOTavgTALK_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgTALK).'</th>'; 
+					$TOTavgDISPO_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgDISPO).'</th>'; 
+					$TOTavgDEAD_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgDEAD).'</th>'; 
+					$TOTavgPAUSE_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgPAUSE).'</th>'; 
+					$TOTavgWAIT_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgWAIT).'</th>'; 
+					$TOTavgCUSTOMER_MS = '<th nowrap>'.gmdate('H:i:s', $TOTavgCUSTOMER).'</th>'; 
 					
 					if ($file_download > 0)
 						{
@@ -1740,7 +1740,7 @@ ini_set('memory_limit', '2048M');
 									$Snon_pause_sec =	($Snon_pause_sec + $PCnon_pause_sec[$i]);
 									$Stotal_sec =	($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
 					
-									$USERcodePAUSE_MS =		go_sec_convert($PCpause_sec[$i],'H'); 
+									$USERcodePAUSE_MS =	gmdate('H:i:s', $PCpause_sec[$i]); 
 									$pfUSERcodePAUSE_MS =	sprintf("%6s", $USERcodePAUSE_MS);
 					
 									$Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
@@ -1763,9 +1763,9 @@ ini_set('memory_limit', '2048M');
 						$TOTtotNONPAUSE = ($TOTtotNONPAUSE + $Snon_pause_sec);
 						$TOTtotTOTAL = ($TOTtotTOTAL + $Stotal_sec);
 					
-						$pfUSERtotPAUSE_MS =		go_sec_convert($Spause_sec,'H'); 
-						$pfUSERtotNONPAUSE_MS =		go_sec_convert($Snon_pause_sec,'H'); 
-						$pfUSERtotTOTAL_MS =		go_sec_convert($Stotal_sec,'H'); 
+						$pfUSERtotPAUSE_MS =		gmdate('H:i:s', $Spause_sec); 
+						$pfUSERtotNONPAUSE_MS =		gmdate('H:i:s', $Snon_pause_sec); 
+						$pfUSERtotTOTAL_MS =		gmdate('H:i:s', $Stotal_sec); 
 					
 						if ($file_download > 0) {
 							$fileToutput = "$Sfull_name,=\"$Suser\",$pfUSERtotTOTAL_MS,$pfUSERtotNONPAUSE_MS,$pfUSERtotPAUSE_MS,$Ssub_statusesFILE\n";
@@ -1843,7 +1843,7 @@ ini_set('memory_limit', '2048M');
 							{
 							$TOTtotPAUSE = ($TOTtotPAUSE + $Scalls);
 					
-							$USERsumstatPAUSE_MS =		go_sec_convert($Scalls,'H'); 
+							$USERsumstatPAUSE_MS =		gmdate('H:i:s', $Scalls); 
 					
 							$SUMsub_statusesFILE .= ",$USERsumstatPAUSE_MS";
 							$SstatusesBSUM .= "<th nowrap> $USERsumstatPAUSE_MS </th>";
@@ -1853,9 +1853,9 @@ ini_set('memory_limit', '2048M');
 					### END loop through each status ###
 						$TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
 					
-						$TOTtotPAUSEB_MS = '<th nowrap>'.go_sec_convert($TOTtotPAUSE,'H').'</th>'; 
-						$TOTtotNONPAUSE_MS = '<th nowrap>'.go_sec_convert($TOTtotNONPAUSE,'H').'</th>'; 
-						$TOTtotTOTAL_MS = '<th nowrap>'.go_sec_convert($TOTtotTOTAL,'H').'</th>'; 
+						$TOTtotPAUSEB_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotPAUSE).'</th>'; 
+						$TOTtotNONPAUSE_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotNONPAUSE).'</th>'; 
+						$TOTtotTOTAL_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotTOTAL).'</th>'; 
 					
 						if ($file_download > 0) {
 							$file_output .= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
