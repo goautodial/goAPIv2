@@ -67,7 +67,7 @@
         $updateQuerygo = mysqli_query($linkgo, $querygo);
         
         if($updateQuery > 0){
-            if ($is_customer) {                                              
+            if ($is_customer) {
                 $rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';");
                 $fresults = mysqli_fetch_array($rsltu, MYSQLI_ASSOC);
                 $user_group = $fresults['user_group'];
@@ -79,30 +79,25 @@
                 $countrsltgo = mysqli_num_rows($updateQuerygo);                
                 
                 if ($countrsltgo < 1) {
-                
                     $querygo = "INSERT
                     INTO go_customers 
-                    VALUES (null, '$lead_id', '$group_list_id', '$avatar') 
-                    WHERE lead_id ='$lead_id';"; 
-                    
-                    $rsltgo = mysqli_query($linkgo, $querygo);
+                    VALUES (null, '$lead_id', '$group_list_id', '$avatar');";
+					$rsltgo = mysqli_query($linkgo, $querygo);
                     $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
+					
                 } else {
-                
                     $querygo = "UPDATE go_customers 
                     SET avatar = '$avatar', group_list_id='$group_list_id'
-                    WHERE lead_id ='$lead_id';";                    
-            
+                    WHERE lead_id ='$lead_id';";
                     $rsltgo = mysqli_query($linkgo, $querygo);
                     $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
                 }
-            } else {           
-            
+				
+            } else {
                 $querygo = "INSERT
                 INTO go_customers 
                 VALUES (null, '$lead_id', '$group_list_id', '$avatar') 
                 WHERE lead_id ='$lead_id';"; 
-                
                 $rsltgo = mysqli_query($linkgo, $querygo);
                 $fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
             }

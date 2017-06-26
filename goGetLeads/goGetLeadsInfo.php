@@ -6,7 +6,7 @@
     #### Written by: Alexander Abenoja                 ####
     #######################################################
     include_once ("../goFunctions.php");
-    
+    include_once ("../goDBgoautodial.php");
     ### POST or GET Variables
     $lead_id = mysqli_real_escape_string($link, $_REQUEST['lead_id']);
     
