@@ -75,9 +75,9 @@
 	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];
 	if($answering_machine_detection == ""){
 		if($dial_method == "MANUAL" && $dial_method == "INBOUND_MAN"){
-			$answering_machinge_detection = '8368';
+			$answering_machine_detection = '8368';
 		}else{
-			$answering_machinge_detection = '8369';	
+			$answering_machine_detection = '8369';	
 		}
 	}
 	$caller_id 	= $_REQUEST['caller_id']; 					
@@ -179,12 +179,12 @@
                 if($campaign_type == "OUTBOUND"){
 						
                 	//$groupId = go_get_groupid($goUser);
-					$groupId = go_get_groupid($session_user);
+	$groupId = go_get_groupid($session_user);
 
 	                if (!checkIfTenant($groupId)) {
 	                   $tenant_id = '---ALL---';
 	                } else {
-	                   $tenant_id = "$groupId";
+	                   $tenant_id = $user_group;
 	                }
 
 	                if ($campaign_id != 'undefined' && $campaign_id != ''){
