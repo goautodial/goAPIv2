@@ -169,7 +169,7 @@
             
             case "campaign":
 				$nextdial_secondsSQL = '';
-				$nextResult = $dbase->rawQuery("SHOW COLUMNS FROM `table` LIKE 'fieldname'");
+				$nextResult = $dbase->rawQuery("SHOW COLUMNS FROM `vicidial_campaigns` LIKE 'nextdial_seconds'");
 				if ($dbase->getRowCount() > 0) {
 					$nextdial_secondsSQL = ",nextdial_seconds";
 				}
