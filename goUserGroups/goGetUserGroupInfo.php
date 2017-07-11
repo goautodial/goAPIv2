@@ -11,7 +11,7 @@
     include_once("../goDBgoautodial.php");
 	
     ### POST or GET Variables
-    $agent_id = $_REQUEST['agent_id'];
+    $agent_id = $_REQUEST['user_group'];
 	
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);

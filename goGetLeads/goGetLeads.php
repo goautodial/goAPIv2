@@ -26,7 +26,7 @@
                    $addedSQL = "WHERE user_group='$groupId'";
                 }*/
     $goVarLimit = $_REQUEST["goVarLimit"];
-	$userid = $_REQUEST["user_id"];
+	$userid = $_REQUEST["user"];
 	$search = mysqli_real_escape_string($link, $_REQUEST['search']);
 	$disposition_filter = mysqli_real_escape_string($link, $_REQUEST['disposition_filter']);
 	$list_filter = mysqli_real_escape_string($link, $_REQUEST['list_filter']);
