@@ -18,6 +18,8 @@ if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSes
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
 if (isset($_GET['goScrollDIV'])) { $ScrollDIV = $astDB->escape($_GET['goScrollDIV']); }
     else if (isset($_POST['goScrollDIV'])) { $ScrollDIV = $astDB->escape($_POST['goScrollDIV']); }
+if (isset($_GET['goCampScript'])) { $go_camp_script = $astDB->escape($_GET['goCampScript']); }
+    else if (isset($_POST['goCampScript'])) { $go_camp_script = $astDB->escape($_POST['goCampScript']); }
 if (isset($_GET['lead_id'])) { $lead_id = $astDB->escape($_GET['lead_id']); }
     else if (isset($_POST['lead_id'])) { $lead_id = $astDB->escape($_POST['lead_id']); }
 if (isset($_GET['vendor_id'])) { $vendor_id = $astDB->escape($_GET['vendor_id']); }
@@ -179,8 +181,13 @@ if (isset($_GET['session_name'])) { $session_name = $astDB->escape($_GET['sessio
 
 
 if ($is_logged_in) {
-    if (strlen($in_script) < 1)
-        {$call_script = $camp_script;}
+    if (strlen($in_script) < 1) {
+        if (isset($camp_script) && $camp_script !== '') {
+            $call_script = $camp_script;
+        } else {
+            $call_script = $go_camp_script;
+        }
+    }
     else
         {$call_script = $in_script;}
     
