@@ -11,14 +11,14 @@
     include_once("../goDBgoautodial.php");
 	
     ### POST or GET Variables
-    $agent_id = $_REQUEST['agent_id'];
+    $agent_id = $_REQUEST['user_group'];
 	
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($agent_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for AGENT ID."); 
+		$apiresults = array("result" => "Error: Set a value for User Group."); 
 	} else {
  
     		$groupId = go_get_groupid($goUser);

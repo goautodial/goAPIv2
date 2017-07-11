@@ -14,7 +14,7 @@
         $script_id = mysqli_real_escape_string($link, $_REQUEST['script_id']);
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
-        $script_text = mysqli_real_escape_string($link, $_REQUEST['script_text']);
+        $script_text = $_REQUEST['script_text'];
         $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
         $active = $_REQUEST['active'];
         $ip_address = $_REQUEST['hostname'];
@@ -31,7 +31,7 @@
         if($script_id == null) {
                 $apiresults = array("result" => "Error: Please try again.");
         } else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]',$script_name) && $script_name != null){
+				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',$script_name) && $script_name != null){
 						$apiresults = array("result" => "Error: Special characters found in script name");
 				} else {
 						### Check value compare to default values

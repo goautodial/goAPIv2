@@ -75,9 +75,9 @@
 	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];
 	if($answering_machine_detection == ""){
 		if($dial_method == "MANUAL" && $dial_method == "INBOUND_MAN"){
-			$answering_machinge_detection = '8368';
+			$answering_machine_detection = '8368';
 		}else{
-			$answering_machinge_detection = '8369';	
+			$answering_machine_detection = '8369';
 		}
 	}
 	$caller_id 	= $_REQUEST['caller_id']; 					
@@ -168,29 +168,30 @@
             $countResultCampaign = mysqli_num_rows($rsltvCampaign);
 		    
             if($countResultCampaign > 0) {
-                $apiresults = array("result" => "Error: Campaign Already Exist!");
+				$err_msg = error_handle("10109");
+                $apiresults = array("result" => "$err_msg");
             } else {
             	$campaign_id = mysqli_real_escape_string($link, $campaign_id);
                 $campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
                 $SQLdate = date("Y-m-d H:i:s");
                 $NOW = date("Y-m-d");
 				
-                // Outbound Campaign here
-                if($campaign_type == "OUTBOUND"){
-						
-                	//$groupId = go_get_groupid($goUser);
-					$groupId = go_get_groupid($session_user);
+				// Outbound Campaign here
+				if($campaign_type == "OUTBOUND"){
+				
+				//$groupId = go_get_groupid($goUser);
+				$groupId = go_get_groupid($session_user);
+				
+				if (!checkIfTenant($groupId)) {
+				$tenant_id = '---ALL---';
+				} else {
+				$tenant_id = "$groupId";
+				}
 
-	                if (!checkIfTenant($groupId)) {
-	                   $tenant_id = '---ALL---';
-	                } else {
-	                   $tenant_id = "$groupId";
-	                }
-
-	                if ($campaign_id != 'undefined' && $campaign_id != ''){
-	                	$queryCampID = "SELECT campaign_id FROM vicidial_campaigns WHERE campaign_id = '$campaign_id'";
-                        $rsltvCampID = mysqli_query($link, $queryCampID);
-                		$campNum = mysqli_num_rows($rsltvCampID);
+	if ($campaign_id != 'undefined' && $campaign_id != ''){
+		$queryCampID = "SELECT campaign_id FROM vicidial_campaigns WHERE campaign_id = '$campaign_id'";
+		$rsltvCampID = mysqli_query($link, $queryCampID);
+		$campNum = mysqli_num_rows($rsltvCampID);
 						
                 		if ($campNum < 1){
                 			$local_call_time = "9am-9pm";
@@ -208,7 +209,7 @@
 												campaign_stats_refresh, list_order_mix, dial_timeout, campaign_recording,			
 												campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,			
 												use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,					
-												manual_dial_list_id, drop_call_seconds, campaign_vdad_exten, disable_alter_custdata, disable_alter_custphone
+												manual_dial_list_id, drop_call_seconds, campaign_vdad_exten, disable_alter_custdata, disable_alter_custphone, campaign_script
 										)
 										VALUES(
 												'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -217,7 +218,7 @@
 												'Y','DISABLED','30','$campaign_recording',
 												'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 												'Y','Y','5164536886','DNC_ONLY','$tenant_id',
-												'${$tenant_id}998','7', '$answering_machine_detection', 'N', 'Y'
+												'${$tenant_id}998','7', '$answering_machine_detection', 'N', 'Y', '$script'
 										)";
 							$rsltvAdd = mysqli_query($link, $queryAdd);
 							$queryVCS = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
@@ -256,7 +257,8 @@
 					
 								$apiresults = array("result" => "success");
 							} else {
-								$apiresults = array("result" => "Error: Failed to add campaign.");
+								$err_msg = error_handle("10003");
+								$apiresults = array("result" => "$err_msg");
 							}
                 		}
 	                }
@@ -298,7 +300,7 @@
 											campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 											use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 											manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone
+											three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone, campaign_script
 										)
 										VALUES(
 											'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -308,7 +310,7 @@
 											'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 											'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 											'{$tenant_id}998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y'
+											'$caller_id_3_way_call','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y', '$script'
 										)";
 
 						$rsltvInbound = mysqli_query($link, $queryAddInbound);
@@ -445,6 +447,7 @@
 		
 							$apiresults = array("result" => "success");
 						} else {
+							
 							$apiresults = array("result" => "Error: Failed to add campaign.");
 						}
 	                }
@@ -488,11 +491,7 @@
 	                                $group_name = "$campType Group $didPattern";
 
 	                                // Insert new Inbound group
-	                                $queryAdd = "INSERT INTO vicidial_inbound_groups (group_id,group_name,group_color,active,web_form_address,voicemail_ext,next_agent_call,
-					                                                                    fronter_display,ingroup_script,get_call_launch,web_form_address_two,start_call_url,dispo_call_url,add_lead_url,
-					                                                                    call_time_id,user_group)
-					                                    VALUES('$group_id','$group_name','$groupColor','Y','','','oldest_call_finish','Y','NONE','NONE','','',
-					                                                                    '','','$local_call_time','$tenant_id')";
+	                                $queryAdd = "INSERT INTO vicidial_inbound_groups (group_id,group_name,group_color,active,web_form_address,voicemail_ext,next_agent_call,fronter_display,ingroup_script,get_call_launch,web_form_address_two,start_call_url,dispo_call_url,add_lead_url,call_time_id,user_group) VALUES('$group_id','$group_name','$groupColor','Y','','','oldest_call_finish','Y','NONE','NONE','','','','','$local_call_time','$tenant_id')";
 
 	                              	$rsltvAdd = mysqli_query($link, $queryAdd);
 
@@ -531,7 +530,7 @@
 																campaign_rec_filename, scheduled_callbacks, scheduled_callbacks_alert, no_hopper_leads_logins, use_internal_dnc,
 																use_campaign_dnc, available_only_ratio_tally, campaign_cid, manual_dial_filter, user_group,
 																manual_dial_list_id, drop_call_seconds, manual_dial_prefix, am_message_exten, agent_pause_codes_active,
-																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone
+																three_way_call_cid, three_way_dial_prefix, customer_3way_hangup_logging, customer_3way_hangup_seconds, customer_3way_hangup_action, campaign_allow_inbound, disable_alter_custdata, disable_alter_custphone, campaign_script
 															)
 															VALUES(
 																'$campaign_id','$campaign_desc','Y','$dial_method','NEW',
@@ -541,7 +540,7 @@
 																'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','Y',
 																'Y','Y','5164536886','DNC_ONLY','$tenant_id',
 																'998','7','$manual_dial_prefix','$answering_machine_message','$pause_codes',
-																'CAMPAIGN','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y'
+																'CAMPAIGN','$dial_prefix_3_way_call','$three_way_hangup_logging','$three_way_hangup_seconds','$three_way_hangup_action', 'Y', 'N', 'Y', '$script'
 															)";
 
 										$rsltvInsert = mysqli_query($link, $queryInsert);
@@ -782,7 +781,7 @@
 									
 								    $wavfile_name = substr($wavfile_name, 0, -4);
                                     //if($VARSERVTYPE == "cloud"){  
-                                    $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,dial_status_a,dial_statuses,lead_order,park_ext,park_file_name,web_form_address,allow_closers,hopper_level,auto_dial_level,available_only_ratio_tally,next_agent_call,local_call_time,dial_prefix,voicemail_ext,campaign_script,get_call_launch,campaign_changedate,campaign_stats_refresh,list_order_mix,web_form_address_two,start_call_url,dispo_call_url,dial_timeout,campaign_vdad_exten,campaign_recording,campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method, disable_alter_custdata, disable_alter_custphone)VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1','Y','random','$local_call_time','$sippy_dial_prefix','','','','$SQLdate','Y','DISABLED','','','','30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION', 'N', 'Y')";
+                                    $queryInsert = "INSERT INTO vicidial_campaigns (campaign_id,campaign_name,campaign_description,active,dial_method,dial_status_a,dial_statuses,lead_order,park_ext,park_file_name,web_form_address,allow_closers,hopper_level,auto_dial_level,available_only_ratio_tally,next_agent_call,local_call_time,dial_prefix,voicemail_ext,campaign_script,get_call_launch,campaign_changedate,campaign_stats_refresh,list_order_mix,web_form_address_two,start_call_url,dispo_call_url,dial_timeout,campaign_vdad_exten,campaign_recording,campaign_rec_filename,scheduled_callbacks,scheduled_callbacks_alert,no_hopper_leads_logins,per_call_notes,agent_lead_search,use_internal_dnc,use_campaign_dnc,campaign_cid,user_group,manual_dial_list_id,drop_call_seconds,survey_opt_in_audio_file,survey_first_audio_file, survey_method, disable_alter_custdata, disable_alter_custphone)VALUES('$campaign_id','$campaign_desc','$campaign_desc','N','RATIO','NEW',' N NA A AA DROP B NEW -','DOWN','','','','Y','100','1','Y','random','$local_call_time','$sippy_dial_prefix','','$script','','$SQLdate','Y','DISABLED','','','','30','8366','$campaign_recording','FULLDATE_CUSTPHONE_CAMPAIGN_AGENT','Y','BLINK_RED','Y','ENABLED','ENABLED','Y','Y','5164536886','$tenant_id','{$tenant_id}998','7','','$wavfile_name', 'EXTENSION', 'N', 'Y')";
                                     $rsltvInsert = mysqli_query($link, $queryInsert);
 
                                     $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
