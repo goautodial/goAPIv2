@@ -26,7 +26,6 @@
     ### Default values
     $defActive = array("Y","N");
 
-
     ### ERROR CHECKING ...
         if($script_id == null) {
                 $apiresults = array("result" => "Error: Please try again.");
