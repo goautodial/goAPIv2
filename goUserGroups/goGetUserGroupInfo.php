@@ -18,7 +18,7 @@
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($agent_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for AGENT ID."); 
+		$apiresults = array("result" => "Error: Set a value for User Group."); 
 	} else {
  
     		$groupId = go_get_groupid($goUser);
