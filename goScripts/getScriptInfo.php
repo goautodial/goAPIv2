@@ -1,12 +1,12 @@
 <?php
-    #######################################################
-    #### Name: getScriptInfo.php 	               ####
-    #### Description: API to get specific Script       ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Jeremiah Sebastian V. Samatra     ####
-    #### License: AGPLv2                               ####
-    #######################################################
+    ///////////////////////////////////////////////////
+    /// Name: getScriptInfo.php 	///
+    /// Description: API to get specific Script 	///
+    /// Version: 0.9 	///
+    /// Copyright: GOAutoDial Inc. (c) 2011-2016 	///
+    /// Written by: Jeremiah Sebastian V. Samatra 	///
+    /// License: AGPLv2 	///
+    //////////////////////////////////////////////////
     include_once ("../goFunctions.php");
     $script_id = mysqli_real_escape_string($link, $_REQUEST["script_id"]); 
 

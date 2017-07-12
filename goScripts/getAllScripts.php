@@ -1,18 +1,18 @@
 <?php
-    #######################################################
-    #### Name: getAllScripts.php                	   ####
-    #### Description: API to get all scripts  		   ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Jeremiah Sebastian V. Samatra     ####
-    #### Modified by: Alexander Jim H. Abenoja         ####
-    #### License: AGPLv2                               ####
-    #######################################################
+    ///////////////////////////////////////////////////
+    /// Name: getAllScripts.php 	///
+    /// Description: API to get all scripts 	///
+    /// Version: 0.9 	///
+    /// Copyright: GOAutoDial Inc. (c) 2011-2016 	///
+    /// Written by: Jeremiah Sebastian V. Samatra 	///
+    /// Modified by: Alexander Jim H. Abenoja 	///
+    /// License: AGPLv2 	///
+    ///////////////////////////////////////////////////
     include_once ("../goFunctions.php");
 		
 		$userid = mysqli_real_escape_string($link, $_REQUEST['userid']);
 		
-		## GET USER GROUP ##
+		// GET USER GROUP //
 		$get_usergroup = "SELECT user_group FROM vicidial_users WHERE user = '$userid'";
 		$exec_get_usergroup = mysqli_query($link, $get_usergroup);
 		$fetch_user_group = mysqli_fetch_array($exec_get_usergroup);
@@ -68,7 +68,7 @@
 		}
 		
 		
-		### GETTING ACTUAL DATA ###
+		// GETTING ACTUAL DATA //
 				
 				$query = "SELECT script_id, script_name, active, user_group FROM vicidial_scripts $ul ORDER BY script_id ASC;";
 				$rsltv = mysqli_query($link, $query);

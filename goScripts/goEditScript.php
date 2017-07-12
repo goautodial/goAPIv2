@@ -1,16 +1,16 @@
 <?php
-   ####################################################
-   #### Name: goEditScript.php                 		####
-   #### Description: API to edit specific Script	####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jeremiah Sebastian V. Samatra  ####
-   #### License: AGPLv2                            ####
-   ####################################################
+   ///////////////////////////////////////////////////
+   /// Name: goEditScript.php 	///
+   /// Description: API to edit specific Script 	///
+   /// Version: 0.9 	///
+   /// Copyright: GOAutoDial Ltd. (c) 2011-2015 	///
+   /// Written by: Jeremiah Sebastian V. Samatra 	///
+   /// License: AGPLv2 	///
+   //////////////////////////////////////////////////
     
     include_once ("../goFunctions.php");
  
-    ### POST or GET Variables
+    // POST or GET Variables
         $script_id = mysqli_real_escape_string($link, $_REQUEST['script_id']);
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
@@ -23,17 +23,17 @@
         $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
         $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
-    ### Default values
+    // Default values
     $defActive = array("Y","N");
 
-    ### ERROR CHECKING ...
+    // ERROR CHECKING ...
         if($script_id == null) {
                 $apiresults = array("result" => "Error: Please try again.");
         } else {
 				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',$script_name) && $script_name != null){
 						$apiresults = array("result" => "Error: Special characters found in script name");
 				} else {
-						### Check value compare to default values
+						// Check value compare to default values
 						if(!in_array($active,$defActive) && $active != null) {
 								$apiresults = array("result" => "Error: Default value for active is Y or N only.");
 						} else {
@@ -83,7 +83,7 @@
 									} else {
 										$apiresults = array("result" => "success");
 						
-						### Admin logs
+						// Admin logs
 										//$SQLdate = date("Y-m-d H:i:s");
 										//
 										//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','Modified Voicemail box: $voicemail_id','UPDATE `vicidial_scripts` SET script_id = $script_id,  script_name = $script_name,  script_comments = $script_comments,  active = $active,  script_text =$script_text WHERE script_id = $script_id');";
