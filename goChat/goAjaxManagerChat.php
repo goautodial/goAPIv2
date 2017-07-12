@@ -12,10 +12,12 @@ if (isset($_GET['old'])) { $old = $goDB->escape($_GET['old']); }
     else if (isset($_POST['old'])) { $old = $goDB->escape($_POST['old']); }
 if (isset($_GET['managers'])) { $managers = $goDB->escape($_GET['managers']); }
     else if (isset($_POST['managers'])) { $managers = $goDB->escape($_POST['managers']); }
+if (isset($_GET['type'])) { $type = $goDB->escape($_GET['type']); }
+    else if (isset($_POST['type'])) { $type = $goDB->escape($_POST['type']); }
 
-
+var_dump($type);
 // Gets new messages
-if (isset($goAction) && $goAction == 'getNewMessages') {
+if (isset($type) && $type == 'getNewMessages') {
     $agent = $goUser;
     //$stmt = "SELECT * FROM vicidial_users where user='$agent'";
 	$goDB->where('user', $agent);
@@ -37,11 +39,10 @@ if (isset($goAction) && $goAction == 'getNewMessages') {
 	$goDB->where('seen', 0);
     $goDB->update('manager_chat', array('seen' => 1));
 	
-    echo json_encode($messages);
+    $APIResult = array( "result" => "success", "code" => 200, "data" => $messages );
 }
-
 // Gets old messages
-if(isset($goAction) && $goAction == 'getOldMessages') {
+else if(isset($type) && $type == 'getOldMessages') {
     $agent = $goUser;
     //$stmt = "SELECT * FROM vicidial_users where user='$agent'";
     $goDB->where('user', $agent);
@@ -70,6 +71,6 @@ if(isset($goAction) && $goAction == 'getOldMessages') {
         $messages[] = $row;
     }
 
-    echo json_encode($messages);
+    $APIResult = array( "result" => "success", "code" => 200, "data" => $messages );
 }
 ?>
