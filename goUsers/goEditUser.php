@@ -1,16 +1,16 @@
 <?php
-   ####################################################
-   #### Name: goEditUser.php	                   ####
-   #### Description: API to edit specific user     ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jeremiah Sebastian V. Samatra  ####
-   #### License: AGPLv2                            ####
-   ####################################################
+   ///////////////////////////////////////////////////////
+   /// Name: goEditUser.php 		///
+   /// Description: API to edit specific user 		///
+   /// Version: 0.9 		///
+   /// Copyright: GOAutoDial Ltd. (c) 2011-2015 		///
+   /// Written by: Jeremiah Sebastian V. Samatra 		///
+   /// License: AGPLv2 		///
+   ///////////////////////////////////////////////////////
     
     include_once ("../goFunctions.php");
 
-    ### Check file is existed
+    // Check file is existed
     if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
         $conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
     } elseif (file_exists("/etc/goautodial.conf")) {
@@ -19,7 +19,7 @@
         $apiresults = array("result" => "Error: File goautodial.conf not found.");
     }
  
-    ### POST or GET Variables		
+    // POST or GET Variables		
     $userid = mysqli_real_escape_string($link, $_REQUEST['user_id']);
     $user = mysqli_real_escape_string($link, $_REQUEST['user']);
     $pass = mysqli_real_escape_string($link, $_REQUEST['pass']);
@@ -45,56 +45,74 @@
     $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
     $agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
     $avatar = $_REQUEST['avatar'];
-                    
+    
     $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
     $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-		
-    ### Default Values
+	
+    // Default Values
     $defActive = array("Y","N");
     $defmodify_same_user_level = array("Y","N");	
 
-    ### Error Checking
-    if($user == null && $userid == null) {
-        $apiresults = array("result" => "Error: Set a value for User ID.");
+    // Error Checking
+    if(empty($user) && empty($userid)) {
+		$err_msg = error_handle("40002");
+		$apiresults = array("code" => "40002", "result" => $err_msg);
+        //$apiresults = array("result" => "Error: Set a value for User ID.");
     } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $user)){
-            $apiresults = array("result" => "Error: Special characters found in user");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $user) || preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $userid)){
+			$err_msg = error_handle("41006", "user_id or user");
+			$apiresults = array("code" => "41006", "result" => $err_msg);
+            //$apiresults = array("result" => "Error: Special characters found in user");
         } else {
 			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass)){
-				$apiresults = array("result" => "Error: Special characters found in password");
+				$err_msg = error_handle("41006", "pass");
+				$apiresults = array("code" => "41006", "result" => $err_msg);
+				//$apiresults = array("result" => "Error: Special characters found in password");
 			} else {
 				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $full_name)){
-					$apiresults = array("result" => "Error: Special characters found in full_name");
+					$err_msg = error_handle("41006", "full_name");
+					$apiresults = array("code" => "41006", "result" => $err_msg);
+					//$apiresults = array("result" => "Error: Special characters found in full_name");
 				} else {
 					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $phone_login)){
-						$apiresults = array("result" => "Error: Special characters found in phone_login");
+						$err_msg = error_handle("41002", "phone_login");
+						$apiresults = array("code" => "41002", "result" => $err_msg);
+						//$apiresults = array("result" => "Error: Special characters found in phone_login");
 					} else {
 						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $phone_pass)){
-							$apiresults = array("result" => "Error: Special characters found in phone_pass");
+							$err_msg = error_handle("41004", "phone_pass");
+							$apiresults = array("code" => "41004", "result" => $err_msg);
+							//$apiresults = array("result" => "Error: Special characters found in phone_pass");
 						} else {
 							if(!in_array($active,$defActive) && $active != null) {
-								$apiresults = array("result" => "Error: Default value for active is Y or N only.");
+								$err_msg = error_handle("41006", "active");
+								$apiresults = array("code" => "41006", "result" => $err_msg);
+								//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
 							} else {
-
 								if(!in_array($modify_same_user_level,$defmodify_same_user_level) && $modify_same_user_level != null) {
-									$apiresults = array("result" => "Error: Default value for modify_same_user_level is Y or N only.");
+									$err_msg = error_handle("41006", "modify_same_user_level");
+									$apiresults = array("code" => "41006", "result" => $err_msg);
+									//$apiresults = array("result" => "Error: Default value for modify_same_user_level is Y or N only.");
 								} else {
-		
 									if($user_level < 1 && $user_level!=null || $user_level > 9 && $user_level!= null) {
-										$apiresults = array("result" => "Error: User Level Value should be in between 1 and 9");
+										$err_msg = error_handle("41002", "user_level");
+										$apiresults = array("code" => "41002", "result" => $err_msg);
+										//$apiresults = array("result" => "Error: User Level Value should be in between 1 and 9");
 									} else {
-
 										if($VARSERVTYPE == "gofree" && $hotkeys_active != null) {
-											$apiresults = array("result" => "Error: hotkeys is disabled");
+											$err_msg = error_handle("10004", "hotkeys_active. Hotkeys is disabled");
+											$apiresults = array("code" => "10004", "result" => $err_msg);
+											//$apiresults = array("result" => "Error: hotkeys is disabled");
 										} else {
-				
-											$group_ug = go_get_groupid($goUser);
-											if($group_ug !== "ADMIN" && $modify_same_user_level != null) {
-												$apiresults = array("result" => "Error: modify_same_user_level is disabled");
-											} else {
-
-												$groupId = go_get_groupid($goUser);
-
+											if($modify_same_user_level != null) {
+												$err_msg = error_handle("10004", "modify_same_user_level. modify_same_user_level is disabled");
+												$apiresults = array("code" => "10004", "result" => $err_msg);
+												//$apiresults = array("result" => "Error: modify_same_user_level is disabled");
+											} elseif(empty($session_user)) {
+												$err_msg = error_handle("40002");
+												$apiresults = array("code" => "40002", "result" => $err_msg);
+											}else{
+												$groupId = go_get_groupid($session_user);
 												if (!checkIfTenant($groupId)) {
 													$ul = "WHERE user_group='$user_group'";
 													
@@ -103,7 +121,6 @@
 													}else{
 														$ulUser = "AND user='$user'";
 													}
-						
 												} else {
 													$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
 													
@@ -113,21 +130,15 @@
 														$ulUser = "AND user='$user' AND user_group='$groupId'";
 													}
 												}
-				
+												
 												if($voicemail != null){
 													$voicemail_query = ", `voicemail_id` = '$voicemail'";
 												}else{
 													$voicemail_query = "";
 												}
-				
-												#### Check User Group if valid
-												if($user_group != null){
-													$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
-													$rsltv = mysqli_query($link, $query);
-													$countResult = mysqli_num_rows($rsltv);
-												}
+												
 												$queryUserCheck = "
-																SELECT user, full_name, user_level, user_group, active 
+																SELECT * 
 																FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') 
 																AND user_level != '4' $ulUser 
 																ORDER BY user 
@@ -139,44 +150,85 @@
 										
 												if($countCheckResult > 0) {
 													while($fresults = mysqli_fetch_array($rsltvCheck, MYSQLI_ASSOC)){
-														$dataUserLevel = $fresults['user_level'];
-														$dataUserGroup = $fresults['user_group'];
 														$dataUser = $fresults['user'];
-														//$dataFullname = $fresults['full_name'];
-														//$dataActive = $fresults['active'];
+														$data_phone_login = $fresults['phone_login'];
+														$dataUserLevel = $fresults['user_level'];
+														$dataFullname = $fresults['full_name'];
+														$dataUserGroup = $fresults['user_group'];
+														$dataActive = $fresults['active'];
+														$dataEmail = $fresults['email'];
+														$dataHotkeys = $fresults['hotkeys_active'];
+														$data_modify_same_user_level = $fresults['modify_same_user_level'];
+														$dataVoicemail = $fresults['voicemail'];
+														$data_vdc_agent_api_access = $fresults['vdc_agent_api_access'];
+														$data_agent_choose_ingroups = $fresults['agent_choose_ingroups'];
+														$data_vicidial_recording_override = $fresults['vicidial_recording_override'];
+														$data_vicidial_transfers = $fresults['vicidial_transfers'];
+														$data_closer_default_blended = $fresults['closer_default_blended'];
+														$data_agentcall_manual = $fresults['agentcall_manual'];
+														$data_scheduled_callbacks = $fresults['scheduled_callbacks'];
+														$data_agentonly_callbacks = $fresults['agentonly_callbacks'];
+														$data_agent_lead_search_override = $fresults['agent_lead_search_override'];
 													}
 													
+													if(empty($phone_login))
+														$phone_login = $data_phone_login;
+													if(empty($user_level))
+														$user_level = $dataUserLevel;
+													if(empty($full_name))
+														$full_name = $dataFullname;
+													if(empty($user_group))
+														$user_group = $dataUserGroup;
+													if(empty($active))
+														$active = $dataActive;
+													if(empty($email))
+														$email = $dataEmail;
+													if(empty($hotkeys_active))
+														$hotkeys_active = $dataHotkeys;
+													if(empty($modify_same_user_level))
+														$modify_same_user_level = $data_modify_same_user_level;
+													if(empty($voicemail))
+														$voicemail = $dataVoicemail;
+													if(empty($vdc_agent_api_access))
+														$vdc_agent_api_access = $data_vdc_agent_api_access;
+													if(empty($agent_choose_ingroups))
+														$agent_choose_ingroups = $data_agent_choose_ingroups;
+													if(empty($vicidial_recording_override))
+														$vicidial_recording_override = $data_vicidial_recording_override;
+													if(empty($vicidial_transfers))
+														$vicidial_transfers = $data_vicidial_transfers;
+													if(empty($closer_default_blended))
+														$closer_default_blended = $data_closer_default_blended;
+													if(empty($agentcall_manual))
+														$agentcall_manual = $data_agentcall_manual;
+													if(empty($scheduled_callbacks))
+														$scheduled_callbacks = $data_scheduled_callbacks;
+													if(empty($agentonly_callbacks))
+														$agentonly_callbacks = $data_agentonly_callbacks;
+													if(empty($agent_lead_search_override))
+														$agent_lead_search_override = $data_agent_lead_search_override;
+														
 													if( $modify_same_user_level == "Y") {
 														$modify_same_user_level = 0;
 													} else {
 														$modify_same_user_level = 1;
 													}
-											
-								
-														   /*     $items = $values;
-																foreach (explode("&",$items) as $item)
-																{
-																		list($var,$val) = explode("=",$item,2);
-																		if (strlen($val) > 0)
-																		{
-								
-																				if ($var!="user")
-																						$itemSQL .= "$var='".str_replace('+',' ',mysqli_real_escape_string($val))."', ";
-								
-																				if ($var=="user")
-																						$user="$val";
-								
-																		}
-																}
-																$itemSQL = rtrim($itemSQL,', ');
-												*/
+													
+													//# Check User Group if valid
+													if($user_group != null){
+														$query = "SELECT user_group FROM vicidial_user_groups WHERE user_group = '$user_group' ORDER BY user_group LIMIT 1;";
+														$rsltv = mysqli_query($link, $query);
+														$countResult = mysqli_num_rows($rsltv);
+													}else{
+														$err_msg = error_handle("41004", "user_group. Doesn't exist");
+														$apiresults = array("code" => "41004", "result" => $err_msg);
+													}
+													
 													if($countResult <= 0 && $user_group!=null) {
-														$apiresults = array("result" => "Error: User Group doesn't exist");
+														$err_msg = error_handle("41004", "user_group. Doesn't exist");
+														$apiresults = array("code" => "41004", "result" => $err_msg);
 													} else {
-														//  $query = "UPDATE vicidial_users SET $itemSQL WHERE user='$user';";
-														//  $resultQuery = mysqli_query($link, $query);
-										
-														## Password Encryption
+														// Password Encryption
 														$cwd = $_SERVER['DOCUMENT_ROOT'];
 														$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
 														$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
@@ -204,17 +256,10 @@
 																$kamPassQuery = "SET `password` = '$pass', `ha1` = '', `ha1b` = ''";
 															}
 																
-															$queryUpdatePhones = "UPDATE `phones`
-																					SET `conf_secret` = '$pass',
-																					$phonePassQuery
-																					WHERE `extension` = '$phone_login'";
-															
+															$queryUpdatePhones = "UPDATE `phones` SET `conf_secret` = '$pass', $phonePassQuery WHERE `extension` = '$phone_login'";
 															$resultQueryUser = mysqli_query($link, $queryUpdatePhones);
 															
-															$kamailioq = "UPDATE `subscriber` 
-																			$kamPassQuery
-																			WHERE `username` = '$phone_login'";
-															
+															$kamailioq = "UPDATE `subscriber` $kamPassQuery WHERE `username` = '$phone_login'";
 															$resultkam = mysqli_query($linkgokam, $kamailioq);
 														}else{
 															$pass_query = "";
@@ -227,7 +272,7 @@
 														}
 								
 														if($userid != NULL){
-															$queryUpdateUser = "UPDATE `vicidial_users` 
+															$queryUpdateUser = "UPDATE `vicidial_users`
 																				SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
 																					`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
 																					`agent_choose_ingroups` = '$agent_choose_ingroups', `vicidial_recording_override` = '$vicidial_recording_override', 
@@ -236,11 +281,8 @@
 																					`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
 																				WHERE `user_id` = '$userid'";
 															
-															$queryUserIDGo = "SELECT userid 
-																				FROM users 
-																				WHERE userid='$userid'";
-															
-															$resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
+															$queryUserIDGo = "SELECT userid FROM users WHERE userid='$userid'";
+															$resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo) or die(mysqli_error($linkgo));
 															$rUserIDGo = mysqli_fetch_array($resultQueryUserIDGo, MYSQLI_ASSOC);
 															$countResultGo = mysqli_num_rows($resultQueryUserIDGo);
 															//$userIDGo = $rUserIDGo['userid'];
@@ -249,7 +291,7 @@
 																$goactive = "0";
 															} else {
 																$goactive = "1";
-															}                                                
+															}
 															
 															if ($countResultGo > 0){
 																$queryUpdateUserGo = "UPDATE users 
@@ -277,7 +319,7 @@
 																				WHERE `user` = '$user'";
 															
 															$queryUserIDGo = "SELECT name from users WHERE name='$user'";
-															$resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo);
+															$resultQueryUserIDGo = mysqli_query($linkgo, $queryUserIDGo) or die(mysqli_error($linkgo));
 															$rUserIDGo = mysqli_fetch_array($resultQueryUserIDGo, MYSQLI_ASSOC);
 															$countResultGo = mysqli_num_rows($resultQueryUserIDGo);
 															//$userGo = $rUserIDGo['user'];
@@ -286,7 +328,7 @@
 																$goactive = "0";
 															} else {
 																$goactive = "1";
-															}                                                
+															}
 															
 															if ($countResultGo > 0){
 																$queryUpdateUserGo = "UPDATE users 
@@ -298,51 +340,39 @@
 																							`user_group` = '$user_group',
 																							`role` = '$user_level',
 																							`status` = '$goactive'
-																						WHERE userid = '$userid'";                                                    
+																						WHERE userid = '$user'";
 															} else {
 																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
 																					VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive')";
-																
 															}
 														}
 														
-														$resultQueryUser = mysqli_query($link, $queryUpdateUser);
-														$resultQueryUserGo = mysqli_query($linkgo, $queryUpdateUserGo);
-						
-												/*	
-												$queryPhoneUpdate = "UPDATE `phones` SET `pass` = '$pass',  `conf_secret` = '$pass' WHERE `login` = '$phone_login'";
-										
-														$resultQueryPhoneUpdate = mysqli_query($link, $queryPhoneUpdate);
-												*/
-										
+														$resultQueryUser = mysqli_query($link, $queryUpdateUser) or die(mysqli_error($link));
+														$resultQueryUserGo = mysqli_query($linkgo, $queryUpdateUserGo) or die(mysqli_error($linkgo));
+														
 														$queryJSIUpdate = "UPDATE justgovoip_sippy_info SET web_password='$phone_pass' where carrier_id='$user_group'";
-										
-														$resultQueryJSIUpdate = mysqli_query($link, $queryJSIUpdate);
-		
-		
-			### Admin logs
-		//                                        $SQLdate = date("Y-m-d H:i:s");
-		//                                        $queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','MODIFY','MODIFY User $user','UPDATE vicidial_users SET user=$user,pass=$pass,full_name=$full_name,phone_login=$phone_login,phone_pass=$phone_pass,user_group=$user_group,active=$active,hotkeys_active=
-		//										,user_level=$user_level,modify_same_user_level=$modify_same_user_level');";
-		//                                        $rsltvLog = mysqli_query($link, $queryLog);
+														$resultQueryJSIUpdate = mysqli_query($link, $queryJSIUpdate) or die(mysqli_error($link));
+														
 														if ($userid != NULL) {
-															$result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$userid';");
+															$result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$userid';") or die(mysqli_error($link));
 															$userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
 															$user = $userInfo['user'];
 														}
 														
 														$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified User: $user", $log_group, $queryUpdateUser);
-		
-		
+														
 														if($resultQueryUser == false) {
-															$apiresults = array("result" => $queryUpdateUser);
-														} else {	
+															$err_msg = error_handle("10010");
+															$apiresults = array("code" => "10010", "result" => $err_msg);
+														} else {
 															$apiresults = array("result" => "success");
 														}
 													}
 												} else {
-													$apiresults = array("result" => "Error: User doesn't exist.", "USER->" => $userid);
+													$err_msg = error_handle("41004", "user or user_id. Doesn't exist");
+													$apiresults = array("code" => "41004", "result" => $err_msg);
 												}
+											
 											}
 										}
 									}

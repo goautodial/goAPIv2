@@ -16,23 +16,24 @@
     $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
     ### Check campaign_id if its null or empty
-	if($campaign_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
+	if(empty($campaign_id) || empty($session_user)) {
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg); 
 	} else {
- 
-    		$groupId = go_get_groupid($goUser);
-    
+		
+		$groupId = go_get_groupid($session_user);
+		
 		if (!checkIfTenant($groupId)) {
-        		$ul = "WHERE campaign_id='$campaign_id'";
-    		} else { 
+			$ul = "WHERE campaign_id='$campaign_id'";
+		} else { 
 			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";  
 		}
-
-   		//$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1;";
+		
+		//$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1;";
 		$query = "SELECT * FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1;";
-   		$rsltv = mysqli_query($link, $query);
+		$rsltv = mysqli_query($link, $query);
 		$countResult = mysqli_num_rows($rsltv);
-
+		
 		if($countResult > 0) {
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
@@ -77,8 +78,10 @@
 			}
 			
 			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
+			
 		} else {
-			$apiresults = array("result" => "Error: Campaign doesn't exist.", "COUNT:" => $countResult);
+			$err_msg = error_handle("41004", "campaign_id");
+			$apiresults = array("code" => "41004", "result" => $err_msg);
 		}
 	}//end
 ?>

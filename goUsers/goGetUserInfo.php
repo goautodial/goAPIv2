@@ -1,16 +1,16 @@
 <?php
-    #######################################################
-    #### Name: goGetUserInfo.php	               ####
-    #### Description: API to get specific user	       ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
-    #### Written by: Jeremiah Sebastian Samatra        ####
-    ####             Demian Lizandro Biscocho          ####
-    #### License: AGPLv2                               ####
-    #######################################################
+    ////////////////////////////////////#
+    //# Name: goGetUserInfo.php	       //#
+    //# Description: API to get specific user	       //#
+    //# Version: 0.9                                  //#
+    //# Copyright: GOAutoDial Inc. (c) 2011-2014      //#
+    //# Written by: Jeremiah Sebastian Samatra        //#
+    //#             Demian Lizandro Biscocho          //#
+    //# License: AGPLv2                               //#
+    ////////////////////////////////////#
     include_once("../goFunctions.php");
 
-    ### POST or GET Variables
+    // POST or GET Variables
     $user_id = $_REQUEST['user_id'];
     $user = $_REQUEST['user'];
     $filter = "default";
@@ -22,34 +22,33 @@
     $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
     $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
         
-    
-    ### Check user_id if its null or empty
-    if($user_id == null && $user == null) { 
-    
-        $apiresults = array("result" => "Error: Set a value for User ID."); 
-        
+    // Check user_id if its null or empty
+    if($user_id == null && $user == null) {
+		$err_msg = error_handle("40001");
+        $apiresults = array("code" => "40001","result" => $err_msg);
     } else {
-            $groupId = go_get_groupid($goUser);
-                        
+            
+			$groupId = go_get_groupid($goUser);
+            
         if (!checkIfTenant($groupId)) {
             if($user_id != NULL){
-                    $ul = "vicidial_users.user_id='$user_id'";
-                    $vul = "and vu.user_id='$user_id'";               
+                $ul = "vicidial_users.user_id='$user_id'";
+                $vul = "and vu.user_id='$user_id'";               
             }else if($user != NULL){
-                    $ul = "vicidial_users.user='$user'";
+                $ul = "vicidial_users.user='$user'";
             }
         } else {
             if($user_id != NULL){
-                    $ul = "vicidial_users.user_id='$user_id' AND vicidial_users.user_group='$groupId'";
+                $ul = "vicidial_users.user_id='$user_id' AND vicidial_users.user_group='$groupId'";
             }else if($user != NULL){
-                    $ul = "vicidial_users.user='$user' AND vicidial_users.user_group='$groupId'";   
+                $ul = "vicidial_users.user='$user' AND vicidial_users.user_group='$groupId'";   
             }
         }
         
         if($user_id != NULL){
-                $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
+            $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
         }else if($user != NULL){
-                $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
+            $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
         }
         
         $NOW = date("Y-m-d");
@@ -57,7 +56,7 @@
         $status = "SALE";
         $date = "BETWEEN '$query_date 00:00:00' AND '$query_date 23:59:59'";
         
-        ### GLOBAL (array, single line)
+        // GLOBAL (array, single line)
         $query_GetUserInfo = "
                             SELECT user_id, user, full_name, email, user_group, active, user_level, 
                             phone_login, phone_pass, voicemail_id, hotkeys_active, vdc_agent_api_access, 
@@ -68,9 +67,15 @@
                             ";
                             
         $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
-        $fresults = mysqli_fetch_array($rsltvGetUserInfo, MYSQLI_ASSOC);         
-        
-        ### DASHBOARD (array, multi-lines)
+        $fresults = mysqli_fetch_array($rsltvGetUserInfo, MYSQLI_ASSOC);
+        $num_users = mysqli_num_rows($rsltvGetUserInfo);   
+		
+		if($num_users < 1){
+			$err_msg = error_handle("41004", "user. Doesn't exist!");
+			$apiresults = array("code" => "40001","result" => $err_msg);
+		}
+		
+        // DASHBOARD (array, multi-lines)
         $query_OnlineAgents = "
                                 SELECT count(*) as 'OnlineAgents' 
                                 FROM vicidial_live_agents 
@@ -79,7 +84,7 @@
         $rsltvOnlineAgents = mysqli_query($link,$query_OnlineAgents);
         $countResultOnlineAgents = mysqli_num_rows($rsltvOnlineAgents);                
         
-        ### USER PROFILE (non-array)
+        // USER PROFILE (non-array)
         //count only calls with length_in_sec > 0
         $query_InboundCallsTodayAgent = "
                                         SELECT count(vcl.lead_id) as incallstoday 
@@ -282,7 +287,7 @@
             
             $apiresults = array("result" => "success", "data" => $data, "parked" => $dataParkedChannels, "callerids" => $dataCallerIDsFromVAC, "dataGo" => $fresultsUserInfoGo);
             
-        } 
+        }
     }
   
 

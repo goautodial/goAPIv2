@@ -73,6 +73,9 @@
 		}
 		
 		$apiresults = array("result" => "success","list_id" => $dataListId,"list_name" => $dataListName,"active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate,"tally" => $dataTally,"cf_count" => $dataCFCount,"campaign_id" => $dataCampaignId, "next_listID" => $next_list, "campaign_name" => $dataCampaignName);
+	}else{
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
 	}
 	
 	

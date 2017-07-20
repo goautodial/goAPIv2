@@ -36,13 +36,17 @@
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
     if ( (strlen($field_label)<1) or (strlen($field_name)<2) or (strlen($field_size)<1) ) {
-        $apiresults = array("result" => "ERROR: You must enter a field label, field name and field size  - ".$list_id." | ".$field_label." | ".$field_name." | ".$field_size);
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
+        //$apiresults = array("result" => "ERROR: You must enter a field label, field name and field size  - ".$list_id." | ".$field_label." | ".$field_name." | ".$field_size);
     }else{
         
         $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_id' and field_label='$field_label';";
         $counterresult = mysqli_query($link, $counterquery);
-
+		
         if(!$counterresult){
+			$err_msg = error_handle("41004", "");
+		$apiresults = array("code" => "41004", "result" => $err_msg);
             $apiresults = array("result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label);
         }else{
             $tableName = "custom_".$list_id;
@@ -151,23 +155,7 @@
             //$stmtCUSTOM="$field_sql";
             //$rslt = mysqli_query($link, $stmtCUSTOM);
             
-            $insert = "INSERT INTO vicidial_lists_fields
-                        set field_label='$field_label',
-                            field_name='$field_name',
-                            field_description='$field_description',
-                            field_rank='$field_rank',
-                            field_help='$field_help',
-                            field_type='$field_type',
-                            field_options='$field_options',
-                            field_size='$field_size',
-                            field_max='$field_max',
-                            field_default='$field_default',
-                            field_required='$field_required',
-                            field_cost='$field_cost',
-                            list_id='$list_id',
-                            multi_position='$multi_position',
-                            name_position='$name_position',
-                            field_order='$field_order';";
+            $insert = "INSERT INTO vicidial_lists_fields set field_label='$field_label', field_name='$field_name', field_description='$field_description', field_rank='$field_rank', field_help='$field_help', field_type='$field_type', field_options='$field_options', field_size='$field_size', field_max='$field_max', field_default='$field_default', field_required='$field_required', field_cost='$field_cost', list_id='$list_id', multi_position='$multi_position', name_position='$name_position', field_order='$field_order';";
             $insertrslt = mysqli_query($link, $insert);
             $countResultInsert = mysqli_num_rows($insertrslt);
 
@@ -179,9 +167,9 @@
                 //$rsltvLog = mysqli_query($linkgo, $queryLog);
                 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insert);
                
-                $apiresults = array("result" => "success", "gg" => $stmtCUSTOM);
+                $apiresults = array("result" => "success");
             }else{
-                $apiresults = array("result" => "Error: Failed to add custom field.");
+                $apiresults = array("result" => "Error: Failed to add custom field.", "query" => $insert);
             }
         }
     }

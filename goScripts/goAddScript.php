@@ -1,16 +1,17 @@
 <?php
-   //////////////////////////////////////////////////
-   /// Name: goAddScript.php                      ///
-   /// Description: API to add Script	           ///
-   /// Version: 0.9                               ///
-   /// Copyright: GOAutoDial Ltd. (c) 2011-2015   ///
-   /// Written by: Jeremiah Sebastian V. Samatra  ///
-   /// License: AGPLv2                            ///
-   //////////////////////////////////////////////////
+   ####################################################
+   #### Name: goAddScript.php                      ####
+   #### Description: API to add Script	           ####
+   #### Version: 0.9                               ####
+   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
+   #### Written by: Jeremiah Sebastian V. Samatra  ####
+   #### License: AGPLv2                            ####
+   ####################################################
     
     include_once("../goFunctions.php");
  
-    // POST or GET Variables
+    ### POST or GET Variables
+    	$script_type = mysqli_real_escape_string($link, $_REQUEST['script_type']);
         $script_id = mysqli_real_escape_string($link, $_REQUEST['script_id']);
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
@@ -25,10 +26,10 @@
 		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
-    // Default values 
+    ### Default values 
     $defActive = array("Y","N");
 
-    // ERROR CHECKING 
+    ### ERROR CHECKING 
         if($script_id == null) {
                 $apiresults = array("result" => "Error: Set a value for Script ID not less than 3 characters.");
         } else {
@@ -62,8 +63,12 @@
 								//}else {
 								//		$user_group = $groupId;
 								//}
-												
-									$newQuery = "INSERT INTO vicidial_scripts(script_id, script_comments, script_name, active, user_group, script_text) VALUES('$script_id', '$script_comments', '$script_name', '$active', '$user_group', '$script_text');";
+								if($script_type == "default"){
+									$subscript = 0;
+								}else{
+									$subscript = 1;
+								}				
+									$newQuery = "INSERT INTO vicidial_scripts(script_id, script_comments, script_name, active, user_group, script_text, subscript) VALUES('$script_id', '$script_comments', '$script_name', '$active', '$user_group', '$script_text', '$subscript');";
 									$rsltv = mysqli_query($link, $newQuery);
 						
 								//$apiresults = array("usergroup" => $user_group, "query" => $newQuery);
@@ -78,7 +83,7 @@
 								/*
 								$newQueryTwo = "UPDATE vicidial_campaigns SET campaign_script = '$script_id' WHERE campaign_id = '$campaign_id';";
 								$rsltvTwo = mysqli_query($link, $newQueryTwo);
-				// Admin logs
+				### Admin logs
 													$SQLdate = date("Y-m-d H:i:s");
 													$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Script $script_id','UPDATE vicidial_campaigns SET campaign_script = $script_id WHERE campaign_id = $campaign_id');";
 													$rsltvLog = mysqli_query($linkgo, $queryLog);

@@ -1,28 +1,29 @@
 <?php
-    #######################################################
-    #### Name: goDeleteCampaign.php	               ####
-    #### Description: API to delete specific campaign  ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
-    #### Written by: Jerico James Milo                 ####
-    #### License: AGPLv2                               ####
-    #######################################################
+    ////////////////////////////////////#
+    //# Name: goDeleteCampaign.php	               //#
+    //# Description: API to delete specific campaign  //#
+    //# Version: 0.9                                  //#
+    //# Copyright: GOAutoDial Inc. (c) 2011-2014      //#
+    //# Written by: Jerico James Milo                 //#
+    //# License: AGPLv2                               //#
+    ////////////////////////////////////#
     include_once("../goFunctions.php");
     
-    ### POST or GET Variables
+    // POST or GET Variables
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
 	$action = strtolower(mysqli_real_escape_string($link, $_REQUEST['action']));
     $goUser = $_REQUEST['goUser'];
     $ip_address = $_REQUEST['hostname'];
 	$log_user = $_REQUEST['log_user'];
 	$log_group = $_REQUEST['log_group'];
-    
-    ### Check campaign_id if its null or empty
-	if($campaign_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
+	
+    // Check campaign_id if its null or empty
+	if(empty($campaign_id) || empty($session_user)) {
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg); 
+		//$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
 		
-		//$groupId = go_get_groupid($goUser);
 		$groupId = go_get_groupid($session_user);
 		if (!checkIfTenant($groupId)) {
 			$ul = "WHERE campaign_id='$campaign_id'";
@@ -30,7 +31,7 @@
 			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";  
 		}
 		
-		if($action == strtolower("delete_selected")){
+		if(!empty($action) && $action == strtolower("delete_selected")){
 			$exploded = explode(",",$campaign_id);
 			$error_count = 0;
 			for($i=0;$i < count($exploded);$i++){
@@ -54,7 +55,9 @@
 			}
 				
 			if($error_count > 0) {
-				$apiresults = array("result" => "Error: Delete Failed");
+				$err_msg = error_handle("10010");
+				$apiresults = array("code" => "10010", "result" => $err_msg); 
+				//$apiresults = array("result" => "Error: Delete Failed");
 			} else {
 				$apiresults = array("result" => "success"); 
 			}
@@ -66,14 +69,17 @@
 			if($first_check > 0) {
 				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='$campaign_id';"; 
 				$deleteResult = mysqli_query($link, $deleteQuery);
-				//echo $deleteQuery;
 				
-		### Admin logs
+				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$campaign_id."';"; 
+				$deleteResult2 = mysqli_query($link, $deleteDispo);
+				
 				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
 				
 				$apiresults = array("result" => "success");
 			} else {
-				$apiresults = array("result" => "Error: Campaign doesn't exist.");
+				$err_msg = error_handle("41004", "campaign. Doesn't exist");
+				$apiresults = array("code" => "41004", "result" => $err_msg); 
+				//$apiresults = array("result" => "Error: Campaign doesn't exist.");
 			}
 		}
 		

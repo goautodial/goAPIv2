@@ -1502,145 +1502,145 @@
 	}
 	
 	// API Response Codes
-	function error_handle($code, $param){
+	function error_handle($code, $param = NULL){
 		$err_msg = "";
 			
 		switch($code){
 			case "10001";
 				$err_msg = "Error: You do not have permission to view this page.";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10003";
-				$err_msg = "Error: Mismatch of given parameteres and accepted parameters";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				$err_msg = "Error: Mismatch of given parameters and accepted parameters";
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10004";
-				$err_msg = "Error: No such resouce or access is restricted.";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				$err_msg = "Error: No such resource or access is restricted.";
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10005";
 				$err_msg = "Error: No such method for the choosen resouce";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10006";
 				$err_msg = "Error: Missing parameters";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10007";
 				$err_msg = "Error: Can't connect to database";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10008";
 				$err_msg = "Error: File upload failed! Possible mismatch file type!";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10009";
 				$err_msg = "Error: Method not allowed";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10010";
 				$err_msg = "Error: SQL Query error or not allowed query	";
-				if(!isnull($param))
-				$err_msg .= " in".$param;
+				if(!empty($param))
+				$err_msg .= " in ".$param;
 			break;
 			case "10011";
 				$err_msg = "Error: The provided JSON string is not valid ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10107";
 				$err_msg = "Error: No list id provided ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10109";
 				$err_msg = "Error: Campaign definition with this ID already exists ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10110";
 				$err_msg = "Error: Campaign definition with this code already exists ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10111";
 				$err_msg = "Error: Campaign definition with this description already exists ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10112";
 				$err_msg = "Error: Location with this name already exists ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10113";
 				$err_msg = "Error: Agent username already in use ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10114";
 				$err_msg = "Error: Invalid location ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10115";
 				$err_msg = "Error: while updating the location ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "10116";
 				$err_msg = "Error: Phone already exists ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			
 			case "40001";
 				$err_msg = "Error: Missing required parameters ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "40002";
 				$err_msg = "Error: Missing required parameter needed for update ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41001";
 				$err_msg = "Required field ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41002";
 				$err_msg = "Invalid value. Interger expected ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41003";
-				$err_msg = "Invalid email. ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				$err_msg = "Invalid email ";
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41004";
-				$err_msg = "Invalid value. ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				$err_msg = "Invalid value ";
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41005";
 				$err_msg = "Mismatched parameter keys ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 			case "41006";
 				$err_msg = "Value does not match required criteria ";
-				if(!isnull($param))
-				$err_msg .= "in".$param;
+				if(!empty($param))
+				$err_msg .= "in ".$param;
 			break;
 		}
 		

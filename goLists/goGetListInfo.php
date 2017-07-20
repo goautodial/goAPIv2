@@ -1,22 +1,24 @@
 <?php
-    #######################################################
-    #### Name: goGetListInfo.php	               ####
-    #### Description: API to get specific List	       ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
-    #### Written by: Jermiah Sebastian Samatra         ####
-    #### License: AGPLv2                               ####
-    #######################################################
+    //////////////////////////////////////////////////////
+    /// Name: goGetListInfo.php 		///
+    /// Description: API to get specific List 		///
+    /// Version: 0.9 		///
+    /// Copyright: GOAutoDial Inc. (c) 2011-2014 		///
+    /// Written by: Jermiah Sebastian Samatra 		///
+    /// License: AGPLv2 		///
+    //////////////////////////////////////////////////////
     include_once("../goFunctions.php");
     
-    ### POST or GET Variables
+    // POST or GET Variables
     $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
-	if($list_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for List ID."); 
+	if($list_id == null) {
+		$err_msg = error_handle("10107");
+		$apiresults = array("code" => "10107", "result" => $err_msg);
+		//$apiresults = array("result" => "Error: Set a value for List ID."); 
 	} else {
  
     	$groupId = go_get_groupid($goUser);
@@ -91,7 +93,9 @@
 				"xferconf_e_number" => $dataxferconf_e_number
 			);
 		} else {
-			$apiresults = array("result" => "Error: List doesn't exist.");
+			$err_msg = error_handle("41004", "list_id. Doesn't exist.");
+			$apiresults = array("code" => "41004", "result" => $err_msg);
+			//$apiresults = array("result" => "Error: List doesn't exist.");
 		}
 	}
 ?>

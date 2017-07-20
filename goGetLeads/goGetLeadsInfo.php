@@ -15,11 +15,14 @@
     $groupId = go_get_groupid($session_user);
 	$log_group = $groupId;
 	
-    ### Check user_id if its null or empty
-    if($lead_id == null) {
-            $apiresults = array("result" => "Error: Set a value for Lead ID."); 
-    } else { 
-        
+	if($session_user == null){
+		$err_msg = error_handle("40001");
+        $apiresults = array("code" => "40001","result" => $err_msg); 
+	}elseif($lead_id == null) {
+		$err_msg = error_handle("40001");
+        $apiresults = array("code" => "40001","result" => $err_msg); 
+    } else {
+		
         if (checkIfTenant($groupId)) {
             $ul = "";
         } else {
@@ -28,11 +31,10 @@
 			else
             $ul = "AND user_group='$groupId'";  
         }
-
         if ($groupId != 'ADMIN') {
             $notAdminSQL = "AND user_group != 'ADMIN'";
         }
-
+		
         $query = "SELECT * FROM vicidial_list where lead_id='$lead_id'";
         $rsltv = mysqli_query($link, $query);
         $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
@@ -104,9 +106,10 @@
 			$record_array = array("start_time" => $record_start_time, "length_in_sec" => $record_length_in_sec, "recording_id" => $record_recording_id, "filename" => $record_filename, "location" => $record_location, "user" => $record_user);
 			
 			$apiresults = array("result" => "success", "data" => $data, "is_customer" => $is_customer, "calls" => $calls_array, "closerlog" => $closerlog_array, "agentlog" => $agentlog_array, "record" => $record_array);
-
+			
 		}else{
-			$apiresults = array("result" => "Error: Lead Does Not Exist");
+			$err_msg = error_handle("41004", "lead_id");
+			$apiresults = array("code" => "41004","result" => $err_msg);
 		}
 		$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the lead info of Lead ID: $lead_id", $log_group);
     }
