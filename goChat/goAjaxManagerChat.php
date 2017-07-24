@@ -1,4 +1,5 @@
 <?php
+/*
 ####################################################
 #### Name: goChatSave.php                       ####
 #### Type: API for Chat History                 ####
@@ -7,13 +8,16 @@
 #### Written by: Christopher P. Lomuntad        ####
 #### License: AGPLv2                            ####
 ####################################################
+*/
 
 if (isset($_GET['old'])) { $old = $goDB->escape($_GET['old']); }
     else if (isset($_POST['old'])) { $old = $goDB->escape($_POST['old']); }
-if (isset($_GET['managers'])) { $managers = $goDB->escape($_GET['managers']); }
-    else if (isset($_POST['managers'])) { $managers = $goDB->escape($_POST['managers']); }
+if (isset($_GET['recipients'])) { $recipients = $_GET['recipients']; }
+    else if (isset($_POST['recipients'])) { $recipients = $_POST['recipients']; }
 if (isset($_GET['type'])) { $type = $goDB->escape($_GET['type']); }
     else if (isset($_POST['type'])) { $type = $goDB->escape($_POST['type']); }
+if (isset($_GET['user'])) { $user = $goDB->escape($_GET['user']); }
+    else if (isset($_POST['user'])) { $user = $goDB->escape($_POST['user']); }
 if (isset($_GET['text'])) { $post = $_GET['text']; }
     else if (isset($_POST['text'])) { $post = $_POST['text']; }
 
@@ -21,40 +25,46 @@ if (isset($_GET['text'])) { $post = $_GET['text']; }
 if (isset($type) && $type == 'sendNewMessage') {
     $date = date("Y-m-d h:i:s");
 
-	$astDB->where('user', $goUser);
+	$astDB->where('user', $user);
 	$rslt = $astDB->getOne('vicidial_users');
     $userId = $rslt['user_id'];
     $fullName = $rslt['full_name'];
+	$userGroup = $rslt['user_group'];
 
     $session = uniqid();
-    foreach($managers as $manager) {
+    foreach($recipients as $to) {
         //$stmt = "INSERT INTO manager_chat SET `date`='$date',`from`='$userId',`to`='$manager', `text`='".$goDB->escape($post)."',`seen`=0, `session`='$session';";
 		$insertData = array(
 			'date' => $date,
 			'from' => $userId,
-			'to' => $manager,
+			'to' => $goDB->escape($to),
 			'text' => $goDB->escape($post),
 			'seen' => 0,
 			'session' => $session
 		);
         $goDB->insert('manager_chat', $insertData);
+		$errorLog = $goDB->getLastError();
     }
 
-	$APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => "<div class='agent-message'><b>Me ($fullName):</b> <div class='agent-message-text'>$post</div></div>" );
+	$thisClass = "agent-message";
+	if (preg_match("/^(MANAGERS|LOCATION_MANAGERS|ADMIN)$/", $userGroup)) {
+		$thisClass = "manager-message";
+	}
+	$APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => "<div class='$thisClass col-md-12'><b>Me ($fullName):</b> <div class='{$thisClass}-text'>$post</div></div>", "error" => $errorLog );
 }
 
 
 // Gets messages on page load
 if (isset($type) && $type == 'getMessages') {
-	$astDB->where('user', $goUser);
+	$astDB->where('user', $user);
 	$rslt = $astDB->getOne('vicidial_users');
     $userId = $rslt['user_id'];
 
     $where = " (`from`='$userId' OR `to`='$userId') GROUP BY `session`";
-    if($managers !== "") {
+    if($recipients !== "") {
         $where = "";
-        foreach ($managers as $managerId) {
-            $where .= "((`from`='$userId' AND `to`='$managerId') OR (`from`='$managerId' AND `to`='$userId')) OR ";
+        foreach ($recipients as $toId) {
+            $where .= "((`from`='$userId' AND `to`='$toId') OR (`from`='$toId' AND `to`='$userId')) OR ";
         }
         $where = trim($where, " OR ");
     }
@@ -66,17 +76,19 @@ if (isset($type) && $type == 'getMessages') {
     $urslt = $goDB->rawQuery($query);
 
     $messages = [];
-    foreach ($result as $row) {
-        $messages[] = $row;
-    }
+	if ($result) {
+		foreach ($result as $row) {
+			$messages[] = $row;
+		}
+	}
 
-    $APIResult = array( "result" => "success", "code" => 200, "data" => $messages );
+    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
 }
 
 // Gets new messages
 if (isset($type) && $type == 'getNewMessages') {
     //$stmt = "SELECT * FROM vicidial_users where user='$agent'";
-	$astDB->where('user', $goUser);
+	$astDB->where('user', $user);
 	$rslt = $astDB->getOne('vicidial_users');
     $userId = $rslt['user_id'];
 
@@ -84,22 +96,25 @@ if (isset($type) && $type == 'getNewMessages') {
     $result = $goDB->rawQuery($query);
 
     $messages = [];
-    foreach ($result as $row) {
-        $messages[] = $row;
-    }
+	if ($result) {
+		foreach ($result as $row) {
+			$messages[] = $row;
+		}
+	}
 
     //$query = "UPDATE manager_chat SET `seen`=1 WHERE `to`='$userId' AND `seen`=0";
-	$goDB->where('to', $userId);
-	$goDB->where('seen', 0);
+	$goDB->where('`to`', $userId);
+	$goDB->where('`seen`', 0);
     $goDB->update('manager_chat', array('seen' => 1));
+	$errorLog = $goDB->getLastError();
 	
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
+    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages, "error" => $errorLog );
 }
 
 // Gets old messages
 if(isset($type) && $type == 'getOldMessages') {
     //$stmt = "SELECT * FROM vicidial_users where user='$agent'";
-	$astDB->where('user', $goUser);
+	$astDB->where('user', $user);
 	$rslt = $astDB->getOne('vicidial_users');
     $userId = $rslt['user_id'];
 
@@ -107,10 +122,10 @@ if(isset($type) && $type == 'getOldMessages') {
     $offset = 15 + $old;
 
     $where = " (`from`='$userId' OR `to`='$userId') GROUP BY `session`";
-    if(!is_null($managers) && $managers !== "") {
+    if(!is_null($recipients) && $recipients !== "") {
         $where = "";
-        foreach ($managers as $managerId) {
-            $where .= "((`from`='$userId' AND `to`='$managerId') OR (`from`='$managerId' AND `to`='$userId')) OR ";
+        foreach ($recipients as $toId) {
+            $where .= "((`from`='$userId' AND `to`='$toId') OR (`from`='$toId' AND `to`='$userId')) OR ";
         }
         $where = trim($where, " OR ");
     }
@@ -121,9 +136,11 @@ if(isset($type) && $type == 'getOldMessages') {
 	$result = $goDB->rawQuery($query);
 
     $messages = [];
-    foreach ($result as $row) {
-        $messages[] = $row;
-    }
+	if ($result) {
+		foreach ($result as $row) {
+			$messages[] = $row;
+		}
+	}
 
     $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
 }
@@ -133,10 +150,26 @@ if(isset($type) && $type == 'getActiveManagers') {
     $managers = [];
     $stmt = "SELECT * FROM users WHERE (user_group='MANAGERS' OR user_group='LOCATION_MANAGERS') AND last_seen_date>'" . date('Y-m-d H:i:s', strtotime('-6 seconds')) . "'";
 	$result = $goDB->rawQuery($stmt);
-    foreach ($result as $row) {
-        $managers[] = $row['userid'];
-    }
 	
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
+	if ($result) {
+		foreach ($result as $row) {
+			$managers[] = $row['userid'];
+		}
+	}
+	
+    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $managers );
+}
+
+// Update Last Seen
+if (isset($type) && $type == 'updateSeen') {
+	//UPDATE vicidial_users SET last_seen_date='" . date("Y-m-d H:i:s") ."' WHERE user='$user';
+	$updateData = array(
+		'last_seen_date' => date("Y-m-d H:i:s")
+	);
+	
+	$goDB->where('name', $user);
+	$goDB->update('users', $updateData);
+	
+    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "message" => "Last seen updated." );
 }
 ?>

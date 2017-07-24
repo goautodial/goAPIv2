@@ -430,7 +430,8 @@
 										alt_number_dialing = '$alt_number_dialing'"; 
 						}
 						$updateQuery = "UPDATE vicidial_campaigns SET
-											campaign_name = '$campaign_name', 
+											campaign_name = '$campaign_name',
+											campaign_description = '$campaign_desc', 
 											active = '$active', 
 											dial_method = '$dial_method', 
 											auto_dial_level = '$autoDialLevel', 

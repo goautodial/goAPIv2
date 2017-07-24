@@ -1618,7 +1618,7 @@
 				$err_msg .= "in ".$param;
 			break;
 			case "41002";
-				$err_msg = "Invalid value. Interger expected ";
+				$err_msg = "Invalid value. Integer expected ";
 				if(!empty($param))
 				$err_msg .= "in ".$param;
 			break;

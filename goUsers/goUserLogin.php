@@ -86,6 +86,11 @@
 			//$logQuery = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,user_group) values('$dataUser','$ip_address','$SQLdate','LOGIN','User $dataUser logged-in','$dataUserGroup');";
 			//mysqli_query($linkgo, $logQuery);
 			
+			$seenResult = mysqli_query($linkgo, "SHOW COLUMNS FROM `users` LIKE 'last_seen_date'");
+			if (mysqli_num_rows($seenResult) > 0) {
+				$rsltu = mysqli_query($linkgo, "UPDATE users SET last_seen_date='".date("Y-m-d H:i:s")."' WHERE name='$dataUser';");
+			}
+			
 			$apiresults = array(
 				"result" => "success",
 				"user_group" => $dataUserGroup,

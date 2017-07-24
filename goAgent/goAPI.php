@@ -33,10 +33,10 @@ $VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
 $VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
 $VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
 
-$VARDBgo_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-$VARDBgo_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
-$VARDBgo_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
-$VARDBgo_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
+$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
+$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
+$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
 ### End of DB variables ###
 
 $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
