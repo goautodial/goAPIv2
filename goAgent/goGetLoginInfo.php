@@ -681,6 +681,7 @@ if ($userExist > 0) {
     
     $goDB->where('campaign_id', $campinfo['campaign_id']);
     $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
+    var_dump($goDB->getLastError());
     $campinfo['custom_fields_launch'] = 'ONCALL';
     $campinfo['custom_fields_list_id'] = '';
     $campinfo['url_tab_first_title'] = '';
