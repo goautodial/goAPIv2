@@ -9,13 +9,7 @@
    ####################################################
     
     include_once ("../goFunctions.php");
-	// Parse conf
-	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
-		$conf = parse_ini_file("/var/www/html/astguiclient.conf", true);
-		$path_sounds = preg_replace("/>/", "", $conf['PATHsounds']);
-		$path_sounds = preg_replace("/ /", "", $path_sounds);
-	}
-	### POST or GET Variables
+	// POST or GET Variables
     /*$audiofiles = $_REQUEST['files']*/;
     $stage = $_REQUEST['stage'];
 	$groupId = go_get_groupid($session_user);
