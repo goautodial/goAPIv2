@@ -52,6 +52,8 @@ if ( file_exists($conf_path) )
                         {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",$PATHlogs);}
                 if (preg_match("/^PATHweb/", $DBCline))
                         {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
+                 if (preg_match("/^PATHsounds/", $DBCline))
+                        {$path_sounds = $DBCline;   $path_sounds = preg_replace("/.*=/","",$path_sounds);}
                 if (preg_match("/^VARserver_ip/", $DBCline))
                         {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}
                 if (preg_match("/^VARDB_server/", $DBCline))
@@ -66,7 +68,6 @@ if ( file_exists($conf_path) )
                         {$VARDB_port = $DBCline;   $VARDB_port = preg_replace("/.*=/","",$VARDB_port);}
                 }
         }
-
 $link=mysqli_connect("$VARDB_server", "$VARDB_user", "$VARDB_pass", "$VARDB_database", "$VARDB_port");
 mysqli_query($link,"set character_set_results='utf8'");
 //print_r($VARDB_server."/".$VARDB_user."/".$VARDB_pass."/".$VARDB_port);
@@ -81,4 +82,5 @@ if (!$link)
     //die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
         }
 //mysqli_select_db("$VARDB_database");
+
 ?>
