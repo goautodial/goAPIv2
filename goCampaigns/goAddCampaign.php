@@ -10,21 +10,6 @@
     
    include_once("../goFunctions.php");
 
-    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
-            $conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
-    } elseif (file_exists("/etc/goautodial.conf")) {
-            $conf_path = "/etc/goautodial.conf";
-    } else {
-            die ($lang['go_conf_file_not_found']);
-    }
-	
-	if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
-        $astgui_path = parse_ini_file("/var/www/html/astguiclient.conf", true);
-		$path_sounds = preg_replace("/>/", "", $astgui_path['PATHsounds']);
-		$path_sounds = preg_replace("/ /", "", $path_sounds);
-    }else {
-        die ($lang['go_conf_file_not_found']);
-    }
 	/* POST or GET Variables */
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
@@ -108,6 +93,8 @@
 	$three_way_hangup_action 		= $_REQUEST['three_way_hangup_action'];
 	$reset_leads_on_hopper 		= $_REQUEST['reset_leads_on_hopper'];
 
+	$location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
+
 	/* Default values */ 
     	$defActive = array("Y","N");
     	$defType = array("OUTBOUND", "INBOUND", "BLENDED", "SURVEY", "COPY");
@@ -160,13 +147,27 @@
 		$err_msg = error_handle("10003", "campaign_type");
 		$apiresults = array("code" => "10003", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Default value for campaign type is OUTBOUND, INBOUND, BLENDED and  SURVEY only.");
-    } else {
+    } elseif(strlen($campaign_id) < 8 ){
+    	$err_msg = error_handle("41006", "campaign_id. Limit is 8 Characters.");
+		$apiresults = array("code" => "41006", "result" => $err_msg);
+    } else{
         if (!checkIfTenant($groupId)) {
 			$ul = "WHERE campaign_id='$campaign_id'";
 		} else {
 			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";
 		}
             
+            if(!empty($location)){
+				$result_location = go_check_location($location, $user_group);
+				if($result_location < 1){
+					$err_msg = error_handle("41006", "location. User group does not exist in the location selected.");
+					$apiresults = array("code" => "41006", "result" => $err_msg);
+					$location = "";
+				}
+			}else{
+				$location = "";
+			}
+
             $queryCampaign = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1;";
             $rsltvCampaign = mysqli_query($link, $queryCampaign);
             $countResultCampaign = mysqli_num_rows($rsltvCampaign);
@@ -185,17 +186,17 @@
 				
 				//$groupId = go_get_groupid($goUser);
 				$groupId = go_get_groupid($session_user);
-				
+
 				if (!checkIfTenant($groupId)) {
 				$tenant_id = '---ALL---';
 				} else {
 				$tenant_id = "$groupId";
 				}
 
-	if ($campaign_id != 'undefined' && $campaign_id != ''){
-		$queryCampID = "SELECT campaign_id FROM vicidial_campaigns WHERE campaign_id = '$campaign_id'";
-		$rsltvCampID = mysqli_query($link, $queryCampID);
-		$campNum = mysqli_num_rows($rsltvCampID);
+				if ($campaign_id != 'undefined' && $campaign_id != ''){
+					$queryCampID = "SELECT campaign_id FROM vicidial_campaigns WHERE campaign_id = '$campaign_id'";
+					$rsltvCampID = mysqli_query($link, $queryCampID);
+					$campNum = mysqli_num_rows($rsltvCampID);
 						
                 		if ($campNum < 1){
                 			$local_call_time = "9am-9pm";
@@ -244,7 +245,7 @@
 							} else {
 								$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";
 							}
-								
+
 							$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ul ORDER BY campaign_id LIMIT 1";
 							$rsltv = mysqli_query($link, $query);
 							$countResult = mysqli_num_rows($rsltv);
@@ -256,7 +257,11 @@
 								//$rsltvLog = mysqli_query($linkgo, $queryLog);
 								$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Outbound Campaign: $campaign_id", $log_group, $queryAdd);
 								
-								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								if(!empty($location))
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+								else
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 					
 								$apiresults = array("result" => "success");
@@ -431,7 +436,11 @@
 							//$rsltvLog = mysqli_query($linkgo, $queryLog);
 							$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $queryAddInbound);
 							
-							$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+							if(!empty($location))
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+							else
+								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+							
 						    $rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 							
 							$apiresults = array("result" => "success");
@@ -502,8 +511,8 @@
 										$manualDialPrefixVal = ",'$manual_dial_prefix'";
 									}
 									
-									#Sippy
-									#jin
+									//Sippy
+									//jin
 									$auth_user = $goUsers;
 									//$VARSERVTYPE = $this->config->item('VARSERVTYPE');
 									//if($VARSERVTYPE == "cloud"){
@@ -665,7 +674,11 @@
 								//$rsltvLog = mysqli_query($linkgo, $queryLog);
 								$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Blended Campaign: $campaign_id", $log_group, $queryInsert);
 								
-								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								if(!empty($location))
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+								else
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 								
 								$apiresults = array("result" => "success");
@@ -732,7 +745,7 @@
                                 if ($campNum < 1){
                                 	$local_call_time = "9am-9pm";
                                     //if($VARSERVTYPE == "gopackages") { $dial_prefix = "9"; }
-                                    #Sippy
+                                    //Sippy
                                     $auth_user = $goUsers;
 
                                     //if($VARSERVTYPE == "cloud" || $VARSERVTYPE == "gofree") {
@@ -841,7 +854,11 @@
 	                            //$rsltvLog = mysqli_query($linkgo, $queryLog);
 										 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Survey Campaign: $campaign_id", $log_group, $queryInsert);
 
-								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								if(!empty($location))
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+								else
+									$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								
 								$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 
 			                    $apiresults = array("result" => "success");
@@ -1221,7 +1238,11 @@
 							//$rsltvLog = mysqli_query($linkgo, $queryLog);
 							$log_id = log_action($linkgo, 'COPY', $log_user, $ip_address, "Copied campaign settings from $copy_from_campaign to $campaign_id", $log_group, $queryAddCopy);
 							
-							$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campType')";
+							if(!empty($location))
+								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+							else
+								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+							
 							$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 							
 							$apiresults = array("result" => "success");
