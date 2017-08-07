@@ -977,14 +977,8 @@ if ($is_logged_in) {
         $VDpr_ct = $astDB->getRowCount();
         if ($VDpr_ct > 0) {
             $row = $rslt[0];
-            if ($row['wait_sec'] > 65000) {
-                $row['wait_sec'] = 0;
-            }
-            
             $wait_sec = (($StarTtimE - $row['wait_epoch']) + $row['wait_sec']);
         }
-        
-        $testData = "$agent_log_id";
         //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtimE',lead_id='$lead_id' where agent_log_id='$agent_log_id';";
         $astDB->where('agent_log_id', $agent_log_id);
         $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtimE, 'lead_id' => $lead_id ));
@@ -1256,7 +1250,7 @@ if ($is_logged_in) {
         }
         
         $outputData = array_merge($dataOutput1, $dataOutput2, $dataOutput3, $dataOutput4, $LeaD_InfO);
-        $APIResult = array( "result" => "success", "data" => $outputData, "test" => $testData );
+        $APIResult = array( "result" => "success", "data" => $outputData );
     } else {
         $APIResult = array( "result" => "error", "message" => "No calls in QUEUE for $user on $server_ip", "data" => array( "has_call" => 0 ));
     #	echo "No calls in QUEUE for $user on $server_ip\n";
