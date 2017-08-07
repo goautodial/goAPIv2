@@ -218,6 +218,7 @@ if ($sipIsLoggedIn) {
                 'pause_sec' => $pause_sec,
                 'wait_epoch' => $StarTtimE
             );
+			$astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateData);
         }
         
