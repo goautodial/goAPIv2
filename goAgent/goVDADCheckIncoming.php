@@ -984,7 +984,7 @@ if ($is_logged_in) {
             $wait_sec = (($StarTtimE - $row['wait_epoch']) + $row['wait_sec']);
         }
         
-        $testData = "(($StarTtimE - {$row['wait_epoch']}) + {$row['wait_sec']})";
+        $testData = "$agent_log_id";
         //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtimE',lead_id='$lead_id' where agent_log_id='$agent_log_id';";
         $astDB->where('agent_log_id', $agent_log_id);
         $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtimE, 'lead_id' => $lead_id ));
