@@ -977,6 +977,10 @@ if ($is_logged_in) {
         $VDpr_ct = $astDB->getRowCount();
         if ($VDpr_ct > 0) {
             $row = $rslt[0];
+            if ($row['wait_sec'] > 65000) {
+                $row['wait_sec'] = 0;
+            }
+            
             $wait_sec = (($StarTtimE - $row['wait_epoch']) + $row['wait_sec']);
         }
         
