@@ -109,8 +109,8 @@
 			$lead_id[] = $agentlog_fetch['lead_id'];
 			$term_reason[] = $agentlog_fetch['term_reason'];
 		}*/
-		$present_user = array($user);
-		$apiresults = array("result" => "success", "query" => $userlog_query, "outbound" => $outbound_array, "inbound" => $closerlog_array, "userlog" => $userlog_array, "user" => $present_user);
+		
+		$apiresults = array("result" => "success", "query" => $userlog_query, "outbound" => $outbound_array, "inbound" => $closerlog_array, "userlog" => $userlog_array);
 		
 		$log_id = log_action($linkgo, 'VIEW', $user, $ip_address, "Viewed the agent log of Agent: $user", $groupId);
 	}
