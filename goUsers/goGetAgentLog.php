@@ -90,7 +90,6 @@
 		$exec_userlog_query = mysqli_query($link, $userlog_query);
 		while($userlog_fetch = mysqli_fetch_array($exec_userlog_query)){
 			$userlog_log_id[] = $userlog_fetch['agent_log_id'];
-			$userlog_user[] = $userlog_fetch['user'];
 			$userlog_event[] = $userlog_fetch['sub_status'];
 			$userlog_event_date[] = $userlog_fetch['event_time'];
 			$userlog_campaign_id[] = $userlog_fetch['campaign_id'];
@@ -110,8 +109,8 @@
 			$lead_id[] = $agentlog_fetch['lead_id'];
 			$term_reason[] = $agentlog_fetch['term_reason'];
 		}*/
-		
-		$apiresults = array("result" => "success", "query" => $userlog_query, "outbound" => $outbound_array, "inbound" => $closerlog_array, "userlog" => $userlog_array);
+		$present_user = array($user);
+		$apiresults = array("result" => "success", "query" => $userlog_query, "outbound" => $outbound_array, "inbound" => $closerlog_array, "userlog" => $userlog_array, "user" => $present_user);
 		
 		$log_id = log_action($linkgo, 'VIEW', $user, $ip_address, "Viewed the agent log of Agent: $user", $groupId);
 	}
