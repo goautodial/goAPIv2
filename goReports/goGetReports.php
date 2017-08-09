@@ -1,12 +1,12 @@
 <?php
-    ####################################################
-    #### Name: goGetReports.php                     ####
-    #### Description: API for reports               ####
-    #### Version: 4.0                               ####
-    #### Copyright: GOAutoDial Ltd. (c) 2011-2016   ####
-    #### Written by: Alexander Jim H. Abenoja       ####
-    #### License: AGPLv2                            ####
-    ####################################################
+    /////////////////////////////////////////////////
+    // Name: goGetReports.php                     ///
+    // Description: API for reports               ///
+    // Version: 4.0                               ///
+    // Copyright: GOAutoDial Ltd. (c) 2011-2016   ///
+    // Written by: Alexander Jim H. Abenoja       ///
+    // License: AGPLv2                            ///
+    /////////////////////////////////////////////////
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);*/
@@ -14,10 +14,11 @@ ini_set('memory_limit', '2048M');
 
     include_once("../goFunctions.php");
 	include_once("goReportsFunctions.php");	
-	
+
+	$fromDate = date("Y-m-d")." 00:00:00";
+	$toDate = date("Y-m-d")." 23:59:59";
 	// need function go_sec_convert();
-	
-    $pageTitle = mysqli_real_escape_string($link, $_REQUEST['pageTitle']);
+    $pageTitle = strtolower(mysqli_real_escape_string($link, $_REQUEST['pageTitle']));
     $fromDate = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
     $toDate = mysqli_real_escape_string($link, $_REQUEST['toDate']);
     $campaignID = mysqli_real_escape_string($link, $_REQUEST['campaignID']);
@@ -31,8 +32,26 @@ ini_set('memory_limit', '2048M');
 	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	
 	$userGroup = go_get_groupid($session_user);
-	//2017-04-06 00:00:00    2017-04-06 07:41:00
-	if($pageTitle == "call_export_report"){
+	
+	$defPage = array("stats", "agent_detail", "agent_pdetail", "dispo", "call_export_report", "sales_agent", "sales_tracker", "inbound_report");
+
+	if(empty($session_user) || empty($pageTitle)){
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
+	}elseif(empty($fromDate) && empty($toDate)){
+		$fromDate = date("Y-m-d")." 00:00:00";
+		$toDate = date("Y-m-d")." 23:59:59";
+		//die($fromDate." - ".$toDate);
+	}elseif($pageTitle == "sales_tracker" && empty($request)){
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
+	}elseif($pageTitle == "sales_agent" && empty($request)){
+		$err_msg = error_handle("40001");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
+	}elseif(!in_array($pageTitle, $defPage)){
+		$err_msg = error_handle("10004");
+		$apiresults = array("code" => "10004", "result" => $err_msg);
+	}elseif($pageTitle == "call_export_report"){
 		$campaigns = mysqli_real_escape_string($link, $_REQUEST['campaigns']);
 		$inbounds = mysqli_real_escape_string($link, $_REQUEST['inbounds']);
 		$lists = mysqli_real_escape_string($link, $_REQUEST['lists']);
@@ -41,12 +60,16 @@ ini_set('memory_limit', '2048M');
 		$rec_location = mysqli_real_escape_string($link, $_REQUEST['rec_location']);
 		
 		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $userGroup, $link);
+		
+		$apiresults = array("result" => "success", "getReports" => $goReportsReturn);
 	}else{
 		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats, $linkgo);
+		$apiresults = array("result" => "success", "getReports" => $goReportsReturn);
+		//var_dump($goReportsReturn);
 	}
+	//2017-04-06 00:00:00    2017-04-06 07:41:00
 	
-    $apiresults = array("result" => "success", "getReports" => $goReportsReturn);
-    
+   
 	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$userGroup, $link){
 		//$date_diff = go_get_date_diff($fromDate, $toDate);
         //$date_array = implode("','",go_get_dates($fromDate, $toDate));
@@ -79,10 +102,10 @@ ini_set('memory_limit', '2048M');
 			
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 			$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
-			$RUNcampaign++;
+			$RUNcampaign=$i;
 			
 		}else{
-			$RUNcampaign=1;
+			$RUNcampaign=0;
 		}
 		
 		if($inbounds != ""){
@@ -99,7 +122,9 @@ ini_set('memory_limit', '2048M');
 				$group_SQL = "and vl.campaign_id IN($group_SQL)";
 			}
 			
-			$RUNgroup++;
+			$RUNgroup=$i;
+		}else{
+			$RUNgroup=0;
 		}
 		
 		if($lists != ""){
@@ -169,22 +194,34 @@ ini_set('memory_limit', '2048M');
 		
 		$export_fields_SQL = "";
 		
-		if ($RUNcampaign > 0){
+		if ($RUNcampaign > 0 && $RUNgroup < 1){
 			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date ";
 		}
 		
-		if ($RUNgroup > 0){
-			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vl,vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+		if ($RUNgroup > 0 && $RUNcampaign < 1){
+		 	if($rec_location == "Y")
+                $rec_location_where = "and re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id";
+//                       $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+                        //$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl, vicidial_closer_log vcl,vicidial_list vi $rec_location_from where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id = vcl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+            $query = "SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid,vi.entry_list_id,vcl.uniqueid $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi $rec_location_from where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date";
 		}
 		
+		if ($RUNcampaign > 0 && $RUNgroup > 0){
+            if($rec_location == "Y")
+            $rec_location_where = "AND ((re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id) OR (re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id))";
+            
+            $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.alt_dial, vcl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL $rec_location_fields FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi $rec_location_from where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $rec_location_where $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+        }
+
+
 		//$query = "SELECT * FROM vicidial_list LIMIT 100;";
-		$result = mysqli_query($link, $query);
+		$result = mysqli_query($link, $query) or die(mysqli_error($link));
 		
 		$num_column = mysqli_num_fields($result);
 		
 		//$filename = $date_diff.".csv";
 		
-	//OUTPUT DATA HEADER//
+		//OUTPUT DATA HEADER//
 		while ($fieldinfo=mysqli_fetch_field($result))
 		{
 			$csv_header[] = $fieldinfo->name;
@@ -212,7 +249,7 @@ ini_set('memory_limit', '2048M');
 			}
 		}
 		
-	//OUTPUT DATA ROW//
+		//OUTPUT DATA ROW//
 		while($row = mysqli_fetch_row($result)) {
 			$lead_id = $row[34];
 			
@@ -336,13 +373,11 @@ ini_set('memory_limit', '2048M');
 		$return = array("query" => $active_list_fields, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
 		
 		return $return;
-		
 	}
 	
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats, $linkgo){
-
-		if ($campaignID!='null' || $pageTitle == 'call_export_report')
-		{
+		
+		if (!empty($campaignID) || $pageTitle == 'call_export_report'){
 		  	//$return['groupId'] = $goReportsClass->go_getUsergroup($userID);
             //$return['groupId'] = go_getUsergroup($userID,$link);
 			$date1=new DateTime($fromDate);
@@ -356,15 +391,18 @@ ini_set('memory_limit', '2048M');
             //Initialise Values
 			if ($pageTitle!='inbound_report') {
 //				$campaignID = '';
-				$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'");
+				$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'") or die(mysqli_error($link));
+				$num_query = mysqli_num_rows($query);
+				if($num_query > 0){
+					$err_msg = error_handle("41004", "campaignID. Doesn't exist");
+					$apiresults = array("code" => "41006", "result" => $err_msg); 
+				}
 			} else {
-				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'");
+				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'") or die(mysqli_error($link));
 			}
             
 				$resultu = mysqli_fetch_array($query);
-				
 				$return['campaign_name'] = $resultu['campaign_name'];
-				
 				$ul = "and campaign_id='$campaignID'";
 				
 				if (!isset($request) || $request=='') {
@@ -373,7 +411,7 @@ ini_set('memory_limit', '2048M');
 					$return['request'] = $request;
 				}
 				
-				$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'");
+				$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'") or die(mysqli_error($link));
 				$sstatusRX = "";
 				$sstatuses = array();
 				
@@ -388,14 +426,8 @@ ini_set('memory_limit', '2048M');
 				if(!empty($sstatuses))
 				$sstatuses = implode("','",$sstatuses);
 				
-				/*foreach ($query->result() as $Qstatus)
-				{
-				   $sstatuses[$Qstatus->status] = $Qstatus->status;
-				   $sstatusRX	.= "{$Qstatus->status}|";
-				}
-				$sstatuses = implode("','",$sstatuses);*/
+				$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'") or die(mysqli_error($link));
 				
-				$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'");
 				$cstatusRX = "";
 				$cstatuses = array();
 				
@@ -410,6 +442,7 @@ ini_set('memory_limit', '2048M');
 				if(!empty($cstatuses))
 				$cstatuses = implode("','",$cstatuses);
 				
+				
 				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
 				{
 				   $statuses = "{$sstatuses}','{$cstatuses}";
@@ -419,25 +452,6 @@ ini_set('memory_limit', '2048M');
 				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
 				}
 				$statusRX = trim($statusRX, "|");
-				
-				
-				/*
-				foreach ($query->result() as $Qstatus)
-				{
-				   $cstatuses[$Qstatus->status] = $Qstatus->status;
-				   $cstatusRX	.= "{$Qstatus->status}|";
-				}
-				$cstatuses = implode("','",$cstatuses);
-				if (strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
-				{
-				   $statuses = "{$sstatuses}','{$cstatuses}";
-				   $statusRX = "{$sstatusRX}{$cstatusRX}";
-				} else {
-				   $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
-				   $statusRX = (strlen($sstatusRX) > 0 && strlen($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
-				}
-				$statusRX = trim($statusRX, "|");
-				*/
 				//End initialize
             
             //Start Report
@@ -704,32 +718,26 @@ ini_set('memory_limit', '2048M');
 					return $apiresults;
 				}
 				
-				
-				
 				// Agent Time Detail
 				if ($pageTitle=="agent_detail") {
-				if($userGroup !== "ADMIN")
-				$ul = "AND user_group = '$userGroup'";
-				else
-				$ul = "";
-					### BEGIN gather user IDs and names for matching up later
+
+					if($userGroup !== "ADMIN")
+						$ul = "AND user_group = '$userGroup'";
+					else
+						$ul = "";
+
+					// BEGIN gather user IDs and names for matching up later
 					$query = mysqli_query($link, "SELECT full_name,user FROM vicidial_users ORDER BY user LIMIT 100000");
 					$user_ct = mysqli_num_rows($query);
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 						$ULname[] = $row['full_name'];
 						$ULuser[] = $row['user'];
-					}	
+					}
 					
-					/* foreach ($query->result() as $i => $row)
-						{
-						$ULname[$i] =	$row->full_name;
-						$ULuser[$i] =	$row->user;
-						}
-					*/
-					### END gather user IDs and names for matching up later
+					// END gather user IDs and names for matching up later
 				
-					### BEGIN gather timeclock records per agent
+					// BEGIN gather timeclock records per agent
 					$query = mysqli_query($link, "SELECT user,SUM(login_sec) AS login_sec FROM vicidial_timeclock_log WHERE event IN('LOGIN','START') AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' GROUP BY user LIMIT 10000000");
 					$timeclock_ct = mysqli_num_rows($query);
 					
@@ -738,21 +746,15 @@ ini_set('memory_limit', '2048M');
 						$TCtime[] = $row['login_sec'];
 					}
 					
-					/*foreach ($query->result() as $i => $row)
-						{
-						$TCuser[$i] =	$row->user;
-						$TCtime[$i] =	$row->login_sec;
-						}
-					*/
-					### END gather timeclock records per agent
-				
-					### BEGIN gather pause code information by user IDs
+					// END gather timeclock records per agent
+					
+					// BEGIN gather pause code information by user IDs
 					$sub_statuses='-';
 					$sub_statusesTXT='';
 					$sub_statusesHEAD='';
 					$sub_statusesHTML='';
 					$sub_statusesFILE='';
-					$sub_statusesTOP='';
+					$sub_statusesTOP= array();
 					$sub_statusesARY=$MT;
 					
 					$PCusers='-';
@@ -760,10 +762,11 @@ ini_set('memory_limit', '2048M');
 					$PCuser_namesARY=$MT;
 					
 					
-					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
+					//$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
+					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
 					$pause_sec_ct = mysqli_num_rows($query);
 			
-					$i=0;
+					$i=0;$a=1;
 					$sub_status_count=0;
 					$user_count=0;
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -775,7 +778,7 @@ ini_set('memory_limit', '2048M');
 							$sub_statusesFILE .= ",$sub_status[$i]";
 							$sub_statuses .= "$sub_status[$i]-";
 							$sub_statusesARY[$sub_status_count] = $sub_status[$i];
-							$sub_statusesTOP .= "<th nowrap> $sub_status[$i] </th>";
+							$sub_statusesTOP[$i] = "$sub_status[$i]";
 							$sub_status_count++;
 						}
 						if (!preg_match("/-$PCuser[$i]-/", $PCusers)){
@@ -809,9 +812,9 @@ ini_set('memory_limit', '2048M');
 				
 						$i++;
 						} */
-					### END gather pause code information by user IDs
+					// END gather pause code information by user IDs
 					
-					##### BEGIN Gather all agent time records and parse through them in PHP to save on DB load
+					//# BEGIN Gather all agent time records and parse through them in PHP to save on DB load
 					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul and campaign_id='$campaignID' LIMIT 10000000");
 					$agent_time_ct = mysqli_num_rows($query);
 					$j=0;
@@ -827,11 +830,11 @@ ini_set('memory_limit', '2048M');
 						$status =		$row['status'];
 						$dead =			$row['dead_sec'];
 						
-						if ($wait > 65000) {$wait=0;}
-						if ($talk > 65000) {$talk=0;}
-						if ($dispo > 65000) {$dispo=0;}
-						if ($pause > 65000) {$pause=0;}
-						if ($dead > 65000) {$dead=0;}
+						// if ($wait > 65000) {$wait=0;}
+						// if ($talk > 65000) {$talk=0;}
+						// if ($dispo > 65000) {$dispo=0;}
+						// if ($pause > 65000) {$pause=0;}
+						// if ($dead > 65000) {$dead=0;}
 						
 						$customer =		($talk - $dead);
 						if ($customer < 1){$customer=0;}
@@ -856,7 +859,6 @@ ini_set('memory_limit', '2048M');
 						while ( ($m < $uc) and ($m < 50000) ){
 							if ($user == $Suser[$m]){
 								$user_found++;
-				
 								$Swait[$m] =	($Swait[$m] + $wait);
 								$Stalk[$m] =	($Stalk[$m] + $talk);
 								$Sdispo[$m] =	($Sdispo[$m] + $dispo);
@@ -866,9 +868,8 @@ ini_set('memory_limit', '2048M');
 								if ( ($lead > 0) and ((!preg_match("/NULL/",$status)) and (strlen($status) > 0)) ) {$Scalls[$m]++;}
 								}
 							$m++;
-							}
-						if ($user_found < 1)
-							{
+						}
+						if ($user_found < 1){
 							$Scalls[$uc] =	0;
 							$Suser[$uc] =	$user;
 							$Swait[$uc] =	$wait;
@@ -879,9 +880,7 @@ ini_set('memory_limit', '2048M');
 							$Scustomer[$uc] =	$customer;
 							if ($lead > 0) {$Scalls[$uc]++;}
 							$uc++;
-							}
-	
-						
+						}
 					}
 					/*
 					foreach ($query->result() as $i => $row)
@@ -951,13 +950,13 @@ ini_set('memory_limit', '2048M');
 						} */
 						
 					//if ($DB) {echo "{$this->lang->line("go_done_gathering")} $i {$this->lang->line("go_records_analyzing")}<BR>\n";}
-					##### END Gather all agent time records and parse through them in PHP to save on DB load
+					//# END Gather all agent time records and parse through them in PHP to save on DB load
 				
-					############################################################################
-					##### END gathering information from the database section
-					############################################################################
+					//////////////////////////////////////
+					//# END gathering information from the database section
+					//////////////////////////////////////
 				
-					##### BEGIN print the output to screen or put into file output variable
+					//# BEGIN print the output to screen or put into file output variable
 					/*
 					if ($file_download > 0)
 						{
@@ -966,15 +965,16 @@ ini_set('memory_limit', '2048M');
 						$file_output .= "USER,ID,CALLS,TIME CLOCK,AGENT TIME,WAIT,TALK,DISPO,PAUSE,WRAPUP,CUSTOMER,$sub_statusesFILE\n";
 						}
 					*/
-					##### END print the output to screen or put into file output variable
+					//# END print the output to screen or put into file output variable
 				
-					############################################################################
-					##### BEGIN formatting data for output section
-					############################################################################
+					//////////////////////////////////////
+					//# BEGIN formatting data for output section
+					//////////////////////////////////////
 				
-					##### BEGIN loop through each user formatting data for output
+					//# BEGIN loop through each user formatting data for output
 					$AUTOLOGOUTflag=0;
 					$m=0;
+					$rowId=1;
 					while ( ($m < $uc) and ($m < 50000) ){
 						$SstatusesHTML='';
 						$SstatusesFILE='';
@@ -983,13 +983,13 @@ ini_set('memory_limit', '2048M');
 						$RAWcalls = $Scalls[$m];
 						$RAWtimeSEC = $Stime[$m];
 				
-						$Swait[$m]=		gmdate('H:i:s', $Swait[$m]); 
-						$Stalk[$m]=		gmdate('H:i:s', $Stalk[$m]); 
-						$Sdispo[$m]=	gmdate('H:i:s', $Sdispo[$m]); 
-						$Spause[$m]=	gmdate('H:i:s', $Spause[$m]); 
-						$Sdead[$m]=		gmdate('H:i:s', $Sdead[$m]); 
-						$Scustomer[$m]=	gmdate('H:i:s', $Scustomer[$m]); 
-						$Stime[$m]=		gmdate('H:i:s', $Stime[$m]); 
+						$Swait[$m] = 	gmdate('H:i:s', $Swait[$m]); 
+						$Stalk[$m] = 	gmdate('H:i:s', $Stalk[$m]); 
+						$Sdispo[$m] = 	gmdate('H:i:s', $Sdispo[$m]); 
+						$Spause[$m] = 	gmdate('H:i:s', $Spause[$m]); 
+						$Sdead[$m] = 	gmdate('H:i:s', $Sdead[$m]); 
+						$Scustomer[$m] = 	gmdate('H:i:s', $Scustomer[$m]); 
+						$Stime[$m] = 	gmdate('H:i:s', $Stime[$m]); 
 				
 						$RAWtime = $Stime[$m];
 						$RAWwait = $Swait[$m];
@@ -1041,12 +1041,11 @@ ini_set('memory_limit', '2048M');
 							$StimeTC[$m] =		sprintf("%10s", $StimeTC[$m]);
 							}
 				
-						### Check if the user had an AUTOLOGOUT timeclock event during the time period
-						//echo $Suser[$m];
+						// Check if the user had an AUTOLOGOUT timeclock event during the time period
 						$TCuserAUTOLOGOUT = ' ';
 						$query = mysqli_query($link, "SELECT COUNT(*) as cnt FROM vicidial_timeclock_log WHERE event='AUTOLOGOUT' AND user='$Suser[$m]' AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'");
 						$timeclock_ct = mysqli_num_rows($query);
-		//die($timeclock_ct);
+						
 						if ($autologout_results > 0){
 							$row = mysqli_fetch_array($query);
 							//$row=$query->row();
@@ -1057,13 +1056,13 @@ ini_set('memory_limit', '2048M');
 							}
 						}
 				
-						### BEGIN loop through each status ###
+						// BEGIN loop through each status //
 						$n=0;
 						while ($n < $sub_status_count){
 							$Sstatus=$sub_statusesARY[$n];
 							$SstatusTXT='';
 							
-							### BEGIN loop through each stat line ###
+							// BEGIN loop through each stat line //
 							$i=0;
 							$status_found=0;
 							
@@ -1075,7 +1074,8 @@ ini_set('memory_limit', '2048M');
 									$pfUSERcodePAUSE_MS =	sprintf("%10s", $USERcodePAUSE_MS);
 		
 									$SstatusesFILE .= ",$USERcodePAUSE_MS";
-									$Sstatuses[$m] .= "<td> $USERcodePAUSE_MS </td>";
+									//$sub_statusesTOP[$m]
+									$Sstatuses[$m] .= "$USERcodePAUSE_MS";
 									$status_found++;
 									}
 								$i++;
@@ -1083,14 +1083,17 @@ ini_set('memory_limit', '2048M');
 							
 							if ($status_found < 1){
 								$SstatusesFILE .= ",0:00";
-								$Sstatuses[$m] .= "<td> 0:00 </td>";
+								//$Sstatuses[$m] .= " 0:00";
 							}
-							### END loop through each stat line ###
+							// END loop through each stat line //
 							
 							$n++;
-							
+							if(!empty($Sstatuses[$m]))
+							$Sstatuses[$m] .= ",";
+
 						}
-						### END loop through each status ###
+
+						// END loop through each status //
 						
 						/*
 						if ($file_download > 0)
@@ -1115,27 +1118,21 @@ ini_set('memory_limit', '2048M');
 						}
 						*/
 					//			<td> $StimeTC[$m]$TCuserAUTOLOGOUT </td>
-						$Toutput = "  <tr>
-								<td> $Sname[$m] </td>
-								<td> $Suser[$m] </td>
-								<td> $Scalls[$m] </td>
-								<td> $Stime[$m] </td>
-								<td> $Swait[$m] </td>
-								<td> $Stalk[$m] </td>
-								<td> $Sdispo[$m] </td>
-								<td> $Spause[$m] </td>
-								<td> $Sdead[$m] </td>
-								<td> $Scustomer[$m] </td>
-								</tr>";
+						if(is_null($Scalls[$m])){
+							$Scalls[$m] = 0;
+						}
+						$Toutput = array("rowID" => $rowId, "name" => $Sname[$m], "user" => $Suser[$m], "number_of_calls" => $Scalls[$m], "agent_time" => $Stime[$m], "wait_time" => $Swait[$m], "talk_time" => $Stalk[$m], "dispo_time" => $Sdispo[$m], "pause_time" => $Spause[$m], "wrap_up" => $Sdead[$m], "customer_time" => $Scustomer[$m]);
 				
-						$Boutput = "  <tr>
+						/*$Boutput = "<tr>
 								<td> $Sname[$m] </td>
 								$Sstatuses[$m]
-								</tr>";
-				
+								</tr>";*/
+						$Sstatuses[$m] = rtrim( $Sstatuses[$m], ",");
+						$Boutput = array("rowID" => $rowId, "name" => $Sname[$m], "statuses" => $Sstatuses[$m]);
+
 						$TOPsorted_output[$m] = $Toutput;
 						$BOTsorted_output[$m] = $Boutput;
-						$TOPsorted_outputFILE[$m] = $fileToutput;
+						//$TOPsorted_outputFILE[$m] = $fileToutput;
 				
 						if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage))
 							if ($file_download > 0)
@@ -1143,14 +1140,15 @@ ini_set('memory_limit', '2048M');
 				
 						if ($TOPsortMAX < $TOPsortTALLY[$m]) {$TOPsortMAX = $TOPsortTALLY[$m];}
 				
-				#		echo "$Suser[$m]|$Sname[$m]|$Swait[$m]|$Stalk[$m]|$Sdispo[$m]|$Spause[$m]|$Scalls[$m]\n";
+					//		echo "$Suser[$m]|$Sname[$m]|$Swait[$m]|$Stalk[$m]|$Sdispo[$m]|$Spause[$m]|$Scalls[$m]\n";
 						$m++;
+						$rowId++;
 					}
-					##### END loop through each user formatting data for output
+					//# END loop through each user formatting data for output
 				
 				
-					$TOT_AGENTS = '<th>AGENTS: '.$m.'</th>';
-				// 	### BEGIN sort through output to display properly ###
+					$TOT_AGENTS = 'AGENTS: '.$m;
+					// 	// BEGIN sort through output to display properly //
 					if ( ($TOT_AGENTS > 0) and (preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) )
 						{
 						if (preg_match("/ID/",$stage))
@@ -1166,25 +1164,25 @@ ini_set('memory_limit', '2048M');
 							$sort_split = explode("-----",$TOPsort[$m]);
 							$i = $sort_split[1];
 							$sort_order[$m] = "$i";
-							if ($file_download > 0)
-								{$file_output .= "$TOPsorted_outputFILE[$i]";}
+							//if ($file_download > 0)
+							//	{$file_output .= "$TOPsorted_outputFILE[$i]";}
 							$m++;
 							}
 						}
-					### END sort through output to display properly ###
+					// END sort through output to display properly //
 				
-					############################################################################
-					##### END formatting data for output section
-					############################################################################
-				
-				
+					//////////////////////////////////////
+					//# END formatting data for output section
+					//////////////////////////////////////
 				
 				
-					############################################################################
-					##### BEGIN last line totals output section
-					############################################################################
+				
+				
+					//////////////////////////////////////
+					//# BEGIN last line totals output section
+					//////////////////////////////////////
 					$SUMstatusesHTML='';
-					$SUMstatusesFILE='';
+					//$SUMstatusesFILE='';
 					$TOTtotPAUSE=0;
 					$n=0;
 					while ($n < $sub_status_count)
@@ -1192,89 +1190,73 @@ ini_set('memory_limit', '2048M');
 						$Scalls=0;
 						$Sstatus=$sub_statusesARY[$n];
 						$SUMstatusTXT='';
-						### BEGIN loop through each stat line ###
+						// BEGIN loop through each stat line //
 						$i=0; $status_found=0;
-						while ($i < $pause_sec_ct)
-							{
+						while ($i < $pause_sec_ct){
 							if ($Sstatus=="$sub_status[$i]")
 								{
-								$Scalls =		($Scalls + $PCpause_sec[$i]);
+								$Scalls = ($Scalls + $PCpause_sec[$i]);
 								$status_found++;
 								}
 							$i++;
-							}
-						### END loop through each stat line ###
-						if ($status_found < 1)
-							{
-							$SUMstatuses .= "<th> 0:00 </th>";
-							}
-						else
-							{
+						}
+						// END loop through each stat line //
+						if ($status_found < 1){
+							$SUMstatuses[$n] = "00:00:00";
+						}
+						else{
 							$TOTtotPAUSE = ($TOTtotPAUSE + $Scalls);
 				
 							$USERsumstatPAUSE_MS =		gmdate('H:i:s', $Scalls); 
-							$pfUSERsumstatPAUSE_MS =	sprintf("%11s", $USERsumstatPAUSE_MS);
+							$pfUSERsumstatPAUSE_MS = 	sprintf("%11s", $USERsumstatPAUSE_MS);
 		
-							$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
-							$SUMstatuses .= "<th nowrap> $USERsumstatPAUSE_MS </th>";
-							}
+							//$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
+							$SUMstatuses[$n] = $USERsumstatPAUSE_MS;
+						}
 						$n++;
-						}
-					### END loop through each status ###
+					}
+					// END loop through each status //
 				
-					### call function to calculate and print dialable leads
-					$TOTwait = '<th nowrap>'.gmdate('H:i:s', $TOTwait).'</th>';
-					$TOTtalk = '<th nowrap>'.gmdate('H:i:s', $TOTtalk).'</th>';
-					$TOTdispo = '<th nowrap>'.gmdate('H:i:s', $TOTdispo).'</th>';
-					$TOTpause = '<th nowrap>'.gmdate('H:i:s', $TOTpause).'</th>';
-					$TOTdead = '<th nowrap>'.gmdate('H:i:s', $TOTdead).'</th>';
-					$TOTcustomer = '<th nowrap>'.gmdate('H:i:s', $TOTcustomer).'</th>';
-					$TOTALtime = '<th nowrap>'.gmdate('H:i:s', $TOTALtime).'</th>';
-					$TOTtimeTC = '<th nowrap>'.gmdate('H:i:s', $TOTtimeTC).'</th>';
+					// call function to calculate and print dialable leads
+					$TOTwait = gmdate('H:i:s', $TOTwait);
+					$TOTtalk = gmdate('H:i:s', $TOTtalk);
+					$TOTdispo = gmdate('H:i:s', $TOTdispo);
+					$TOTpause = gmdate('H:i:s', $TOTpause);
+					$TOTdead = gmdate('H:i:s', $TOTdead);
+					$TOTcustomer = gmdate('H:i:s', $TOTcustomer);
+					$TOTALtime = gmdate('H:i:s', $TOTALtime);
+					$TOTtimeTC = gmdate('H:i:s', $TOTtimeTC);
 					
 		
-					if ($file_download > 0)
-						{
-						$file_output .= "TOTAL: $TOT_AGENTS,$TOTcalls,$TOTtimeTC,$TOTALtime,$TOTwait,$TOTtalk,$TOTdispo,$TOTpause,$TOTdead,$TOTcustomer,$SUMstatusesFILE\n";
-						}
-					############################################################################
-					##### END formatting data for output section
-					############################################################################
+					// if ($file_download > 0)
+					// 	{
+					// 	$file_output .= "TOTAL: $TOT_AGENTS,$TOTcalls,$TOTtimeTC,$TOTALtime,$TOTwait,$TOTtalk,$TOTdispo,$TOTpause,$TOTdead,$TOTcustomer,$SUMstatusesFILE\n";
+					// 	}
+					//////////////////////////////////////
+					//# END formatting data for output section
+					//////////////////////////////////////
 					
-					$return['TOPsorted_output']		= $TOPsorted_output;
-					$return['BOTsorted_output']		= $BOTsorted_output;
-					$return['TOPsorted_outputFILE']	= $TOPsorted_outputFILE;
-					$return['TOTwait']				= $TOTwait;
-					$return['TOTtalk']				= $TOTtalk;
-					$return['TOTdispo']				= $TOTdispo;
-					$return['TOTpause']				= $TOTpause;
-					$return['TOTdead']				= $TOTdead;
-					$return['TOTcustomer']			= $TOTcustomer;
-					$return['TOTALtime']			= $TOTALtime;
-					$return['TOTtimeTC']			= $TOTtimeTC;
-					$return['sub_statusesTOP']		= $sub_statusesTOP;
-					$return['SUMstatuses']			= $SUMstatuses;
-					$return['TOT_AGENTS']			= $TOT_AGENTS;
-					$return['TOTcalls']				= $TOTcalls;
-					$return['file_output']			= $file_output;
-									
-					$apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOPsorted_outputFILE" => $TOPsorted_outputFILE, 
-					"TOTwait" => $TOTwait,
-					"TOTtalk" => $TOTtalk,
-					"TOTdispo" => $TOTdispo,
-					"TOTpause" => $TOTpause,
-					"TOTdead" => $TOTdead,
-					"TOTcustomer" => $TOTcustomer,
-					"TOTALtime" => $TOTALtime,
-					"TOTtimeTC" => $TOTtimeTC,
-					"sub_statusesTOP" => $sub_statusesTOP,
-					"SUMstatuses" => $SUMstatuses,
-					"TOT_AGENTS" => $TOT_AGENTS,
-					"TOTcalls" => $TOTcalls
-					);
+					// $return['TOPsorted_output']		= $TOPsorted_output;
+					// $return['BOTsorted_output']		= $BOTsorted_output;
+					// $return['TOPsorted_outputFILE']	= $TOPsorted_outputFILE;
+					// $return['TOTwait']				= $TOTwait;
+					// $return['TOTtalk']				= $TOTtalk;
+					// $return['TOTdispo']				= $TOTdispo;
+					// $return['TOTpause']				= $TOTpause;
+					// $return['TOTdead']				= $TOTdead;
+					// $return['TOTcustomer']			= $TOTcustomer;
+					// $return['TOTALtime']			= $TOTALtime;
+					// $return['TOTtimeTC']			= $TOTtimeTC;
+					// $return['sub_statusesTOP']		= $sub_statusesTOP;
+					// $return['SUMstatuses']			= $SUMstatuses;
+					// $return['TOT_AGENTS']			= $TOT_AGENTS;
+					// $return['TOTcalls']				= $TOTcalls;
+					// $return['file_output']			= $file_output;
+
+					$apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "sub_statusesTOP" => $sub_statusesTOP, "BOTsorted_output" => $BOTsorted_output, "SUMstatuses" => $SUMstatuses, "TOTwait" => $TOTwait, "TOTtalk" => $TOTtalk, "TOTdispo" => $TOTdispo, "TOTpause" => $TOTpause, "TOTdead" => $TOTdead, "TOTcustomer" => $TOTcustomer, "TOTALtime" => $TOTALtime, "TOTtimeTC" => $TOTtimeTC, "TOT_AGENTS" => $TOT_AGENTS, "TOTcalls" => $TOTcalls);
 					
 					return $apiresults;
-									
+					
 				}
 				
 				// Agent Performance Detail
@@ -1394,7 +1376,7 @@ ini_set('memory_limit', '2048M');
 						$file_output .= "USER NAME,ID,CALLS,AGENT TIME,PAUSE,PAUSE AVG,WAIT,WAIT AVG,TALK,TALK AVG,DISPO,DISPO AVG,WRAPUP,WRAPUP AVG,CUSTOMER,CUST AVG $statusesFILE\n";
 						}
 					
-					### BEGIN loop through each user ###
+					// BEGIN loop through each user //
 					$m=0;
 					while ($m < $k)
 						{
@@ -1411,13 +1393,13 @@ ini_set('memory_limit', '2048M');
 						$SstatusesHTML='';
 						$SstatusesFILE='';
 					
-						### BEGIN loop through each status ###
+						// BEGIN loop through each status //
 						$n=0;
 						while ($n < $j)
 							{
 							$Sstatus=$statusesARY[$n];
 							$SstatusTXT='';
-							### BEGIN loop through each stat line ###
+							// BEGIN loop through each stat line //
 							$i=0; $status_found=0;
 							while ($i < $rows_to_print)
 								{
@@ -1441,10 +1423,10 @@ ini_set('memory_limit', '2048M');
 								$SstatusesFILE .= ",0";
 								$SstatusesMID[$m] .= "<td> 0 </td>";
 								}
-							### END loop through each stat line ###
+							// END loop through each stat line //
 							$n++;
 							}
-						### END loop through each status ###
+						// END loop through each status //
 						$Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
 						$TOTcalls=($TOTcalls + $Scalls);
 						$TOTtime=($TOTtime + $Stime);
@@ -1533,9 +1515,9 @@ ini_set('memory_limit', '2048M');
 					
 						$m++;
 						}
-					### END loop through each user ###
+					// END loop through each user //
 					
-					### BEGIN sort through output to display properly ###
+					// BEGIN sort through output to display properly //
 					if (preg_match("/ID|TIME|LEADS/",$stage))
 						{
 						if (preg_match("/ID/",$stage))
@@ -1554,12 +1536,12 @@ ini_set('memory_limit', '2048M');
 							$m++;
 							}
 						}
-					### END sort through output to display properly ###
+					// END sort through output to display properly //
 					
 					
 					
-					###### LAST LINE FORMATTING ##########
-					### BEGIN loop through each status ###
+					//## LAST LINE FORMATTING ////##
+					// BEGIN loop through each status //
 					$SUMstatusesHTML='';
 					$SUMstatusesFILE='';
 					$n=0;
@@ -1568,7 +1550,7 @@ ini_set('memory_limit', '2048M');
 						$Scalls=0;
 						$Sstatus=$statusesARY[$n];
 						$SUMstatusTXT='';
-						### BEGIN loop through each stat line ###
+						// BEGIN loop through each stat line //
 						$i=0; $status_found=0;
 						while ($i < $rows_to_print)
 							{
@@ -1579,7 +1561,7 @@ ini_set('memory_limit', '2048M');
 								}
 							$i++;
 							}
-						### END loop through each stat line ###
+						// END loop through each stat line //
 						if ($status_found < 1)
 							{
 							$SUMstatusesFILE .= ",0";
@@ -1592,7 +1574,7 @@ ini_set('memory_limit', '2048M');
 							}
 						$n++;
 						}
-					### END loop through each status ###
+					// END loop through each status //
 					$TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
 					
 					if ($TOTtotTALK < 1) {$TOTavgTALK = '0';}
@@ -1701,7 +1683,7 @@ ini_set('memory_limit', '2048M');
 						$file_output .= "\n\nUSER NAME,ID,TOTAL,NONPAUSE,PAUSE,$sub_statusesFILE\n";
 					}
 					
-					### BEGIN loop through each user ###
+					// BEGIN loop through each user //
 					$m=0;
 					$Suser_ct = count($usersARY);
 					$TOTtotNONPAUSE = 0;
@@ -1724,13 +1706,13 @@ ini_set('memory_limit', '2048M');
 						$SstatusesHTML='';
 						$Ssub_statusesFILE='';
 					
-						### BEGIN loop through each status ###
+						// BEGIN loop through each status //
 						$n=0;
 						while ($n < $j)
 							{
 							$Sstatus=$sub_statusesARY[$n];
 							$SstatusTXT='';
-							### BEGIN loop through each stat line ###
+							// BEGIN loop through each stat line //
 							$i=0; $status_found=0;
 							while ($i < $subs_to_print)
 								{
@@ -1754,10 +1736,10 @@ ini_set('memory_limit', '2048M');
 								$Ssub_statusesFILE .= ",0";
 								$SstatusesBOTR[$m] .= "<td> 0:00 </td>";
 								}
-							### END loop through each stat line ###
+							// END loop through each stat line //
 							$n++;
 							}
-						### END loop through each status ###
+						// END loop through each status //
 						$TOTtotPAUSE=($TOTtotPAUSE + $Spause_sec);
 					
 						$TOTtotNONPAUSE = ($TOTtotNONPAUSE + $Snon_pause_sec);
@@ -1795,9 +1777,9 @@ ini_set('memory_limit', '2048M');
 					
 						$m++;
 						}
-					### END loop through each user ###
+					// END loop through each user //
 					
-					### BEGIN sort through output to display properly ###
+					// BEGIN sort through output to display properly //
 					if (preg_match("/ID|TIME|LEADS/",$stage))
 						{
 						$n=0;
@@ -1809,10 +1791,10 @@ ini_set('memory_limit', '2048M');
 							$m--;
 							}
 						}
-					### END sort through output to display properly ###
+					// END sort through output to display properly //
 					
-					###### LAST LINE FORMATTING ##########
-					### BEGIN loop through each status ###
+					//## LAST LINE FORMATTING ////##
+					// BEGIN loop through each status //
 					$SUMstatusesHTML='';
 					$SUMsub_statusesFILE='';
 					$TOTtotPAUSE=0;
@@ -1822,7 +1804,7 @@ ini_set('memory_limit', '2048M');
 						$Scalls=0;
 						$Sstatus=$sub_statusesARY[$n];
 						$SUMstatusTXT='';
-						### BEGIN loop through each stat line ###
+						// BEGIN loop through each stat line //
 						$i=0; $status_found=0;
 						while ($i < $subs_to_print)
 							{
@@ -1833,7 +1815,7 @@ ini_set('memory_limit', '2048M');
 								}
 							$i++;
 							}
-						### END loop through each stat line ###
+						// END loop through each stat line //
 						if ($status_found < 1)
 							{
 							$SUMsub_statusesFILE .= ",0";
@@ -1850,7 +1832,7 @@ ini_set('memory_limit', '2048M');
 							}
 						$n++;
 						}
-					### END loop through each status ###
+					// END loop through each status //
 						$TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
 					
 						$TOTtotPAUSEB_MS = '<th nowrap>'.gmdate('H:i:s', $TOTtotPAUSE).'</th>'; 
@@ -1946,7 +1928,6 @@ ini_set('memory_limit', '2048M');
 					return $apiresults;
 				}
 				
-				
 				//Dial Statuses Summary
 				if ($pageTitle=="dispo") {
 					$list_ids[0] = "ALL";
@@ -1969,8 +1950,8 @@ ini_set('memory_limit', '2048M');
 						}
 						//$list_ids[$i] = "{$userGroup}0";
 					}
-				$list = "'".implode("','",$list_ids)."'";
-					# grab names of global statuses and statuses in the selected campaign
+					$list = "'".implode("','",$list_ids)."'";
+					// grab names of global statuses and statuses in the selected campaign
 					$query = mysqli_query($link, "SELECT status,status_name from vicidial_statuses order by status");
 					//$statuses_to_print = $query->num_rows();
 					$statuses_to_print = mysqli_num_rows($query);
@@ -1985,9 +1966,9 @@ ini_set('memory_limit', '2048M');
 					}
 			
 					$query_list = "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID'; ";
-$query = mysqli_query($link, $query_list);
-//					//$Cstatuses_to_print = $query->num_rows();
-//					$Cstatuses_to_print = mysqli_num_rows($query);
+					$query = mysqli_query($link, $query_list);
+					//$Cstatuses_to_print = $query->num_rows();
+					//$Cstatuses_to_print = mysqli_num_rows($query);
 		
 					/*foreach ($query->result() as $o => $row) 
 						{
@@ -2005,7 +1986,7 @@ $query = mysqli_query($link, $query_list);
 					$leads_in_list_Y = 0;
 					
 					$queryx = "SELECT status, if(called_count >= 10, 10, called_count) as called_count, count(*) as count from vicidial_list where list_id IN(".$list.") and status NOT IN('DC','DNCC','XDROP') group by status, if(called_count >= 10, 10, called_count) order by status,called_count";
-$query = mysqli_query($link, $queryx);
+					$query = mysqli_query($link, $queryx);
 					$status_called_to_print = mysqli_num_rows($query);
 					
 					$sts=0;
@@ -2144,9 +2125,6 @@ $query = mysqli_query($link, $queryx);
 					return $apiresults;
 				}
 				
-				
-				
-				
 				// SALES PER AGENT
 				if ($pageTitle == "sales_agent") {
 					if($userGroup !== "ADMIN")
@@ -2156,10 +2134,10 @@ $query = mysqli_query($link, $queryx);
 					//$list_ids = "{$this->lang->line("go_all")}";
 					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
 					if($request == "outbound"){
-						### Outbound Sales ###
+						// Outbound Sales //
 						
 						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' $ul group by us.full_name";
-						$query = mysqli_query($link, $outbound_query);
+						$query = mysqli_query($link, $outbound_query) or die(mysqli_error($link));
 						
 						$TOPsorted_output = "";
 						$total_out_sales = "";
@@ -2203,9 +2181,9 @@ $query = mysqli_query($link, $queryx);
 					}
 					
 					if($request == "inbound"){
-						### Inbound Sales ###
+						// Inbound Sales //
 						$inbound_query = "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='".$campaignID."' ORDER BY campaign_id";
-						$query = mysqli_query($link, $inbound_query);
+						$query = mysqli_query($link, $inbound_query) or die(mysqli_error($link));
 						$row = mysqli_fetch_array($query);
 						$closer_camp_array=explode(" ",$row['closer_campaigns']);
 						$num=count($closer_camp_array);
@@ -2258,9 +2236,6 @@ $query = mysqli_query($link, $queryx);
 					
 					return $apiresults;
 				}
-				
-				
-				
 				
 				// SALES TRACKER
 				if ($pageTitle == "sales_tracker") {
@@ -2361,9 +2336,6 @@ $query = mysqli_query($link, $queryx);
 					return $apiresults;
 				}
 				
-				
-				
-				
 				// INBOUND CALL REPORT
 				if ($pageTitle == "inbound_report") {
 					
@@ -2421,7 +2393,6 @@ $query = mysqli_query($link, $queryx);
 					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "query" => $inbound_report_query);
 					return $apiresults;
 				}
-				
 				
 				/* CALL EXPORT REPORT 
 				if ($pageTitle == "call_export_report") {
@@ -2861,10 +2832,6 @@ $query = mysqli_query($link, $queryx);
 					$return['custom_fields_enabled']= $custom_fields_enabled;
 					$return['file_output']			= $file_output;
 				}
-				
-				
-				
-				
 				
 				/* Dashboard 
 				if ($pageTitle=="dashboard") {
