@@ -807,7 +807,7 @@ ini_set('memory_limit', '2048M');
 							$sub_statusesFILE .= ",$sub_status[$i]";
 							$sub_statuses .= "$sub_status[$i]-";
 							$sub_statusesARY[$sub_status_count] = $sub_status[$i];
-							$sub_statusesTOP[$i] = "$sub_status[$i]";
+							$sub_statusesTOP[] = $sub_status[$i];
 							$sub_status_count++;
 						}
 						if (!preg_match("/-$PCuser[$i]-/", $PCusers)){
