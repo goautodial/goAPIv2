@@ -1,18 +1,18 @@
 <?php
-    ######################################################
-    #### Name: goGetAgentLog.php  	####
-    #### Description: API to get agent log of user  	####
-    #### Copyright: GOAutoDial Inc. (c) 2016  	####
-    #### Written by: Alexander Abenoja  	####
-    ######################################################
+    ////////////////////////////////////////////////////////
+    /// Name: goGetAgentLog.php 						 ///
+    /// Description: API to get agent log of user 		 ///
+    /// Copyright: GOAutoDial Inc. (c) 2016 			///
+    /// Written by: Alexander Abenoja 					///
+    ///////////////////////////////////////////////////////
     include_once ("../goFunctions.php");
     
-    ### POST or GET Variables
+    // POST or GET Variables
     $user = mysqli_real_escape_string($link, $_REQUEST['user']);
     $start_date = mysqli_real_escape_string($link, $_REQUEST['start_date']);
 	$end_date = mysqli_real_escape_string($link, $_REQUEST['end_date']);
 	
-    ### Check user_id if its null or empty
+    // Check user_id if its null or empty
     if($user === "" || $user === NULL) { 
             $apiresults = array("result" => "Error: Incomplete data passed."); 
     } else {
@@ -95,7 +95,7 @@
 			$userlog_campaign_id[] = $userlog_fetch['campaign_id'];
 			$userlog_user_group[] = $userlog_fetch['user_group'];
 		}
-		$userlog_array = array("user_log_id" => $userlog_log_id, "event" => $userlog_event, "event_date" => $userlog_event_date, "campaign_id" => $userlog_campaign_id, "user_group" => $userlog_user_group);
+		$userlog_array = array("user_log_id" => $userlog_log_id, "user" => $userlog_user, "event" => $userlog_event, "event_date" => $userlog_event_date, "campaign_id" => $userlog_campaign_id, "user_group" => $userlog_user_group);
 		/*
 		while($agentlog_fetch = mysqli_fetch_array($exec_outbound_query)){
 			$agent_log_id[] = $agentlog_fetch['agent_log_id'];
