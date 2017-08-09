@@ -35,7 +35,8 @@ ini_set('memory_limit', '2048M');
 	
 	$defPage = array("stats", "agent_detail", "agent_pdetail", "dispo", "call_export_report", "sales_agent", "sales_tracker", "inbound_report");
 
-	if(empty($session_user) || empty($pageTitle)){
+	//if(empty($session_user) || empty($pageTitle)){
+	if(empty($session_user)){
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 	}elseif(empty($fromDate) && empty($toDate)){
@@ -48,10 +49,12 @@ ini_set('memory_limit', '2048M');
 	}elseif($pageTitle == "sales_agent" && empty($request)){
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
-	}elseif(!in_array($pageTitle, $defPage)){
-		$err_msg = error_handle("10004");
-		$apiresults = array("code" => "10004", "result" => $err_msg);
-	}elseif($pageTitle == "call_export_report"){
+	}
+	// elseif(!in_array($pageTitle, $defPage)){
+	// 	$err_msg = error_handle("10004");
+	// 	$apiresults = array("code" => "10004", "result" => $err_msg);
+	// }
+	elseif($pageTitle == "call_export_report"){
 		$campaigns = mysqli_real_escape_string($link, $_REQUEST['campaigns']);
 		$inbounds = mysqli_real_escape_string($link, $_REQUEST['inbounds']);
 		$lists = mysqli_real_escape_string($link, $_REQUEST['lists']);
