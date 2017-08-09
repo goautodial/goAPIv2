@@ -122,7 +122,7 @@ ini_set('memory_limit', '2048M');
 			
 			$group_SQL = preg_replace("/,$/i",'',$group_SQL);
 			if($group_ct > 0){
-				$group_SQL = "and vl.campaign_id IN($group_SQL)";
+				$group_SQL = "and vcl.campaign_id IN($group_SQL)";
 			}
 			
 			$RUNgroup=$i;
@@ -373,7 +373,7 @@ ini_set('memory_limit', '2048M');
 		$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
 		$log_id = log_action($linkgo, 'DOWNLOAD', $log_user, $ip_address, "Exported Call Reports starting from $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 		
-		$return = array("query" => $active_list_fields, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
+		$return = array("query" => $query, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
 		
 		return $return;
 	}
