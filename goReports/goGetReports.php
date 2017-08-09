@@ -203,7 +203,7 @@ ini_set('memory_limit', '2048M');
             //if($rec_location == "Y")
             //$rec_location_where = "AND ((re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id) OR (re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id))";
             
-            $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vl.alt_dial, vcl.closecallid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+            $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vcl.closecallid,vl.alt_dial, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
         }
 
 
@@ -251,6 +251,10 @@ ini_set('memory_limit', '2048M');
 		while($row = mysqli_fetch_row($result)) {
 			$lead_id = $row[34];
 			$uniqueid = $row[35];
+			
+			if($RUNcampaign > 0 && $RUNgroup > 0)
+				$uniqueid2 = $row[36];
+
 			if($per_call_notes == "Y"){
 				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
 				$notes_ct = mysqli_num_rows($query_callnotes);
@@ -270,8 +274,13 @@ ini_set('memory_limit', '2048M');
 				// }else{
 				// 	$id_SQL = " AND vicidial_id = '$uniqueid'";
 				// }
-				
-				$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' AND vicidial_id = '$uniqueid' LIMIT 1;");
+				if(isset($uniqueid2) && !empty($uniqueid2)){
+					$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
+				}else{
+					$condition_SQL = "AND vicidial_id = '$uniqueid'";
+				}
+					
+				$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' $condition_SQL LIMIT 1;");
 				$rec_ct = mysqli_num_rows($query_recordings);
 				if ($rec_ct > 0){
 					$fetch_recording = mysqli_fetch_array($query_recordings);
