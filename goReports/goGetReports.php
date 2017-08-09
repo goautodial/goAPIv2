@@ -196,7 +196,7 @@ ini_set('memory_limit', '2048M');
             //    $rec_location_where = "and re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id";
 //                       $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
                         //$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl, vicidial_closer_log vcl,vicidial_list vi $rec_location_from where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id = vcl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
-            $query = "SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id, vcl.uniqueid,vcl.closecallid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date";
+            $query = "SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vcl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date";
 		}
 		
 		if ($RUNcampaign > 0 && $RUNgroup > 0){
@@ -265,6 +265,12 @@ ini_set('memory_limit', '2048M');
 			}
 
 			if($rec_location == "Y"){
+				// if(($RUNcampaign > 0 && $RUNgroup < 1) || ($RUNcampaign > 0 && $RUNgroup > 0)){
+				// 	$id_SQL = " AND vicidial_id = '$uniqueid'";
+				// }else{
+				// 	$id_SQL = " AND vicidial_id = '$uniqueid'";
+				// }
+				
 				$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' AND vicidial_id = '$uniqueid' LIMIT 1;");
 				$rec_ct = mysqli_num_rows($query_recordings);
 				if ($rec_ct > 0){
