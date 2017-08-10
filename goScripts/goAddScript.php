@@ -67,8 +67,19 @@
 									$subscript = 0;
 								}else{
 									$subscript = 1;
-								}				
-									$newQuery = "INSERT INTO vicidial_scripts(script_id, script_comments, script_name, active, user_group, script_text, subscript) VALUES('$script_id', '$script_comments', '$script_name', '$active', '$user_group', '$script_text', '$subscript');";
+								}		
+									$queryColumn = "SHOW COLUMNS FROM `vicidial_scripts` LIKE 'subscript';";
+									$resultColumn = mysqli_query($link, $queryColumn);	
+									$resultCpulumnNumRows = mysqli_num_rows($resultColumn);
+
+									if($resultCpulumnNumRows > 0){
+										$subscriptCol = ", subscript";
+										$subscriptVal = ", '$subscript'";
+									}else{
+										$subscriptCol = "";
+										$subscriptVal = "";
+									}
+									$newQuery = "INSERT INTO vicidial_scripts(script_id, script_comments, script_name, active, user_group, script_text{$subscriptCol}) VALUES('$script_id', '$script_comments', '$script_name', '$active', '$user_group', '$script_text'{$subscriptVal});";
 									$rsltv = mysqli_query($link, $newQuery);
 						
 								//$apiresults = array("usergroup" => $user_group, "query" => $newQuery);
