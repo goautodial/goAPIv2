@@ -44,7 +44,7 @@
 				$APIResult = array("code" => "10010", "result" => $err_msg);
 			}
 		} else {
-			$err_msg = error_handle("41004", "user_group. Does not exist");
+			$err_msg = error_handle("41004", "location. Does not exist");
 			$APIResult = array("code" => "41004", "result" => $err_msg);
 		}
 		
@@ -55,7 +55,7 @@
 		$countResult = $goDB->getRowCount();
 	
 		if($countResult > 0) {
-			$err_msg = error_handle("41004", "user_group");
+			$err_msg = error_handle("41004", "location");
 			$APIResult = array("code" => "41004", "result" => $err_msg);
 		} else {
 			$APIResult = array("result" => "success");

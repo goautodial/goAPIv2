@@ -17,10 +17,7 @@
 	
 	$log_user = $goDB->escape($_REQUEST['log_user']);
 	$log_group = $goDB->escape($_REQUEST['log_group']);
-   //user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
-    ### Default values 
-    $defFTL = array('Y','N','ADMIN_EXEMPT');
-    $defSE = array('OFF','START','ALL');
+	
 ########################
 	if($location == null) {
 		$APIResult = array("result" => "Error: Set a value for Location.");
@@ -53,10 +50,10 @@
 						} else {
 							$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Location: $location", $log_group, $goDB->getLastQuery());
 		
-							$APIResult = array("result" => "success", "query" => $goDB->getLastQuery());
+							$APIResult = array("result" => "success");
 						}
 					} else {
-						$APIResult = array("result" => "Error: User Group doesn't exist. ". $goDB->getLastQuery());
+						$APIResult = array("result" => "Error: Location doesn't exist. ");
 					}
 				}
 			}

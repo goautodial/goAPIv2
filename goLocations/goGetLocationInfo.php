@@ -16,7 +16,7 @@
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
     
 	if($location == null) { 
-		$APIResult = array("result" => "Error: Set a value for Location."); 
+		$APIResult = array("code" => "41004", "result" => "Error: Set a value for Location."); 
 	} else {
     	$groupId = go_get_groupid($goUser);
     
@@ -27,7 +27,7 @@
 
    		//$query = "SELECT user_group,group_name,forced_timeclock_login,shift_enforcement,allowed_campaigns FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
 		$goDB->orderBy('name', 'desc');
-		$rsltv = $goDB->getOne('locations', 'name,description,user_group,active,date_add,date_edit');
+		$rsltv = $goDB->getOne('locations', 'id,name,description,user_group,active,date_add,date_edit');
 		$countResult = $goDB->getRowCount();
 		$data = $rsltv;
 		

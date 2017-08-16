@@ -22,7 +22,7 @@
 		$err_msg = error_handle("40001");
 		$APIResult = array("code" => "40001","result" => $err_msg);
 	} else {
-        if(strlen($location) < 3 ) {
+        if(strlen($location) < 2 ) {
             $err_msg = error_handle("41006", "location");
 			$APIResult = array("code" => "41006","result" => $err_msg);
         } else {
@@ -67,8 +67,12 @@
 						
 						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Location $location under $user_group User Group(s)", $log_group, $goDB->getLastQuery());
 						
+						$get_location_id = mysqli_query($linkgo, "SELECT id FROM locations WHERE name = '$location';");
+						$fetch_id = mysqli_fetch_array($get_location_id);
+						$location_id = $fetch_id['id'];
+
 						if($countCheck > 0) {
-							$APIResult = array("result" => "success", "location" => $location, "user_group" => $user_group);
+							$APIResult = array("result" => "success", "location_id" => $location_id , "location" => $location, "user_group" => $user_group);
 						} else {
 							$err_msg = error_handle("10010");
 							$APIResult = array("code" => "10010","result" => $err_msg);

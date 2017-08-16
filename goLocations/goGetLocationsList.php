@@ -14,7 +14,7 @@
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
     //$groupId = go_get_groupid($session_user);
-    $groupId = $_REQUEST['group_id'];
+    $groupId = $goDB->escape($_REQUEST['user_group']);
     
 	if(!checkIfTenant($groupId) && $groupId !== "ADMIN") {
 		$goDB->where('user_group', $groupId);
