@@ -1238,6 +1238,25 @@ if ($sipIsLoggedIn) {
                     $CCID_on++;
                 }
                 
+                $dynRslt = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
+                if ($goDB->getRowCount() > 0) {
+                    $goDB->where('campaign_id', $campaign);
+                    $rslt = $goDB->getOne('go_campaigns', 'dynamic_cid');
+                    $dynCID = $rslt['dynamic_cid'];
+                    
+                    if ($dynCID === 'Y') {
+                        $astDB->where('phone_number', $phone_number);
+                        $astDB->where('lead_id', $lead_id);
+                        $rslt = $astDB->getOne('vicidial_list', 'security_phrase');
+                        $dynamic_cid = $rslt['security_phrase'];
+                        
+                        if (strlen($dynamic_cid) > 6) {
+                            $CCID = "$dynamic_cid";
+                            $CCID_on++;
+                        }
+                    }
+                }
+                
                 ### check for custom cid use
                 $use_custom_cid = 0;
                 $temp_CID = '';

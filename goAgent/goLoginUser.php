@@ -258,6 +258,18 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $query = $astDB->insert('vicidial_agent_log', $insertData);
         $agent_log_id = $astDB->getInsertId();
         
+        ##### insert an entry on vicidial_user_log
+        //$stmt = "INSERT INTO vicidial_user_log (user,event,campaign_id,event_date,event_epoch,user_group) values('$user','LOGOUT','$campaign','$NOW_TIME','$StarTtimE','$user_group')";
+        $insertData = array(
+            'user' => $user,
+            'event' => 'LOGIN',
+            'campaign_id' => $campaign,
+            'event_date' => $NOW_TIME,
+            'event_epoch' => $StarTtimE,
+            'user_group' => $user_settings->user_group
+        );
+        $query = $astDB->insert('vicidial_user_log', $insertData);
+
         ////$query = $db->query("UPDATE vicidial_campaigns SET campaign_logindate='$NOW_TIME' WHERE campaign_id='$campaign';");
         $astDB->where('campaign_id', $campaign);
         $query = $astDB->update('vicidial_campaigns', array('campaign_logindate' => $NOW_TIME));
@@ -375,6 +387,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $astDB->orderBy('status');
     $query = $astDB->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
     $statuses_ct = $astDB->getRowCount();
+    $statuses = array();
     foreach ($query as $row) {
         $status = $row['status'];
         $status_name = $row['status_name'];
@@ -406,6 +419,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $astDB->orderBy('pause_code', 'asc');
     $rslt = $astDB->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
     $pause_codes_ct = $astDB->getRowCount();
+    $pause_codes = array();
     foreach ($rslt as $row) {
         $pause = $row['pause_code'];
         $pause_name = str_replace("+", " ", $row['pause_code_name']);

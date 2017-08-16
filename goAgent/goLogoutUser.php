@@ -80,18 +80,6 @@ if ($sipIsLoggedIn) {
         $query = $astDB->getOne('vicidial_live_agents', 'campaign_id');
         $campaign = $query['campaign_id'];
         
-        ##### insert an entry on vicidial_user_log
-        //$stmt = "INSERT INTO vicidial_user_log (user,event,campaign_id,event_date,event_epoch,user_group) values('$user','LOGOUT','$campaign','$NOW_TIME','$StarTtimE','$user_group')";
-        $insertData = array(
-            'user' => $user,
-            'event' => 'LOGOUT',
-            'campaign_id' => $campaign,
-            'event_date' => $NOW_TIME,
-            'event_epoch' => $StarTtimE,
-            'user_group' => $user_group
-        );
-        $query = $astDB->insert('vicidial_user_log', $insertData);
-        
 		if ($no_delete_sessions < 1) {
 			##### Remove the reservation on the vicidial_conferences meetme room
 			//$stmt="UPDATE vicidial_conferences set extension='' where server_ip='$server_ip' and conf_exten='$conf_exten';";
@@ -221,7 +209,21 @@ if ($sipIsLoggedIn) {
 			$astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateData);
         }
-        
+
+        ##### insert an entry on vicidial_user_log
+        $NOW_USERLOG = date("Y-m-d H:i:s");
+        $NOWepoch_USERLOG = date("U");
+        //$stmt = "INSERT INTO vicidial_user_log (user,event,campaign_id,event_date,event_epoch,user_group) values('$user','LOGOUT','$campaign','$NOW_TIME','$StarTtimE','$user_group')";
+        $insertData = array(
+            'user' => $user,
+            'event' => 'LOGOUT',
+            'campaign_id' => $campaign,
+            'event_date' => $NOW_USERLOG,
+            'event_epoch' => $NOWepoch_USERLOG,
+            'user_group' => $user_group
+        );
+        $query = $astDB->insert('vicidial_user_log', $insertData);
+
         $result = 'success';
         $message = "User {$user} has been logged out";
     } else {
