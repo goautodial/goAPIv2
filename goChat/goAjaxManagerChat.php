@@ -63,9 +63,11 @@ if (isset($type) && $type == 'getMessages') {
     $where = " (`from`='$userId' OR `to`='$userId') GROUP BY `session`";
     if($recipients !== "") {
         $where = "";
-        foreach ($recipients as $toId) {
-            $where .= "((`from`='$userId' AND `to`='$toId') OR (`from`='$toId' AND `to`='$userId')) OR ";
-        }
+		if (count($recipients) > 0) {
+			foreach ($recipients as $toId) {
+				$where .= "((`from`='$userId' AND `to`='$toId') OR (`from`='$toId' AND `to`='$userId')) OR ";
+			}
+		}
         $where = trim($where, " OR ");
     }
 
