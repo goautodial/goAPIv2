@@ -71,6 +71,7 @@
 	$agent_lead_search_method 		= $_REQUEST['agent_lead_search_method'];
     $omit_phone_code = $_REQUEST['omit_phone_code'];
 	$alt_number_dialing = $_REQUEST['alt_number_dialing'];
+	$dynamic_cid = $_REQUEST['dynamic_cid'];
 	
 	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
 	$survey_method = $_REQUEST['survey_method'];
@@ -95,6 +96,7 @@
 	$amd_send_to_vmx = $_REQUEST['amd_send_to_vmx'];
 	$waitforsilence_options = $_REQUEST['waitforsilence_options'];
 
+	$location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
    	//$apiresults = array("data" => $_REQUEST); 
 
     // Default values 
@@ -200,6 +202,7 @@
 						$data_disable_alter_custphone = $fetch_exist['disable_alter_custphone'];
 						$data_amd_send_to_vmx = $fetch_exist['amd_send_to_vmx'];
 						$data_waitforsilence_options = $fetch_exist['waitforsilence_options'];
+						$data_dynamic_cid = $fetch_exist['dynamic_cid'];
 					}
 					
 					if(empty($campaign_name))
@@ -353,6 +356,36 @@
 					if(empty($waitforsilence_options))
 						$waitforsilence_options = $data_waitforsilence_options;
 					
+					if(empty($dynamic_cid))
+						$dynamic_cid = $data_dynamic_cid;
+					
+					$dynamic_cid_SQL = "";
+					$dynamic_cid_COL = "";
+					$dynamic_cid_VAL = "";
+					$checkColumn = mysqli_query($linkgo, "SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
+					$columnRows = mysqli_num_rows($checkColumn);
+					if ($columnRows > 0) {
+						$dynamic_cid_SQL = ", `dynamic_cid` = '$dynamic_cid' ";
+						$dynamic_cid_COL = ", dynamic_cid";
+						$dynamic_cid_VAL = ", '$dynamic_cid'";
+					}
+					
+					if(!empty($location)){
+						//$result_location = go_check_location($location, $user_group);
+						// if($result_location < 1){
+						// 	$err_msg = error_handle("41006", "location. User group does not exist in the location selected.");
+						// 	$apiresults = array("code" => "41006", "result" => $err_msg);
+						// }
+						$location_SQL = ", `location_id` = '$location' ";
+						$location_COL = ", location_id";
+						$location_VAL = ",'$location'";
+					}else{
+						$location = "";
+						$location_SQL = "";
+						$location_COL = "";
+						$location_VAL = "";
+					}
+
 					if($campaign_type == "SURVEY"){
 						if(!empty($dial_method)){
 							$dial_method = $dial_method;
@@ -487,11 +520,11 @@
 						$url_tab_first_url = str_replace("http://", "https://", $url_tab_first_url);
 						$url_tab_second_url = str_replace("http://", "https://", $url_tab_second_url);
 						if ($numGO > 0) {
-							$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id',url_tab_first_title='$url_tab_first_title',url_tab_first_url='$url_tab_first_url',url_tab_second_title='$url_tab_second_title',url_tab_second_url='$url_tab_second_url' WHERE campaign_id='$campaign_id';";
+							$updateGO = "UPDATE go_campaigns SET custom_fields_launch='$custom_fields_launch', custom_fields_list_id='$custom_fields_list_id',url_tab_first_title='$url_tab_first_title',url_tab_first_url='$url_tab_first_url',url_tab_second_title='$url_tab_second_title',url_tab_second_url='$url_tab_second_url' $location_SQL $dynamic_cid_SQL WHERE campaign_id='$campaign_id';";
 							$resultGO = mysqli_query($linkgo, $updateGO);
 						} else {
 							$campaign_type = (strlen($campaign_type) > 0) ? $campaign_type : "OUTBOUND";
-							$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id','$url_tab_first_title','$url_tab_first_url','$url_tab_second_title','$url_tab_second_url');";
+							$insertGO = "INSERT INTO go_campaigns (campaign_id, campaign_type, custom_fields_launch, custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url{$location_COL} {$dynamic_cid_COL}) VALUES('$campaign_id', '$campaign_type', '$custom_fields_launch', '$custom_fields_list_id','$url_tab_first_title','$url_tab_first_url','$url_tab_second_title','$url_tab_second_url'{$location_VAL} {$dynamic_cid_VAL});";
 							$resultGO = mysqli_query($linkgo, $insertGO);
 						}
 						
