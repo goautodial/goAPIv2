@@ -1668,6 +1668,25 @@
         }else{
             return $result;
         }
-        
+    }
+
+    // check if user location exists
+    function go_check_user_location($user, $id){
+        $result = 0; // if result is returned 1, then the location feature exists
+        include("goDBgoautodial.php");
+        $query = "SELECT location_id FROM users WHERE name='$user' OR userid='$id';";
+        $rsltv = mysqli_query($linkgo, $query);
+        $check_resultv = mysqli_num_rows($rsltv);
+
+        if ($check_resultv > 0) {
+            $rowc=mysqli_fetch_array($rsltv);
+            $goLocation = $rowc["location_id"];
+
+            $result = $goLocation;
+
+            return $result;
+        }else{
+            return $result;
+        }
     }
 ?>

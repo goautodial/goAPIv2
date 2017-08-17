@@ -1,13 +1,13 @@
 <?php
-    ////////////////////////////////////#
-    //# Name: goGetUserInfo.php	       //#
-    //# Description: API to get specific user	       //#
-    //# Version: 0.9                                  //#
-    //# Copyright: GOAutoDial Inc. (c) 2011-2014      //#
-    //# Written by: Jeremiah Sebastian Samatra        //#
-    //#             Demian Lizandro Biscocho          //#
-    //# License: AGPLv2                               //#
-    ////////////////////////////////////#
+    /************************************************
+    * Name: goGetUserInfo.php                       *
+    * Description: API to get specific user         *
+    * Version: 0.9                                  *
+    * Copyright: GOAutoDial Inc. (c) 2011-2014      *
+    * Written by: Jeremiah Sebastian Samatra        *
+    *             Demian Lizandro Biscocho          *
+    * License: AGPLv2                               *
+    ************************************************/
     include_once("../goFunctions.php");
 
     // POST or GET Variables
@@ -136,12 +136,19 @@
             
         
         if($user_id != NULL){
-        
-            $queryUserInfoGo = "
+            $check_location = go_check_user_location(NULL, $user_id);
+            
+            if($check_location !== 0){
+                $queryUserInfoGo = "
                                 SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description
                                 FROM users us, locations lo
                                 WHERE us.location_id = lo.id AND us.userid='$user_id'
                                 ";
+            }else{
+                $queryUserInfoGo = "
+                                SELECT avatar, gcal, calendar_apikey, calendar_id FROM users us WHERE userid='$user_id';
+                                ";
+            }
                                 
             $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo) or die(mysqli_error($linkgo));
             $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);      
@@ -177,13 +184,19 @@
         }
         
         if ($user != NULL && $countResultOnlineAgents > 0 ){
-        
-            $queryUserInfoGo = "
+            
+            $check_location = go_check_user_location($user, NULL);
+            
+            if($check_location !== 0){
+                $queryUserInfoGo = "
                                 SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description 
                                 FROM users us, locations lo
                                 WHERE us.location_id = lo.id AND us.name='$user'
                                 ";
-                                
+            }else{
+                $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE name='$user';";
+            }
+            
             $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
             $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);         
             
