@@ -15,12 +15,14 @@ ini_set('memory_limit', '2048M');
     include_once("../goFunctions.php");
 	include_once("goReportsFunctions.php");	
 
-	$fromDate = date("Y-m-d")." 00:00:00";
-	$toDate = date("Y-m-d")." 23:59:59";
 	// need function go_sec_convert();
     $pageTitle = strtolower(mysqli_real_escape_string($link, $_REQUEST['pageTitle']));
     $fromDate = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
+    if(empty($fromDate))
+    	$fromDate = date("Y-m-d")." 00:00:00";
     $toDate = mysqli_real_escape_string($link, $_REQUEST['toDate']);
+    if(empty($toDate))
+    	$toDate = date("Y-m-d")." 23:59:59";
     $campaignID = mysqli_real_escape_string($link, $_REQUEST['campaignID']);
     $request = mysqli_real_escape_string($link, $_REQUEST['request']);
     $userID = mysqli_real_escape_string($link, $_REQUEST['userID']);
@@ -1150,7 +1152,8 @@ ini_set('memory_limit', '2048M');
 						if(is_null($Scalls[$m])){
 							$Scalls[$m] = 0;
 						}
-						$Toutput = array("rowID" => $rowId, "name" => $Sname[$m], "user" => $Suser[$m], "number_of_calls" => $Scalls[$m], "agent_time" => $Stime[$m], "wait_time" => $Swait[$m], "talk_time" => $Stalk[$m], "dispo_time" => $Sdispo[$m], "pause_time" => $Spause[$m], "wrap_up" => $Sdead[$m], "customer_time" => $Scustomer[$m]);
+						//"rowID" => $rowId, 
+						$Toutput = array("name" => $Sname[$m], "user" => $Suser[$m], "number_of_calls" => $Scalls[$m], "agent_time" => $Stime[$m], "wait_time" => $Swait[$m], "talk_time" => $Stalk[$m], "dispo_time" => $Sdispo[$m], "pause_time" => $Spause[$m], "wrap_up" => $Sdead[$m], "customer_time" => $Scustomer[$m]);
 				
 						/*$Boutput = "<tr>
 								<td> $Sname[$m] </td>
@@ -1158,10 +1161,11 @@ ini_set('memory_limit', '2048M');
 								</tr>";*/
 						$Sstatuses[$m] = rtrim( $Sstatuses[$m], ",");
 						$Boutput = array("rowID" => $rowId, "name" => $Sname[$m], "statuses" => $Sstatuses[$m]);
+						$BoutputFile = array("statuses" => $Sstatuses[$m]);
 
 						$TOPsorted_output[$m] = $Toutput;
 						$BOTsorted_output[$m] = $Boutput;
-						//$TOPsorted_outputFILE[$m] = $fileToutput;
+						$TOPsorted_outputFILE[$m] = array_merge($Toutput, $BoutputFile);
 				
 						if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage))
 							if ($file_download > 0)
@@ -1282,7 +1286,7 @@ ini_set('memory_limit', '2048M');
 					// $return['TOTcalls']				= $TOTcalls;
 					// $return['file_output']			= $file_output;
 
-					$apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "sub_statusesTOP" => $sub_statusesTOP, "BOTsorted_output" => $BOTsorted_output, "SUMstatuses" => $SUMstatuses, "TOTwait" => $TOTwait, "TOTtalk" => $TOTtalk, "TOTdispo" => $TOTdispo, "TOTpause" => $TOTpause, "TOTdead" => $TOTdead, "TOTcustomer" => $TOTcustomer, "TOTALtime" => $TOTALtime, "TOTtimeTC" => $TOTtimeTC, "TOT_AGENTS" => $TOT_AGENTS, "TOTcalls" => $TOTcalls);
+					$apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "sub_statusesTOP" => $sub_statusesTOP, "BOTsorted_output" => $BOTsorted_output, "SUMstatuses" => $SUMstatuses, "TOTwait" => $TOTwait, "TOTtalk" => $TOTtalk, "TOTdispo" => $TOTdispo, "TOTpause" => $TOTpause, "TOTdead" => $TOTdead, "TOTcustomer" => $TOTcustomer, "TOTALtime" => $TOTALtime, "TOTtimeTC" => $TOTtimeTC, "TOT_AGENTS" => $TOT_AGENTS, "TOTcalls" => $TOTcalls, "FileExport" => $TOPsorted_outputFILE);
 					
 					return $apiresults;
 					
