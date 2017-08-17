@@ -24,6 +24,7 @@
         $phone_pass = mysqli_real_escape_string($link, $pass);
         $user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
         $active = strtoupper($_REQUEST['active']);
+        $location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
 		
 		if(isset($_REQUEST['seats']))
         $seats = mysqli_real_escape_string($link, $_REQUEST['seats']);
@@ -51,7 +52,7 @@
 		$apiresults = array("code" => "41004", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Special characters found in password");
 	} else {
-	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_full_name)){
+	if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', $orig_full_name)){
 		$err_msg = error_handle("41004", "full_name");
 		$apiresults = array("code" => "41004", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Special characters found in full_name");
@@ -141,6 +142,18 @@
 							$ulUser = "AND user='$user' AND user_group='$groupId'";
 							$ulug = "WHERE user_group='$user_group' AND user_group='$groupId'";
 						}
+
+						if(!empty($location)){
+							$result_location = go_check_location($location, $user_group);
+							
+							if($result_location < 1){
+								$err_msg = error_handle("41006", "location. User group does not exist in the location selected.");
+								$apiresults = array("code" => "41006", "result" => $err_msg);
+								$location = "";
+							}
+						}else{
+							$location = "";
+						}
 						
 						$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
 						$rsltv = mysqli_query($link, $query);
@@ -207,7 +220,7 @@
                                     $goactive = "1";
 								}
 								
-								$queryUserAddGo = "INSERT INTO users (userid, name, fullname, avatar, role, status, user_group, phone) VALUES ('$userid', '$user', '$full_name', '$avatar', '$user_level', '$goactive', '$user_group', '$phone_login')";
+								$queryUserAddGo = "INSERT INTO users (userid, name, fullname, avatar, role, status, user_group, phone, location_id) VALUES ('$userid', '$user', '$full_name', '$avatar', '$user_level', '$goactive', '$user_group', '$phone_login', '$location')";
 								$resultQueryAddUserGo = mysqli_query($linkgo, $queryUserAddGo);
 								
 							// Admin logs
@@ -249,7 +262,8 @@
 									$kamailioq = "INSERT INTO subscriber (username, domain, password{$kamha1fields}) VALUES ('$phone_login','$domain','$phone_pass'{$kamha1values});";
 									$resultkam = mysqli_query($linkgokam, $kamailioq);
 									
-									$return_user = $user." (".$userid.")";
+									//$return_user = $user." (".$userid.")";
+									$return_user = $userid;
 									array_push($arr_user, $return_user);
 									
 								} else {

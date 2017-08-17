@@ -1305,10 +1305,10 @@
                 $auth_key = 'ERRSERVERS';
                 $login_problem++;
             }
-    #       if ($ap_total < 1) {
-    #           $auth_key = 'ERRPHONES';
-    #           $login_problem++;
-    #       }
+    //       if ($ap_total < 1) {
+    //           $auth_key = 'ERRPHONES';
+    //           $login_problem++;
+    //       }
             if ( ($vla_total >= $vla_set) and ($vla_on > 0) ) {
                 $auth_key = 'ERRAGENTS';
                 $login_problem++;
@@ -1646,4 +1646,28 @@
 		
 		return $err_msg;
 	}
+
+    // check location
+    function go_check_location($id, $usergroup){
+        $result = 0; // if result is returned 1, then the usergroup exists within the location
+        include("goDBgoautodial.php");
+        $query = "SELECT user_group FROM locations WHERE id='$id'";
+        $rsltv = mysqli_query($linkgo, $query) or die(mysql_error($linkgo));
+        $check_resultv = mysqli_num_rows($rsltv);
+
+        if ($check_resultv > 0) {
+            $rowc=mysqli_fetch_array($rsltv);
+            $goUser_group = $rowc["user_group"];
+
+            $user_group_array = explode(",",$goUser_group);
+
+            if(in_array($usergroup, $user_group_array)){
+                $result = 1;
+            }
+            return $result;
+        }else{
+            return $result;
+        }
+        
+    }
 ?>

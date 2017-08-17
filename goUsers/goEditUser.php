@@ -45,6 +45,7 @@
     $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
     $agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
     $avatar = $_REQUEST['avatar'];
+    $location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
     
     $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
     $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
@@ -69,7 +70,7 @@
 				$apiresults = array("code" => "41006", "result" => $err_msg);
 				//$apiresults = array("result" => "Error: Special characters found in password");
 			} else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $full_name)){
+				if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', $full_name)){
 					$err_msg = error_handle("41006", "full_name");
 					$apiresults = array("code" => "41006", "result" => $err_msg);
 					//$apiresults = array("result" => "Error: Special characters found in full_name");
@@ -113,6 +114,19 @@
 												$apiresults = array("code" => "40002", "result" => $err_msg);
 											}else{
 												$groupId = go_get_groupid($session_user);
+
+												if(!empty($location)){
+													$result_location = go_check_location($location, $user_group);
+													if($result_location < 1){
+														$err_msg = error_handle("41006", "location. User group does not exist in the location selected.");
+														$apiresults = array("code" => "41006", "result" => $err_msg);
+													}
+													$location_SQL = ", `location_id` = '$location' ";
+												}else{
+													$location = "";
+													$location_SQL = "";
+												}
+
 												if (!checkIfTenant($groupId)) {
 													$ul = "WHERE user_group='$user_group'";
 													
@@ -130,7 +144,7 @@
 														$ulUser = "AND user='$user' AND user_group='$groupId'";
 													}
 												}
-												
+
 												if($voicemail != null){
 													$voicemail_query = ", `voicemail_id` = '$voicemail'";
 												}else{
@@ -223,7 +237,7 @@
 														$err_msg = error_handle("41004", "user_group. Doesn't exist");
 														$apiresults = array("code" => "41004", "result" => $err_msg);
 													}
-													
+
 													if($countResult <= 0 && $user_group!=null) {
 														$err_msg = error_handle("41004", "user_group. Doesn't exist");
 														$apiresults = array("code" => "41004", "result" => $err_msg);
@@ -294,19 +308,9 @@
 															}
 															
 															if ($countResultGo > 0){
-																$queryUpdateUserGo = "UPDATE users 
-																						SET `name` = '$dataUser',
-																							`fullname` = '$full_name', 
-																							`phone` = '$phone_login',
-																							`email` = '$email',
-																							`avatar` = '$avatar',
-																							`user_group` = '$user_group',
-																							`role` = '$user_level',
-																							`status` = '$goactive'
-																						WHERE userid = '$userid'";                                                    
+																$queryUpdateUserGo = "UPDATE users  SET `name` = '$dataUser', `fullname` = '$full_name', `phone` = '$phone_login', `email` = '$email', `avatar` = '$avatar', `user_group` = '$user_group', `role` = '$user_level', `status` = '$goactive' $location_SQL WHERE userid = '$userid'";                                                    
 															} else {
-																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
-																						VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive')";
+																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status, location_id) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive', '$location')";
 															}
 														}else{
 															$queryUpdateUser = "UPDATE `vicidial_users` 
@@ -331,19 +335,9 @@
 															}
 															
 															if ($countResultGo > 0){
-																$queryUpdateUserGo = "UPDATE users 
-																						SET `name` = '$dataUser',
-																							`fullname` = '$full_name', 
-																							`phone` = '$phone_login',
-																							`email` = '$email',
-																							`avatar` = '$avatar',
-																							`user_group` = '$user_group',
-																							`role` = '$user_level',
-																							`status` = '$goactive'
-																						WHERE userid = '$user'";
+																$queryUpdateUserGo = "UPDATE users SET `name` = '$dataUser', `fullname` = '$full_name', `phone` = '$phone_login', `email` = '$email', `avatar` = '$avatar', `user_group` = '$user_group', `role` = '$user_level', `status` = '$goactive' $location_SQL WHERE name = '$user'";
 															} else {
-																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status) 
-																					VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive')";
+																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status, location_id) VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive', '$location')";
 															}
 														}
 														

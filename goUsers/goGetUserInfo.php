@@ -138,12 +138,12 @@
         if($user_id != NULL){
         
             $queryUserInfoGo = "
-                                SELECT avatar, gcal, calendar_apikey, calendar_id 
-                                FROM users 
-                                WHERE userid='$user_id'
+                                SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description
+                                FROM users us, locations lo
+                                WHERE us.location_id = lo.id AND us.userid='$user_id'
                                 ";
                                 
-            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
+            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo) or die(mysqli_error($linkgo));
             $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);      
             
             if ($filter == "userInfo") {
@@ -176,12 +176,12 @@
             
         }
         
-        if ($user != NULL && $countResultOnlineAgents > 0 ){      
+        if ($user != NULL && $countResultOnlineAgents > 0 ){
         
             $queryUserInfoGo = "
-                                SELECT avatar, gcal, calendar_apikey, calendar_id 
-                                FROM users 
-                                WHERE name='$user'
+                                SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description 
+                                FROM users us, locations lo
+                                WHERE us.location_id = lo.id AND us.name='$user'
                                 ";
                                 
             $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
