@@ -861,11 +861,11 @@ ini_set('memory_limit', '2048M');
 						$status =		$row['status'];
 						$dead =			$row['dead_sec'];
 						
-						// if ($wait > 65000) {$wait=0;}
-						// if ($talk > 65000) {$talk=0;}
-						// if ($dispo > 65000) {$dispo=0;}
-						// if ($pause > 65000) {$pause=0;}
-						// if ($dead > 65000) {$dead=0;}
+						if ($wait > 65000) {$wait=0;}
+						if ($talk > 65000) {$talk=0;}
+						if ($dispo > 65000) {$dispo=0;}
+						if ($pause > 65000) {$pause=0;}
+						if ($dead > 65000) {$dead=0;}
 						
 						$customer =		($talk - $dead);
 						if ($customer < 1){$customer=0;}
