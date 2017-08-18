@@ -205,7 +205,13 @@ ini_set('memory_limit', '2048M');
             //if($rec_location == "Y")
             //$rec_location_where = "AND ((re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id) OR (re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id))";
             
-            $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vcl.closecallid,vl.alt_dial, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+			$query = "
+				(SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.term_reason,vi.rank,vi.owner,vi.lead_id,vl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date) 
+				UNION 
+				(SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.term_reason,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date);
+				";
+
+            //$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vcl.closecallid,vl.alt_dial, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
         }
 
 
@@ -254,8 +260,8 @@ ini_set('memory_limit', '2048M');
 			$lead_id = $row[34];
 			$uniqueid = $row[35];
 			
-			if($RUNcampaign > 0 && $RUNgroup > 0)
-				$uniqueid2 = $row[36];
+			//if($RUNcampaign > 0 && $RUNgroup > 0)
+			//	$uniqueid2 = $row[36];
 
 			if($per_call_notes == "Y"){
 				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
@@ -310,16 +316,16 @@ ini_set('memory_limit', '2048M');
 			//}
 
                         if(!empty($row[28])) {
-                                $row[28] = preg_replace('/[ ,]+/', '-', trim($row[28]));
+                                $row[28] = preg_replace('/[,]+/', '-', trim($row[28]));
                         }
                         if(!empty($row[15])) {
-                                $row[15] = preg_replace('/[ ,]+/', '-', trim($row[15]));
+                                $row[15] = preg_replace('/[,]+/', '-', trim($row[15]));
                         }
                         if(!empty($row[16])) {
-                                $row[16] = preg_replace('/[ ,]+/', '-', trim($row[16]));
+                                $row[16] = preg_replace('/[,]+/', '-', trim($row[16]));
                         }
                         if(!empty($row[17])) {
-                                $row[17] = preg_replace('/[ ,]+/', '-', trim($row[17]));
+                                $row[17] = preg_replace('/[,]+/', '-', trim($row[17]));
                         }
 
 
