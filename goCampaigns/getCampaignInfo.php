@@ -14,6 +14,7 @@
     $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
     $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$session_user = mysqli_real_escape_string($link, $_REQUEST['session_user']);
 
     // Check campaign_id if its null or empty
 	if(empty($campaign_id) || empty($session_user)) {
