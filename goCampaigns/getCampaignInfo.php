@@ -17,7 +17,7 @@
 	$session_user = mysqli_real_escape_string($link, $_REQUEST['session_user']);
 
     // Check campaign_id if its null or empty
-	if(empty($campaign_id) || empty($session_user)) {
+	if(empty($campaign_id) && empty($session_user)) {
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg); 
 	} else {
