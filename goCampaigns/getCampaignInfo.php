@@ -36,6 +36,13 @@
 		$countResult = mysqli_num_rows($rsltv);
 		
 		if($countResult > 0) {
+			$location_id_COL = '';
+			$checkColumn = mysqli_query($linkgo, "SHOW COLUMNS FROM `go_campaigns` LIKE 'location_id'");
+			$columnRows = mysqli_num_rows($checkColumn);
+			if ($columnRows > 0) {
+				$location_id_COL = ", location_id";
+			}
+			
 			$dynamic_cid_COL = '';
 			$checkColumn = mysqli_query($linkgo, "SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
 			$columnRows = mysqli_num_rows($checkColumn);
@@ -44,7 +51,7 @@
 			}
 			
 			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url,location_id $dynamic_cid_COL FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
+				$queryGoCampaign = "SELECT campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url $location_id_COL $dynamic_cid_COL FROM go_campaigns WHERE campaign_id='$campaign_id' LIMIT 1";
 				$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 				while($typeresults = mysqli_fetch_array($rsltvGoCampaign, MYSQLI_ASSOC)){
 					$campaign_type = $typeresults['campaign_type'];
@@ -54,7 +61,9 @@
 					$url_tab_first_url = $typeresults['url_tab_first_url'];
 					$url_tab_second_title = $typeresults['url_tab_second_title'];
 					$url_tab_second_url = $typeresults['url_tab_second_url'];
-					$location_id = $typeresults['location_id'];
+					if ($location_id_COL !== '') {
+						$location_id = $typeresults['location_id'];
+					}
 					if ($dynamic_cid_COL !== '') {
 						$dynamic_cid = $typeresults['dynamic_cid'];
 					}
