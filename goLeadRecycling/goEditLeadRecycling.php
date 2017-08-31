@@ -28,11 +28,11 @@ if(empty($campaign_id) || empty($session_user) || empty($status)) {
       $apiresults = array("code" => "40001", "result" => $err_msg);
 } elseif(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $status)){
     $apiresults = array("result" => "Error: Special characters found in Status and must not be empty");
-} elseif(strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay)){
+} elseif(strlen($attempt_delay) > 5) || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay)){
     $apiresults = array("result" => "Error: Special characters found in Attempt Delay and must not be empty");
 } elseif(strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
    $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
-} elseif(!in_array($active, $defActive) && !empty($active)) {
+} elseif(!in_array($active, $defActive) && $active != null) {
     $apiresults = array("result" => "Error: Default value for active is N for No and Y for Yes only.");
 } else {
 	$groupId = go_get_groupid($session_user);
@@ -66,7 +66,7 @@ if(empty($campaign_id) || empty($session_user) || empty($status)) {
 
 				$log_id = log_action($linkgo, 'MODIFY', $session, $ip_address, "Modified Lead Recycling: $status", $groupId, $queryVM);
             }
-
+            
         } else {
 	        $apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");
 	    }
