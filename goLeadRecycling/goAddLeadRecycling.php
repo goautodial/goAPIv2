@@ -55,7 +55,7 @@
         $sqlCheck2 = mysqli_query($link,$queryCheck2);
         $countCheck2 = mysqli_num_rows($sqlCheck2);
 
-      if($countCheck1 > 0 || $countCheck2 > 0){
+      if($countCheck1 > 0 || $countCheck2 > 0 || $campaign_id === "ALL"){
         if($campaign_id === "ALL"){
           $all_campaigns = "SELECT campaign_id FROM vicidial_campaigns;";
           $query_all_campaigns = mysqli_query($link, $all_campaigns);
