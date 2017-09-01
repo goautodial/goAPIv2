@@ -23,10 +23,10 @@
 
 	// ERROR CHECKING ...
 	if(empty($session_user) || empty($recycle_id)) {
-	    $err_msg = error_handle("40001", "campaign_id, session_user, and status");
+	    $err_msg = error_handle("40001", "recycle_id or session_user");
 	      $apiresults = array("code" => "40001", "result" => $err_msg);
-	} elseif(!empty($attempt_delay) && (strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay)) ){
-	    $apiresults = array("result" => "Error: Special characters found in Attempt Delay and must not be empty");
+	} elseif(!empty($attempt_delay) && (strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay > 120) ){
+	    $apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
 	} elseif(!empty($attempt_delay) && (strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)) ){
 	   $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
 	} elseif(!in_array($active, $defActive) && $active != null) {
@@ -39,13 +39,12 @@
 	    $check_usergroup = go_check_usergroup_campaign($groupId, $campaign_id);
 
 	    if($check_usergroup > 0){
-	        $queryCheck = "SELECT status,attempt_delay,attempt_maximum,campaign_id,active FROM vicidial_lead_recycle WHERE campaign_id='$campaign_id' AND status = '$status';";
+	        $queryCheck = "SELECT status,attempt_delay,attempt_maximum,campaign_id,active FROM vicidial_lead_recycle WHERE recycle_id='$recycle_id';";
 	        $sqlCheck = mysqli_query($link,$queryCheck);
 	        $countCheck = mysqli_num_rows($sqlCheck);
 
 			if($countCheck > 0){
 				while($fresults = mysqli_fetch_array($sqlCheck, MYSQLI_ASSOC)){
-					$dataStatus = $fresults['status'];
 					$dataAttemptDelay = $fresults['attempt_delay'];
 					$dataAttemptMaximum = $fresults['attempt_maximum'];
 					$dataCampID = $fresults['campaign_id'];
@@ -57,7 +56,7 @@
 				if(empty($campaign_id)){$campaign_id = $dataCampID;}
 				if(empty($active)){$active = $dataActive;}
 
-				$queryVM ="UPDATE vicidial_lead_recycle SET attempt_delay='$attempt_delay',attempt_maximum='$attempt_maximum', active='$active' WHERE status='$status' and campaign_id='$campaign_id'";
+				$queryVM ="UPDATE vicidial_lead_recycle SET attempt_delay='$attempt_delay',attempt_maximum='$attempt_maximum', active='$active' WHERE recycle_id='$recycle_id'";
 				$rsltv1 = mysqli_query($link,$queryVM) or die(mysqli_error($link));
 
 
@@ -68,7 +67,7 @@
 	            }
 	            
 	        } else {
-		        $apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");
+		        $apiresults = array("result" => "Error: Lead Recycle ID does not exist!");
 		    }
 	    }else{
 	    	$apiresults = array("result" => "Error: Current user ".$session_user." doesn't have enough permission to access this feature");
