@@ -35,7 +35,7 @@
       $apiresults = array("code" => "40001", "result" => $err_msg);
   } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status) ){
     $apiresults = array("result" => "Error: Special characters found in status");
-  } elseif(strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay > 120){
+  } elseif($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120){
     $apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
   } elseif(strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
     $apiresults = array("result" => "Error: Maximum is 3 digits. No special characters allowed.");

@@ -25,7 +25,7 @@
 	if(empty($session_user) || empty($recycle_id)) {
 	    $err_msg = error_handle("40001", "recycle_id or session_user");
 	      $apiresults = array("code" => "40001", "result" => $err_msg);
-	} elseif(!empty($attempt_delay) && (strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay > 120) ){
+	} elseif(!empty($attempt_delay) && ($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120) ){
 	    $apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
 	} elseif(!empty($attempt_delay) && (strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)) ){
 	   $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
