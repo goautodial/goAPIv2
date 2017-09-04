@@ -122,9 +122,13 @@
 														$apiresults = array("code" => "41006", "result" => $err_msg);
 													}
 													$location_SQL = ", `location_id` = '$location' ";
+													$location_COL = ", location_id";
+													$location_VAL = ", '$location'";
 												}else{
 													$location = "";
 													$location_SQL = "";
+													$location_COL = "";
+													$location_VAL = "";
 												}
 
 												if (!checkIfTenant($groupId)) {
@@ -310,7 +314,7 @@
 															if ($countResultGo > 0){
 																$queryUpdateUserGo = "UPDATE users  SET `name` = '$dataUser', `fullname` = '$full_name', `phone` = '$phone_login', `email` = '$email', `avatar` = '$avatar', `user_group` = '$user_group', `role` = '$user_level', `status` = '$goactive' $location_SQL WHERE userid = '$userid'";                                                    
 															} else {
-																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status, location_id) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive', '$location')";
+																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status $location_COL) VALUES ('$userid', '$dataUser', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive' $location_VAL)";
 															}
 														}else{
 															$queryUpdateUser = "UPDATE `vicidial_users` 
@@ -337,7 +341,7 @@
 															if ($countResultGo > 0){
 																$queryUpdateUserGo = "UPDATE users SET `name` = '$dataUser', `fullname` = '$full_name', `phone` = '$phone_login', `email` = '$email', `avatar` = '$avatar', `user_group` = '$user_group', `role` = '$user_level', `status` = '$goactive' $location_SQL WHERE name = '$user'";
 															} else {
-																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status, location_id) VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive', '$location')";
+																$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status $location_COL) VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive' $location_VAL)";
 															}
 														}
 														
