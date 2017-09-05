@@ -14,6 +14,8 @@ if (isset($_GET['campaigns'])) { $campaigns = $_GET['campaigns']; }
     else if (isset($_POST['campaigns'])) { $campaigns = $_POST['campaigns']; }
 if (isset($_GET['agents'])) { $agents = $_GET['agents']; }
     else if (isset($_POST['agents'])) { $agents = $_POST['agents']; }
+if (isset($_GET['location'])) { $location = $_GET['location']; }
+    else if (isset($_POST['location'])) { $location = $_POST['location']; }
 
 $newAssignments = [];
 foreach ($agents as $agent) {
@@ -25,7 +27,7 @@ foreach ($agents as $agent) {
 		$astDB->where('campaign_id', $campaign);
 		$rslt = $astDB->get('vicidial_campaign_agents');
 		$existingCampaignUser = $astDB->getRowCount();
-		if($existingCampaignUser == 0) {
+		if($existingCampaignUser < 1) {
 			$insertData = array(
 				'user' => $user,
 				'campaign_id' => $campaign,
@@ -48,6 +50,14 @@ foreach ($agents as $agent) {
 			$newAssignments[] = $newCampaignAgent;
 	   }
 	}
+	
+	//Assign Location
+	$goDB->where('name', $location);
+	$rslt = $goDB->getOne('locations', 'id');
+	$location_id = $rslt['id'];
+	
+	$goDB->where('userid', $agent);
+	$goDB->update('users', array('location_id' => $location_id));
 }
 
 $APIResult = array("result" => "success", "data" => $newAssignments);

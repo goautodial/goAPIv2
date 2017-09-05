@@ -128,11 +128,11 @@
             }
             
             if ( (!empty($field_default) ) and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
-                if($fieldcatch == "") {
-                    $field_sql .= "default '$field_default'";
-                } else {
-                    $field_sql .= "default $fieldcatch";
-                }
+                //if($fieldcatch == "") {
+                    $field_sql .= "DEFAULT '$field_default'";
+                //} else {
+                //    $field_sql .= "default $fieldcatch";
+                //}
             }
             
             if ( empty($field_default) ) {

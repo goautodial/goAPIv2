@@ -38,7 +38,8 @@
         $query = "SELECT * FROM vicidial_list where lead_id='$lead_id'";
         $rsltv = mysqli_query($link, $query);
         $fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
-        
+        $list_id = $fresults['list_id'];
+
         $is_customer = 0;
         if ($rsltv) {
             $rsltc = mysqli_query($linkgo, "SELECT * FROM go_customers WHERE lead_id='$lead_id' LIMIT 1;");
@@ -105,7 +106,31 @@
 				}
 			$record_array = array("start_time" => $record_start_time, "length_in_sec" => $record_length_in_sec, "recording_id" => $record_recording_id, "filename" => $record_filename, "location" => $record_location, "user" => $record_user);
 			
-			$apiresults = array("result" => "success", "data" => $data, "is_customer" => $is_customer, "calls" => $calls_array, "closerlog" => $closerlog_array, "agentlog" => $agentlog_array, "record" => $record_array);
+			$list_id = "custom_".$list_id;
+			$query_CF_list = mysqli_query($link, "DESC $list_id;");
+			if($query_CF_list){
+				while ($field_list=mysqli_fetch_array($query_CF_list)){
+					$exec_query_CF_list = $field_list["Field"];
+
+					if($exec_query_CF_list != "lead_id"){
+						$list_fields[] = $exec_query_CF_list;
+					}
+				}
+			}
+			$fields = implode(",", $list_fields);
+			$CF_sql = "SELECT $fields FROM $list_id WHERE lead_id = '$lead_id' LIMIT 10000;";
+			$CF_query = mysqli_query($link, $CF_sql);
+			
+			if($CF_query){
+				$CF_fetch = mysqli_fetch_array($CF_query);
+
+				 for($x=0;$x < count($list_fields);$x++){
+				 	//if($CF_fetch[$x] !== NULL)
+				 	$CF_data[$list_fields[$x]] =  str_replace(",", " | ", $CF_fetch[$x]);
+				 }
+			}
+
+			$apiresults = array("result" => "success", "data" => $data, "is_customer" => $is_customer, "calls" => $calls_array, "closerlog" => $closerlog_array, "agentlog" => $agentlog_array, "record" => $record_array, "custom_fields" => $CF_data);
 			
 		}else{
 			$err_msg = error_handle("41004", "lead_id");

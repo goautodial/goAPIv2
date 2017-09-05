@@ -33,9 +33,10 @@ if (!is_null($campaign_id) && $campaign_id !== '') {
 }
 $astDB->where('vu.user_group', 'AGENTS');
 $astDB->orderBy('vc.campaign_id');
+$astDB->groupBy('campaign');
 $astDB->join('vicidial_campaign_agents vca', 'vu.user=vca.user', 'LEFT');
 $astDB->join('vicidial_campaigns vc', 'vca.campaign_id=vc.campaign_id', 'LEFT');
-$astDB->join("`$VARDBgo_database`.go_campaigns AS gc", 'gc.campaign_id=vca.campaign_id', 'LEFT');
+$astDB->join("`$VARDBgo_database`.go_campaigns AS gc", 'gc.campaign_id=vc.campaign_id', 'LEFT');
 $rsltv = $astDB->get('vicidial_users vu', null, 'vu.user_id,vu.user,vu.full_name,vca.campaign_id AS campaign, vc.campaign_name, vca.id AS campaign_agent, user_level AS role');
 
 $dataUserID = [];

@@ -153,7 +153,7 @@
 			$updateQuerygo = mysqli_query($linkgo, $querygo) or die(mysqli_error($linkgo));
 			
 			if($updateQuery > 0){
-				if ($is_customer) {
+				if ($is_customer > 0) {
 					if(!empty($session_user))
 					$rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user='$session_user';") or die(mysqli_error($link));
 					else
@@ -183,13 +183,6 @@
 						$fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
 					}
 					
-				} else {
-					$querygo = "INSERT
-					INTO go_customers 
-					VALUES (null, '$lead_id', '$group_list_id', '$avatar') 
-					WHERE lead_id ='$lead_id';"; 
-					$rsltgo = mysqli_query($linkgo, $querygo) or die(mysqli_error($linkgo));
-					$fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
 				}
 				
 				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query, $querygo);
