@@ -34,7 +34,7 @@
     	$limit = 1000;
 
 	if(empty($sortBy)){
-		$sortBy = "vl.end_epoch";
+		$sortBy = "AfterDispo";
 	}else{
 		switch($sortBy){
 			case "callId";
@@ -181,10 +181,11 @@
 				
 				//$id_SQL = preg_replace("/,$/i",'',$id_SQL);
 
-				$get_end = "SELECT end_epoch FROM vicidial_log WHERE uniqueid = '$id';";
+				$get_end = "SELECT vl.end_epoch, (val.dispo_sec + val.dispo_epoch) AS time_end FROM vicidial_log vl, vicidial_agent_log val WHERE vl.uniqueid = val.uniqueid AND vl.uniqueid = '$id';";
 				$query_end = mysqli_query($link, $get_end) or die(mysqli_error($link));
 				$fetch_end = mysqli_fetch_array($query_end);
 				$end_epoch = $fetch_end['end_epoch'];
+				$time_end = $fetch_end['time_end'];
 
 				if(!empty($start_date) || !empty($end_date)){
 					if(empty($start_date))
@@ -195,11 +196,11 @@
 					$id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 
 					if(!empty($end_epoch))
-						$id_SQL .= " and vl.end_epoch > '$end_epoch'";
+						$id_SQL .= " and (val.dispo_sec + val.dispo_epoch) > '$time_end'";
 
 				}else{
 					if(!empty($end_epoch))
-						$id_SQL = "vl.end_epoch > '$end_epoch'";
+						$id_SQL = "(val.dispo_sec + val.dispo_epoch) > '$time_end'";
 				}
 					
 					
@@ -330,13 +331,13 @@
 			//$location_from = "";
 			//$location_where = "";
 
-			$query = "SELECT vl.uniqueid as callId, vi.lead_id as leadId, vl.phone_code as Phone_code, vi.first_name as First_name, vi.last_name as Last_name, vl.phone_number as Phone_number, vi.email as Email, vi.address1 as Address1, vi.city as City, vi.state as State, vi.postal_code as Zip, vl.length_in_sec as CallDuration, vl.user as agentName, vu.user_id as agentId, vl.list_id as ListId, vl.campaign_id as CampaignId, vc.campaign_name as CampaignName $location_fields, vl.call_date as TransactionDate, vl.status as ResultCode, CASE WHEN vl.status = 'SALE' THEN 1 ELSE 0 END as isConversion $export_fields_SQL $rec_location_fields FROM asteriskV4.vicidial_users vu, asteriskV4.vicidial_log vl, asteriskV4.vicidial_list vi, asteriskV4.vicidial_campaigns vc $location_from $rec_location_from WHERE $id_SQL and vu.user=vl.user $location_where and vi.lead_id=vl.lead_id and vl.campaign_id=vc.campaign_id and vl.status NOT IN ('INCALL', 'DISPO') and vl.end_epoch IS NOT NULL $rec_location_where $list_SQL  $user_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by $sortBy $sortOrder LIMIT $limit";
+			$query = "SELECT vl.uniqueid as callId, vi.lead_id as leadId, vl.phone_code as Phone_code, vi.first_name as First_name, vi.last_name as Last_name, vl.phone_number as Phone_number, vi.email as Email, vi.address1 as Address1, vi.city as City, vi.state as State, vi.postal_code as Zip, vl.length_in_sec as CallDuration, vl.user as agentName, vu.user_id as agentId, vl.list_id as ListId, vl.campaign_id as CampaignId, vc.campaign_name as CampaignName $location_fields, vl.call_date as TransactionDate, vl.status as ResultCode, (val.dispo_sec + val.dispo_epoch) as AfterDispo, CASE WHEN vl.status = 'SALE' THEN 1 ELSE 0 END as isConversion $export_fields_SQL $rec_location_fields FROM asteriskV4.vicidial_users vu, asteriskV4.vicidial_log vl, asteriskV4.vicidial_agent_log val, asteriskV4.vicidial_list vi, asteriskV4.vicidial_campaigns vc $location_from $rec_location_from WHERE $id_SQL and val.uniqueid = vl.uniqueid and vu.user=vl.user $location_where and vi.lead_id=vl.lead_id and vl.campaign_id=vc.campaign_id and vl.status NOT IN ('INCALL', 'DISPO') and vl.end_epoch IS NOT NULL $rec_location_where $list_SQL  $user_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by $sortBy $sortOrder LIMIT $limit";
 		}else{
 			$err_msg = error_handle("40001");
 			$apiresults = array("code" => "40001", "result" => $err_msg);
 		}
 		
-		$result = mysqli_query($linkgo, $query) or die($end_epoch);
+		$result = mysqli_query($linkgo, $query) or die($query);
 
 		//OUTPUT DATA HEADER//
 		while ($fieldinfo=mysqli_fetch_field($result))
@@ -384,6 +385,7 @@
 		//OUTPUT DATA ROW//
 		$count_row = 1;
 		while($row = mysqli_fetch_row($result)) {
+
 			$lead_id = $row[1];
 			$list_id_spec = $row[14];
 
@@ -453,6 +455,7 @@
 			//unset($re_head);
 			for($a=0;$a<count($csv_header);$a++){
 				//$re_head[] = $csv_header[$a];
+				if($csv_header[$a] !== "AfterDispo")
 				$re_row[$csv_header[$a]] = $csv_row[$i][$a];
 			}
 			

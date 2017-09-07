@@ -56,7 +56,15 @@
 		foreach($leadsFields as $fields){
 			if(in_array($fields['FieldName'], $baseFields) && $fields['FieldType'] != "custom"){
 				$insertFields[] = "`".$fields['FieldName']."`";
-				$insertValues[] = '"'.$fields['FieldValue'].'"';
+				if($fields['FieldName'] == "phone_code"){
+					if(!empty($fields['FieldValue'])){
+						$insertValues[] = '"'.$fields['FieldValue'].'"';
+					}else{
+						$insertValues[] = '"1"';
+					}
+				}else{
+					$insertValues[] = '"'.$fields['FieldValue'].'"';
+				}
 			}else{
 				if(in_array($fields['FieldName'], $customFields)){
 					$insertCustomFields[] = "`".$fields['FieldName']."`";
@@ -79,7 +87,14 @@
 
     	// INSERT TO DATABASE
     	// insert to vicidial_list
-    	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields) VALUES ('$list_id', 'NEW', $insertValues);";
+    	if(in_array("phone_code", $insertFields)){
+    		$phone_code_field = "";
+    		$phone_code_value = "";
+    	}else{
+    		$phone_code_field = ", `phone_code`";
+    		$phone_code_value = ", '1'";
+    	}
+    	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
     	$resultInsertList = mysqli_query($link, $insertListQuery);
 
     	if($resultInsertList){

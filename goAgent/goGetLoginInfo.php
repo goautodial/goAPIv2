@@ -10,6 +10,8 @@
 
 if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
     else if (isset($_POST['goUserID'])) { $user_id = $astDB->escape($_POST['goUserID']); }
+if (isset($_GET['isPBP'])) { $isPBP = $astDB->escape($_GET['isPBP']); }
+    else if (isset($_POST['isPBP'])) { $isPBP = $astDB->escape($_POST['isPBP']); }
 
 $SIP_server = (!isset($SIP_server)) ? 'kamailio' : $SIP_server;
 
@@ -464,18 +466,22 @@ if ($userExist > 0) {
     $server_ip = $rslt['server_ip'];
 
     $VARCBstatusesLIST = '';
-    ##### grab the statuses that can be used for dispositioning by an agent
-    $astDB->where('selectable', 'Y');
-    $astDB->orderBy('status');
-    $query = $astDB->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
-    $statuses_ct = $astDB->getRowCount();
-    foreach ($query as $row) {
-        $status = $row['status'];
-        $status_name = $row['status_name'];
-        $scheduled_callback = $row['scheduled_callback'];
-        $statuses[$status] = "{$status_name}";
-        if ($scheduled_callback == 'Y')
-            {$VARCBstatusesLIST .= " {$status}";}
+    $statuses_ct = 0;
+    $statuses = array();
+    if ($isPBP !== 'Y') {
+        ##### grab the statuses that can be used for dispositioning by an agent
+        $astDB->where('selectable', 'Y');
+        $astDB->orderBy('status');
+        $query = $astDB->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
+        $statuses_ct = $astDB->getRowCount();
+        foreach ($query as $row) {
+            $status = $row['status'];
+            $status_name = $row['status_name'];
+            $scheduled_callback = $row['scheduled_callback'];
+            $statuses[$status] = "{$status_name}";
+            if ($scheduled_callback == 'Y')
+                {$VARCBstatusesLIST .= " {$status}";}
+        }
     }
     
     if (isset($campaign) && strlen($campaign) > 0) {

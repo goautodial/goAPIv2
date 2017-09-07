@@ -10,6 +10,8 @@
 
 if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
     else if (isset($_POST['goUserID'])) { $user_id = $astDB->escape($_POST['goUserID']); }
+if (isset($_GET['isPBP'])) { $isPBP = $astDB->escape($_GET['isPBP']); }
+    else if (isset($_POST['isPBP'])) { $isPBP = $astDB->escape($_POST['isPBP']); }
 
 $getUser = $goUser;
 if (isset($user_id) && ($user_id !== "" || $user_id != $goUser)) { $getUser = $user_id; }
@@ -382,19 +384,22 @@ if ($sipIsLoggedIn || $use_webrtc) {
     }
     
     $VARCBstatusesLIST = '';
-    ##### grab the statuses that can be used for dispositioning by an agent
-    $astDB->where('selectable', 'Y');
-    $astDB->orderBy('status');
-    $query = $astDB->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
-    $statuses_ct = $astDB->getRowCount();
     $statuses = array();
-    foreach ($query as $row) {
-        $status = $row['status'];
-        $status_name = $row['status_name'];
-        $scheduled_callback = $row['scheduled_callback'];
-        $statuses[$status] = "{$status_name}";
-        if ($scheduled_callback == 'Y')
-            {$VARCBstatusesLIST .= " {$status}";}
+    $statuses_ct = 0;
+    if ($isPBP !== 'Y') {
+        ##### grab the statuses that can be used for dispositioning by an agent
+        $astDB->where('selectable', 'Y');
+        $astDB->orderBy('status');
+        $query = $astDB->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
+        $statuses_ct = $astDB->getRowCount();
+        foreach ($query as $row) {
+            $status = $row['status'];
+            $status_name = $row['status_name'];
+            $scheduled_callback = $row['scheduled_callback'];
+            $statuses[$status] = "{$status_name}";
+            if ($scheduled_callback == 'Y')
+                {$VARCBstatusesLIST .= " {$status}";}
+        }
     }
     
     ##### grab the campaign-specific statuses that can be used for dispositioning by an agent
@@ -564,6 +569,21 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $default_web_vars =	$row['group_web_vars'];
     }
     
+    $chkLocTable = $goDB->rawQuery("SHOW TABLES LIKE 'locations'");
+    $locTableFound = $goDB->getRowCount();
+    $location = array();
+    if ($locTableFound > 0) {
+        $goDB->where('u.name', $getUser);
+        $goDB->join('locations l', 'u.location_id=l.id', 'LEFT');
+        $locRslt = $goDB->getOne('users u', 'u.location_id, l.name, l.description');
+        
+        if ($goDB->getRowCount() > 0) {
+            $location['id'] = $locRslt['location_id'];
+            $location['name'] = $locRslt['name'];
+            $location['desc'] = $locRslt['description'];
+        }
+    }
+    
     $return = array(
         'user' => $user,
         'agent_log_id' => $agent_log_id,
@@ -616,7 +636,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'LIVE_web_vars' => $default_web_vars
     );
 
-    $APIResult = array( "result" => "success", "data" => $return );
+    $APIResult = array( "result" => "success", "data" => $return, "location" => $location );
 } else {
     $message = "SIP exten '{$phone_login}' is NOT connected";
     if (strlen($phone_login) < 1) {
