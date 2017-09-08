@@ -195,12 +195,20 @@
 
 					$id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 
-					if(!empty($end_epoch))
+					if(!empty($time_end))
 						$id_SQL .= " and (val.dispo_sec + val.dispo_epoch) > '$time_end'";
 
 				}else{
-					if(!empty($end_epoch))
+					if(!empty($time_end))
 						$id_SQL = "(val.dispo_sec + val.dispo_epoch) > '$time_end'";
+					else{
+						if(empty($start_date))
+                        		                $start_date = $def_start_date;
+                	                        if(empty($end_date))
+        	                                       $end_date = $def_end_date;
+
+	                                        $id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
+					}
 				}
 					
 					
@@ -218,14 +226,14 @@
 		if($campaigns != ""){
 			if (in_array("ALL", $campaigns)){
 				$campaign_SQL = "";
-
+				
 				$query_campaign = mysqli_query($link,"SELECT campaign_id FROM vicidial_campaigns;");
 				while($fetch_campaign = mysqli_fetch_array($query_campaign)){
 					$array_campaign[] = $fetch_campaign["campaign_id"];
 				}
 
-				$imploded_campaigns = implode("','", $array_campaign);
-				$campaign_SQL = "and vl.campaign_id IN('$imploded_campaigns')";
+				//$imploded_campaigns = implode("','", $array_campaign);
+				//$campaign_SQL = "and vl.campaign_id IN('$imploded_campaigns')";
 				$RUNcampaign=1;
 			}else{
 				$i=0;
@@ -327,17 +335,19 @@
 			$location_fields = ", gu.location_id as LocationId";
 			$location_from = ", users gu, locations gl";
 			$location_where = " and vu.user=gu.name and gu.location_id=gl.id";
+			$sale_field = ", CASE WHEN vl.status = '60' THEN 1 ELSE 0 END as isConversion";
+			//$sale_field = "";
 			//$location_fields = "";
 			//$location_from = "";
 			//$location_where = "";
 
-			$query = "SELECT vl.uniqueid as callId, vi.lead_id as leadId, vl.phone_code as Phone_code, vi.first_name as First_name, vi.last_name as Last_name, vl.phone_number as Phone_number, vi.email as Email, vi.address1 as Address1, vi.city as City, vi.state as State, vi.postal_code as Zip, vl.length_in_sec as CallDuration, vl.user as agentName, vu.user_id as agentId, vl.list_id as ListId, vl.campaign_id as CampaignId, vc.campaign_name as CampaignName $location_fields, vl.call_date as TransactionDate, vl.status as ResultCode, (val.dispo_sec + val.dispo_epoch) as AfterDispo, CASE WHEN vl.status = 'SALE' THEN 1 ELSE 0 END as isConversion $export_fields_SQL $rec_location_fields FROM asteriskV4.vicidial_users vu, asteriskV4.vicidial_log vl, asteriskV4.vicidial_agent_log val, asteriskV4.vicidial_list vi, asteriskV4.vicidial_campaigns vc $location_from $rec_location_from WHERE $id_SQL and val.uniqueid = vl.uniqueid and vu.user=vl.user $location_where and vi.lead_id=vl.lead_id and vl.campaign_id=vc.campaign_id and vl.status NOT IN ('INCALL', 'DISPO') and vl.end_epoch IS NOT NULL $rec_location_where $list_SQL  $user_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by $sortBy $sortOrder LIMIT $limit";
+			$query = "SELECT vl.uniqueid as callId, vi.lead_id as leadId, vl.phone_code as Phone_code, vi.first_name as First_name, vi.last_name as Last_name, vl.phone_number as Phone_number, vi.email as Email, vi.address1 as Address1, vi.city as City, vi.state as State, vi.postal_code as Zip, vl.length_in_sec as CallDuration, vl.user as agentName, vu.user_id as agentId, vl.list_id as ListId, vl.campaign_id as CampaignId, vc.campaign_name as CampaignName $location_fields, vl.call_date as TransactionDate, vl.status as ResultCode, (val.dispo_sec + val.dispo_epoch) as AfterDispo $sale_field $export_fields_SQL $rec_location_fields FROM asteriskV4.vicidial_users vu, asteriskV4.vicidial_log vl, asteriskV4.vicidial_agent_log val, asteriskV4.vicidial_list vi, asteriskV4.vicidial_campaigns vc $location_from $rec_location_from WHERE $id_SQL and val.uniqueid = vl.uniqueid and vu.user=vl.user $location_where and vi.lead_id=vl.lead_id and vl.campaign_id=vc.campaign_id and vl.status NOT IN ('INCALL', 'DISPO') and vl.end_epoch IS NOT NULL $rec_location_where $list_SQL  $user_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by $sortBy $sortOrder LIMIT $limit";
 		}else{
 			$err_msg = error_handle("40001");
 			$apiresults = array("code" => "40001", "result" => $err_msg);
 		}
 		
-		$result = mysqli_query($linkgo, $query) or die($query);
+		$result = mysqli_query($linkgo, $query) or die(mysqli_error($linkgo));
 
 		//OUTPUT DATA HEADER//
 		while ($fieldinfo=mysqli_fetch_field($result))
