@@ -87,7 +87,7 @@
 
     	// INSERT TO DATABASE
     	// insert to vicidial_list
-    	if(in_array("phone_code", $insertFields)){
+    	if(strpos($insertFields, 'phone_code') !== false){
     		$phone_code_field = "";
     		$phone_code_value = "";
     	}else{
@@ -96,7 +96,6 @@
     	}
     	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
     	$resultInsertList = mysqli_query($link, $insertListQuery);
-
     	if($resultInsertList){
     		//true
     		array_push($resultOfInserts, "ok");
