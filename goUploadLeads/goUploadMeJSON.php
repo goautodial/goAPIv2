@@ -53,17 +53,47 @@
 		$insertCustomFields = array();
 		$insertCustomValues = array();
 		$lead_id = "";
+		$phone_number = ''; 
+		$phone_code = '';
+		$state = '';
+		$postal_code = '';
 		foreach($leadsFields as $fields){
 			if(in_array($fields['FieldName'], $baseFields) && $fields['FieldType'] != "custom"){
 				$insertFields[] = "`".$fields['FieldName']."`";
 				if($fields['FieldName'] == "phone_code"){
 					if(!empty($fields['FieldValue'])){
 						$insertValues[] = '"'.$fields['FieldValue'].'"';
+						$phone_code = $fields['FieldValue'];
 					}else{
 						$insertValues[] = '"1"';
+						$phone_code = '';
 					}
 				}else{
 					$insertValues[] = '"'.$fields['FieldValue'].'"';
+				}
+
+				if($fields['FieldName'] == "state"){
+					if(!empty($fields['FieldValue'])){
+						$state = $fields['FieldValue'];
+					}else{
+						$state = '';
+					}
+				}
+
+				if($fields['FieldName'] == "phone_number"){
+					if(!empty($fields['FieldValue'])){
+						$phone_number = $fields['FieldValue'];
+					}else{
+						$phone_number = '';
+					}
+				}
+
+				if($fields['FieldName'] == "postal_code"){
+					if(!empty($fields['FieldValue'])){
+						$postal_code = $fields['FieldValue'];
+					}else{
+						$postal_code = '';
+					}
 				}
 			}else{
 				if(in_array($fields['FieldName'], $customFields)){
@@ -76,6 +106,12 @@
 			if($fields['FieldName'] == "lead_id"){
 				$lead_id = $fields['FieldValue'];
 			}
+		}
+		$USarea = substr($phone_number, 0, 3);
+		$gmt_offset = lookup_gmt($goGMTastDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+		if(strpos($insertFields, 'gmt_offset_now') !== false){
+			$insertFields[] = "`gmt_offset_now`";
+			$insertValues[] = '"'.$gmt_offset.'"';
 		}
 
 		// Base fields and values
@@ -94,6 +130,7 @@
     		$phone_code_field = ", `phone_code`";
     		$phone_code_value = ", '1'";
     	}
+    	
     	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
     	$resultInsertList = mysqli_query($link, $insertListQuery);
     	if($resultInsertList){
