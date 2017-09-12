@@ -16,13 +16,6 @@
   $attempt_maximum = mysqli_real_escape_string($link, $_REQUEST['attempt_maximum']);
   $active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
 
-  if(empty($attempt_delay))
-    $attempt_delay = 1800;
-  if(empty($attempt_maximum))
-    $attempt_maximum = 2;
-  if(empty($active))
-    $active = "Y";
-
   //optional
     $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 
@@ -35,13 +28,19 @@
       $apiresults = array("code" => "40001", "result" => $err_msg);
   } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status) ){
     $apiresults = array("result" => "Error: Special characters found in status");
-  } elseif($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120){
-    $apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
-  } elseif(strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
-    $apiresults = array("result" => "Error: Maximum is 3 digits. No special characters allowed.");
+  } elseif(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120 || $attempt_delay > 99999 ){
+    $apiresults = array("result" => "Error: Attempt Delay Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
+  } elseif($attempt_maximum < 1 || strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
+    $apiresults = array("result" => "Error: Attempt Maximum is 3 digits. No special characters allowed.");
   } elseif(!in_array($active,$defActive) && !empty($active)) {
     $apiresults = array("result" => "Error: Default value for Active is Y or N only.");
   } else {
+    if(empty($attempt_delay))
+      $attempt_delay = 1800;
+    if(empty($attempt_maximum))
+      $attempt_maximum = 2;
+    if(empty($active))
+      $active = "Y";
 
     $groupId = go_get_groupid($session_user);
     $check_usergroup = go_check_usergroup_campaign($groupId, $campaign_id);
