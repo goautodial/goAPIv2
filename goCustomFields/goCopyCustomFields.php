@@ -206,13 +206,15 @@
             $counterresult = mysqli_query($link, $counterquery);
     
             if($counterresult){
-                $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
-                $queryCheckTable = mysqli_query($link, $checkTable);
+                $tableName = "custom_".$list_to;
+                $tableCheck="SHOW TABLES LIKE '$tableName'";
+                $tableCheckResult = mysqli_query($link, $tableCheck);
+                $tableExist = mysqli_num_rows($tableCheckResult);
                 
-                if($queryCheckTable){
-                    $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
+                if ($tableExist < 1) {
+                    $field_sql .= "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";      
                 }else{
-                    $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                    $field_sql .= "ALTER TABLE custom_$list_to ADD $field_label ";
                 }
 
                
@@ -295,6 +297,7 @@
                     $field_sql .= ");";
                 }
                 $stmtCUSTOM="$field_sql";
+                // $output[] = $field_sql;
                 $rslt = mysqli_query($link, $stmtCUSTOM);
 
                 $insert = "INSERT INTO vicidial_lists_fields
