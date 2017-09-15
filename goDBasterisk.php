@@ -32,6 +32,12 @@ if ( file_exists($conf_path) )
                         {$VARSIPPYPASSRECOVERYSUPPORTEMAIL = $DBCline;   $VARSIPPYPASSRECOVERYSUPPORTEMAIL = preg_replace("/.*=/","",$VARSIPPYPASSRECOVERYSUPPORTEMAIL);}   
                      if (preg_match("/^VARSHOWSIGNUP/", $DBCline))
                         {$VARSHOWSIGNUP = $DBCline;   $VARSHOWSIGNUP = preg_replace("/.*=/","",$VARSHOWSIGNUP);}
+		
+		     if (preg_match("/^VARPACKAGETYPE/", $DBCline))
+                        {$VARPACKAGETYPE = $DBCline;   $VARPACKAGETYPE = preg_replace("/.*=/","",$VARPACKAGETYPE);}
+		     if (preg_match("/^VARBRINGOWNVOIP/", $DBCline))
+                        {$VARBRINGOWNVOIP = $DBCline;   $VARBRINGOWNVOIP = preg_replace("/.*=/","",$VARBRINGOWNVOIP);}
+	
                 }
         }
 
