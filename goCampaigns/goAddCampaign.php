@@ -1239,9 +1239,9 @@
 							$log_id = log_action($linkgo, 'COPY', $log_user, $ip_address, "Copied campaign settings from $copy_from_campaign to $campaign_id", $log_group, $queryAddCopy);
 							
 							if(!empty($location))
-								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campaign_type', '$location')";
+								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type, location_id) values('$campaign_id', '$campType', '$location')";
 							else
-								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campaign_type')";
+								$queryGoCampaign = "INSERT INTO go_campaigns (campaign_id, campaign_type) values('$campaign_id', '$campType')";
 							
 							$rsltvGoCampaign = mysqli_query($linkgo, $queryGoCampaign);
 							

@@ -1,12 +1,12 @@
 <?php
-    ####################################################
-    #### Name: goAPI.php                            ####
-    #### Type: API for dashboard php encode         ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Jerico James Flores Milo       ####
-    #### License: AGPLv2                            ####
-    ####################################################
+    //////////////////////////
+    // Name: goAPI.php                            //
+    // Type: API for dashboard php encode         //
+    // Version: 0.9                               //
+    // Copyright: GOAutoDial Inc. (c) 2011-2014   //
+    // Written by: Jerico James Flores Milo       //
+    // License: AGPLv2                            //
+    //////////////////////////
 //    ini_set('display_errors', 'on');
 //    error_reporting(E_ALL);
     
@@ -17,45 +17,45 @@
     
     //$version = file_get_contents('../version.txt');
     
-    ####### Variables #########
+    ///// Variables /////
     
     if (isset($_GET["goAction"])) {
-            $goAction = $_GET["goAction"];
+        $goAction = $_GET["goAction"];
     } elseif (isset($_POST["goAction"])) {
-            $goAction = $_POST["goAction"];
+        $goAction = $_POST["goAction"];
     }
     
     if (isset($_GET["goUser"])) {
-            $goUser = $_GET["goUser"];
+        $goUser = $_GET["goUser"];
     } elseif (isset($_POST["goUser"])) {
-            $goUser = $_POST["goUser"];
+        $goUser = $_POST["goUser"];
     }
     
     if (isset($_GET["goPass"])) {
-            $goPass = $_GET["goPass"];
+        $goPass = $_GET["goPass"];
     } elseif (isset($_POST["goPass"])) {
-            $goPass = $_POST["goPass"];
+        $goPass = $_POST["goPass"];
     }
     
     if (isset($_GET["goURL"])) {
-            $goURL = $_GET["goURL"];
+        $goURL = $_GET["goURL"];
     } elseif (isset($_POST["goURL"])) {
-            $goURL = $_POST["goURL"];
+        $goURL = $_POST["goURL"];
     }
     
     $goCharset = "UTF-8";
     $goVersion = "1.0";
     
-    #### check credentials ####
+    // check credentials //
     $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
     $rslt=mysqli_query($link,$query_user);
     $check_result = mysqli_num_rows($rslt);
-    // var_dump($query_user); 
+    
     if ($check_result > 0) {
        
         if (file_exists($goAction . ".php" )) {
             include_once($goAction . ".php");
-           #$apiresults = array( "result" => "success", "message" => "Command Not Found" );
+           //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
     		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
         }
@@ -73,7 +73,7 @@
     	$userresponsetype = "xml";
     }
     
-    #### API OUTPUT ####
+    // API OUTPUT //
     ob_start();
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: POST');

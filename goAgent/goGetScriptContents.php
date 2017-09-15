@@ -178,6 +178,11 @@ if (isset($_GET['web_vars'])) { $web_vars = $astDB->escape($_GET['web_vars']); }
     else if (isset($_POST['web_vars'])) { $web_vars = $astDB->escape($_POST['web_vars']); }
 if (isset($_GET['session_name'])) { $session_name = $astDB->escape($_GET['session_name']); }
     else if (isset($_POST['session_name'])) { $session_name = $astDB->escape($_POST['session_name']); }
+if (isset($_GET['goUserCustomFields'])) { $CF_uses_custom_fields = $astDB->escape($_GET['goUserCustomFields']); }
+    else if (isset($_POST['goUserCustomFields'])) { $CF_uses_custom_fields = $astDB->escape($_POST['goUserCustomFields']); }
+    
+if (isset($_GET['isPBP'])) { $isPBP = $astDB->escape($_GET['isPBP']); }
+    else if (isset($_POST['isPBP'])) { $isPBP = $astDB->escape($_POST['isPBP']); }
 
 
 if ($is_logged_in) {
@@ -403,15 +408,22 @@ if ($is_logged_in) {
             $row = $rslt[$d];
             $field_name_id = $row['field_label'];
             $field_name_tag = "--A--" . $field_name_id . "--B--";
-            if (isset($_GET["$field_name_id"]))				{$form_field_value = $_GET["$field_name_id"];}
-                else if (isset($_POST["$field_name_id"]))	{$form_field_value = $_POST["$field_name_id"];}
+            
+            $astDB->where('lead_id', $lead_id);
+            $cRow = $astDB->getOne("custom_{$entry_list_id}");
+            $form_field_value = $cRow["$field_name_id"];
+            
+            //if (isset($_GET["$field_name_id"]))				{$form_field_value = $_GET["$field_name_id"];}
+            //    else if (isset($_POST["$field_name_id"]))	{$form_field_value = $_POST["$field_name_id"];}
             $script_text = preg_replace("/$field_name_tag/i", "$form_field_value", $script_text);
             //if ($DB) {echo "$d|$field_name_id|$field_name_tag|$form_field_value|<br>\n";}
             $d++;
         }
     }
     
-    $script_text = preg_replace("/\n/i", "<BR>", $script_text);
+    if ($isPBP !== 'Y') {
+        $script_text = preg_replace("/\n/i", "<BR style='clear: both;'>", $script_text);
+    }
     $script_text = stripslashes($script_text);
     
     $scriptHtml  = '';
@@ -420,10 +432,15 @@ if ($is_logged_in) {
     $scriptHtml .= "<TABLE WIDTH=100%><TR><TD>\n";
     if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i", $script_text)) )
         {$scriptHtml .= "<div id=\"NewScriptContents\">";}
-    $scriptHtml .= "<center><B>$script_name</B><BR>\n";
+    if ($isPBP !== 'Y') {
+        $scriptHtml .= "<center><B>$script_name</B><BR>\n";
+    }
     $scriptHtml .= "$script_text\n";
+    if ($isPBP !== 'Y') {
+        $scriptHtml .= "</center>";
+    }
     if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i", $script_text)) )
-        {$scriptHtml .= "</center></div>";}
+        {$scriptHtml .= "</div>";}
     $scriptHtml .= "</TD></TR></TABLE>\n";
     
     $APIResult = array( "result" => "success", "content" => $scriptHtml );

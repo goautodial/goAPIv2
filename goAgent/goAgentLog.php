@@ -26,19 +26,28 @@ if (isset($_GET['goExtension'])) { $extension = $astDB->escape($_GET['goExtensio
 $NOW = date("Y-m-d H:i:s");
 $NOWepoch = date("U");
 
-$insertData = array(
-	"user" => $goUser,
-	"event" => strtoupper($event),
-	"campaign_id" => $campaign,
-	"event_date" => $NOW,
-	"event_epoch" => $NOWepoch,
-	"user_group" => $user_group,
-	"session_id" => $session_id,
-	"server_ip" => $server_ip,
-	"extension" => $extension,
-	"computer_ip" => $computer_ip
-);
-$astDB->insert('vicidial_user_log', $insertData);
+$check = "SELECT user_log_id,event FROM vicidial_user_log WHERE user='$goUser' AND campaign_id='$campaign' ORDER BY user_log_id DESC LIMIT 1;";
+$check_query = mysqli_query($link, $check) or die(mysqli_error($link));
+$row = mysqli_fetch_array($check_query);
+$eventDB = $row['event'];
 
-$APIResult = array("result" => "success");
+if( strtoupper($event) === strtoupper($eventDB) || ($event === strtoupper("resume") && $eventDB === strtoupper("LOGIN") ) ){
+	//error DO NOT INSERT
+	$APIResult = array("result" => "error");
+}else{
+	$insertData = array(
+		"user" => $goUser,
+		"event" => strtoupper($event),
+		"campaign_id" => $campaign,
+		"event_date" => $NOW,
+		"event_epoch" => $NOWepoch,
+		"user_group" => $user_group,
+		"session_id" => $session_id,
+		"server_ip" => $server_ip,
+		"extension" => $extension,
+		"computer_ip" => $computer_ip
+	);
+	$astDB->insert('vicidial_user_log', $insertData);
+	$APIResult = array("result" => "success");
+}
 ?>

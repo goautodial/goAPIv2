@@ -10,13 +10,14 @@
 
 	include_once ("../goFunctions.php");
 
-	$queryGetSubscripts = "SELECT script_id, script_name FROM vicidial_scripts WHERE subscript='1';";
+	$queryGetSubscripts = "SELECT script_id, script_name, script_text FROM vicidial_scripts WHERE subscript='1';";
 	$sql = mysqli_query($link, $queryGetSubscripts);
 	
 	while($fresults = mysqli_fetch_array($sql, MYSQLI_ASSOC)){
 		$script_id[] = $fresults['script_id'];
 		$script_name[] = $fresults['script_name'];
+		$script_text[] = $fresults['script_text'];
 	}
 
-	$apiresults = array("result" => "success", "script_id" => $script_id, "script_name" => $script_name);
+	$apiresults = array("result" => "success", "script_id" => $script_id, "script_name" => $script_name, "script_text" => $script_text);
 ?>

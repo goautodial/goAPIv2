@@ -1689,4 +1689,25 @@
             return $result;
         }
     }
+
+    // check usergroup in-reference to campaign
+    function go_check_usergroup_campaign($usergroup = NULL, $campaign_id = NULL){
+        $result = 0; // if result is returned 1, then the usergroup is matched with the campaign
+
+        if(empty($usergroup) || empty($campaign_id)){
+            include("goDBasterisk.php");
+            $query = "SELECT user_group FROM vicidial_campaigns WHERE campaign_id = '$campaign_id' AND user_group='$usergroup'";
+            $rsltv = mysqli_query($link, $query) or die(mysqli_error($link));
+            $check_resultv = mysqli_num_rows($rsltv);
+
+            if ($check_resultv > 0) {
+                $result = 1;
+            }
+        }
+        if($usergroup === "ADMIN"){
+            $result = 1;
+        }
+        return $result;
+        
+    }
 ?>

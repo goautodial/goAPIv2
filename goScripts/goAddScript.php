@@ -15,7 +15,7 @@
         $script_id = mysqli_real_escape_string($link, $_REQUEST['script_id']);
         $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
         $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
-        $script_text = mysqli_real_escape_string($link, $_REQUEST['script_text']);
+        $script_text = $_REQUEST['script_text'];
         $active = mysqli_real_escape_string($link, $_REQUEST['active']);
         //$campaign_id = $_REQUEST['campaign_id'];
 		$user = mysqli_real_escape_string($link, $_REQUEST['user']);

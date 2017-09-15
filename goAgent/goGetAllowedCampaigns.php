@@ -8,6 +8,8 @@
 #### License: AGPLv2                            ####
 ####################################################
 
+$hasLocation = $astDB->escape($_REQUEST['has_location']);
+
 $agent = get_settings('user', $astDB, $goUser);
 
 // Getting Allowed Campigns
@@ -16,16 +18,22 @@ $query = $astDB->getOne('vicidial_user_groups', "REPLACE(TRIM(allowed_campaigns)
 
 // Get Campaign List
 if (!preg_match("/ALL-CAMPAIGNS/", $query['allowed_campaigns'])) {
-    //$cl = explode(' ', $query['allowed_campaigns']);
-    //$astDB->where('campaign_id', $cl, 'in');
     $cl = str_replace(" ", "','", $query['allowed_campaigns']);
     $allowed_camps = "campaign_id IN ('$cl') AND";
 }
-//$astDB->where('active', 'Y');
-//$astDB->where('campaign_vdad_exten', array('8366', '8373'), 'not in');
-//$astDB->orWhere('survey_method', 'AGENT_XFER');
-//$astDB->orderBy('campaign_id');
-//$result = $astDB->get('vicidial_campaigns', null, 'campaign_id,campaign_name');
+
+if ($hasLocation) {
+    $astDB->where('user', $goUser);
+    $query = $astDB->get('vicidial_campaign_agents', null, 'campaign_id');
+    $camps = array();
+    foreach ($query as $row) {
+        $camps[] = $row['campaign_id'];
+    }
+    $camps = implode("','", $camps);
+    
+    $allowed_camps = "campaign_id IN ('$camps') AND";
+}
+
 $result = $astDB->rawQuery("SELECT campaign_id,campaign_name FROM vicidial_campaigns WHERE $allowed_camps active='Y' AND (campaign_vdad_exten NOT IN ('8366', '8373') OR survey_method='AGENT_XFER') ORDER BY campaign_id");
 //$camp_list = "<option value=''>".$lh->translationFor('select_a_campaign')."</option>";
 foreach ($result as $camp) {

@@ -185,6 +185,8 @@
         $rsltv = mysqli_query($link, $query);
         
         $output = array();
+        $output1 = array();
+        $field_sql ='';
         while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
             $field_label       = $fresults['field_label'];
             $field_name        = $fresults['field_name'];
@@ -206,13 +208,15 @@
             $counterresult = mysqli_query($link, $counterquery);
     
             if($counterresult){
-                $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
-                $queryCheckTable = mysqli_query($link, $checkTable);
+                $tableName = "custom_".$list_to;
+                $tableCheck="SHOW TABLES LIKE '$tableName'";
+                $tableCheckResult = mysqli_query($link, $tableCheck);
+                $tableExist = mysqli_num_rows($tableCheckResult);
                 
-                if($queryCheckTable){
-                    $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
+                if ($tableExist < 1) {
+                    $field_sql .= "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";      
                 }else{
-                    $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                    $field_sql .= "ALTER TABLE custom_$list_to ADD $field_label ";
                 }
 
                
@@ -220,12 +224,13 @@
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
+                    $field_options_ENUM='';
                     while ($te < $field_options_count)
                         {
                         if (preg_match("/,/",$field_options_array[$te]))
                             {
                             $field_options_value_array = explode(",",$field_options_array[$te]);
-                            $field_options_ENUM .= str_replace(" ","_",$field_options_value_array[0].",");
+                            $field_options_ENUM .= str_replace(" ","_","'".$field_options_value_array[0]."',");
                             }
                         $te++;
                        }
@@ -289,14 +294,16 @@
                     $field_sql .="";  
                 }
                 
-                if ($queryCheckTable) {
+                if ($tableExist > 0) {
                     $field_sql .= ";";
                 } else {
                     $field_sql .= ");";
                 }
                 $stmtCUSTOM="$field_sql";
+                // $output1[] = $field_sql;
                 $rslt = mysqli_query($link, $stmtCUSTOM);
-
+                $field_sql = '';
+                // $output[] = mysqli_error($link);
                 $insert = "INSERT INTO vicidial_lists_fields
                             set field_label='$field_label',
                                 field_name='$field_name',
@@ -329,7 +336,7 @@
                 }
             }
         }
-
+        // $apiresults = array("result" => "success", "query" => $output, "query1" => $output1);
         if(in_array("error", $output)){
             $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
         }else{
