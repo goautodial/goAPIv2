@@ -31,7 +31,7 @@ $check_query = mysqli_query($link, $check) or die(mysqli_error($link));
 $row = mysqli_fetch_array($check_query);
 $eventDB = $row['event'];
 
-if( strtoupper($event) === strtoupper($eventDB) || ($event === strtoupper("resume") && $eventDB === strtoupper("LOGIN") ) ){
+if( strtoupper($event) === strtoupper($eventDB) || (strtoupper($event) === strtoupper("resume") && strtoupper($eventDB) === strtoupper("LOGIN") ) ){
 	//error DO NOT INSERT
 	$APIResult = array("result" => "error");
 }else{

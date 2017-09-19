@@ -146,7 +146,9 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $enable_sipsak = false;
 		if ( ($phone_settings->enable_sipsak_messages > 0) and ($system_settings->allow_sipsak_messages > 0) and (preg_match("/SIP/i",$protocol)) ) {
             $enable_sipsak = true;
+            $DS = '-';
             $SIPSAK_prefix = 'LIN-';
+            $phone_ip = $phone_settings->phone_ip;
             //echo "<!-- sending login sipsak message: $SIPSAK_prefix$VD_campaign -->\n";
             passthru("/usr/local/bin/sipsak -M -O desktop -B \"$SIPSAK_prefix$VD_campaign\" -r 5060 -s sip:$extension@$phone_ip > /dev/null");
             $SIqueryCID = "$SIPSAK_prefix$VD_campaign$DS$CIDdate";
@@ -383,8 +385,23 @@ if ($sipIsLoggedIn || $use_webrtc) {
         }
     }
     
+    $chkStatus = "SHOW TABLES LIKE 'go_statuses'";
+    $statusRslt = mysqli_query($linkgo, $chkStatus);
+    $statusExist = mysqli_num_rows($statusRslt);
+    $statusTBL = '';
+    $statusSQL = '';
+    if ($statusExist > 0) {
+        $statusTBL = ",`$VARDBgo_database`.go_statuses gs";
+        $statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
+    }
+    
+    $chkStatusTable = $goDB->rawQuery("SHOW TABLES LIKE 'go_statuses'");
+    $statusTableFound = $goDB->getRowCount();
+    
     $VARCBstatusesLIST = '';
     $statuses = array();
+    $statuses_colors = array();
+    $statuses_priority = array();
     $statuses_ct = 0;
     if ($isPBP !== 'Y') {
         ##### grab the statuses that can be used for dispositioning by an agent
@@ -403,20 +420,34 @@ if ($sipIsLoggedIn || $use_webrtc) {
     }
     
     ##### grab the campaign-specific statuses that can be used for dispositioning by an agent
+    $astDB->where('vcs.campaign_id', $campaign);
     $astDB->where('selectable', 'Y');
-    $astDB->where('campaign_id', $campaign);
-    $astDB->orderBy('status');
-    $query = $astDB->get('vicidial_campaign_statuses', 500, 'status,status_name,scheduled_callback');
+    if ($statusTableFound > 0) {
+        $thisColumns = 'vcs.status,status_name,scheduled_callback,priority,color';
+        $astDB->join("`$VARDBgo_database`.go_statuses gs", 'vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id', 'LEFT');
+        $astDB->orderBy('priority,vcs.status', 'ASC');
+    } else {
+        $thisColumns = 'status,status_name,scheduled_callback';
+        $astDB->orderBy('vcs.status');
+    }
+    $query = $astDB->get('vicidial_campaign_statuses vcs', 500, $thisColumns);
     $statuses_camp_ct = $astDB->getRowCount();
+    $thisLastQuery = $astDB->getLastQuery();
     foreach ($query as $row) {
         $status = $row['status'];
         $status_name = $row['status_name'];
         $scheduled_callback = $row['scheduled_callback'];
+        $priority = $row['priority'];
+        $color = $row['color'];
         $statuses[$status] = "{$status_name}";
+        $statuses_priority[$status] = "{$priority}";
+        $statuses_colors[$status] = "{$color}";
         if ($scheduled_callback == 'Y')
             {$VARCBstatusesLIST .= " {$status}";}
     }
     ksort($statuses);
+    ksort($statuses_priority);
+    ksort($statuses_colors);
     $statuses_ct = ($statuses_ct + $statuses_camp_ct);
     $VARCBstatusesLIST .= " ";
     
@@ -603,6 +634,8 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'closer_blended' => $closer_blended,
         'statuses_count' => $statuses_ct,
         'statuses' => $statuses,
+        'statuses_priority' => $statuses_priority,
+        'statuses_colors' => $statuses_colors,
         'callback_statuses_list' => $VARCBstatusesLIST,
         'pause_codes_count' => $pause_codes_ct,
         'pause_codes' => (array) $pause_codes,
@@ -636,7 +669,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         'LIVE_web_vars' => $default_web_vars
     );
 
-    $APIResult = array( "result" => "success", "data" => $return, "location" => $location );
+    $APIResult = array( "result" => "success", "data" => $return, "location" => $location, "lastQuery" => $thisLastQuery );
 } else {
     $message = "SIP exten '{$phone_login}' is NOT connected";
     if (strlen($phone_login) < 1) {

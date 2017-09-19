@@ -27,6 +27,12 @@
 
 		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		
+        $priority = $_REQUEST['priority'];
+        $color = $_REQUEST['color'];
+        $edit_type = $_REQUEST['type'];
+		
+		$type = (!in_array($edit_type, array('SYSTEM', 'CUSTOM'))) ? 'CUSTOM' : $edit_type;
 
     ### Default values
     $defVal = array("Y","N");
@@ -134,6 +140,23 @@
 						$apiresults = array("result" => "Error: Try updating Disposition Again");
 					} else {
 						$apiresults = array("result" => "success");
+						
+						$chkStatus = "SHOW TABLES LIKE 'go_statuses'";
+						$statusRslt = mysqli_query($linkgo, $chkStatus);
+						$statusExist = mysqli_num_rows($statusRslt);
+						
+						if ($statusExist > 0) {
+							$chkStatus = "SELECT * FROM go_statuses WHERE status='$status' AND campaign_id='$campaign_id';";
+							$statusRslt = mysqli_query($linkgo, $chkStatus);
+							$statusCnt = mysqli_num_rows($statusRslt);
+							
+							if ($statusCnt > 0) {
+								$statusQuery = "UPDATE go_statuses SET priority='$priority',color='$color',type='$type' WHERE status='$status' AND campaign_id='$campaign_id';";
+							} else {
+								$statusQuery = "INSERT INTO go_statuses (status, campaign_id, priority, color, type) VALUES ('$status', '$campaign_id', '$priority', '$color', '$type');";
+							}
+							$statusRslt = mysqli_query($linkgo, $statusQuery);
+						}
 
         ### Admin logs
                                         //$SQLdate = date("Y-m-d H:i:s");

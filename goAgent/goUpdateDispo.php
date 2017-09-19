@@ -533,12 +533,18 @@ if ($is_logged_in) {
 		
 			# Insert into vicidial_call_notes
 			//$stmt="INSERT INTO vicidial_call_notes set lead_id='$lead_id',vicidial_id='$vicidial_id',call_date='$NOW_TIME',call_notes='" . mysqli_real_escape_string($call_notes) . "';";
+			
 			$call_notes = urldecode($call_notes);
+			$call_notes = preg_replace("/\r/i", '', $call_notes);
+			$call_notes = preg_replace("/\n/i", '!N!', $call_notes);
+			$call_notes = preg_replace("/--AMP--/i", '&', $call_notes);
+			$call_notes = preg_replace("/--QUES--/i", '?', $call_notes);
+			$call_notes = preg_replace("/--POUND--/i", '#', $call_notes);
 			$insertData = array(
 				'lead_id' => $lead_id,
 				'vicidial_id' => $vicidial_id,
 				'call_date' => $NOW_TIME,
-				'call_notes' => $astDB->escape($call_notes)
+				'call_notes' => $call_notes
 			);
 			$rslt = $astDB->insert('vicidial_call_notes', $insertData);
 			$affected_rows = $astDB->getRowCount();

@@ -1686,6 +1686,7 @@ if ($sipIsLoggedIn) {
             $comments = preg_replace("/\n/i", '!N!', $comments);
             
             $astDB->where('lead_id', $lead_id);
+            $astDB->orderBy('notesid', 'desc');
             $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
             $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
             

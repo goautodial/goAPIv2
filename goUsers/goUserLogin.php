@@ -91,6 +91,25 @@
 				$rsltu = mysqli_query($linkgo, "UPDATE users SET last_seen_date='".date("Y-m-d H:i:s")."' WHERE name='$dataUser';");
 			}
 			
+			### Check if someone is logged in on phone but agent is not live
+			if ($dataUserLevel < 7) {
+				$kamQ = "SELECT * FROM location WHERE username='$dataPhone_login';";
+				$rsltQ = mysqli_query($linkgokam, $kamQ);
+				$isLoggedIn = mysqli_num_rows($rsltQ);
+				
+				$astQ = "SELECT * FROM vicidial_live_agents WHERE user='$dataUser';";
+				$rsltQ = mysqli_query($link, $astQ);
+				$isLive = mysqli_num_rows($rsltQ);
+				
+				if (($isLoggedIn < 1 && $isLive > 0) || ($isLoggedIn > 0 && $isLive < 1)) {
+					$astQ = "DELETE FROM go_agent_sessions WHERE sess_agent_user='$dataUser' LIMIT 1;";
+					$rsltQ  = mysqli_query($link, $astQ);
+					
+					$log_id = log_action($linkgo, 'FORCE-LOGOUT', $dataUser, $ip_address, "User $dataUser used emergency log out upon login.", $dataUserGroup);
+				}
+			}
+			### End checker
+			
 			$apiresults = array(
 				"result" => "success",
 				"user_group" => $dataUserGroup,

@@ -26,8 +26,8 @@
     }else{
     	$campaignNewLeads = "AND list_id IN (SELECT list_id FROM vicidial_lists WHERE campaign_id ='$campaign_id')";
     	$campaignOldLeads = "AND l.list_id IN (SELECT list_id FROM vicidial_lists WHERE campaign_id ='$campaign_id')";
-    	$campaignQuery = "val.campaign_id='$campaign_id'";
-    	$campaignStatuses = "AND val.status IN (SELECT vicidial_campaign_statuses.status FROM vicidial_campaign_statuses WHERE vicidial_campaign_statuses.sale='Y' AND vicidial_campaign_statuses.campaign_id = '$campaign_id';)";
+    	$campaignQuery = "AND val.campaign_id='$campaign_id'";
+    	$campaignStatuses = "AND val.status IN (SELECT vicidial_campaign_statuses.status FROM vicidial_campaign_statuses WHERE vicidial_campaign_statuses.sale='Y' AND vicidial_campaign_statuses.campaign_id = '$campaign_id')";
     }
 
     if($location == "all"){
@@ -78,190 +78,28 @@
 	    }
 	// End of Old Leads Counter
 
-    // Getting Campaign Today Stats
-	    $CampTodayStatsstatuses = getStatuses($campaign_id);
-	    // Sales Today
-	    $querySalesToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id 
-	    		FROM vicidial_log vl,vicidial_agent_log val
-                INNER JOIN vicidial_users ON vicidial_users.user=val.user
-                WHERE vl.uniqueid=val.uniqueid 
-                AND val.status IN ('$CampTodayStatsstatuses') 
-                AND {$queryDate} AND {$campaignQuery};";
-	    $resultSalesToday = mysqli_query($link,$querySalesToday);
-	    // $salesToday = sizeof($resultSalesToday);
-	    $salesToday = mysqli_num_rows($resultSalesToday);
-	    $dataCampaignStatsToday['salesToday'] = $salesToday;
-
-	    // Hours Today
-	    $queryHoursToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id 
-	    		FROM vicidial_agent_log val
-                INNER JOIN vicidial_users ON vicidial_users.user=val.user
-                WHERE {$queryDate} AND {$campaignQuery}";
-	    $resultHoursToday = mysqli_query($link,$queryHoursToday);
-	    $hoursToday = 0;
-        while($fresultsHours = mysqli_fetch_array($resultHoursToday, MYSQLI_ASSOC)){
-        	$hoursToday += $fresultsHours['pause_sec'];
-            $hoursToday += $fresultsHours['wait_sec'];
-            $hoursToday += $fresultsHours['talk_sec'];
-            $hoursToday += $fresultsHours['dispo_sec'];
-            // $hoursToday += $fresultsHours['dead_sec'];
-        }
-        $hoursToday = round($hoursToday / 3600, 4);
-        $salesHourToday = round($salesToday / $hoursToday, 1);
-        $dataCampaignStatsToday['hoursToday'] = $hoursToday;
-        $dataCampaignStatsToday['salesHourToday'] = $salesHourToday;
-
-	    // Conversion Today
-	    $queryConversionToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id 
-	    		FROM vicidial_log vl,vicidial_agent_log val
-                INNER JOIN vicidial_users ON vicidial_users.user=val.user
-                WHERE vl.uniqueid=val.uniqueid 
-                AND val.status IN ('$CampTodayStatsstatuses', 'QualR', 'QUANS') 
-                AND {$queryDate} AND {$campaignQuery};";
-        $resultConvertionToday = mysqli_query($link,$queryConversionToday);
-        $countConvertionToday = mysqli_num_rows($resultConvertionToday);
-        $conversionToday = 0;
-        // if(sizeof($resultConvertionToday) > 0)
-        if(mysqli_num_rows($resultConvertionToday) > 0){
-            // $conversionToday = $salesToday / sizeof($resultConvertionToday) * 100;
-            $conversionToday = $salesToday / $countConvertionToday * 100;
-        }
-        // $contactsHourToday = round(sizeof($resultConvertionToday) / $hoursToday, 1);
-        $contactsHourToday = round($countConvertionToday / $hoursToday, 1);
-        $dataCampaignStatsToday['conversionToday'] = $conversionToday;
-        $dataCampaignStatsToday['contactsHourToday'] = $contactsHourToday;
-	// End of Campaign Today Stats
-
-    // Getting Campaign Stats
-        $CampaignStatsstatuses = getStatuses($campaign_id);
-        // Sales
-        $querySales = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
-        	FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val
-	        INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-            WHERE vl.uniqueid=val.uniqueid 
-            AND val.status IN ('$CampaignStatsstatuses') AND {$campaignQuery} {$locationQuery};";
-        $resultSales = mysqli_query($link,$querySales);
-        $salesCampaign = mysqli_num_rows($resultSales);
-	    $dataCampaignStats['salesCampaign'] = $salesCampaign;
-        // Hours
-        $queryHours = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
-    		FROM `asteriskV4`.`vicidial_agent_log` val
-            INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-            WHERE {$campaignQuery} {$locationQuery};";
-        $resultHours = mysqli_query($link,$queryHours);
-        $hoursCampaign = 0;
-        while($fresultsHoursCampaign = mysqli_fetch_array($resultHours, MYSQLI_ASSOC)){
-            $hoursTotal += $fresultsHoursCampaign['pause_sec'];
-            $hoursTotal += $fresultsHoursCampaign['wait_sec'];
-            $hoursTotal += $fresultsHoursCampaign['talk_sec'];
-            $hoursTotal += $fresultsHoursCampaign['dispo_sec'];
-            // $hoursTotal += $fresultsHoursCampaign['dead_sec'];
-        }
-
-        $hoursCampaign = round($hoursCampaign / 3600, 2);
-        $salesHourCampaign = round($salesCampaign / $hoursCampaign, 1);
-        $dataCampaignStats['hoursCampaign'] = $hoursCampaign;
-        $dataCampaignStats['salesHourCampaign'] = $salesHourCampaign;
-
-        // Conversion
-        $queryConversion = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
-        	FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val
-            INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-            WHERE vl.uniqueid=val.uniqueid 
-            AND val.status IN ('$CampaignStatsstatuses', 'QualR', 'QUANS') AND {$campaignQuery} {$locationQuery};";
-        $resultConversion = mysqli_query($link,$queryConversion);
-     	$countConvertionCampaign = mysqli_num_rows($resultConversion);
-        $conversionCampaign = 0;
-        if(mysqli_num_rows($resultConversion) > 0){
-            // $conversionCampaign = $salesCampaign / sizeof($countConvertionCampaign) * 100;
-            $conversionCampaign = $salesCampaign / $countConvertionCampaign * 100;
-        }
-        // $contactsHourCampaign = round(sizeof($countConvertionCampaign) / $hoursCampaign, 1);
-        $contactsHourCampaign = round($countConvertionCampaign / $hoursCampaign, 1);
-        $dataCampaignStats['conversionCampaign'] = $conversionCampaign;
-        $dataCampaignStats['contactsHourCampaign'] = $contactsHourCampaign;
-    // End of Camapaign stats
-
-    // Getting Campaign Stats Total
-        $CampaignTotalStatsstatuses = getStatuses();
-    	// Sales Total
-        $querySalesTotal = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
-        	FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val
-	        INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-	        WHERE vl.uniqueid=val.uniqueid 
-	        AND val.status IN ('$CampaignTotalStatsstatuses') 
-	        AND {$dateQueryTotal} {$locationQuery};";
-        $resultSalesTotal = mysqli_query($link,$querySalesTotal);
-        $salesTotal = mysqli_num_rows($resultSalesTotal);
-	    $dataCampaignStatsTotal['salesTotal'] = $salesTotal;
-
-	    // Hours Total
-	    $queryHoursTotal = "SELECT DISTINCT val.agent_log_id, pause_sec,wait_sec,talk_sec,dispo_sec,dead_sec, vu.user_id 
-    		FROM `asteriskV4`.`vicidial_agent_log` val
-            INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-            WHERE {$dateHoursQueryTotal} {$locationQuery};";
-	    $resultHoursTotal = mysqli_query($link,$queryHoursTotal);
-	    $hoursTotal = 0;
-        while($fresultsHoursTotal = mysqli_fetch_array($resultHoursTotal, MYSQLI_ASSOC)){
-        	$hoursTotal += $fresultsHoursTotal['pause_sec'];
-            $hoursTotal += $fresultsHoursTotal['wait_sec'];
-            $hoursTotal += $fresultsHoursTotal['talk_sec'];
-            $hoursTotal += $fresultsHoursTotal['dispo_sec'];
-            // $hoursTotal += $fresultsHoursTotal['dead_sec'];
-        }
-        $hoursTotal = round($hoursTotal / 3600, 4);
-        $salesHourTotal = round($salesTotal / $hoursTotal, 1);
-        $dataCampaignStatsTotal['hoursTotal'] = $hoursTotal;
-        $dataCampaignStatsTotal['salesHourTotal'] = $salesHourTotal;
-
-	    // Conversion Total
-	    $queryConversionTotal = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
-	    	FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val
-            INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id
-            WHERE vl.uniqueid=val.uniqueid 
-            AND val.status IN ('$CampaignTotalStatsstatuses', 'QualR', 'QUANS') 
-            AND {$dateQueryTotal} {$locationQuery};";
-	    $resultConversionTotal = mysqli_query($link,$queryConversionTotal);
-	    $countConvertionTotal = mysqli_num_rows($resultConversionTotal);
-        $conversionTotal = 0;
-        // if(sizeof($resultConversionTotal) > 0)
-        if(mysqli_num_rows($resultConversionTotal) > 0){
-            // $conversionTotal = $salesTotal / sizeof($countConvertionTotal) * 100;
-            $conversionTotal = $salesTotal / $countConvertionTotal * 100;
-        }
-        // $contactsHourTotal = round(sizeof($countConvertionTotal) / $hoursTotal, 1);
-        $contactsHourTotal = round($countConvertionTotal / $hoursTotal, 1);
-        $dataCampaignStatsTotal['conversionTotal'] = $conversionTotal;
-        $dataCampaignStatsTotal['contactsHourTotal'] = $contactsHourTotal;
-    // End of Campaign Stats Total
-
     if($location == "all"){
     	$locationQueryStats = "";
     	$locationQueryStatsShort = "";
     }else{
     	// AND gc.location_id='$location'
-    	$locationQueryStats = "AND (gc.location_id='$location' OR vc.campaign_id NOT IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`;))";
+    	$locationQueryStats = "AND (gc.location_id='$location' OR vc.campaign_id NOT IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`))";
     	// $locationQueryStatsShort = "AND val.user IN (SELECT vicidial_users.user FROM vicidial_users WHERE vicidial_users.user_id IN (SELECT gc.user_id FROM `goautodialV4`.`go_campaigns` gc WHERE gc.location_id = '$location';))";
-    	$locationQueryStatsShort = "AND val.campaign_id IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`;)";
+    	$locationQueryStatsShort = "AND val.campaign_id IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`)";
     }
 
     // Getting Data for Today Stats
     	// Calls
-        $queryStatsTodayCalls = "SELECT COUNT(DISTINCT val.agent_log_id) as count, val.user FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} AND {$campaignQuery} AND {queryDate} AND val.lead_id IS NOT NULL;";
+        $queryStatsTodayCalls = "SELECT COUNT(DISTINCT val.agent_log_id) as count, val.user FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.lead_id IS NOT NULL;";
         $resultStatsTodayCalls = mysqli_query($link,$queryStatsTodayCalls);
         while($fresultsStatsTodayCalls = mysqli_fetch_array($resultStatsTodayCalls, MYSQLI_ASSOC)){
         	$StatsTodayCalls = $fresultsStatsTodayCalls['count'];
        	}
        	$callsST = $StatsTodayCalls;
        	$dataStatsToday['callsST'] = $callsST;
+        // $dataStatsToday['querycallsST'] = $queryStatsTodayCalls;
         // Hours
-        $queryStatsTodayHours = "SELECT val.agent_log_id , (sum(pause_sec)+sum(wait_sec)+sum(talk_sec)+sum(dispo_sec))/3600 as hours FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} AND {$campaignQuery} AND {queryDate};";
+        $queryStatsTodayHours = "SELECT val.agent_log_id , (sum(pause_sec)+sum(wait_sec)+sum(talk_sec)+sum(dispo_sec))/3600 as hours FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate};";
         $resultStatsTodayHours = mysqli_query($link,$queryStatsTodayHours);
         $hoursST = 0; 
         $callsHourST = 0;
@@ -273,16 +111,23 @@
         $callsHourST = round($callsST / $hoursST, 2);
         $dataStatsToday['hoursST'] = $hoursST;
         $dataStatsToday['callsHourST'] = $callsHourST;
+        // $dataStatsToday['queryhoursST'] = $queryStatsTodayHours;
         // Contact Hour & Contact
-        $queryStatsTodayContactHour = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM  `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} AND {$campaignQuery} AND {queryDate} AND val.status IN ('SALE','RESIDENCE','SUBSCRIBER','CORPORATE','STATUS', 'QualR', 'QUANS');";
+		// SALE = 60
+		// RESIDENCE = 13
+		// SUBSCRIBER = 32
+		// CORPORATE = 33
+		// QUANS = 40
+        $queryStatsTodayContactHour = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM  `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('60','13','32','33','STATUS', 'QualR', '40');";
         $resultStatsTodayContactHour = mysqli_query($link,$queryStatsTodayContactHour);
         $contactsHourST = 0;
         $contactST = mysqli_num_rows($resultStatsTodayContactHour);
         $contactsHourST = round($contactST / $hoursST, 2);
         $dataStatsToday['contactST'] = $contactST;
         $dataStatsToday['contactsHourST'] = $contactsHourST;
+        // $dataStatsToday['querycontactST'] = $queryStatsTodayContactHour;
         // Sales
-        $queryStatsTodaySales = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val WHERE 1 {$locationQueryStatsShort} AND {$campaignQuery} AND {queryDate} AND val.status IN ('SALE','RESIDENCE' ,'SUBSCRIBER','CORPORATE','STATUS');";
+        $queryStatsTodaySales = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('60','13' ,'32','33','STATUS');";
         $resultStatsTodaySales = mysqli_query($link,$queryStatsTodaySales);
         $salesST = mysqli_num_rows($resultStatsTodaySales);
         $salesHourST = round($salesST / $hoursST, 2);
@@ -290,6 +135,7 @@
         $dataStatsToday['salesST'] = $salesST;
         $dataStatsToday['salesHourST'] = $salesHourST;
         $dataStatsToday['conversionST'] = $conversionST;
+        // $dataStatsToday['querySalesST'] = $queryStatsTodaySales;
     // End of today stats
 
     if($location == "all"){
@@ -305,20 +151,21 @@
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
-            WHERE val.lead_id IS NOT NULL {$locationQueryCampaignStats} AND {$campaignQuery} AND {$dateQueryTotal};";
+            WHERE val.lead_id IS NOT NULL {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsCalls = mysqli_query($link,$queryStatsCalls);
         while($fresultsStatsCalls = mysqli_fetch_array($resultStatsCalls, MYSQLI_ASSOC)){
         	$StatsCalls = $fresultsStatsCalls['count'];
        	}
        	$callsCST = $StatsCalls;
        	$dataStatsCampaign['callsCST'] = $callsCST;
+        // $dataStatsCampaign['querycallsCST'] = $queryStatsCalls;
         // Hours
         $queryStatsHours = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
-            WHERE {$campaignQuery} {$locationQueryCampaignStats} AND {$dateQueryTotal}  
+            WHERE {$dateQueryTotal} {$campaignQuery} {$locationQueryCampaignStats} 
             GROUP BY val.agent_log_id, val.campaign_id;";
         $resultStatsHours = mysqli_query($link,$queryStatsHours);
         $hoursCST = 0;
@@ -335,26 +182,28 @@
         $callsHourCST = round($callsCST / $hoursCST, 2);
         $dataStatsCampaign['hoursCST'] = $hoursCST;
         $dataStatsCampaign['callsHourCST'] = $callsHourCST;
+        // $dataStatsCampaign['queryhoursCST'] = $queryStatsHours;
         // Contact Hour
-        $queryStatsContactHour = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id 
+        $queryStatsContactHour = "SELECT DISTINCT val.agent_log_id, val.*, vu.user
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
-            WHERE  vl.uniqueid=val.uniqueid AND val.status IN ('$CampStatsstatuses', 'QualR', 'QUANS') {$locationQueryCampaignStats} AND {$campaignQuery} AND {$dateQueryTotal};";
+            WHERE val.status IN ('$CampStatsstatuses', 'QualR', '40') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsContactHour = mysqli_query($link,$queryStatsContactHour);
         $contactsHourCST = 0;
         $contactsCST = mysqli_num_rows($resultStatsContactHour);
         $contactsHourCST = round($contactsCST / $hoursCST, 2);
         $dataStatsCampaign['contactsCST'] = $contactsCST;
         $dataStatsCampaign['contactsHourCST'] = $contactsHourCST;
+        // $dataStatsCampaign['querycontactsCST'] = $queryStatsContactHour;
         // Sales
-        $queryStatsSales = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id 
+        $queryStatsSales = "SELECT DISTINCT val.agent_log_id, val.*, vu.user
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
-            where vl.uniqueid=val.uniqueid AND val.status IN ('$CampStatsstatuses') {$locationQueryCampaignStats} AND {$campaignQuery} AND {$dateQueryTotal};";
+            WHERE val.status IN ('$CampStatsstatuses') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsSales = mysqli_query($link,$queryStatsSales);
         $salesCST = mysqli_num_rows($resultStatsSales);
         $salesHourCST = round($sales / $hoursCST, 2);
@@ -362,6 +211,7 @@
         $dataStatsCampaign['salesCST'] = $salesCST;
         $dataStatsCampaign['salesHourCST'] = $salesHourCST;
         $dataStatsCampaign['conversionCST'] = $conversionCST;
+        // $dataStatsCampaign['querysalesCST'] = $queryStatsSales;
     // End of campaign stats
 
 
@@ -369,9 +219,6 @@
     	"result" => "success", 
     	"newLeadsCounter" => $dataNewLeads,
     	"oldLeadsCounter" => $dataOldLeads,
-    	"campaignStatsToday" => $dataCampaignStatsToday,
-    	"campaignStats" => $dataCampaignStats,
-    	"campaignStatsTotal" => $dataCampaignStatsTotal,
     	"statsToday" => $dataStatsToday,
     	"statsCampaign" => $dataStatsCampaign
     );

@@ -20,6 +20,7 @@
 	// if(empty($end_date))
 	// 	$end_date = $def_end_date;
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+	$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
 	$groupId = go_get_groupid($session_user);
 	//$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 	$id = mysqli_real_escape_string($link, $_REQUEST['id']);
@@ -128,12 +129,12 @@
 			$user = array("ALL");
 		
 		if($campaigns != "")
-			$campaigns = explode(",",$campaigns);
+			$campaigns = explode(",",$campaign_id);
 		else
 			$campaigns = array("ALL");
 
 		if($lists != "")	
-		    $lists = explode(",",$lists);
+		    $lists = explode(",",$list_id);
 		else
 			$lists = array("ALL");
 		
@@ -203,11 +204,10 @@
 						$id_SQL = "(val.dispo_sec + val.dispo_epoch) > '$time_end'";
 					else{
 						if(empty($start_date))
-                        		                $start_date = $def_start_date;
-                	                        if(empty($end_date))
-        	                                       $end_date = $def_end_date;
-
-	                                        $id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
+			                $start_date = $def_start_date;
+	                    if(empty($end_date))
+	                           $end_date = $def_end_date;
+	                    $id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 					}
 				}
 					
@@ -398,6 +398,15 @@
 
 			$lead_id = $row[1];
 			$list_id_spec = $row[14];
+			// $row[3] = str_replace("\'", "'", $row[3]);
+			// $row[4] = str_replace("\'", "'", $row[4]);
+			// $row[5] = str_replace("\'", "'", $row[7]);
+			// $row[6] = str_replace("\'", "'", $row[8]);
+
+			// $row[3] = str_replace("\\", "", $row[3]);
+			// $row[4] = str_replace("\\", "", $row[4]);
+			// $row[5] = str_replace("\\", "", $row[7]);
+			// $row[6] = str_replace("\\", "", $row[8]);
 
 			if($per_call_notes == "Y"){
 				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
@@ -466,7 +475,7 @@
 			for($a=0;$a<count($csv_header);$a++){
 				//$re_head[] = $csv_header[$a];
 				if($csv_header[$a] !== "AfterDispo")
-				$re_row[$csv_header[$a]] = $csv_row[$i][$a];
+				$re_row[$csv_header[$a]] = str_replace("\\", "", $csv_row[$i][$a]);
 			}
 			
 			array_push($main_row,$re_row);

@@ -28,10 +28,18 @@
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	
+	$color = mysqli_real_escape_string($link, $_REQUEST['color']);
+	$priority = mysqli_real_escape_string($link, $_REQUEST['priority']);
+	$type = mysqli_real_escape_string($link, $_REQUEST['type']);
 	$goUser = $_REQUEST['goUser'];
 
     // Default values 
     $defVal = array("Y","N");
+	
+	if (!$color) { $color = "#b5b5b5"; }
+	if (!$priority) { $priority = 1; }
+	if (!$type) { $type = 'CUSTOM'; }
 
 
     // ERROR CHECKING 
@@ -122,6 +130,14 @@
 									$campaign_id = $row['campaign_id'];
 									$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback');";
 									$rsltv = mysqli_query($link, $newQuery);
+									
+									$tableQuery = "SHOW tables LIKE 'go_statuses';";
+									$checkTable = mysqli_query($linkgo, $tableQuery);
+									$tableExist = mysqli_num_rows($checkTable);
+									if ($tableExist > 0) {
+										$statusQuery = "INSERT INTO go_statuses (status, campaign_id, priority, color, type) VALUES ('$status', '$campaign_id', '$priority', '$color', '$type');";
+										$statusRslt = mysqli_query($linkgo, $statusQuery);
+									}
 								}
 							}else{
 								$multiple_campaigns = explode("-", $allowedCampaigns);
@@ -133,12 +149,28 @@
 									if($campaign_id != ''){
 										$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback');";
 										$rsltv = mysqli_query($link, $newQuery);
+										
+										$tableQuery = "SHOW tables LIKE 'go_statuses';";
+										$checkTable = mysqli_query($linkgo, $tableQuery);
+										$tableExist = mysqli_num_rows($checkTable);
+										if ($tableExist > 0) {
+											$statusQuery = "INSERT INTO go_statuses (status, campaign_id, priority, color, type) VALUES ('$status', '$campaign_id', '$priority', '$color', '$type');";
+											$statusRslt = mysqli_query($linkgo, $statusQuery);
+										}
 									}
 								}
 							}
 						}else{
 							$newQuery = "INSERT INTO vicidial_campaign_statuses (status,status_name,selectable,campaign_id,human_answered,category,sale,dnc,customer_contact,not_interested,unworkable,scheduled_callback) VALUES('$status','$status_name','$selectable','$campaign_id','$human_answered','$category','$sale','$dnc','$customer_contact','$not_interested','$unworkable','$scheduled_callback')";
 							$rsltv = mysqli_query($link, $newQuery);
+							
+							$tableQuery = "SHOW tables LIKE 'go_statuses';";
+							$checkTable = mysqli_query($linkgo, $tableQuery);
+							$tableExist = mysqli_num_rows($checkTable);
+							if ($tableExist > 0) {
+								$statusQuery = "INSERT INTO go_statuses (status, campaign_id, priority, color, type) VALUES ('$status', '$campaign_id', '$priority', '$color', '$type');";
+								$statusRslt = mysqli_query($linkgo, $statusQuery);
+							}
 						}
 							
 						// Admin logs

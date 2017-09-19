@@ -42,6 +42,9 @@
 				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$exploded[$i]."';"; 
 				$deleteResult2 = mysqli_query($link, $deleteDispo);
 				
+				$deleteRecycle = "DELETE FROM vicidial_lead_recycle WHERE campaign_id = '".$exploded[$i]."';";
+				$deleteResult3 = mysqli_query($link, $deleteRecycle);
+
 				$querydel = "SELECT campaign_id FROM vicidial_campaigns $ul;";
 				$rsltvdel = mysqli_query($link, $querydel);
 				$countResult = mysqli_num_rows($rsltvdel);
@@ -52,6 +55,7 @@
 					
 				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
 				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $deleteDispo);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $deleteRecycle);
 			}
 				
 			if($error_count > 0) {
@@ -73,7 +77,12 @@
 				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$campaign_id."';"; 
 				$deleteResult2 = mysqli_query($link, $deleteDispo);
 				
+				$deleteRecycle = "DELETE FROM vicidial_lead_recycle WHERE campaign_id = '".$campaign_id."';";
+				$deleteResult3 = mysqli_query($link, $deleteRecycle);
+
 				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $deleteDispo);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $deleteRecycle);
 				
 				$apiresults = array("result" => "success");
 			} else {

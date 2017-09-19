@@ -21,7 +21,7 @@
 	} else {
         $groupId = go_get_groupid($session_user);
         if(empty($campaign_id)){
-            $get_campaign = mysqli_query($link, "SELECT campaign_id FROM recycle_id = '$recycle_id';");
+            $get_campaign = mysqli_query($link, "SELECT campaign_id FROM vicidial_lead_recycle WHERE recycle_id = '$recycle_id';");
             $fetch_campaign = mysqli_fetch_array($get_campaign);
             $campaign_id = $fetch_campaign['campaign_id'];
         }
@@ -31,7 +31,7 @@
         $confirmed_exist = 0;
         if($check_usergroup > 0){
 
-            if(!empty($campaign_id)){
+            if(!empty($campaign_id) && empty($recycle_id)){
                 $check = "SELECT recycle_id FROM vicidial_lead_recycle WHERE campaign_id = '$campaign_id';";
                 $query_check = mysqli_query($link, $check);
                 $num_check = mysqli_num_rows($query_check);

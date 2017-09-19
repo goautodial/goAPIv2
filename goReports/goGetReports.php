@@ -237,18 +237,44 @@ ini_set('memory_limit', '2048M');
 		if($custom_fields == "Y")	{
 		    for($i = 0 ; $i < count($array_list); $i++){
 				$list_id = $array_list[$i];
-				$query_CF_list = mysqli_query($link, "SELECT * FROM custom_$list_id;");
+				$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
 				if($query_CF_list){
-					while ($field_list=mysqli_fetch_field($query_CF_list)){
-						$exec_query_CF_list = $field_list->name;
+					$n=0;
+					while ($field_list=mysqli_fetch_array($query_CF_list)){
+						$exec_query_CF_list = $field_list["Field"];
+
 						if($exec_query_CF_list != "lead_id"){
-							$active_list_fields[] = $exec_query_CF_list;
-							array_push($csv_header, $exec_query_CF_list);
+							$active_list_fields["custom_$list_id"][$n] = $exec_query_CF_list;
+							$n++;
 						}
 					}
-					$active_list_fields[] = "|";
+				}
+				//old
+					// $query_CF_list = mysqli_query($link, "SELECT * FROM custom_$list_id;");
+					// if($query_CF_list){
+					// 	while ($field_list=mysqli_fetch_field($query_CF_list)){
+					// 		$exec_query_CF_list = $field_list->name;
+					// 		if($exec_query_CF_list != "lead_id"){
+					// 			$active_list_fields[] = $exec_query_CF_list;
+					// 			array_push($csv_header, $exec_query_CF_list);
+					// 		}
+					// 	}
+					// 	$active_list_fields[] = "|";
+					// }
+			}
+			// new
+			$header_CF = array();
+			$keys = array_keys($active_list_fields);
+			for($i = 0 ; $i < count($keys); $i++){
+				$list_id = $keys[$i];
+				for($x=0;$x < count($active_list_fields[$list_id]);$x++){
+					$field = $active_list_fields[$list_id][$x];
+					if(!in_array($field,$header_CF)){
+						$header_CF[] = $field;
+					}
 				}
 			}
+			$csv_header = array_merge($csv_header,$header_CF);
 		}
 
 		if($rec_location == "Y"){
@@ -259,7 +285,7 @@ ini_set('memory_limit', '2048M');
 		while($row = mysqli_fetch_row($result)) {
 			$lead_id = $row[34];
 			$uniqueid = $row[35];
-			
+			$list_id_spec = $row[8];
 			//if($RUNcampaign > 0 && $RUNgroup > 0)
 			//	$uniqueid2 = $row[36];
 
@@ -330,78 +356,78 @@ ini_set('memory_limit', '2048M');
 
 
 			if($custom_fields == "Y")	{
-			    for($i = 0 ; $i < count($array_list); $i++){
-				    $list_id = "custom_".$array_list[$i];
+				$keys = array_keys($active_list_fields); // list of active custom lists
+				for($i = 0 ; $i < count($keys); $i++){
+				    $list_id = $keys[$i];
+					//var_dump($active_list_fields[$list_id]);
+					$fields = implode(",", $active_list_fields[$list_id]);
 					
-					$active_list_fields = implode(",",$active_list_fields);
-					$active_list_fields = trim($active_list_fields, "|,");
-					$active_list_fields = explode("|,", $active_list_fields);
-					$fields = implode(",",$active_list_fields);
-					$fields_array = explode(",", $fields);
-					//$queries[] = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;";
-					$query_CF = mysqli_query($link, "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;");
-					if($query_CF){
-						$fetch_CF = mysqli_fetch_array($query_CF);
-						//while($fetch_CF = mysqli_fetch_array($query_CF)){
-						for($x=0;$x < count($fields_array);$x++){
-							$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$fields_array[$x]]);
-						}
-					}else{
-					//	for($x=0;$x < count($fields_array);$x++){
-					//		$fetch_row[] =  '';
-					//	}
+					if("custom_".$list_id_spec === $list_id){
+						$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
+						$query_CF = mysqli_query($link, $query_row_sql);
+						
+						//if($query_CF){
+							$fetch_CF = mysqli_fetch_array($query_CF);
+							
+							if($fetch_CF !== NULL){
+								//var_dump($fetch_CF);
+								for($x=0;$x < count($header_CF);$x++){
+									if(!empty($fetch_CF[$header_CF[$x]])){
+										$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+									}else{
+										$fetch_row[] =  "";
+									}
+								}
+							}
+							
+							//die();
+						//}
 					}
 					
-					
+
 					for($a=0;$a < count($fetch_row);$a++){
 						array_push($row, $fetch_row[$a]);
 					}
-					
+					$queries[] = $row;
 					unset($fetch_row);
 					unset($fetch_CF);
-					/*
-					$x = 0;
-					while($x < count($active_list_fields)){
-						$field = $active_list_fields[$x];
-						$field = rtrim($field, ",");
-						
-						$query_CF = mysqli_query($link, "SELECT $field FROM $list_id WHERE lead_id ='$lead_id';");
-						$list_data = mysqli_fetch_assoc($query_CF);
-						
-						$getColumn = mysqli_query($link, "DESC $list_id;");
-						$y = 0;
-						while($getcolumn_row = mysqli_fetch_array($getColumn)){
-							if($field == $getcolumn_row[$y]){
-								array_push($row, $list_data);
-							}else{
-								array_push($row, " ");
-							}
-							$y++;
-						}
-						
-						$x++;
-					}
-					*/
-					/*for($x=0;$x < count($active_list_fields);$x++){
-						$list_field = $active_list_fields[$x];
-						$query_CF = mysqli_query($link, "SELECT $list_field FROM $list_id WHERE lead_id ='$lead_id';");
-						$list_data = mysqli_fetch_array($query_CF);
-						$list_row_data = $list_data[$list_field];
-						array_push($row, $list_row_data);
-					}*/
-					//array(",", $active_list_fields);
-					
-			//		//$list_fields = implode(",",$active_list_fields);
-			//	    //$query_CF = mysqli_query($link, "SELECT * FROM $list_id WHERE lead_id ='$lead_id';");
-			//	    //while($list_data = mysqli_fetch_array($query_CF)){
-			//	    //
-			//	    //	   array_push($row, $list_data);
-			//	    //}
 			    }
+				// old
+				  //   for($i = 0 ; $i < count($array_list); $i++){
+					 //    $list_id = "custom_".$array_list[$i];
+						
+						// $active_list_fields = implode(",",$active_list_fields);
+						// $active_list_fields = trim($active_list_fields, "|,");
+						// $active_list_fields = explode("|,", $active_list_fields);
+						// $fields = implode(",",$active_list_fields);
+						// $fields_array = explode(",", $fields);
+						// //$queries[] = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;";
+						// $query_CF = mysqli_query($link, "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;");
+						// if($query_CF){
+						// 	$fetch_CF = mysqli_fetch_array($query_CF);
+						// 	//while($fetch_CF = mysqli_fetch_array($query_CF)){
+						// 	for($x=0;$x < count($fields_array);$x++){
+						// 		$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$fields_array[$x]]);
+						// 	}
+						// }else{
+						// //	for($x=0;$x < count($fields_array);$x++){
+						// //		$fetch_row[] =  '';
+						// //	}
+						// }
+						
+						
+						// for($a=0;$a < count($fetch_row);$a++){
+						// 	array_push($row, $fetch_row[$a]);
+						// }
+						
+						// unset($fetch_row);
+						// unset($fetch_CF);
+				  //   }
 			}
 			$csv_row[] = $row;
 		}
-		
+		// new
+		// ----
 		$campFilter = (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
 		$inbFilter  = (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
 		$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";

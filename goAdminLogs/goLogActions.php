@@ -30,6 +30,31 @@ if ($user === 'sess_expired') {
     $user = $rslt['user'];
     $user_group = $rslt['user_group'];
     $details = "Session expired on user $user";
+    
+    if ($user_group == 'AGENTS') {
+        $NOW = date("Y-m-d H:i:s");
+        $NOWepoch = date("U");
+        
+        $astDB->where('user' => $user);
+        $astDB->where('event' => 'LOGIN');
+        $astDB->orderBy('event_date', 'desc');
+        $sessRslt = $astDB->getOne('vicidial_user_log', 'campaign_id');
+        $campaign = $sessRslt['campaign_id'];
+        
+        $insertData = array(
+            "user" => $user,
+            "event" => 'AUTO-LOGOUT',
+            "campaign_id" => $campaign,
+            "event_date" => $NOW,
+            "event_epoch" => $NOWepoch,
+            "user_group" => $user_group,
+            "session_id" => '',
+            "server_ip" => '',
+            "extension" => '',
+            "computer_ip" => ''
+        );
+        $astDB->insert('vicidial_user_log', $insertData);
+    }
 }
 
 $insertData = array(

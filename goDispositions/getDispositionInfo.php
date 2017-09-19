@@ -43,16 +43,32 @@
 		   $addedSQL = "WHERE user_group='$groupId'";
 		}
 		
+		$chkStatus = "SHOW TABLES LIKE 'go_statuses'";
+		$statusRslt = mysqli_query($linkgo, $chkStatus);
+		$statusExist = mysqli_num_rows($statusRslt);
+		$statusTBL = '';
+		$statusSQL = '';
+		if ($statusExist > 0) {
+			$statusTBL = ",`$VARDBgo_database`.go_statuses gs";
+			$statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
+		}
+		
 		if($status != NULL){
 			$query = "SELECT status,status_name,campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses WHERE campaign_id='$camp' AND status='$status';";
 		}else{
-			$query = "SELECT status,status_name,campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses WHERE campaign_id='$camp';";
+			$query = "SELECT vcs.status,status_name,vcs.campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses vcs $statusTBL WHERE vcs.campaign_id='$camp' $statusSQL;";
 		}
 		$rsltv = mysqli_query($link, $query);
 		$exist = mysqli_num_rows($rsltv);
 		
 		if($exist >= 1){
 			while($fresult = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+				if ($statusExist > 0) {
+					$statusQuery = "SELECT priority,color FROM go_statuses WHERE status='".$fresult['status']."'";
+					$statusRslt = mysqli_query($linkgo, $statusQuery);
+					$statusData = mysqli_fetch_array($statusRslt, MYSQLI_ASSOC);
+				}
+				
 				$dataStat[] = $fresult['status'];
 				$dataStatName[] = $fresult['status_name'];
 				$dataCampID[] = $fresult['campaign_id'];
@@ -64,11 +80,13 @@
 				$dataNot_interested[] = $fresult['not_interested'];
 				$dataUnworkable[] = $fresult['unworkable'];
 				$dataScheduled_callback[] = $fresult['scheduled_callback'];
+				$dataPriority[] = (!is_null($statusData['priority'])) ? $statusData['priority'] : "1";
+				$dataColor[] = (!is_null($statusData['color'])) ? $statusData['color'] : "#b5b5b5";
 				
 				//$apiresults = array("result" => "success", "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback);
 			}
 			
-			$apiresults = array("result" => "success", "campaign_id" => $camp, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback);
+			$apiresults = array("result" => "success", "campaign_id" => $camp, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback, "priority" => $dataPriority, "color" => $dataColor);
 			
 			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the dispositions of campaign $camp", $log_group);
 			

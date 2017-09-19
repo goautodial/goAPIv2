@@ -910,6 +910,7 @@ if ($is_logged_in) {
         $LISTweb_form_address_two = $row['web_form_address_two'];
         
         $astDB->where('lead_id', $lead_id);
+        $astDB->orderBy('notesid', 'desc');
         $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
         $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
 
