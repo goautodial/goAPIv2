@@ -19,7 +19,7 @@
 	        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
     ### Check Campaign ID if its null or empty
-	if($campaign_id == null) { 
+	if( empty($campaign_id) && empty($statuses)) { 
 		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
  

@@ -54,8 +54,8 @@
 			$campExist = mysqli_num_rows($campRslt);
 			
 			if ($campExist) {
-				$statusTBL = ",`$VARDBgo_database`.go_statuses gs";
-				$statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
+				//$statusTBL = ",`$VARDBgo_database`.go_statuses gs";
+				//$statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
 			}
 		}
 		
