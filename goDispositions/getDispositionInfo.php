@@ -49,8 +49,14 @@
 		$statusTBL = '';
 		$statusSQL = '';
 		if ($statusExist > 0) {
-			$statusTBL = ",`$VARDBgo_database`.go_statuses gs";
-			$statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
+			$chkCamp = "SELECT * FROM go_statuses WHERE campaign_id='$camp';";
+			$campRslt = mysqli_query($linkgo, $chkCamp);
+			$campExist = mysqli_num_rows($campRslt);
+			
+			if ($campExist) {
+				$statusTBL = ",`$VARDBgo_database`.go_statuses gs";
+				$statusSQL = "AND (vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id) ORDER BY priority,vcs.status";
+			}
 		}
 		
 		if($status != NULL){
