@@ -425,8 +425,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
     if ($statusTableFound > 0) {
         $thisColumns = 'vcs.status,status_name,scheduled_callback,priority,color';
         $astDB->join("`$VARDBgo_database`.go_statuses gs", 'vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id', 'LEFT');
-        $astDB->orderBy('priority', 'ASC');
-        $astDB->orderBy('vcs.status', 'ASC');
+        $astDB->orderBy('priority', 'asc')->orderBy('vcs.status', 'asc');
     } else {
         $thisColumns = 'status,status_name,scheduled_callback';
         $astDB->orderBy('vcs.status');
