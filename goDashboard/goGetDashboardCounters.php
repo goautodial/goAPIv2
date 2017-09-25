@@ -113,12 +113,7 @@
         $dataStatsToday['callsHourST'] = $callsHourST;
         // $dataStatsToday['queryhoursST'] = $queryStatsTodayHours;
         // Contact Hour & Contact
-		// SALE = 60
-		// RESIDENCE = 13
-		// SUBSCRIBER = 32
-		// CORPORATE = 33
-		// QUANS = 40
-        $queryStatsTodayContactHour = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM  `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('60','13','32','33','STATUS', 'QualR', '40');";
+        $queryStatsTodayContactHour = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM  `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('SALE','RESIDENCE','SUBSCRIBER','CORPORATE','STATUS', 'QualR', 'QUANS');";
         $resultStatsTodayContactHour = mysqli_query($link,$queryStatsTodayContactHour);
         $contactsHourST = 0;
         $contactST = mysqli_num_rows($resultStatsTodayContactHour);
@@ -127,7 +122,7 @@
         $dataStatsToday['contactsHourST'] = $contactsHourST;
         // $dataStatsToday['querycontactST'] = $queryStatsTodayContactHour;
         // Sales
-        $queryStatsTodaySales = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('60','13' ,'32','33','STATUS');";
+        $queryStatsTodaySales = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('SALE','RESIDENCE' ,'SUBSCRIBER','CORPORATE','STATUS');";
         $resultStatsTodaySales = mysqli_query($link,$queryStatsTodaySales);
         $salesST = mysqli_num_rows($resultStatsTodaySales);
         $salesHourST = round($salesST / $hoursST, 2);
@@ -189,7 +184,7 @@
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
-            WHERE val.status IN ('$CampStatsstatuses', 'QualR', '40') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
+            WHERE val.status IN ('$CampStatsstatuses', 'QualR', 'QUANS') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsContactHour = mysqli_query($link,$queryStatsContactHour);
         $contactsHourCST = 0;
         $contactsCST = mysqli_num_rows($resultStatsContactHour);
