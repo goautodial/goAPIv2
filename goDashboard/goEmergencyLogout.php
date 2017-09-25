@@ -84,10 +84,18 @@
 
             }
 
+            $sql_getsessID = "SELECT agent_session_id FROM go_agent_sessions WHERE sess_agent_user='$user_name';";
+			$query_sessID = mysqli_query($link, $sql_getsessID);
+			$fetch_sessID = mysqli_fetch_array($query_sessID);
+
 			$query5 = "DELETE FROM vicidial_live_agents WHERE user='".$agents['user']."' LIMIT 1;";
 			$rslt5  = mysqli_query($link, $query5);
 			$query6 = "DELETE FROM go_agent_sessions WHERE sess_agent_user='".$agents['user']."' LIMIT 1;";
 			$rslt6  = mysqli_query($link, $query6);
+
+			//insert to user_log
+			$query7 = "INSERT INTO vicidial_user_log(user, event, campaign_id, event_date, user_group, server_ip, session_id) VALUE('".$agents['user']."', 'FORCE-LOGOUT', '".$agents['campaign_id']."', '".$NOW_TIME."', '".$agents['user_group']."', '".$ip_address."', '".$fetch_sessID['agent_session_id']."');";
+			$rslt7  = mysqli_query($link, $query7);
 			
 			$log_id = log_action($linkgo, 'LOGOUT', $log_user, $ip_address, "User $log_user used emergency log out on $user_name", $log_group);
                      
@@ -103,6 +111,9 @@
 				$query8 = "DELETE FROM go_agent_sessions WHERE sess_agent_user='$user_name';";
 				$rslt8  = mysqli_query($link, $query8);
 				
+				$query7 = "INSERT INTO vicidial_user_log(user, event, campaign_id, event_date, user_group, server_ip, session_id) VALUE('".$user_name."', 'FORCE-LOGOUT', '".$agents['campaign_id']."', '".$NOW_TIME."', '".$agents['user_group']."', '".$ip_address."', '".$VliveagentSess['agent_session_id']."');";
+				$rslt7  = mysqli_query($link, $query7);
+
 				$log_id = log_action($linkgo, 'LOGOUT', $log_user, $ip_address, "User $log_user used emergency log out on $user_name", $log_group);
 				$apiresults = array("result" => "success");
 			} else {
