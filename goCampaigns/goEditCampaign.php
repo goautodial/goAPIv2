@@ -73,6 +73,7 @@
 	$alt_number_dialing = $_REQUEST['alt_number_dialing'];
 	$dynamic_cid = $_REQUEST['dynamic_cid'];
 	$nextdial_seconds = $_REQUEST['nextdial_seconds'];
+	$my_callback_option = $_REQUEST['my_callback_option'];
 	
 	$survey_first_audio_file = $_REQUEST['survey_first_audio_file'];
 	$survey_method = $_REQUEST['survey_method'];
@@ -205,6 +206,7 @@
 						$data_waitforsilence_options = $fetch_exist['waitforsilence_options'];
 						$data_dynamic_cid = $fetch_exist['dynamic_cid'];
 						$data_nextdial_seconds = $fetch_exist['nextdial_seconds'];
+						$data_my_callback_option = $fetch_exist['my_callback_option'];
 					}
 					
 					if(empty($campaign_name))
@@ -363,6 +365,8 @@
 					
 					if(empty($nextdial_seconds))
 						$nextdial_seconds = $data_nextdial_seconds;
+					if(empty($my_callback_option))
+						$my_callback_option = $data_my_callback_option;
 					
 					$dynamic_cid_SQL = "";
 					$dynamic_cid_COL = "";
@@ -516,7 +520,8 @@
 											agent_lead_search_method = '$agent_lead_search_method',
 											omit_phone_code = '$omit_phone_code',
 											disable_alter_custdata = '$disable_alter_custdata',
-											disable_alter_custphone = '$disable_alter_custphone' 
+											disable_alter_custphone = '$disable_alter_custphone',
+											my_callback_option = '$my_callback_option' 
 											$addedQuery
 											$nextdial_seconds_SQL
 										WHERE campaign_id='$campaign_id'

@@ -210,6 +210,22 @@ if ($is_logged_in) {
                 $CBuser =			trim("{$row['user']}");
                 $CBcomments =		trim("{$row['comments']}");
             }
+            
+            $astDB->where('lead_id', $lead_id);
+            $astDB->orderBy('entry_time', 'asc');
+            $rslt = $astDB->get('vicidial_callbacks', null, 'entry_time,comments,user');
+            $CBcommentsALL = '<div class="col-sm-12"><h4 style="font-weight: 600;">CallBack Comments</h4></div>';
+            foreach ($rslt as $row) {
+                $getDate = strtotime($row['entry_time']);
+                $thisDate = date('Y-m-d', $getDate);
+                $thisComment = $row['comments'];
+                $thisUser = $row['user'];
+                if (strlen($thisComment) > 0) {
+                    $CBcommentsALL .= '<div class="col-sm-12" style="font-size: 14px;">';
+                    $CBcommentsALL .= '	<strong>'.$thisDate.':</strong> '.$thisComment.' ~ <strong>'.$thisUser.'</strong>';
+                    $CBcommentsALL .= '</div>';
+                }
+            }
         }
         //$stmt="SELECT owner_populate FROM vicidial_campaigns where campaign_id='$campaign';";
         $astDB->where('campaign_id', $campaign);
@@ -967,7 +983,8 @@ if ($is_logged_in) {
             'ACcount' => $ACcount,
             'ACcomments' => $ACcomments,
             'converted_dial_code' => $converted_dial_code,
-            'call_notes' => $call_notes
+            'call_notes' => $call_notes,
+            'CBcommentsALL' => $CBcommentsALL
         );
 
         $wait_sec = 0;

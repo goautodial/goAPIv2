@@ -499,8 +499,9 @@ if ($userExist > 0) {
             if ($scheduled_callback == 'Y')
                 {$VARCBstatusesLIST .= " {$status}";}
         }
-        ksort($statuses);
+        //ksort($statuses);
         $statuses_ct = ($statuses_ct + $statuses_camp_ct);
+        $testVal = $astDB->getLastQuery();
     }
     $VARCBstatusesLIST .= " ";
     
@@ -815,7 +816,7 @@ if ($userExist > 0) {
     }
     $data = array_merge($data, array( 'country_codes' => $country_code ));
     
-    $APIResult = array( "result" => "success", "data" => $data );
+    $APIResult = array( "result" => "success", "data" => $data, "test" => $testVal );
 } else {
     $APIResult = array( "result" => "error", "message" => "User ID '{$user_id}' does NOT exist." );
 }

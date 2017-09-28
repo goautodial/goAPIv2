@@ -1141,6 +1141,22 @@ if ($sipIsLoggedIn) {
                     $astDB->where('status', 'INACTIVE', '!=');
                     $query = $astDB->update('vicidial_callbacks', array('status'=>'INACTIVE'));
                 }
+                
+                $astDB->where('lead_id', $lead_id);
+                $astDB->orderBy('entry_time', 'asc');
+                $rslt = $astDB->get('vicidial_callbacks', null, 'entry_time,comments,user');
+                $CBcommentsALL = '<div class="col-sm-12"><h4 style="font-weight: 600;">CallBack Comments</h4></div>';
+                foreach ($rslt as $row) {
+                    $getDate = strtotime($row['entry_time']);
+                    $thisDate = date('Y-m-d', $getDate);
+                    $thisComment = $row['comments'];
+                    $thisUser = $row['user'];
+                    if (strlen($thisComment) > 0) {
+                        $CBcommentsALL .= '<div class="col-sm-12" style="font-size: 14px;">';
+                        $CBcommentsALL .= '	<strong>'.$thisDate.':</strong> '.$thisComment.' ~ <strong>'.$thisUser.'</strong>';
+                        $CBcommentsALL .= '</div>';
+                    }
+                }
             }
     
             //$stmt = "SELECT local_gmt FROM servers where active='Y' limit 1;";
@@ -1744,7 +1760,8 @@ if ($sipIsLoggedIn) {
                 'post_phone_time_diff_alert_message' => $post_phone_time_diff_alert_message,
                 'ACcount' => $ACcount,
                 'ACcomments' => $ACcomments,
-                'call_notes' => $call_notes
+                'call_notes' => $call_notes,
+                'CBcommentsALL' => $CBcommentsALL
             );
     
             $APIResult = array( "result" => "success", "data" => $LeaD_InfO );

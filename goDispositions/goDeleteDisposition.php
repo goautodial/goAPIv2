@@ -47,6 +47,14 @@
 				//echo $deleteQuery;
 			}
 			
+			$tableQuery = "SHOW tables LIKE 'go_statuses';";
+			$checkTable = mysqli_query($linkgo, $tableQuery);
+			$tableExist = mysqli_num_rows($checkTable);
+			if ($tableExist > 0) {
+				$statusQuery = "DELETE FROM go_statuses WHERE campaign_id='$campaign_id' AND status='$statuses';";
+				$statusRslt = mysqli_query($linkgo, $statusQuery);
+			}
+			
         ### Admin logs
 				//$SQLdate = date("Y-m-d H:i:s");
 				//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Status $statuses from Campaign $campaign_id','DELETE FROM vicidial_campaign_statuses  WHERE status IN ($statuses) AND campaign_id=$campaign_id;');";

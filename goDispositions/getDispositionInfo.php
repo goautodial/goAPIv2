@@ -70,7 +70,7 @@
 		if($exist >= 1){
 			while($fresult = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
 				if ($statusExist > 0) {
-					$statusQuery = "SELECT priority,color FROM go_statuses WHERE status='".$fresult['status']."'";
+					$statusQuery = "SELECT priority,color FROM go_statuses WHERE status='".$fresult['status']."' AND campaign_id='".$fresult['campaign_id']."'";
 					$statusRslt = mysqli_query($linkgo, $statusQuery);
 					$statusData = mysqli_fetch_array($statusRslt, MYSQLI_ASSOC);
 				}

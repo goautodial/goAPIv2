@@ -63,7 +63,7 @@ if ($cbcount) {
 	}
 }
 
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE');";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE') ORDER BY callback_time ASC;";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_live = $astDB->getRowCount();
 $cb_live = array();
@@ -86,7 +86,7 @@ if ($cbcount_live) {
 	}
 }
 
-$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59';";
+$stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59' ORDER BY callback_time ASC;";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_today = $astDB->getRowCount();
 $cb_today = array();
