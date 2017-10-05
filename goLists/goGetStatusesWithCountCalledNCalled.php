@@ -10,7 +10,7 @@
     include_once("../goFunctions.php");
     
     $list_id = $_REQUEST['list_id'];
-    
+    // GROUP BY vicidial_list.status,vicidial_list.called_since_last_reset
     $query = "SELECT
                 vicidial_list.status as stats,
                 vicidial_list.called_since_last_reset,
@@ -20,7 +20,7 @@
             LEFT JOIN vicidial_statuses
             ON vicidial_list.status=vicidial_statuses.status
             WHERE vicidial_list.list_id='$list_id'
-            GROUP BY vicidial_list.status,vicidial_list.called_since_last_reset
+            GROUP BY vicidial_list.status
             ORDER BY vicidial_list.status,vicidial_list.called_since_last_reset;";
 	$rsltv = mysqli_query($link, $query);
     
@@ -36,6 +36,7 @@
             "called_since_last_reset"   => $dataCalledSinceLastReset,
             "countvlists"               => $dataCountVLists,
             "status_name"               => $dataStatName
+            // "query" => $query
 		);
 	}
 ?>
