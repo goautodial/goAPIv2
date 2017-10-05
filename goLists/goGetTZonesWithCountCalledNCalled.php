@@ -10,14 +10,14 @@
     include_once("../goFunctions.php");
     
     $list_id = $_REQUEST['list_id'];
-    
+    // GROUP BY gmt_offset_now,called_since_last_reset
     $query = "SELECT
 				gmt_offset_now,
 				called_since_last_reset,
 				count(*) as counttlist
 			FROM vicidial_list
 			WHERE list_id='$list_id'
-			GROUP BY gmt_offset_now,called_since_last_reset
+			GROUP BY gmt_offset_now 
 			ORDER BY gmt_offset_now,called_since_last_reset;";
 	$rsltv = mysqli_query($link, $query);
     
