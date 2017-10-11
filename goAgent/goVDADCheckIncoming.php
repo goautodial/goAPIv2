@@ -141,8 +141,8 @@ if ($is_logged_in) {
             $first_name		= trim("{$row['first_name']}");
             $middle_initial	= trim("{$row['middle_initial']}");
             $last_name		= trim("{$row['last_name']}");
-            $address1		= trim("{$row['address1']}");
-            $address2		= trim("{$row['address2']}");
+            $address1		= stripcslashes(trim("{$row['address1']}"));
+            $address2		= stripcslashes(trim("{$row['address2']}"));
             $address3		= trim("{$row['address3']}");
             $city			= trim("{$row['city']}");
             $state			= trim("{$row['state']}");
@@ -907,6 +907,12 @@ if ($is_logged_in) {
 
         $comments = preg_replace("/\r/i", '', $comments);
         $comments = preg_replace("/\n/i", '!N!', $comments);
+
+        $address1 = preg_replace("/\r/i", '', $address1);
+        $address1 = preg_replace("/\n/i", '!N!', $address1);
+
+        $address2 = preg_replace("/\r/i", '', $address2);
+        $address2 = preg_replace("/\n/i", '!N!', $address2);
 
         $areacode = substr($phone_number, 0, 3);
         //$stmt="SELECT country FROM vicidial_phone_codes where country_code='$phone_code' and areacode='$areacode' LIMIT 1;";

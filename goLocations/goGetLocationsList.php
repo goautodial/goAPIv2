@@ -21,14 +21,15 @@
 	}
 
 	$goDB->orderBy('name', 'desc');
-	$rsltv = $goDB->get('locations', $limit, 'name,description,user_group,active');
+	$rsltv = $goDB->get('locations', $limit, 'id,name,description,user_group,active');
 
 	foreach ($rsltv as $row) {
+		$dataLocationID[] = $row['id'];
 		$dataLocation[] = $row['name'];
        	$dataDescription[] = $row['description'];
 		$dataUserGroup[] = $row['user_group'];
 		$dataActive[] = $row['active'];
 	}
-	$APIResult = array("result" => "success", "location" => $dataLocation, "description" => $dataDescription, "user_group" => $dataUserGroup, "active" => $dataActive);
+	$APIResult = array("result" => "success", "location_id" => $dataLocationID, "location" => $dataLocation, "description" => $dataDescription, "user_group" => $dataUserGroup, "active" => $dataActive);
 
 ?>

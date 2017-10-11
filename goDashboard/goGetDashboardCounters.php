@@ -14,6 +14,7 @@
     $user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
 
     $date = date("Y-m-d");
+	//$date = "2017-10-04";
     $queryDate = "event_time BETWEEN '$date 00:00:00' AND '$date 23:59:59'";
     $dateQueryTotal = "event_time > '$date'";
     $dateHoursQueryTotal = "event_time > '$date'";
@@ -33,7 +34,7 @@
     if($location == "all"){
     	$locationQuery = "";
     }else{
-    	$locationQuery = "AND gc.location_id='$location'";
+    	$locationQuery = "AND gu.location_id='$location'";
     }
 
     // Getting New Leads Counter
@@ -83,7 +84,7 @@
     	$locationQueryStatsShort = "";
     }else{
     	// AND gc.location_id='$location'
-    	$locationQueryStats = "AND (gc.location_id='$location' OR vc.campaign_id NOT IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`))";
+    	$locationQueryStats = "AND (gu.location_id='$location' OR vc.campaign_id NOT IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`))";
     	// $locationQueryStatsShort = "AND val.user IN (SELECT vicidial_users.user FROM vicidial_users WHERE vicidial_users.user_id IN (SELECT gc.user_id FROM `goautodialV4`.`go_campaigns` gc WHERE gc.location_id = '$location';))";
     	$locationQueryStatsShort = "AND val.campaign_id IN (SELECT campaign_id FROM `goautodialV4`.`go_campaigns`)";
     }
@@ -136,7 +137,7 @@
     if($location == "all"){
     	$locationQueryCampaignStats = "";
     }else{
-    	$locationQueryCampaignStats = "AND gc.location_id='$location'";
+    	$locationQueryCampaignStats = "AND gu.location_id='$location'";
    	}
     // Getting Data for Campaign Stats
     	$CampStatsstatuses = getStatuses($campaign_id);
@@ -145,7 +146,7 @@
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
+            LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
             WHERE val.lead_id IS NOT NULL {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsCalls = mysqli_query($link,$queryStatsCalls);
         while($fresultsStatsCalls = mysqli_fetch_array($resultStatsCalls, MYSQLI_ASSOC)){
@@ -159,7 +160,7 @@
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
+            LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
             WHERE {$dateQueryTotal} {$campaignQuery} {$locationQueryCampaignStats} 
             GROUP BY val.agent_log_id, val.campaign_id;";
         $resultStatsHours = mysqli_query($link,$queryStatsHours);
@@ -183,7 +184,7 @@
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
+            LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
             WHERE val.status IN ('$CampStatsstatuses', 'QualR', 'QUANS') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsContactHour = mysqli_query($link,$queryStatsContactHour);
         $contactsHourCST = 0;
@@ -197,7 +198,7 @@
         	FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
-            LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=vc.campaign_id
+            LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
             WHERE val.status IN ('$CampStatsstatuses') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsSales = mysqli_query($link,$queryStatsSales);
         $salesCST = mysqli_num_rows($resultStatsSales);

@@ -23,6 +23,13 @@ if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
 
 $user = (strlen($user_id) > 0) ? $user_id : $goUser;
 
+$astDB->where('user', $user);
+$astDB->where('campaign_id', $campaign);
+$astDB->where('status', array('INACTIVE', 'DEAD'), 'NOT IN');
+$astDB->where('DATEDIFF(NOW(), callback_time)', '21', '>');
+$astDB->where('recipient', 'USERONLY');
+$astDB->update('vicidial_callbacks', array('status' => 'INACTIVE'));
+
 $campaignCBhoursSQL = '';
 //$stmt = "SELECT callback_hours_block from vicidial_campaigns where campaign_id='$campaign';";
 $astDB->where('campaign_id', $campaign);
@@ -36,6 +43,8 @@ if ($camp_count > 0) {
 		$campaignCBhoursSQL = "AND entry_time < '{$x_hours_ago}'";
 	}
 }
+
+// All Callbacks
 $campaignCBsql = '';
 if ($settings->agentonly_callback_campaign_lock > 0 && strlen($campaign) > 0) {
 	$campaignCBsql = "AND campaign_id='{$campaign}'";
@@ -47,13 +56,14 @@ $cb_all = array();
 if ($cbcount) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
-		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
+		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name,gmt_offset_now');
 		$row['phone_number'] = trim($xrslt['phone_number']);
 		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
+		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -63,6 +73,7 @@ if ($cbcount) {
 	}
 }
 
+// Live Callbacks
 $stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status IN('LIVE') ORDER BY callback_time ASC;";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_live = $astDB->getRowCount();
@@ -70,13 +81,14 @@ $cb_live = array();
 if ($cbcount_live) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
-		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
+		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name,gmt_offset_now');
 		$row['phone_number'] = trim($xrslt['phone_number']);
 		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
+		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
@@ -86,6 +98,7 @@ if ($cbcount_live) {
 	}
 }
 
+// Callbacks Today
 $stmt = "SELECT * FROM vicidial_callbacks WHERE recipient='USERONLY' AND user='$user' $campaignCBsql $campaignCBhoursSQL AND status NOT IN('INACTIVE','DEAD') AND callback_time BETWEEN '$NOW_DATE 00:00:00' AND '$NOW_DATE 23:59:59' ORDER BY callback_time ASC;";
 $rslt = $astDB->rawQuery($stmt);
 $cbcount_today = $astDB->getRowCount();
@@ -93,13 +106,14 @@ $cb_today = array();
 if ($cbcount_today) {
 	foreach ($rslt as $x => $row) {
 		$astDB->where('lead_id', $row['lead_id']);
-		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name');
+		$xrslt = $astDB->getOne('vicidial_list', 'phone_number,first_name,last_name,gmt_offset_now');
 		$row['phone_number'] = trim($xrslt['phone_number']);
 		$row['cust_name'] = trim("{$xrslt['first_name']} {$xrslt['last_name']}");
 		$row['short_callback_time'] = relativeTime($row['callback_time'], 1);
 		$row['long_callback_time'] = relativeTime($row['callback_time'], 6);
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
+		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
 		
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');

@@ -119,6 +119,12 @@ if ($is_logged_in) {
 			$comments = preg_replace("/--AMP--/i", '&', $comments);
 			$comments = preg_replace("/--QUES--/i", '?', $comments);
 			$comments = preg_replace("/--POUND--/i", '#', $comments);
+			
+			$address1 = preg_replace("/\r/i", '', $address1);
+			$address1 = preg_replace("/\n/i", '!N', $address1);
+			
+			$address2 = preg_replace("/\r/i", '', $address2);
+			$address2 = preg_replace("/\n/i", '!N', $address2);
 
 			$updateData = array(
                 'vendor_lead_code' => $vendor_lead_code,
