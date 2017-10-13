@@ -2181,11 +2181,41 @@ ini_set('memory_limit', '2048M');
 					</tfoot></table>";
 					
 					//<br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
+					$queryforBot = "SELECT DISTINCT gmt_offset_now FROM vicidial_list WHERE list_id IN (".$list.");";
+					$sqlBot = mysqli_query($link, $queryforBot);
+					$numBot = mysqli_num_rows($sqlBot);
 					
+					$BOTsorted_output = "<TABLE class='table table-striped table-bordered table-hover' id='dispo_bot'>";
+					$BOTsorted_output .= "<tr><thead>
+								<th>Timezone</th>
+								<th>Called</th>
+								<th>Not Called</th>	
+							     <thead></tr><tbody>";
+					if($numBot > 0){
+						while($rowBot = mysqli_fetch_array($sqlBot)){
+							$timezone_now = $rowBot['gmt_offset_now'];
+							$CALLEDsql = "SELECT count(gmt_offset_now) as Clead_count FROM vicidial_list WHERE list_id IN (".$list.") AND status != 'NEW' AND gmt_offset_now = '$timezone_now'";
+							$queryCALLED = mysqli_query($link, $CALLEDsql);
+							$fetchCalled = mysqli_fetch_array($queryCALLED);
+							$called_leadCount = $fetchCalled['Clead_count'];
+							
+							$NOTCALLEDsql = "SELECT count(gmt_offset_now) as NClead_count FROM vicidial_list WHERE list_id IN (".$list.") AND status = 'NEW' AND gmt_offset_now = '$timezone_now'";
+                                                        $queryNOTCALLED = mysqli_query($link, $NOTCALLEDsql);
+                                                        $fetchCalled = mysqli_fetch_array($queryNOTCALLED);
+							$notcalled_leadCount = $fetchCalled['NClead_count'];
+	
+							$BOTsorted_output .= "<tr>";
+									$BOTsorted_output .= "<td>".$timezone_now."</td><td>".$called_leadCount."</td><td>".$notcalled_leadCount."</td>";
+							$BOTsorted_output .= "</tr>";
+						}
+					}else{
+						$BOTsorted_output .= "<tr><td colspan='3'><center>No available Leads</center></td></tr>";
+					}	
+					$BOTsorted_output .= "</tbody></TABLE>";
 					$return['TOPsorted_output']		= $TOPsorted_output;
 					$return['SUMstatuses']			= $sts;
 					
-					$apiresults = array("result" => "success", "SUMstatuses" => $sts, "TOPsorted_output" => $TOPsorted_output, "query_list" => $query_list, "queryx" => $queryx);
+					$apiresults = array("result" => "success", "SUMstatuses" => $sts, "TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "query_list" => $query_list, "queryx" => $queryx);
 					
 					return $apiresults;
 				}
