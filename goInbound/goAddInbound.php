@@ -10,7 +10,7 @@
     
     include_once ("../goFunctions.php");
  
-	### POST or GET Variables
+	// POST or GET Variables
         $group_id = mysqli_real_escape_string($link, $_REQUEST['group_id']);
         $group_name = mysqli_real_escape_string($link, $_REQUEST['group_name']);
         $group_color = mysqli_real_escape_string($link,$_REQUEST['group_color']);
@@ -36,7 +36,7 @@
 		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 
 
-    ### Default values 
+    // Default values 
     $defActive = array("Y","N");
     $deffronter_display = array("Y","N");
     $defget_call_launch = array('NONE','SCRIPT','WEBFORM','WEBFORMTWO','FORM','EMAIL'); 
@@ -44,7 +44,6 @@
 
 
 
-#####################
 
         if($group_id == null) {
                 $apiresults = array("result" => "Error: Set a value for Group ID.");
@@ -108,7 +107,7 @@
 																						if ($count > 0) {
 																								$apiresults = array("result" => "<br>GROUP NOT ADDED - there is already a campaign in the system with this ID\n");
 																						} else {
-																								if ( (strlen($group_id) < 2) || (strlen($group_name) < 2)  || (strlen($group_color) < 2) || (strlen($group_id) > 20) || (eregi(' ',$group_id)) or (eregi("\-",$group_id)) || (eregi("\+",$group_id)) ) {
+																								if ( (strlen($group_id) < 2) || (strlen($group_name) < 2)  || (strlen($group_color) < 2) || (strlen($group_id) > 20) || (preg_match('/ /i',$group_id)) or (preg_match("/\-/i",$group_id)) || (preg_match("/\+/i",$group_id)) ) {
 																										$apiresults = array("result" => "<br>GROUP NOT ADDED - Please go back and look at the data you entered\n <br>Group ID must be between 2 and 20 characters in length and contain no ' -+'.\n <br>Group name and group color must be at least 2 characters in length\n");
 																								} else {
 																										$stmtInsert = "INSERT INTO vicidial_inbound_groups (group_id,group_name,group_color,active,web_form_address,voicemail_ext,next_agent_call,fronter_display,ingroup_script,get_call_launch,web_form_address_two,start_call_url,dispo_call_url,add_lead_url,uniqueid_status_prefix,call_time_id,user_group) values('$group_id','$group_name','$group_color','$active','$web_form_address','$voicemail_ext','$next_agent_call','$fronter_display','$script_id','$get_call_launch','','','','','$accounts','24hours','$user_group');";
