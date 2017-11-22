@@ -260,8 +260,7 @@
 				$resultSelect = mysqli_query($link, $querySelect);
 				$isExist = mysqli_num_rows($resultSelect);
 			*/	
-			//if (!$isExist || $carrier_type == "copy")
-			if($carrier_type === "copy")
+			if (!$isExist || $carrier_type == "copy")
 			{
 					/*if ($reg_string=="dal.justgovoip.com" || $reg_string=="208.43.27.84")
 					{
