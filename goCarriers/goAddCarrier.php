@@ -241,7 +241,7 @@
 			//                $reg_ipSQL = "OR registration_string rlike '@".$dns['ip'].":'";
 			//        }
 			//}*/
-			
+			/* sir dems deactivate
 			if($carrier_type == "manual"){
 				$reg_string = $host;
 				
@@ -255,15 +255,16 @@
 			}else{
 				$additional_sql = "";
 			}
-	
+			
 				$querySelect = "select carrier_id from vicidial_server_carriers where $additional_sql server_ip='$server_ip';";
 				$resultSelect = mysqli_query($link, $querySelect);
 				$isExist = mysqli_num_rows($resultSelect);
-				
-			if (!$isExist || $carrier_type == "copy")
+			*/	
+			//if (!$isExist || $carrier_type == "copy")
+			if($carrier_type === "copy")
 			{
-					if ($reg_string=="dal.justgovoip.com" || $reg_string=="208.43.27.84")
-					{/*
+					/*if ($reg_string=="dal.justgovoip.com" || $reg_string=="208.43.27.84")
+					{
 							$r = $this->commonhelper->getAccountInfo("username",substr($reg_string_orig,strrpos($reg_string_orig,"/") + 1));
 							$data['carrier_id']             = $carrier_id;
 							$data['username']               = $r->structmem('username')->getval();
@@ -276,7 +277,7 @@
 							$data['i_account']              = $r->structmem('i_account')->getval();
 
 							$this->go_carriers->goautodialDB->insert('justgovoip_sippy_info',$data);
-					*/}
+					}*/
 					$varSQL = rtrim($varSQL,",");
 					$valSQL = rtrim($valSQL,",");
 					$itemSQL = "($varSQL) VALUES ($valSQL)";
