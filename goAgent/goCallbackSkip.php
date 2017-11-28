@@ -53,6 +53,7 @@ if ($sipIsLoggedIn) {
 			'user' => $user,
 			'recipient' => 'USERONLY'
 		);
+		$astDB->where('callback_id', $callback_id);
 		$rslt = $astDB->update('vicidial_callbacks', $updateData);
 		
 		// Add Callback to events
