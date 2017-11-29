@@ -86,9 +86,21 @@
 				$license_query = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC");
 				$num_users = mysqli_num_rows($license_query);
 				
+				// Check if DB Licensed Seats Exists //
+				$check_db_license = "SELECT * FROM settings WHERE setting = 'GO_licensed_seats' LIMIT 1;";
+        			$exec_check_license = mysqli_query($linkgo, $check_db_license);
+        			$num_check_license = mysqli_num_rows($exec_check_license);			
+				
+				if($num_check_license > 0){
+					$fetch_license = mysqli_fetch_array($exec_check_license);
+					$licensedSeats = $fetch_license["value"];
+				}else{
+					$licensedSeats = $config["licensedSeats"];
+				}
+			
 				$error_count = 0;
 				$checker = 0;
-				if($num_users <= $config["licensedSeats"] || $config["licensedSeats"] == "0"){
+				if($num_users <= $licensedSeats || $licensedSeats == "0"){
 					
 					$queryPassHash = "SELECT pass_hash_enabled from system_settings";
 					$resultQueryPassHash = mysqli_query($link, $queryPassHash);
