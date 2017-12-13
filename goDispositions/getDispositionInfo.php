@@ -60,7 +60,7 @@
 			$campExist = mysqli_num_rows($campRslt);
 			
 			if ($campExist) {
-				$statusTBL = "LEFT JOIN `$VARDBgo_database`.go_statuses gs ON vcs.status=gs.status";
+				$statusTBL = "LEFT JOIN `$VARDBgo_database`.go_statuses gs ON vcs.status=gs.status AND vcs.campaign_id=gs.campaign_id";
 				$statusSQL = "GROUP BY status,campaign_id ORDER BY priority,vcs.status";
 			}
 		}
