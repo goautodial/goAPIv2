@@ -12,6 +12,12 @@
     $camp = mysqli_real_escape_string($link, $camp);
 	$status = mysqli_real_escape_string($link, $_REQUEST["status"]);
 	
+	$sortBy = mysqli_real_escape_string($link, $_REQUEST["sortBy"]);
+	if(!empty($sortBy)){
+		$sortBy = $sortBy;
+	}else{
+		$sortBy = "status";
+	}
 	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
 	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
 	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
@@ -60,7 +66,7 @@
 		}
 		
 		if($status != NULL){
-			$query = "SELECT status,status_name,campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses WHERE campaign_id='$camp' AND status='$status';";
+			$query = "SELECT status,status_name,campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses WHERE campaign_id='$camp' AND status='$status' ORDER BY $sortBy;";
 		}else{
 			$query = "SELECT vcs.status,status_name,vcs.campaign_id, selectable, human_answered, sale, dnc, customer_contact, not_interested, unworkable, scheduled_callback FROM vicidial_campaign_statuses vcs $statusTBL WHERE vcs.campaign_id='$camp' $statusSQL;";
 		}
