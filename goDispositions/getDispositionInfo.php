@@ -92,8 +92,8 @@
 				$dataNot_interested[] = $fresult['not_interested'];
 				$dataUnworkable[] = $fresult['unworkable'];
 				$dataScheduled_callback[] = $fresult['scheduled_callback'];
-				$dataPriority[$fresult['status']] = (!is_null($statusData['priority'])) ? $statusData['priority'] : "1";
-				$dataColor[$fresult['status']] = (!is_null($statusData['color'])) ? $statusData['color'] : "#b5b5b5";
+				$dataPriority[] = (!is_null($statusData['priority'])) ? $statusData['priority'] : "1";
+				$dataColor[] = (!is_null($statusData['color'])) ? $statusData['color'] : "#b5b5b5";
 				
 				//$apiresults = array("result" => "success", "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback);
 			}
