@@ -14,6 +14,8 @@ if (isset($_GET['goTask'])) { $task = $astDB->escape($_GET['goTask']); }
     else if (isset($_POST['goTask'])) { $task = $astDB->escape($_POST['goTask']); }
 if (isset($_GET['goUpdateStatus'])) { $is_online = $astDB->escape($_GET['goUpdateStatus']); }
     else if (isset($_POST['goUpdateStatus'])) { $is_online = $astDB->escape($_POST['goUpdateStatus']); }
+if (isset($_GET['goCheckLastCall'])) { $check_last_call = $astDB->escape($_GET['goCheckLastCall']); }
+    else if (isset($_POST['goCheckLastCall'])) { $check_last_call = $astDB->escape($_POST['goCheckLastCall']); }
 
 if (!isset($task) || (isset($task) && $task === '')) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
@@ -37,9 +39,15 @@ if (!isset($task) || (isset($task) && $task === '')) {
     $rslt = $astDB->getOne('web_client_sessions');
     $web_client_sessions = $astDB->getRowCount();
     
+    $last_call_is_null = 0;
+    if ($check_last_call) {
+        $rslt = $astDB->rawQuery("SELECT * FROM vicidial_agent_log WHERE user='$goUser' AND (lead_id IS NOT NULL AND lead_id > '0') AND pause_sec >= '65535' AND status IS NULL AND sub_status IS NULL ORDER BY event_time DESC LIMIT 1;");
+        $last_call_is_null = $astDB->getRowCount();
+    }
+    
     $is_logged_in = 0;
     $message = "You have been logged out from the dialer.";
-    if ($go_agent_sessions > 0 && $web_client_sessions > 0) {
+    if ($go_agent_sessions > 0 && $web_client_sessions > 0 && $last_call_is_null < 1) {
         $is_logged_in = 1;
         $message = "You're currently logged in on the dialer.";
     }
