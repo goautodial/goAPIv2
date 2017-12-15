@@ -14,7 +14,14 @@
 	$select = $_REQUEST['select'];
 	$camp = $_REQUEST['campaign_id'];
 	$customRequest = mysqli_real_escape_string($link, $_REQUEST['custom_request']);
+	$sortBy = mysqli_real_escape_string($link, $_REQUEST['sortBy']);
 	$defCustom = "custom";
+	
+	if(!empty($sortBy)){
+		$sortBy = $sortBy;
+	}else{
+		$sortBy = "status";
+	}
 	
 	if(empty($session_user)){
 		$err_msg = error_handle("40001");
@@ -50,7 +57,7 @@
 		if($camp != NULL || $customRequest != NULL){
 			$query = "SELECT status,status_name,campaign_id FROM vicidial_campaign_statuses $campSQL ORDER BY campaign_id";
 		}else{
-			$query = "SELECT status, status_name FROM vicidial_campaign_statuses UNION  SELECT status, status_name FROM vicidial_statuses ORDER BY status;";
+			$query = "SELECT status, status_name FROM vicidial_campaign_statuses UNION  SELECT status, status_name FROM vicidial_statuses ORDER BY $sortBy;";
 		}
 		
 		$rsltv = mysqli_query($link, $query);

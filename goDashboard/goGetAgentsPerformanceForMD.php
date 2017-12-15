@@ -92,7 +92,7 @@
         $resultSales = mysqli_query($link,$querySales);
         $salesCampaign = mysqli_num_rows($resultSales);
 	    $dataCampaignStats['salesCampaign'] = $salesCampaign;
-        // $dataCampaignStats['querysalesCampaign'] = $querySales;
+        $dataCampaignStats['querysalesCampaign'] = $querySales;
         // Hours
         if($campaign_id == "all"){
             $campaignQueryHours = "1";
@@ -114,7 +114,7 @@
         $salesHourCampaign = round($salesCampaign / $hoursCampaign, 1);
         $dataCampaignStats['hoursCampaign'] = $hoursCampaign;
         $dataCampaignStats['salesHourCampaign'] = $salesHourCampaign;
-        // $dataCampaignStats['queryhoursCampaign'] = $queryHours;
+        $dataCampaignStats['queryhoursCampaign'] = $queryHours;
 
         // Conversion
         $queryConversion = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE vl.uniqueid=val.uniqueid  AND val.status IN ('$CampaignStatsstatuses', 'QualR', 'QUANS') {$campaignQuery} {$locationQuery} {$userQuery};";
@@ -129,7 +129,7 @@
         $contactsHourCampaign = round($countConvertionCampaign / $hoursCampaign, 1);
         $dataCampaignStats['conversionCampaign'] = $conversionCampaign;
         $dataCampaignStats['contactsHourCampaign'] = $contactsHourCampaign;
-        // $dataCampaignStats['queryconversionCampaign'] = $queryConversion;
+        $dataCampaignStats['queryconversionCampaign'] = $queryConversion;
     // End of Camapaign stats
 
     // Getting Campaign Stats Total

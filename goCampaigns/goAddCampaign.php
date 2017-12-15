@@ -871,6 +871,8 @@
                 // End of SURVEY
 				
 				if($campaign_type == "COPY"){
+					if(count($_REQUEST) == 8){
+						// proceed copy campaign
 						$getToCopy = "SELECT * FROM vicidial_campaigns WHERE campaign_id ='$copy_from_campaign'";
 						$rsltvToCopy = mysqli_query($link, $getToCopy);
 						while($fresults = mysqli_fetch_array($rsltvToCopy, MYSQLI_ASSOC)){
@@ -1175,6 +1177,11 @@
 							$err_msg = error_handle("10010");
 							$apiresults = array("code" => "10010", "result" => $err_msg);
 						}
+					}else{
+						// cancel copy
+						$apiresults = array("result" => "error", "message" => "8 post parameters are only needed for copy campaign(goUser,goPass,goAction,responsetype,campaign_id,campaign_name,campaign_type,copy_from_campaign). Please check your API url and post parameters.");
+					}
+						
 				}
             }
         }
