@@ -42,7 +42,9 @@ if (!isset($task) || (isset($task) && $task === '')) {
     $last_call_is_null = 0;
     $added_message = '';
     if ($check_last_call) {
-        $rslt = $astDB->rawQuery("SELECT * FROM vicidial_agent_log WHERE user='$goUser' AND (lead_id IS NOT NULL AND lead_id > '0') AND pause_sec >= '65535' AND status IS NULL AND sub_status IS NULL AND event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY event_time DESC LIMIT 1;");
+        //$stmt = "SELECT * FROM vicidial_agent_log WHERE user='$goUser' AND (lead_id IS NOT NULL AND lead_id > '0') AND pause_sec >= '65535' AND status IS NULL AND sub_status IS NULL AND event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY event_time DESC LIMIT 1;";
+        $stmt = "SELECT * FROM vicidial_agent_log val LEFT JOIN vicidial_log vl ON val.uniqueid=vl.uniqueid AND val.lead_id!=vl.lead_id WHERE val.user='$goUser' AND (val.lead_id IS NOT NULL AND val.lead_id > '0') AND val.pause_sec >= '65535' AND val.status IS NULL AND val.sub_status IS NULL AND val.event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY val.event_time DESC LIMIT 1;";
+        $rslt = $astDB->rawQuery($stmt);
         $last_call_is_null = $astDB->getRowCount();
         $added_message = " There was a problem with your session. Reloading the dialer.";
     }
