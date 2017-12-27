@@ -1207,7 +1207,9 @@ if ($sipIsLoggedIn) {
     
             //$stmt="UPDATE vicidial_agent_log set lead_id='$lead_id',comments='MANUAL' where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
-            $rslt = $astDB->update('vicidial_agent_log', array('lead_id'=>$lead_id, 'comments'=>'MANUAL'));
+            //$astDB->where('uniqueid', 'INACTIVE', '!=');
+            //$rslt = $astDB->update('vicidial_agent_log', array('lead_id'=>$lead_id, 'comments'=>'MANUAL'));
+            $rslt = $astDB->update('vicidial_agent_log', array('comments'=>'MANUAL'));
     
             //$stmt="UPDATE vicidial_lists set list_lastcalldate=NOW() where list_id='$list_id';";
             $astDB->where('list_id', $list_id);
