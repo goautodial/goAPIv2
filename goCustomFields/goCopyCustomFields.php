@@ -220,7 +220,7 @@
                 }
 
                
-                if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
+                if ( ($field_type==strtoupper('select')) or ($field_type=='RADIO') ) {
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
@@ -262,7 +262,7 @@
                     $field_sql .= "VARCHAR($field_cost) ";
                 }
                 
-                if ($field_type=='TEXT') {
+                if ( ($field_type=='TEXT') or ($field_type=='HIDDEN') ) {
                     if ($field_max < 1) {$field_max=1;};
                     $field_sql .= "VARCHAR($field_max) ";
                 }

@@ -7,8 +7,8 @@
 #### Written by: Christopher P. Lomuntad        ####
 #### License: AGPLv2                            ####
 ####################################################
-ini_set('display_errors', 'on');
-error_reporting(E_ALL);
+//ini_set('display_errors', 'on');
+//error_reporting(E_ALL);
 
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
 $version = file_get_contents("{$webRoot}/version.txt");
@@ -83,8 +83,6 @@ if (!isset($userResponseType) || strlen($userResponseType) < 1) {
 ### API OUTPUT ###
 ob_start();
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Max-Age: 1000');
 
 if (count($apiresults)) {
     if ($userResponseType == "json") {

@@ -1,18 +1,18 @@
 <?php
-    ////////////////////////////////////#
-    //# Name: goDeleteUser.php  	               //#
-    //# Description: API to delete specific User      //#
-    //# Version: 0.9                                  //#
-    //# Copyright: GOAutoDial Ltd. (c) 2011-2015      //#
-    //# Written by: Jeremiah Sebastian V. Samatra     //#
-    //# License: AGPLv2                               //#
-    ////////////////////////////////////#
-    include_once ("../goFunctions.php");
+    /****************************************************
+    ### Name: goDeleteUser.php  	           		  ###
+    ### Description: API to delete specific User      ###
+    ### Version: 0.9                                  ###
+    ### Copyright: GOAutoDial Ltd. (c) 2011-2015      ###
+    ### Written by: Jeremiah Sebastian V. Samatra     ###
+    ### License: AGPLv2                               ###
+    ****************************************************/
+    include_once ("goAPI.php");
     
     // POST or GET Variables
-    $user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
-	$user = mysqli_real_escape_string($link, $_REQUEST['user']);
-	$action = mysqli_real_escape_string($link, $_REQUEST['action']);
+    $user_id = $_REQUEST['user_id'];
+	$user = $_REQUEST['user'];
+	//$action = $_REQUEST['action'];
     $ip_address = $_REQUEST['hostname'];
     $goUser = $_REQUEST['goUser'];
 	
@@ -31,15 +31,18 @@
 		
 		$groupId = go_get_groupid($session_user);
 		if (!checkIfTenant($groupId)) {
-			$ul = "AND user_id='$user_id'";
+			$ul = "AND user_id=?";
+			$arr_ul = array($user_id);
 		} else { 
-			$ul = "AND user_id='$user_id' AND user_group='$groupId'";  
+			$ul = "AND user_id=? AND user_group=?";
+			$arr_ul = array($user_id, $groupId);  
 		}
 		if ($groupId != 'ADMIN') {
 			$notAdminSQL = "AND user_group != 'ADMIN'";
+			$arr_notAdminSQL = array("ADMIN");
 		}
 		
-		if($action == "delete_selected"){
+		//if($action == "delete_selected"){
 			if(!empty($user)){
 				$exploded = explode(",",$user);
 			}else{
@@ -49,41 +52,62 @@
 			$error_count = 0;
 			$string_return = "";
 			$test = array();
+
+			//$arr_select = array();
+			//array_push($default_users, 4, "");
 			for($i=0;$i < count($exploded);$i++){
-				if(!empty($user))
-				$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user = '".$exploded[$i]."';";
-				else
-				$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user_id = '".$exploded[$i]."';";
+				if(!empty($user)){
+				//$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND user = '".$exploded[$i]."';";
+					//$arr_select[5] = $exploded[$i];
+					//$selectQuery = $astDB->rawQuery("SELECT user,phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND user = ?;", $arr_select);
+					$astDB->where("user", $default_users, "NOT IN");
+					$astDB->where("user_level", 4);
+					$astDB->where("user", $exploded[$i]);
+					$selectQuery = $astDB->getOne("vicidial_users", "user, phone_login");
+				}else{
+					//$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user_id = '".$exploded[$i]."';";
+					//$arr_select[5] = $exploded[$i];
+					$astDB->where("user", $default_users, "NOT IN");
+					$astDB->where("user_level", 4);
+					$astDB->where("user_id", $exploded[$i]);
+					$selectQuery = $astDB->getOne("vicidial_users", "user, phone_login");
+					//$selectQuery = $astDB->rawQuery("SELECT user,phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND user_id = ?;", $arr_select);	
+				}
 				
-				$selectResult = mysqli_query($link, $selectQuery) or die(mysqli_error($link));
-				$numResult = mysqli_num_rows($selectResult);
-				array_push($test, $selectQuery);
+				//$selectResult = mysqli_query($link, $selectQuery) or die(mysqli_error($link));
+				$numResult = $astDB->count;
+				//array_push($test, $selectQuery);
 				if($numResult > 0){
-					while($fresults = mysqli_fetch_array($selectResult)){
-						$dataUserID = $fresults["user"];
-						$dataPhoneLogin = $fresults["phone_login"];
+					//while($fresults = mysqli_fetch_array($selectResult)){
+						$dataUserID = $selectQuery["user"];
+						$dataPhoneLogin = $selectQuery["phone_login"];
 						
-						$deleteQuery = "DELETE FROM vicidial_users WHERE user='$dataUserID' $notAdminSQL"; 
-						$deleteResult = mysqli_query($link, $deleteQuery) or die(mysqli_error($link));
+						if($groupId !== "ADMIN")
+							$astDB->where("user_group", "ADMIN", "!=");
+						$astDB->where("user", $dataUserID);
+						$deleteQuery = $astDB->delete("vicidial_users");
+						//"DELETE FROM vicidial_users WHERE user='$dataUserID' $notAdminSQL";
 						
-						$deleteQueryGo = "DELETE FROM users WHERE name='$dataUserID'"; 
-						$deleteResultGo = mysqli_query($linkgo, $deleteQueryGo) or die(mysqli_error($linkgo));
+						$goDB->where("name", $dataUserID);
+						$deleteQueryGo = $goDB->delete("users");
+						//"DELETE FROM users WHERE name='$dataUserID'";
+
+						$astDB->where("extension", $dataPhoneLogin);
+						$deleteQueryA = $astDB->delete("phones");
+						//"DELETE FROM phones WHERE extension='$dataPhoneLogin';";
 						
-						$deleteQueryA = "DELETE FROM phones WHERE extension='$dataPhoneLogin';";
-						$deleteResultA = mysqli_query($link, $deleteQueryA) or die(mysqli_error($link));
-						
-						$deleteQueryCB = "DELETE FROM subscriber WHERE username='$dataPhoneLogin';";
-						$deleteResultCB = mysqli_query($linkgokam, $deleteQueryCB) or die(mysqli_error($linkgokam));
-						
-					}
+						$kamDB->where("username", $dataPhoneLogin);
+						$deleteQueryCB = $kamDB->delete("phones");
+						//"DELETE FROM subscriber WHERE username='$dataPhoneLogin';";
+					//}
 				}else{
 					$error_count = $error_count + 1;
 				}
 				
-				
-				$querydel = "SELECT user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user='$dataUserID' $notAdminSQL ORDER BY user ASC LIMIT 1;";
-				$rsltvdel = mysqli_query($link, $querydel) or die(mysqli_error($db));
-				$countResult = mysqli_num_rows($rsltvdel);
+				$astDB->where("user", $dataUserID);
+				$check_del = $astDB->query("vicidial_users", "user");
+				//$querydel = "SELECT user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user='$dataUserID' $notAdminSQL ORDER BY user ASC LIMIT 1;";
+				$countResult = $astDB->count;
 				
 				if($countResult > 0) {
 					$error_count = $error_count + 1;
@@ -100,7 +124,7 @@
 			} else {
 				$apiresults = array("result" => "success", "query" => $test); 
 			}
-			
+		/*	
 		}else{
 			if(!empty($user)){
 				$ul = "AND user = '$user'";
@@ -148,6 +172,6 @@
 				$err_msg = error_handle("41004");
 				$apiresults = array("code" => "41004", "result" => $err_msg);
 			}
-		}
+		}*/
 	}
 ?>

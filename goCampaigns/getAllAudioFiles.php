@@ -1,6 +1,4 @@
 <?php
-    include_once("../goFunctions.php");
-    
     $sounds_web_directory = '../../sounds';
     $files = scandir($sounds_web_directory);
     

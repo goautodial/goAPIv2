@@ -7,44 +7,39 @@
     /// Written by: Jeremiah Sebastian V. Samatra 		///
     /// License: AGPLv2 		///
     ///////////////////////////////////////////////////////
+	$agent = get_settings('user', $astDB, $goUser);
 	
-    include_once("../goFunctions.php");
-	
-	$groupId = go_get_groupid($session_user);
-	$user_group = $_REQUEST['user_group'];
-	
-	if(!empty($session_user)){
-		if(!empty($user_group)){
-			
-			$allowed_campaigns = go_getall_allowed_campaigns($user_group);
-			$allowed_camps = "";
-			
-			if (checkIfTenant($user_group)) {
-				$ul='';
+	if(!empty($agent)){
+		if(!empty($agent->user_group)){
+			// Getting Allowed Campigns
+			$astDB->where('user_group', $agent->user_group);
+			$allowedCamp = $astDB->getOne('vicidial_user_groups', "TRIM(REPLACE(allowed_campaigns,' -','')) AS allowed_campaigns");
+
+			if (checkIfTenant($agent->user_group)) {
+				//do nothing
 			} else {
-				if($user_group !== "ADMIN")
-				$ul = "WHERE user_group='$user_group'";
-				else
-				$ul = "";
-			}
-			
-			if (isset($user_group) && strlen($user_group) > 0) {
-				if (!preg_match("/ALLCAMPAIGNS/", $allowed_campaigns)) {
-					$allowed_camps = "WHERE campaign_id IN ";
-					$allowed_camps .= "(".$allowed_campaigns.")";
+				if($agent->user_group !== "ADMIN"){
+					$astDB->where('user_group', $agent->user_group);
 				}
 			}
 			
-			$query = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $allowed_camps ORDER BY campaign_id";
-			$rsltv = mysqli_query($link, $query);
-			
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+			if (isset($user_group) && strlen($user_group) > 0) {
+				if (!preg_match("/ALLCAMPAIGNS/",  $allowedCamp['allowed_campaigns'])) {
+					$cl = explode(' ', $query['allowed_campaigns']);
+    				$astDB->where('campaign_id', $cl, 'in');
+				}
+			}
+
+			$astDB->orderBy('campaign_id');
+			$result = $astDB->get('vicidial_campaigns', null, 'campaign_id,campaign_name,dial_method,active');
+
+			foreach($result as $fresults){
 				$dataCampID[] = $fresults['campaign_id'];
 				$dataCampName[] = $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
 				$dataDialMethod[] = $fresults['dial_method'];
 				$dataActive[] = $fresults['active'];
 			}
-			
+
 			$apiresults = array("result" => "success", "campaign_id" => $dataCampID, "campaign_name" => $dataCampName, "dial_method" => $dataDialMethod, "active" => $dataActive);
 			
 		}else{

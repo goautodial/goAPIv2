@@ -1,14 +1,11 @@
 <?php
-    include_once("../goFunctions.php");
-    
     $keyword = $_REQUEST['keyword'];
+
+    $astDB->where('did_pattern', 'LIKE', $keyword.'%');
+    $rsltv = $astDB->get('vicidial_inbound_dids', null, 'did_pattern')
     
-    $query = "SELECT did_pattern from vicidial_inbound_dids where did_pattern LIKE '$keyword%';";
-   	$rsltv = mysqli_query($link, $query);
-    $countResult = mysqli_num_rows($rsltv);
-    
-    if($countResult > 0) {
-        while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+    if($rsltv) {
+        foreach($rsltv as $fresults){
             $dids[] = $fresults['did_pattern'];
         }
         

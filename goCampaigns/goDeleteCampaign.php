@@ -7,9 +7,9 @@
     //# Written by: Jerico James Milo                 //#
     //# License: AGPLv2                               //#
     ////////////////////////////////////#
-    include_once("../goFunctions.php");
-    
     // POST or GET Variables
+	$agent = get_settings('user', $astDB, $goUser);
+
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
 	$action = strtolower(mysqli_real_escape_string($link, $_REQUEST['action']));
     $goUser = $_REQUEST['goUser'];
@@ -23,39 +23,34 @@
 		$apiresults = array("code" => "40001", "result" => $err_msg); 
 		//$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
-		
 		$groupId = go_get_groupid($session_user);
-		if (!checkIfTenant($groupId)) {
-			$ul = "WHERE campaign_id='$campaign_id'";
-		} else { 
-			$ul = "WHERE campaign_id='$campaign_id' AND user_group='$groupId'";  
-		}
-		
 		if(!empty($action) && $action == strtolower("delete_selected")){
 			$exploded = explode(",",$campaign_id);
 			$error_count = 0;
 			for($i=0;$i < count($exploded);$i++){
-				
-				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='".$exploded[$i]."';"; 
-				$deleteResult = mysqli_query($link, $deleteQuery);
-				
-				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$exploded[$i]."';"; 
-				$deleteResult2 = mysqli_query($link, $deleteDispo);
-				
-				$deleteRecycle = "DELETE FROM vicidial_lead_recycle WHERE campaign_id = '".$exploded[$i]."';";
-				$deleteResult3 = mysqli_query($link, $deleteRecycle);
+				$astDB->where('campaign_id', $exploded[$i]);
+				$deleteResult  = $astDB->delete('vicidial_campaigns');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
 
-				$querydel = "SELECT campaign_id FROM vicidial_campaigns $ul;";
-				$rsltvdel = mysqli_query($link, $querydel);
-				$countResult = mysqli_num_rows($rsltvdel);
+				$astDB->where('campaign_id', $exploded[$i]);
+				$deleteResult2  = $astDB->delete('vicidial_campaigns_statuses');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
 				
-				if($countResult > 0) {
-					$error_count = $error_count + 1;
+				$astDB->where('campaign_id', $exploded[$i]);
+				$deleteResult3  = $astDB->delete('vicidial_lead_recycle');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
+
+				if (!checkIfTenant($groupId)) {
+					$astDB->where('campaign_id', $campaign_id);
+				} else { 
+					$astDB->where('campaign_id', $campaign_id);
+					$astDB->where('user_group', $agent->user_group);  
 				}
-					
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $deleteDispo);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $deleteRecycle);
+				$rsltvdel = $astDB->getOne('vicidial_campaigns', 'campaign_id');
+				
+				if($rsltvdel) {
+					$error_count = $error_count + 1;
+				}			
 			}
 				
 			if($error_count > 0) {
@@ -66,23 +61,26 @@
 				$apiresults = array("result" => "success"); 
 			}
 		}else{
-			$querycheck = "SELECT campaign_id FROM vicidial_campaigns $ul;";
-			$first_check_query = mysqli_query($link, $querycheck);
-			$first_check = mysqli_num_rows($first_check_query);
+			if (!checkIfTenant($groupId)) {
+				$astDB->where('campaign_id', $campaign_id);
+			} else { 
+				$astDB->where('campaign_id', $campaign_id);
+				$astDB->where('user_group', $agent->user_group);  
+			}
+			$first_check = $astDB->getOne('vicidial_campaigns', 'campaign_id');
 			
-			if($first_check > 0) {
-				$deleteQuery = "DELETE FROM vicidial_campaigns WHERE campaign_id='$campaign_id';"; 
-				$deleteResult = mysqli_query($link, $deleteQuery);
+			if($first_check) {
+				$astDB->where('campaign_id', $campaign_id);
+				$deleteResult  = $astDB->delete('vicidial_campaigns');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$deleteDispo = "DELETE FROM vicidial_campaigns_statuses WHERE campaign_id='".$campaign_id."';"; 
-				$deleteResult2 = mysqli_query($link, $deleteDispo);
+				$astDB->where('campaign_id', $campaign_id);
+				$deleteResult2  = $astDB->delete('vicidial_campaigns_statuses');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$deleteRecycle = "DELETE FROM vicidial_lead_recycle WHERE campaign_id = '".$campaign_id."';";
-				$deleteResult3 = mysqli_query($link, $deleteRecycle);
-
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $deleteQuery);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $deleteDispo);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $deleteRecycle);
+				$astDB->where('campaign_id', $campaign_id);
+				$deleteResult3  = $astDB->delete('vicidial_lead_recycle');
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
 				$apiresults = array("result" => "success");
 			} else {
