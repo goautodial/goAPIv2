@@ -7,8 +7,6 @@
     #### Written by: Jerico James Flores Milo       ####
     #### License: AGPLv2                            ####
     ####################################################
-ini_set('display_errors', 'on');
-error_reporting(E_ALL);
     
 	include_once("../MySQLiDB.php");
     include_once("../goDBasterisk.php");
