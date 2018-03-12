@@ -26,6 +26,8 @@
 		GROUP BY vicidial_lists.list_id
 		ORDER BY vicidial_lists.list_id;";
 	$rsltv = $astDB->rawQuery($query);
+	
+	var_dump($rsltv);
 	foreach ($rsltv as $fresults){
 		$dataListId[] =  $fresults['list_id'];
 		$dataListName[] =  $fresults['list_name'];
