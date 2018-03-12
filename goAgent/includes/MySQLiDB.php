@@ -959,11 +959,13 @@ class MySQLiDB {
         }
 
         $row = array();
+		$fields = array();
         while ($field = $meta->fetch_field()) {
             $row[$field->name] = null;
             $parameters[] = & $row[$field->name];
+			$fields[] = $field->name;
         }
-		$this->_fields = $parameters;
+		$this->_fields = $fields;
 
         // avoid out of memory bug in php 5.2 and 5.3
         //if (version_compare (phpversion(), '5.4', '<'))

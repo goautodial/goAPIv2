@@ -63,10 +63,10 @@ ini_set('memory_limit', '2048M');
 		}
 		
 		$dllist = $astDB->rawQuery($stmt);
-		var_dump($astDB->getFieldNames());die();
-		while($fetch_header = mysqli_fetch_field($dllist)){
-			$header[] = $fetch_header->name;
-		}
+		$header = $astDB->getFieldNames();
+		//while($fetch_header = $astDB->getFieldNames()){
+		//	$header[] = $fetch_header;
+		//}
 		/*
 		$u=0;
 		$count_header = count($header);
@@ -85,7 +85,7 @@ ini_set('memory_limit', '2048M');
 		$u=0;
 		$x=0;
 		$count_header = count($header);
-		while($fetch_row = mysqli_fetch_row($dllist)){
+		foreach ($dllist as $fetch_row) {
 			$array_fetch = $fetch_row[0];
 			$u = $u+1;
 			while($u < $count_header){
