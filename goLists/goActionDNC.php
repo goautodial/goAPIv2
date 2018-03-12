@@ -73,7 +73,7 @@
 		}
     } else {
 		$dnc_numbers = explode("\r\n",$phone_numbers);
-
+var_dump($dnc_numbers);
 		foreach ($dnc_numbers as $dnc){
 			//$query = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
 			$astDB->where('phone_number', $dnc);
