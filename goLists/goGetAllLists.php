@@ -7,27 +7,27 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
 
-    $groupId = go_get_groupid($goUser);
-	$user_group = $_REQUEST['user_group'];
+    $groupId = go_get_groupid($goUser, $astDB);
+	$user_group = $astDB->escape($_REQUEST['user_group']);
     
-    if (!checkIfTenant($groupId)) {
+    if (!checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-	$ul = "WHERE user_group='$groupId'";  
+		$ul = "WHERE user_group='$groupId'";  
     }
 	
 	if (isset($user_group) && strlen($user_group) > 0) {
-		$query = "SELECT TRIM(allowed_campaigns) AS allowed_camps FROM vicidial_user_groups WHERE user_group='$user_group';";
-		$rsltv = mysqli_query($link, $query);
-		$frslt = mysqli_fetch_assoc($rsltv);
+		//$query = "SELECT TRIM(allowed_campaigns) AS allowed_camps FROM vicidial_user_groups WHERE user_group='$user_group';";
+		$astDB->where('user_group', $user_group);
+		$rsltv = $astDB->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS allowed_camps');
 		
-		if (!preg_match("/ALL-CAMPAIGNS/", $frslt['allowed_camps'])) {
-			$allowed_camps = explode(' ', $frslt['allowed_camps']);
-			$allowed_campaigns = "";
+		$allowed_campaigns = "";
+		if (!preg_match("/ALL-CAMPAIGNS/", $rsltv['allowed_camps'])) {
+			$allowed_camps = explode(' ', $rsltv['allowed_camps']);
 			if (count($allowed_camps) > 0) {
-				$allowed_campaigns = ($ul !== '') ? "AND campaign_id IN (" : "WHERE campaign_id IN (";
+				//$allowed_campaigns = ($ul !== '') ? "AND campaign_id IN (" : "WHERE campaign_id IN (";
+				$allowed_campaigns = "WHERE campaign_id IN (";
 				foreach ($allowed_camps as $camp) {
 					if ($camp !== "-") {
 						$allowed_campaigns .= "'{$camp}',";
@@ -39,8 +39,8 @@
 		}
 		
 		$query = "SELECT vicidial_lists.list_id,vicidial_lists.list_name,vicidial_lists.list_description,(SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally,(SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active,vicidial_lists.list_lastcalldate,vicidial_lists.campaign_id,vicidial_lists.reset_time, vicidial_campaigns.campaign_name from vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $allowed_campaigns order by list_id;";
-		$rsltv = mysqli_query($link, $query);
-		while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		$rsltv = $astDB->rawQuery($query);
+		foreach ($rsltv as $fresults) {
 			$dataListId[] =  $fresults['list_id'];
 			$dataListName[] =  $fresults['list_name'];
 			$dataActive[] =  $fresults['active'];
@@ -52,9 +52,11 @@
 		}
 		
 		#get next list id
-		$query2 = "SELECT list_id from vicidial_lists WHERE list_id NOT IN ('999', '998') order by list_id;";
-		$rsltv2 = mysqli_query($link, $query2);
-		while($fetch_lists = mysqli_fetch_array($rsltv2, MYSQLI_ASSOC)){
+		//$query2 = "SELECT list_id from vicidial_lists WHERE list_id NOT IN ('999', '998') order by list_id;";
+		$astDB->where('list_id', array('999','998'), 'not in');
+		$astDB->orderBy('list_id', 'desc');
+		$rsltv2 = $astDB->get('vicidial_lists', null, 'list_id');
+		foreach ($rsltv2 as $fetch_lists){
 			$lists[] =  $fetch_lists['list_id'];
 		}
 		

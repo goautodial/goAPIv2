@@ -7,10 +7,9 @@
     #### Written by: Jermiah Sebastian Samatra         ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $campaign_id = $_REQUEST['campaign_id'];
-	$list_id = $_REQUEST['campaign_id'];
+    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+	$list_id = $astDB->escape($_REQUEST['list_id']);
     
     $query = "SELECT
         vicidial_hopper.lead_id,
@@ -29,45 +28,44 @@
 	AND vicidial_hopper.campaign_id = '$campaign_id'
 	ORDER BY vicidial_hopper.hopper_id
     LIMIT 2000;";
-    $rsltv = mysqli_query($link, $query);
-	$countResult = mysqli_num_rows($rsltv);
+    $rsltv = $astDB->rawQuery($query);
+	$countResult = $astDB->getRowCount();
     
     if($countResult > 0) {
-            $queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaigns WHERE campaign_id = '$campaign_id';";
-            $resultQuery = mysqli_query($link, $queryGetDialStatus);
-            while($resultGet = mysqli_fetch_array($resultQuery, MYSQLI_ASSOC)){
-                $dataDialStatuses[] = $resultGet['dial_statuses'];
-            }
-        
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                $dataLeadID[]       = $fresults['lead_id'];
-                $dataPhoneNO[]      = $fresults['phone_number'];
-                $dataState[]        = $fresults['state'];
-                $dataStatus[]       = $fresults['status'];
-                $dataCalledCount[]  = $fresults['called_count'];
-                $dataGMT[]          = $fresults['gmt_offset_now'];
-                $dataHopperID[]     = $fresults['hopper_id'];
-                $dataAltDial[]      = $fresults['alt_dial'];
-                $dataListID[]       = $fresults['list_id'];
-                $dataPriority[]     = $fresults['priority'];
-                $dataSource[]       = $fresults['source'];
-            }
-            
-            $apiresults = array(
-                "result"            => "success",
-                "lead_id"           => $dataLeadID,
-                "phone_number"      => $dataPhoneNO,
-                "state"             => $dataState,
-                "status"            => $dataStatus,
-                "called_count"      => $dataCalledCount,
-                "gmt_offset_now"    => $dataGMT,
-                "hopper_id"         => $dataHopperID,
-                "alt_dial"          => $dataAltDial,
-                "list_id"           => $dataListID,
-                "priority"          => $dataPriority,
-                "source"            => $dataSource,
-                "camp_dial_status"  => $dataDialStatuses
-            );
+		//$queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaigns WHERE campaign_id = '$campaign_id';";
+		$astDB->where('campaign_id', $campaign_id);
+		$resultQuery = $astDB->getOne('vicidial_campaigns', 'dial_statuses');
+		$dataDialStatuses[] = $resultQuery['dial_statuses'];
+	
+		foreach ($rsltv as $fresults){
+			$dataLeadID[]       = $fresults['lead_id'];
+			$dataPhoneNO[]      = $fresults['phone_number'];
+			$dataState[]        = $fresults['state'];
+			$dataStatus[]       = $fresults['status'];
+			$dataCalledCount[]  = $fresults['called_count'];
+			$dataGMT[]          = $fresults['gmt_offset_now'];
+			$dataHopperID[]     = $fresults['hopper_id'];
+			$dataAltDial[]      = $fresults['alt_dial'];
+			$dataListID[]       = $fresults['list_id'];
+			$dataPriority[]     = $fresults['priority'];
+			$dataSource[]       = $fresults['source'];
+		}
+		
+		$apiresults = array(
+			"result"            => "success",
+			"lead_id"           => $dataLeadID,
+			"phone_number"      => $dataPhoneNO,
+			"state"             => $dataState,
+			"status"            => $dataStatus,
+			"called_count"      => $dataCalledCount,
+			"gmt_offset_now"    => $dataGMT,
+			"hopper_id"         => $dataHopperID,
+			"alt_dial"          => $dataAltDial,
+			"list_id"           => $dataListID,
+			"priority"          => $dataPriority,
+			"source"            => $dataSource,
+			"camp_dial_status"  => $dataDialStatuses
+		);
     }else{
         $apiresults = array("result" => "Error: No record found.");
     }
