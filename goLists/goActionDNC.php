@@ -1,34 +1,38 @@
 <?php
-    include_once("../goFunctions.php");
-    
-	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$phone_numbers = str_replace(" ", "\n", rawurldecode(mysqli_real_escape_string($link, $_REQUEST['phone_numbers'])));
-	$stage = mysqli_real_escape_string($link, $_REQUEST['stage']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$campaign_id = $astDB->escape($link, $_REQUEST['campaign_id']);
+	$phone_numbers = str_replace(" ", "\n", rawurldecode($astDB->escape($link, $_REQUEST['phone_numbers'])));
+	$stage = $astDB->escape($link, $_REQUEST['stage']);
+	$ip_address = $astDB->escape($link, $_REQUEST['hostname']);
 	
-	$groupId = go_get_groupid($session_user);
+	$groupId = go_get_groupid($session_user, $astDB);
 	$log_user = $session_user;
 	$log_group = $groupId;
-	$allowed_campaigns = get_allowed_campaigns($groupId, $link);
+	$allowed_campaigns = get_allowed_campaigns($groupId, $astDB);
 	$cnt = 0;
 	
 	if ($campaign_id == "INTERNAL"){
 		$dnc_numbers = explode("\r\n",$phone_numbers);
 		
 		foreach ($dnc_numbers as $dnc){
-			$query_dnc = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc'");
-			$idnc_exist = mysqli_num_rows($query_dnc);
-			$query_campaign_dnc = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc'");
-			$cdnc_exist = mysqli_num_rows($query_campaign_dnc);
+			//$query_dnc = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc'");
+			$astDB->where('phone_number', $dnc);
+			$query_dnc = $astDB->get('vicidial_dnc', null, 'phone_number');
+			$idnc_exist = $astDB->getRowCount();
+			//$query_campaign_dnc = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc'");
+			$astDB->where('phone_number', $dnc);
+			$query_campaign_dnc = $astDB->get('vicidial_campaign_dnc', null, 'phone_number');
+			$cdnc_exist = $astDB->getRowCount();
 			
 			if ($idnc_exist < 1 && $cdnc_exist < 1){
 				if ($stage == "ADD" && $dnc != ''){
 					if (count($allowed_campaigns) > 1 && !in_array($allowed_campaigns,"---ALL---")) {
 						foreach ($allowed_campaigns as $camp) {
-							$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$camp');");
+							//$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$camp');");
+							$query = $astDB->insert('vicidial_campaign_dnc', array('phone_number' => $dnc, 'campaign_id' => $camp));
 						}
 					} else {
-						$query = mysqli_query($link, "INSERT INTO vicidial_dnc VALUES('$dnc');");
+						//$query = mysqli_query($link, "INSERT INTO vicidial_dnc VALUES('$dnc');");
+						$query = $astDB->insert('vicidial_dnc', array('phone_number' => $dnc));
 					}
 					$cnt++;
 				}
@@ -36,10 +40,14 @@
 				if ($stage == "DELETE" && $dnc != ''){
 					if (count($allowed_campaigns) > 1 && !in_array($allowed_campaigns,"---ALL---")) {
 						foreach ($allowed_campaigns as $camp) {
-							$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc';");
+							//$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc';");
+							$astDB->where('phone_number', $dnc);
+							$query = $astDB->delete('vicidial_campaign_dnc');
 						}
 					} else {
-						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+						//$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+						$astDB->where('phone_number', $dnc);
+						$query = $astDB->delete('vicidial_dnc');
 					}
 					
 					if ($query) {
@@ -56,7 +64,7 @@
 				$msg = "added";
 			
 			$details = ucfirst($msg) . " {$cnt} numbers " . ($msg == 'added' ? 'to' : 'from') . " Internal DNC list";
-			$log_id = log_action($linkgo, $stage, $log_user, $ip_address, $details, $log_group);
+			$log_id = log_action($goDB, $stage, $log_user, $ip_address, $details, $log_group);
 		} else {
 			if ($stage == "ADD")
 				$msg = "already exist";
@@ -67,25 +75,36 @@
 		$dnc_numbers = explode("\r\n",$phone_numbers);
 
 		foreach ($dnc_numbers as $dnc){
-			$query = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
-			$cdnc_exist = mysqli_num_rows($query);
-			$query2 = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc';");
-			$idnc_exist = mysqli_num_rows($query2);
+			//$query = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
+			$astDB->where('phone_number', $dnc);
+			$astDB->where('campaign_id', $campaign_id);
+			$query = $astDB->get('vicidial_campaign_dnc', null, 'phone_number');
+			$cdnc_exist = $astDB->getRowCount();
+			//$query2 = mysqli_query($link, "SELECT phone_number AS cnt FROM vicidial_dnc WHERE phone_number='$dnc';");
+			$astDB->where('phone_number', $dnc);
+			$query2 = $astDB->get('vicidial_dnc', null, 'phone_number');
+			$idnc_exist = $astDB->getRowCount();
 		
 			if ($idnc_exist < 1 && $cdnc_exist < 1){
 				if ($stage == "ADD"){
-					$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$campaign_id');");
+					//$query = mysqli_query($link, "INSERT INTO vicidial_campaign_dnc VALUES('$dnc','$campaign_id');");
+					$query = $astDB->insert('vicidial_campaign_dnc', array('phone_number' => $dnc, 'campaign_id' => $campaign_id));
 					$cnt++;
 				}
 			} else {
 				if ($stage == "DELETE"){
 					if ($cdnc_exist > 0) {
-						$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
+						//$query = mysqli_query($link, "DELETE FROM vicidial_campaign_dnc WHERE phone_number='$dnc' AND campaign_id='$campaign_id';");
+						$astDB->where('phone_number', $dnc);
+						$astDB->where('campaign_id', $campaign_id);
+						$query = $astDB->delete('vicidial_campaign_dnc');
 						$cnt++;
 					}
 					
 					if ($campaign_id === '' && $idnc_exist > 0) {
-						$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+						//$query = mysqli_query($link, "DELETE FROM vicidial_dnc WHERE phone_number='$dnc';");
+						$astDB->where('phone_number', $dnc);
+						$query = $astDB->delete('vicidial_dnc');
 						$cnt++;
 					}
 				}
@@ -99,7 +118,7 @@
 				$msg = "deleted";
 			
 			$details = ucfirst($msg) . " {$cnt} numbers " . ($msg == 'added' ? 'to' : 'from') . " Campaign DNC list";
-			$log_id = log_action($linkgo, $stage, $log_user, $ip_address, $details, $log_group);
+			$log_id = log_action($goDB, $stage, $log_user, $ip_address, $details, $log_group);
 		} else {
 			if ($stage == "ADD")
 				$msg = "already exist";
@@ -114,12 +133,16 @@
 	);
 	
 	function get_allowed_campaigns($groupId, $link){
-		$query2 = mysqli_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupId'");
-		$check = mysqli_num_rows($query2);
+		//$query2 = mysqli_query($link, "select campaign_id from vicidial_campaigns where user_group = '$groupId'");
+		$link->where('user_group', $groupId);
+		$query2 = $link->get('vicidial_campaigns', null, 'campaign_id');
+		$check = $link->getRowCount();
 		if($check > 0){
-			while($resultc = mysqli_fetch_array($query2)){
-				$allowed_campaigns = $resultc['campaign_id'];
+			$camp_array = array();
+			foreach ($query2 as $camp){
+				$camp_array[] = $camp['campaign_id'];
 			}
+			$allowed_campaigns = $camp_array;
 		}else{
 			$allowed_campaigns = array('---ALL---');
 		}

@@ -13,17 +13,18 @@
 	else $session_user = "";
 	
     ##### get usergroup #########
-    function go_get_groupid($goUser){
-        include("goDBasterisk.php");
-        $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
-        $rsltv = mysqli_query($link, $query_userv);
-	$check_resultv = mysqli_num_rows($rsltv);
+    function go_get_groupid($goUser, $dbase){
+        //$query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
+		$dbase->where('user', $goUser);
+        $rsltv = $dbase->getOne('vicidial_users', 'user_group');
+		$check_resultv = $dbase->getRowCount();
 
         if ($check_resultv > 0) {
-            $rowc=mysqli_fetch_assoc($rsltv);
-            $goUser_group = $rowc["user_group"];
+            $goUser_group = $rsltv["user_group"];
             return $goUser_group;
-        }
+        } else {
+			return false;
+		}
         
     }
     
@@ -1335,21 +1336,30 @@
     
 	##### ACTION LOGS #####
 	function log_action($link, $action, $user, $ip, $details, $user_group, $db_query = '') {
-		$action = mysqli_real_escape_string($link, strtoupper($action));
+		$action = $link->escape(strtoupper($action));
 		$event_date = date("Y-m-d H:i:s");
-		$user = mysqli_real_escape_string($link, $user);
-		$ip = mysqli_real_escape_string($link, $ip);
-		$user_group = mysqli_real_escape_string($link, $user_group);
-		$details = mysqli_real_escape_string($link, $details);
-		$db_query = mysqli_real_escape_string($link, $db_query);
+		$user = $link->escape($user);
+		$ip = $link->escape($ip);
+		$user_group = $link->escape($user_group);
+		$details = $link->escape($details);
+		$db_query = $link->escape($db_query);
 		
 		if ((!is_null($user) && strlen($user) > 0) && (!is_null($ip) && strlen($ip) > 0) && $link) {
-			$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
-			$result = mysqli_query($link, $logSQL);
+			//$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
+			$insertData = array(
+				'user' => $user,
+				'ip_address' => $ip,
+				'event_date' => $event_date,
+				'action' => $action,
+				'details' => $details,
+				'db_query' => $db_query,
+				'user_group' => $user_group
+			);
+			$result = $link->insert('go_action_logs', $insertData);
 		}
 		
 		if ($result) {
-			$log_id = mysqli_insert_id($link);
+			$log_id = $link->getInsertId();
 			return $log_id;
 		} else {
 			return false;
