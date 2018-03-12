@@ -1,8 +1,8 @@
 <?php
-	$campaign_id = $astDB->escape($link, $_REQUEST['campaign_id']);
-	$phone_numbers = str_replace(" ", "\n", rawurldecode($astDB->escape($link, $_REQUEST['phone_numbers'])));
-	$stage = $astDB->escape($link, $_REQUEST['stage']);
-	$ip_address = $astDB->escape($link, $_REQUEST['hostname']);
+	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+	$phone_numbers = str_replace(" ", "\n", rawurldecode($astDB->escape($_REQUEST['phone_numbers'])));
+	$stage = $astDB->escape($_REQUEST['stage']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
 	
 	$groupId = go_get_groupid($session_user, $astDB);
 	$log_user = $session_user;
