@@ -7,13 +7,12 @@
     /// Written by: Jermiah Sebastian Samatra 		///
     /// License: AGPLv2 		///
     //////////////////////////////////////////////////////
-    include_once("../goFunctions.php");
     
     // POST or GET Variables
-    $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $list_id = $astDB->escape($_REQUEST['list_id']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
     
 	if($list_id == null) {
 		$err_msg = error_handle("10107");
@@ -21,9 +20,9 @@
 		//$apiresults = array("result" => "Error: Set a value for List ID."); 
 	} else {
  
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
     
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
         	$ul = "WHERE vicidial_lists.list_id='$list_id'";
     	} else { 
 			$ul = "WHERE vicidial_lists.list_id='$list_id' AND user_group='$groupId'";  
@@ -42,33 +41,33 @@
 		LEFT JOIN vicidial_list
 		ON vicidial_lists.list_id=vicidial_list.list_id
 		$ul order by list_id LIMIT 1";
-   		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
+   		$rsltv = $astDB->rawQuery($query);
+		$countResult = $astDB->getRowCount();
 
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-					$dataListId[] =  $fresults['list_id'];
-					$dataListName[] =  $fresults['list_name'];
-					$dataActive[] =  $fresults['active'];
-					$dataListLastcallDate[] =  $fresults['list_lastcalldate'];
-					$dataTally[] =  $fresults['tally'];
-					$dataCFCount[] =  $fresults['cf_count'];
-					$dataCampaignId[] =  $fresults['campaign_id'];
-					$datareset_called_lead_status[] =  $fresults['reset_called_lead_status'];
-					$dataweb_form_address[] =  $fresults['web_form_address'];
-					$dataagent_script_override[] =  $fresults['agent_script_override'];
-					$datacampaign_cid_override[] =  $fresults['campaign_cid_override'];
-					$datadrop_inbound_group_override[] =  $fresults['drop_inbound_group_override'];
-					$datareset_time[] = $fresults['reset_time'];
-					$datalist_desc[] = $fresults['list_description'];
-					$dataxferconf_a_number[] = $fresults['xferconf_a_number'];
-					$dataxferconf_b_number[] = $fresults['xferconf_b_number'];
-					$dataxferconf_c_number[] = $fresults['xferconf_c_number'];
-					$dataxferconf_d_number[] = $fresults['xferconf_d_number'];
-					$dataxferconf_e_number[] = $fresults['xferconf_e_number'];
+			foreach ($rsltv as $fresults) {
+				$dataListId[] =  $fresults['list_id'];
+				$dataListName[] =  $fresults['list_name'];
+				$dataActive[] =  $fresults['active'];
+				$dataListLastcallDate[] =  $fresults['list_lastcalldate'];
+				$dataTally[] =  $fresults['tally'];
+				$dataCFCount[] =  $fresults['cf_count'];
+				$dataCampaignId[] =  $fresults['campaign_id'];
+				$datareset_called_lead_status[] =  $fresults['reset_called_lead_status'];
+				$dataweb_form_address[] =  $fresults['web_form_address'];
+				$dataagent_script_override[] =  $fresults['agent_script_override'];
+				$datacampaign_cid_override[] =  $fresults['campaign_cid_override'];
+				$datadrop_inbound_group_override[] =  $fresults['drop_inbound_group_override'];
+				$datareset_time[] = $fresults['reset_time'];
+				$datalist_desc[] = $fresults['list_description'];
+				$dataxferconf_a_number[] = $fresults['xferconf_a_number'];
+				$dataxferconf_b_number[] = $fresults['xferconf_b_number'];
+				$dataxferconf_c_number[] = $fresults['xferconf_c_number'];
+				$dataxferconf_d_number[] = $fresults['xferconf_d_number'];
+				$dataxferconf_e_number[] = $fresults['xferconf_e_number'];
 			}
 			
-			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of List ID: $list_id", $log_group);
+			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of List ID: $list_id", $log_group);
 			
 			$apiresults = array(
 				"result" => "success",
