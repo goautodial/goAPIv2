@@ -29,11 +29,11 @@
     }
     
     ##### checkiftenant ######
-    function checkIfTenant($groupId){
-        include("goDBgoautodial.php");
-        $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
-        $rslt_tenant = mysqli_query($linkgo, $query_tenant);
-		$check_result_tenant = mysqli_num_rows($rslt_tenant);
+    function checkIfTenant($groupId, $dbase){
+        //$query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
+		$dbase->where('tenant_id', $groupId);
+        $rslt_tenant = $dbase->get('go_multi_tenant');
+		$check_result_tenant = $dbase->getRowCount();
 		
         if ($check_result_tenant > 0) {
             return true;

@@ -8,19 +8,17 @@
    //# License: AGPLv2                            //#
    //////////////////////////////////#
     
-    include_once ("../goFunctions.php");
- 
 	// POST or GET Variables
-	$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
-	$list_name = mysqli_real_escape_string($link, $_REQUEST['list_name']);
-	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$active = mysqli_real_escape_string($link, $_REQUEST['active']);
-	$list_description = mysqli_real_escape_string($link, $_REQUEST['list_description']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-	$goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+	$list_id = $astDB->escape($_REQUEST['list_id']);
+	$list_name = $astDB->escape($_REQUEST['list_name']);
+	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+	$active = $astDB->escape($_REQUEST['active']);
+	$list_description = $astDB->escape($_REQUEST['list_description']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	$goUser = $astDB->escape($_REQUEST['goUser']);
 		
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
 
 
     // Default values 
@@ -64,21 +62,29 @@
 				}
 				
 				$queryCamp = "SELECT campaign_id,campaign_name,dial_method,active FROM vicidial_campaigns $ulcamp ORDER BY campaign_id LIMIT 1;";
-				$rsltvCamp = mysqli_query($link, $queryCamp);
-				$countResultCamp = mysqli_num_rows($rsltvCamp);
+				$rsltvCamp = $astDB->rawQuery($queryCamp);
+				$countResultCamp = $astDB->getRowCount();
 				
                 if($countResultCamp > 0) {
 					$query = "SELECT list_id from vicidial_lists $ul order by list_id LIMIT 1";
-					$rsltv = mysqli_query($link, $query);
-		            $countResult = mysqli_num_rows($rsltv);
+					$rsltv = $astDB->rawQuery($query);
+		            $countResult = $astDB->getRowCount();
 	                if($countResult > 0) {
-        			        $apiresults = array("result" => "Error: there is already a LIST ID in the system with this ID.");
+        			    $apiresults = array("result" => "Error: there is already a LIST ID in the system with this ID.");
 					} else {
 						$SQLdate = date("Y-m-d H:i:s");
-						$addQuery = "INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description,list_changedate) values('$list_id','$list_name','$campaign_id','$active','$list_description','$SQLdate');";
-						$addResult = mysqli_query($link, $addQuery);
+						//$addQuery = "INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description,list_changedate) values('$list_id','$list_name','$campaign_id','$active','$list_description','$SQLdate');";
+						$insertData = array(
+							'list_id' => $list_id,
+							'list_name' => $list_name,
+							'campaign_id' => $campaign_id,
+							'active' => $active,
+							'list_description' => $list_description,
+							'list_changedate' => $SQLdate
+						);
+						$addResult = $astDB->insert('vicidial_lists', $insertData);
 						
-						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New List: $list_id", $log_group, $addQuery);
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New List: $list_id", $log_group, $addQuery);
 						
 						if($addResult == false){
 							$err_msg = error_handle("10010");

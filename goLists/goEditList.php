@@ -8,36 +8,34 @@
 //# License: AGPLv2                            //#
 //////////////////////////////////#
 
-include_once("../goFunctions.php");
-
 // POST or GET Variables
-$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
-$list_name = mysqli_real_escape_string($link, $_REQUEST['list_name']);
-$list_description = mysqli_real_escape_string($link, $_REQUEST['list_description']);
-$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-$active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
-$reset_time = mysqli_real_escape_string($link, $_REQUEST['reset_time']);
-$xferconf_a_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_a_number']);
-$xferconf_b_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_b_number']);
-$xferconf_c_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_c_number']);
-$xferconf_d_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_d_number']);
-$xferconf_e_number = mysqli_real_escape_string($link, $_REQUEST['xferconf_e_number']);
-$agent_script_override = mysqli_real_escape_string($link, $_REQUEST['agent_script_override']);
-$drop_inbound_group_override = mysqli_real_escape_string($link, $_REQUEST['drop_inbound_group_override']);
-$campaign_cid_override = mysqli_real_escape_string($link, $_REQUEST['campaign_cid_override']);
-$web_form_address = mysqli_real_escape_string($link, $_REQUEST['web_form_address']);
-$reset_list = mysqli_real_escape_string($link, strtoupper($_REQUEST['reset_list']));
+$list_id = $astDB->escape($_REQUEST['list_id']);
+$list_name = $astDB->escape($_REQUEST['list_name']);
+$list_description = $astDB->escape($_REQUEST['list_description']);
+$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+$active = $astDB->escape(strtoupper($_REQUEST['active']));
+$reset_time = $astDB->escape($_REQUEST['reset_time']);
+$xferconf_a_number = $astDB->escape($_REQUEST['xferconf_a_number']);
+$xferconf_b_number = $astDB->escape($_REQUEST['xferconf_b_number']);
+$xferconf_c_number = $astDB->escape($_REQUEST['xferconf_c_number']);
+$xferconf_d_number = $astDB->escape($_REQUEST['xferconf_d_number']);
+$xferconf_e_number = $astDB->escape($_REQUEST['xferconf_e_number']);
+$agent_script_override = $astDB->escape($_REQUEST['agent_script_override']);
+$drop_inbound_group_override = $astDB->escape($_REQUEST['drop_inbound_group_override']);
+$campaign_cid_override = $astDB->escape($_REQUEST['campaign_cid_override']);
+$web_form_address = $astDB->escape($_REQUEST['web_form_address']);
+$reset_list = $astDB->escape(strtoupper($_REQUEST['reset_list']));
 // $values = $_REQUEST['items'];
-$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-$goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
+$ip_address = $astDB->escape($_REQUEST['hostname']);
+$goUser = $astDB->escape($_REQUEST['goUser']);
 
-$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+$log_user = $astDB->escape($_REQUEST['log_user']);
+$log_group = $astDB->escape($_REQUEST['log_group']);
 
 // Default values 
 $defActive = array("Y","N");
 
-$groupId = go_get_groupid($session_user);
+$groupId = go_get_groupid($session_user, $astDB);
 
 if (!checkIfTenant($groupId)) {
 	$ul = "WHERE campaign_id='$campaign_id'";
@@ -108,12 +106,13 @@ if($list_id == null) {
 	$apiresults = array("code" => "40001", "result" => $err_msg);
 } else{
 	
-	$query_check = "SELECT * FROM vicidial_lists WHERE list_id = '$list_id';";
-	$rsltv_check = mysqli_query($link, $query_check) or die(mysqli_error($link));
-	$num_rsltv = mysqli_num_rows($rsltv_check);
+	//$query_check = "SELECT * FROM vicidial_lists WHERE list_id = '$list_id';";
+	$astDB->where('list_id', $list_id);
+	$rsltv_check = $astDB->get('vicidial_lists');
+	$num_rsltv = $astDB->getRowCount();
 	
 	if($num_rsltv > 0){
-		while($fresults = mysqli_fetch_array($rsltv_check)){
+		foreach ($rsltv_check as $fresults){
 			$data_list_name = $fresults['list_name'];
 			$data_list_description = $fresults['list_description'];
 			$data_campaign_id = $fresults['campaign_id'];
@@ -162,11 +161,29 @@ if($list_id == null) {
 		if(empty($reset_list))
 			$reset_list = $data_reset_list;
 		
-		$queryreset = "UPDATE vicidial_list set called_since_last_reset='$reset_list' where list_id='$list_id';";
-		$rsltvreset = mysqli_query($link, $queryreset);
+		//$queryreset = "UPDATE vicidial_list set called_since_last_reset='$reset_list' where list_id='$list_id';";
+		$astDB->where('list_id', $list_id);
+		$rsltvreset = $astDB->update('vicidial_list', array('called_since_last_reset' => $reset_list));
 	
-		$query = "UPDATE vicidial_lists set list_name = '$list_name', list_description = '$list_description', campaign_id = '$campaign_id', active = '$active', reset_time='$reset_time', xferconf_a_number = '$xferconf_a_number', xferconf_b_number = '$xferconf_b_number', xferconf_c_number = '$xferconf_c_number', xferconf_d_number = '$xferconf_d_number', xferconf_e_number = '$xferconf_e_number',  agent_script_override = '$agent_script_override', drop_inbound_group_override = '$drop_inbound_group_override', campaign_cid_override = '$campaign_cid_override', web_form_address = '$web_form_address' WHERE list_id='$list_id';";
-		$resultQuery = mysqli_query($link, $query);
+		//$query = "UPDATE vicidial_lists set list_name = '$list_name', list_description = '$list_description', campaign_id = '$campaign_id', active = '$active', reset_time='$reset_time', xferconf_a_number = '$xferconf_a_number', xferconf_b_number = '$xferconf_b_number', xferconf_c_number = '$xferconf_c_number', xferconf_d_number = '$xferconf_d_number', xferconf_e_number = '$xferconf_e_number',  agent_script_override = '$agent_script_override', drop_inbound_group_override = '$drop_inbound_group_override', campaign_cid_override = '$campaign_cid_override', web_form_address = '$web_form_address' WHERE list_id='$list_id';";
+		$updateData = array(
+			'list_name' => $list_name,
+			'list_description' => $list_description,
+			'campaign_id' => $campaign_id,
+			'active' => $active,
+			'reset_time' => $reset_time,
+			'xferconf_a_number' => $xferconf_a_number,
+			'xferconf_b_number' => $xferconf_b_number,
+			'xferconf_c_number' => $xferconf_c_number,
+			'xferconf_d_number' => $xferconf_d_number,
+			'xferconf_e_number' => $xferconf_e_number,
+			'agent_script_override' => $agent_script_override,
+			'drop_inbound_group_override' => $drop_inbound_group_override,
+			'campaign_cid_override' => $campaign_cid_override,
+			'web_form_address' => $web_form_address
+		);
+		$astDB->where('list_id', $list_id);
+		$resultQuery = $astDB->update('vicidial_lists', $updateData);
 	
 		if($resultQuery == false){
 			$err_msg = error_handle("10010");
@@ -175,13 +192,15 @@ if($list_id == null) {
 		} else {
 			$SQLdate = date("Y-m-d H:i:s");
 			
-			$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
-			$resultQueryDate = mysqli_query($link, $querydate);
+			//$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
+			$astDB->where('list_id', $list_id);
+			$resultQueryDate = $astDB->update('vicidial_lists', array('list_changedate' => $SQLdate));
 			
-			$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
-			$rsltvresetback = mysqli_query($link, $queryresetback);
+			//$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
+			$astDB->where('list_id', $list_id);
+			$rsltvresetback = $astDB->update('vicidial_list', array('called_since_last_reset', 'N'));
 			
-			$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the List ID: $list_id", $log_group, $query);
+			$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified the List ID: $list_id", $log_group, $query);
 			$apiresults = array("result" => "success");
 			
 		}
