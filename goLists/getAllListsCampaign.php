@@ -7,9 +7,8 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-     include_once("../goFunctions.php");
 
-    $campaign_id = $_REQUEST['campaign_id'];
+	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
 
 	$query = "SELECT
 			vicidial_lists.list_id,vicidial_lists.list_name,vicidial_lists.list_description,
@@ -26,8 +25,8 @@
 		WHERE vicidial_lists.campaign_id = '$campaign_id'
 		GROUP BY vicidial_lists.list_id
 		ORDER BY vicidial_lists.list_id;";
-	$rsltv = mysqli_query($link, $query);
-	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+	$rsltv = $astDB->rawQuery($query);
+	foreach ($rsltv as $fresults){
 		$dataListId[] =  $fresults['list_id'];
 		$dataListName[] =  $fresults['list_name'];
 		$dataActive[] =  $fresults['active'];
