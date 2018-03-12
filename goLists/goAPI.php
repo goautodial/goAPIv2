@@ -8,11 +8,16 @@
     #### License: AGPLv2                            ####
     ####################################################
     
+	include_once("../MySQLiDB.php");
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
     include_once("../goFunctions.php");
     
     $version = file_get_contents('../version.txt');
+
+	$astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
+	$goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
+	$kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $VARDBgokam_database);
     
     ####### Variables #########
     
@@ -44,9 +49,11 @@
     $goVersion = "1.0";
     
     #### check credentials ####
-    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
-    $rslt=mysqli_query($link,$query_user);
-    $check_result = mysqli_num_rows($rslt);
+    //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
+	$astDB->where('user', $goUser);
+	$astDB->where('pass', $goPass);
+	$rslt = $astDB->getOne('vicidial_users', 'user,pass');
+    $check_result = $astDB->getRowCount();
     // var_dump($query_user); 
     if ($check_result > 0) {
        

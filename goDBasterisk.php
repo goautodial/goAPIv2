@@ -89,4 +89,9 @@ if (!$link)
         }
 //mysqli_select_db("$VARDB_database");
 
+$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
+$VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
+$VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
+$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
+
 ?>

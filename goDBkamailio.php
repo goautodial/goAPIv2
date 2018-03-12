@@ -46,4 +46,9 @@ if (!$linkgokam)
     exit;
         }
 //mysqli_select_db("$VARDBgo_database");
+
+$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
+$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
+$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
+$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
 ?>
