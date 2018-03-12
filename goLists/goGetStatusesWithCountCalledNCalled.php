@@ -7,9 +7,8 @@
     #### Written by: NOEL UMANDAP                      ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $list_id = $_REQUEST['list_id'];
+    $list_id = $astDB->escape($_REQUEST['list_id']);
     // GROUP BY vicidial_list.status,vicidial_list.called_since_last_reset
     // $query = "SELECT
     //             vicidial_list.status as stats,
@@ -34,22 +33,22 @@
             WHERE vicidial_list.list_id='$list_id' 
             GROUP BY vicidial_list.status 
             ORDER BY vicidial_list.status,vicidial_list.called_since_last_reset;";
-	$rsltv = mysqli_query($link, $query);
+	$rsltv = $astDB->rawQuery($query);
     
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-		$dataStats[]                =  $fresults['stats'];
-        $dataIsCalled[] =  $fresults['is_called'];
-        $dataNotCalled[] =  $fresults['not_called'];
-        $dataCountVLists[]          =  $fresults['countvlists'];
-        $dataStatName[]             =  $fresults['status_name'];
+    foreach ($rsltv as $fresults) {
+		$dataStats[]		=  $fresults['stats'];
+        $dataIsCalled[]		=  $fresults['is_called'];
+        $dataNotCalled[]	=  $fresults['not_called'];
+        $dataCountVLists[]	=  $fresults['countvlists'];
+        $dataStatName[]		=  $fresults['status_name'];
 
 		$apiresults = array(
-			"result"                    => "success",
-			"stats"                     => $dataStats,
-            "is_called"   => $dataIsCalled,
-            "not_called"   => $dataNotCalled,
-            "countvlists"               => $dataCountVLists,
-            "status_name"               => $dataStatName
+			"result"		=> "success",
+			"stats"			=> $dataStats,
+            "is_called"		=> $dataIsCalled,
+            "not_called"	=> $dataNotCalled,
+            "countvlists"	=> $dataCountVLists,
+            "status_name"	=> $dataStatName
             // "query" => $query
 		);
 	}

@@ -7,9 +7,8 @@
     #### Written by: NOEL UMANDAP                      ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $list_id = $_REQUEST['list_id'];
+    $list_id = $astDB->escape($_REQUEST['list_id']);
     // GROUP BY gmt_offset_now,called_since_last_reset
     $query = "SELECT
 				gmt_offset_now,
@@ -19,9 +18,9 @@
 			WHERE list_id='$list_id'
 			GROUP BY gmt_offset_now 
 			ORDER BY gmt_offset_now,called_since_last_reset;";
-	$rsltv = mysqli_query($link, $query);
+	$rsltv = $astDB->rawQuery($query);
     
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+    foreach ($rsltv as $fresults) {
 		$dataGMT[]                	=  $fresults['gmt_offset_now'];
         $dataCalledSinceLastReset[] =  $fresults['called_since_last_reset'];
         $dataCountTLists[]          =  $fresults['counttlist'];

@@ -115,6 +115,13 @@ class MySQLiDB {
     protected $isSubQuery = false;
 
     /**
+     * An array that holds fetched fields
+     *
+     * @var array
+     */
+    protected $_fields = array();
+
+    /**
      * @param string $host
      * @param string $username
      * @param string $password
@@ -232,6 +239,11 @@ class MySQLiDB {
 	 * This is useful for pagination in datatables.
 	 */
 	public function getUnlimitedRowCount() { return $this->unlimitedCount; }
+
+	/**
+	 * Gets the field names obtained in the last query.
+	 */
+	public function getFieldNames() { return $this->_fields; }
 
 	/**
 	 * Calculates the unlimited filtered results from a previous query that has applied SQL_CALC_FOUND_ROWS
@@ -951,6 +963,7 @@ class MySQLiDB {
             $row[$field->name] = null;
             $parameters[] = & $row[$field->name];
         }
+		$this->_fields = $parameters;
 
         // avoid out of memory bug in php 5.2 and 5.3
         //if (version_compare (phpversion(), '5.4', '<'))
