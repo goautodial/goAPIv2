@@ -86,10 +86,10 @@ ini_set('memory_limit', '2048M');
 		$x=0;
 		$count_header = count($header);
 		foreach ($dllist as $fetch_row) {
-			$array_fetch = $fetch_row[0];
+			$array_fetch = $fetch_row[$header[0]];
 			$u = $u+1;
 			while($u < $count_header){
-				$array_fetch .= "|".utf8_encode($fetch_row[$u]);
+				$array_fetch .= "|".utf8_encode($fetch_row[$header[$u]]);
 				$u++;
 			}
 			$explode_array = explode("|",$array_fetch);
