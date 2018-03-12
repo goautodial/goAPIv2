@@ -1,6 +1,4 @@
 <?php
-    include_once("../goFunctions.php");
-    
 	$search = $astDB->escape($_REQUEST['search']);
 	
     //$query = "SELECT phone_number, campaign_id from vicidial_campaign_dnc WHERE phone_number LIKE '$search%' OR campaign_id LIKE '$search%' LIMIT 1000;";
