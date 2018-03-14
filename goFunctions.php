@@ -1718,6 +1718,21 @@
             $result = 1;
         }
         return $result;
+    }
+
+    function rebuildconfQuery($dbase, $server_ip){
+        //"UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
+        $data = Array("rebuild_conf_files" => "Y");
+        $dbase->where('generate_vicidial_conf', "Y");
+        $dbase->where('active_asterisk_server', "Y");
+        $dbase->where('server_ip', "Y");
+        $result = $dbase->update("servers", $data);
         
+        if ($result) {
+            return "Success!";
+        } else {
+            return "Failed to rebuild conf. Mysql_Error: ".$dbase->getLastError();
+        }
+
     }
 ?>
