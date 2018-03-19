@@ -7,23 +7,22 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $limit = mysqli_real_escape_string($link, $_REQUEST['limit']);
-    $requestDataPhone = mysqli_real_escape_string($link, $_REQUEST['requestDataPhone']);
-	$start_filterdate = mysqli_real_escape_string($link, $_REQUEST['start_filterdate']);
-	$end_filterdate = mysqli_real_escape_string($link, $_REQUEST['end_filterdate']);
-	$agent_filter = mysqli_real_escape_string($link, $_REQUEST['agent_filter']);
-	//$session_user = mysqli_real_escape_string($link, $_REQUEST['session_user']);
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $limit = $astDB->escape($_REQUEST['limit']);
+    $requestDataPhone = $astDB->escape($_REQUEST['requestDataPhone']);
+	$start_filterdate = $astDB->escape($_REQUEST['start_filterdate']);
+	$end_filterdate = $astDB->escape($_REQUEST['end_filterdate']);
+	$agent_filter = $astDB->escape($_REQUEST['agent_filter']);
+	//$session_user = $astDB->escape($_REQUEST['session_user']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
 	
     if($limit < 1){ $limit = 20; } else { $limit = 0; }
  
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
 	
-	if (checkIfTenant($groupId)) {
+	if (checkIfTenant($groupId, $goDB)) {
 		$ul="AND vl.user_group = '$groupId'";
 	} else {
 		if($groupId !== "ADMIN"){
@@ -83,29 +82,30 @@ if(!empty($agent_filter)){
 //search via date
 //	$query = "SELECT vl.last_local_call_time, vl.phone_number, rl.recording_id, rl.length_in_sec, rl.filename, rl.location, rl.lead_id, rl.user, cl.start_time, cl.end_time, cl.uniqueid FROM recording_log AS rl, call_log as cl, vicidial_list vl WHERE rl.vicidial_id = cl.uniqueid AND rl.lead_id = vl.lead_id AND vl.last_local_call_time LIKE '%$searchString%' ORDER BY cl.uniqueid DESC";
    	
-	$rsltv = mysqli_query($link, $query);
+	$rsltv = $astDB->rawQuery($query);
 		
-	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+	foreach ($rsltv as $fresults){
 		$location = $fresults['location'];
 		if (strlen($location)>2) {
 			$URLserver_ip = $location;
 			$URLserver_ip = preg_replace('/http:\/\//i', '', $URLserver_ip);
 			$URLserver_ip = preg_replace('/https:\/\//i', '', $URLserver_ip);
 			$URLserver_ip = preg_replace('/\/.*/i', '', $URLserver_ip);
-			$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
-			$rsltx=mysqli_query($link, $stmt);
-			$rowx=mysqli_fetch_row($rsltx);
+			//$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
+			$astDB->where('server_ip', $URLserver_ip);
+			$rsltx = $astDB->get('servers');
+			$rowCnt = $astDB->getRowCount();
 			
-			if ($rowx[0] > 0) {
-				$stmt="SELECT recording_web_link,alt_server_ip,external_server_ip FROM servers WHERE server_ip='$URLserver_ip';";
-				$rsltx=mysqli_query($link, $stmt);
-				$rowx=mysqli_fetch_row($rsltx);
+			if ($rowCnt > 0) {
+				//$stmt="SELECT recording_web_link,alt_server_ip,external_server_ip FROM servers WHERE server_ip='$URLserver_ip';";
+				$astDB->where('server_ip', $URLserver_ip);
+				$rsltx = $astDB->get('servers', null, 'recording_web_link,alt_server_ip,external_server_ip');
 				
-				if (preg_match("/ALT_IP/i",$rowx[0])) {
-					$location = preg_replace("/$URLserver_ip/i", "$rowx[1]", $location);
+				if (preg_match("/ALT_IP/i", $rsltx['recording_web_link'])) {
+					$location = preg_replace("/$URLserver_ip/i", "{$rowx['alt_server_ip']}", $location);
 				}
-				if (preg_match("/EXTERNAL_IP/i",$rowx[0])) {
-					$location = preg_replace("/$URLserver_ip/i", "$rowx[2]", $location);
+				if (preg_match("/EXTERNAL_IP/i", $rowx['recording_web_link'])) {
+					$location = preg_replace("/$URLserver_ip/i", "{$rowx['external_server_ip']}", $location);
 				}
 			}
 		}
@@ -125,14 +125,12 @@ if(!empty($agent_filter)){
 		
 	}
 
-	$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
-	$rsltv1 = mysqli_query($link, $query1);
-	
-	while($fresults1 = mysqli_fetch_array($rsltv1)){
-		$dataCount[] = $fresults1['cnt'];	
-	}
+	//$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
+	$astDB->where('lead_id', $fresults['lead_id']);
+	$rsltv1 = $astDB->get('recording_log');
+	$dataCount[] = $astDB->getRowCount();
 
-	$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
+	$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
 
 	$apiresults = array(
 		"result" => "success",

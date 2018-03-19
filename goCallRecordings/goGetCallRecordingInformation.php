@@ -7,37 +7,37 @@
     #### Written by: Demian Lizandro A. Biscocho       ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
     $recording_id = $_REQUEST['recording_id'];
 
 	if($recording_id == null) {
 			$apiresults = array("result" => "Error: Set a value for Recording ID");
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			$ul='';
 		} else { 
 			$ul = "WHERE user_group='$groupId'";  
 		}
 		
-		$query = "SELECT recording_id, length_in_sec, filename, location, lead_id, user, start_time, end_time
-		FROM recording_log WHERE recording_id = '$recording_id'";
-		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
+		//$query = "SELECT recording_id, length_in_sec, filename, location, lead_id, user, start_time, end_time FROM recording_log WHERE recording_id = '$recording_id'";
+		$astDB->where('recording_id', $recording_id);
+		$rsltv = $astDB->get('recording_log', null, 'recording_id, length_in_sec, filename, location, lead_id, user, start_time, end_time');
+		$countResult = $astDB->getRowCount();
 		
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                $dataRecordingId[] = $fresults['recording_id'];
+			foreach ($rsltv as $fresults) {
+				$dataRecordingId[] = $fresults['recording_id'];
 				$dataLeadId[] = $fresults['lead_id'];
 				$dataUser[] = $fresults['user'];
 				//$dataLocation[] = $fresults['location'];
 				
-				$querygo = "SELECT data, mimetype FROM go_recordings WHERE recording_id='{$fresults['recording_id']}';";
-                $rsltvgo = mysqli_query($linkgo, $querygo);
+				//$querygo = "SELECT data, mimetype FROM go_recordings WHERE recording_id='{$rsltv['recording_id']}';";
+				$goDB->where('recording_id', $fresults['recording_id']);
+				$rsltvgo = $goDB->get('go_recordings', null, 'data, mimetype');
 				
-				while($fresultsgo = mysqli_fetch_array($rsltvgo, MYSQLI_ASSOC)){
+				foreach ($rsltvgo as $fresultsgo){
 					$dataData[] = $fresultsgo['data'];	
 					$dataMimetype[] = $fresultsgo['mimetype'];
 				}

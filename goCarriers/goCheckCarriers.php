@@ -8,14 +8,13 @@
    #### License: AGPLv2                             ####
    #####################################################
     
-    include_once ("../goFunctions.php");
- 
     ### POST or GET Variables
-    $carrier_id = $_REQUEST['carrier_id'];
+    $carrier_id = $astDB->escape($_REQUEST['carrier_id']);
     
-    $queryCheck = "SELECT carrier_id FROM vicidial_server_carriers WHERE carrier_id ='$carrier_id';";
-    $rsltv = mysqli_query($link, $queryCheck);
-    $countCheck = mysqli_num_rows($rsltv);
+    //$queryCheck = "SELECT carrier_id FROM vicidial_server_carriers WHERE carrier_id ='$carrier_id';";
+    $astDB->where('carrier_id', $carrier_id);
+    $rsltv = $astDB->get('vicidial_server_carriers');
+    $countCheck = $astDB->getRowCount();
     
     if($countCheck > 0) {
         $apiresults = array("result" => "Error: Carrier already exist.");
