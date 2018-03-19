@@ -8,10 +8,9 @@
     #### Modified by: Chris Lomuntad                   ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
-	
-	$hotkeys_only = mysqli_escape_string($link, $_REQUEST['hotkeys_only']);
-	$campaign_id = mysqli_escape_string($link, $_REQUEST['campaign_id']);
+    
+	$hotkeys_only = $astDB->escape($_REQUEST['hotkeys_only']);
+	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
 	
 	$selectable = '';
 	if ($hotkeys_only === "1") {
@@ -24,9 +23,9 @@
 					$selectable
 					AND campaign_id='$campaign_id'
 					ORDER BY status";
-		$rsltv = mysqli_query($link, $query);
+		$rsltv = $astDB->rawQuery($query);
 		
-		while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		foreach ($rsltv as $fresults){
 			$dataStatus[] = $fresults['status'];
 			$dataStatusName[] = $fresults['status_name'];
 		}
@@ -36,9 +35,9 @@
 				FROM vicidial_statuses
 				$selectable
 				ORDER BY status";
-   	$rsltv = mysqli_query($link, $query);
+   	$rsltv = $astDB->rawQuery($query);
     
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+    foreach ($rsltv as $fresults){
 		$dataStatus[] = $fresults['status'];
        	$dataStatusName[] = $fresults['status_name'];
 	}

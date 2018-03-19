@@ -7,24 +7,25 @@
     #### Written by: Noel Umandap                      ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $campaign_id = $_REQUEST['campaign_id'];
+    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
     
-    $query = "SELECT status,status_name
-            FROM vicidial_campaign_statuses 
-            WHERE campaign_id='$campaign_id'
-            ORDER BY status";
-   	$rsltv = mysqli_query($link, $query);
+    //$query = "SELECT status,status_name
+    //        FROM vicidial_campaign_statuses 
+    //        WHERE campaign_id='$campaign_id'
+    //        ORDER BY status";
+	$astDB->where('campaign_id', $campaign_id);
+	$astDB->orderBy('status', 'desc');
+   	$rsltv = $astDB->get('vicidial_campaign_statuses', null, 'status,status_name');
     
-    while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+    foreach ($rsltv as $fresults){
 		$dataStatus[] = $fresults['status'];
        	$dataStatusName[] = $fresults['status_name'];
    		$apiresults = array(
-                        "result" => "success",
-                        "status" => $dataStatus,
-                        "status_name" => $dataStatusName,
-						"test" => $query
-                    );
+			"result" => "success",
+			"status" => $dataStatus,
+			"status_name" => $dataStatusName,
+			"test" => $query
+		);
 	}
 ?>
