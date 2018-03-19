@@ -7,14 +7,13 @@
     /// Written by: Jeremiah Sebastian V. Samatra 	///
     /// License: AGPLv2 	///
     /////////////////////////////////////////////////////////
-    include_once ("../goFunctions.php");
-
+    
 	$selectSQL = "";
 	$campSQL = "";
-	$select = $_REQUEST['select'];
-	$camp = $_REQUEST['campaign_id'];
-	$customRequest = mysqli_real_escape_string($link, $_REQUEST['custom_request']);
-	$sortBy = mysqli_real_escape_string($link, $_REQUEST['sortBy']);
+	$select = $astDB->escape($_REQUEST['select']);
+	$camp = $astDB->escape($_REQUEST['campaign_id']);
+	$customRequest = $astDB->escape($_REQUEST['custom_request']);
+	$sortBy = $astDB->escape($_REQUEST['sortBy']);
 	$defCustom = "custom";
 	
 	if(!empty($sortBy)){
@@ -36,7 +35,7 @@
 		//	$campSQL = "AND campaign_id='$camp'";
 		//if (is_null($camp)){
 		if(!empty($customRequest)){
-			$camps = go_getall_allowed_campaigns($session_user);
+			$camps = go_getall_allowed_campaigns($session_user, $astDB);
 			
 			if ($select=="N"){
 				$campSQL = "WHERE campaign_id IN ($camps)";
@@ -45,9 +44,9 @@
 			}
 		}
 		
-		$groupId = go_get_groupid($session_user);
+		$groupId = go_get_groupid($session_user, $astDB);
 		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "";
 		} else {
 			$ul = "AND user_group='$groupId'";
@@ -60,8 +59,8 @@
 			$query = "SELECT status, status_name FROM vicidial_campaign_statuses UNION  SELECT status, status_name FROM vicidial_statuses ORDER BY $sortBy;";
 		}
 		
-		$rsltv = mysqli_query($link, $query);
-		while($fresult = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		$rsltv = $astDB->rawQuery($query);
+		foreach ($rsltv as $fresult){
 			$dataStat[] = $fresult['status'];			
 			$dataStatName[] = $fresult['status_name'];
 			

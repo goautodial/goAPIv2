@@ -88,29 +88,28 @@
         return $fresults;
     }
 	
-    function go_getall_allowed_campaigns($groupId)
+    function go_getall_allowed_campaigns($groupId, $dbase)
     {
-		include("goDBasterisk.php");
-            /*$groupId = $this->go_get_groupid();
-                if (!is_null($tenant)) {
-                        $groupId = $tenant;
-                }*/
-            $query_date =  date('Y-m-d');
-            $query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
-            $resultsu = mysqli_query($link,$query);
+		/*$groupId = $this->go_get_groupid();
+			if (!is_null($tenant)) {
+					$groupId = $tenant;
+			}*/
+		$query_date =  date('Y-m-d');
+		//$query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
+		$dbase->where('user_group', $groupId);
+		$resultsu = $dbase->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS qresult');
+		
+		if($dbase->getRowCount() > 0){
+			$fresults = $resultsu['qresult'];
+			$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
 			
-			if(mysqli_num_rows($resultsu) > 0){
-				$fetch = mysqli_fetch_array($resultsu);
-				$fresults = $fetch['qresult'];
-				$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-				
-				$allAllowedCampaigns = implode("",$allowedCampaigns);
-				$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
-			}else{
-				$allAllowedCampaigns = '';
-			}
-			
-            return $allAllowedCampaigns;
+			$allAllowedCampaigns = implode("",$allowedCampaigns);
+			$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
+		}else{
+			$allAllowedCampaigns = '';
+		}
+		
+		return $allAllowedCampaigns;
     }
 
 

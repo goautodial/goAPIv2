@@ -7,62 +7,68 @@
     #### Written by: Jeremiah Sebastian V. Samatra     ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once ("goFunctions.php");
     
     ### POST or GET Variables
-		$campaign_id = $_REQUEST["campaign_id"];
-		$campaign_id = mysqli_real_escape_string($link, $campaign_id);
-		
-		$statuses = $_REQUEST["statuses"];
-	        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-	        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$campaign_id = $astDB->escape($_REQUEST["campaign_id"]);
+	//$campaign_id = $astDB->escape($campaign_id);
+	
+	$statuses = $astDB->escape($_REQUEST["statuses"]);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
     
     ### Check Campaign ID if its null or empty
 	if( empty($campaign_id) && empty($statuses)) { 
 		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
 	} else {
  
-                $groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 
-                if (!checkIfTenant($groupId)) {
-                        $ul = "";
-                } else {
-                        $ul = "AND user_group='$groupId'";
-                   $addedSQL = "WHERE user_group='$groupId'";
-                }
-				
-   		$queryOne = "SELECT campaign_id, status FROM vicidial_campaign_statuses $ul where campaign_id='$campaign_id';";
-   		$rsltvOne = mysqli_query($link, $queryOne);
-		$countResult = mysqli_num_rows($rsltvOne);
+		if (!checkIfTenant($groupId, $goDB)) {
+			//$ul = "";
+		} else {
+			//$ul = "AND user_group='$groupId'";
+			//$addedSQL = "WHERE user_group='$groupId'";
+			$astDB->where('user_group', $groupId);
+		}
+		
+   		//$queryOne = "SELECT campaign_id, status FROM vicidial_campaign_statuses $ul where campaign_id='$campaign_id';";
+		$astDB->where('campaign_id', $campaign_id);
+   		$rsltvOne = $astDB->get('vicidial_campaign_statuses', null, 'campaign_id, status');
+		$countResult = $astDB->getRowCount();
 
 		if($countResult > 0) {
 			
 			if($statuses != NULL){
-				$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id' AND status = '$statuses' LIMIT 1;"; 
-   				$deleteResult = mysqli_query($link, $deleteQuery);			
+				//$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id' AND status = '$statuses' LIMIT 1;";
+				$astDB->where('status', $statuses);
+				$astDB->where('campaign_id', $campaign_id);
+   				$deleteResult = $astDB->delete('vicidial_campaign_statuses', 1);			
 			}else{
-				$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id';"; 
-   				$deleteResult = mysqli_query($link, $deleteQuery);
+				//$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id';";
+				$astDB->where('campaign_id', $campaign_id);
+   				$deleteResult = $astDB->delete('vicidial_campaign_statuses');
 				//echo $deleteQuery;
 			}
 			
 			$tableQuery = "SHOW tables LIKE 'go_statuses';";
-			$checkTable = mysqli_query($linkgo, $tableQuery);
-			$tableExist = mysqli_num_rows($checkTable);
+			$checkTable = $goDB->rawQuery($tableQuery);
+			$tableExist = $goDB->getRowCount();
 			if ($tableExist > 0) {
-				$statusQuery = "DELETE FROM go_statuses WHERE campaign_id='$campaign_id' AND status='$statuses';";
-				$statusRslt = mysqli_query($linkgo, $statusQuery);
+				//$statusQuery = "DELETE FROM go_statuses WHERE campaign_id='$campaign_id' AND status='$statuses';";
+				$goDB->where('campaign_id', $campaign_id);
+				$goDB->where('status', $statuses);
+				$statusRslt = $goDB->delete('go_statuses');
 			}
 			
         ### Admin logs
-				//$SQLdate = date("Y-m-d H:i:s");
-				//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Status $statuses from Campaign $campaign_id','DELETE FROM vicidial_campaign_statuses  WHERE status IN ($statuses) AND campaign_id=$campaign_id;');";
-				//$rsltvLog = mysqli_query($linkgo, $queryLog);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Status $statuses from Campaign $campaign_id", $log_group, $deleteQuery);
+			//$SQLdate = date("Y-m-d H:i:s");
+			//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Status $statuses from Campaign $campaign_id','DELETE FROM vicidial_campaign_statuses  WHERE status IN ($statuses) AND campaign_id=$campaign_id;');";
+			//$rsltvLog = mysqli_query($linkgo, $queryLog);
+			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Status $statuses from Campaign $campaign_id", $log_group, $deleteQuery);
 
 			
-				$apiresults = array("result" => "success");
+			$apiresults = array("result" => "success");
 
 		} else {
 			$apiresults = array("result" => "Error: Campaign statuses doesn't exist.");
