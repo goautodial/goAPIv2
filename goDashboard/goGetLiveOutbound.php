@@ -8,21 +8,19 @@
     #### License: AGPLv2                           	      ####
     ##############################################################
     
-    include_once("../goFunctions.php");
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    $groupId = go_get_groupid($session_user);
-    
-    if (!checkIfTenant($groupId)) {
+    if (!checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
+        $stringv = go_getall_allowed_users($groupId, $astDB);
         $ul = " and vu.user IN ($stringv) and vu.user_level != 4";
     }
 
-   $NOW = date("Y-m-d");
-
-   $query = "select count(*) AS outbound from vicidial_live_agents as vla,vicidial_users as vu where vla.user=vu.user and status = 'INCALL' and (comments IN ('MANUAL','AUTO') or length(comments) < '1') $ul";
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
+    $NOW = date("Y-m-d");
+ 
+    $query = "select count(*) AS outbound from vicidial_live_agents as vla,vicidial_users as vu where vla.user=vu.user and status = 'INCALL' and (comments IN ('MANUAL','AUTO') or length(comments) < '1') $ul";
+    $fresults = $astDB->rawQuery($query);
+    //$fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
 ?>

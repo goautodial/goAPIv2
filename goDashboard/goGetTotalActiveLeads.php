@@ -8,14 +8,12 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
-	
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId);
+        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and vls.campaign_id IN ($stringv)";
 		else
@@ -23,7 +21,7 @@
     }
 	
     $query = "SELECT count(*) as getTotalActiveLeads from vicidial_lists as vls,vicidial_list as vl where vl.list_id=vls.list_id and active='Y' $ul"; 
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
+    $fresults = $astDB->rawQuery($query);
+    //$fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
 ?>

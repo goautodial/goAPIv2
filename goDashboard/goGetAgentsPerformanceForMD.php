@@ -7,11 +7,10 @@
     #### Written by: Noel Umandap					   ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
     
-    $campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-    $location = mysqli_real_escape_string($link, $_REQUEST['location']);
-    $user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
+    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+    $location = $astDB->escape($_REQUEST['location']);
+    $user_id = $astDB->escape($_REQUEST['user_id']);
 
     $date = date("Y-m-d");
     $queryDate = "event_time BETWEEN '$date 00:00:00' AND '$date 23:59:59'";
@@ -42,20 +41,20 @@
         $userQuery = "AND val.user='$user_id'";
     }
     // Getting Campaign Today Stats
-	    $CampTodayStatsstatuses = getStatuses($campaign_id);
+	    $CampTodayStatsstatuses = getStatuses($astDB, $campaign_id);
 	    // Sales Today
 	    $querySalesToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id FROM vicidial_log vl,vicidial_agent_log val INNER JOIN vicidial_users ON vicidial_users.user=val.user WHERE vl.uniqueid=val.uniqueid  AND val.status IN ('$CampTodayStatsstatuses') AND {$queryDate} {$campaignQuery} {$userQuery};";
-	    $resultSalesToday = mysqli_query($link,$querySalesToday);
+	    $resultSalesToday = $astDB->rawQuery($querySalesToday);
 	    // $salesToday = sizeof($resultSalesToday);
-	    $salesToday = mysqli_num_rows($resultSalesToday);
+	    $salesToday = $astDB->getRowCount();
 	    $dataCampaignStatsToday['salesToday'] = $salesToday;
         // $dataCampaignStatsToday['querysalesToday'] = $querySalesToday;
 
 	    // Hours Today
 	    $queryHoursToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id FROM vicidial_agent_log val INNER JOIN vicidial_users ON vicidial_users.user=val.user WHERE {$queryDate} {$campaignQuery} {$userQuery};";
-	    $resultHoursToday = mysqli_query($link,$queryHoursToday);
+	    $resultHoursToday = $astDB->rawQuery($queryHoursToday);
 	    $hoursToday = 0;
-        while($fresultsHours = mysqli_fetch_array($resultHoursToday, MYSQLI_ASSOC)){
+        foreach ($resultHoursToday as $fresultsHours){
         	$hoursToday += $fresultsHours['pause_sec'];
             $hoursToday += $fresultsHours['wait_sec'];
             $hoursToday += $fresultsHours['talk_sec'];
@@ -70,11 +69,11 @@
 
 	    // Conversion Today
 	    $queryConversionToday = "SELECT DISTINCT val.agent_log_id, val.*, vicidial_users.user_id FROM vicidial_log vl,vicidial_agent_log val INNER JOIN vicidial_users ON vicidial_users.user=val.user WHERE vl.uniqueid=val.uniqueid AND val.status IN ('$CampTodayStatsstatuses', 'QualR', 'QUANS') AND {$queryDate} {$campaignQuery} {$userQuery};";
-        $resultConvertionToday = mysqli_query($link,$queryConversionToday);
-        $countConvertionToday = mysqli_num_rows($resultConvertionToday);
+        $resultConvertionToday = $astDB->rawQuery($queryConversionToday);
+        $countConvertionToday = $astDB->getRowCount();
         $conversionToday = 0;
         // if(sizeof($resultConvertionToday) > 0)
-        if(mysqli_num_rows($resultConvertionToday) > 0){
+        if($countConvertionToday > 0){
             // $conversionToday = $salesToday / sizeof($resultConvertionToday) * 100;
             $conversionToday = $salesToday / $countConvertionToday * 100;
         }
@@ -86,11 +85,11 @@
 	// End of Campaign Today Stats
 
     // Getting Campaign Stats
-        $CampaignStatsstatuses = getStatuses($campaign_id);
+        $CampaignStatsstatuses = getStatuses($astDB, $campaign_id);
         // Sales
         $querySales = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE vl.uniqueid=val.uniqueid AND val.status IN ('$CampaignStatsstatuses') {$campaignQuery} {$locationQuery} {$userQuery};";
-        $resultSales = mysqli_query($link,$querySales);
-        $salesCampaign = mysqli_num_rows($resultSales);
+        $resultSales = $astDB->rawQuery($querySales);
+        $salesCampaign = $astDB->getRowCount();
 	    $dataCampaignStats['salesCampaign'] = $salesCampaign;
         $dataCampaignStats['querysalesCampaign'] = $querySales;
         // Hours
@@ -100,9 +99,9 @@
             $campaignQueryHours = "val.campaign_id='$campaign_id'";
         }
         $queryHours = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE {$campaignQueryHours} {$locationQuery} {$userQuery};";
-        $resultHours = mysqli_query($link,$queryHours);
+        $resultHours = $astDB->rawQuery($queryHours);
         $hoursCampaign = 0;
-        while($fresultsHoursCampaign = mysqli_fetch_array($resultHours, MYSQLI_ASSOC)){
+        foreach ($resultHours as $fresultsHoursCampaign){
             $hoursCampaign += $fresultsHoursCampaign['pause_sec'];
             $hoursCampaign += $fresultsHoursCampaign['wait_sec'];
             $hoursCampaign += $fresultsHoursCampaign['talk_sec'];
@@ -118,10 +117,10 @@
 
         // Conversion
         $queryConversion = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE vl.uniqueid=val.uniqueid  AND val.status IN ('$CampaignStatsstatuses', 'QualR', 'QUANS') {$campaignQuery} {$locationQuery} {$userQuery};";
-        $resultConversion = mysqli_query($link,$queryConversion);
-     	$countConvertionCampaign = mysqli_num_rows($resultConversion);
+        $resultConversion = $astDB->rawQuery($queryConversion);
+     	$countConvertionCampaign = $astDB->getRowCount();
         $conversionCampaign = 0;
-        if(mysqli_num_rows($resultConversion) > 0){
+        if($countConvertionCampaign > 0){
             // $conversionCampaign = $salesCampaign / sizeof($countConvertionCampaign) * 100;
             $conversionCampaign = $salesCampaign / $countConvertionCampaign * 100;
         }
@@ -133,19 +132,19 @@
     // End of Camapaign stats
 
     // Getting Campaign Stats Total
-        $CampaignTotalStatsstatuses = getStatuses();
+        $CampaignTotalStatsstatuses = getStatuses($astDB);
     	// Sales Total
         $querySalesTotal = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE vl.uniqueid=val.uniqueid AND val.status IN ('$CampaignTotalStatsstatuses') AND {$dateQueryTotal} {$locationQuery} {$userQuery};";
-        $resultSalesTotal = mysqli_query($link,$querySalesTotal);
-        $salesTotal = mysqli_num_rows($resultSalesTotal);
+        $resultSalesTotal = $astDB->rawQuery($querySalesTotal);
+        $salesTotal = $astDB->getRowCount();
 	    $dataCampaignStatsTotal['salesTotal'] = $salesTotal;
         // $dataCampaignStatsTotal['querysalesTotal'] = $querySalesTotal;
 
 	    // Hours Total
 	    $queryHoursTotal = "SELECT DISTINCT val.agent_log_id, pause_sec,wait_sec,talk_sec,dispo_sec,dead_sec, vu.user_id FROM `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE {$dateHoursQueryTotal} {$locationQuery} {$userQuery};";
-	    $resultHoursTotal = mysqli_query($link,$queryHoursTotal);
+	    $resultHoursTotal = $astDB->rawQuery($queryHoursTotal);
 	    $hoursTotal = 0;
-        while($fresultsHoursTotal = mysqli_fetch_array($resultHoursTotal, MYSQLI_ASSOC)){
+        foreach ($resultHoursTotal as $fresultsHoursTotal){
         	$hoursTotal += $fresultsHoursTotal['pause_sec'];
             $hoursTotal += $fresultsHoursTotal['wait_sec'];
             $hoursTotal += $fresultsHoursTotal['talk_sec'];
@@ -160,11 +159,11 @@
 
 	    // Conversion Total
 	    $queryConversionTotal = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id FROM `asteriskV4`.`vicidial_log` vl, `asteriskV4`.`vicidial_agent_log` val INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user = val.user LEFT JOIN `goautodialV4`.`go_campaigns` gc ON gc.campaign_id=val.campaign_id WHERE vl.uniqueid=val.uniqueid AND val.status IN ('$CampaignTotalStatsstatuses', 'QualR', 'QUANS') AND {$dateQueryTotal} {$locationQuery} {$userQuery};";
-	    $resultConversionTotal = mysqli_query($link,$queryConversionTotal);
-	    $countConvertionTotal = mysqli_num_rows($resultConversionTotal);
+	    $resultConversionTotal = $astDB->rawQuery($queryConversionTotal);
+	    $countConvertionTotal = $astDB->getRowCount();
         $conversionTotal = 0;
         // if(sizeof($resultConversionTotal) > 0)
-        if(mysqli_num_rows($resultConversionTotal) > 0){
+        if($countConvertionTotal > 0){
             // $conversionTotal = $salesTotal / sizeof($countConvertionTotal) * 100;
             $conversionTotal = $salesTotal / $countConvertionTotal * 100;
         }
@@ -183,18 +182,20 @@
     	"campaignStatsTotal" => $dataCampaignStatsTotal
     );
 
-    function getStatuses($campaign_id="all"){
+    function getStatuses($dbase, $campaign_id="all"){
         if($campaign_id == "all"){
-            $queryStatuses = "SELECT status FROM vicidial_statuses WHERE sale='Y';";
-            $resultStatuses = mysqli_query($link,$queryStatuses);
-            while($fresultsStatuses = mysqli_fetch_array($resultStatuses, MYSQLI_ASSOC)){
+            //$queryStatuses = "SELECT status FROM vicidial_statuses WHERE sale='Y';";
+			$dbase->where('sale', 'Y');
+            $resultStatuses = $dbase->get('vicidial_statuses', null, 'status');
+            foreach ($resultStatuses as $fresultsStatuses){
                 $status = $fresultsStatuses['status'];
                 $sstatuses[$status] = $fresultsStatuses['status'];
             }
             $sstatuses = implode("','", $sstatuses);
-            $queryCStatuses = "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y';";
-            $resultCStatuses = mysqli_query($link,$queryCStatuses);
-            while($fresultsCStatuses = mysqli_fetch_array($resultCStatuses, MYSQLI_ASSOC)){
+            //$queryCStatuses = "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y';";
+			$dbase->where('sale', 'Y');
+            $resultCStatuses = $dbase->get('vicidial_campaign_statuses', null, 'status');
+            foreach ($resultCStatuses as $fresultsCStatuses){
                 $status = $fresultsCStatuses['status'];
                 $cstatuses[$status] = $fresultsCStatuses['status'];
             }
@@ -203,15 +204,15 @@
                 FROM vicidial_statuses 
                 WHERE sale='Y' 
                 AND cam_category IN (SELECT vicidial_campaign_definitions.id FROM vicidial_campaign_definitions, vicidial_campaigns WHERE vicidial_campaigns.campaign_def = vicidial_campaign_definitions.code AND vicidial_campaigns.campaign_id = '$campaign_id');";
-            $resultStatuses = mysqli_query($link,$queryStatuses);
-            while($fresultsStatuses = mysqli_fetch_array($resultStatuses, MYSQLI_ASSOC)){
+            $resultStatuses = $dbase->rawQuery($queryStatuses);
+            foreach ($resultStatuses as $fresultsStatuses){
                 $status = $fresultsStatuses['status'];
                 $sstatuses[$status] = $fresultsStatuses['status'];
             }
             $sstatuses = implode("','", $sstatuses);
             $queryCStatuses = "SELECT vicidial_campaign_statuses.status FROM vicidial_campaign_statuses WHERE vicidial_campaign_statuses.sale='Y' AND vicidial_campaign_statuses.campaign_id = '$campaign_id';";
-            $resultCStatuses = mysqli_query($link,$queryCStatuses);
-            while($fresultsCStatuses = mysqli_fetch_array($resultCStatuses, MYSQLI_ASSOC)){
+            $resultCStatuses = $dbase->rawQuery($queryCStatuses);
+            foreach ($resultCStatuses as $fresultsCStatuses){
                 $status = $fresultsCStatuses['status'];
                 $cstatuses[$status] = $fresultsCStatuses['status'];
             }

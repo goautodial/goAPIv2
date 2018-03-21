@@ -8,19 +8,17 @@
     #### License: AGPLv2                              ####
     ######################################################
     
-    include_once("../goFunctions.php");
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    $groupId = go_get_groupid($session_user);
-    
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
+        $stringv = go_getall_allowed_users($groupId, $astDB);
         $ul = " where campaign_id IN ($stringv)";
     }
-   $query = "SELECT sum(dialable_leads) as getTotalDialableLeads FROM vicidial_campaign_stats $ul"; 
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
+    $query = "SELECT sum(dialable_leads) as getTotalDialableLeads FROM vicidial_campaign_stats $ul"; 
+    $fresults = $astDB->rawQuery($query);
+    //$fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
 
 ?>

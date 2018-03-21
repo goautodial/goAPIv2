@@ -9,19 +9,17 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
-	
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
 		$ul = " and user_level != '4'";
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
+        $stringv = go_getall_allowed_users($groupId, $astDB);
 		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
     $query = "SELECT count(*) as getTotalAgentsWaitCalls FROM vicidial_live_agents WHERE status IN ('READY','CLOSER') $ul"; 
-    $rsltv = mysqli_query($link, $query);
-    $data = mysqli_fetch_assoc($rsltv);
+    $data = $astDB->rawQuery($query);
+    //$data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
 ?>

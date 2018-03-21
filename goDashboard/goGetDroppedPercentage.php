@@ -8,14 +8,12 @@
     #### License: AGPLv2                           	      ####
     ##############################################################
     
-    include_once("../goFunctions.php");
-	
-	$groupId = go_get_groupid($session_user);
+	$groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId);
+        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv)";
 		else
@@ -25,8 +23,8 @@
     $NOW = date("Y-m-d");
     
     $query = "SELECT concat(round((sum(drops_today)/sum(answers_today) * 100)),'') as getDroppedPercentage from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    $rsltv = mysqli_query($link, $query)or die("Error: ".mysqli_error($link));
-    $data = mysqli_fetch_assoc($rsltv);
+    $data = $astDB->rawQuery($query);
+    //$data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
     
 ?>

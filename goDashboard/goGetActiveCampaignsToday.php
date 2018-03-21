@@ -8,14 +8,12 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
-	
-	$groupId = go_get_groupid($session_user);
+	$groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId);
+        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv)";
 		else
@@ -27,16 +25,16 @@
     $query = "SELECT campaign_id as getActiveCampaignsToday from vicidial_campaign_stats  where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'  $ul LIMIT 1000"; 
     //$query = "SELECT sum(drops_today) as getTotalDroppedCalls from vicidial_campaign_stats where calls_today > -1 and  $ul"; 
     
-    $rsltv = mysqli_query($link,$query);
-    $countResult = mysqli_num_rows($rsltv);
+    $rsltv = $astDB->rawQuery($query);
+    $countResult = $astDB->getRowCount();
     //echo "<pre>";
     //var_dump($rsltv);   
         
     if($countResult > 0) {
         $data = array();
-            while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){       
-                array_push($data, $fresults);
-            }
-            $apiresults = array("result" => "success", "data" => $data);
+		foreach ($rsltv as $fresults){       
+			array_push($data, $fresults);
+		}
+		$apiresults = array("result" => "success", "data" => $data);
     }
 ?>

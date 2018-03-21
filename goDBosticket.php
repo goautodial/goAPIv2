@@ -41,4 +41,9 @@ if (!$linkost)
     echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
     exit;
         }
+
+$VARDBost_server   = (!isset($VARDBost_server)) ? "localhost" : $VARDBost_server;
+$VARDBost_user     = (!isset($VARDBost_user)) ? "osticketu" : $VARDBost_user;
+$VARDBost_pass     = (!isset($VARDBost_pass)) ? "osticket1234" : $VARDBost_pass;
+$VARDBost_database = (!isset($VARDBost_database)) ? "osticketdb" : $VARDBost_database;
 ?>

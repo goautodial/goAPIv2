@@ -9,21 +9,19 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
-	
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
 		$stringv = '';
 		$ul="user_level != '4'";
     } else { 
-        $stringv = go_getall_allowed_users($groupId);
+        $stringv = go_getall_allowed_users($groupId, $astDB);
 		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
     $query = "SELECT count(*) as getTotalAgentsPaused FROM vicidial_live_agents WHERE status IN ('PAUSED') $ul"; 
-    $rsltv = mysqli_query($link, $query);
-    $data = mysqli_fetch_assoc($rsltv);
+    $data = $astDB->rawQuery($query);
+    //$data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
 	
 ?>

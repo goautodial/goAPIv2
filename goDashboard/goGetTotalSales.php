@@ -8,11 +8,9 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    $groupId = go_get_groupid($session_user);
-    
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul_vcl = "";
 		$ul_vl = "";
     } else { 
@@ -39,11 +37,11 @@
     
     //	$query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid ) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid ) as TotalSales;";
     //$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
-    $rsltvY =  mysqli_query($link,$queryY)or die("Error: ".mysqli_error($link));
-    $rsltvLW =  mysqli_query($link,$queryLW)or die("Error: ".mysqli_error($link));
-    $fresults = mysqli_fetch_assoc($rsltv);
-    $fresultsY = mysqli_fetch_assoc($rsltvY);
-    $fresultsLW = mysqli_fetch_assoc($rsltvLW);
+    $fresults = $astDB->rawQuery($query);
+    $fresultsY =  $astDB->rawQuery($queryY);
+    $fresultsLW =  $astDB->rawQuery($queryLW);
+    //$fresults = mysqli_fetch_assoc($rsltv);
+    //$fresultsY = mysqli_fetch_assoc($rsltvY);
+    //$fresultsLW = mysqli_fetch_assoc($rsltvLW);
     $apiresults = array_merge( array( "result" => "success", "query" => $query), $fresults, $fresultsY, $fresultsLW);
 ?>

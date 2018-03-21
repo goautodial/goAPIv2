@@ -8,11 +8,9 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
-    
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
 
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else {
         if($groupId !== "ADMIN")
@@ -21,13 +19,13 @@
 			$ul = "";
     }
 
-   $NOW = date("Y-m-d");
+	$NOW = date("Y-m-d");
 	$query_date =  date('Y-m-d H');
 	$status = "SALE";
 	$date = "vlog.call_date BETWEEN '$query_date:00:00' AND '$query_date:59:59'";
 	$query="select count(*) as getOutSalesPerHour FROM vicidial_log as vlog LEFT JOIN vicidial_list as vl ON vlog.lead_id=vl.lead_id WHERE vlog.status='SALE' $ul and $date";
-    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
-    $fresults = mysqli_fetch_assoc($rsltv);
+    $fresults = $astDB->rawQuery($query);
+    //$fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success", "query" => $date), $fresults );
 	
 	

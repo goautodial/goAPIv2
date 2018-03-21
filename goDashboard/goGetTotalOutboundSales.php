@@ -8,11 +8,9 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    $groupId = go_get_groupid($session_user);
-    
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
 		if($groupId !== "ADMIN")
@@ -21,7 +19,7 @@
 			$ul = "";
     }
 
-   $NOW = date("Y-m-d");
+	$NOW = date("Y-m-d");
 	$query_date =  date('Y-m-d');
 	$status = "SALE";
 	$date = "vlog.call_date BETWEEN '$query_date 00:00:00' AND '$query_date 23:59:59'";
@@ -33,10 +31,10 @@
             ON vlog.lead_id=vl.lead_Id
             WHERE vlog.status='$status' $ul and $date ";
     //$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $rsltv = mysqli_query($link,$query)or die("Error: ".mysqli_error($link));
-	$count = mysqli_num_rows($rsltv);
+    $rsltv = $astDB->rawQuery($query);
+	$count = $astDB->getRowCount();
 	if($count > 0){
-		$fresults = mysqli_fetch_assoc($rsltv);
+		$fresults = $rsltv[0];
 		$result = $fresults['OutboundSales'];
 	}else{
 		$result = 0;

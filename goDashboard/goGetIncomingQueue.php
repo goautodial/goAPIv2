@@ -9,14 +9,12 @@
     #### License: AGPLv2                           	      ####
     ##############################################################
     
-    include_once("../goFunctions.php");
+	$groupId = go_get_groupid($session_user, $astDB);
     
-	$groupId = go_get_groupid($session_user);
-    
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId);
+        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv)";
 		else
@@ -26,7 +24,7 @@
     $NOW = date("Y-m-d");
 
     $query = "select count(*) AS getIncomingQueue from vicidial_auto_calls where status NOT IN('XFER') and call_type = 'IN' $ul";
-    $rsltv = mysqli_query($link, $query)or die("Error: ".mysqli_error($link));
-    $data = mysqli_fetch_assoc($rsltv);
+    $data = $astDB->rawQuery($query);
+    //$data = mysqli_fetch_assoc($rsltv);
     $apiresults = array("result" => "success", "data" => $data);
 ?>

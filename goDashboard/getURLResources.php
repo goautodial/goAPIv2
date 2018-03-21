@@ -18,12 +18,13 @@ if (file_exists("/etc/goautodial.conf")) {
  
     include "goFunctions.php";
     
-    $groupId = go_get_groupid();
+    $groupId = go_get_groupid($goUser, $astDB);
     
-    if (!checkIfTenant($groupId)) {
-        $ul='';
+    if (!checkIfTenant($groupId, $goDB)) {
+        //$ul='';
     } else { 
-        $ul = "AND user_group='$groupId'";
+        //$ul = "AND user_group='$groupId'";
+        $astDB->where('user_group', $groupId);
     }
 
 
@@ -50,9 +51,10 @@ if (file_exists("/etc/goautodial.conf")) {
 
 
 
-   $query = "select count(user) as num_seats from vicidial_users where user_level < '4' and user NOT IN ('VDAD','VDCL') $ul";
-
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysql_fetch_assoc($rsltv);
+    //$query = "select count(user) as num_seats from vicidial_users where user_level < '4' and user NOT IN ('VDAD','VDCL') $ul";
+    $astDB->where('user_level', '4', '<');
+    $astDB->where('user', array('VDAD', 'VDCL'), 'not in');
+    $fresults = $astDB->get('vicidial_users', null, 'COUNT(user) AS num_seats');
+    //$fresults = mysql_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
 ?>

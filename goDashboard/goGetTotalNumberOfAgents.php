@@ -8,18 +8,16 @@
     #### License: AGPLv2                            ####
     ####################################################
     
-    include_once("../goFunctions.php");
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    $groupId = go_get_groupid($session_user);
-    
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
         $ul = "AND user_group='$groupId'";
     }
 
     $query = "select count(user) as num_seats from vicidial_users where user_level < '4' and user NOT IN ('VDAD','VDCL', 'goAPI','goautodial') $ul";
-    $rsltv = mysqli_query($link,$query);
-    $fresults = mysqli_fetch_assoc($rsltv);
+    $fresults = $astDB->rawQuery($query);
+    //$fresults = mysqli_fetch_assoc($rsltv);
     $apiresults = array_merge( array( "result" => "success" ), $fresults );
 ?>

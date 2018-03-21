@@ -9,14 +9,12 @@
     #### License: AGPLv2                                ####
     ########################################################
     
-    require_once("../goFunctions.php");
-	
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
     
-    if (checkIfTenant($groupId)) {
+    if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId);
+        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " AND campaign_id IN ($stringv)";
 		else
@@ -31,13 +29,13 @@
     
     $queryOutboundcalls = "select count(call_date) as getTotalOutboundCalls from vicidial_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
     
-    $rsltvTotalcalls = mysqli_query($link, $queryTotalcalls)or die("Error: ".mysqli_error($link));
-    $rsltvIncalls = mysqli_query($link, $queryInboundcalls)or die("Error: ".mysqli_error($link));
-    $rsltvOutcalls = mysqli_query($link, $queryOutboundcalls)or die("Error: ".mysqli_error($link));
+    $dataTotalCalls = $astDB->rawQuery($queryTotalcalls);
+    $dataIncalls = $astDB->rawQuery($queryInboundcalls);
+    $dataOutcalls = $astDB->rawQuery($queryOutboundcalls);
 	
-	$dataTotalCalls = mysqli_fetch_array($rsltvTotalcalls,MYSQLI_ASSOC);
-	$dataIncalls = mysqli_fetch_array($rsltvIncalls,MYSQLI_ASSOC);
-	$dataOutcalls = mysqli_fetch_array($rsltvOutcalls,MYSQLI_ASSOC);
+	//$dataTotalCalls = mysqli_fetch_array($rsltvTotalcalls,MYSQLI_ASSOC);
+	//$dataIncalls = mysqli_fetch_array($rsltvIncalls,MYSQLI_ASSOC);
+	//$dataOutcalls = mysqli_fetch_array($rsltvOutcalls,MYSQLI_ASSOC);
 	
     $data = array("getTotalCalls" => $dataTotalCalls['getTotalCalls'], "getTotalInboundCalls" => $dataIncalls['getTotalInboundCalls'], "getTotalOutboundCalls" => $dataOutcalls['getTotalOutboundCalls']);
 	
