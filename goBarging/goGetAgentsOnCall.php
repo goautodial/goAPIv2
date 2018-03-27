@@ -1,12 +1,25 @@
 <?php
-    #######################################################
-    #### Name: goGetAgentsOnCall.php 	               ####
-    #### Description: API to get all Users Online      ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Ltd. (c) 2011-2016      ####
-    #### Written by: Jerico James F. Milo              ####
-    #### License: AGPLv2                               ####
-    #######################################################
+ /**
+ * @file 		goGetAgentsOnCall.php
+ * @brief 		API for Barging
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Jericho James Milo <james@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     
 	$query = "SELECT extension as 'station',vicidial_live_agents.user as 'user',vicidial_users.user_group as 'tenant_id',conf_exten as 'sessionid',status,comments,server_ip,call_server_ip,UNIX_TIMESTAMP(last_call_time) as 'last_call_time',UNIX_TIMESTAMP(last_call_finish) as last_call_finish,campaign_id as 'campaign',UNIX_TIMESTAMP(last_state_change) as 'last_state_change',lead_id,agent_log_id,vicidial_live_agents.callerid as 'callerid' FROM vicidial_live_agents,vicidial_users WHERE vicidial_live_agents.user=vicidial_users.user AND vicidial_live_agents.user_level != 4 ORDER BY status,last_call_time LIMIT 2000;";
     $rsltv = $astDB->rawQuery($query);

@@ -1,17 +1,29 @@
 <?php
-####################################################
-#### Name: goGetLabels.php                      ####
-#### Type: API for Agent UI                     ####
-#### Version: 0.9                               ####
-#### Copyright: GOAutoDial Inc. (c) 2011-2016   ####
-#### Written by: Christopher P. Lomuntad        ####
-#### License: AGPLv2                            ####
-####################################################
+ /**
+ * @file 		goGetCallLogs.php
+ * @brief 		API for Agent UI
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Chris Lomuntad <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 if (isset($_GET['goLimit'])) { $limit = $astDB->escape($_GET['goLimit']); }
     else if (isset($_POST['goLimit'])) { $limit = $astDB->escape($_POST['goLimit']); }
 if (isset($_GET['goDate'])) { $date = $astDB->escape($_GET['goDate']); }
-    else if (isset($_POST['goTabgoDateleName'])) { $date = $astDB->escape($_POST['goDate']); }
+    else if (isset($_POST['goDate'])) { $date = $astDB->escape($_POST['goDate']); }
 
 if (!isset($limit) || strlen($limit) < 1 || !is_numeric($limit)) {
 	$limit = 5;

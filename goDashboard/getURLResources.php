@@ -1,22 +1,35 @@
 <?php
-    ####################################################
-    #### Name: getAllPhones.php                     ####
-    #### Type: API to get all phones                ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Waren Ipac Briones             ####
-    #### License: AGPLv2                            ####
-    ####################################################
+ /**
+ * @file 	goAPI.php
+ * @brief 	API for Dashboard
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Warren Ipac Briones  <warren@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-if (file_exists("/etc/goautodial.conf")) {
-        $conf_path = "/etc/goautodial.conf";
-} elseif (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
-        $conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
-} else {
-        die ("ERROR: 'goautodial.conf' file not found.");
-}
- 
-    include "goFunctions.php";
+//if (file_exists("/etc/goautodial.conf")) {
+//        $conf_path = "/etc/goautodial.conf";
+//} elseif (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
+//        $conf_path = "{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf";
+//} else {
+//        die ("ERROR: 'goautodial.conf' file not found.");
+//}
+// 
+//    include "goFunctions.php";
     
     $groupId = go_get_groupid($goUser, $astDB);
     

@@ -1,14 +1,27 @@
 <?php
-    #######################################################
-    #### Name: goGetCallRecordingInformation.php       ####
-    #### Description: API to get specific recordings   ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Demian Lizandro A. Biscocho       ####
-    #### License: AGPLv2                               ####
-    #######################################################
+ /**
+ * @file 		goGetCallRecordingInformation.php
+ * @brief 		API for getting specific recordings
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Demian Lizandro A. Biscocho <demian@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     
-    $recording_id = $_REQUEST['recording_id'];
+    $recording_id = $astDB->escape($_REQUEST['recording_id']);
 
 	if($recording_id == null) {
 			$apiresults = array("result" => "Error: Set a value for Recording ID");

@@ -1,43 +1,51 @@
 <?php
-   ####################################################
-   #### Name: goAddCarrier.php                     ####
-   #### Description: API to add new carrier        ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jeremiah Sebastian Samatra     ####
-   #### License: AGPLv2                            ####
-   ####################################################
-   
-    include_once ("../goFunctions.php");
-	include_once ("../goDBasterisk.php");
-	include_once ("../goDBkamailio.php");
- 
+ /**
+ * @file 		goAddCarrier.php
+ * @brief 		API for Carriers
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Jeremiah Sebastian Samatra <jeremiah@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 	### POST or GET Variables
-		$carrier_type = $_REQUEST['carrier_type'];
+		$carrier_type = $astDB->escape($_REQUEST['carrier_type']);
 		
 		if($carrier_type == "justgo"){
-			$company		= mysqli_real_escape_string($link, $_REQUEST['company']);
-			$firstname 		= mysqli_real_escape_string($link, $_REQUEST['firstname']);
-			$lastname 		= mysqli_real_escape_string($link, $_REQUEST['lastname']);
-			$address 		= mysqli_real_escape_string($link, $_REQUEST['address']);
-			$city 		= mysqli_real_escape_string($link, $_REQUEST['city']);
-			$state 		= mysqli_real_escape_string($link, $_REQUEST['state']);
-			$postal 		= mysqli_real_escape_string($link, $_REQUEST['postal']);
-			$country 		= mysqli_real_escape_string($link, $_REQUEST['country']);
-			$timezone 		= mysqli_real_escape_string($link, $_REQUEST['timezone']);
-			$phone 		= mysqli_real_escape_string($link, $_REQUEST['phone']);
-			$mobilephone 		= mysqli_real_escape_string($link, $_REQUEST['mobilephone']);
-			$email 		= mysqli_real_escape_string($link, $_REQUEST['email']);
+			$company		= $astDB->escape($_REQUEST['company']);
+			$firstname 		= $astDB->escape($_REQUEST['firstname']);
+			$lastname 		= $astDB->escape($_REQUEST['lastname']);
+			$address 		= $astDB->escape($_REQUEST['address']);
+			$city 		= $astDB->escape($_REQUEST['city']);
+			$state 		= $astDB->escape($_REQUEST['state']);
+			$postal 		= $astDB->escape($_REQUEST['postal']);
+			$country 		= $astDB->escape($_REQUEST['country']);
+			$timezone 		= $astDB->escape($_REQUEST['timezone']);
+			$phone 		= $astDB->escape($_REQUEST['phone']);
+			$mobilephone 		= $astDB->escape($_REQUEST['mobilephone']);
+			$email 		= $astDB->escape($_REQUEST['email']);
 		}
 		
 		if($carrier_type == "manual" || $carrier_type == "copy"){
-			$carrier_id	= mysqli_real_escape_string($link, $_REQUEST['carrier_id']);
-			$carrier_name 	= mysqli_real_escape_string($link, $_REQUEST['carrier_name']);
+			$carrier_id	= $astDB->escape($_REQUEST['carrier_id']);
+			$carrier_name 	= $astDB->escape($_REQUEST['carrier_name']);
 			$active	= $_REQUEST['active'];
 		}
 		
 		if($carrier_type == "manual"){
-			$carrier_description	= mysqli_real_escape_string($link, $_REQUEST['carrier_description']);
+			$carrier_description	= $astDB->escape($_REQUEST['carrier_description']);
 			$user_group	= $_REQUEST['user_group'];
 			$authentication	= $_REQUEST['authentication'];
 			
@@ -45,18 +53,18 @@
 				$host = $_REQUEST['sip_server_ip'];
 			}
 			if($authentication == "auth_reg"){
-				$host = mysqli_real_escape_string($link, $_REQUEST['reg_host']);
-				$username = mysqli_real_escape_string($link, $_REQUEST['username']);
-				$password = mysqli_real_escape_string($link, $_REQUEST['password']);
-				$reg_port = mysqli_real_escape_string($link, $_REQUEST['reg_port']);
+				$host = $astDB->escape($_REQUEST['reg_host']);
+				$username = $astDB->escape($_REQUEST['username']);
+				$password = $astDB->escape($_REQUEST['password']);
+				$reg_port = $astDB->escape($_REQUEST['reg_port']);
 			}
 			
 			$codecs			= $_REQUEST['codecs'];
 			$codecs 			= explode("&", $codecs);
 			
 			$dtmf			= $_REQUEST['dtmf'];
-			$custom_dtmf			= mysqli_real_escape_string($link, $_REQUEST['custom_dtmf']);
-			$dialprefix			= mysqli_real_escape_string($link, $_REQUEST['dialprefix']);
+			$custom_dtmf			= $astDB->escape($_REQUEST['custom_dtmf']);
+			$dialprefix			= $astDB->escape($_REQUEST['dialprefix']);
 			$protocol			= $_REQUEST['protocol'];
 			$server_ip			= $_REQUEST['manual_server_ip'];
 			
@@ -124,25 +132,25 @@
 				$dialplan_entry .= "exten => _". $dialprefix .".,3,Hangup";
 				
 			}else{
-				$protocol	= mysqli_real_escape_string($link, $_REQUEST['cust_protocol']);
-				$registration_string	= mysqli_real_escape_string($link, $_REQUEST['registration_string']);
-				$account_entry	= mysqli_real_escape_string($link, $_REQUEST['account_entry']);
-				$global_string	= mysqli_real_escape_string($link, $_REQUEST['global_string']);
-				$dialplan_entry	= mysqli_real_escape_string($link, $_REQUEST['dialplan_entry']);
+				$protocol	= $astDB->escape($_REQUEST['cust_protocol']);
+				$registration_string	= $astDB->escape($_REQUEST['registration_string']);
+				$account_entry	= $astDB->escape($_REQUEST['account_entry']);
+				$global_string	= $astDB->escape($_REQUEST['global_string']);
+				$dialplan_entry	= $astDB->escape($_REQUEST['dialplan_entry']);
 			}
 			
 		}
 		
 		if($carrier_type == "copy"){
 			$server_ip	= $_REQUEST['copy_server_ip'];
-			$source_carrier	= mysqli_real_escape_string($link, $_REQUEST['source_carrier']);
+			$source_carrier	= $astDB->escape($_REQUEST['source_carrier']);
 		}
 
 		$goUser = $_REQUEST['goUser'];
 		$ip_address = $_REQUEST['hostname'];
 		
-		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+		$log_user = $astDB->escape($_REQUEST['log_user']);
+		$log_group = $astDB->escape($_REQUEST['log_group']);
 
 
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
@@ -173,8 +181,9 @@
 			//}
 			
 			if($carrier_type == "copy"){
-				$query_copy = mysqli_query($link, "SELECT * FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
-				$fetch_copy = mysqli_fetch_array($query_copy);
+				//$query_copy = mysqli_query($link, "SELECT * FROM vicidial_server_carriers WHERE carrier_id = '$source_carrier' LIMIT 1;");
+				$astDB->where('carrier_id', $source_carrier);
+				$fetch_copy = $astDB->getOne('vicidial_server_carriers');
 				$user_group = $fetch_copy["user_group"]; 
 				$ulug = "WHERE user_group = '$user_group'";
 				
@@ -191,15 +200,15 @@
 			}
 
 			$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;";
-			$rsltv = mysqli_query($link, $query);
-			$countResult = mysqli_num_rows($rsltv);
+			$rsltv = $astDB->rawQuery($query);
+			$countResult = $astDB->getRowCount();
 
 			if($countResult <= 0 && $user_group != "---ALL---") {
 				$apiresults = array("result" => "Error: Invalid usergroup.");
 			} else {
 				$queryCheck = "SELECT carrier_id,carrier_name,server_ip,protocol,registration_string,active,user_group FROM vicidial_server_carriers $ul ORDER BY carrier_id LIMIT 3;";
-				$rsltv = mysqli_query($link, $queryCheck);
-				$countCheck = mysqli_num_rows($rsltv);
+				$rsltv = $astDB->rawQuery($queryCheck);
+				$countCheck = $astDB->getRowCount();
 
 			if($countCheck > 0) {
 				$apiresults = array("result" => "Error: Carrier already exist.");
@@ -282,18 +291,18 @@
 					$itemSQL = "($varSQL) VALUES ($valSQL)";
 			
 			$queryVSC = "INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string, active) VALUES ('$carrier_id', '$carrier_name', '$registration_string', '$account_entry', '$carrier_description', '$user_group', '$protocol', '$dialplan_entry', '$server_ip', '$global_string', '$active');";
-			$resultVSC = mysqli_query($link, $queryVSC);
+			$resultVSC = $astDB->rawQuery($queryVSC);
 			
 				if($resultVSC) {
 				//$this->commonhelper->auditadmin('ADD',"Added New Carrier $carrier_id","INSERT INTO vicidial_server_carriers $itemSQL;");
 				$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
-				$resultVSC = mysqli_query($link, $queryUpdate);
+				$resultVSC = $astDB->rawQuery($queryUpdate);
 
 	### Admin logs
 					//$SQLdate = date("Y-m-d H:i:s");
 					//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','ADD','Added New Carrier ID $carrier_id','INSERT INTO vicidial_server_carriers (carrier_id, carrier_name, registration_string, account_entry, carrier_description, user_group, protocol, dialplan_entry, server_ip, globals_string) VALUES ($carrier_id, $carrier_name, $registration_string, $account_entry, $carrier_description, $user_group, $protocol, $dialplan_entry, $server_ip, $global_string);');";
 					//$rsltvLog = mysqli_query($linkgo, $queryLog);
-					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Carrier: $carrier_id", $log_group, $queryVSC);
+					$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Carrier: $carrier_id", $log_group, $queryVSC);
 
 					$apiresults = array("result" => "success", "data" => $queryUpdate);
 				}else{
