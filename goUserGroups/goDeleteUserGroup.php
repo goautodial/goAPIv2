@@ -1,48 +1,67 @@
 <?php
-    ////////////////////////////////////////////////////////////
-    /// Name: goDeleteUserGroup.php 		///
-    /// Description: API to delete specific User Group 		///
-    /// Version: 0.9 		///
-    /// Copyright: GOAutoDial Inc. (c) 2011-2014 		///
-    /// Written by: Jeremiah Sebastian V. Samatra 		///
-    /// License: AGPLv2 		///
-    ////////////////////////////////////////////////////////////
+/**
+ * @file 		goDeleteUserGroup.php
+ * @brief 		API to delete specific User Group
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
     include_once ("../goFunctions.php");
     
     // POST or GET Variables
     $user_group = $_REQUEST['user_group'];
 	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user);
+	$ip_address = $_REQUEST['hostname'];
     
-    
-	if($user_group == null) {
+    if(!isset($session_user) || is_null($session_user)){
+    	$apiresults = array("result" => "Error: Missing Required Parameters.");
+    }elseif(is_null($user_group)) {
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Set a value for User Group."); 
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = $log_group;
 		if (!checkIfTenant($groupId)) {
-				$ul = "WHERE user_group='$user_group'";
-		} else { 
-			$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";  
+			$astDB->where("user_group", $user_group);
+			//$ul = "WHERE user_group='$user_group'";
+		} else {
+			$astDB->where("user_group", $user_group);
+			$astDB->where("user_group", $groupId);
+			//$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";  
 		}
 		
-		$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
-		$rsltv = mysqli_query($link, $query) or die(mysqli_error($link));
-		$countResult = mysqli_num_rows($rsltv);
+		$fresults = $astDB->getOne("vicidial_user_groups", "user_group");
+		//$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
+		$countResult = $astDB->count;
 		
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-				$dataUserGroup = $fresults['user_group'];
-			}
-			
+			$dataUserGroup = $fresults['user_group'];
+						
 			if(!$dataUserGroup == null) {
-				$deleteQuery = "DELETE FROM vicidial_user_groups WHERE user_group='$dataUserGroup' AND user_group != 'ADMIN';"; 
-				$deleteResult = mysqli_query($link, $deleteQuery) or die(mysqli_error($link));
-				$deleteQueryA = "DELETE FROM user_access_group WHERE user_group='$dataUserGroup' AND user_group != 'ADMIN';";
-				$deleteResultA = mysqli_query($linkgo, $deleteQueryA) or die(mysqli_error($link));
+				$astDB->where("user_group", $dataUserGroup);
+				$astDB->where("user_group", "ADMIN", "!=");
+				$astDB->delete("vicidial_user_groups");
+				//$deleteQuery = "DELETE FROM vicidial_user_groups WHERE user_group='$dataUserGroup' AND user_group != 'ADMIN';";
+
+				$goDB->where("user_group", $dataUserGroup);
+				$goDB->where("user_group", "ADMIN", "!=");
+				$goDB->delete("user_access_group");
+				//$deleteQueryA = "DELETE FROM user_access_group WHERE user_group='$dataUserGroup' AND user_group != 'ADMIN';";
 				
 			} else {
 				$err_msg = error_handle("10010");
@@ -56,16 +75,24 @@
 			//$apiresults = array("result" => "Error: User Group doesn't exist.");
 		}
 		
-		$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
-		$rsltv = mysqli_query($link, $query) or die(mysqli_error($link));
-		$countResult = mysqli_num_rows($rsltv);
-	
+		if (!checkIfTenant($groupId)) {
+			$astDB->where("user_group", $user_group);
+		} else {
+			$astDB->where("user_group", $user_group);
+			$astDB->where("user_group", $groupId);
+		}
+
+		$astDB->getOne("vicidial_user_groups", "user_group");
+		//$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
+		//$rsltv = mysqli_query($link, $query) or die(mysqli_error($link));
+		$countResult = $astDB->count;
+		
 		if($countResult > 0) {
 			$err_msg = error_handle("41004", "user_group");
 			$apiresults = array("code" => "41004", "result" => $err_msg);
 		}else{
 			$apiresults = array("result" => "success");
-			$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
+			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
 		}
 	}//end
 ?>

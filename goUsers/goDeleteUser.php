@@ -1,12 +1,25 @@
 <?php
-    /****************************************************
-    ### Name: goDeleteUser.php  	           		  ###
-    ### Description: API to delete specific User      ###
-    ### Version: 0.9                                  ###
-    ### Copyright: GOAutoDial Ltd. (c) 2011-2015      ###
-    ### Written by: Jeremiah Sebastian V. Samatra     ###
-    ### License: AGPLv2                               ###
-    ****************************************************/
+/**
+ * @file 		goDeleteUser.php
+ * @brief 		API to delete specific User 
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+
     include_once ("goAPI.php");
     
     // POST or GET Variables
@@ -14,10 +27,9 @@
 	$user = $_REQUEST['user'];
 	//$action = $_REQUEST['action'];
     $ip_address = $_REQUEST['hostname'];
-    $goUser = $_REQUEST['goUser'];
-	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    
+	$log_user = $session_user;
+	$groupId = go_get_groupid($session_user, $astDB);
 
 	if(empty($user_id) && empty($user)) {
 		$err_msg = error_handle("40001");
@@ -29,7 +41,6 @@
 		//$apiresults = array("result" => "Error: Set a value for User ID."); 
 	}else {
 		
-		$groupId = go_get_groupid($session_user);
 		if (!checkIfTenant($groupId)) {
 			$ul = "AND user_id=?";
 			$arr_ul = array($user_id);
@@ -60,14 +71,14 @@
 				//$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND user = '".$exploded[$i]."';";
 					//$arr_select[5] = $exploded[$i];
 					//$selectQuery = $astDB->rawQuery("SELECT user,phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND user = ?;", $arr_select);
-					$astDB->where("user", $default_users, "NOT IN");
+					$astDB->where("user", DEFAULT_USERS, "NOT IN");
 					$astDB->where("user_level", 4);
 					$astDB->where("user", $exploded[$i]);
 					$selectQuery = $astDB->getOne("vicidial_users", "user, phone_login");
 				}else{
 					//$selectQuery = "SELECT user,phone_login FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL','goautodial','goAPI') AND user_level != '4' AND user_id = '".$exploded[$i]."';";
 					//$arr_select[5] = $exploded[$i];
-					$astDB->where("user", $default_users, "NOT IN");
+					$astDB->where("user", DEFAULT_USERS, "NOT IN");
 					$astDB->where("user_level", 4);
 					$astDB->where("user_id", $exploded[$i]);
 					$selectQuery = $astDB->getOne("vicidial_users", "user, phone_login");
@@ -113,7 +124,7 @@
 					$error_count = $error_count + 1;
 				}
 				
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User: $dataUserID", $log_group, $deleteQuery);
+				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User: $dataUserID", $groupId, $deleteQuery);
 				
 			}
 			
