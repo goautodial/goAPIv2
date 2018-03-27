@@ -1,47 +1,58 @@
 <?php
-   //////////////////////////////////////////////////////
-   /// Name: goEditLeads.php 		///
-   /// Description: API to edit specific lead 		///
-   /// Version: 4.0 		///
-   /// Copyright: GOAutoDial Ltd. (c) 2011-2016 		///
-   /// Written by: Alexander Abenoja _m/ 		///
-   /// License: AGPLv2 		///
-   /////////////////////////////////////////////////////
-	
-    include_once ("../goFunctions.php");
-    
+ /**
+ * @file 		goEditLeads.php
+ * @brief 		API for Editing Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Alexander Abenoja  <alex@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     // POST or GET Variables
-        $goUser = $_REQUEST['goUser'];
-        $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-        $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-        $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$goUser = $astDB->escape($_REQUEST['goUser']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
 
-        $lead_id 		= mysqli_real_escape_string($link, $_REQUEST['lead_id']);
-        $first_name 		= mysqli_real_escape_string($link, $_REQUEST['first_name']);
-        $middle_initial 		= mysqli_real_escape_string($link, $_REQUEST['middle_initial']);
-        $last_name 		= mysqli_real_escape_string($link, $_REQUEST['last_name']);
-        $gender 		= mysqli_real_escape_string($link, $_REQUEST['gender']);
-        $email 		= mysqli_real_escape_string($link, $_REQUEST['email']);
-        $phone_number 		= mysqli_real_escape_string($link, $_REQUEST['phone_number']);
-        $alt_phone 		= mysqli_real_escape_string($link, $_REQUEST['alt_phone']);
-        $address1 		= mysqli_real_escape_string($link, $_REQUEST['address1']);
-        $address2 		= mysqli_real_escape_string($link, $_REQUEST['address2']);
-        $address3 		= mysqli_real_escape_string($link, $_REQUEST['address3']);
-        $city 		= mysqli_real_escape_string($link, $_REQUEST['city']);
-        $province 		= mysqli_real_escape_string($link, $_REQUEST['province']);
-        $postal_code 		= mysqli_real_escape_string($link, $_REQUEST['postal_code']);
-        $country_code 		= mysqli_real_escape_string($link, $_REQUEST['country_code']);
-        $date_of_birth 		= mysqli_real_escape_string($link, $_REQUEST['date_of_birth']);
-        $title 		= mysqli_real_escape_string($link, $_REQUEST['title']);
-        $status 		= mysqli_real_escape_string($link, $_REQUEST['status']);
-        $is_customer 		= mysqli_real_escape_string($link, $_REQUEST['is_customer']);
+	$lead_id 		= $astDB->escape($_REQUEST['lead_id']);
+	$first_name 		= $astDB->escape($_REQUEST['first_name']);
+	$middle_initial 		= $astDB->escape($_REQUEST['middle_initial']);
+	$last_name 		= $astDB->escape($_REQUEST['last_name']);
+	$gender 		= $astDB->escape($_REQUEST['gender']);
+	$email 		= $astDB->escape($_REQUEST['email']);
+	$phone_number 		= $astDB->escape($_REQUEST['phone_number']);
+	$alt_phone 		= $astDB->escape($_REQUEST['alt_phone']);
+	$address1 		= $astDB->escape($_REQUEST['address1']);
+	$address2 		= $astDB->escape($_REQUEST['address2']);
+	$address3 		= $astDB->escape($_REQUEST['address3']);
+	$city 		= $astDB->escape($_REQUEST['city']);
+	$province 		= $astDB->escape($_REQUEST['province']);
+	$postal_code 		= $astDB->escape($_REQUEST['postal_code']);
+	$country_code 		= $astDB->escape($_REQUEST['country_code']);
+	$date_of_birth 		= $astDB->escape($_REQUEST['date_of_birth']);
+	$title 		= $astDB->escape($_REQUEST['title']);
+	$status 		= $astDB->escape($_REQUEST['status']);
+	$is_customer 		= $astDB->escape($_REQUEST['is_customer']);
 
-	$user_id 		= mysqli_real_escape_string($link, $_REQUEST['user_id']);
-	$user 		= mysqli_real_escape_string($link, $_REQUEST['user']);
-	$avatar 		= mysqli_real_escape_string($link, $_REQUEST['avatar']); //base64 encoded
-        
-		$defGender = array("M", "F", "U");
-		
+	$user_id 		= $astDB->escape($_REQUEST['user_id']);
+	$user 		= $astDB->escape($_REQUEST['user']);
+	$avatar 		= $astDB->escape($_REQUEST['avatar']); //base64 encoded
+	
+	$defGender = array("M", "F", "U");
+	
 	if(empty($lead_id) || empty($session_user)){
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
@@ -65,12 +76,13 @@
 		$apiresults = array("code" => "41004", "result" => $err_msg);
 	}else{
 		
-		$query_check = "SELECT * FROM vicidial_list WHERE lead_id = '$lead_id';";
-		$exec_query_check = mysqli_query($link, $query_check);
-		$num_query_check = mysqli_num_rows($exec_query_check);
+		//$query_check = "SELECT * FROM vicidial_list WHERE lead_id = '$lead_id';";
+		$astDB->where('lead_id', $lead_id);
+		$exec_query_check = $astDB->get('vicidial_list');
+		$num_query_check = $astDB->getRowCount();
 		
 		if($num_query_check > 0){
-			while($fresults = mysqli_fetch_array($exec_query_check)){
+			foreach ($exec_query_check as $fresults){
 				$data_first_name = $fresults['first_name'];
 				$data_middle_initial = $fresults['middle_initial'];
 				$data_last_name = $fresults['last_name'];
@@ -149,43 +161,43 @@
 			WHERE lead_id ='$lead_id' 
 			LIMIT 1;";                
 			
-			$updateQuery = mysqli_query($link, $query) or die(mysqli_error($link));
-			$updateQuerygo = mysqli_query($linkgo, $querygo) or die(mysqli_error($linkgo));
+			$updateQuery = $astDB->rawQuery($query);
+			$updateCnter = $astDB->getRowCount();
+			$updateQuerygo = $goDB->rawQuery($querygo);
+			$countrsltgo = $goDB->getRowCount();
 			
-			if($updateQuery > 0){
+			if($updateCnter > 0){
 				if ($is_customer > 0) {
-					if(!empty($session_user))
-					$rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user='$session_user';") or die(mysqli_error($link));
-					else
-					$rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';") or die(mysqli_error($link));
+					if(!empty($session_user)) {
+						//$rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user='$session_user';") or die(mysqli_error($link));
+						$astDB->where('user', $session_user);
+						$rsltu = $astDB->get('vicidial_users', null, 'user_group');
+					} else {
+						//$rsltu = mysqli_query($link, "SELECT user_group FROM vicidial_users WHERE user_id='$user_id';") or die(mysqli_error($link));
+						$astDB->where('user_id', $user_id);
+						$rsltu = $astDB->get('vicidial_users', null, 'user_group');
+					}
 					
-					$fresults = mysqli_fetch_array($rsltu, MYSQLI_ASSOC);
+					$fresults = $rsltu[0];
 					$user_group = $fresults['user_group'];
 					
-					$rsltg = mysqli_query($linkgo, "SELECT group_list_id FROM user_access_group WHERE user_group='$user_group';") or die(mysqli_error($linkgo));
-					$fresults = mysqli_fetch_array($rsltg, MYSQLI_ASSOC);
+					//$rsltg = mysqli_query($linkgo, "SELECT group_list_id FROM user_access_group WHERE user_group='$user_group';") or die(mysqli_error($linkgo));
+					$goDB->where('user_group', $user_group);
+					$fresults = $goDB->getOne('user_access_group', 'group_list_id');
 					$group_list_id = $fresults['group_list_id'];
 					
-					$countrsltgo = mysqli_num_rows($updateQuerygo);                
-					
 					if ($countrsltgo < 1) {
-						$querygo = "INSERT
-						INTO go_customers 
-						VALUES (null, '$lead_id', '$group_list_id', '$avatar');";
-						$rsltgo = mysqli_query($linkgo, $querygo) or die(mysqli_error($linkgo));
-						$fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
+						$querygo = "INSERT INTO go_customers VALUES (null, '$lead_id', '$group_list_id', '$avatar');";
+						$fresultsgo = $goDB->rawQuery($querygo);
 						
 					} else {
-						$querygo = "UPDATE go_customers 
-						SET avatar = '$avatar', group_list_id='$group_list_id'
-						WHERE lead_id ='$lead_id';";
-						$rsltgo = mysqli_query($linkgo, $querygo) or die(mysqli_error($linkgo));
-						$fresultsgo = mysqli_fetch_array($rsltgo, MYSQLI_ASSOC);
+						$querygo = "UPDATE go_customers SET avatar = '$avatar', group_list_id='$group_list_id' WHERE lead_id ='$lead_id';";
+						$fresultsgo = $goDB->rawQuery($querygo);
 					}
 					
 				}
 				
-				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query, $querygo);
+				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified the Lead ID: $lead_id", $log_group, $query, $querygo);
 				
 				$apiresults = array("result" => "success");
 			}else{

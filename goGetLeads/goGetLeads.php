@@ -1,32 +1,44 @@
 <?php
-    #######################################################
-    #### Name: goGetLeads.php     	               ####
-    #### Description: API to get Leads                 ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Warren Ipac Briones               ####
-    #### Modified by: Alexander Jim Abenoja	       ####
-    #### License: AGPLv2                               ####
-    #######################################################
-    include_once ("../goFunctions.php");
+ /**
+ * @file 		goGetLeads.php
+ * @brief 		API for Getting Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Warren Ipac Briones <warren@goautodial.com>
+ * @author     	Alexander Abenoja  <alex@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
     function remove_empty($array) {
     	return array_filter($array, '_remove_empty_internal');
     }
 
     function _remove_empty_internal($value) {
-  	return !empty($value) || $value === 0;
+		return !empty($value) || $value === 0;
     }
     
-    $goVarLimit = $_REQUEST["goVarLimit"];
-	$userid = $_REQUEST["user"];
-	$search = mysqli_real_escape_string($link, $_REQUEST['search']);
-	$disposition_filter = mysqli_real_escape_string($link, $_REQUEST['disposition_filter']);
-	$list_filter = mysqli_real_escape_string($link, $_REQUEST['list_filter']);
-	$address_filter = mysqli_real_escape_string($link, $_REQUEST['address_filter']);
-	$city_filter = mysqli_real_escape_string($link, $_REQUEST['city_filter']);
-	$state_filter = mysqli_real_escape_string($link, $_REQUEST['state_filter']);
-	$search_customers = mysqli_real_escape_string($link, $_REQUEST['search_customers']);
+    $goVarLimit = $astDB->escape($_REQUEST["goVarLimit"]);
+	$userid = $astDB->escape($_REQUEST["user"]);
+	$search = $astDB->escape($_REQUEST['search']);
+	$disposition_filter = $astDB->escape($_REQUEST['disposition_filter']);
+	$list_filter = $astDB->escape($_REQUEST['list_filter']);
+	$address_filter = $astDB->escape($_REQUEST['address_filter']);
+	$city_filter = $astDB->escape($_REQUEST['city_filter']);
+	$state_filter = $astDB->escape($_REQUEST['state_filter']);
+	$search_customers = $astDB->escape($_REQUEST['search_customers']);
 	
 	$goSearch = "";
 	
@@ -86,7 +98,7 @@
 		//if admin
 		if(preg_match("/ALL-CAMPAIGNS/", $allowedCampaigns)){
 			$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status,last_local_call_time FROM vicidial_list WHERE phone_number != '' $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit";
-			$returnRes = mysqli_query($link, $queryx);
+			$returnRes = $astDB->rawQuery($queryx);
 		} else { //if multiple allowed campaigns
 			$multiple_campaigns = explode("-", $allowedCampaigns);
 			$allowedCampaignsx = $multiple_campaigns[0];
@@ -97,10 +109,10 @@
 			
 			//get lists id from return campaigns
 			$getListsID_query = "select list_id from vicidial_lists where campaign_id IN($allowedCampaignsx)";
-			$listsID_result = mysqli_query($link, $getListsID_query);
+			$listsID_result = $astDB->rawQuery($getListsID_query);
 			//$listsIDFetch = mysqli_fetch_array($listsID_result, MYSQLI_ASSOC);
 			
-			while($listsID_resultx = mysqli_fetch_array($listsID_result, MYSQLI_ASSOC)){
+			foreach ($listsID_result as $listsID_resultx){
 				$list_results .= $listsID_resultx['list_id']." ";
 			}
 			$fetchLists = explode(" ", $list_results);
@@ -115,11 +127,11 @@
 			//get all leads from return list_id
 	//		$queryx = "SELECT count(*) as xxx FROM vicidial_list WHERE list_id IN($fetchLists);";
 			$queryx = "SELECT lead_id,list_id,first_name,middle_initial,last_name,phone_number,status,last_local_call_time FROM vicidial_list WHERE phone_number != '' $additional_query $goSearch $filterDispo $filterList $filterAddress $filterCity $filterState $customersOnly $goMyLimit;";
-			$returnRes = mysqli_query($link, $queryx);
+			$returnRes = $astDB->rawQuery($queryx);
 		}
 		
 		$data = array();
-		while($fresults = mysqli_fetch_array($returnRes)){
+		foreach ($returnRes as $fresults){
 			if(in_array($fresults['lead_id'], $customers)){
 				$dataLeadid[] = $fresults['lead_id'];
 				$dataListid[] = $fresults['list_id'];
