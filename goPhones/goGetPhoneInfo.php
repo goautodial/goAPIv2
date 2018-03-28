@@ -1,56 +1,69 @@
 <?php
-    #######################################################
-    #### Name: goGetMOHInfo.php		               ####
-    #### Description: API to get specific MOH	       ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
-    #### Written by: Jeremiah Sebastian Samatra        ####
-    #### License: AGPLv2                               ####
-    #######################################################
+ /**
+ * @file        goGetphoneInfo.php
+ * @brief       API for get specific Phone Details
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
+ * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     include_once("../goFunctions.php");
-    
-    ### POST or GET Variables
-    $exten_id = $_REQUEST['exten_id'];
-	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-    
-    ### Check moh_id if its null or empty
-	if($exten_id == null) { 
+        
+    // POST or GET Variables
+        $extension = $_REQUEST['extension'];
+	    $ip_address = $_REQUEST['log_ip'];
+        
+    // Check extension if its null or empty
+    if(empty($session_user)){
+        $apiresults = array("result" => "Error: Session User Not Defined.");
+    }elseif(is_null($extension)) { 
 		$apiresults = array("result" => "Error: Set a value for EXTEN ID."); 
 	} else {
- 
-    		$groupId = go_get_groupid($goUser);
-    
-		if (!checkIfTenant($groupId)) {
-        		$ul = "WHERE extension='$exten_id'";
-    		} else { 
-			$ul = "WHERE extension='$exten_id' AND user_group='$groupId'";  
+        $log_user = $session_user;
+        $groupId = go_get_groupid($session_user, $astDB);
+        
+        if (!checkIfTenant($groupId)) {
+        	$astDB->where("extension", $extension);
+            //$ul = "WHERE extension='$extension'";
+    	} else {
+            $astDB->where("extension", $extension);
+            $astDB->where("user_group", $groupId); 
+			//$ul = "WHERE extension='$extension' AND user_group='$groupId'";  
 		}
-
-   		$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT 1;";
-   		$rsltv = mysqli_query($link,$query);
-		$countResult = mysqli_num_rows($rsltv);
+        $astDB->orderby("extension", "asc");
+        $fresults = $astDB->getOne("phones", "extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group")
+   		//$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT 1;";
+		$countResult = $astDB->count;
 
 		if($countResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-                $dataExtension[] = $fresults['extension'];
-                $dataProtocol[] = $fresults['protocol'];// .$fresults['dial_method'].$fresults['active'];
-                $dataServerIp[] = $fresults['server_ip'];
-                $dataDialplanNumber[] = $fresults['dialplan_number'];
-                $dataVoicemailId[] = $fresults['voicemail_id'];
-                $dataStatus[] = $fresults['status'];
-                $dataActive[] = $fresults['active'];
-                $dataFullname[] = $fresults['fullname'];
-                $dataMessages[] = $fresults['messages'];
-                $dataOldMessages[] = $fresults['old_messages'];
-                $dataUserGroup[] = $fresults['user_group'];
-                $apiresults = array("result" => "success", "extension" => $dataExtension, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
+            $dataExtension = $fresults['extension'];
+            $dataProtocol = $fresults['protocol'];
+            $dataServerIp = $fresults['server_ip'];
+            $dataDialplanNumber = $fresults['dialplan_number'];
+            $dataVoicemailId = $fresults['voicemail_id'];
+            $dataStatus = $fresults['status'];
+            $dataActive = $fresults['active'];
+            $dataFullname = $fresults['fullname'];
+            $dataMessages = $fresults['messages'];
+            $dataOldMessages = $fresults['old_messages'];
+            $dataUserGroup = $fresults['user_group'];
 
-			}
+            $apiresults = array("result" => "success", "extension" => $dataExtension, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
 			
-			$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of Phone: $exten_id", $log_group);
+			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of Phone: $exten_id", $groupId);
 		} else {
 			$apiresults = array("result" => "Error: Phone doesn't exist.");
 		}

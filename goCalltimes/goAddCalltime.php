@@ -1,16 +1,29 @@
 <?php
-   ####################################################
-   #### Name: goAddCalltime.php                    ####
-   #### Description: API to add Call Time          ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Warren Ipac Briones            ####
-   #### License: AGPLv2                            ####
-   ####################################################
+/**
+ * @file        goAddCalltime.php
+ * @brief       API to add Call Time
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Warren Ipac Briones <warren@goautodial.com>
+ * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 
     include_once("../goFunctions.php");
  
-    ### POST or GET Variables
+    // POST or GET Variables
         $call_time_id = $_REQUEST['call_time_id'];
         $call_time_name = $_REQUEST['call_time_name'];
         //$state_call_time_name = $_REQUEST['state_call_time_name'];
@@ -44,19 +57,14 @@
 		}else{
 			$user_group = $_REQUEST['user_group'];
 		}
-        //$user_group = ($_REQUEST['user_group'] == "ALL")? "---ALL---":$_REQUEST['user_group'];
-		
+
 		$ip_address = $_REQUEST['hostname'];
-		$log_user = $_REQUEST['log_user'];
-		$log_group = $_REQUEST['log_group'];
-		$goUser = $_REQUEST['goUser'];
 		
 
-    ### Default values 
-
-
-    ### ERROR CHECKING 
-        if($call_time_id == null || strlen($call_time_id) < 3) {
+    // ERROR CHECKING 
+        if(empty($session_user)){
+            $apiresults = array("result" => "Error: Session User Not Defined.");
+        }elseif($call_time_id == null || strlen($call_time_id) < 3) {
             $apiresults = array("result" => "Error: Set a value for Call Time ID not less than 3 characters.");
         }elseif(preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_name) || $call_time_name == null){
             $apiresults = array("result" => "Error: Special characters found in call time name and must not be empty");
@@ -97,7 +105,8 @@
         }elseif(!is_numeric($ct_saturday_stop) && $ct_saturday_stop != null){
             $apiresults = array("result" => "Error: ct_saturday_stop must be a number or combination of number");
         }else{
-            $groupId = go_get_groupid($goUser);
+            $groupId = go_get_groupid($session_user, $astDB);
+            $log_user = $session_user;
 
             if (!checkIfTenant($groupId)) {
                 $ul = "";
