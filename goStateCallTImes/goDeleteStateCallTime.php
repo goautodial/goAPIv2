@@ -1,57 +1,60 @@
 <?php
-    #######################################################
-    #### Name: goDeleteStateCallTime.php	               ####
-    #### Description: API to delete specific State Call Time ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Jeremiah Sebastian V. Samatra     ####
-    #### License: AGPLv2                               ####
-    #######################################################
-    include_once ("goFunctions.php");
-    
+ /**
+ * @file 		goDeleteStateCallTime.php
+ * @brief 		API for State Calltimes
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     ### POST or GET Variables
-        $state_call_time_id = mysqli_real_escape_string($_REQUEST['state_call_time_id']);
-        $ip_address = mysqli_real_escape_string($_REQUEST['hostname']);
-		
-        $log_user = mysqli_real_escape_string($_REQUEST['log_user']);
-        $log_group = mysqli_real_escape_string($_REQUEST['log_group']);
+	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($state_call_time_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for State Call Time ID."); 
 	} else {
- 
-                $groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser);
 
-                if (!checkIfTenant($groupId)) {
-                        $ul = "";
-                } else {
-                        $ul = "AND user_group='$groupId'";
-                   $addedSQL = "WHERE user_group='$groupId'";
-                }
+		if (!checkIfTenant($groupId)) {
+			//$ul = "";
+		} else {
+			//$ul = "AND user_group='$groupId'";
+			//$addedSQL = "WHERE user_group='$groupId'";
+			$astDB->where('user_group', $groupId);
+		}
 
-				
-   		$queryOne = "SELECT state_call_time_id FROM vicidial_state_call_times $ul where state_call_time_id='".mysqli_escape_string($state_call_time_id)."';";
-   		$rsltvOne = mysqli_query($link, $queryOne);
-		$countResult = mysqli_num_rows($rsltvOne);
+		
+   		//$queryOne = "SELECT state_call_time_id FROM vicidial_state_call_times $ul where state_call_time_id='".mysqli_escape_string($state_call_time_id)."';";
+		$astDB->where('state_call_time_id', $state_call_time_id);
+   		$rsltvOne = $astDB->get('vicidial_state_call_times');
+		$countResult = $astDB->getRowCount();
 
 		if($countResult > 0) {
-				$deleteQuery = "DELETE FROM vicidial_state_call_times WHERE state_call_time_id= '$state_call_time_id';"; 
-   				$deleteResult = mysqli_query($link, $deleteQuery);
-				//echo $deleteQuery;
-/*
-DELETE FROM vicidial_state_call_times WHERE state_call_time_id
-*/
-
-        ### Admin logs
-                                        //$SQLdate = date("Y-m-d H:i:s");
-                                        //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted State Call Time ID $state_call_time_id','DELETE FROM vicidial_state_call_times WHERE state_call_time_id=$state_call_time_id;');";
-                                        //$rsltvLog = mysqli_query($linkgo, $queryLog);
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted State Call Time: $state_call_time_id", $log_group, $deleteQuery);
-
-
-				$apiresults = array("result" => "success");
-
+			//$deleteQuery = "DELETE FROM vicidial_state_call_times WHERE state_call_time_id= '$state_call_time_id';";
+			$astDB->where('state_call_time_id', $state_call_time_id);
+			$astDB->delete('vicidial_state_call_times');
+			
+			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
+			$apiresults = array("result" => "success");
 		} else {
 			$apiresults = array("result" => "Error: State Call Menu doesn't exist.");
 		}
