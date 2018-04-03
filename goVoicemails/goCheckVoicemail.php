@@ -1,7 +1,7 @@
 <?php
  /**
  * @file 		goCheckVoicemail.php
- * @brief 		API for Getting Leads
+ * @brief 		API for Voicemails
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author		Alexander Abenoja  <alex@goautodial.com>
  * @author     	Chris Lomuntad  <chris@goautodial.com>

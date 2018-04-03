@@ -1,7 +1,7 @@
 <?php
  /**
  * @file 		goAPI.php
- * @brief 		API for Getting Leads
+ * @brief 		API for Voice Files
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author		Jericho James Milo  <james@goautodial.com>
  * @author     	Chris Lomuntad  <chris@goautodial.com>
