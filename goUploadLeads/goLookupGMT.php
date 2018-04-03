@@ -1,7 +1,7 @@
 <?php
  /**
- * @file 		goAPI.php
- * @brief 		API for Getting Leads
+ * @file 		goLookupGMT.php
+ * @brief 		API for Uploading Leads
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author		Jericho James Milo  <james@goautodial.com>
  * @author     	Chris Lomuntad  <chris@goautodial.com>

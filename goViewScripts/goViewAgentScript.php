@@ -1,6 +1,6 @@
 <?php
  /**
- * @file 		goAPI.php
+ * @file 		goViewAgentScript.php
  * @brief 		API for Getting Leads
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author		Jericho James Milo  <james@goautodial.com>
