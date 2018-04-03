@@ -1,185 +1,195 @@
 <?php
-   ####################################################
-   #### Name: goViewAgentScript.php                ####
-   #### Description: API view script               ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jerico James Milo              ####
-   #### License: AGPLv2                            ####
-   ####################################################
+ /**
+ * @file 		goAPI.php
+ * @brief 		API for Getting Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jericho James Milo  <james@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-include_once ("../goFunctions.php");
-
-
-if (isset($_GET["lead_id"]))	{$lead_id=$_GET["lead_id"];}
-	elseif (isset($_POST["lead_id"]))	{$lead_id=$_POST["lead_id"];}
-if (isset($_GET["vendor_id"]))	{$vendor_id=$_GET["vendor_id"];}
-	elseif (isset($_POST["vendor_id"]))	{$vendor_id=$_POST["vendor_id"];}
+if (isset($_GET["lead_id"]))	{$lead_id=$astDB->escape($_GET["lead_id"]);}
+	elseif (isset($_POST["lead_id"]))	{$lead_id=$astDB->escape($_POST["lead_id"]);}
+if (isset($_GET["vendor_id"]))	{$vendor_id=$astDB->escape($_GET["vendor_id"]);}
+	elseif (isset($_POST["vendor_id"]))	{$vendor_id=$astDB->escape($_POST["vendor_id"]);}
 	$vendor_lead_code = $vendor_id;
 //if (isset($_GET["list_id"]))	{$list_id=$_GET["list_id"];}
 //	elseif (isset($_POST["list_id"]))	{$list_id=$_POST["list_id"];}
-if (isset($_GET["gmt_offset_now"]))	{$gmt_offset_now=$_GET["gmt_offset_now"];}
-	elseif (isset($_POST["gmt_offset_now"]))	{$gmt_offset_now=$_POST["gmt_offset_now"];}
-if (isset($_GET["phone_code"]))	{$phone_code=$_GET["phone_code"];}
-	elseif (isset($_POST["phone_code"]))	{$phone_code=$_POST["phone_code"];}
-if (isset($_GET["phone_number"]))	{$phone_number=$_GET["phone_number"];}
-	elseif (isset($_POST["phone_number"]))	{$phone_number=$_POST["phone_number"];}
-if (isset($_GET["title"]))	{$title=$_GET["title"];}
-	elseif (isset($_POST["title"]))	{$title=$_POST["title"];}
-if (isset($_GET["first_name"]))	{$first_name=$_GET["first_name"];}
-	elseif (isset($_POST["first_name"]))	{$first_name=$_POST["first_name"];}
-if (isset($_GET["middle_initial"]))	{$middle_initial=$_GET["middle_initial"];}
-	elseif (isset($_POST["middle_initial"]))	{$middle_initial=$_POST["middle_initial"];}
-if (isset($_GET["last_name"]))	{$last_name=$_GET["last_name"];}
-	elseif (isset($_POST["last_name"]))	{$last_name=$_POST["last_name"];}
-if (isset($_GET["address1"]))	{$address1=$_GET["address1"];}
-	elseif (isset($_POST["address1"]))	{$address1=$_POST["address1"];}
-if (isset($_GET["address2"]))	{$address2=$_GET["address2"];}
-	elseif (isset($_POST["address2"]))	{$address2=$_POST["address2"];}
-if (isset($_GET["address3"]))	{$address3=$_GET["address3"];}
-	elseif (isset($_POST["address3"]))	{$address3=$_POST["address3"];}
-if (isset($_GET["city"]))	{$city=$_GET["city"];}
-	elseif (isset($_POST["city"]))	{$city=$_POST["city"];}
-if (isset($_GET["state"]))	{$state=$_GET["state"];}
-	elseif (isset($_POST["state"]))	{$state=$_POST["state"];}
-if (isset($_GET["province"]))	{$province=$_GET["province"];}
-	elseif (isset($_POST["province"]))	{$province=$_POST["province"];}
-if (isset($_GET["postal_code"]))	{$postal_code=$_GET["postal_code"];}
-	elseif (isset($_POST["postal_code"]))	{$postal_code=$_POST["postal_code"];}
-if (isset($_GET["country_code"]))	{$country_code=$_GET["country_code"];}
-	elseif (isset($_POST["country_code"]))	{$country_code=$_POST["country_code"];}
-if (isset($_GET["gender"]))	{$gender=$_GET["gender"];}
-	elseif (isset($_POST["gender"]))	{$gender=$_POST["gender"];}
-if (isset($_GET["date_of_birth"]))	{$date_of_birth=$_GET["date_of_birth"];}
-	elseif (isset($_POST["date_of_birth"]))	{$date_of_birth=$_POST["date_of_birth"];}
-if (isset($_GET["alt_phone"]))	{$alt_phone=$_GET["alt_phone"];}
-	elseif (isset($_POST["alt_phone"]))	{$alt_phone=$_POST["alt_phone"];}
-if (isset($_GET["email"]))	{$email=$_GET["email"];}
-	elseif (isset($_POST["email"]))	{$email=$_POST["email"];}
-if (isset($_GET["security_phrase"]))	{$security_phrase=$_GET["security_phrase"];}
-	elseif (isset($_POST["security_phrase"]))	{$security_phrase=$_POST["security_phrase"];}
-if (isset($_GET["comments"]))	{$comments=$_GET["comments"];}
-	elseif (isset($_POST["comments"]))	{$comments=$_POST["comments"];}
-if (isset($_GET["user"]))	{$user=$_GET["user"];}
-	elseif (isset($_POST["user"]))	{$user=$_POST["user"];}
-if (isset($_GET["pass"]))	{$pass=$_GET["pass"];}
-	elseif (isset($_POST["pass"]))	{$pass=$_POST["pass"];}
-if (isset($_GET["campaign"]))	{$campaign=$_GET["campaign"];}
-	elseif (isset($_POST["campaign"]))	{$campaign=$_POST["campaign"];}
-if (isset($_GET["phone_login"]))	{$phone_login=$_GET["phone_login"];}
-	elseif (isset($_POST["phone_login"]))	{$phone_login=$_POST["phone_login"];}
-if (isset($_GET["original_phone_login"]))	{$original_phone_login=$_GET["original_phone_login"];}
-	elseif (isset($_POST["original_phone_login"]))	{$original_phone_login=$_POST["original_phone_login"];}
-if (isset($_GET["phone_pass"]))	{$phone_pass=$_GET["phone_pass"];}
-	elseif (isset($_POST["phone_pass"]))	{$phone_pass=$_POST["phone_pass"];}
-if (isset($_GET["fronter"]))	{$fronter=$_GET["fronter"];}
-	elseif (isset($_POST["fronter"]))	{$fronter=$_POST["fronter"];}
-if (isset($_GET["closer"]))	{$closer=$_GET["closer"];}
-	elseif (isset($_POST["closer"]))	{$closer=$_POST["closer"];}
-if (isset($_GET["group"]))	{$group=$_GET["group"];}
-	elseif (isset($_POST["group"]))	{$group=$_POST["group"];}
-if (isset($_GET["channel_group"]))	{$channel_group=$_GET["channel_group"];}
-	elseif (isset($_POST["channel_group"]))	{$channel_group=$_POST["channel_group"];}
-if (isset($_GET["SQLdate"]))	{$SQLdate=$_GET["SQLdate"];}
-	elseif (isset($_POST["SQLdate"]))	{$SQLdate=$_POST["SQLdate"];}
-if (isset($_GET["epoch"]))	{$epoch=$_GET["epoch"];}
-	elseif (isset($_POST["epoch"]))	{$epoch=$_POST["epoch"];}
-if (isset($_GET["uniqueid"]))	{$uniqueid=$_GET["uniqueid"];}
-	elseif (isset($_POST["uniqueid"]))	{$uniqueid=$_POST["uniqueid"];}
-if (isset($_GET["customer_zap_channel"]))	{$customer_zap_channel=$_GET["customer_zap_channel"];}
-	elseif (isset($_POST["customer_zap_channel"]))	{$customer_zap_channel=$_POST["customer_zap_channel"];}
-if (isset($_GET["customer_server_ip"]))	{$customer_server_ip=$_GET["customer_server_ip"];}
-	elseif (isset($_POST["customer_server_ip"]))	{$customer_server_ip=$_POST["customer_server_ip"];}
-if (isset($_GET["server_ip"]))	{$server_ip=$_GET["server_ip"];}
-	elseif (isset($_POST["server_ip"]))	{$server_ip=$_POST["server_ip"];}
-if (isset($_GET["SIPexten"]))	{$SIPexten=$_GET["SIPexten"];}
-	elseif (isset($_POST["SIPexten"]))	{$SIPexten=$_POST["SIPexten"];}
-if (isset($_GET["session_id"]))	{$session_id=$_GET["session_id"];}
-	elseif (isset($_POST["session_id"]))	{$session_id=$_POST["session_id"];}
-if (isset($_GET["phone"]))	{$phone=$_GET["phone"];}
-	elseif (isset($_POST["phone"]))	{$phone=$_POST["phone"];}
-if (isset($_GET["parked_by"]))	{$parked_by=$_GET["parked_by"];}
-	elseif (isset($_POST["parked_by"]))	{$parked_by=$_POST["parked_by"];}
-if (isset($_GET["dispo"]))	{$dispo=$_GET["dispo"];}
-	elseif (isset($_POST["dispo"]))	{$dispo=$_POST["dispo"];}
-if (isset($_GET["dialed_number"]))	{$dialed_number=$_GET["dialed_number"];}
-	elseif (isset($_POST["dialed_number"]))	{$dialed_number=$_POST["dialed_number"];}
-if (isset($_GET["dialed_label"]))	{$dialed_label=$_GET["dialed_label"];}
-	elseif (isset($_POST["dialed_label"]))	{$dialed_label=$_POST["dialed_label"];}
-if (isset($_GET["source_id"]))	{$source_id=$_GET["source_id"];}
-	elseif (isset($_POST["source_id"]))	{$source_id=$_POST["source_id"];}
-if (isset($_GET["rank"]))	{$rank=$_GET["rank"];}
-	elseif (isset($_POST["rank"]))	{$rank=$_POST["rank"];}
-if (isset($_GET["owner"]))	{$owner=$_GET["owner"];}
-	elseif (isset($_POST["owner"]))	{$owner=$_POST["owner"];}
-if (isset($_GET["camp_script"]))	{$camp_script=$_GET["camp_script"];}
-	elseif (isset($_POST["camp_script"]))	{$camp_script=$_POST["camp_script"];}
-if (isset($_GET["in_script"]))	{$in_script=$_GET["in_script"];}
-	elseif (isset($_POST["in_script"]))	{$in_script=$_POST["in_script"];}
-if (isset($_GET["script_width"]))	{$script_width=$_GET["script_width"];}
-	elseif (isset($_POST["script_width"]))	{$script_width=$_POST["script_width"];}
-if (isset($_GET["script_height"]))	{$script_height=$_GET["script_height"];}
-	elseif (isset($_POST["script_height"]))	{$script_height=$_POST["script_height"];}
-if (isset($_GET["fullname"]))	{$fullname=$_GET["fullname"];}
-	elseif (isset($_POST["fullname"]))	{$fullname=$_POST["fullname"];}
-if (isset($_GET["recording_filename"]))	{$recording_filename=$_GET["recording_filename"];}
-	elseif (isset($_POST["recording_filename"]))	{$recording_filename=$_POST["recording_filename"];}
-if (isset($_GET["recording_id"]))	{$recording_id=$_GET["recording_id"];}
-	elseif (isset($_POST["recording_id"]))	{$recording_id=$_POST["recording_id"];}
-if (isset($_GET["user_custom_one"]))	{$user_custom_one=$_GET["user_custom_one"];}
-	elseif (isset($_POST["user_custom_one"]))	{$user_custom_one=$_POST["user_custom_one"];}
-if (isset($_GET["user_custom_two"]))	{$user_custom_two=$_GET["user_custom_two"];}
-	elseif (isset($_POST["user_custom_two"]))	{$user_custom_two=$_POST["user_custom_two"];}
-if (isset($_GET["user_custom_three"]))	{$user_custom_three=$_GET["user_custom_three"];}
-	elseif (isset($_POST["user_custom_three"]))	{$user_custom_three=$_POST["user_custom_three"];}
-if (isset($_GET["user_custom_four"]))	{$user_custom_four=$_GET["user_custom_four"];}
-	elseif (isset($_POST["user_custom_four"]))	{$user_custom_four=$_POST["user_custom_four"];}
-if (isset($_GET["user_custom_five"]))	{$user_custom_five=$_GET["user_custom_five"];}
-	elseif (isset($_POST["user_custom_five"]))	{$user_custom_five=$_POST["user_custom_five"];}
-if (isset($_GET["preset_number_a"]))	{$preset_number_a=$_GET["preset_number_a"];}
-	elseif (isset($_POST["preset_number_a"]))	{$preset_number_a=$_POST["preset_number_a"];}
-if (isset($_GET["preset_number_b"]))	{$preset_number_b=$_GET["preset_number_b"];}
-	elseif (isset($_POST["preset_number_b"]))	{$preset_number_b=$_POST["preset_number_b"];}
-if (isset($_GET["preset_number_c"]))	{$preset_number_c=$_GET["preset_number_c"];}
-	elseif (isset($_POST["preset_number_c"]))	{$preset_number_c=$_POST["preset_number_c"];}
-if (isset($_GET["preset_number_d"]))	{$preset_number_d=$_GET["preset_number_d"];}
-	elseif (isset($_POST["preset_number_d"]))	{$preset_number_d=$_POST["preset_number_d"];}
-if (isset($_GET["preset_number_e"]))	{$preset_number_e=$_GET["preset_number_e"];}
-	elseif (isset($_POST["preset_number_e"]))	{$preset_number_e=$_POST["preset_number_e"];}
-if (isset($_GET["preset_number_f"]))	{$preset_number_f=$_GET["preset_number_f"];}
-	elseif (isset($_POST["preset_number_f"]))	{$preset_number_f=$_POST["preset_number_f"];}
-if (isset($_GET["preset_dtmf_a"]))	{$preset_dtmf_a=$_GET["preset_dtmf_a"];}
-	elseif (isset($_POST["preset_dtmf_a"]))	{$preset_dtmf_a=$_POST["preset_dtmf_a"];}
-if (isset($_GET["preset_dtmf_b"]))	{$preset_dtmf_b=$_GET["preset_dtmf_b"];}
-	elseif (isset($_POST["preset_dtmf_b"]))	{$preset_dtmf_b=$_POST["preset_dtmf_b"];}
-if (isset($_GET["did_id"]))				{$did_id=$_GET["did_id"];}
-	elseif (isset($_POST["did_id"]))	{$did_id=$_POST["did_id"];}
-if (isset($_GET["did_extension"]))			{$did_extension=$_GET["did_extension"];}
-	elseif (isset($_POST["did_extension"]))	{$did_extension=$_POST["did_extension"];}
-if (isset($_GET["did_pattern"]))			{$did_pattern=$_GET["did_pattern"];}
-	elseif (isset($_POST["did_pattern"]))	{$did_pattern=$_POST["did_pattern"];}
-if (isset($_GET["did_description"]))			{$did_description=$_GET["did_description"];}
-	elseif (isset($_POST["did_description"]))	{$did_description=$_POST["did_description"];}
-if (isset($_GET["closecallid"]))			{$closecallid=$_GET["closecallid"];}
-	elseif (isset($_POST["closecallid"]))	{$closecallid=$_POST["closecallid"];}
-if (isset($_GET["xfercallid"]))				{$xfercallid=$_GET["xfercallid"];}
-	elseif (isset($_POST["xfercallid"]))	{$xfercallid=$_POST["xfercallid"];}
-if (isset($_GET["agent_log_id"]))			{$agent_log_id=$_GET["agent_log_id"];}
-	elseif (isset($_POST["agent_log_id"]))	{$agent_log_id=$_POST["agent_log_id"];}
-if (isset($_GET["ScrollDIV"]))			{$ScrollDIV=$_GET["ScrollDIV"];}
-	elseif (isset($_POST["ScrollDIV"]))	{$ScrollDIV=$_POST["ScrollDIV"];}
-if (isset($_GET["ignore_list_script"]))				{$ignore_list_script=$_GET["ignore_list_script"];}
-	elseif (isset($_POST["ignore_list_script"]))	{$ignore_list_script=$_POST["ignore_list_script"];}
-if (isset($_GET["CF_uses_custom_fields"]))			{$CF_uses_custom_fields=$_GET["CF_uses_custom_fields"];}
-	elseif (isset($_POST["CF_uses_custom_fields"]))	{$CF_uses_custom_fields=$_POST["CF_uses_custom_fields"];}
-if (isset($_GET["entry_list_id"]))			{$entry_list_id=$_GET["entry_list_id"];}
-	elseif (isset($_POST["entry_list_id"]))	{$entry_list_id=$_POST["entry_list_id"];}
-if (isset($_GET["call_id"]))			{$call_id=$_GET["call_id"];}
-	elseif (isset($_POST["call_id"]))	{$call_id=$_POST["call_id"];}
-if (isset($_GET["user_group"]))				{$user_group=$_GET["user_group"];}
-	elseif (isset($_POST["user_group"]))	{$user_group=$_POST["user_group"];}
-if (isset($_GET["web_vars"]))			{$web_vars=$_GET["web_vars"];}
-	elseif (isset($_POST["web_vars"]))	{$web_vars=$_POST["web_vars"];}
+if (isset($_GET["gmt_offset_now"]))	{$gmt_offset_now=$astDB->escape($_GET["gmt_offset_now"]);}
+	elseif (isset($_POST["gmt_offset_now"]))	{$gmt_offset_now=$astDB->escape($_POST["gmt_offset_now"]);}
+if (isset($_GET["phone_code"]))	{$phone_code=$astDB->escape($_GET["phone_code"]);}
+	elseif (isset($_POST["phone_code"]))	{$phone_code=$astDB->escape($_POST["phone_code"]);}
+if (isset($_GET["phone_number"]))	{$phone_number=$astDB->escape($_GET["phone_number"]);}
+	elseif (isset($_POST["phone_number"]))	{$phone_number=$astDB->escape($_POST["phone_number"]);}
+if (isset($_GET["title"]))	{$title=$astDB->escape($_GET["title"]);}
+	elseif (isset($_POST["title"]))	{$title=$astDB->escape($_POST["title"]);}
+if (isset($_GET["first_name"]))	{$first_name=$astDB->escape($_GET["first_name"]);}
+	elseif (isset($_POST["first_name"]))	{$first_name=$astDB->escape($_POST["first_name"]);}
+if (isset($_GET["middle_initial"]))	{$middle_initial=$astDB->escape($_GET["middle_initial"]);}
+	elseif (isset($_POST["middle_initial"]))	{$middle_initial=$astDB->escape($_POST["middle_initial"]);}
+if (isset($_GET["last_name"]))	{$last_name=$astDB->escape($_GET["last_name"]);}
+	elseif (isset($_POST["last_name"]))	{$last_name=$astDB->escape($_POST["last_name"]);}
+if (isset($_GET["address1"]))	{$address1=$astDB->escape($_GET["address1"]);}
+	elseif (isset($_POST["address1"]))	{$address1=$astDB->escape($_POST["address1"]);}
+if (isset($_GET["address2"]))	{$address2=$astDB->escape($_GET["address2"]);}
+	elseif (isset($_POST["address2"]))	{$address2=$astDB->escape($_POST["address2"]);}
+if (isset($_GET["address3"]))	{$address3=$astDB->escape($_GET["address3"]);}
+	elseif (isset($_POST["address3"]))	{$address3=$astDB->escape($_POST["address3"]);}
+if (isset($_GET["city"]))	{$city=$astDB->escape($_GET["city"]);}
+	elseif (isset($_POST["city"]))	{$city=$astDB->escape($_POST["city"]);}
+if (isset($_GET["state"]))	{$state=$astDB->escape($_GET["state"]);}
+	elseif (isset($_POST["state"]))	{$state=$astDB->escape($_POST["state"]);}
+if (isset($_GET["province"]))	{$province=$astDB->escape($_GET["province"]);}
+	elseif (isset($_POST["province"]))	{$province=$astDB->escape($_POST["province"]);}
+if (isset($_GET["postal_code"]))	{$postal_code=$astDB->escape($_GET["postal_code"]);}
+	elseif (isset($_POST["postal_code"]))	{$postal_code=$astDB->escape($_POST["postal_code"]);}
+if (isset($_GET["country_code"]))	{$country_code=$astDB->escape($_GET["country_code"]);}
+	elseif (isset($_POST["country_code"]))	{$country_code=$astDB->escape($_POST["country_code"]);}
+if (isset($_GET["gender"]))	{$gender=$astDB->escape($_GET["gender"]);}
+	elseif (isset($_POST["gender"]))	{$gender=$astDB->escape($_POST["gender"]);}
+if (isset($_GET["date_of_birth"]))	{$date_of_birth=$astDB->escape($_GET["date_of_birth"]);}
+	elseif (isset($_POST["date_of_birth"]))	{$date_of_birth=$astDB->escape($_POST["date_of_birth"]);}
+if (isset($_GET["alt_phone"]))	{$alt_phone=$astDB->escape($_GET["alt_phone"]);}
+	elseif (isset($_POST["alt_phone"]))	{$alt_phone=$astDB->escape($_POST["alt_phone"]);}
+if (isset($_GET["email"]))	{$email=$astDB->escape($_GET["email"]);}
+	elseif (isset($_POST["email"]))	{$email=$astDB->escape($_POST["email"]);}
+if (isset($_GET["security_phrase"]))	{$security_phrase=$astDB->escape($_GET["security_phrase"]);}
+	elseif (isset($_POST["security_phrase"]))	{$security_phrase=$astDB->escape($_POST["security_phrase"]);}
+if (isset($_GET["comments"]))	{$comments=$astDB->escape($_GET["comments"]);}
+	elseif (isset($_POST["comments"]))	{$comments=$astDB->escape($_POST["comments"]);}
+if (isset($_GET["user"]))	{$user=$astDB->escape($_GET["user"]);}
+	elseif (isset($_POST["user"]))	{$user=$astDB->escape($_POST["user"]);}
+if (isset($_GET["pass"]))	{$pass=$astDB->escape($_GET["pass"]);}
+	elseif (isset($_POST["pass"]))	{$pass=$astDB->escape($_POST["pass"]);}
+if (isset($_GET["campaign"]))	{$campaign=$astDB->escape($_GET["campaign"]);}
+	elseif (isset($_POST["campaign"]))	{$campaign=$astDB->escape($_POST["campaign"]);}
+if (isset($_GET["phone_login"]))	{$phone_login=$astDB->escape($_GET["phone_login"]);}
+	elseif (isset($_POST["phone_login"]))	{$phone_login=$astDB->escape($_POST["phone_login"]);}
+if (isset($_GET["original_phone_login"]))	{$original_phone_login=$astDB->escape($_GET["original_phone_login"]);}
+	elseif (isset($_POST["original_phone_login"]))	{$original_phone_login=$astDB->escape($_POST["original_phone_login"]);}
+if (isset($_GET["phone_pass"]))	{$phone_pass=$astDB->escape($_GET["phone_pass"]);}
+	elseif (isset($_POST["phone_pass"]))	{$phone_pass=$astDB->escape($_POST["phone_pass"]);}
+if (isset($_GET["fronter"]))	{$fronter=$astDB->escape($_GET["fronter"]);}
+	elseif (isset($_POST["fronter"]))	{$fronter=$astDB->escape($_POST["fronter"]);}
+if (isset($_GET["closer"]))	{$closer=$astDB->escape($_GET["closer"]);}
+	elseif (isset($_POST["closer"]))	{$closer=$astDB->escape($_POST["closer"]);}
+if (isset($_GET["group"]))	{$group=$astDB->escape($_GET["group"]);}
+	elseif (isset($_POST["group"]))	{$group=$astDB->escape($_POST["group"]);}
+if (isset($_GET["channel_group"]))	{$channel_group=$astDB->escape($_GET["channel_group"]);}
+	elseif (isset($_POST["channel_group"]))	{$channel_group=$astDB->escape($_POST["channel_group"]);}
+if (isset($_GET["SQLdate"]))	{$SQLdate=$astDB->escape($_GET["SQLdate"]);}
+	elseif (isset($_POST["SQLdate"]))	{$SQLdate=$astDB->escape($_POST["SQLdate"]);}
+if (isset($_GET["epoch"]))	{$epoch=$astDB->escape($_GET["epoch"]);}
+	elseif (isset($_POST["epoch"]))	{$epoch=$astDB->escape($_POST["epoch"]);}
+if (isset($_GET["uniqueid"]))	{$uniqueid=$astDB->escape($_GET["uniqueid"]);}
+	elseif (isset($_POST["uniqueid"]))	{$uniqueid=$astDB->escape($_POST["uniqueid"]);}
+if (isset($_GET["customer_zap_channel"]))	{$customer_zap_channel=$astDB->escape($_GET["customer_zap_channel"]);}
+	elseif (isset($_POST["customer_zap_channel"]))	{$customer_zap_channel=$astDB->escape($_POST["customer_zap_channel"]);}
+if (isset($_GET["customer_server_ip"]))	{$customer_server_ip=$astDB->escape($_GET["customer_server_ip"]);}
+	elseif (isset($_POST["customer_server_ip"]))	{$customer_server_ip=$astDB->escape($_POST["customer_server_ip"]);}
+if (isset($_GET["server_ip"]))	{$server_ip=$astDB->escape($_GET["server_ip"]);}
+	elseif (isset($_POST["server_ip"]))	{$server_ip=$astDB->escape($_POST["server_ip"]);}
+if (isset($_GET["SIPexten"]))	{$SIPexten=$astDB->escape($_GET["SIPexten"]);}
+	elseif (isset($_POST["SIPexten"]))	{$SIPexten=$astDB->escape($_POST["SIPexten"]);}
+if (isset($_GET["session_id"]))	{$session_id=$astDB->escape($_GET["session_id"]);}
+	elseif (isset($_POST["session_id"]))	{$session_id=$astDB->escape($_POST["session_id"]);}
+if (isset($_GET["phone"]))	{$phone=$astDB->escape($_GET["phone"]);}
+	elseif (isset($_POST["phone"]))	{$phone=$astDB->escape($_POST["phone"]);}
+if (isset($_GET["parked_by"]))	{$parked_by=$astDB->escape($_GET["parked_by"]);}
+	elseif (isset($_POST["parked_by"]))	{$parked_by=$astDB->escape($_POST["parked_by"]);}
+if (isset($_GET["dispo"]))	{$dispo=$astDB->escape($_GET["dispo"]);}
+	elseif (isset($_POST["dispo"]))	{$dispo=$astDB->escape($_POST["dispo"]);}
+if (isset($_GET["dialed_number"]))	{$dialed_number=$astDB->escape($_GET["dialed_number"]);}
+	elseif (isset($_POST["dialed_number"]))	{$dialed_number=$astDB->escape($_POST["dialed_number"]);}
+if (isset($_GET["dialed_label"]))	{$dialed_label=$astDB->escape($_GET["dialed_label"]);}
+	elseif (isset($_POST["dialed_label"]))	{$dialed_label=$astDB->escape($_POST["dialed_label"]);}
+if (isset($_GET["source_id"]))	{$source_id=$astDB->escape($_GET["source_id"]);}
+	elseif (isset($_POST["source_id"]))	{$source_id=$astDB->escape($_POST["source_id"]);}
+if (isset($_GET["rank"]))	{$rank=$astDB->escape($_GET["rank"]);}
+	elseif (isset($_POST["rank"]))	{$rank=$astDB->escape($_POST["rank"]);}
+if (isset($_GET["owner"]))	{$owner=$astDB->escape($_GET["owner"]);}
+	elseif (isset($_POST["owner"]))	{$owner=$astDB->escape($_POST["owner"]);}
+if (isset($_GET["camp_script"]))	{$camp_script=$astDB->escape($_GET["camp_script"]);}
+	elseif (isset($_POST["camp_script"]))	{$camp_script=$astDB->escape($_POST["camp_script"]);}
+if (isset($_GET["in_script"]))	{$in_script=$astDB->escape($_GET["in_script"]);}
+	elseif (isset($_POST["in_script"]))	{$in_script=$astDB->escape($_POST["in_script"]);}
+if (isset($_GET["script_width"]))	{$script_width=$astDB->escape($_GET["script_width"]);}
+	elseif (isset($_POST["script_width"]))	{$script_width=$astDB->escape($_POST["script_width"]);}
+if (isset($_GET["script_height"]))	{$script_height=$astDB->escape($_GET["script_height"]);}
+	elseif (isset($_POST["script_height"]))	{$script_height=$astDB->escape($_POST["script_height"]);}
+if (isset($_GET["fullname"]))	{$fullname=$astDB->escape($_GET["fullname"]);}
+	elseif (isset($_POST["fullname"]))	{$fullname=$astDB->escape($_POST["fullname"]);}
+if (isset($_GET["recording_filename"]))	{$recording_filename=$astDB->escape($_GET["recording_filename"]);}
+	elseif (isset($_POST["recording_filename"]))	{$recording_filename=$astDB->escape($_POST["recording_filename"]);}
+if (isset($_GET["recording_id"]))	{$recording_id=$astDB->escape($_GET["recording_id"]);}
+	elseif (isset($_POST["recording_id"]))	{$recording_id=$astDB->escape($_POST["recording_id"]);}
+if (isset($_GET["user_custom_one"]))	{$user_custom_one=$astDB->escape($_GET["user_custom_one"]);}
+	elseif (isset($_POST["user_custom_one"]))	{$user_custom_one=$astDB->escape($_POST["user_custom_one"]);}
+if (isset($_GET["user_custom_two"]))	{$user_custom_two=$astDB->escape($_GET["user_custom_two"]);}
+	elseif (isset($_POST["user_custom_two"]))	{$user_custom_two=$astDB->escape($_POST["user_custom_two"]);}
+if (isset($_GET["user_custom_three"]))	{$user_custom_three=$astDB->escape($_GET["user_custom_three"]);}
+	elseif (isset($_POST["user_custom_three"]))	{$user_custom_three=$astDB->escape($_POST["user_custom_three"]);}
+if (isset($_GET["user_custom_four"]))	{$user_custom_four=$astDB->escape($_GET["user_custom_four"]);}
+	elseif (isset($_POST["user_custom_four"]))	{$user_custom_four=$astDB->escape($_POST["user_custom_four"]);}
+if (isset($_GET["user_custom_five"]))	{$user_custom_five=$astDB->escape($_GET["user_custom_five"]);}
+	elseif (isset($_POST["user_custom_five"]))	{$user_custom_five=$astDB->escape($_POST["user_custom_five"]);}
+if (isset($_GET["preset_number_a"]))	{$preset_number_a=$astDB->escape($_GET["preset_number_a"]);}
+	elseif (isset($_POST["preset_number_a"]))	{$preset_number_a=$astDB->escape($_POST["preset_number_a"]);}
+if (isset($_GET["preset_number_b"]))	{$preset_number_b=$astDB->escape($_GET["preset_number_b"]);}
+	elseif (isset($_POST["preset_number_b"]))	{$preset_number_b=$astDB->escape($_POST["preset_number_b"]);}
+if (isset($_GET["preset_number_c"]))	{$preset_number_c=$astDB->escape($_GET["preset_number_c"]);}
+	elseif (isset($_POST["preset_number_c"]))	{$preset_number_c=$astDB->escape($_POST["preset_number_c"]);}
+if (isset($_GET["preset_number_d"]))	{$preset_number_d=$astDB->escape($_GET["preset_number_d"]);}
+	elseif (isset($_POST["preset_number_d"]))	{$preset_number_d=$astDB->escape($_POST["preset_number_d"]);}
+if (isset($_GET["preset_number_e"]))	{$preset_number_e=$astDB->escape($_GET["preset_number_e"]);}
+	elseif (isset($_POST["preset_number_e"]))	{$preset_number_e=$astDB->escape($_POST["preset_number_e"]);}
+if (isset($_GET["preset_number_f"]))	{$preset_number_f=$astDB->escape($_GET["preset_number_f"]);}
+	elseif (isset($_POST["preset_number_f"]))	{$preset_number_f=$astDB->escape($_POST["preset_number_f"]);}
+if (isset($_GET["preset_dtmf_a"]))	{$preset_dtmf_a=$astDB->escape($_GET["preset_dtmf_a"]);}
+	elseif (isset($_POST["preset_dtmf_a"]))	{$preset_dtmf_a=$astDB->escape($_POST["preset_dtmf_a"]);}
+if (isset($_GET["preset_dtmf_b"]))	{$preset_dtmf_b=$astDB->escape($_GET["preset_dtmf_b"]);}
+	elseif (isset($_POST["preset_dtmf_b"]))	{$preset_dtmf_b=$astDB->escape($_POST["preset_dtmf_b"]);}
+if (isset($_GET["did_id"]))				{$did_id=$astDB->escape($_GET["did_id"]);}
+	elseif (isset($_POST["did_id"]))	{$did_id=$astDB->escape($_POST["did_id"]);}
+if (isset($_GET["did_extension"]))			{$did_extension=$astDB->escape($_GET["did_extension"]);}
+	elseif (isset($_POST["did_extension"]))	{$did_extension=$astDB->escape($_POST["did_extension"]);}
+if (isset($_GET["did_pattern"]))			{$did_pattern=$astDB->escape($_GET["did_pattern"]);}
+	elseif (isset($_POST["did_pattern"]))	{$did_pattern=$astDB->escape($_POST["did_pattern"]);}
+if (isset($_GET["did_description"]))			{$did_description=$astDB->escape($_GET["did_description"]);}
+	elseif (isset($_POST["did_description"]))	{$did_description=$astDB->escape($_POST["did_description"]);}
+if (isset($_GET["closecallid"]))			{$closecallid=$astDB->escape($_GET["closecallid"]);}
+	elseif (isset($_POST["closecallid"]))	{$closecallid=$astDB->escape($_POST["closecallid"]);}
+if (isset($_GET["xfercallid"]))				{$xfercallid=$astDB->escape($_GET["xfercallid"]);}
+	elseif (isset($_POST["xfercallid"]))	{$xfercallid=$astDB->escape($_POST["xfercallid"]);}
+if (isset($_GET["agent_log_id"]))			{$agent_log_id=$astDB->escape($_GET["agent_log_id"]);}
+	elseif (isset($_POST["agent_log_id"]))	{$agent_log_id=$astDB->escape($_POST["agent_log_id"]);}
+if (isset($_GET["ScrollDIV"]))			{$ScrollDIV=$astDB->escape($_GET["ScrollDIV"]);}
+	elseif (isset($_POST["ScrollDIV"]))	{$ScrollDIV=$astDB->escape($_POST["ScrollDIV"]);}
+if (isset($_GET["ignore_list_script"]))				{$ignore_list_script=$astDB->escape($_GET["ignore_list_script"]);}
+	elseif (isset($_POST["ignore_list_script"]))	{$ignore_list_script=$astDB->escape($_POST["ignore_list_script"]);}
+if (isset($_GET["CF_uses_custom_fields"]))			{$CF_uses_custom_fields=$astDB->escape($_GET["CF_uses_custom_fields"]);}
+	elseif (isset($_POST["CF_uses_custom_fields"]))	{$CF_uses_custom_fields=$astDB->escape($_POST["CF_uses_custom_fields"]);}
+if (isset($_GET["entry_list_id"]))			{$entry_list_id=$astDB->escape($_GET["entry_list_id"]);}
+	elseif (isset($_POST["entry_list_id"]))	{$entry_list_id=$astDB->escape($_POST["entry_list_id"]);}
+if (isset($_GET["call_id"]))			{$call_id=$astDB->escape($_GET["call_id"]);}
+	elseif (isset($_POST["call_id"]))	{$call_id=$astDB->escape($_POST["call_id"]);}
+if (isset($_GET["user_group"]))				{$user_group=$astDB->escape($_GET["user_group"]);}
+	elseif (isset($_POST["user_group"]))	{$user_group=$astDB->escape($_POST["user_group"]);}
+if (isset($_GET["web_vars"]))			{$web_vars=$astDB->escape($_GET["web_vars"]);}
+	elseif (isset($_POST["web_vars"]))	{$web_vars=$astDB->escape($_POST["web_vars"]);}
 
 
 header ("Content-type: text/html; charset=utf-8");
@@ -200,33 +210,27 @@ $IFRAME=0;
 
 #############################################
 ##### START SYSTEM_SETTINGS LOOKUP #####
-$stmt = "SELECT use_non_latin,timeclock_end_of_day,agentonly_callback_campaign_lock FROM system_settings;";
-$rslt=mysqli_query($link, $stmt);
-if ($DB) {echo "$stmt\n";}
-$qm_conf_ct = mysqli_num_rows($rslt);
-if ($qm_conf_ct > 0)
-	{
-	$row=mysqli_fetch_row($rslt);
-	$non_latin =							$row[0];
-	$timeclock_end_of_day =					$row[1];
-	$agentonly_callback_campaign_lock =		$row[2];
-	}
+//$stmt = "SELECT use_non_latin,timeclock_end_of_day,agentonly_callback_campaign_lock FROM system_settings;";
+$rslt = $astDB->getOne('system_settings', 'use_non_latin,timeclock_end_of_day,agentonly_callback_campaign_lock');
+$qm_conf_ct = $astDB->getRowCount();
+if ($qm_conf_ct > 0) {
+	$non_latin =							$rslt['use_non_latin'];
+	$timeclock_end_of_day =					$rslt['timeclock_end_of_day'];
+	$agentonly_callback_campaign_lock =		$rslt['agentonly_callback_campaign_lock'];
+}
 ##### END SETTINGS LOOKUP #####
 ###########################################
 
-if ($non_latin < 1)
-	{
-	$user=preg_replace("/[^-_0-9a-zA-Z]/","",$user);
-	$pass=preg_replace("/[^\.-_0-9a-zA-Z]/","",$pass);
+if ($non_latin < 1) {
+	$user = preg_replace("/[^-_0-9a-zA-Z]/","",$user);
+	$pass = preg_replace("/[^\.-_0-9a-zA-Z]/","",$pass);
 	$length_in_sec = preg_replace("/[^0-9]/","",$length_in_sec);
 	$phone_code = preg_replace("/[^0-9]/","",$phone_code);
 	$phone_number = preg_replace("/[^0-9]/","",$phone_number);
-	}
-else
-	{
+} else {
 	$user = preg_replace("/\'|\"|\\\\|;/","",$user);
 	$pass = preg_replace("/\'|\"|\\\\|;/","",$pass);
-	}
+}
 
 
 # default optional vars if not set
@@ -275,60 +279,56 @@ if (strlen($in_script) < 1)
 else
 	{$call_script = $in_script;}
 
-$ignore_list_script_override='N';
-$stmt = "SELECT ignore_list_script_override FROM vicidial_inbound_groups where group_id='$group';";
-$rslt=mysqli_query($link, $stmt);
-if ($DB) {echo "$stmt\n";}
-$ilso_ct = mysqli_num_rows($rslt);
-if ($ilso_ct > 0)
-	{
-	$row=mysqli_fetch_row($rslt);
-	$ignore_list_script_override =		$row[0];
-	}
-if ($ignore_list_script_override=='Y')
-	{$ignore_list_script=1;}
+$ignore_list_script_override = 'N';
+//$stmt = "SELECT ignore_list_script_override FROM vicidial_inbound_groups where group_id='$group';";
+$astDB->where('group_id', $group);
+$rslt = $astDB->getOne('vicidial_inbound_groups', 'ignore_list_script_override');
+$ilso_ct = $astDB->getRowCount();
+if ($ilso_ct > 0) {
+	$ignore_list_script_override =		$rslt['ignore_list_script_override'];
+}
+if ($ignore_list_script_override == 'Y')
+	{$ignore_list_script = 1;}
 
-if ($ignore_list_script < 1)
-	{
-
+if ($ignore_list_script < 1) {
 //milo
 //get list_id from lead_id
-	$queryGetlist_id = "SELECT list_id FROM vicidial_list WHERE lead_id='$lead_id';";
-	$qrslt=mysqli_query($link, $queryGetlist_id);
-	$fetchlistid = mysqli_fetch_row($qrslt);
-	$list_id = $fetchlistid[0];
+	//$queryGetlist_id = "SELECT list_id FROM vicidial_list WHERE lead_id='$lead_id';";
+    $astDB->where('lead_id', $lead_id);
+	$qrslt = $astDB->getOne('vicidial_list', 'list_id');
+	$list_id = $qrslt['list_id'];
 
-	$stmt="SELECT agent_script_override from vicidial_lists where list_id='$list_id';";
-	$rslt=mysqli_query($link, $stmt);
-	$row=mysqli_fetch_row($rslt);
-	$agent_script_override =		$row[0];
+	//$stmt="SELECT agent_script_override from vicidial_lists where list_id='$list_id';";
+    $astDB->where('list_id', $list_id);
+	$rslt = $astDB->getOne('vicidial_lists', 'agent_script_override');
+	$agent_script_override =		$rslt['agent_script_override'];
 	if (strlen($agent_script_override) > 0)
 		{$call_script = $agent_script_override;}
-	}
+}
 
 //milo
 //get script id
-	$queryGetscript = "SELECT vc.campaign_script FROM vicidial_campaigns vc, vicidial_lists vl WHERE vc.campaign_id = vl.campaign_id AND vl.list_id='$list_id';";
-	$gsrslt = mysqli_query($link, $queryGetscript);
-	$fetchscriptid = mysqli_fetch_row($gsrslt);
-	$call_script = $fetchscriptid[0];
+//$queryGetscript = "SELECT vc.campaign_script FROM vicidial_campaigns vc, vicidial_lists vl WHERE vc.campaign_id = vl.campaign_id AND vl.list_id='$list_id';";
+$astDB->where('vl.list_id', $list_id);
+$astDB->join('vicidial_campaigns vc', 'vc.campaign_id=vl.campaign_id', 'LEFT');
+$gsrslt = $astDB->getOne('vicidial_lists vl', 'vc.campaign_script');
+$call_script = $gsrslt['campaign_script'];
 
 
-$stmt="SELECT list_name,list_description from vicidial_lists where list_id='$list_id';";
-$rslt=mysqli_query($link, $stmt);
-$row=mysqli_fetch_row($rslt);
-$list_name =			$row[0];
-$list_description =		$row[1];
+//$stmt="SELECT list_name,list_description from vicidial_lists where list_id='$list_id';";
+$astDB->where('list_id', $list_id);
+$rslt = $astDB->getOne('vicidial_lists', 'list_name,list_description');
+$list_name =			$rslt['list_name'];
+$list_description =		$rslt['list_description'];
 
-$stmt="SELECT script_name,script_text from vicidial_scripts where script_id='$call_script';";
-$rslt=mysqli_query($link, $stmt);
-$row=mysqli_fetch_row($rslt);
-$script_name =		$row[0];
-$script_text =		stripslashes($row[1]);
+//$stmt="SELECT script_name,script_text from vicidial_scripts where script_id='$call_script';";
+$astDB->where('script_id', $call_script);
+$rslt = $astDB->getOne('vicidial_scripts', 'script_name,script_text');
+$script_name =		$rslt['script_name'];
+$script_text =		stripslashes($rslt['script_text']);
 
-if (preg_match("/iframe\ssrc/i",$script_text))
-	{
-	$IFRAME=1;
+if (preg_match("/iframe\ssrc/i",$script_text)) {
+	$IFRAME = 1;
 	$lead_id = preg_replace('/\s/i','+',$lead_id);
 	$vendor_id = preg_replace('/\s/i','+',$vendor_id);
 	$vendor_lead_code = preg_replace('/\s/i','+',$vendor_lead_code);
@@ -407,7 +407,7 @@ if (preg_match("/iframe\ssrc/i",$script_text))
 	$did_pattern = preg_replace('/\s/i','+',$did_pattern);
 	$did_description = preg_replace('/\s/i','+',$did_description);
 	$web_vars = preg_replace('/\s/i','+',$web_vars);
-	}
+}
 
 $script_text = preg_replace('/--A--lead_id--B--/i',"$lead_id",$script_text);
 $script_text = preg_replace('/--A--vendor_id--B--/i',"$vendor_id",$script_text);
@@ -494,26 +494,22 @@ $script_text = preg_replace('/--A--call_id--B--/i',"$call_id",$script_text);
 $script_text = preg_replace('/--A--user_group--B--/i',"$user_group",$script_text);
 $script_text = preg_replace('/--A--web_vars--B--/i',"$web_vars",$script_text);
 
-if ($CF_uses_custom_fields=='Y')
-	{
+if ($CF_uses_custom_fields == 'Y') {
 	### find the names of all custom fields, if any
-	$stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
-	$rslt=mysqli_query($link, $stmt);
-	if ($DB) {echo "$stmt\n";}
-	$cffn_ct = mysqli_num_rows($rslt);
-	$d=0;
-	while ($cffn_ct > $d)
-		{
-		$row=mysqli_fetch_row($rslt);
-		$field_name_id = $row[0];
+	//$stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
+    $astDB->where('list_id', $entry_list_id);
+    $astDB->where('field_type', array('SCRIPT', 'DISPLAY'), 'not in');
+    $astDB->where('field_label', array('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner'), 'not in');
+	$rslt = $astDB->get('vicidial_lists_fields', null, 'field_label,field_type');
+	$cffn_ct = $astDB->getRowCount();
+	foreach ($rslt as $row) {
+		$field_name_id = $row['field_label'];
 		$field_name_tag = "--A--" . $field_name_id . "--B--";
-		if (isset($_GET["$field_name_id"]))				{$form_field_value=$_GET["$field_name_id"];}
-			elseif (isset($_POST["$field_name_id"]))	{$form_field_value=$_POST["$field_name_id"];}
+		if (isset($_GET["$field_name_id"]))				{$form_field_value=$astDB->escape($_GET["$field_name_id"]);}
+			elseif (isset($_POST["$field_name_id"]))	{$form_field_value=$astDB->escape($_POST["$field_name_id"]);}
 		$script_text = preg_replace("/$field_name_tag/i","$form_field_value",$script_text);
-			if ($DB) {echo "$d|$field_name_id|$field_name_tag|$form_field_value|<br>\n";}
-		$d++;
-		}
-	}
+    }
+}
 
 $script_text = preg_replace("/\n/i","<BR>",$script_text);
 $script_text = stripslashes($script_text);
@@ -532,8 +528,5 @@ $goAgentScripts .=  "</TD></TR></TABLE>\n";
 
 //exit;
 
-
 $apiresults = array("result" => "success", "gocampaignScript" => $goAgentScripts);
-
-
 ?>

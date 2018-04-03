@@ -1,18 +1,36 @@
 <?php
-    ####################################################
-    #### Name: goAPI.php                            ####
-    #### Type: API for dashboard php encode         ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Jerico James Flores Milo       ####
-    #### License: AGPLv2                            ####
-    ####################################################
-    
+ /**
+ * @file 		goAPI.php
+ * @brief 		API for Getting Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jericho James Milo  <james@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+	include_once("../MySQLiDB.php");
     include_once("../goDBasterisk.php");
     include_once("../goDBgoautodial.php");
     include_once("../goFunctions.php");
     
     ####### Variables #########
+
+	$astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
+	$goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
+	//$kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $VARDBgokam_database);
     
     if (isset($_GET["goAction"])) {
             $goAction = $_GET["goAction"];
@@ -42,9 +60,11 @@
     $goVersion = "1.0";
     
     #### check credentials ####
-    $query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
-    $rslt=mysqli_query($link,$query_user);
-    $check_result = mysqli_num_rows($rslt);
+    //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND pass='$goPass' limit 1";
+	$astDB->where('user', $goUser);
+	$astDB->where('pass', $goPass);
+	$rslt = $astDB->getOne('vicidial_users', 'user,pass');
+    $check_result = $astDB->getRowCount();
     // var_dump($query_user); 
     if ($check_result > 0) {
        

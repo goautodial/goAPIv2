@@ -1,20 +1,33 @@
 <?php
- ####################################################
- #### Name: goGetLeadsOfList.php                 ####
- #### Description: API to get leads from list_id ####
- #### Version: 0.9                               ####
- #### Copyright: GOAutoDial Ltd. (c) 2011-2016   ####
- #### Written by: Jerico James Milo              ####
- #### License: AGPLv2                            ####
- ####################################################
-    include_once("goFunctions.php");
+ /**
+ * @file 		goAPI.php
+ * @brief 		API for Getting Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jericho James Milo  <james@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
     //$thefile = $_FILES['goFileMe']['tmp_name'];
-    $theList = $_REQUEST["goListId"];
+    $theList = $astDB->escape($_REQUEST["goListId"]);
 
-	$query = "SELECT phone_number FROM vicidial_list WHERE list_id='$theList';";
-	$rsltv = mysqli_query($link, $query);
-	$countResult = mysqli_num_rows($rsltv);
+	//$query = "SELECT phone_number FROM vicidial_list WHERE list_id='$theList';";
+	$astDB->where('list_id', $theList);
+	$rsltv = $astDB->get('vicidial_list', null, 'phone_number');
+	$countResult = $astDB->getRowCount();
 
 /*    if($countResult > 0) {
         while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
@@ -29,7 +42,7 @@
         
 			$dataPhoneNumbers = array();
             
-			while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+			foreach ($rsltv as $fresults){
                 array_push($dataPhoneNumbers, $fresults);
 				//$dataPhoneNumbers[] = 	$fresults['phone_number'];
             }

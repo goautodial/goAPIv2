@@ -1,29 +1,35 @@
 <?php
+ /**
+ * @file 		goAPI.php
+ * @brief 		API for Getting Leads
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jericho James Milo  <james@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-	####################################################
-	#### Name: goUploadMe.php                       ####
-	#### Description: API for Uploading Leads       ####
-	#### Version: 4                                 ####
-	#### Copyright: GOAutoDial Ltd. (c) 2011-2016   ####
-	#### Written by: Jerico James Milo              ####
-	#### License: AGPLv2                            ####
-	####################################################
-	
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');
 	
-	#ini_set('display_errors', 'on');
-    #error_reporting(E_ALL);
-	
-	include_once("../goFunctions.php");
-	include_once("goLookupGMT.php");
-	
-	$goDupcheck = $_REQUEST["goDupcheck"];
+	$goDupcheck = $astDB->escape($_REQUEST["goDupcheck"]);
 	$jsonDataRequest = json_decode($_REQUEST['jsonData'], true);
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
 	$jsonDataPost = (array) json_decode(file_get_contents('php://input'), TRUE);
 
 	if(!empty($jsonDataRequest)){
@@ -39,10 +45,11 @@
 	$resultOfInserts = array();
 	$leadsNotSaved = array();
 
-	$queryGetCustomFields = "SELECT column_name FROM information_schema.columns WHERE table_name='custom_$list_id';";
-	$sqlCF = mysqli_query($link, $queryGetCustomFields);
+	//$queryGetCustomFields = "SELECT column_name FROM information_schema.columns WHERE table_name='custom_$list_id';";
+	$astDB->where('table_name', "custom_$list_id");
+	$sqlCF = $astDB->get('information_schema.columns', null, 'column_name');
 
-	while($fresults = mysqli_fetch_array($sqlCF, MYSQLI_ASSOC)){
+	foreach ($sqlCF as $fresults){
 		$customFields[] = $fresults['column_name'];
 	}
 
@@ -108,7 +115,7 @@
 			}
 		}
 		$USarea = substr($phone_number, 0, 3);
-		$gmt_offset = lookup_gmt($goGMTastDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+		$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
 		if(strpos($insertFields, 'gmt_offset_now') !== false){
 			$insertFields[] = "`gmt_offset_now`";
 			$insertValues[] = '"'.$gmt_offset.'"';
@@ -132,16 +139,14 @@
     	}
     	
     	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
-    	$resultInsertList = mysqli_query($link, $insertListQuery);
+    	$resultInsertList = $astDB->rawQuery($insertListQuery);
     	if($resultInsertList){
     		//true
     		array_push($resultOfInserts, "ok");
-    		$getLastInserted = "SELECT lead_id FROM vicidial_list ORDER BY lead_id DESC LIMIT 1;";
-	    	$resultLastInserted = mysqli_query($link,  $getLastInserted);
-
-	    	while($last_id = mysqli_fetch_array($resultLastInserted, MYSQLI_ASSOC)){
-				$LastID = $last_id['lead_id'];
-			}
+    		//$getLastInserted = "SELECT lead_id FROM vicidial_list ORDER BY lead_id DESC LIMIT 1;";
+			$astDB->orderBy('lead_id', 'desc');
+	    	$resultLastInserted = $astDB->getOne('vicidial_list', 'lead_id');
+			$LastID = $resultLastInserted['lead_id'];
     	}else{
     		array_push($resultOfInserts, "error");
     		array_push($leadsNotSaved, array("fields" => $insertFields, "value" => $insertValues));
@@ -150,7 +155,7 @@
     	if(!empty($insertCustomFields) && !empty($insertCustomValues)){
     		// insert to custom_$list_id
 	    	$insertCustomFieldQuery = "INSERT INTO custom_$list_id(`lead_id`, $insertCustomFields) VALUES('$LastID', $insertCustomValues);";
-	    	$resultInsertCustomField = mysqli_query($link, $insertCustomFieldQuery);
+	    	$resultInsertCustomField = $astDB->rawQuery($insertCustomFieldQuery);
 	    	// array_push($resultOfInserts, $insertCustomFieldQuery);
 	    	// array_push($resultOfInserts, $resultInsertCustomField);
 	    	if($resultInsertCustomField){
@@ -166,11 +171,9 @@
 	// print_r($resultOfInserts);die;
 	if(in_array("error", $resultOfInserts)){
 		$apiresults = array("result" => "error", "message" => "Uploading Leads interrupted due too some errors. Please contact administrator.", "LeadNotSaved" => $leadsNotSaved);
-		$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Error in uploading leads on List ID $list_id", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Error in uploading leads on List ID $list_id", $log_group);
 	}else{
 		$apiresults = array("result" => "success", "message" => "Uploading Leads success!");
-		$log_id = log_action($linkgo, 'UPLOAD', $log_user, $ip_address, "Successfully uploaded leads on List ID $list_id", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Successfully uploaded leads on List ID $list_id", $log_group);
 	}
-
-
 ?>
