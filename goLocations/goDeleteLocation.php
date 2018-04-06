@@ -1,13 +1,25 @@
 <?php
-/**********************************************
- * Name: goDeleteLocation.php                 *
- * Description: API to delete Location        *
- * Version: 0.9                               *
- * Copyright: GOAutoDial Ltd. (c) 2011-2015   *
- * Written by: Christopher P. Lomuntad        *
- * License: AGPLv2                            *
- *********************************************/
-    
+ /**
+ * @file 		goDeleteLocation.php
+ * @brief 		API for Deleting Locations
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     // POST or GET Variables
     $location = $goDB->escape($_REQUEST['location']);
 	
@@ -20,10 +32,10 @@
 		$err_msg = error_handle("40001");
 		$APIResult = array("code" => "40001", "result" => $err_msg);
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 		
 		$goDB->where('name', $location);
-		if (checkIfTenant($groupId)) {
+		if (checkIfTenant($groupId, $goDB)) {
 			$goDB->where('user_group', $groupId);
 		}
 		
@@ -59,7 +71,7 @@
 			$APIResult = array("code" => "41004", "result" => $err_msg);
 		} else {
 			$APIResult = array("result" => "success");
-			$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
+			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
 		}
 	}//end
 ?>

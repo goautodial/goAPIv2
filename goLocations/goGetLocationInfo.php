@@ -1,27 +1,39 @@
 <?php
-/**********************************************
- * Name: goGetLocationInfo.php                *
- * Description: API to get Location Info      *
- * Version: 0.9                               *
- * Copyright: GOAutoDial Ltd. (c) 2011-2015   *
- * Written by: Christopher P. Lomuntad        *
- * License: AGPLv2                            *
- *********************************************/
-	
+ /**
+ * @file 		goGetLocationInfo.php
+ * @brief 		API for Getting Location Info
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
     ### POST or GET Variables
-    $location = $_REQUEST['location'];
+    $location = $astDB->escape($_REQUEST['location']);
 	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $ostDB->escape($_REQUEST['log_group']);
+	$ip_address = $ostDB->escape($_REQUEST['log_ip']);
     
 	if($location == null) { 
 		$APIResult = array("code" => "41004", "result" => "Error: Set a value for Location."); 
 	} else {
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
     
 		$goDB->where('name', $location);
-		if (checkIfTenant($groupId)) {
+		if (checkIfTenant($groupId, $goDB)) {
 			$goDB->where('user_group', $groupId);
 		}
 
@@ -31,7 +43,7 @@
 		$countResult = $goDB->getRowCount();
 		$data = $rsltv;
 		
-		$log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed the info of Location: $location", $log_group);
+		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of Location: $location", $log_group);
 
         $APIResult = array("result" => "success", "data" => $data);
 	}

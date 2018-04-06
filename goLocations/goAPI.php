@@ -1,14 +1,24 @@
 <?php
-####################################################
-#### Name: goAPI.php                            ####
-#### Type: API for Chat History                 ####
-#### Version: 0.9                               ####
-#### Copyright: GOAutoDial Inc. (c) 2011-2016   ####
-#### Written by: Christopher P. Lomuntad        ####
-#### License: AGPLv2                            ####
-####################################################
-//ini_set('display_errors', 'on');
-//error_reporting(E_ALL);
+ /**
+ * @file 		goAPI.php
+ * @brief 		API for Locations
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
 $goCharset = "UTF-8";
@@ -20,23 +30,6 @@ include_once('./includes/MySQLiDB.php');
 @include_once('../goDBkamailio.php');
 @include_once('../goFunctions.php');
 include_once('./includes/XMLParser.php');
-
-### Check if DB variables are not set ###
-$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-$VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
-$VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
-$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
-
-$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
-$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
-
-$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
-$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
-$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
-### End of DB variables ###
 
 $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
 $goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
