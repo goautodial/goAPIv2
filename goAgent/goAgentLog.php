@@ -36,10 +36,12 @@ if (isset($_GET['goExtension'])) { $extension = $astDB->escape($_GET['goExtensio
 $NOW = date("Y-m-d H:i:s");
 $NOWepoch = date("U");
 
-$check = "SELECT user_log_id,event FROM vicidial_user_log WHERE user='$goUser' AND campaign_id='$campaign' ORDER BY user_log_id DESC LIMIT 1;";
-$check_query = mysqli_query($link, $check) or die(mysqli_error($link));
-$row = mysqli_fetch_array($check_query);
-$eventDB = $row['event'];
+//$check = "SELECT user_log_id,event FROM vicidial_user_log WHERE user='$goUser' AND campaign_id='$campaign' ORDER BY user_log_id DESC LIMIT 1;";
+$astDB->where('user', $goUser);
+$astDB->where('campaign_id', $campaign);
+$astDB->orderBy('user_log_id', 'desc');
+$check_query = $astDB->getOne('vicidial_user_log', 'user_log_id,event');
+$eventDB = $check_query['event'];
 
 if( (strtoupper($event) === strtoupper($eventDB) /*&& strtoupper($eventDB) !== "MANUAL" */) || (strtoupper($event) === strtoupper("resume") && strtoupper($eventDB) === strtoupper("LOGIN") ) || (strtoupper($event) === strtoupper("resume") && strtoupper($eventDB) === strtoupper("MANUAL") ) ){
 	//error DO NOT INSERT
