@@ -1,50 +1,63 @@
 <?php
-/***********************************************************
-**** Name: goEditLeadRecycling.php                  	****
-**** Description: API to edit specific Lead Recycling   ****
-**** Version: 4.0                                   	****
-**** Copyright: GOAutoDial Ltd. (c) 2016-2017       	****
-**** Written by: Alexander Jim Abenoja			      	****
-**** License: AGPLv2                                	****
-************************************************************/
-
- include_once("../goFunctions.php");
+ /**
+ * @file       goEditLeadRecycling.php
+ * @brief 	    API for Modifying Lead Recycling
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author	    Alexander Abenoja  <alex@goautodial.com>
+ * @author     Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
  // POST or GET Variables
- 	$recycle_id = mysqli_real_escape_string($link, $_REQUEST['recycle_id']);
-	$attempt_delay = mysqli_real_escape_string($link, $_REQUEST['attempt_delay']);
-	$attempt_maximum = mysqli_real_escape_string($link, $_REQUEST['attempt_maximum']);
-	$active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+ $recycle_id = $astDB->escape($_REQUEST['recycle_id']);
+	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
+	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
+	$active = $astDB->escape(strtoupper($_REQUEST['active']));
 
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 
 	// Default values
 	$defActive = array('N','Y');
 
 	// ERROR CHECKING ...
 	if(empty($session_user) || empty($recycle_id)) {
-	    $err_msg = error_handle("40001", "recycle_id or session_user");
-	      $apiresults = array("code" => "40001", "result" => $err_msg);
+	 $err_msg = error_handle("40001", "recycle_id or session_user");
+		$apiresults = array("code" => "40001", "result" => $err_msg);
 	} elseif(!empty($attempt_delay) && ($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120) ){
-	    $apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
+		$apiresults = array("result" => "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds");
 	} elseif(!empty($attempt_delay) && (strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)) ){
-	   $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
+		$apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
 	} elseif(!in_array($active, $defActive) && $active != null) {
-	    $apiresults = array("result" => "Error: Default value for active is N for No and Y for Yes only.");
+		$apiresults = array("result" => "Error: Default value for active is N for No and Y for Yes only.");
 	} else {
-		$groupId = go_get_groupid($session_user);
-		$get_campaign = mysqli_query($link, "SELECT campaign_id FROM recycle_id = '$recycle_id';");
-		$fetch_campaign = mysqli_fetch_array($get_campaign);
+		$groupId = go_get_groupid($session_user, $astDB);
+		//$get_campaign = mysqli_query($link, "SELECT campaign_id FROM recycle_id = '$recycle_id';");
+		$astDB->where('recycle_id', $recycle_id);
+		$fetch_campaign = $astDB->getOne('vicidial_lead_recycle', 'campaign_id');
 		$campaign_id = $fetch_campaign['campaign_id'];
-	    $check_usergroup = go_check_usergroup_campaign($groupId, $campaign_id);
+	 $check_usergroup = go_check_usergroup_campaign($astDB, $groupId, $campaign_id);
 
-	    if($check_usergroup > 0){
-	        $queryCheck = "SELECT status,attempt_delay,attempt_maximum,campaign_id,active FROM vicidial_lead_recycle WHERE recycle_id='$recycle_id';";
-	        $sqlCheck = mysqli_query($link,$queryCheck);
-	        $countCheck = mysqli_num_rows($sqlCheck);
+		if($check_usergroup > 0){
+			//$queryCheck = "SELECT status,attempt_delay,attempt_maximum,campaign_id,active FROM vicidial_lead_recycle WHERE recycle_id='$recycle_id';";
+			$astDB->where('recycle_id', $recycle_id);
+			$sqlCheck = $astDB->get('vicidial_lead_recycle', null, 'status,attempt_delay,attempt_maximum,campaign_id,active');
+			$countCheck = $astDB->getRowCount();
 
-			if($countCheck > 0){
-				while($fresults = mysqli_fetch_array($sqlCheck, MYSQLI_ASSOC)){
+			if($countCheck > 0) {
+				foreach ($sqlCheck as $fresults){
 					$dataAttemptDelay = $fresults['attempt_delay'];
 					$dataAttemptMaximum = $fresults['attempt_maximum'];
 					$dataCampID = $fresults['campaign_id'];
@@ -57,20 +70,18 @@
 				if(empty($active)){$active = $dataActive;}
 
 				$queryVM ="UPDATE vicidial_lead_recycle SET attempt_delay='$attempt_delay',attempt_maximum='$attempt_maximum', active='$active' WHERE recycle_id='$recycle_id'";
-				$rsltv1 = mysqli_query($link,$queryVM) or die(mysqli_error($link));
+				$rsltv1 = $astDB->rawQuery($queryVM);
+				
+				if($rsltv1){
+					$apiresults = array("result" => "success");
 
-
-	            if($rsltv1){
-	                $apiresults = array("result" => "success");
-
-					$log_id = log_action($linkgo, 'MODIFY', $session, $ip_address, "Modified Lead Recycling: $status", $groupId, $queryVM);
-	            }
-	            
-	        } else {
-		        $apiresults = array("result" => "Error: Lead Recycle ID does not exist!");
-		    }
-	    }else{
-	    	$apiresults = array("result" => "Error: Current user ".$session_user." doesn't have enough permission to access this feature");
-	    }
+					$log_id = log_action($goDB, 'MODIFY', $session, $ip_address, "Modified Lead Recycling: $status", $groupId, $queryVM);
+	   }
+			} else {
+				$apiresults = array("result" => "Error: Lead Recycle ID does not exist!");
+			}
+		}else{
+			$apiresults = array("result" => "Error: Current user ".$session_user." doesn't have enough permission to access this feature");
+		}
 	}
 ?>

@@ -1,23 +1,35 @@
 <?php
-  /***************************************************
-  **** Name: goAddLeadRecycling.php               ****
-  **** Description: API to add new Lead Recycling ****
-  **** Version: 4.0                               ****
-  **** Copyright: GOAutoDial Ltd. (c) 2016-2017   ****
-  **** Written by: Alexander Jim Abenoja          ****
-  **** License: AGPLv2                            ****
-  ****************************************************/
-  
-  include_once("../goFunctions.php");
+ /**
+ * @file        goAddLeadRecycling.php
+ * @brief 	    API for Adding Lead Recycling
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author	    Alexander Abenoja  <alex@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
   // POST or GET Variables
-  $campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-  $status = mysqli_real_escape_string($link, $_REQUEST['status']);
-  $attempt_delay = mysqli_real_escape_string($link, $_REQUEST['attempt_delay']);
-  $attempt_maximum = mysqli_real_escape_string($link, $_REQUEST['attempt_maximum']);
-  $active = mysqli_real_escape_string($link, strtoupper($_REQUEST['active']));
+  $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+  $status = $astDB->escape($_REQUEST['status']);
+  $attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
+  $attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
+  $active = $astDB->escape(strtoupper($_REQUEST['active']));
 
   //optional
-    $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+  $log_ip = $astDB->escape($_REQUEST['log_ip']);
 
   // Default values 
   $defActive = array('Y','N');
@@ -25,7 +37,7 @@
   // ERROR CHECKING 
   if(empty($campaign_id) || empty($session_user) || empty($status) ) {
     $err_msg = error_handle("40001", "campaign_id, session_user, and status");
-      $apiresults = array("code" => "40001", "result" => $err_msg);
+    $apiresults = array("code" => "40001", "result" => $err_msg);
   } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status) ){
     $apiresults = array("result" => "Error: Special characters found in status");
   } elseif(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120 || $attempt_delay > 99999 ){
@@ -42,73 +54,62 @@
     if(empty($active))
       $active = "Y";
 
-    $groupId = go_get_groupid($session_user);
-    $check_usergroup = go_check_usergroup_campaign($groupId, $campaign_id);
+    $groupId = go_get_groupid($session_user, $astDB);
+    $check_usergroup = go_check_usergroup_campaign($astDB, $groupId, $campaign_id);
 
     if($check_usergroup > 0){
-        $queryCheck = "SELECT * FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id' and status = '$status';";
-        $sqlCheck = mysqli_query($link,$queryCheck);
-        $countCheck1 = mysqli_num_rows($sqlCheck);
+      //$queryCheck = "SELECT * FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id' and status = '$status';";
+      $astDB->where('campaign_id', $campaign_id);
+      $astDB->where('status', $status);
+      $sqlCheck = $astDB->get('vicidial_campaign_statuses');
+      $countCheck1 = $astDB->getRowCount();
 
-        $queryCheck2 = "SELECT * FROM vicidial_statuses WHERE status='$status';";
-        $sqlCheck2 = mysqli_query($link,$queryCheck2);
-        $countCheck2 = mysqli_num_rows($sqlCheck2);
+      //$queryCheck2 = "SELECT * FROM vicidial_statuses WHERE status='$status';";
+      $astDB->where('status', $status);
+      $sqlCheck2 = $astDB->get('vicidial_statuses');
+      $countCheck2 = $astDB->getRowCount();
 
-      if($countCheck1 > 0 || $countCheck2 > 0 || $campaign_id === "ALL"){
-        if($campaign_id === "ALL"){
-          $all_campaigns = "SELECT campaign_id FROM vicidial_campaigns;";
-          $query_all_campaigns = mysqli_query($link, $all_campaigns);
+      if($countCheck1 > 0 || $countCheck2 > 0 || $campaign_id === "ALL") {
+        if($campaign_id === "ALL") {
+          //$all_campaigns = "SELECT campaign_id FROM vicidial_campaigns;";
+          $query_all_campaigns = $astDB->get('vicidial_campaigns', null, 'campaign_id');
           
-          while($row = mysqli_fetch_array($query_all_campaigns)){
+          foreach ($query_all_campaigns as $row){
             $camp_id = $row['campaign_id'];
-            //$arr_campaign[] = $camp_id;
-
             $newQuery = "INSERT INTO vicidial_lead_recycle (campaign_id,status,attempt_delay,attempt_maximum,active) VALUES ('$camp_id', '$status', '$attempt_delay', '$attempt_maximum', '$active');";
-            $rsltv = mysqli_query($link,$newQuery) or die(mysqli_error($link));
+            $rsltv = $astDB->rawQuery($newQuery);
 
             if($rsltv){
-              $log_id = log_action($linkgo, 'ADD', $session_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $camp_id", $groupId, $newQuery);
+              $log_id = log_action($goDB, 'ADD', $session_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $camp_id", $groupId, $newQuery);
             }
 
-            $queryCheck3 = "SELECT MAX(recycle_id) as last_recycle_id FROM vicidial_lead_recycle;";
-            $sqlCheck3 = mysqli_query($link,$queryCheck3) or die(mysqli_error($link));
-            $fetch_check = mysqli_fetch_array($sqlCheck3);
-            $inserted_id[] = $fetch_check['last_recycle_id'];
+            //$queryCheck3 = "SELECT MAX(recycle_id) as last_recycle_id FROM vicidial_lead_recycle;";
+            $sqlCheck3 = $astDB->getOne('vicidial_lead_recycle', 'MAX(recycle_id) AS last_recycle_id');
+            $inserted_id[] = $sqlCheck3['last_recycle_id'];
           }
 
-          if(count($inserted_id) > 0){
+          if(count($inserted_id) > 0) {
             $imploded_ids = implode(",",$inserted_id);
             $apiresults = array("result" => "success", "recycle_id" => $imploded_ids);
           }
-
-
-        }else{
+        } else {
           $newQuery = "INSERT INTO vicidial_lead_recycle (campaign_id,status,attempt_delay,attempt_maximum,active) VALUES ('$campaign_id', '$status', '$attempt_delay', '$attempt_maximum', '$active');";
-          $rsltv = mysqli_query($link,$newQuery) or die(mysqli_error($link));
+          $rsltv = $astDB->rawQuery($newQuery);
 
-          $queryCheck3 = "SELECT MAX(recycle_id) as last_recycle_id FROM vicidial_lead_recycle;";
-          $sqlCheck3 = mysqli_query($link,$queryCheck3) or die(mysqli_error($link));
-          $num_check3 = mysqli_num_rows($sqlCheck3);
-          $fetch_check = mysqli_fetch_array($sqlCheck3);
+          //$queryCheck3 = "SELECT MAX(recycle_id) as last_recycle_id FROM vicidial_lead_recycle;";
+          $sqlCheck3 = $astDB->getOne('vicidial_lead_recycle', 'MAX(recycle_id) AS last_recycle_id');
+          $num_check3 = $astDB->getRowCount();
 
-          if($rsltv === true && $num_check3 > 0){
-            $apiresults = array("result" => "success", "recycle_id" => $fetch_check['last_recycle_id']);
-            $log_id = log_action($linkgo, 'ADD', $session_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $groupId, $newQuery);
+          if($rsltv && $num_check3 > 0){
+            $apiresults = array("result" => "success", "recycle_id" => $sqlCheck3['last_recycle_id']);
+            $log_id = log_action($goDB, 'ADD', $session_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $groupId, $newQuery);
           }
         }
-        
-
-        
-
-      }else{
+      } else {
         $apiresults = array("result" => "Error: Campaign ID or Status does not exist.");
       }
-    }else{
+    } else {
       $apiresults = array("result" => "Error: Current user ".$session_user." doesn't have permission to access this feature");
     }
-
-    
-
   }
-
 ?>
