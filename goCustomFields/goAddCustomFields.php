@@ -7,16 +7,12 @@
    #### Written by: Noel Umandap                    ####
    #### License: AGPLv2                             ####
    #####################################################
-    
-    include_once ("../goFunctions.php");
-//    error_reporting(E_ALL & ~E_NOTICE);
-//ini_set('display_errors', 1);
     $list_id            = mysqli_real_escape_string($link, $_REQUEST['list_id']);
     $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
     $field_name         = $_REQUEST['field_name'];
     $field_description  = $_REQUEST['field_description'];
     $field_rank         = $_REQUEST['field_rank'];
-    $field_help         = $_REQUEST['field_help'];
+    $field_help         = (isset($_REQUEST['field_help'])) ? $_REQUEST['field_help']:"";
     $field_type         = $_REQUEST['field_type'];
     $field_options      = $_REQUEST['field_options'];
     $field_size         = $_REQUEST['field_size'];
@@ -43,10 +39,10 @@
         
         $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_id' and field_label='$field_label';";
         $counterresult = mysqli_query($link, $counterquery);
-		
+		$field_sql=''; $field_cost='';
         if(!$counterresult){
-			$err_msg = error_handle("41004", "");
-		$apiresults = array("code" => "41004", "result" => $err_msg);
+            $err_msg = error_handle("41004", "");
+            $apiresults = array("code" => "41004", "result" => $err_msg);
             $apiresults = array("result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label);
         }else{
             $tableName = "custom_".$list_id;
@@ -128,11 +124,7 @@
             }
             
             if ( (!empty($field_default) ) and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
-                //if($fieldcatch == "") {
-                    $field_sql .= "DEFAULT '$field_default'";
-                //} else {
-                //    $field_sql .= "default $fieldcatch";
-                //}
+                $field_sql .= "DEFAULT '$field_default'";
             }
             
             if ( empty($field_default) ) {
@@ -151,25 +143,34 @@
                 $stmtCUSTOM="$field_sql";
                 $rslt = mysqli_query($link, $stmtCUSTOM);
             }
-           
-            //$stmtCUSTOM="$field_sql";
-            //$rslt = mysqli_query($link, $stmtCUSTOM);
-            
-            $insert = "INSERT INTO vicidial_lists_fields set field_label='$field_label', field_name='$field_name', field_description='$field_description', field_rank='$field_rank', field_help='$field_help', field_type='$field_type', field_options='$field_options', field_size='$field_size', field_max='$field_max', field_default='$field_default', field_required='$field_required', field_cost='$field_cost', list_id='$list_id', multi_position='$multi_position', name_position='$name_position', field_order='$field_order';";
-            $insertrslt = mysqli_query($link, $insert);
-            $countResultInsert = mysqli_num_rows($insertrslt);
 
-            if($insertrslt){
-                //$SQLdate = date("Y-m-d H:i:s");
-                //$queryLog = "INSERT INTO go_action_logs
-                //                (user,ip_address,event_date,action,details,db_query)
-                //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_id','');";
-                //$rsltvLog = mysqli_query($linkgo, $queryLog);
-                $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insert);
+            $data_cf = array(
+                'field_label'       => $field_label, 
+                'field_name'        => $field_name, 
+                'field_description' => $field_description, 
+                'field_rank'        => $field_rank, 
+                'field_help'        => $field_help, 
+                'field_type'        => $field_type, 
+                'field_options'     => $field_options, 
+                'field_size'        => $field_size, 
+                'field_max'         => $field_max, 
+                'field_default'     => $field_default, 
+                'field_required'    => $field_required, 
+                'field_cost'        => $field_cost, 
+                'list_id'           => $list_id, 
+                'multi_position'    => $multi_position, 
+                'name_position'     => $name_position, 
+                'field_order'       => $field_order
+            );
+            $insertCF = $astDB->insert('vicidial_lists_fields', $data_cf);
+            $insertQuery = $astDB->getLastQuery();
+            
+            if($insertCF){
+                $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
                
                 $apiresults = array("result" => "success");
             }else{
-                $apiresults = array("result" => "Error: Failed to add custom field.", "query" => $insert);
+                $apiresults = array("result" => "Error: Failed to add custom field.", "query" => $insertQuery);
             }
         }
     }

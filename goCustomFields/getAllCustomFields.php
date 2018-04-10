@@ -7,22 +7,16 @@
    #### Written by: Alexander Jim H. Abenoja        ####
    #### License: AGPLv2                             ####
    #####################################################
-    
-    include_once ("../goFunctions.php");
-    
     $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
     
 	if(!empty($list_id)) {
-		$query = "SELECT
-                field_id,field_label,field_name,field_description,field_rank,field_help,field_type,
-                field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,
-                name_position,field_order
-            FROM vicidial_lists_fields
-            WHERE list_id='$list_id'
-            ORDER BY field_rank,field_order,field_label;";
-		$rsltv = mysqli_query($link, $query);
+		$astDB->where('list_id', $list_id);
+		$astDB->orderBy('field_rank');
+		$astDB->orderBy('field_order');
+		$astDB->orderBy('field_label');
+		$rsltv = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
 		
-		while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+		foreach($rsltv as $fresults){
 			$data[] = array(
 				'field_id'          => $fresults['field_id'],
 				'field_label'       => $fresults['field_label'],

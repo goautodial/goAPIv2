@@ -7,46 +7,34 @@
    #### Written by: Noel Umandap                   ####
    #### License: AGPLv2                            ####
    ####################################################
-    include_once("goFunctions.php");
-   
-    $campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-    $hotkey = mysqli_real_escape_string($link, $_REQUEST['hotkey']);
-    $status = mysqli_real_escape_string($link, $_REQUEST['status']);
-    $status_name = mysqli_real_escape_string($link, $_REQUEST['status_name']);
+    $campaign_id    = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
+    $hotkey         = mysqli_real_escape_string($link, $_REQUEST['hotkey']);
+    $status         = mysqli_real_escape_string($link, $_REQUEST['status']);
+    $status_name    = mysqli_real_escape_string($link, $_REQUEST['status_name']);
+    $ip_address     = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $log_user       = mysqli_real_escape_string($link, $_REQUEST['log_user']);
+    $log_group      = mysqli_real_escape_string($link, $_REQUEST['log_group']);
     
-    $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $astDB->where('campaign_id', $campaign_id);
+    $astDB->where('hotkey', $hotkey);
+    $astDB->orwhere('status', $status);
+    $hotkeys = $astDB->get('vicidial_campaign_hotkeys', null, '*');
     
-    $checkHotkey = "SELECT * FROM vicidial_campaign_hotkeys WHERE campaign_id = '$campaign_id' AND (hotkey = '$hotkey' OR status = '$status')";
-    $checkResult = mysqli_query($link, $checkHotkey);
-    $countCheck = mysqli_num_rows($checkResult);
-    
-    if($countCheck > 0) {
+    if(count($hotkeys) > 0) {
         $apiresults = array("result" => "duplicate");
     } else {
-        $query = "INSERT into vicidial_campaign_hotkeys
-                (
-                    status,
-                    hotkey,
-                    status_name,
-                    selectable,
-                    campaign_id
-                ) 
-                VALUES(
-                    '$status',
-                    '$hotkey',
-                    '$status_name',
-                    'Y',
-                    '$campaign_id'
-                )
-        ";
+        $data_insert = array(
+            'status'        => $status,
+            'hotkey'        => $hotkey,
+            'status_name'   => $status_name,
+            'selectable'    => 'Y',
+            'campaign_id'   => $campaign_id
+        );
+        $insertHotkey = $astDB->insert('vicidial_campaign_hotkeys', $data_insert);
+        $insertQuery = $astDB->getLastQuery();
         
-        $rsltv = mysqli_query($link, $query);
-        $countResult = mysqli_num_rows($rsltv);
-        
-        if($rsltv) {
-            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Hotkey $status on Campaign $campaign_id", $log_group, $query);
+        if($insertHotkey) {
+            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Hotkey $status on Campaign $campaign_id", $log_group, $insertQuery);
             
             $apiresults = array("result" => "success");
         } else {

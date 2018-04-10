@@ -8,7 +8,7 @@
     /// License: AGPLv2 		///
     ///////////////////////////////////////////////////////
 	$agent = get_settings('user', $astDB, $goUser);
-	
+
 	if(!empty($agent)){
 		if(!empty($agent->user_group)){
 			// Getting Allowed Campigns
