@@ -7,13 +7,10 @@
 	#### Written by: Jeremiah Sebastian V. Samatra  ####
 	#### License: AGPLv2                            ####
 	####################################################
-
-	include_once ("../goFunctions.php");
-
-	$queryGetSubscripts = "SELECT script_id, script_name, script_text FROM vicidial_scripts WHERE subscript='1';";
-	$sql = mysqli_query($link, $queryGetSubscripts);
+	$astDB->where('subscript' , 1);
+	$subScripts = $astDB->get('vicidial_scripts', null, 'script_id, script_name, script_text');
 	
-	while($fresults = mysqli_fetch_array($sql, MYSQLI_ASSOC)){
+	foreach($subScripts as $fresults){
 		$script_id[] = $fresults['script_id'];
 		$script_name[] = $fresults['script_name'];
 		$script_text[] = $fresults['script_text'];

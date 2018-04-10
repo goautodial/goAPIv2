@@ -1,7 +1,7 @@
 <?php
     $keyword = $_REQUEST['keyword'];
 
-    $astDB->where('did_pattern', 'LIKE', $keyword.'%');
+    $astDB->where('did_pattern', "$keyword%", 'like');
     $rsltv = $astDB->get('vicidial_inbound_dids', null, 'did_pattern')
     
     if($rsltv) {

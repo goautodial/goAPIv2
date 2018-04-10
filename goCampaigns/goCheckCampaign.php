@@ -37,7 +37,7 @@
         $astDB->where('campaign_id', $campaign_id);
         $rsltvCheck1 = $astDB->get('vicidial_campaigns', null, 'campaign_id');
 
-        if($rsltvCheck1 > 0) {
+        if($rsltvCheck1) {
             $apiresults = array("result" => "fail", "status" => "Campaign already exist.");
         }else{
             $apiresults = array("result" => "success");

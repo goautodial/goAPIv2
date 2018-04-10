@@ -7,9 +7,6 @@
    #### Written by: Noel Umandap                    ####
    #### License: AGPLv2                             ####
    #####################################################
-    
-    include_once ("../goFunctions.php");
-    
     $list_id        = mysqli_real_escape_string($link, $_REQUEST['list_id']);
     $field_label    = str_replace(" ","_",trim($_REQUEST['field_label']));
     $field_id       = $_REQUEST['field_id'];
@@ -24,19 +21,19 @@
         $countResult1 = mysqli_num_rows($queryResult1);
         
         if($countResult1 > 0 && $field_label != "lead_id"){
-            $deleteColumnTable = "ALTER TABLE `custom_$list_id` DROP $field_label;";
-            $queryDelete = mysqli_query($link, $deleteColumnTable);
+            $table_name = 'custom_'.$list_id;
+
+            $astDB->where('field_label', $field_label);
+            $astDB->where('field_id', $field_id);
+            $astDB->where('list_id', $list_id);
+            $queryDeleteCF = $astDB->delete('vicidial_lists_fields');
             
-            $deleteColumn = "DELETE FROM vicidial_lists_fields
-                            WHERE field_label='$field_label' and field_id='$field_id' and list_id='$list_id'
-                            LIMIT 1;";
-            $query = mysqli_query($link, $deleteColumn);
-            //$result = mysqli_num_rows($query);
-            
-            if($query){
-                $apiresults = array("result" => "success");
+            if($queryDeleteCF){
+              $astDB->dropColumnFromTable($table_name, $field_label);
+
+              $apiresults = array("result" => "success");
             }else{
-                $apiresults = array("result" => "Error: Custom Field does not exist");
+              $apiresults = array("result" => "Error: Custom Field does not exist");
             }
         }else{
             $apiresults = array("result" => "Error: $field_label does not exist");

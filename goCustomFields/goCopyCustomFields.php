@@ -22,17 +22,11 @@
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
     if($copy_option == "UPDATE"){
-        $query = "SELECT
-                    field_id,field_label,field_name,field_description,field_rank,field_help,field_type,
-                    field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,
-                    name_position,field_order
-                FROM vicidial_lists_fields
-                WHERE list_id='$list_from'
-                ORDER BY field_rank,field_order,field_label;";
-        $rsltv = mysqli_query($link, $query);
+        $astDB->where('list_id', $list_from);
+        $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
         
         $output = array();
-        while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+        foreach($fromList as $fresults){
             $field_id          = $fresults['field_id'];
             $field_label       = $fresults['field_label'];
             $field_name        = $fresults['field_name'];
@@ -49,11 +43,12 @@
             $multi_position    = $fresults['multi_position'];
             $name_position     = $fresults['name_position'];
             $field_order       = $fresults['field_order'];
-            //$apiresults = array("result" => $fresults);
-            $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_to' and field_label='$field_label';";
-            $counterresult = mysqli_query($link, $counterquery);
+
+            $astDB->where('list_id', $list_to);
+            $astDB->where('field_label', $field_label);
+            $checkField = $astDB->get('vicidial_lists_fields', null, '*');
             
-            if($counterresult){
+            if($checkField){
                 $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                 $queryCheckTable = mysqli_query($link, $checkTable);
                 
@@ -134,33 +129,30 @@
                 $stmtCUSTOM="$field_sql";
                 $rslt = mysqli_query($link, $stmtCUSTOM);
 
-                $update = "UPDATE vicidial_lists_fields
-                            set field_label='$field_label',
-                                field_name='$field_name',
-                                field_description='$field_description',
-                                field_rank='$field_rank',
-                                field_help='$field_help',
-                                field_type='$field_type',
-                                field_options='$field_options',
-                                field_size='$field_size',
-                                field_max='$field_max',
-                                field_default='$field_default',
-                                field_required='$field_required',
-                                field_cost='$field_cost',
-                                multi_position='$multi_position',
-                                name_position='$name_position',
-                                field_order='$field_order'
-                            where
-                                list_id='$list_to'
-                            and field_id='$field_id';";
-                $updaterslt = mysqli_query($link, $update);
-                if($updaterslt){
-                    //$SQLdate = date("Y-m-d H:i:s");
-                    //$queryLog = "INSERT INTO go_action_logs
-                    //                (user,ip_address,event_date,action,details,db_query)
-                    //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                    //$rsltvLog = mysqli_query($linkgo, $queryLog);
-                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $update);
+                $data_update = array(
+                    'field_label'       => $field_label,
+                    'field_name'        => $field_name,
+                    'field_description' => $field_description,
+                    'field_rank'        => $field_rank,
+                    'field_help'        => $field_help,
+                    'field_type'        => $field_type,
+                    'field_options'     => $field_options,
+                    'field_size'        => $field_size,
+                    'field_max'         => $field_max,
+                    'field_default'     => $field_default,
+                    'field_required'    => $field_required,
+                    'field_cost'        => $field_cost,
+                    'multi_position'    => $multi_position,
+                    'name_position'     => $name_position,
+                    'field_order'       => $field_order
+                );
+                $astDB->where('list_id', $list_to);
+                $astDB->where('field_id', $field_id);
+                $queryUpdate = $astDB->update('vicidial_lists_fields', $data_update);
+                $updateQuery = $astDB->getLastQuery();
+
+                if($queryUpdate){
+                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $updateQuery);
                    
                     $output[] = "success";
                 }else{
@@ -175,19 +167,13 @@
             $apiresults = array("result" => "success", "query" => $field_sql);
         }
     }elseif($copy_option == "APPEND"){
-        $query = "SELECT
-                    field_id,field_label,field_name,field_description,field_rank,field_help,field_type,
-                    field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,
-                    name_position,field_order
-                FROM vicidial_lists_fields
-                WHERE list_id='$list_from'
-                ORDER BY field_rank,field_order,field_label;";
-        $rsltv = mysqli_query($link, $query);
+        $astDB->where('list_id', $list_from);
+        $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
         
         $output = array();
         $output1 = array();
         $field_sql ='';
-        while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+        foreach($fromList as $fresults){
             $field_label       = $fresults['field_label'];
             $field_name        = $fresults['field_name'];
             $field_description = $fresults['field_description'];
@@ -203,11 +189,12 @@
             $multi_position    = $fresults['multi_position'];
             $name_position     = $fresults['name_position'];
             $field_order       = $fresults['field_order'];
-            //$apiresults = array("result" => $fresults);
-            $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_to' and field_label='$field_label';";
-            $counterresult = mysqli_query($link, $counterquery);
+
+            $astDB->where('list_id', $list_to);
+            $astDB->where('field_label', $field_label);
+            $checkField = $astDB->get('vicidial_lists_fields', null, '*');
     
-            if($counterresult){
+            if(!$checkField){
                 $tableName = "custom_".$list_to;
                 $tableCheck="SHOW TABLES LIKE '$tableName'";
                 $tableCheckResult = mysqli_query($link, $tableCheck);
@@ -300,48 +287,46 @@
                     $field_sql .= ");";
                 }
                 $stmtCUSTOM="$field_sql";
-                // $output1[] = $field_sql;
+                $output1[] = $field_sql;
                 $rslt = mysqli_query($link, $stmtCUSTOM);
-                $field_sql = '';
                 // $output[] = mysqli_error($link);
-                $insert = "INSERT INTO vicidial_lists_fields
-                            set field_label='$field_label',
-                                field_name='$field_name',
-                                field_description='$field_description',
-                                field_rank='$field_rank',
-                                field_help='$field_help',
-                                field_type='$field_type',
-                                field_options='$field_options',
-                                field_size='$field_size',
-                                field_max='$field_max',
-                                field_default='$field_default',
-                                field_required='$field_required',
-                                field_cost='$field_cost',
-                                list_id='$list_to',
-                                multi_position='$multi_position',
-                                name_position='$name_position',
-                                field_order='$field_order';";
-                $insertrslt = mysqli_query($link, $insert);
-                if($insertrslt){
+
+                $data_insert = array(
+                    'field_label'       => $field_label,
+                    'field_name'        => $field_name,
+                    'field_description' => $field_description,
+                    'field_rank'        => $field_rank,
+                    'field_help'        => (!empty($field_help)) ? $field_help:"NULL",
+                    'field_type'        => $field_type,
+                    'field_options'     => (!empty($field_options)) ? $field_options:"NULL",
+                    'field_size'        => $field_size,
+                    'field_max'         => $field_max,
+                    'field_default'     => (!empty($field_default)) ? $field_default:"NULL",
+                    'field_required'    => (!empty($field_required)) ? $field_required:"N",
+                    'field_cost'        => (!empty($field_cost)) ? $field_cost:"NULL",
+                    'multi_position'    => (!empty($multi_position)) ? $multi_position:"HORIZONTAL",
+                    'name_position'     => (!empty($name_position)) ? $name_position:"LEFT",
+                    'field_order'       => $field_order
+                );
+                $queryInsert = $astDB->insert('vicidial_lists_fields', $data_insert);
+                $insertQuery = $astDB->getLastQuery();
+
+                if($queryInsert){
                     $SQLdate = date("Y-m-d H:i:s");
-                    //$queryLog = "INSERT INTO go_action_logs
-                    //                (user,ip_address,event_date,action,details,db_query)
-                    //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                    //$rsltvLog = mysqli_query($linkgo, $queryLog);
-                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insert);
+                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
                    
                     $output[] = "success";
                 }else{
-                    $output[] = "error";
+                    $output[] = $insertQuery;
                 }
             }
         }
-        // $apiresults = array("result" => "success", "query" => $output, "query1" => $output1);
-        if(in_array("error", $output)){
-            $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
-        }else{
-            $apiresults = array("result" => "success", "query" => $field_sql);
-        }
+        $apiresults = array("result" => "success", "query" => $output, "query1" => $output1);
+        // if(in_array("error", $output)){
+        //     $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
+        // }else{
+        //     $apiresults = array("result" => "success", "query" => $field_sql);
+        // }
     }elseif($copy_option == "REPLACE"){
         //delete first existing
         $selectTable = "SHOW TABLES LIKE 'custom_$list_to'";
@@ -358,17 +343,11 @@
             //$result = mysqli_num_rows($query);
             
             if($query){
-                $query = "SELECT
-                            field_id,field_label,field_name,field_description,field_rank,field_help,field_type,
-                            field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,
-                            name_position,field_order
-                        FROM vicidial_lists_fields
-                        WHERE list_id='$list_from'
-                        ORDER BY field_rank,field_order,field_label;";
-                $rsltv = mysqli_query($link, $query);
+                $astDB->where('list_id', $list_from);
+                $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
                 
                 $output = array();
-                while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+                foreach($fromList as $fresults){
                     $field_label       = $fresults['field_label'];
                     $field_name        = $fresults['field_name'];
                     $field_description = $fresults['field_description'];
@@ -479,32 +458,28 @@
                         }
                         $stmtCUSTOM="$field_sql";
                         $rslt = mysqli_query($link, $stmtCUSTOM);
-                        
-                        $insert = "INSERT INTO vicidial_lists_fields
-                                    set field_label='$field_label',
-                                        field_name='$field_name',
-                                        field_description='$field_description',
-                                        field_rank='$field_rank',
-                                        field_help='$field_help',
-                                        field_type='$field_type',
-                                        field_options='$field_options',
-                                        field_size='$field_size',
-                                        field_max='$field_max',
-                                        field_default='$field_default',
-                                        field_required='$field_required',
-                                        field_cost='$field_cost',
-                                        list_id='$list_to',
-                                        multi_position='$multi_position',
-                                        name_position='$name_position',
-                                        field_order='$field_order';";
-                        $insertrslt = mysqli_query($link, $insert);
-                        if($insertrslt){
-                            //$SQLdate = date("Y-m-d H:i:s");
-                            //$queryLog = "INSERT INTO go_action_logs
-                            //                (user,ip_address,event_date,action,details,db_query)
-                            //            values('$goUser','$ip_address','$SQLdate','ADD','Added New Custom Field $field_label on list $list_to','');";
-                            //$rsltvLog = mysqli_query($linkgo, $queryLog);
-                            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insert);
+        
+                        $data_insert = array(
+                            'field_label'       => $field_label,
+                            'field_name'        => $field_name,
+                            'field_description' => $field_description,
+                            'field_rank'        => $field_rank,
+                            'field_help'        => $field_help,
+                            'field_type'        => $field_type,
+                            'field_options'     => $field_options,
+                            'field_size'        => $field_size,
+                            'field_max'         => $field_max,
+                            'field_default'     => $field_default,
+                            'field_required'    => $field_required,
+                            'field_cost'        => $field_cost,
+                            'multi_position'    => $multi_position,
+                            'name_position'     => $name_position,
+                            'field_order'       => $field_order
+                        );
+                        $queryInsert = $astDB->insert('vicidial_lists_fields', $data_insert);
+                        $insertQuery = $astDB->getLastQuery();
+                        if($queryInsert){
+                            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
                            
                             $fullData[] = "success";
                         }else{

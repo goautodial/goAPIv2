@@ -61,8 +61,8 @@
 				$dynamic_cid_COL = ", dynamic_cid";
 			}
 			
-			$astDB->where('campaign_id', $campaign_id);
-			$rsltvGoCampaign = $astDB->get('vicidial_campaigns', null, 'campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url $location_id_COL $dynamic_cid_COL');
+			$goDB->where('campaign_id', $campaign_id);
+			$rsltvGoCampaign = $goDB->get('go_campaigns', null, 'campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
 
 			foreach((array)$rsltvGoCampaign as $typeresults){
 				$campaign_type = $typeresults['campaign_type'];
@@ -97,18 +97,18 @@
 			$location_id = (gettype($location_id) != 'NULL') ? $location_id : '';
 			$dynamic_cid = (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
 			$apiresults = array(
-								"result" => "success",
-								"data" => $result,
-								"campaign_type" => $campaign_type,
-								"custom_fields_launch" => $custom_fields_launch,
+								"result" 				=> "success",
+								"data" 					=> array_shift($result),
+								"campaign_type" 		=> $campaign_type,
+								"custom_fields_launch" 	=> $custom_fields_launch,
 								'custom_fields_list_id' => $custom_fields_list_id,
-								'url_tab_first_title' => $url_tab_first_title,
-								'url_tab_first_url' => $url_tab_first_url,
-								'url_tab_second_title' => $url_tab_second_title,
-								'url_tab_second_url' => $url_tab_second_url,
-								'number_of_lines' => $numberoflines,
-								'location_id' => $location_id,
-								'dynamic_cid' => $dynamic_cid
+								'url_tab_first_title' 	=> $url_tab_first_title,
+								'url_tab_first_url' 	=> $url_tab_first_url,
+								'url_tab_second_title' 	=> $url_tab_second_title,
+								'url_tab_second_url' 	=> $url_tab_second_url,
+								'number_of_lines' 		=> $numberoflines,
+								'location_id' 			=> $location_id,
+								'dynamic_cid' 			=> $dynamic_cid
 							);
 			
 			$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
