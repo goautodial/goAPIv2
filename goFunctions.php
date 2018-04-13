@@ -10,7 +10,7 @@
     
 	if (isset($_GET["session_user"])) { $session_user = $_GET["session_user"];
     } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }
-	else $session_user = "";
+	else $apiresults = array("result" => "Error: Session User Not Defined");
 	
     ##### get usergroup #########
     function go_get_groupid($goUser, $dbase){
