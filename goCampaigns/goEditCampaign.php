@@ -1,12 +1,27 @@
 <?php
-   //////////////////////////////////#
-   //# Name: goEditCampaign.php                   //#
-   //# Description: API to edit specific campaign //#
-   //# Version: 0.9                               //#
-   //# Copyright: GOAutoDial Ltd. (c) 2011-2015   //#
-   //# Written by: Jerico James Milo              //#
-   //# License: AGPLv2                            //#
-   //////////////////////////////////#
+ /**
+ * @file 		goEditCampaign.php
+ * @brief 		API for Modifying Campaigns
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Jericho James Milo  <james@goautodial.com>
+ * @author		Noel Umandap  <noel@goautodial.com>
+ * @author     	Chris Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 	// POST or GET Variables
 	$goUser 						= $_REQUEST['goUser'];
 	$ip_address 					= $_REQUEST['hostname'];
@@ -94,7 +109,7 @@
 	$amd_send_to_vmx 				= $_REQUEST['amd_send_to_vmx'];
 	$waitforsilence_options 		= $_REQUEST['waitforsilence_options'];
 
-	$location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
+	$location = $astDB->escape($_REQUEST['location_id']);
    	//$apiresults = array("data" => $_REQUEST); 
 
     // Default values 
@@ -125,8 +140,8 @@
 					$dynamic_cid_SQL = "";
 					$dynamic_cid_COL = "";
 					$dynamic_cid_VAL = "";
-					$checkColumn = mysqli_query($linkgo, "SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
-					$columnRows = mysqli_num_rows($checkColumn);
+					$checkColumn = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
+					$columnRows = $goDB->getRowCount();
 
 					if ($columnRows > 0) {
 						$data_update_go = array('dynamic_cid' => $dynamic_cid);
@@ -311,7 +326,7 @@
 					}
 					
 					$SQLdate = date("Y-m-d H:i:s");
-					$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated campaign settings for $campaign_id", $log_group, $updateQuery);
+					$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Updated campaign settings for $campaign_id", $log_group, $updateQuery);
 					
 					if($force_reset_hopper == "Y"){
 						$astDB->where('campaign_id', $campaign_id);
