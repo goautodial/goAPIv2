@@ -35,7 +35,7 @@
     $shift_enforcement = strtoupper($_REQUEST['shift_enforcement']);
 
 	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user);
+	$log_group = go_get_groupid($session_user, $astDB);
 
     // Defaul Values
     $defFTL = array('Y','N','ADMIN_EXEMPT');
@@ -58,7 +58,7 @@
     } else {
     
         $groupId = $log_user;
-        if (!checkIfTenant($groupId)) {
+        if (!checkIfTenant($groupId, $goDB)) {
             $astDB->where("user_group", $user_group);
             //$ul = "WHERE user_group='$user_group'";
         } else {

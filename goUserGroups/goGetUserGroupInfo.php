@@ -35,7 +35,7 @@
 		$apiresults = array("result" => "Error: Set a value for User Group."); 
 	} else {
 
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			$astDB->where("user_group", $user_group);
     		//$ul = "WHERE user_group='$user_group'";
             $group_type = "Multi-tenant";

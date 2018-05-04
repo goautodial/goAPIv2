@@ -1,32 +1,40 @@
 <?php
-    #######################################################
-    #### Name: getAllCalltimes.php 	               ####
-    #### Description: API to get all calltimes         ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Warren Ipac Briones               ####
-    #### License: AGPLv2                               ####
-    #######################################################
+/**
+ * @file        getAllCalltimes.php
+ * @brief       API to get all Calltime details
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Warren Ipac Briones   <warren@goautodial.com>
+ * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     include_once ("../goFunctions.php");
 
-    $groupId = go_get_groupid($goUser);
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+    $groupId = go_get_groupid($session_user, $astDB);
+    $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 
-	if (!checkIfTenant($groupId)) {
-		$ul = "";
-	} else {
-		$ul = "AND user_group='$groupId'";
-		$addedSQL = "WHERE user_group='$groupId'";
+	if (checkIfTenant($groupId)) {
+		$astDB->where("user_group", $groupId);
 	}
 
-	$query = "SELECT * FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
-	$rsltv = mysqli_query($link,$query);
+	$query = $astDB->get("vicidial_call_times");
+	//$query = "SELECT * FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
+
+	$log_id = log_action($goDB, 'VIEW', $session_user, $log_ip, "Viewed the Calltimes List", $groupId);
 	
-	//$log_id = log_action($linkgo, 'VIEW', $log_user, $log_ip, "Viewed the Calltimes List", $log_group);
-	
-	while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
+	foreach ($query as $fresults) {
 		$dataCalltimeID[] = $fresults['call_time_id'];
 		$dataCalltimeName[] = $fresults['call_time_name'];
 		$dataCtDefStart[] = $fresults['ct_default_start'];

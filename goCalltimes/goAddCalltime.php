@@ -108,28 +108,58 @@
             $groupId = go_get_groupid($session_user, $astDB);
             $log_user = $session_user;
 
-            if (!checkIfTenant($groupId)) {
-                $ul = "";
-            } else {
-                $ul = "AND user_group='$groupId'";
-                $addedSQL = "WHERE user_group='$groupId'";
+            if (checkIfTenant($groupId $goDB)) {
+                $astDB->where("user_group", $groupId);
+                //$ul = "AND user_group='$groupId'";
             }
-
-            $query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='$user_group' $ul ORDER BY user_group LIMIT 1;";
-            $rsltv = mysqli_query($link,$query);
-            $countResult = mysqli_num_rows($rsltv);
+            
+            $astDB->where("user_group", $user_group);
+            $astDB->getOne("vicidial_user_groups", "user_group,group_name,forced_timeclock_login");
+            //$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='$user_group' $ul ORDER BY user_group LIMIT 1;";
+            $countResult = $astDB->count;
 			
 			if($user_group == "---ALL---"){ // temporary
-					$countResult = 1;
+				$countResult = 1;
 			}
 			
             if($countResult > 0) {
-
-                $queryCheck = "SELECT call_time_id from vicidial_call_times where call_time_id='$call_time_id';";
-                $sqlCheck = mysqli_query($link, $queryCheck);
-                $countCheck = mysqli_num_rows($sqlCheck);
-                if($countCheck <= 0){             
-
+                $astDB->where("call_time_id", $call_time_id);
+                $astDB->getOne("vicidial_call_times");
+                //$queryCheck = "SELECT call_time_id from vicidial_call_times where call_time_id='$call_time_id';";
+                
+                if($astDB->count < 1){
+                    $data = Array(
+                                "call_time_id" => $call_time_id,
+                                "call_time_name" => $call_time_name,
+                                "call_time_comments" => $call_time_comments,
+                                "user_group" => $user_group,
+                                "ct_default_start" => $ct_default_start,
+                                "ct_default_stop" => $ct_default_stop,
+                                "ct_sunday_start" => $ct_sunday_start,
+                                "ct_sunday_stop" => $ct_sunday_stop,
+                                "ct_monday_start" => $ct_monday_start,
+                                "ct_monday_stop" => $ct_monday_stop,
+                                "ct_tuesday_start" => $ct_tuesday_start,
+                                "ct_tuesday_stop" => $ct_tuesday_stop,
+                                "ct_wednesday_start" => $ct_wednesday_start,
+                                "ct_wednesday_stop" => $ct_wednesday_stop,
+                                "ct_thursday_start" => $ct_thursday_start,
+                                "ct_thursday_stop" => $ct_thursday_stop,
+                                "ct_friday_start" => $ct_friday_start,
+                                "ct_friday_stop" => $ct_friday_stop,
+                                "ct_saturday_start" => $ct_saturday_start,
+                                "ct_saturday_stop" => $ct_saturday_stop,
+                                "default_afterhours_filename_override" => $default_audio,
+                                "sunday_afterhours_filename_override" => $sunday_audio,
+                                "monday_afterhours_filename_override" => $monday_audio,
+                                "tuesday_afterhours_filename_override" => $tuesday_audio,
+                                "wednesday_afterhours_filename_override" => $wednesday_audio,
+                                "thursday_afterhours_filename_override" => $thursday_audio,
+                                "friday_afterhours_filename_override" => $friday_audio,
+                                "saturday_afterhours_filename_override" => $saturday_audio
+                            );
+                    $insertQuery = $astDB->insert("vicidial_call_times", $data);
+                    /*
                     $newQuery = "INSERT INTO vicidial_call_times (
 							call_time_id,
 							call_time_name,
@@ -188,16 +218,11 @@
 							'".$thursday_audio."',
 							'".$friday_audio."',
 							'".$saturday_audio."');";
-							
-                    $rsltvx = mysqli_query($link, $newQuery);
+					*/
 
-                    ### Admin logs
-                    //$SQLdate = date("Y-m-d H:i:s");
-                    //$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$log_user','$ip_address','$SQLdate','ADD','Added New Call Time $call_time_id','INSERT INTO vicidial_call_times (call_time_id, call_time_name, call_time_comments, user_group, ct_default_start, ct_default_stop, ct_sunday_start, ct_sunday_stop, ct_monday_start, ct_monday_stop, ct_tuesday_start, ct_tuesday_stop, ct_wednesday_start, ct_wednesday_stop, ct_thursday_start, ct_thursday_stop, ct_friday_start, ct_friday_stop, ct_saturday_start, ct_saturday_stop) VALUES ($call_time_id, $call_time_name, $call_time_comments, $user_group, $ct_default_start, $ct_default_stop, $ct_sunday_start, $ct_sunday_stop,$ct_monday_start, $ct_monday_stop, $ct_tuesday_start, $ct_tuesday_stop, $ct_wednesday_start, $ct_wednesday_stop, $ct_thursday_start, $ct_thursday_stop, $ct_friday_start, $ct_friday_stop, $ct_saturday_start, $ct_saturday_stop);');";
-                    //$rsltvLog = mysqli_query($queryLog, $linkgo);
-					$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Call Time $call_time_id", $log_group, $newQuery);
+                    $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New Call Time $call_time_id", $groupId, $newQuery);
 
-                    if($rsltvx == false){
+                    if(!$insertQuery){
                         $apiresults = array("result" => "Error: Add failed, check your details");
                     } else {
                         $apiresults = array("result" => "success");

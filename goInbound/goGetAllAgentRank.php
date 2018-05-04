@@ -1,60 +1,88 @@
 <?php
-    #######################################################
-    #### Name:  goGetAllAgentRank.php	               ####
-    #### Description: API to get all agent assign      ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Ltd. (c) 2011-2016      ####
-    #### Written by: Jerico James F. Milo 	       ####
-    #### License: AGPLv2                               ####
-    #######################################################
+/**
+ * @file        goGetAllAgentRank.php
+ * @brief       API to all agent rank info
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jerico James F. Milo  <jericojames@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     
     include_once ("../goFunctions.php");
     
-    $goUser 	= $_REQUEST['user_id'];
-    $goVarLimit = $_REQUEST['goVarLimit'];
+    $limit = $_REQUEST['limit'];
     $goGroupID 	= $_REQUEST['group_id'];
+    $find_user 	= $_REQUEST['findUser'];
     
-    if($goUser == null ) {  $apiresults = array(  "result" => "Error: Set a value for user_id");
-	}elseif($goGroupID == null ) { $apiresults = array(  "result" => "Error: Set a value for group_id"); 
+    if(empty($goGroupID) ) { 
+		$apiresults = array(  "result" => "Error: Set a value for group_id"); 
     } else {
 	
-		if($goVarLimit < 1){ $goVarLimit = ""; 	} else { $goVarLimit = "limit $goVarLimit"; }
-		if (checkIfTenant($goUser)) { $addedSQL = "AND user_group='$user_group'"; }
-		if (!is_null($find_user)) {	$findSQL = "AND user RLIKE '$find_user'"; }
-	
-		$query = "SELECT user,full_name,closer_campaigns,user_group from vicidial_users where user NOT IN ('VDAD','VDCL') and user_level != '4' $addedSQL $findSQL order by user $goVarLimit";
-		$rsltv = mysqli_query($link, $query);
-		$countResult = mysqli_num_rows($rsltv);
-	
-		if($countResult > 0) {
-	
-			while($fresults = mysqli_fetch_assoc($rsltv)){
-			$isChecked = '';
+		if($limit < 1)
+			$limit = 1;
+
+		$groupId = go_get_groupid($goUser, $astDB);
+
+		if (checkIfTenant($goUser, $goDB)) {
+			$astDB->where("user_group", $groupId);
+			//$addedSQL = "AND user_group='$user_group'";
+		}
+		if (!is_null($find_user)) {
+			$astDB->where("user", $find_user, "RLIKE")
+			//$findSQL = "AND user RLIKE '$find_user'";
+		}
+		
+		$cols = Array("user", "full_name", "closer_campaigns", "user_group");
+		$astDB->where("user", Array("VDAD", "VDCL"), "NOT IN");
+		$astDB->where("user_level", "4", "!=");
+		$selectQuery = $astDB->get("vicidial_users", $limit, $cols);
+		//$query = "SELECT user,full_name,closer_campaigns,user_group from vicidial_users where user NOT IN ('VDAD','VDCL') and user_level != '4' $addedSQL $findSQL order by user $goVarLimit";
+		
+		if($astDB->count > 0) {
+			foreach ($selectQuery as $fresults) {
+				$isChecked = '';
 				if (preg_match("/ $goGroupID /",$fresults['closer_campaigns'])) {$isChecked = ' CHECKED';}
-	
-			$stmtx="SELECT group_rank,group_grade,calls_today from vicidial_inbound_group_agents where group_id='$goGroupID' and user='{$fresults['user']}';";
-			$rsltx = mysqli_query($link, $stmtx);
-			$viga_to_print = mysqli_num_rows($rsltx);
-	
-				if ($viga_to_print > 0) {
-						while($rowx = mysqli_fetch_assoc($rsltx)){
-	
-							$ARIG_rank  = $rowx['group_rank'];
-							$ARIG_grade = $rowx['group_grade'];
-							$ARIG_calls = $rowx['calls_today'];
-	
-							if($ARIG_calls==null){ $ARIG_calls="0";	}
-	
-						}
-	
+				
+				$cols2 = Array("group_rank", "group_grade", "calls_today");
+				$astDB->where("group_id", $goGroupID);
+				$astDB->where("user", "{$fresults['user']}");
+				$selectQuery2 = $astDB->get("vicidial_inbound_group_agents", null, $cols2);
+				//$stmtx="SELECT group_rank,group_grade,calls_today from vicidial_inbound_group_agents where group_id='$goGroupID' and user='{$fresults['user']}';";
+				
+				if ($astDB->count > 0) {
+					foreach ($selectQuery2 as $rowx){
+						$ARIG_rank  = $rowx['group_rank'];
+						$ARIG_grade = $rowx['group_grade'];
+						$ARIG_calls = $rowx['calls_today'];
+						if($ARIG_calls==null){ $ARIG_calls="0";	}
+					}
 				} else {
-	
-					$stmtD="INSERT INTO vicidial_inbound_group_agents set calls_today='0',group_rank='0',group_weight='0',user='{$fresults['user']}',group_id='$goGroupID';";
-					$rsltxy = mysqli_query($link, $stmtD);
+					$insertData = Array(
+									"calls_today" => 0,
+									"group_rank" => 0,
+									"group_weight" => 0,
+									"user" => "{$fresults[user]}",
+									"group_id" => $goGroupID
+								);
+					$astDB->insert("vicidial_inbound_group_agents");
+					//$stmtD="INSERT INTO vicidial_inbound_group_agents set calls_today='0',group_rank='0',group_weight='0',user='{$fresults['user']}',group_id='$goGroupID';";
+					//$rsltxy = mysqli_query($link, $stmtD);
 					$ARIG_rank =        '0';
 					$ARIG_grade =       '0';
 					$ARIG_calls =       '0';
-	
 				}
 	
 			$checkbox_field = "CHECK_{$fresults['user']}";
@@ -106,9 +134,7 @@
 			}
 	
 		}  else {
-	
-					$apiresults = array("result" => "Error: No data to show.");
-	
+			$apiresults = array("result" => "Error: No data to show.");
 	   }
    }
 ?>

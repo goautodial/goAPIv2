@@ -1,25 +1,37 @@
 <?php
-   #####################################################
-   #### Name: goCheckUser.php	                    ####
-   #### Description: API to check for existing data ####
-   #### Version: 4.0                                ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2016    ####
-   #### Written by: Alexander Jim H. Abenoja        ####
-   #### License: AGPLv2                             ####
-   #####################################################
+/**
+ * @file        goCheckDID.php
+ * @brief       API to check for existing DID Pattern
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     
-    include_once ("../goFunctions.php");
- 
-    ### POST or GET Variables
-    $did_pattern = $_REQUEST['did_pattern'];
-    
-    $stmtdf = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
-    $querydf = mysqli_query($link, $stmtdf);
-    $rowdf = mysqli_num_rows($querydf);
+  include_once ("../goFunctions.php");
 
-    if ($rowdf > 0) {
-        $apiresults = array("result" => "<br>DID NOT ADDED - DID already exist.\n");
-    } else {
-        $apiresults = array("result" => "success");
-    }
+  // POST or GET Variables
+  $did_pattern = $astDB->escape($_REQUEST['did_pattern']);
+
+  $astDB->where("did_pattern", $did_pattern);
+  $rowdf = $astDB->getValue("vicidial_inbound_dids", "count(*)");
+  //$stmtdf = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
+  
+  if ($rowdf > 0) {
+    $apiresults = array("result" => "<br>DID NOT ADDED - DID already exist.\n");
+  } else {
+    $apiresults = array("result" => "success");
+  }
 ?>

@@ -1,9 +1,9 @@
 <?php
  /**
- * @file        goGetDIDInfo.php
- * @brief       API to get specific DID Details
+ * @file        goGetIngroupInfo.php
+ * @brief       API to get specific Ingroup Details
  * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
+ * @author      Jerico James Milo  <jericojames@goautodial.com>
  * @author      Alexander Jim Abenoja  <alex@goautodial.com>
  *
  * @par <b>License</b>:
@@ -24,25 +24,23 @@
     include_once ("../goFunctions.php");
     
     // POST or GET Variables
-    $did_id = $_REQUEST['did_id'];
+    $group_id = $_REQUEST['group_id'];
     
-	if(empty($did_id)) { 
-		$apiresults = array("result" => "Error: Set a value for DID ID."); 
+	if(empty($group_id)) { 
+		$apiresults = array("result" => "Error: Set a value for Group ID."); 
 	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
+		$groupId = go_get_groupid($goUser, $astDB);
     
 		if (checkIfTenant($groupId, $goDB)) {
             $astDB->where("user_group", $groupId);
-		}
-
-        $astDB->where("did_id", $did_id);
-        $fresults = $astDB->getOne("vicidial_inbound_dids");
-   		//$query = "SELECT * FROM vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
+    	}
+        $astDB->where("group_id", $group_id);
+        $fresults = $astDB->getOne("vicidial_inbound_groups");
    		
-		if($astDB->count > 0) {
+		if($fresults) {
 			$apiresults = array( "result" => "success", "data" => $fresults);
 		} else {
-			$apiresults = array("result" => "Error: DID doesn't exist.");
+			$apiresults = array("result" => "Error: Inbound doesn't exist.");
 		}
 	}
 ?>
