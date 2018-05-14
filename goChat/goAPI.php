@@ -21,11 +21,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
    
-    include_once ("goDBasterisk.php");
-    include_once ("goDBgoautodial.php");
-    include_once ("goDBkamailio.php");
-    include_once ("includes/goFunctions.php");
-    include_once ("includes/XMLParser.php");
+    include_once ("../goDBasterisk.php");
+    include_once ("../goDBgoautodial.php");
+    include_once ("../goDBkamailio.php");
+    include_once ("../includes/goFunctions.php");
+    include_once ("../includes/XMLParser.php");
 
     /* Check if DB variables are not set */
 	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
