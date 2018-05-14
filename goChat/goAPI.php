@@ -1,9 +1,10 @@
 <?php
- /**
- * @file 		goAPI.php
- * @brief 		API for Manager Chat
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+/**
+ * @file    goAPI.php
+ * @brief     API to handle every API
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
+ * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -18,170 +19,140 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+**/
+   
+    include_once ("goDBasterisk.php");
+    include_once ("goDBgoautodial.php");
+    include_once ("goDBkamailio.php");
+    include_once ("includes/goFunctions.php");
+    include_once ("includes/XMLParser.php");
 
-//ini_set('display_errors', 'on');
-//error_reporting(E_ALL);
+    /* Check if DB variables are not set */
+	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
+	$VARDB_user     = (!isset($VARDB_user)) ? "asteriskDBu" : $VARDB_user;
+	$VARDB_pass     = (!isset($VARDB_pass)) ? "asteriskDBpw" : $VARDB_pass;
+	$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
 
-$webRoot = $_SERVER['DOCUMENT_ROOT'];
-$goCharset = "UTF-8";
-$goVersion = "1.0";
+	$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
+	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialDBu" : $VARDBgo_user;
+	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialDBpw" : $VARDBgo_pass;
+	$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
 
-include_once('../MySQLiDB.php');
-@include_once('../goDBasterisk.php');
-@include_once('../goDBgoautodial.php');
-@include_once('../goDBkamailio.php');
-@include_once('../goFunctions.php');
-include_once('./includes/XMLParser.php');
-
-$astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
-$goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
-$kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $VARDBgokam_database);
-
-### Variables ###
-if (isset($_GET['goAction'])) { $goAction = $astDB->escape($_GET['goAction']); }
-    else if (isset($_POST['goAction'])) { $goAction = $astDB->escape($_POST['goAction']); }
-
-if (isset($_GET['goUser'])) { $goUser = $astDB->escape($_GET['goUser']); }
-    else if (isset($_POST['goUser'])) { $goUser = $astDB->escape($_POST['goUser']); }
-
-if (isset($_GET['goPass'])) { $goPass = $astDB->escape($_GET['goPass']); }
-    else if (isset($_POST['goPass'])) { $goPass = $astDB->escape($_POST['goPass']); }
-
-if (isset($_GET['goCampaign'])) { $campaign = $astDB->escape($_GET['goCampaign']); }
-    else if (isset($_POST['goCampaign'])) { $campaign = $astDB->escape($_POST['goCampaign']); }
-
-if (isset($_GET['goPhone'])) { $phone_login = $astDB->escape($_GET['goPhone']); }
-    else if (isset($_POST['goPhone'])) { $phone_login = $astDB->escape($_POST['goPhone']); }
-
-if (isset($_GET['goPhonePass'])) { $phone_pass = $astDB->escape($_GET['goPhonePass']); }
-    else if (isset($_POST['goPhonePass'])) { $phone_pass = $astDB->escape($_POST['goPhonePass']); }
-
-if (isset($_GET['goSIPServer'])) { $SIPserver = $astDB->escape($_GET['goSIPServer']); }
-    else if (isset($_POST['goSIPServer'])) { $SIPserver = $astDB->escape($_POST['goSIPServer']); }
-
-if (isset($_GET['bcrypt'])) { $bcrypt = $astDB->escape($_GET['bcrypt']); }
-    else if (isset($_POST['bcrypt'])) { $bcrypt = $astDB->escape($_POST['bcrypt']); }
-
-if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
-    else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }
-
-$auth = 0;
-$US = '_';
-$CL = ':';
-$AT = '@';
-$DS = '-';
-$StarTtimE = date("U");
-$NOW_DATE = date("Y-m-d");
-$NOW_TIME = date("Y-m-d H:i:s");
-$tsNOW_TIME = date("YmdHis");
-$FILE_TIME = date("Ymd-His");
-$loginDATE = date("Ymd");
-$CIDdate = date("mdHis");
-$ENTRYdate = date("YmdHis");
-
-while (strlen($CIDdate) > 9) {$CIDdate = substr("$CIDdate", 1);}
-$check_time = ($StarTtimE - 86400);
-
-$secX = date("U");
-$hour = date("H");
-$min = date("i");
-$sec = date("s");
-$mon = date("m");
-$mday = date("d");
-$year = date("Y");
-$isdst = date("I");
-$Shour = date("H");
-$Smin = date("i");
-$Ssec = date("s");
-$Smon = date("m");
-$Smday = date("d");
-$Syear = date("Y");
-
-$SIPserver = (!isset($SIPserver)) ? 'kamailio' : $SIPserver; // Put 'asterisk' if not using 'kamailio'.
-### End Variables ###
-
-### Check Credentials ###
-$path = getcwd();
-$files = scandir($path);
-foreach ($files as $file) {
-    if ($file != "." && $file != "..") {
-        $fileName = str_replace('.php', '', $file);
-        if (!preg_match('/^(index|goAPI|includes)$/', $fileName)) {
-            $fileList[] = $fileName;
-        }
+	$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
+	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailioDBu" : $VARDBgokam_user;
+	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailioDBpw" : $VARDBgokam_pass;
+	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+    /* End of DB variables */
+    
+    /* Variables */
+    
+    if (isset($_GET["goAction"])) {
+            $goAction = $_GET["goAction"];
+    } elseif (isset($_POST["goAction"])) {
+            $goAction = $_POST["goAction"];
     }
-}
-$actions = implode('|', $fileList);
-if (isset($goAction) && $goAction != "") {
-    if (preg_match("/$actions/", $goAction)) {
-        $system = get_settings('system', $astDB);
-        //$bcrypt = (isset($bcrypt)) ? $bcrypt : 0;
-        $bcrypt = (strlen($goPass) > 20) ? 1 : 0;
-        $err_message = "Login incorrect, please try again";
-        $auth_message = user_authorization($astDB, $goUser, $goPass, '', 1, $bcrypt, 0);
-        if ($auth_message == 'GOOD')
-            {$auth = 1;}
-        if ($auth_message == 'LOCK')
-            {$err_message = "Too many login attempts, try again in 15 minutes";}
-        if ($auth_message == 'ERRNETWORK')
-            {$err_message = "Too many network errors, please contact your administrator";}
-        if ($auth_message == 'ERRSERVERS')
-            {$err_message = "No available servers, please contact your administrator";}
-        if ($auth_message == 'ERRPHONES')
-            {$err_message = "No available phones, please contact your administrator";}
-        if ($auth_message == 'ERRDUPLICATE')
-            {$err_message = "You are already logged in, please log out of your other session first";}
-        if ($auth_message == 'ERRAGENTS')
-            {$err_message = "Too many agents logged in, please contact your administrator";}
+    
+    if (isset($_GET["goUser"])) {
+            $goUser = $_GET["goUser"];
+    } elseif (isset($_POST["goUser"])) {
+            $goUser = $_POST["goUser"];
+    }
+    
+    if (isset($_GET["goPass"])) {
+            $goPass = $_GET["goPass"];
+    } elseif (isset($_POST["goPass"])) {
+            $goPass = $_POST["goPass"];
+    }
+    
+    if (isset($_GET["goURL"])) {
+            $goURL = $_GET["goURL"];
+    } elseif (isset($_POST["goURL"])) {
+            $goURL = $_POST["goURL"];
+    }
+    
+    define('DEFAULT_USERS', array('VDAD','VDCL'));
 
+    $goCharset = "UTF-8";
+    $goVersion = "4.0";
+    
+    /* check credentials */
+	$pass_hash = '';
+	$cwd = $_SERVER['DOCUMENT_ROOT'];
+	$bcrypt = 0;
 
-        if ($auth < 1) {
-            $APIResult = array( "result" => "error", "message" => $err_message );
+	$user = preg_replace("/\'|\"|\\\\|;| /", "", $goUser);
+	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
+	
+    //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
+    $pass_hash_enabled = $astDB->getValue("system_settings", "pass_hash_enabled", NULL);
+
+	$passSQL = "pass='$pass'";
+	if ($pass_hash_enabled > 0) {
+		if ($bcrypt < 1) {
+			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+		} else {$pass_hash = $pass;}
+		$passSQL = "pass_hash='$pass_hash'";
+	}
+	
+    //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
+    //$rslt=mysqli_query($link, $query_user);
+    $astDB->where("user", $goUser);
+    if($pass_hash_enabled > 0 )
+    	$astDB->where("pass_hash", $pass_hash);
+    else
+	   $astDB->where("pass", $pass);
+    $astDB->getOne("vicidial_users", "count(*) as sum");
+    $check_result = $astDB->count;
+    
+    if ($check_result > 0) {
+       
+        if (file_exists($goAction . ".php" )) {
+            include $goAction . ".php";
+            //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
-            $astDB->where('user', $goUser);
-            $rslt = $astDB->getOne('vicidial_users', 'vdc_agent_api_access');
-            $allowedAPIAccess = $rslt['vdc_agent_api_access'];
-            if ($allowedAPIAccess) {
-                include("{$goAction}.php");
+    		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
+        }
+    
+    } else {
+        
+        $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );
+        
+    }
+    
+    $userresponsetype = $_REQUEST["responsetype"];
+    
+    if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
+    	$userresponsetype = "xml";
+    }
+    
+    /* API OUTPUT */
+    ob_start();
+    
+    if (count( $apiresults )) {
+    	if ($userresponsetype == "json") {
+    		$apiresults = json_encode( $apiresults );
+    		echo $apiresults;
+    		exit();
+    	} else {
+    		if ($userresponsetype == "xml") {
+    			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $action .' "</action>\n" )';
+                apiXMLOutput( $apiresults );
+                echo "</goautodialapi>";
             } else {
-                $APIResult = array( "result" => "error", "message" => "User '$goUser' is NOT allowed to access GOagent API" );
+                if ($responsetype) {
+                    exit( "result=error;message=This API function can only return XML response format;" );
+                }
+
+                foreach ($apiresults as $k => $v) {
+                    echo "" . $k . "=" . $v . ";";
+                }
             }
         }
-    } else {
-        $APIResult = array( "result" => "error", "message" => "Command NOT Found" );
     }
-} else {
-    $APIResult = array( "result" => "error", "message" => "goAction should NOT be empty" );
-}
 
-if (!isset($userResponseType) || strlen($userResponseType) < 1) {
-    $userResponseType = "xml";
-}
-
-### API OUTPUT ###
-ob_start();
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Max-Age: 1000');
-if (count($APIResult)) {
-    if ($userResponseType == "json") {
-        $APIResult = json_encode( $APIResult );
-        echo $APIResult;
-        exit();
-    } else if ($userResponseType == "xml") {
-        if (isset($goAction) && $goAction != "") {
-            $xml_data->addChild("action", htmlspecialchars("$goAction"));
-        }
-        array_to_xml( $APIResult, $xml_data);
-        echo $xml_data->asXML();
-    } else {
-        exit( "result=error;message=This API function only accepts XML or JSON value on responsetype;" );
-        //echo implode_recur(';', $APIResult);
-    }
-}
-$APIOutput = ob_get_contents();
-ob_end_clean();
-
-parse_xml($APIOutput);
+    $apioutput = ob_get_contents();
+    ob_end_clean();
+    echo $apioutput;
 ?>
+
