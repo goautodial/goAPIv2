@@ -1,100 +1,113 @@
 <?php
-    ####################################################
-    #### Name: goGetReports.php                     ####
-    #### Description: API for reports               ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-    #### Written by: Jerico James Milo              ####
-    #### License: AGPLv2                            ####
-    ####################################################
+/**
+ * @file        goFunctions.php
+ * @brief       General Functions
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-        function go_getUsergroup($goUser ,$link){
-            
-            $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
-            $rsltv = mysqli_query($link, $query_userv);
-            $check_resultv = mysqli_num_rows($rsltv);
-            
-            if ($check_resultv > 0) {
-                $rowc=mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
-                $goUser_group = $rowc["user_group"];
-                return $goUser_group;
-            }
-           
-        }
-
-        function remove_empty($array) {
-    	   return array_filter($array, '_remove_empty_internal');
-        }
-
-        function _remove_empty_internal($value) {
-            return !empty($value) || $value === 0;
-        }
+    function go_getUsergroup($goUser ,$link){
         
-        function go_get_dates($d1, $d2)
-        {
-                $diff = explode("|", go_get_date_diff($d1, $d2));
-                $days = $diff[2];
-
-                for ($i=0;$i<=$days;$i++)
-                {
-                        $dateARY[$i] = $d1;
-                        $d1 = date("Y-m-d", strtotime(date("Y-m-d", strtotime($d1)) . " +1 day"));
-                }
-                return $dateARY;
+        $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
+        $rsltv = mysqli_query($link, $query_userv);
+        $check_resultv = mysqli_num_rows($rsltv);
+        
+        if ($check_resultv > 0) {
+            $rowc=mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
+            $goUser_group = $rowc["user_group"];
+            return $goUser_group;
         }
-
        
-        function go_get_date_diff($d1, $d2)
-        {
-                $diff = abs(strtotime($d2) - strtotime($d1));
+    }
 
-                $years = floor($diff / (365*60*60*24));
-                $months = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
-                $days = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+    function remove_empty($array) {
+	   return array_filter($array, '_remove_empty_internal');
+    }
 
-                //printf("%d years, %d months, %d days\n", $years, $months, $days);
-                return "$years|$months|$days";
-        }
+    function _remove_empty_internal($value) {
+        return !empty($value) || $value === 0;
+    }
+    
+    function go_get_dates($d1, $d2)
+    {
+            $diff = explode("|", go_get_date_diff($d1, $d2));
+            $days = $diff[2];
 
-        ##### reformat seconds into HH:MM:SS or MM:SS #####
-        function go_sec_convert($sec,$precision){
-			$sec = round($sec,0);
-			if ($sec < 1){
-				return "0:00";
-			}
-			else{
-				if ($sec < 3600) {$precision='M';}
-				if ($precision == 'H'){
-					$Fhours_H = ($sec / 3600);
-					$Fhours_H_int = floor($Fhours_H);
-					$Fhours_H_int = intval("$Fhours_H_int");
-					$Fhours_M = ($Fhours_H - $Fhours_H_int);
-					$Fhours_M = ($Fhours_M * 60);
-					$Fhours_M_int = floor($Fhours_M);
-					$Fhours_M_int = intval("$Fhours_M_int");
-					$Fhours_S = ($Fhours_M - $Fhours_M_int);
-					$Fhours_S = ($Fhours_S * 60);
-					$Fhours_S = round($Fhours_S, 0);
-					if ($Fhours_S < 10) {$Fhours_S = "0$Fhours_S";}
-					if ($Fhours_M_int < 10) {$Fhours_M_int = "0$Fhours_M_int";}
-					$Ftime = "$Fhours_H_int:$Fhours_M_int:$Fhours_S";
-				}
-				if ($precision == 'M'){
-					$Fminutes_M = ($sec / 60);
-					$Fminutes_M_int = floor($Fminutes_M);
-					$Fminutes_M_int = intval("$Fminutes_M_int");
-					$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
-					$Fminutes_S = ($Fminutes_S * 60);
-					$Fminutes_S = round($Fminutes_S, 0);
-					if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
-					$Ftime = "$Fminutes_M_int:$Fminutes_S";
-				}
-				if ($precision == 'S'){
-					$Ftime = $sec;
-				}
-				return "$Ftime";
-			}
+            for ($i=0;$i<=$days;$i++)
+            {
+                    $dateARY[$i] = $d1;
+                    $d1 = date("Y-m-d", strtotime(date("Y-m-d", strtotime($d1)) . " +1 day"));
+            }
+            return $dateARY;
+    }
+
+   
+    function go_get_date_diff($d1, $d2)
+    {
+            $diff = abs(strtotime($d2) - strtotime($d1));
+
+            $years = floor($diff / (365*60*60*24));
+            $months = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
+            $days = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+
+            //printf("%d years, %d months, %d days\n", $years, $months, $days);
+            return "$years|$months|$days";
+    }
+
+    ##### reformat seconds into HH:MM:SS or MM:SS #####
+    function go_sec_convert($sec,$precision){
+		$sec = round($sec,0);
+		if ($sec < 1){
+			return "0:00";
 		}
+		else{
+			if ($sec < 3600) {$precision='M';}
+			if ($precision == 'H'){
+				$Fhours_H = ($sec / 3600);
+				$Fhours_H_int = floor($Fhours_H);
+				$Fhours_H_int = intval("$Fhours_H_int");
+				$Fhours_M = ($Fhours_H - $Fhours_H_int);
+				$Fhours_M = ($Fhours_M * 60);
+				$Fhours_M_int = floor($Fhours_M);
+				$Fhours_M_int = intval("$Fhours_M_int");
+				$Fhours_S = ($Fhours_M - $Fhours_M_int);
+				$Fhours_S = ($Fhours_S * 60);
+				$Fhours_S = round($Fhours_S, 0);
+				if ($Fhours_S < 10) {$Fhours_S = "0$Fhours_S";}
+				if ($Fhours_M_int < 10) {$Fhours_M_int = "0$Fhours_M_int";}
+				$Ftime = "$Fhours_H_int:$Fhours_M_int:$Fhours_S";
+			}
+			if ($precision == 'M'){
+				$Fminutes_M = ($sec / 60);
+				$Fminutes_M_int = floor($Fminutes_M);
+				$Fminutes_M_int = intval("$Fminutes_M_int");
+				$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
+				$Fminutes_S = ($Fminutes_S * 60);
+				$Fminutes_S = round($Fminutes_S, 0);
+				if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
+				$Ftime = "$Fminutes_M_int:$Fminutes_S";
+			}
+			if ($precision == 'S'){
+				$Ftime = $sec;
+			}
+			return "$Ftime";
+		}
+	}
 				
 	function inner_checkIfTenant($groupId, $linkgo){
         $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";

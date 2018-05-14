@@ -1,16 +1,29 @@
 <?php
-    ####################################################
-    #### Name: goFunctions.php                      ####
-    #### Type: API Functions                        ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Jerico James Flores Milo       ####
-    #### License: AGPLv2                            ####
-    ####################################################
-    
+/**
+ * @file        goFunctions.php
+ * @brief       General Functions
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 	if (isset($_GET["session_user"])) { $session_user = $_GET["session_user"];
     } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }
-	else $apiresults = array("result" => "Error: Session User Not Defined");
+	//else $apiresults = array("result" => "Error: Session User Not Defined");
 	
     ##### get usergroup #########
     function go_get_groupid($goUser, $dbase){
@@ -70,12 +83,12 @@
     
     function go_total_agents_callv($groupId) {
         include("goDBasterisk.php");
-        if (!checkIfTenant($groupId)) {
-                   $query = "select count(*) as qresult from vicidial_users";
-                   $rsltv = mysqli_query($link,$query);
+        if (!checkIfTenant($groupId)) { 
+           $query = "select count(*) as qresult from vicidial_users";
+           $rsltv = mysqli_query($link,$query);
         } else {
-                   $query = "select count(*) as qresult from vicidial_users where user_group='$groupId'";
-                   $rsltv = mysqli_query($link,$query);
+           $query = "select count(*) as qresult from vicidial_users where user_group='$groupId'";
+           $rsltv = mysqli_query($link,$query);
         }
                 
         $fresults = mysqli_fetch_assoc($rsltv);
@@ -1698,7 +1711,7 @@
             return $result;
         }
     }
-
+    
     // check usergroup in-reference to campaign
     function go_check_usergroup_campaign($link, $usergroup = NULL, $campaign_id = NULL){
         $result = 0; // if result is returned 1, then the usergroup is matched with the campaign
@@ -1733,6 +1746,5 @@
         } else {
             return "Failed to rebuild conf. Mysql_Error: ".$dbase->getLastError();
         }
-
     }
 ?>

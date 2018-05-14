@@ -1,36 +1,47 @@
 <?php
-    /***************************************************
-    #### Name: goAPI.php                            ####
-    #### Type: API for dashboard php encode         ####
-    #### Version: 0.9                               ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014   ####
-    #### Written by: Jerico James Flores Milo       ####
-    #### License: AGPLv2                            ####
-    ***************************************************/
+/**
+ * @file    goAPI.php
+ * @brief     API to handle every API
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
+ * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
    
-    include_once ("MySQLiDB.php"); 
     include_once ("goDBasterisk.php");
     include_once ("goDBgoautodial.php");
     include_once ("goDBkamailio.php");
     include_once ("goFunctions.php");
 
-    ### Check if DB variables are not set ###
+    /* Check if DB variables are not set */
 	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-	$VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
-	$VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
+	$VARDB_user     = (!isset($VARDB_user)) ? "asteriskDBu" : $VARDB_user;
+	$VARDB_pass     = (!isset($VARDB_pass)) ? "asteriskDBpw" : $VARDB_pass;
 	$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
 
 	$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
+	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialDBu" : $VARDBgo_user;
+	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialDBpw" : $VARDBgo_pass;
 	$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
 
 	$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
-	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
+	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailioDBu" : $VARDBgokam_user;
+	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailioDBpw" : $VARDBgokam_pass;
 	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
-     ### End of DB variables ###
-
+    /* End of DB variables */
     
     /* Variables */
     
@@ -58,15 +69,11 @@
             $goURL = $_POST["goURL"];
     }
     
-    $default_users = array('VDAD','goAPI','goautodial','VDCL');
+    define('DEFAULT_USERS', array('VDAD','VDCL'));
 
     $goCharset = "UTF-8";
-    $goVersion = "1.0";
+    $goVersion = "4.0";
     
-    $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
-    $goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
-    $kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $VARDBgokam_database);
-
     /* check credentials */
 	$pass_hash = '';
 	$cwd = $_SERVER['DOCUMENT_ROOT'];
@@ -93,8 +100,9 @@
     if($pass_hash_enabled > 0 )
     	$astDB->where("pass_hash", $pass_hash);
     else
-	$astDB->where("pass", $pass);
-    $check_result = $astDB->getValue("vicidial_users", "count(*)", NULL);
+	   $astDB->where("pass", $pass);
+    $astDB->getOne("vicidial_users", "count(*) as sum");
+    $check_result = $astDB->count;
     
     if ($check_result > 0) {
        
@@ -110,7 +118,6 @@
         $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );
         
     }
-    
     
     $userresponsetype = $_REQUEST["responsetype"];
     
@@ -129,17 +136,17 @@
     	} else {
     		if ($userresponsetype == "xml") {
     			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $action .' "</action>\n" )';
-			apiXMLOutput( $apiresults );
-                        echo "</goautodialapi>";
-                } else {
-                        if ($responsetype) {
-                                exit( "result=error;message=This API function can only return XML response format;" );
-                        }
-
-                        foreach ($apiresults as $k => $v) {
-                                echo "" . $k . "=" . $v . ";";
-                        }
+                apiXMLOutput( $apiresults );
+                echo "</goautodialapi>";
+            } else {
+                if ($responsetype) {
+                    exit( "result=error;message=This API function can only return XML response format;" );
                 }
+
+                foreach ($apiresults as $k => $v) {
+                    echo "" . $k . "=" . $v . ";";
+                }
+            }
         }
     }
 

@@ -1,12 +1,25 @@
 <?php
-    /////////////////////////////////////////////////
-    // Name: goGetReports.php                     ///
-    // Description: API for reports               ///
-    // Version: 4.0                               ///
-    // Copyright: GOAutoDial Ltd. (c) 2011-2016   ///
-    // Written by: Alexander Jim H. Abenoja       ///
-    // License: AGPLv2                            ///
-    /////////////////////////////////////////////////
+/**
+ * @file        goGetReports.php
+ * @brief       API to for Reports (Export Call Report, Stats, Agent Details etc.)
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);*/
@@ -16,29 +29,28 @@ ini_set('memory_limit', '2048M');
 	include_once("goReportsFunctions.php");	
 
 	// need function go_sec_convert();
-    $pageTitle = strtolower(mysqli_real_escape_string($link, $_REQUEST['pageTitle']));
-    $fromDate = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
+    $pageTitle = strtolower($astDB->escape($_REQUEST['pageTitle']));
+    $fromDate = $astDB->escape($_REQUEST['fromDate']);
     if(empty($fromDate))
     	$fromDate = date("Y-m-d")." 00:00:00";
-    $toDate = mysqli_real_escape_string($link, $_REQUEST['toDate']);
+    $toDate = $astDB->escape($_REQUEST['toDate']);
     if(empty($toDate))
     	$toDate = date("Y-m-d")." 23:59:59";
-    $campaignID = mysqli_real_escape_string($link, $_REQUEST['campaignID']);
-    $request = mysqli_real_escape_string($link, $_REQUEST['request']);
-    $userID = mysqli_real_escape_string($link, $_REQUEST['userID']);
-    $userGroup = mysqli_real_escape_string($link, $_REQUEST['userGroup']);
-	$dispo_stats = mysqli_real_escape_string($link, $_REQUEST['statuses']);
+    $campaignID = $astDB->escape($_REQUEST['campaignID']);
+    $request = $astDB->escape($_REQUEST['request']);
+    $userID = $astDB->escape($_REQUEST['userID']);
+    $userGroup = $astDB->escape($_REQUEST['userGroup']);
+	$dispo_stats = $astDB->escape($_REQUEST['statuses']);
 	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	$log_user = $astDB->escape($_REQUEST['log_user']);
+	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
 	
-	$userGroup = go_get_groupid($session_user);
+	$userGroup = go_get_groupid($goUser, $astDB);
 	
 	$defPage = array("stats", "agent_detail", "agent_pdetail", "dispo", "call_export_report", "sales_agent", "sales_tracker", "inbound_report");
 
-	//if(empty($session_user) || empty($pageTitle)){
-	if(empty($session_user)){
+	if(empty($session_user) && empty($goUser)){
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 	}elseif(empty($fromDate) && empty($toDate)){
@@ -51,18 +63,16 @@ ini_set('memory_limit', '2048M');
 	}elseif($pageTitle == "sales_agent" && empty($request)){
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
-	}
-	// elseif(!in_array($pageTitle, $defPage)){
-	// 	$err_msg = error_handle("10004");
-	// 	$apiresults = array("code" => "10004", "result" => $err_msg);
-	// }
-	elseif($pageTitle == "call_export_report"){
-		$campaigns = mysqli_real_escape_string($link, $_REQUEST['campaigns']);
-		$inbounds = mysqli_real_escape_string($link, $_REQUEST['inbounds']);
-		$lists = mysqli_real_escape_string($link, $_REQUEST['lists']);
-		$custom_fields = mysqli_real_escape_string($link, $_REQUEST['custom_fields']);
-		$per_call_notes = mysqli_real_escape_string($link, $_REQUEST['per_call_notes']);
-		$rec_location = mysqli_real_escape_string($link, $_REQUEST['rec_location']);
+	}elseif(!in_array($pageTitle, $defPage)){
+	 	$err_msg = error_handle("10004");
+		$apiresults = array("code" => "10004", "result" => $err_msg);
+	}elseif($pageTitle == "call_export_report"){
+		$campaigns = $astDB->escape($_REQUEST['campaigns']);
+		$inbounds = $astDB->escape($_REQUEST['inbounds']);
+		$lists = $astDB->escape($_REQUEST['lists']);
+		$custom_fields = $astDB->escape($_REQUEST['custom_fields']);
+		$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
+		$rec_location = $astDB->escape($_REQUEST['rec_location']);
 		
 		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $userGroup, $link);
 		
@@ -70,22 +80,17 @@ ini_set('memory_limit', '2048M');
 	}else{
 		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats, $linkgo);
 		$apiresults = array("result" => "success", "getReports" => $goReportsReturn);
-		//var_dump($goReportsReturn);
 	}
-	//2017-04-06 00:00:00    2017-04-06 07:41:00
-	
    
 	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$userGroup, $link){
-		//$date_diff = go_get_date_diff($fromDate, $toDate);
-        //$date_array = implode("','",go_get_dates($fromDate, $toDate));
 		
-		if($campaigns != "")
+		if(!empty($campaigns))
 			$campaigns = explode(",",$campaigns);
-		if($inbounds != "")
+		if(!empty($inbounds))
 		    $inbounds = explode(",",$inbounds);
-		if($lists != "")	
+		if(!empty($lists))	
 		    $lists = explode(",",$lists);
-		if($dispo_stats != "")	
+		if(!empty($dispo_stats))	
 		    $dispo_stats = explode(",",$dispo_stats);
 		
 		$campaign_SQL = "";
@@ -97,11 +102,15 @@ ini_set('memory_limit', '2048M');
 		$group_ct = count($inbounds);
 		$list_ct = count($lists);
 		$status_ct = count($dispo_stats);
-		
+
 		if($campaigns != ""){
 			$i=0;
+			$array_campaign = Array();
+
 			while($i < $campaign_ct){
-				$campaign_SQL .= "'$campaigns[$i]',";
+				//$campaign_SQL .= "'$campaigns[$i]',";
+				$campaign_SQL .= "'?',";
+				array_push($array_campaign, $campaigns[$i]);
 				$i++;
 			}
 			
@@ -115,9 +124,13 @@ ini_set('memory_limit', '2048M');
 		
 		if($inbounds != ""){
 			$i=0;
+			$array_inbound = Array();
+
 			while($i < $group_ct){
 				if (strlen($inbounds[$i]) > 0) {
-				  $group_SQL .= "'$inbounds[$i]',";
+				  //$group_SQL .= "'$inbounds[$i]',";
+					$group_SQL .= "'?',";
+					array_push($array_inbound, $inbounds[$i]);
 				}
 				$i++;
 			}
@@ -136,8 +149,11 @@ ini_set('memory_limit', '2048M');
 			$list_SQL = "";
 			
 			$i=0;
+			$array_list = Array();
 			while($i < $list_ct){
-				$list_SQL .= "'$lists[$i]',";
+				//$list_SQL .= "'$lists[$i]',";
+				$list_SQL .= "'?',";
+				array_push($array_list, $lists[$i]);
 				$i++;
 			}
 			if (in_array("ALL", $lists)){
@@ -145,8 +161,10 @@ ini_set('memory_limit', '2048M');
 				$i=0;
 				while($i < $campaign_ct){
 					$camp_id = $campaigns[$i];
-					$query_list = mysqli_query($link,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
-					while($fetch_list = mysqli_fetch_array($query_list)){
+					$astDB->where("campaign_id", $camp_id);
+					$selectQuery = $astDB->getValue("vicidial_lists", "list_id");
+					//$query_list = mysqli_query($link,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
+					foreach($selectQuery as $fetch_list){
 						$array_list[] = $fetch_list["list_id"];
 					}
 					$i++;
@@ -166,8 +184,12 @@ ini_set('memory_limit', '2048M');
 		
 		if($dispo_stats != ""){
 			$i=0;
+			$array_status = Array();
+
 			while($i < $status_ct){
-				$status_SQL .= "'$dispo_stats[$i]',";
+				//$status_SQL .= "'$dispo_stats[$i]',";
+				$status_SQL .= "'?',";
+				array_push($array_status, $dispo_stats[$i]);
 				$i++;
 			}
 			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ){
@@ -179,7 +201,6 @@ ini_set('memory_limit', '2048M');
 			}
 		}
 		
-		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
 		if($userGroup !== "ADMIN"){
 			$stringv = go_getall_allowed_users($userGroup);
 			$user_group_SQL = "AND vl.user IN ($stringv)";
@@ -190,40 +211,34 @@ ini_set('memory_limit', '2048M');
 		$export_fields_SQL = "";
 		
 		if ($RUNcampaign > 0 && $RUNgroup < 1){
-			$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+			$where_data = Array($fromDate, $toDate);
+			$result = $astDB->rawQuery("SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' AND '?') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date", $where_data);
+				//$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
 		}
 		
 		if ($RUNgroup > 0 && $RUNcampaign < 1){
-		 	//if($rec_location == "Y")
-            //    $rec_location_where = "and re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id";
-//                       $query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
-                        //$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid,vi.entry_list_id,vl.uniqueid $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl, vicidial_closer_log vcl,vicidial_list vi $rec_location_from where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id = vcl.lead_id $rec_location_where $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date ";
-            $query = "SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vcl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date";
+			$where_data = Array($fromDate, $toDate);
+			$result = $astDB->rawQuery("SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vcl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' AND '?') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date", $where_data);
+            //$query = "SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vcl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id AND vcl.lead_id = vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date";
 		}
 		
 		if ($RUNcampaign > 0 && $RUNgroup > 0){
-            //if($rec_location == "Y")
-            //$rec_location_where = "AND ((re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id) OR (re.lead_id=vcl.lead_id and vcl.closecallid = re.vicidial_id))";
-            
-			$query = "
+			$where_data = Array($fromDate, $toDate);
+			$result = $astDB->rawQuery("
+				(SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.term_reason,vi.rank,vi.owner,vi.lead_id,vl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' AND '?') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date) 
+				UNION 
+				(SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.term_reason,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' AND '?') and vu.user=vcl.user and vi.lead_id=vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date);
+				", $where_data);
+			/*$query = "
 				(SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.term_reason,vi.rank,vi.owner,vi.lead_id,vl.uniqueid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date) 
 				UNION 
 				(SELECT vcl.call_date,vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.length_in_sec,vcl.user_group,vcl.term_reason,vi.rank,vi.owner,vi.lead_id, vcl.closecallid, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi where (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vcl.user and vi.lead_id=vcl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vcl.call_date);
-				";
-
-            //$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vcl.closecallid,vl.alt_dial, vi.entry_list_id $export_fields_SQL FROM vicidial_users vu,vicidial_closer_log vcl, vicidial_log vl, vicidial_list vi where (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') and vu.user=vl.user and vi.lead_id=vl.lead_id AND vl.lead_id=vcl.lead_id $list_SQL $group_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date ";
+				";*/
         }
-
-
-		//$query = "SELECT * FROM vicidial_list LIMIT 100;";
-		$result = mysqli_query($link, $query) or die(mysqli_error($link));
-		
-		$num_column = mysqli_num_fields($result);
-		
-		//$filename = $date_diff.".csv";
 		
 		//OUTPUT DATA HEADER//
-		while ($fieldinfo=mysqli_fetch_field($result))
+		//while ($fieldinfo=mysqli_ftch_field($result))
+		while ($fieldinfo = $astDB->getFieldNames())
 		{
 			$csv_header[] = $fieldinfo->name;
 		}
@@ -231,16 +246,19 @@ ini_set('memory_limit', '2048M');
 			array_push($csv_header, "call_notes");
 		}
 
-		//if($rec_location == "Y"){
-		//	array_push($csv_header, "recording_location");
-		//}
+		if($rec_location == "Y"){
+			array_push($csv_header, "recording_location");
+		}
 		if($custom_fields == "Y")	{
 		    for($i = 0 ; $i < count($array_list); $i++){
 				$list_id = $array_list[$i];
-				$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
+				//$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
+				$cflist_data = Array("custom_".$list_id);
+				$query_CF_list = rawQuery("DESC ?;", $cflist_data);
 				if($query_CF_list){
 					$n=0;
-					while ($field_list=mysqli_fetch_array($query_CF_list)){
+					//while ($field_list=mysqli_fetch_array($query_CF_list)){
+					foreach ($query_CF_list as $field_list){
 						$exec_query_CF_list = $field_list["Field"];
 
 						if($exec_query_CF_list != "lead_id"){
@@ -249,20 +267,8 @@ ini_set('memory_limit', '2048M');
 						}
 					}
 				}
-				//old
-					// $query_CF_list = mysqli_query($link, "SELECT * FROM custom_$list_id;");
-					// if($query_CF_list){
-					// 	while ($field_list=mysqli_fetch_field($query_CF_list)){
-					// 		$exec_query_CF_list = $field_list->name;
-					// 		if($exec_query_CF_list != "lead_id"){
-					// 			$active_list_fields[] = $exec_query_CF_list;
-					// 			array_push($csv_header, $exec_query_CF_list);
-					// 		}
-					// 	}
-					// 	$active_list_fields[] = "|";
-					// }
 			}
-			// new
+
 			$header_CF = array();
 			$keys = array_keys($active_list_fields);
 			for($i = 0 ; $i < count($keys); $i++){
@@ -276,24 +282,19 @@ ini_set('memory_limit', '2048M');
 			}
 			$csv_header = array_merge($csv_header,$header_CF);
 		}
-
-		if($rec_location == "Y"){
-			array_push($csv_header, "recording_location");
-		}
 		
 		//OUTPUT DATA ROW//
-		while($row = mysqli_fetch_row($result)) {
+		foreach ($result as $row) {
 			$lead_id = $row[34];
 			$uniqueid = $row[35];
 			$list_id_spec = $row[8];
-			//if($RUNcampaign > 0 && $RUNgroup > 0)
-			//	$uniqueid2 = $row[36];
 
 			if($per_call_notes == "Y"){
-				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
-				$notes_ct = mysqli_num_rows($query_callnotes);
+				$astDB->where("lead_id", $lead_id);
+				$fetch_callnotes = $astDB->getValue("vicidial_call_notes", "call_notes");
+				//$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
+				$notes_ct = $astDB->count;
 				if ($notes_ct > 0){
-					$fetch_callnotes = mysqli_fetch_array($query_callnotes);
 					$notes_data =	$fetch_callnotes["call_notes"];
 					$notes_data = rawurldecode($notes_data);
 				}else{
@@ -303,85 +304,62 @@ ini_set('memory_limit', '2048M');
 			}
 
 			if($rec_location == "Y"){
-				// if(($RUNcampaign > 0 && $RUNgroup < 1) || ($RUNcampaign > 0 && $RUNgroup > 0)){
-				// 	$id_SQL = " AND vicidial_id = '$uniqueid'";
-				// }else{
-				// 	$id_SQL = " AND vicidial_id = '$uniqueid'";
-				// }
+				//$recording_array = Array($lead_id);
 				if(isset($uniqueid2) && !empty($uniqueid2)){
-					$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
+					//$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
+					$astDB->where("vicidial_id", $uniqueid);
+					$astDB->orWhere("vicidial_id", $uniqueid2);
 				}else{
-					$condition_SQL = "AND vicidial_id = '$uniqueid'";
+					//$condition_SQL = "AND vicidial_id = '$uniqueid'";
+					$astDB->where("vicidial_id", $uniqueid);
 				}
-					
-				$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' $condition_SQL LIMIT 1;");
+				$astDB->where("lead_id", $lead_id);
+				$fetch_recording = $astDB->getValue("recording_log", "location");	
+				//$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' $condition_SQL LIMIT 1;");
 				$rec_ct = mysqli_num_rows($query_recordings);
 				if ($rec_ct > 0){
-					$fetch_recording = mysqli_fetch_array($query_recordings);
 					$rec_data =	$fetch_recording["location"];
 					//$rec_data = rawurldecode($rec_data);
 				}else{
 					$rec_data = "";
 				}
 				array_push($row,$rec_data);
-
-				// $rec_location_fields = ", re.location as recording_location";
-				// $rec_location_from = ", recording_log re";
-				// $rec_location_where = "and re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id";
 			}
-			//if($rec_location == "Y"){
-			//	$query_rec_location = mysqli_query($link, "SELECT recording_id as recording_location from recording_log AND (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') where lead_id='$lead_id' LIMIT 1;");
-			//	$rec_location_ct = mysqli_num_rows($query_rec_location);
-			//	if ($rec_location_ct > 0){
-			//		$fetch_rec_location = mysqli_fetch_array($query_rec_location);
-			//		$rec_location_data =	$fetch_rec_location["recording_location"];
-			//	}else{
-			//		$rec_location_data = "";
-			//	}
-			//	array_push($row,$rec_location_data);
-			//}
 
-                        if(!empty($row[28])) {
-                                $row[28] = preg_replace('/[,]+/', '-', trim($row[28]));
-                        }
-                        if(!empty($row[15])) {
-                                $row[15] = preg_replace('/[,]+/', '-', trim($row[15]));
-                        }
-                        if(!empty($row[16])) {
-                                $row[16] = preg_replace('/[,]+/', '-', trim($row[16]));
-                        }
-                        if(!empty($row[17])) {
-                                $row[17] = preg_replace('/[,]+/', '-', trim($row[17]));
-                        }
-
+			// Replace special characters [,] with -
+            if(!empty($row[28])) {
+                $row[28] = preg_replace('/[,]+/', '-', trim($row[28]));
+            }
+            if(!empty($row[15])) {
+                $row[15] = preg_replace('/[,]+/', '-', trim($row[15]));
+            }
+            if(!empty($row[16])) {
+                $row[16] = preg_replace('/[,]+/', '-', trim($row[16]));
+            }
+            if(!empty($row[17])) {
+                $row[17] = preg_replace('/[,]+/', '-', trim($row[17]));
+            }
 
 			if($custom_fields == "Y")	{
 				$keys = array_keys($active_list_fields); // list of active custom lists
 				for($i = 0 ; $i < count($keys); $i++){
 				    $list_id = $keys[$i];
-					//var_dump($active_list_fields[$list_id]);
 					$fields = implode(",", $active_list_fields[$list_id]);
 					
 					if("custom_".$list_id_spec === $list_id){
-						$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
-						$query_CF = mysqli_query($link, $query_row_sql);
-						
-						//if($query_CF){
-							$fetch_CF = mysqli_fetch_array($query_CF);
-							
-							if($fetch_CF !== NULL){
-								//var_dump($fetch_CF);
-								for($x=0;$x < count($header_CF);$x++){
-									if(!empty($fetch_CF[$header_CF[$x]])){
-										$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
-									}else{
-										$fetch_row[] =  "";
-									}
+						$astDB->where("lead_id", $lead_id);
+						$fetch_CF = $astDB->getValue($list_id, $fields);
+						//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
+
+						if($fetch_CF !== NULL){
+							for($x=0;$x < count($header_CF);$x++){
+								if(!empty($fetch_CF[$header_CF[$x]])){
+									$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+								}else{
+									$fetch_row[] =  "";
 								}
 							}
-							
-							//die();
-						//}
+						}
 					}
 					
 
@@ -392,37 +370,6 @@ ini_set('memory_limit', '2048M');
 					unset($fetch_row);
 					unset($fetch_CF);
 			    }
-				// old
-				  //   for($i = 0 ; $i < count($array_list); $i++){
-					 //    $list_id = "custom_".$array_list[$i];
-						
-						// $active_list_fields = implode(",",$active_list_fields);
-						// $active_list_fields = trim($active_list_fields, "|,");
-						// $active_list_fields = explode("|,", $active_list_fields);
-						// $fields = implode(",",$active_list_fields);
-						// $fields_array = explode(",", $fields);
-						// //$queries[] = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;";
-						// $query_CF = mysqli_query($link, "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id' LIMIT 1;");
-						// if($query_CF){
-						// 	$fetch_CF = mysqli_fetch_array($query_CF);
-						// 	//while($fetch_CF = mysqli_fetch_array($query_CF)){
-						// 	for($x=0;$x < count($fields_array);$x++){
-						// 		$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$fields_array[$x]]);
-						// 	}
-						// }else{
-						// //	for($x=0;$x < count($fields_array);$x++){
-						// //		$fetch_row[] =  '';
-						// //	}
-						// }
-						
-						
-						// for($a=0;$a < count($fetch_row);$a++){
-						// 	array_push($row, $fetch_row[$a]);
-						// }
-						
-						// unset($fetch_row);
-						// unset($fetch_CF);
-				  //   }
 			}
 			$csv_row[] = $row;
 		}
@@ -441,32 +388,32 @@ ini_set('memory_limit', '2048M');
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats, $linkgo){
 		
 		if (!empty($campaignID) || $pageTitle == 'call_export_report'){
-		  	//$return['groupId'] = $goReportsClass->go_getUsergroup($userID);
-            //$return['groupId'] = go_getUsergroup($userID,$link);
 			$date1=new DateTime($fromDate);
 			$date2=new DateTime($toDate);
 			$interval = date_diff($date1,$date2);
 			$date_diff = $interval->format('%d');
             $date_array = implode("','",go_get_dates($fromDate, $toDate));
-//			 $mysqli_query($link, cache_on();
 			$file_download = 1;
             
             //Initialise Values
 			if ($pageTitle!='inbound_report') {
-//				$campaignID = '';
-				$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'") or die(mysqli_error($link));
-				$num_query = mysqli_num_rows($query);
-				if($num_query > 0){
+				$astDB->where("campaign_id", $campaignID);
+				$resultu = $astDB->getValue("vicidial_campaigns", "campaign_name");
+				//$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'") or die(mysqli_error($link));
+				//$num_query = mysqli_num_rows($query);
+				if($astDB->count > 0){
 					$err_msg = error_handle("41004", "campaignID. Doesn't exist");
 					$apiresults = array("code" => "41006", "result" => $err_msg); 
 				}
 			} else {
-				$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'") or die(mysqli_error($link));
+				$astDB->where("uniqueid_status_prefix", $userGroup);
+				$resultu = $astDB->getValue("vicidial_inbound_groups", "group_name as campaign_name");
+				//$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'") or die(mysqli_error($link));
 			}
             
-				$resultu = mysqli_fetch_array($query);
 				$return['campaign_name'] = $resultu['campaign_name'];
-				$ul = "and campaign_id='$campaignID'";
+
+				//$ul = "and campaign_id='$campaignID'";
 				
 				if (!isset($request) || $request=='') {
 					$return['request'] = 'daily';
@@ -474,12 +421,14 @@ ini_set('memory_limit', '2048M');
 					$return['request'] = $request;
 				}
 				
-				$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'") or die(mysqli_error($link));
+				$astDB->where("sale", "Y");
+				$query = $astDB->getValue("vicidial_statuses", "status");
+				//$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'") or die(mysqli_error($link));
 				$sstatusRX = "";
 				$sstatuses = array();
 				
 				$a = 0;
-				while($Qstatus = mysqli_fetch_array($query)){
+				foreach($query as $Qstatus){
 					$goTempStatVal = $Qstatus['status'];
 					$sstatuses[$a] = $Qstatus['status'];
 					$sstatusRX	.= "{$goTempStatVal}|";
@@ -489,13 +438,16 @@ ini_set('memory_limit', '2048M');
 				if(!empty($sstatuses))
 				$sstatuses = implode("','",$sstatuses);
 				
-				$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'") or die(mysqli_error($link));
+				$astDB->where("sale", "Y");
+				$astDB->where("campaign_id", $campaignID);
+				$query = $astDB->get("vicidial_campaign_statuses", "status");
+				//$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'") or die(mysqli_error($link));
 				
 				$cstatusRX = "";
 				$cstatuses = array();
 				
 				$b = 0;
-				while($Qstatus = mysqli_fetch_array($query2)){
+				foreach($query as $Qstatus){
 					$goTempStatVal = $Qstatus['status'];
 					$cstatuses[$b] = $Qstatus['status'];
 					$cstatusRX	.= "{$goTempStatVal}|";
@@ -534,13 +486,14 @@ ini_set('memory_limit', '2048M');
 						$ul = "";
 						
 						if (strlen($stringv) > 0 && $stringv != '') {
+							$stats_array(0,$fromDate, $toDate);
+							$astDB->rawQuery("UNION select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' FROM vicidial_closer_log WHERE length_in_sec > '?' $ul and date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' and '?' $closerCampaigns group by cdate", $stats_array);
 							$MunionSQL = "UNION select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_closer_log where length_in_sec>'0' $ul and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns group by cdate";
 							$TunionSQL = "UNION ALL select phone_number from vicidial_closer_log vcl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul";
 							$DunionSQL = "UNION select status,count(*) as ccount from vicidial_closer_log where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul group by status";
 						}
 						
 						// Total Calls Made
-						//$query = mysqli_query($link, "select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and call_date between '$fromDate 00:00:00' and '$toDate 23:59:59'");
 						$query_total_calls_made = "select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where length_in_sec>'0' $ul and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cdate $MunionSQL) t group by cdate;";
 						$query = mysqli_query($link, $query_total_calls_made);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -634,7 +587,6 @@ ini_set('memory_limit', '2048M');
 						}
 						
 						// Total Calls Made
-						//$query = mysqli_query($link, "select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and call_date between '$fromDate 00:00:00' and '$toDate 23:59:59'");
 						$query = mysqli_query($link, "select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by weekno $MunionSQL) t group by weekno;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$weekno[] = "Week ".$row['weekno'];
@@ -824,8 +776,6 @@ ini_set('memory_limit', '2048M');
 					$PCusersARY=$MT;
 					$PCuser_namesARY=$MT;
 					
-					
-					//$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
 					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
 					$pause_sec_ct = mysqli_num_rows($query);
 			
@@ -851,31 +801,6 @@ ini_set('memory_limit', '2048M');
 						
 						$i++;
 					}
-					
-					
-					/*foreach ($query->result() as $i => $row)
-						{
-						$PCuser[$i] =		$row->user;
-						$PCpause_sec[$i] =	$row->pause_sec;
-						$sub_status[$i] =	$row->sub_status;
-				
-						if (!eregi("-$sub_status[$i]-", $sub_statuses))
-							{
-							$sub_statusesFILE .= ",$sub_status[$i]";
-							$sub_statuses .= "$sub_status[$i]-";
-							$sub_statusesARY[$sub_status_count] = $sub_status[$i];
-							$sub_statusesTOP .= "<td><div align=\"center\" class=\"style4\" nowrap><strong> &nbsp;$sub_status[$i]&nbsp; </strong></div></td>";
-							$sub_status_count++;
-							}
-						if (!eregi("-$PCuser[$i]-", $PCusers))
-							{
-							$PCusersARY[$user_count] = $PCuser[$i];
-							$user_count++;
-							}
-				
-						$i++;
-						} */
-					// END gather pause code information by user IDs
 					
 					//# BEGIN Gather all agent time records and parse through them in PHP to save on DB load
 					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul and campaign_id='$campaignID' LIMIT 10000000");
@@ -945,74 +870,6 @@ ini_set('memory_limit', '2048M');
 							$uc++;
 						}
 					}
-					/*
-					foreach ($query->result() as $i => $row)
-						{
-						$user =			$row->user;
-						$wait =			$row->wait_sec;
-						$talk =			$row->talk_sec;
-						$dispo =		$row->dispo_sec;
-						$pause =		$row->pause_sec;
-						$lead =			$row->lead_id;
-						$status =		$row->status;
-						$dead =			$row->dead_sec;
-						if ($wait > 65000) {$wait=0;}
-						if ($talk > 65000) {$talk=0;}
-						if ($dispo > 65000) {$dispo=0;}
-						if ($pause > 65000) {$pause=0;}
-						if ($dead > 65000) {$dead=0;}
-						$customer =		($talk - $dead);
-						if ($customer < 1)
-							{$customer=0;}
-						$TOTwait =	($TOTwait + $wait);
-						$TOTtalk =	($TOTtalk + $talk);
-						$TOTdispo =	($TOTdispo + $dispo);
-						$TOTpause =	($TOTpause + $pause);
-						$TOTdead =	($TOTdead + $dead);
-						$TOTcustomer =	($TOTcustomer + $customer);
-						$TOTALtime = ($TOTALtime + $pause + $dispo + $talk + $wait);
-						if ( ($lead > 0) and ((!eregi("NULL",$status)) and (strlen($status) > 0)) ) {$TOTcalls++;}
-						
-						$user_found=0;
-						if ($uc < 1) 
-							{
-							$Suser[$uc] = $user;
-							$uc++;
-							}
-						$m=0;
-						while ( ($m < $uc) and ($m < 50000) )
-							{
-							if ($user == "$Suser[$m]")
-								{
-								$user_found++;
-				
-								$Swait[$m] =	($Swait[$m] + $wait);
-								$Stalk[$m] =	($Stalk[$m] + $talk);
-								$Sdispo[$m] =	($Sdispo[$m] + $dispo);
-								$Spause[$m] =	($Spause[$m] + $pause);
-								$Sdead[$m] =	($Sdead[$m] + $dead);
-								$Scustomer[$m] =	($Scustomer[$m] + $customer);
-								if ( ($lead > 0) and ((!eregi("NULL",$status)) and (strlen($status) > 0)) ) {$Scalls[$m]++;}
-								}
-							$m++;
-							}
-						if ($user_found < 1)
-							{
-							$Scalls[$uc] =	0;
-							$Suser[$uc] =	$user;
-							$Swait[$uc] =	$wait;
-							$Stalk[$uc] =	$talk;
-							$Sdispo[$uc] =	$dispo;
-							$Spause[$uc] =	$pause;
-							$Sdead[$uc] =	$dead;
-							$Scustomer[$uc] =	$customer;
-							if ($lead > 0) {$Scalls[$uc]++;}
-							$uc++;
-							}
-		
-						} */
-						
-					//if ($DB) {echo "{$this->lang->line("go_done_gathering")} $i {$this->lang->line("go_records_analyzing")}<BR>\n";}
 					//# END Gather all agent time records and parse through them in PHP to save on DB load
 				
 					//////////////////////////////////////
@@ -1066,7 +923,6 @@ ini_set('memory_limit', '2048M');
 						$user_name_found=0;
 						while ($n < $user_ct)
 							{
-							//if (strtolower($Suser[$m]) == strtolower("$ULuser[$n]"))
 							if ($Suser[$m] == $ULuser[$n])
 								{
 								$user_name_found++;
@@ -1158,39 +1014,12 @@ ini_set('memory_limit', '2048M');
 
 						// END loop through each status //
 						
-						/*
-						if ($file_download > 0)
-							{
-							if (strlen($RAWtime)<1) {$RAWtime='0';}
-							if (strlen($RAWwait)<1) {$RAWwait='0';}
-							if (strlen($RAWtalk)<1) {$RAWtalk='0';}
-							if (strlen($RAWdispo)<1) {$RAWdispo='0';}
-							if (strlen($RAWpause)<1) {$RAWpause='0';}
-							if (strlen($RAWdead)<1) {$RAWdead='0';}
-							if (strlen($RAWcustomer)<1) {$RAWcustomer='0';}
-							$fileToutput = "$RAWname,$RAWuser,$RAWcalls,$RAWtimeTC,$RAWtime,$RAWwait,$RAWtalk,$RAWdispo,$RAWpause,$RAWdead,$RAWcustomer,$SstatusesFILE\n";
-							}
-						$Scalls[$m] = ($Scalls[$m] > 0) ? $Scalls[$m] : 0;
-						
-						if ($x==0) {
-							$bgcolor = "#E0F8E0";
-							$x=1;
-						} else {
-							$bgcolor = "#EFFBEF";
-							$x=0;
-						}
-						*/
-					//			<td> $StimeTC[$m]$TCuserAUTOLOGOUT </td>
 						if(is_null($Scalls[$m])){
 							$Scalls[$m] = 0;
 						}
-						//"rowID" => $rowId, 
+
 						$Toutput = array("name" => $Sname[$m], "user" => $Suser[$m], "number_of_calls" => $Scalls[$m], "agent_time" => $Stime[$m], "wait_time" => $Swait[$m], "talk_time" => $Stalk[$m], "dispo_time" => $Sdispo[$m], "pause_time" => $Spause[$m], "wrap_up" => $Sdead[$m], "customer_time" => $Scustomer[$m]);
 				
-						/*$Boutput = "<tr>
-								<td> $Sname[$m] </td>
-								$Sstatuses[$m]
-								</tr>";*/
 						$Sstatuses[$m] = rtrim( $Sstatuses[$m], ",");
 						$Boutput = array("rowID" => $rowId, "name" => $Sname[$m], "statuses" => $Sstatuses[$m]);
 						$BoutputFile = array("statuses" => $Sstatuses[$m]);
@@ -1205,7 +1034,6 @@ ini_set('memory_limit', '2048M');
 				
 						if ($TOPsortMAX < $TOPsortTALLY[$m]) {$TOPsortMAX = $TOPsortTALLY[$m];}
 				
-					//		echo "$Suser[$m]|$Sname[$m]|$Swait[$m]|$Stalk[$m]|$Sdispo[$m]|$Spause[$m]|$Scalls[$m]\n";
 						$m++;
 						$rowId++;
 					}
@@ -1292,32 +1120,6 @@ ini_set('memory_limit', '2048M');
 					$TOTALtime = gmdate('H:i:s', $TOTALtime);
 					$TOTtimeTC = gmdate('H:i:s', $TOTtimeTC);
 					
-		
-					// if ($file_download > 0)
-					// 	{
-					// 	$file_output .= "TOTAL: $TOT_AGENTS,$TOTcalls,$TOTtimeTC,$TOTALtime,$TOTwait,$TOTtalk,$TOTdispo,$TOTpause,$TOTdead,$TOTcustomer,$SUMstatusesFILE\n";
-					// 	}
-					//////////////////////////////////////
-					//# END formatting data for output section
-					//////////////////////////////////////
-					
-					// $return['TOPsorted_output']		= $TOPsorted_output;
-					// $return['BOTsorted_output']		= $BOTsorted_output;
-					// $return['TOPsorted_outputFILE']	= $TOPsorted_outputFILE;
-					// $return['TOTwait']				= $TOTwait;
-					// $return['TOTtalk']				= $TOTtalk;
-					// $return['TOTdispo']				= $TOTdispo;
-					// $return['TOTpause']				= $TOTpause;
-					// $return['TOTdead']				= $TOTdead;
-					// $return['TOTcustomer']			= $TOTcustomer;
-					// $return['TOTALtime']			= $TOTALtime;
-					// $return['TOTtimeTC']			= $TOTtimeTC;
-					// $return['sub_statusesTOP']		= $sub_statusesTOP;
-					// $return['SUMstatuses']			= $SUMstatuses;
-					// $return['TOT_AGENTS']			= $TOT_AGENTS;
-					// $return['TOTcalls']				= $TOTcalls;
-					// $return['file_output']			= $file_output;
-
 					$apiresults = array("result" => "success", "TOPsorted_output" => $TOPsorted_output, "sub_statusesTOP" => $sub_statusesTOP, "BOTsorted_output" => $BOTsorted_output, "SUMstatuses" => $SUMstatuses, "TOTwait" => $TOTwait, "TOTtalk" => $TOTtalk, "TOTdispo" => $TOTdispo, "TOTpause" => $TOTpause, "TOTdead" => $TOTdead, "TOTcustomer" => $TOTcustomer, "TOTALtime" => $TOTALtime, "TOTtimeTC" => $TOTtimeTC, "TOT_AGENTS" => $TOT_AGENTS, "TOTcalls" => $TOTcalls, "FileExport" => $TOPsorted_outputFILE);
 					
 					return $apiresults;
@@ -1346,39 +1148,6 @@ ini_set('memory_limit', '2048M');
 					
 					$rows_to_print = mysqli_num_rows($query);
 					
-					/* foreach($query->result() as $i => $row)
-						{
-						$calls[$i] =		$row->calls;
-						$talk_sec[$i] =		$row->talk;
-						$full_name[$i] =	$row->full_name;
-						$user[$i] =		$row->user;
-						$pause_sec[$i] =	$row->pause_sec;
-						$wait_sec[$i] =		$row->wait_sec;
-						$dispo_sec[$i] =	$row->dispo_sec;
-						$status[$i] =		$row->status;
-						$dead_sec[$i] =		$row->dead_sec;
-						$customer_sec[$i] =	($talk_sec[$i] - $dead_sec[$i]);
-						if ($customer_sec[$i] < 1)
-							{$customer_sec[$i]=0;}
-						if ( (!eregi("-$status[$i]-", $statuses)) and (strlen($status[$i])>0) )
-							{
-							$statusesFILE .= ",$status[$i]";
-							$statuses .= "$status[$i]-";
-							$SUMstatuses .= "$status[$i] ";
-							$statusesARY[$j] = $status[$i];
-							$SstatusesTOP .= "<td nowrap><div align=\"center\" class=\"style4\"><strong>&nbsp; $status[$i] &nbsp;</strong></div></td>";
-							$j++;
-							}
-						if (!eregi("-$user[$i]-", $users))
-							{
-							$users .= "$user[$i]-";
-							$usersARY[$k] = $user[$i];
-							$user_namesARY[$k] = $full_name[$i];
-							$k++;
-							}
-					
-						$i++;
-						} */
 					$i=0;
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
 						$calls[$i] =		$row['calls'];
@@ -1688,33 +1457,6 @@ ini_set('memory_limit', '2048M');
 					$k=0;
 					$query = mysqli_query($link, "select full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sub_status,sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 group by user,full_name,sub_status order by full_name,user,sub_status desc limit 100000");
 					$subs_to_print = mysqli_num_rows($query);
-				   
-					/* foreach ($query->result() as $i => $row)
-						{
-						$PCfull_name[$i] =	$row->full_name;
-						$PCuser[$i] =		$row->user;
-						$PCpause_sec[$i] =	$row->pause_sec;
-						$sub_status[$i] =	$row->sub_status;
-						$PCnon_pause_sec[$i] =	$row->non_pause_sec;
-					
-						if (!eregi("-$sub_status[$i]-", $sub_statuses))
-							{
-							$sub_statuses .= "$sub_status[$i]-";
-							$sub_statusesFILE .= ",$sub_status[$i]";
-							$sub_statusesARY[$j] = $sub_status[$i];
-							$SstatusesBOT .= "<td nowrap><div align=\"center\" class=\"style4\"><strong>&nbsp; $sub_status[$i] &nbsp;</strong></div></td>";
-							$j++;
-							}
-						if (!eregi("-$PCuser[$i]-", $PCusers))
-							{
-							$PCusers .= "$PCuser[$i]-";
-							$PCusersARY[$k] = $PCuser[$i];
-							$PCuser_namesARY[$k] = $PCfull_name[$i];
-							$k++;
-							}
-					
-						$i++;
-						}*/
 					
 					$i=0;             
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -1907,45 +1649,6 @@ ini_set('memory_limit', '2048M');
 						if ($file_download > 0) {
 							$file_output .= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
 						}
-						
-					$return['TOPsorted_output']		= $TOPsorted_output;
-					$return['BOTsorted_output']		= $BOTsorted_output;
-					$return['TOPsorted_outputFILE']	= $TOPsorted_outputFILE;
-					$return['TOTwait']				= $TOTwait;
-					$return['TOTtalk']				= $TOTtalk;
-					$return['TOTdispo']				= $TOTdispo;
-					$return['TOTpause']				= $TOTpause;
-					$return['TOTdead']				= $TOTdead;
-					$return['TOTcustomer']			= $TOTcustomer;
-					$return['TOTALtime']			= $TOTALtime;
-					$return['TOTtimeTC']			= $TOTtimeTC;
-					$return['sub_statusesTOP']		= $sub_statusesTOP;
-					$return['SUMstatuses']			= $SUMstatuses;
-					$return['TOT_AGENTS']			= $TOT_AGENTS;
-					$return['TOTcalls']				= $TOTcalls;
-					$return['TOTtime_MS']			= $TOTtime_MS; 
-					$return['TOTtotTALK_MS']		= $TOTtotTALK_MS; 
-					$return['TOTtotDISPO_MS']		= $TOTtotDISPO_MS; 
-					$return['TOTtotDEAD_MS']		= $TOTtotDEAD_MS; 
-					$return['TOTtotPAUSE_MS']		= $TOTtotPAUSE_MS; 
-					$return['TOTtotWAIT_MS']		= $TOTtotWAIT_MS; 
-					$return['TOTtotCUSTOMER_MS']	= $TOTtotCUSTOMER_MS; 
-					$return['TOTavgTALK_MS']		= $TOTavgTALK_MS; 
-					$return['TOTavgDISPO_MS']		= $TOTavgDISPO_MS; 
-					$return['TOTavgDEAD_MS']		= $TOTavgDEAD_MS; 
-					$return['TOTavgPAUSE_MS']		= $TOTavgPAUSE_MS; 
-					$return['TOTavgWAIT_MS']		= $TOTavgWAIT_MS; 
-					$return['TOTavgCUSTOMER_MS']	= $TOTavgCUSTOMER_MS; 
-					$return['TOTtotTOTAL_MS']		= $TOTtotTOTAL_MS;
-					$return['TOTtotNONPAUSE_MS']	= $TOTtotNONPAUSE_MS; 
-					$return['TOTtotPAUSEB_MS']		= $TOTtotPAUSEB_MS; 
-					$return['MIDsorted_output']		= $MIDsorted_output; 
-					$return['SstatusesTOP']			= $SstatusesTOP; 
-					$return['SstatusesSUM']			= $SstatusesSUM;
-					$return['SstatusesBOT']			= $SstatusesBOT; 
-					$return['SstatusesBOTR']		= $SstatusesBOTR;
-					$return['SstatusesBSUM']		= $SstatusesBSUM;
-					$return['file_output']			= $file_output;
 					
 					$apiresults = array("result" => "success",
 					"TOPsorted_output" => $TOPsorted_output,
@@ -1987,7 +1690,6 @@ ini_set('memory_limit', '2048M');
 					"SstatusesBSUM"	=> $SstatusesBSUM,
 					"Legend" => $legend,
 					"query" => $perfdetails_sql
-					//$return['file_output']			= $file_output;
 					);
 					
 					return $apiresults;
@@ -1996,24 +1698,16 @@ ini_set('memory_limit', '2048M');
 				//Dial Statuses Summary
 				if ($pageTitle=="dispo") {
 					$list_ids[0] = "ALL";
-					//$total_all=($list_ids[0] == "{$this->lang->line("go_all")}") ? ''.$this->lang->line("go_all_list_ids").' '.$campaignID : ''.$this->lang->line("go_list_ids").': '.implode(',',$list_ids);
 					$total_all=($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
 					
 					if (isset($list_ids) && $list_ids[0] == "ALL") {
 						$query = mysqli_query($link, "SELECT list_id FROM vicidial_lists WHERE campaign_id='$campaignID' ORDER BY list_id");
 		
-						/*foreach ($query->result() as $i => $row) {
-							$list_ids[$i]=$row->list_id;
-						}
-						$i++;
-						$list_ids[$i] = "{$userGroup}0";
-						*/
 						$i=0;
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$list_ids[$i]=$row['list_id'];
 							$i++;
 						}
-						//$list_ids[$i] = "{$userGroup}0";
 					}
 					$list = "'".implode("','",$list_ids)."'";
 					// grab names of global statuses and statuses in the selected campaign
@@ -2021,24 +1715,12 @@ ini_set('memory_limit', '2048M');
 					//$statuses_to_print = $query->num_rows();
 					$statuses_to_print = mysqli_num_rows($query);
 					
-					/*foreach ($query->result() as $o => $row) 
-						{
-						$statuses_list[$row->status] = $row->status_name;
-						}
-						*/
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 						$statuses_list[$row['status']] = $row['status_name'];
 					}
 			
 					$query_list = "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID'; ";
 					$query = mysqli_query($link, $query_list);
-					//$Cstatuses_to_print = $query->num_rows();
-					//$Cstatuses_to_print = mysqli_num_rows($query);
-		
-					/*foreach ($query->result() as $o => $row) 
-						{
-						$statuses_list[$row->status] = $row->status_name;
-						}*/
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 						$query_name = mysqli_query($link, "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID' and list_id");
@@ -2059,27 +1741,6 @@ ini_set('memory_limit', '2048M');
 					$all_called_first=1000;
 					$all_called_last=0;
 					
-					/* foreach ($query->result() as $o => $row) 
-						{
-						$leads_in_list = ($leads_in_list + $row->count);
-						$count_statuses[$o]			= $row->status;
-						$count_called[$o]			= $row->called_count;
-						$count_count[$o]			= $row->count;
-						$all_called_count[$row->called_count] = ($all_called_count[$row->called_count] + $row->count);
-			
-						if ( (strlen($status[$sts]) < 1) or ($status[$sts] != $row->status) )
-							{
-							if ($first_row) {$first_row=0;}
-							else {$sts++;}
-							$status[$sts] = $row->status;
-							$status_called_first[$sts] = $row->called_count;
-							if ($status_called_first[$sts] < $all_called_first) {$all_called_first = $status_called_first[$sts];}
-							}
-						$leads_in_sts[$sts] = ($leads_in_sts[$sts] + $row->count);
-						$status_called_last[$sts] = $row->called_count;
-						if ($status_called_last[$sts] > $all_called_last) {$all_called_last = $status_called_last[$sts];}
-						} */
-		 
 					$o=0;
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 						$leads_in_list = ($leads_in_list + $row['count']);
@@ -2164,8 +1825,6 @@ ini_set('memory_limit', '2048M');
 					$first = $all_called_first;
 					while ($first <= $all_called_last)
 						{
-						/*if (eregi("1$|3$|5$|7$|9$", $first)) {$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';} 
-						else{$AB='style="background-color:#FFF;border-top:#D0D0D0 dashed 1px;"';}*/
 						if ($all_called_count[$first]) {
 							$TOPsorted_output .= "
 							<th> $all_called_count[$first] </th>";
@@ -2177,10 +1836,8 @@ ini_set('memory_limit', '2048M');
 						}
 					$TOPsorted_output .= "<th>$leads_in_list</th></tr>\n";
 					
-					$TOPsorted_output .= "
-					</tfoot></table>";
+					$TOPsorted_output .= "</tfoot></table>";
 					
-					//<br /><small style='color:red;'>NO Selected Campaign</small></center>\n";
 					$queryforBot = "SELECT DISTINCT gmt_offset_now FROM vicidial_list WHERE list_id IN (".$list.");";
 					$sqlBot = mysqli_query($link, $queryforBot);
 					$numBot = mysqli_num_rows($sqlBot);
@@ -2226,8 +1883,6 @@ ini_set('memory_limit', '2048M');
 					$ul = "AND us.user_group = '$userGroup'";
 					else
 					$ul = "";
-					//$list_ids = "{$this->lang->line("go_all")}";
-					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlog.list_id IN ('".implode("','",$list_ids)."')" : "";
 					if($request == "outbound"){
 						// Outbound Sales //
 						
@@ -2237,27 +1892,10 @@ ini_set('memory_limit', '2048M');
 						$TOPsorted_output = "";
 						$total_out_sales = "";
 						
-						/*
-						$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
-						$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
-						$file_output .= "{$this->lang->line("go_outbound_sales_an_aid_sc")}";*/
 						if ($query) {
 							$total_sales=0;
 							
-							/*
-							foreach($query->result() as $row) {
-							
-								if ($x==1) {
-									$bgcolor = "#E0F8E0";
-									$x=0;
-								} else {
-									$bgcolor = "#EFFBEF";
-									$x=1;
-								}
-							*/
-							
 							while($row = mysqli_fetch_array($query)) {
-								//$file_output .= $row['full_name'].",".$row['user'].",".$row['sale']."\n";
 								$TOPsorted_output .= "<tr>";
 								$TOPsorted_output .= "<td nowrap>".$row['full_name']."</td>";
 								$TOPsorted_output .= "<td nowrap>".$row['user']."</td>";
@@ -2267,12 +1905,6 @@ ini_set('memory_limit', '2048M');
 								
 							}
 						}
-						/*
-						if ($total_out_sales < 1) {
-							$file_output .= "{$this->lang->line("go_no_records_found")}";
-						} else {
-							$file_output .= "{$this->lang->line("go_total")},,$total_out_sales\n\n";
-						}*/
 					}
 					
 					if($request == "inbound"){
@@ -2297,14 +1929,11 @@ ini_set('memory_limit', '2048M');
 						$BOTsorted_output = "";
 						$total_in_sales = "";
 						
-						//$file_output .= "{$this->lang->line("go_inbound_sales_an_ai_sc")}";
 						if ($query) {
 							$total_sales=0;
 							
 							//foreach($query->result() as $row) {
 							while($row = mysqli_fetch_array($query)){
-							
-								//$file_output .= $row->full_name.",".$row->user.",".$row->sale."\n";
 								$BOTsorted_output .= "<tr>";
 								$BOTsorted_output .= "<td nowrap> ".$row['full_name']." </td>";
 								$BOTsorted_output .= "<td nowrap> ".$row['user']." </td>";
@@ -2313,18 +1942,6 @@ ini_set('memory_limit', '2048M');
 								$total_in_sales = $total_in_sales + $row['sale'];
 							}
 						}
-						/*
-						if ($total_in_sales < 1) {
-							$file_output .= "{$this->lang->line("go_no_records_found")}";
-						} else {
-							$file_output .= "{$this->lang->line("go_total")},,$total_in_sales";
-						}*/
-						
-						//$return['TOPsorted_output']		= $TOPsorted_output;
-						//$return['BOTsorted_output']		= $BOTsorted_output;
-						//$return['TOToutbound']			= $total_out_sales;
-						//$return['TOTinbound']			= $total_in_sales;
-						//$return['file_output']			= $file_output;
 					}
 					
 					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "BOTsorted_output" => $BOTsorted_output, "TOToutbound" => $total_out_sales, "TOTinbound" => $total_in_sales, "query" => $outbound_query);
@@ -2334,8 +1951,6 @@ ini_set('memory_limit', '2048M');
 				
 				// SALES TRACKER
 				if ($pageTitle == "sales_tracker") {
-					//$list_ids = "{$this->lang->line("go_all")}";
-					//$list_id_query=(isset($list_ids) && $list_ids != "{$this->lang->line("go_all")}") ? "and vlo.list_id IN ('".implode("','",$list_ids)."')" : "";
 					if($userGroup !== "ADMIN")
 					$ul = "AND us.user_group = '$userGroup'";
 					else
@@ -2363,16 +1978,6 @@ ini_set('memory_limit', '2048M');
 							$comments[] = $row['comments'];
 							$sale_num_value++;
 						}
-						/*
-						if ($file_download > 0) {
-							$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
-							$file_output .= "{$this->lang->line("go_date_range")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
-							$file_output .= "{$this->lang->line("go_outbound_sales_cdt_a_pn_f_l_a_c_s_p_e_an_c")}";
-						
-							foreach ($TOPsorted_output as $row) {
-								$file_output .=$row->call_date.",".$row->agent.",".$row->phone_number.",".$row->first_name.",".$row->last_name.",".$row->address.",".$row->city.",".$row->state.",".$row->postal.",".$row->email.",".$row->alt_phone.",".$row->comments."\n";
-							}
-						}*/
 					}
 				
 					if ($request == 'inbound') {
@@ -2412,16 +2017,6 @@ ini_set('memory_limit', '2048M');
 							$comments[] = $row['comments'];
 							$sale_num_value++;
 						}
-						/*
-						if ($file_download > 0) {
-							$file_output  = "{$this->lang->line("go_campaign")},$campaignID - ".$resultu->campaign_name."\n";
-							$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
-							$file_output .= "{$this->lang->line("go_outbound_sales_cdt_a_pn_f_l_a_c_s_p_e_an_c")}";
-							
-							foreach ($TOPsorted_output as $row) {
-								$file_output .=$row->call_date.",".$row->agent.",".$row->phone_number.",".$row->first_name.",".$row->last_name.",".$row->address.",".$row->city.",".$row->state.",".$row->postal.",".$row->email.",".$row->alt_phone.",".$row->comments."\n";
-							}
-						}*/
 					}
 					
 					//$return['TOPsorted_output']		= $TOPsorted_output;
@@ -2466,684 +2061,10 @@ ini_set('memory_limit', '2048M');
 						$TOPsorted_output[] .= '</tr>';
 						$number++;
 					}
-					/*
-					if ($file_download > 0) {
-						$file_output  = "{$this->lang->line("go_inbound_camp")},$campaignID - ".$resultu->campaign_name."\n";
-						$file_output .= "{$this->lang->line("go_date_range_caps")},$fromDate {$this->lang->line("go_to_caps")} $toDate\n\n";
-						$file_output .= "{$this->lang->line("go_date_aid_pn_t_cd_d")}";
-						
-						foreach ($TOPsorted_output as $row) {
-							list($ldate, $ltime) = split(' ',$row->call_date);
-							$phone_number = ($row->phone_number != "") ? $row->phone_number : "{$this->lang->line("go_not_registered")}";
-							
-							$file_output .= "$ldate,".$row->user.",$phone_number,$ltime,".$row->length_in_sec.",".$row->status."\n";
-						}
-					}
-					
-					$return['TOPsorted_output']		= $TOPsorted_output;
-					$return['file_output']			= $file_output;
-					*/
-					
 					
 					$apiresults = array("TOPsorted_output" => $TOPsorted_output, "query" => $inbound_report_query);
 					return $apiresults;
 				}
-				
-				/* CALL EXPORT REPORT 
-				if ($pageTitle == "call_export_report") {
-					//$return['allowed_campaigns']	= $this->go_getall_allowed_campaigns();
-					//$groupId = go_get_groupid($userID);
-					$groupId = $userGroup;
-					if (!checkIfTenant($groupId)) {
-					  $ul = '';
-					  $user_group_SQL = '';
-					} else {
-					  $ul = "WHERE user_group='$userGroup'";
-					  $user_group_SQL = "and (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
-					}
-					
-					$query = mysqli_query($link, "SELECT campaign_id FROM vicidial_campaigns $ul");
-					while($row = mysqli_fetch_array($query)){
-						$allowed_campaigns[] = $row['campaign_id'];
-					}
-					
-					$return['allowed_campaigns']	= implode(",",$allowed_campaigns);
-					$return['inbound_groups']		= get_inbound_groups($serID, $link, $userGroup);
-					
-					$filterSQL = ($this->commonhelper->checkIfTenant($groupId)) ? "WHERE campaign_id IN ('".implode("','",$allowed_campaigns)."')" : "";
-					$query = mysqli_query($link, "SELECT list_id FROM vicidial_lists $filterSQL");
-					$return['lists_to_print']		= $query->result();
-	
-					$query = mysqli_query($link, "select status,status_name from vicidial_statuses union select status,status_name from vicidial_campaign_statuses $filterSQL");
-					$return['statuses_to_print'] = $query->result();
-					
-					$query = mysqli_query($link, "select custom_fields_enabled from system_settings");
-					$custom_fields_enabled = $query->row();
-					
-					if (strlen($campaignID) > 4) {
-						//$query = mysqli_query($link, "");
-						list($header_row, $rec_fields, $custom_fields, $call_notes, $export_fields) = explode(",",$request);
-						list($campaign, $group, $list_id, $status) = split(",", $campaignID);
-						$campaign = explode("+",eregi_replace("\+$",'',$campaign));
-						$group = explode("+",eregi_replace("\+$",'',$group));
-						$list_id = explode("+",eregi_replace("\+$",'',$list_id));
-						$status = explode("+",eregi_replace("\+$",'',$status));
-						
-						$campaign_ct = count($campaign);
-						$group_ct = count($group);
-						$user_group_ct = count($group);
-						$list_ct = count($list_id);
-						$status_ct = count($status);
-						$campaign_string='|';
-						$group_string='|';
-						$user_group_string='|';
-						$list_string='|';
-						$status_string='|';
-						$outbound_calls=0;
-						$export_rows='';
-					
-						$i=0;
-						while($i < $campaign_ct)
-							{
-							   if (strlen($campaign[$i]) > 0) {
-								  $campaign_string .= "$campaign[$i]|";
-								  $campaign_SQL .= "'$campaign[$i]',";
-							   }
-							$i++;
-							}
-						if ( (ereg("--{$this->lang->line("go_none")}--",$campaign_string) ) or (strlen($campaign_SQL) < 1) )
-							{
-							//$campaign_SQL = "campaign_id IN('')";
-							$campaign_SQL = "";
-							$RUNcampaign=1;
-							}
-						else
-							{
-							$campaign_SQL = eregi_replace(",$",'',$campaign_SQL);
-							$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
-							$RUNcampaign++;
-							}
-					
-						$i=0;
-						while($i < $group_ct)
-							{
-							   if (strlen($group[$i]) > 0) {
-								  $group_string .= "$group[$i]|";
-								  $group_SQL .= "'$group[$i]',";
-							   }
-							$i++;
-							}
-						if ( (ereg("--{$this->lang->line("go_none")}--",$group_string) ) or ($group_ct < 1) )
-							{
-							//$group_SQL = "campaign_id IN('')";
-							$group_SQL = "";
-							$RUNgroup=0;
-							}
-						else
-							{
-							$group_SQL = eregi_replace(",$",'',$group_SQL);
-							if($group_SQL!=NULL){
-													$group_SQL = "and vl.campaign_id IN($group_SQL)";
-							}
-							else {
-							$group_SQL = "and vl.campaign_id IN('$group_SQL')";
-							}
-							$RUNgroup++;
-							}
-							
-						//$user_group_SQL = "and vl.user_group = '".$return['groupId']."'";
-						//$user_group_SQL = '';
-						
-						$i=0;
-						while($i < $list_ct)
-							{
-							$list_string .= "$list_id[$i]|";
-							$list_SQL .= "'$list_id[$i]',";
-							$i++;
-							}
-						if ( (ereg("--{$this->lang->line("go_all")}--",$list_string) ) or ($list_ct < 1) )
-							{
-							$list_SQL = "";
-							}
-						else
-							{
-							$list_SQL = eregi_replace(",$",'',$list_SQL);
-							$list_SQL = "and vi.list_id IN($list_SQL)";
-							}
-					
-						$i=0;
-						while($i < $status_ct)
-							{
-							$status_string .= "$status[$i]|";
-							$status_SQL .= "'$status[$i]',";
-							$i++;
-							}
-						if ( (ereg("--{$this->lang->line("go_all")}--",$status_string) ) or ($status_ct < 1) )
-							{
-							$status_SQL = "";
-							}
-						else
-							{
-							$status_SQL = eregi_replace(",$",'',$status_SQL);
-							$status_SQL = "and vl.status IN ($status_SQL)";
-							}
-						
-						if ($export_fields == "{$this->lang->line("go_extended")}")
-							{
-							$export_fields_SQL = ",entry_date,vi.called_count,last_local_call_time,modify_date,called_since_last_reset";
-							$EFheader = ",entry_date,called_count,last_local_call_time,modify_date,called_since_last_reset";
-							}
-		
-						$k=1;
-						if ($RUNcampaign > 0)
-							{
-							$query = mysqli_query($link, "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.phone_number,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id$export_fields_SQL from vicidial_users vu,vicidial_log vl,vicidial_list vi where date_format(vl.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and (CASE WHEN vl.user!='VDAD' THEN vu.user=vl.user ELSE vl.user='VDAD' END) and vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date limit 100000");
-							$outbound_to_print = $query->num_rows();
-							if ($outbound_to_print < 1)
-								{
-								$err_nooutbcalls = "{$this->lang->line("go_no_outbound_calls")}";
-					// 			exit;
-								}
-							else
-								{
-								foreach ($query->result_array() as $row)
-									{
-									$row['comments'] = preg_replace("/\n|\r/",'!N',$row['comments']);
-					
-									$export_status[$k] =		$row['status'];
-									$export_list_id[$k] =		$row['list_id'];
-									$export_lead_id[$k] =		$row['lead_id'];
-									$export_uniqueid[$k] =		$row['uniqueid'];
-									$export_vicidial_id[$k] =	$row['uniqueid'];
-									$export_entry_list_id[$k] =	$row['entry_list_id'];
-									$export_fieldsDATA='';
-									if ($export_fields == "{$this->lang->line("go_extended")}")
-										{$export_fieldsDATA = $row['entry_date'].",".$row['called_count'].",".$row['last_local_call_time'].",".$row['modify_date'].",".$row['called_since_last_reset'].",";}
-									$export_rows[$k] = $row['call_date'].",".$row['phone_number'].",".$row['status'].",".$row['user'].",\"".$row['full_name']."\",".$row['campaign_id'].",\"".$row['vendor_lead_code']."\",".$row['source_id'].",".$row['list_id'].",".$row['gmt_offset_now'].",\"".$row['phone_code']."\",\"".$row['phone_number']."\",\"".$row['title']."\",\"".$row['first_name']."\",\"".$row['middle_initial']."\",\"".$row['last_name']."\",\"".$row['address1']."\",\"".$row['address2']."\",\"".$row['address3']."\",\"".$row['city']."\",\"".$row['state']."\",\"".$row['province']."\",\"".$row['postal_code']."\",\"".$row['country_code']."\",\"".$row['gender']."\",\"".$row['date_of_birth']."\",\"".$row['alt_phone']."\",\"".$row['email']."\",\"".$row['security_phrase']."\",\"".$row['comments']."\",".$row['length_in_sec'].",\"".$row['user_group']."\",\"".$row['alt_dial']."\",\"".$row['rank']."\",\"".$row['owner']."\",".$row['lead_id'].",$export_fieldsDATA";
-									$k++;
-									$outbound_calls++;
-									}
-								}
-							}
-							
-						if ($header_row=="{$this->lang->line("go_yes")}")
-							{
-							$RFheader = '';
-							$NFheader = '';
-							$CFheader = '';
-							$EXheader = '';
-							if ($rec_fields=="{$this->lang->line("go_id")}")
-								{$RFheader = ",recording_id";}
-							if ($rec_fields=="{$this->lang->line("go_filename")}")
-								{$RFheader = ",recording_filename";}
-							if ($rec_fields=="{$this->lang->line("go_location")}")
-								{$RFheader = ",recording_location";}
-							if ($rec_fields=="{$this->lang->line("go_all")}")
-								{$RFheader = ",recording_id,recording_filename,recording_location";}
-							if ($export_fields=="{$this->lang->line("go_extended")}")
-								{$EXheader = ",uniqueid,caller_code,server_ip,hangup_cause,dialstatus,channel,dial_time,answered_time,cpd_result";}
-							if ($call_notes=="{$this->lang->line("go_yes")}")
-								{$NFheader = ",call_notes";}
-							//if ( ($custom_fields_enabled > 0) and ($custom_fields=='YES') )
-							//	{$CFheader = ",custom_fields";}
-							if ( ($custom_fields_enabled > 0) and ($custom_fields=="{$this->lang->line("go_yes")}") )
-							   {
-								  $x = 1;
-								  while ($k > $x) {
-								 $CF_list_id = $export_list_id[$x];
-								 if ($export_entry_list_id[$x] > 99)
-									 {$CF_list_id = $export_entry_list_id[$x];}
-								 $stmt="SHOW TABLES LIKE \"custom_$CF_list_id\";";
-								 $query=mysqli_query($link, $stmt);
-								 $tablecount_to_print = $query->num_rows();
-								 if ($tablecount_to_print > 0) 
-									{
-									$stmt = "describe custom_$CF_list_id;";
-									$query=mysqli_query($link, $stmt);
-									foreach ($query->result() as $row)
-										   {
-										   if ($row->Field != "lead_id" && !in_array($row->Field,explode(",",$CFheader))) {
-											  $CFheader .= ",".$row->Field;
-											  $CFdata[$row->Field] = '';
-										   }
-										   }
-									}
-								 $x++;
-								  }
-							   }
-				
-							$export_rows[0] = "call_date,phone_number,status,user,full_name,campaign_id,vendor_lead_code,source_id,list_id,gmt_offset_now,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,length_in_sec,user_group,alt_dial,rank,owner,lead_id$EFheader,list_name,list_description,status_name$RFheader$EXheader$NFheader$CFheader";
-							}
-							
-						  if ($RUNgroup > 0)
-							{
-							$query = mysqli_query($link, "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.phone_number,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vl.closecallid,vi.entry_list_id,vl.uniqueid$export_fields_SQL from vicidial_users vu,vicidial_closer_log vl,vicidial_list vi where date_format(vl.call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and vu.user=vl.user and vi.lead_id=vl.lead_id $list_SQL $group_SQL $user_group_SQL $status_SQL order by vl.call_date limit 100000");
-							$inbound_to_print = $query->num_rows();
-							if ( ($inbound_to_print < 1) and ($outbound_calls < 1) )
-								{
-								$err_noinbcalls = "{$this->lang->line("go_no_outbound_calls")}";
-					// 			exit;
-								}
-							else
-								{
-								foreach ($query->result_array() as $row)
-									{
-									$row['comments'] = preg_replace("/\n|\r/",'!N',$row['comments']);
-					
-									$export_status[$k] =		$row['status'];
-									$export_list_id[$k] =		$row['list_id'];
-									$export_lead_id[$k] =		$row['lead_id'];
-									$export_vicidial_id[$k] =	$row['closecallid'];
-									$export_entry_list_id[$k] =	$row['entry_list_id'];
-									$export_uniqueid[$k] =		$row['uniqueid'];
-									$export_fieldsDATA='';
-									if ($export_fields == "{$this->lang->line("go_extended")}")
-										{$export_fieldsDATA = $row['entry_date'].",".$row['called_count'].",".$row['last_local_call_time'].",".$row['modify_date'].",".$row['called_since_last_reset'].",";}
-									$export_rows[$k] = $row['call_date'].",\"".$row['phone_number']."\",\"".$row['status']."\",\"".$row['user']."\",\"".$row['full_name']."\",".$row['campaign_id'].",\"".$row['vendor_lead_code']."\",\"".$row['source_id']."\",".$row['list_id'].",".$row['gmt_offset_now'].",\"".$row['phone_code']."\",\"".$row['phone_number']."\",\"".$row['title']."\",\"".$row['first_name']."\",\"".$row['middle_initial']."\",\"".$row['last_name']."\",\"".$row['address1']."\",\"".$row['address2']."\",\"".$row['address3']."\",\"".$row['city']."\",\"".$row['state']."\",\"".$row['province']."\",\"".$row['postal_code']."\",\"".$row['country_code']."\",\"".$row['gender']."\",\"".$row['date_of_birth']."\",\"".$row['alt_phone']."\",\"".$row['email']."\",\"".$row['security_phrase']."\",\"".$row['comments']."\",".$row['length_in_sec'].",\"".$row['user_group']."\",".$row['queue_seconds'].",\"".$row['rank']."\",\"".$row['owner']."\",".$row['lead_id'].",$export_fieldsDATA";
-									$k++;
-									}
-								}
-							}
-							
-						$i=0;
-						while ($k > $i)
-							{
-							$custom_data='';
-							$ex_list_name='';
-							$ex_list_description='';
-							$query = mysqli_query($link, "SELECT list_name,list_description FROM vicidial_lists where list_id='$export_list_id[$i]'");
-							$ex_list_ct = $query->num_rows();
-							if ($ex_list_ct > 0)
-								{
-								$row = $query->row();
-								$ex_list_name =			$row->list_name;
-								$ex_list_description =	$row->list_description;
-								}
-				
-							$ex_status_name='';
-							$query = mysqli_query($link, "SELECT status_name FROM vicidial_statuses where status='$export_status[$i]'");
-							$ex_list_ct = $query->num_rows();
-							if ($ex_list_ct > 0)
-								{
-								$row = $query->row();
-								$ex_status_name =			$row->status_name;
-								}
-							else
-								{
-								$query = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses where status='$export_status[$i]'");
-								$ex_list_ct = $query->num_rows();
-								if ($ex_list_ct > 0)
-									{
-									$row = $query->row();
-									$ex_status_name =			$row->status_name;
-									}
-								}
-				
-							$rec_data='';
-							if ( (($rec_fields=="{$this->lang->line("go_id")}") or ($rec_fields=="{$this->lang->line("go_filename")}") or ($rec_fields=="{$this->lang->line("go_location")}") or ($rec_fields=="{$this->lang->line("go_all")}")) && $i > 0 )
-								{
-								$rec_id='';
-								$rec_filename='';
-								$rec_location='';
-								$query = mysqli_query($link, "SELECT recording_id,filename,location from recording_log where vicidial_id='$export_vicidial_id[$i]' order by recording_id desc LIMIT 10");
-								$recordings_ct = $query->num_rows();
-								$u=0;
-								while ($recordings_ct > $u)
-									{
-									$row = $query->row();
-									$rec_id .=			$row->recording_id;
-									$rec_filename .=	$row->filename;
-									$rec_location .=	$row->location;
-				
-									$u++;
-									}
-								//$rec_id = preg_replace("/.$/",'',$rec_id);
-								//$rec_filename = preg_replace("/.$/",'',$rec_filename);
-								//$rec_location = preg_replace("/.$/",'',$rec_location);
-								if ($rec_fields=="{$this->lang->line("go_id")}")
-									{$rec_data = ",$rec_id";}
-								if ($rec_fields=="{$this->lang->line("go_filename")}")
-									{$rec_data = ",$rec_filename";}
-								if ($rec_fields=="{$this->lang->line("go_location")}")
-									{$rec_data = ",$rec_location";}
-								if ($rec_fields=="{$this->lang->line("go_all")}")
-									{$rec_data = ",$rec_id,\"$rec_filename\",\"$rec_location\"";}
-								}
-				
-							$extended_data_a='';
-							$extended_data_b='';
-							$extended_data_c='';
-							if ($export_fields=="{$this->lang->line("go_extended")}")
-								{
-								$extended_data = ",$export_uniqueid[$i]";
-								if (strlen($export_uniqueid[$i]) > 0)
-									{
-									$uniqueidTEST = $export_uniqueid[$i];
-									$uniqueidTEST = preg_replace('/\..*$/','',$uniqueidTEST);
-									$query = mysqli_query($link, "SELECT caller_code,server_ip from vicidial_log_extended where uniqueid LIKE \"$uniqueidTEST%\" and lead_id='$export_lead_id[$i]' LIMIT 1");
-									$vle_ct = $query->num_rows();
-									if ($vle_ct > 0)
-										{
-										$row=$query->row();
-										$extended_data_a =	",".$row->caller_code.",".$row->server_ip;
-										$export_call_id[$i] = $row->caller_code;
-										}
-				
-									$query = mysqli_query($link, "SELECT hangup_cause,dialstatus,channel,dial_time,answered_time from vicidial_carrier_log where uniqueid LIKE \"$uniqueidTEST%\" and lead_id='$export_lead_id[$i]' LIMIT 1");
-									$vcarl_ct = $query->num_rows();
-									if ($vcarl_ct > 0)
-										{
-										$row=$query->row();
-										$extended_data_b =	",\"".$row->hangup_cause."\",\"".$row->dialstatus."\",\"".$row->channel."\",\"".$row->dial_time."\",\"".$row->answered_time."\"";
-										}
-				
-									$query = mysqli_query($link, "SELECT result from vicidial_cpd_log where callerid='$export_call_id[$i]' LIMIT 1");
-									$vcpdl_ct = $query->num_rows();
-									if ($vcpdl_ct > 0)
-										{
-										$row=$query->row();
-										$extended_data_c =	",\"".$row->result."\"";
-										}
-				
-									}
-								if (strlen($extended_data_a)<1)
-									{$extended_data_a =	",,";}
-								if (strlen($extended_data_b)<1)
-									{$extended_data_b =	",,,,,";}
-								if (strlen($extended_data_c)<1)
-									{$extended_data_c =	",";}
-								$extended_data .= "$extended_data_a$extended_data_b$extended_data_c";
-								}
-				
-							$notes_data='';
-							if ($call_notes=="{$this->lang->line("go_yes")}")
-								{
-								if (strlen($export_vicidial_id[$i]) > 0)
-									{
-									$query = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where vicidial_id='$export_vicidial_id[$i]' LIMIT 1");
-									$notes_ct = $query->num_rows();
-									if ($notes_ct > 0)
-										{
-										$row=$query->row;
-										$notes_data =	$row->call_notes;
-										}
-									$notes_data = preg_replace("/\r\n/",' ',$notes_data);
-									$notes_data = preg_replace("/\n/",' ',$notes_data);
-									}
-								$notes_data =	",\"$notes_data\"";
-								}
-				
-							if ( ($custom_fields_enabled > 0) and ($custom_fields=="{$this->lang->line("go_yes")}") )
-								{
-								$CF_list_id = $export_list_id[$i];
-								if ($export_entry_list_id[$i] > 99)
-									{$CF_list_id = $export_entry_list_id[$i];}
-								$query = mysqli_query($link, "SHOW TABLES LIKE \"custom_$CF_list_id\"");
-								$tablecount_to_print = $query->num_rows();
-								if ($tablecount_to_print > 0) 
-									{
-									$query = mysqli_query($link, "describe custom_$CF_list_id");
-									$columns_ct = $query->num_rows();
-									$u=0;
-									foreach ($query->result() as $row)
-										{
-										//$row=$query->row();
-										$column[$u] =	$row->Field;
-										$u++;
-										}
-									if ($columns_ct > 1)
-										{
-										$query = mysqli_query($link, "SELECT * from custom_$CF_list_id where lead_id='$export_lead_id[$i]' limit 1");
-										$customfield_ct = $query->num_rows();
-										if ($customfield_ct > 0)
-											{
-											$row=$query->row_array();
-											$t=1;
-											while ($columns_ct > $t) 
-												{
-												//$custom_data .= ",\"".$row[$column[$t]]."\"";
-													$CFdata[$column[$t]] = $row[$column[$t]];
-												$t++;
-												}
-											}
-										}
-										$custom_data = ",\"".implode('","',$CFdata)."\"";
-									$custom_data = preg_replace("/\r\n/",'!N',$custom_data);
-									$custom_data = preg_replace("/\n/",'!N',$custom_data);
-										
-										$CFdata = array_fill_keys(array_keys($CFdata), '');
-									}
-								}
-	
-							if ($i < 1)
-							   $file_output .= $export_rows[$i]."\n";
-							else
-							   $file_output .= $export_rows[$i]."\"$ex_list_name\",\"$ex_list_description\",\"$ex_status_name\"$rec_data$extended_data$notes_data$custom_data\n";
-							$i++;
-							}
-					
-					}
-					
-					$return['custom_fields_enabled']= $custom_fields_enabled;
-					$return['file_output']			= $file_output;
-				}
-				
-				/* Dashboard 
-				if ($pageTitle=="dashboard") {
-				$sub_total = array();
-				//list($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code) = go_get_statuses($campaignID, $link);
-				$TOPsorted_output = "";
-				
-				// and (val.sub_status NOT LIKE 'LOGIN%' OR val.sub_status IS NULL) 
-				$query = mysqli_query($link, "select us.user,us.full_name,val.status,count(*) as calls from vicidial_users as us,vicidial_agent_log as val where date_format(val.event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and us.user=val.user and val.status and val.campaign_id='$campaignID' group by us.user,us.full_name,val.status order by us.full_name,us.user,val.status desc limit 500000");
-					
-					$calls = "";
-					$user = "";
-					$fullname = "";
-					$status = "";
-				while($row = mysqli_fetch_array($query)){
-					$calls .= $row['calls'];
-					$user .= $row['user'];
-					$fullname .= $row['full_name'];
-					$status .= $row['status'];
-				}
-				
-				$query = mysqli_query($link, "select val.status from vicidial_agent_log as val, vicidial_log as vl where val.status<>'' and date_format(val.event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and val.campaign_id='$campaignID' and val.uniqueid=vl.uniqueid group by val.status limit 500000");
-				
-				while($row = mysqli_fetch_array($query)){
-					$Dstatus[$row['status']] = $row['status'];
-					$TOPsorted_output .= "<td nowrap>".$row['status']."</td>";
-				}
-				
-				/*
-				foreach ($query->result() as $i => $row)
-				{
-					$Dstatus[$row->status] = $row->status;
-					$TOPsorted_output .= "<td nowrap style=\"text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$row->status."</td>";
-				}-=-
-				
-				//$TOPsorted_output .= "<td nowrap>{$this->lang->line("go_sub_total_caps")}&nbsp;</strong></td></tr>";
-	
-				if (count($agent) > 0) {
-					$query = mysqli_query($link, "select lower(us.user) as user,us.full_name from vicidial_users as us, vicidial_agent_log as val where date_format(val.event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and lower(us.user)=lower(val.user) and val.campaign_id='$campaignID' group by us.user limit 500000");
-					
-					while($user_info = mysqli_fetch_array($query)) {
-	
-						$TOPsorted_output .= "<tr><td nowrap> ".$user_info['full_name']." </td>";
-						
-						$t = 0;
-						$call_cnt = "";
-						for($i = 0; $i < count($Dstatus); $i++) {
-							if($agent[$user_info['user']][$Dstatus[$i]] > 0){
-								$call_cnt = $agent[$user_info['user']][$Dstatus[$i]] : 0;
-							}else{
-								$call_cnt = 0;
-							}
-							$call_cnt = ($agent[$user_info['user']][$Dstatus[$i]] > 0) ? $agent[$user_info['user']][$Dstatus[$i]] : 0;
-							$TOPsorted_output .= "<td nowrap> ".$call_cnt." </td>";
-							$sub_total[$user_info['user']] = $sub_total[$user_info['user']] + $agent[$user_info['user']][$Dstatus[$i]];
-						}
-	
-						$TOPsorted_output .= "<td nowrap> ".$sub_total[$user_info['user']]." </td></tr>";
-						$total_all = $total_all + $sub_total[$user_info['user']];
-					}
-				}
-				
-	// 			$query = mysqli_query($link, "select val.status from vicidial_agent_log as val, vicidial_log as vl where val.status<>'' and date_format(val.event_time, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate' and val.campaign_id='$campaignID' and val.uniqueid=vl.uniqueid group by val.status limit 500000");
-	// 			foreach ($query->result() as $row)
-	// 			{
-	// 				if ($c == 1) {
-	// 					$bgcolor = "#EFFBEF";
-	// 					$c = 0;
-	// 				} else {
-	// 					$bgcolor = "#E0F8E0";
-	// 					$c = 1;
-	// 				}
-	// 				
-	// 				$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;text-transform:uppercase;\"><div align=\"center\" class=\"style4\">&nbsp;".$statuses_name[$row->status]." (".$row->status.")</td>";
-	// 				
-	// 				foreach ($agent as $o => $user)
-	// 				{
-	// 					$TOPsorted_output .= "<td nowrap style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style4\">&nbsp;".$user[$row->status]."</td>";
-	// 					$sub_total[$o][$row->status] = $sub_total[$o][$row->status] + $user[$row->status];
-	// 				}
-	// 			}
-
-	//			$TOPsorted_output .= "<tr><td nowrap style=\"border-top:#D0D0D0 dashed 1px;\" colspan=\"".(1+$t)."\"><div align=\"right\" class=\"style3\"><strong>&nbsp;TOTAL:&nbsp;</strong></td><td style=\"border-top:#D0D0D0 dashed 1px;\"><div align=\"center\" class=\"style3\"><strong>&nbsp;$total_all&nbsp;</strong></td></tr>";
-				
-				if (count($system_statuses) > 0)
-				{
-					$statuses_codes = implode("','", $system_statuses);
-				}
-				
-				if (count($campaign_statuses) > 0)
-				{
-					$statuses_codes .= implode("','", $campaign_statuses);
-				}
-				
-				// TOTAL CALLS ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status<>''");
-				$total_calls = mysqli_num_rows($query);
-				
-				// TOTAL CONTACTS ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status IN ('$statuses_codes')");
-				$total_contacts = mysqli_num_rows($query);
-			
-				// TOTAL NON-CONTACTS ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status NOT IN ('$statuses_codes')");
-				$total_noncontacts = mysqli_num_rows($query);
-	
-				// TOTAL SALES ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status IN ('$statuses','XFER')");
-				$total_sales = mysqli_num_rows($query);
-			
-				// TOTAL XFER ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status='XFER'");
-				$total_xfer = mysqli_num_rows($query);
-			
-				// TOTAL NOT INTERESTED ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status='NI'");
-				$total_notinterested = mysqli_num_rows($query);
-			
-				// TOTAL CALLBACKS ====  AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)
-				$query = mysqli_query($link, "SELECT * FROM vicidial_agent_log WHERE campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND status='CALLBK'");
-				$total_callbacks = mysqli_num_rows($query);
-				
-				$query = mysqli_query($link, "select sum(talk_sec) talk_sec,sum(pause_sec) pause_sec,sum(wait_sec) wait_sec,sum(dispo_sec) dispo_sec,sum(dead_sec) dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user and $dac_agents_query2 talk_sec<36000 and wait_sec<36000 and talk_sec<36000 and dispo_sec<36000 and campaign_id='$campaignID' limit 500000");
-				$total_hours= mysqli_fetch_array($query);
-				
-				$total_talk_hours = $total_hours['talk_sec'];
-				$total_pause_hours = $total_hours['pause_sec'];
-				$total_wait_hours = $total_hours['wait_sec'];
-				$total_dispo_hours = $total_hours['dispo_sec'];
-				$total_dead_hours = $total_hours['dead_sec'];
-				$total_login_hours = ($total_hours['talk_sec'] + $total_hours['pause_sec'] + $total_hours['wait_sec'] + $total_hours['dispo_sec'] + $total_hours['dead_sec']);
-				
-				
-				$inbound_campaigns = get_group_id($userID, $link);
-				foreach ($inbound_campaigns as $i => $item)
-				{
-					$inb_camp[$i] = $item->group_id;
-				}
-	
-				if (count($inb_camp)>0)
-					$inbCamp = implode("','",$inb_camp);
-				
-				$total_dialer_calls=0;
-// 				$total_dialer_calls_output[]='';
-				$isGraph = false;
-				$c=0;
-				for($i = 0; $i < count($statuses_code); $i++) {
-					$code = $statuses_code[$i];
-					$query = mysqli_query($link, "select count(*) as cnt from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and status='$code' and date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'");
-					$fetch_query = mysqli_fetch_array($query);
-					$row_out[$code]=$fetch_query['cnt'];
-					
-					$query = mysqli_query($link, "select count(*) as cnt from vicidial_closer_log where campaign_id IN ('$inbCamp') and length_in_sec>'0' and status='$code' and date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'");
-					$fetch_query = mysqli_fetch_array($query);
-					$row_in[$code]=$fetch_query['cnt'];
-	//				var_dump("select * from vicidial_log where campaign_id='$campaignID' and length_in_sec>'0' and status='$code' and date_format(call_date, '%Y-%m-%d') BETWEEN '$fromDate' AND '$toDate'");
-					$subtotal[$code]=$row_out[$code]+$row_in[$code];
-			
-					if ($subtotal[$code]>0) {
-						
-						if (!$isGraph){
-							$total_dialer_calls_output .= '<tr>
-								<td> '.$code.' </td>
-								<td> '.$statuses_name[$code].' </td>
-								<td> '.$subtotal[$code].' </td>
-							</tr>';
-						} else {
-							$total_dialer_calls_output[$code] = $subtotal[$code];
-						}
-					}
-			
-					$total_dialer_calls=$total_dialer_calls+$subtotal[$code];
-				}
-// 				$total_dialer_calls_output = json_encode($total_dialer_calls_output);
-				
-				// Graph
-				for ($i =0; $i < count($statuses); $i++) {
-					$status = $statuses[$i];
-					$query = mysqli_query($link, "SELECT count(*) as cnt FROM vicidial_agent_log WHERE campaign_id='$campaignID' and status='$status' and date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND (sub_status NOT LIKE 'LOGIN%' OR sub_status IS NULL)");
-					$fetch_query = mysqli_fetch_array($query);
-					$SUMstatuses[$status]=$fetch_query['cnt'];
-				}
-	
-				for($x=0;$x<count($statuses);$x++)
-				{
-					$SstatusesARY[$x] = $statuses_name[$statuses[$x]]." (".$statuses[$x].")";
-				}
-				
-				/*
-				$return['TOPsorted_output']	= $TOPsorted_output;
-				$return['SstatusesTOP']		= $SstatusesARY;
-				$return['SUMstatuses']		= $SUMstatuses;
-				$return['total_calls']		= $total_calls;
-				$return['total_contacts']	= $total_contacts;
-				$return['total_noncontacts']= $total_noncontacts;
-				$return['total_sales']		= $total_sales;
-				$return['total_xfer']		= $total_xfer;
-				$return['total_notinterested']= $total_notinterested;
-				$return['total_callbacks']	= $total_callbacks;
-				$return['total_talk_hours']	= $total_talk_hours;
-				$return['total_pause_hours']= $total_pause_hours;
-				$return['total_wait_hours']	= $total_wait_hours;
-				$return['total_dispo_hours']= $total_dispo_hours;
-				$return['total_dead_hours']	= $total_dead_hours;
-				$return['total_login_hours']= $total_login_hours;
-				$return['total_dialer_calls_output']= $total_dialer_calls_output;
-				$return['total_dialer_calls']= $total_dialer_calls;-=-
-				
-				$apiresults = array("TOPsorted_output" => $TOPsorted_output, "SstatusesTOP" => $SstatusesARY, "SUMstatuses" => $SUMstatuses, "total_calls" => $total_calls, "total_contacts" => $total_contacts, "total_noncontacts" => $total_noncontacts, "total_sales" => $total_sales, "total_xfer" => $total_xfer, "total_notinterested" => $total_notinterested, "total_callbacks" => $total_callbacks, "total_talk_hours" => $total_talk_hours, "total_pause_hours" => $total_pause_hours, "total_wait_hours" => $total_wait_hours, "total_dispo_hours" => $total_dispo_hours, "total_dead_hours" => $total_dead_hours, "total_login_hours" => $total_login_hours, "total_dialer_calls_output" => $total_dialer_calls_output, "total_dialer_calls" => $total_dialer_calls);
-				return $apiresults;
-			}
-			*/
 		}
-
-		//$query = mysqli_query($link, "select status,status_name from vicidial_statuses union select status,status_name from vicidial_campaign_statuses");
-		//$return['statuses'] = $query->result();
-		
-		//return $return;
 	}
 ?>
