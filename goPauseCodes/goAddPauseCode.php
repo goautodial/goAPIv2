@@ -1,12 +1,25 @@
 <?php
-  ####################################################
-  #### Name: goAddPauseCode.php                   ####
-  #### Description: API to add new Pause Code     ####
-  #### Version: 0.9                               ####
-  #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-  #### Written by: Jeremiah Sebastian V. Samatra  ####
-  #### License: AGPLv2                            ####
-  ####################################################
+ /**
+ * @file    goAddPauseCode.php
+ * @brief     API to add new Pause Code
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Noel Umandap  <noel@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
   ### POST or GET Variables
   $agent = get_settings('user', $astDB, $goUser);
 
@@ -15,9 +28,9 @@
   $pause_code_name = $_REQUEST['pause_code_name'];
   $billable = strtoupper($_REQUEST['billable']);
 
-  $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-  $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-  $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+  $ip_address = $astDB->escape($_REQUEST['log_ip']);
+  $log_user = $astDB->escape($_REQUEST['log_user']);
+  $log_group = $astDB->escape($_REQUEST['log_group']);
 
   ### Default values 
   $defBill = array('NO','YES','HALF');

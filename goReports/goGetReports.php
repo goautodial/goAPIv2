@@ -20,12 +20,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);*/
 ini_set('memory_limit', '2048M');
 
-    include_once("../goFunctions.php");
 	include_once("goReportsFunctions.php");	
 
 	// need function go_sec_convert();

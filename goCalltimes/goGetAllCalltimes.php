@@ -20,8 +20,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("../goFunctions.php");
-
     $groupId = go_get_groupid($session_user, $astDB);
     $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 

@@ -1,4 +1,25 @@
 <?php
+/**
+ * @file        goModifyCustomField.php
+ * @brief       API to edit custom field
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Noel Umandap  <jeremiah@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
    #####################################################
    #### Name: goModifyCustomField.php               ####
    #### Description: API to check for existing data ####
@@ -7,7 +28,7 @@
    #### Written by: Noel Umandap                    ####
    #### License: AGPLv2                             ####
    #####################################################
-    $list_id            = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+    $list_id            = $astDB->escape($_REQUEST['list_id']);
     $field_id           = $_REQUEST['field_id'];
     $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
     $field_label_old    = str_replace(" ","_",trim($_REQUEST['field_label_old']));
@@ -25,9 +46,9 @@
     $name_position      = $_REQUEST['field_position'];
     $field_order        = $_REQUEST['field_order'];
 	
-	$ip_address			= mysqli_real_escape_string($link, $_REQUEST['hostname']);
-	$log_user			= mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group			= mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	$ip_address			= $astDB->escape($_REQUEST['hostname']);
+	$log_user			= $astDB->escape($_REQUEST['log_user']);
+	$log_group			= $astDB->escape($_REQUEST['log_group']);
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     $field_sql='';

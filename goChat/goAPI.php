@@ -27,7 +27,7 @@ $webRoot = $_SERVER['DOCUMENT_ROOT'];
 $goCharset = "UTF-8";
 $goVersion = "1.0";
 
-include_once('./includes/MySQLiDB.php');
+include_once('../MySQLiDB.php');
 @include_once('../goDBasterisk.php');
 @include_once('../goDBgoautodial.php');
 @include_once('../goDBkamailio.php');

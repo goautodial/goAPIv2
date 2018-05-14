@@ -1,12 +1,25 @@
 <?php
-   //////////////////////////////////////////////////
-   /// Name: goAddList.php                        ///
-   /// Description: API to add new list           ///
-   /// Version: 0.9                               ///
-   /// Copyright: GOAutoDial Ltd. (c) 2011-2015   ///
-   /// Written by: Jeremiah Sebastian Samatra     ///
-   /// License: AGPLv2                            ///
-   //////////////////////////////////////////////////
+/**
+ * @file 		goAddCampaign.php
+ * @brief 		API to add campaign
+ * @copyright 	Copyright (C) GOautodial Inc.
+ * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
+ * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     
 	$agent = get_settings('user', $astDB, $goUser);
 
@@ -93,7 +106,7 @@
 	$three_way_hangup_action 		= $_REQUEST['three_way_hangup_action'];
 	$reset_leads_on_hopper 		= $_REQUEST['reset_leads_on_hopper'];
 
-	$location = mysqli_real_escape_string($link, $_REQUEST['location_id']);
+	$location = $astDB->escape($_REQUEST['location_id']);
 
 	/* Default values */ 
     	$defActive = array("Y","N");
@@ -174,8 +187,8 @@
 				$err_msg = error_handle("10109");
                 $apiresults = array("result" => "$err_msg");
             } else {
-            	$campaign_id = mysqli_real_escape_string($link, $campaign_id);
-                $campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
+            	$campaign_id = $astDB->escape($campaign_id);
+                $campaign_desc = $astDB->escape(str_replace('+',' ',$campaign_name));
                 $SQLdate = date("Y-m-d H:i:s");
                 $NOW = date("Y-m-d");
 				
@@ -270,8 +283,8 @@
                 if($campaign_type == "INBOUND"){
 					$defCallRoute = array("INGROUP","IVR","AGENT","VOICEMAIL");
 					$callRoute = strtoupper($call_route);
-					$campaign_id = mysqli_real_escape_string($link, $campaign_id);
-					$campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
+					$campaign_id = $astDB->escape($campaign_id);
+					$campaign_desc = $astDB->escape(str_replace('+',' ',$campaign_name));
 					$SQLdate = date("Y-m-d H:i:s");
 					$NOW = date("Y-m-d");
 					//$groupId = go_get_groupid($goUser);
@@ -518,11 +531,11 @@
                 // Blended Campaign here
                 if($campaign_type == "BLENDED"){
 					$defCallRoute = array("INGROUP","IVR","AGENT","VOICEMAIL");
-					$campaign_id = mysqli_real_escape_string($link, $campaign_id);
+					$campaign_id = $astDB->escape($campaign_id);
 					$didPattern = $did_pattern;
 					$groupColor = $group_color;
 					$emailORagent = $goUsers;
-					$campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
+					$campaign_desc = $astDB->escape(str_replace('+',' ',$campaign_name));
 					$callRoute = strtoupper($call_route);
 					$SQLxdate = date("Y-m-d H:i:s");
 					$NOW = date("m-d-Y");
@@ -825,10 +838,10 @@
                 if($campaign_type == "SURVEY"){
 					$userID = $goUsers;
 					$campType = $campaign_type;
-					$campaign_id = mysqli_real_escape_string($link, $campaign_id);
+					$campaign_id = $astDB->escape($campaign_id);
 					$surveyType = strtoupper($survey_type);
 					$numChannels = $number_channels;
-					$campaign_desc = mysqli_real_escape_string($link, str_replace('+',' ',$campaign_name));
+					$campaign_desc = $astDB->escape(str_replace('+',' ',$campaign_name));
 					$SQLdate = date("Y-m-d H:i:s");
 					$NOW = date("m-d-Y");
 	                $defSurveyType = array('BROADCAST','PRESS1');

@@ -21,7 +21,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("../goFunctions.php");
     $call_time_id = $_REQUEST["call_time_id"]; 
 	$log_user = $session_user;
 	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);

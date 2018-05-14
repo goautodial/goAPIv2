@@ -1,23 +1,36 @@
 <?php
-   #####################################################
-   #### Name: goDeleteCustomField.php               ####
-   #### Description: API to check for existing data ####
-   #### Version: 4.0                                ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2016    ####
-   #### Written by: Noel Umandap                    ####
-   #### License: AGPLv2                             ####
-   #####################################################
+/**
+ * @file        goCopyCustomFields.php
+ * @brief       API to copy a custom field from another list to an existing list
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Noel Umandap  <jeremiah@goautodial.com>
+ * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
     
     include_once ("../goFunctions.php");
     
-    $list_to   = mysqli_real_escape_string($link, $_REQUEST['list_to']);
-    $list_from = mysqli_real_escape_string($link, $_REQUEST['list_from']);
-    $copy_option = mysqli_real_escape_string($link, $_REQUEST['copy_option']);
+    $list_to   = $astDB->escape($_REQUEST['list_to']);
+    $list_from = $astDB->escape($_REQUEST['list_from']);
+    $copy_option = $astDB->escape($_REQUEST['copy_option']);
     
-    $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
-    $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $goUser = $astDB->escape($_REQUEST['goUser']);
+    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    $log_user = $astDB->escape($_REQUEST['log_user']);
+    $log_group = $astDB->escape($_REQUEST['log_group']);
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     

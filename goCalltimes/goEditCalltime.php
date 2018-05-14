@@ -20,8 +20,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-    include_once("../goFunctions.php");
- 
     // POST or GET Variables
         $call_time_id = $_REQUEST['call_time_id'];
         $call_time_name = $_REQUEST['call_time_name'];
