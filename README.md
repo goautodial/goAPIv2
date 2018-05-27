@@ -1,7 +1,12 @@
 # goAPI
 
-<p>The GOautodial APIs allow you to perform operations and actions within GOautodial from external applications. This allows GOautodial to integrate seamlessly with third party software and custom code.</p><br>
-<p>Access to the APIs are via HTTPS and authentication is done via username and password.</p><br>
+<p>The GOautodial APIs allow you to perform operations and actions within GOautodial from external applications. This allows GOautodial to integrate seamlessly with third party software and custom code.</p>
+<p>Access to the APIs are via HTTPS and authentication is done via username and password.</p>
+<p>To install (need to have a working GOautodial v4):</p>
+<pre>
+cd /var/www/html
+git clone https://github.com/goautodial/goAPIv2
+</pre>
 <p>Documentation (incomplete): https://drive.google.com/drive/folders/1ERrp_QdSVBsIpPKzoeU2hNQikCYSKJH0?usp=sharing.</p><br>
 <p>Sample PHP code to create campaign:
   
