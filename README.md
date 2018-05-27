@@ -2,6 +2,7 @@
 
 <p>The GOautodial APIs allow you to perform operations and actions within GOautodial from external applications. This allows third party software to integrate seamlessly with the system.</p><br>
 <p>Access to the APIs are via HTTPS and authentication is done via username and password.</p>
+<p>Documentation (incomplete): https://drive.google.com/drive/folders/1ERrp_QdSVBsIpPKzoeU2hNQikCYSKJH0?usp=sharing.</p>
 <p>Sample PHP code to create campaign:
   
   	$postfields = array(
