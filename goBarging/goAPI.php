@@ -20,13 +20,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-   
     include_once ("../goDBasterisk.php");
     include_once ("../goDBgoautodial.php");
     include_once ("../goDBkamailio.php");
-    include_once ("../includes/goFunctions.php");
-    include_once ("../includes/XMLParser.php");
-
+    include_once ("../goFunctions.php");
+    
     /* Check if DB variables are not set */
 	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
 	$VARDB_user     = (!isset($VARDB_user)) ? "asteriskDBu" : $VARDB_user;
