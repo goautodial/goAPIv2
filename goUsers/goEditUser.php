@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    @include_once ("goAPI.php");
 
     // Check file is existed
     if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/goautodial.conf")) {
@@ -32,33 +32,33 @@
     }
  
     // POST or GET Variables		
-    $userid = $_REQUEST['user_id'];
-    $user = $_REQUEST['user'];
-    $pass = $_REQUEST['pass'];
-    $full_name = $_REQUEST['full_name'];
-    $phone_login = $_REQUEST['phone_login'];
+    $userid = $astDB->escape($_REQUEST['user_id']);
+    $user = $astDB->escape($_REQUEST['user']);
+    $pass = $astDB->escape($_REQUEST['pass']);
+    $full_name = $astDB->escape($_REQUEST['full_name']);
+    $phone_login = $astDB->escape($_REQUEST['phone_login']);
     $phone_pass = $pass;
-    $user_group = $_REQUEST['user_group'];
-    $email = $_REQUEST['email'];
-    $active = strtoupper($_REQUEST['active']);
-    $hotkeys_active = $_REQUEST['hotkeys_active'];
-    $user_level = $_REQUEST['user_level'];
-    $modify_same_user_level = strtoupper($_REQUEST['modify_same_user_level']);
-    $ip_address = $_REQUEST['hostname'];
-    $goUser = $_REQUEST['goUser'];
-    $voicemail = $_REQUEST['voicemail'];
-    $vdc_agent_api_access = $_REQUEST['vdc_agent_api_access'];
-    $agent_choose_ingroups = $_REQUEST['agent_choose_ingroups'];
-    $vicidial_recording_override = $_REQUEST['vicidial_recording_override'];
-    $vicidial_transfers = $_REQUEST['vicidial_transfers'];
-    $closer_default_blended = $_REQUEST['closer_default_blended'];
-    $agentcall_manual = $_REQUEST['agentcall_manual'];
-    $scheduled_callbacks = $_REQUEST['scheduled_callbacks'];
-    $agentonly_callbacks = $_REQUEST['agentonly_callbacks'];
-    $agent_lead_search_override = $_REQUEST['agent_lead_search_override'];
-    $avatar = $_REQUEST['avatar'];
+    $user_group = $astDB->escape($_REQUEST['user_group']);
+    $email = $astDB->escape($_REQUEST['email']);
+    $active = strtoupper($astDB->escape($_REQUEST['active']));
+    $hotkeys_active = $astDB->escape($_REQUEST['hotkeys_active']);
+    $user_level = $astDB->escape($_REQUEST['user_level']);
+    $modify_same_user_level = strtoupper($astDB->escape($_REQUEST['modify_same_user_level']));
+    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    $goUser = $astDB->escape($_REQUEST['goUser']);
+    $voicemail = $astDB->escape($_REQUEST['voicemail']);
+    $vdc_agent_api_access = $astDB->escape($_REQUEST['vdc_agent_api_access']);
+    $agent_choose_ingroups = $astDB->escape($_REQUEST['agent_choose_ingroups']);
+    $vicidial_recording_override = $astDB->escape($_REQUEST['vicidial_recording_override']);
+    $vicidial_transfers = $astDB->escape($_REQUEST['vicidial_transfers']);
+    $closer_default_blended = $astDB->escape($_REQUEST['closer_default_blended']);
+    $agentcall_manual = $astDB->escape($_REQUEST['agentcall_manual']);
+    $scheduled_callbacks = $astDB->escape($_REQUEST['scheduled_callbacks']);
+    $agentonly_callbacks = $astDB->escape($_REQUEST['agentonly_callbacks']);
+    $agent_lead_search_override = $astDB->escape($_REQUEST['agent_lead_search_override']);
+    $avatar = $astDB->escape($_REQUEST['avatar']);
 
-    $location = $_REQUEST['location_id'];
+    $location = $astDB->escape($_REQUEST['location_id']);
     
     $log_user = $session_user;
 	
@@ -149,14 +149,14 @@
 				$err_msg = error_handle("41006", "location. User group does not exist in the location selected.");
 				$apiresults = array("code" => "41006", "result" => $err_msg);
 			}
-			array_push($updateUserGoArray, "location_id" => $location);
-			array_push($insertUserGoArray, "location_id" => $location);
+			$updateUserGoArray = array_merge($updateUserGoArray, array("location_id" => $location));
+			$insertUserGoArray = array_merge($insertUserGoArray, array("location_id" => $location));
 			/*$location_SQL = ", `location_id` = '$location' ";
 			$location_COL = ", location_id";
 			$location_VAL = ", '$location'";*/
 		}
 
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			$astDB->where("user", $user);
 		} else {
 			$astDB->where("user", $user);
@@ -165,7 +165,7 @@
 		}
 		
 		$astDB->where("user", DEFAULT_USERS, "NOT IN");
-        $astDB->getOne("vicidial_users", "extension");
+        $rsltvCheck = $astDB->getOne("vicidial_users", "extension");
         $countCheckResult = $astDB->count; 
 		/*$queryUserCheck = "
 						SELECT * 
@@ -176,7 +176,7 @@
 						";
 		*/
 		if($countCheckResult > 0) {
-			while($fresults = mysqli_fetch_array($rsltvCheck, MYSQLI_ASSOC)){
+			foreach ($rsltvCheck as $fresults){
 				$dataUser = $fresults['user'];
 				$data_phone_login = $fresults['phone_login'];
 				$dataUserLevel = $fresults['user_level'];
@@ -295,7 +295,7 @@
 							"pass" => ""
 						);
 
-						array_push($update_array, "pass_hash" => $pass_hash, "pass" => "", "phone_pass" => $pass_hash);
+						$update_array = array_merge($update_array, array("pass_hash" => $pass_hash, "pass" => "", "phone_pass" => $pass_hash));
 						/*
 						$pass_query = "`pass_hash` = '$pass_hash', `pass` = '', `phone_pass` = '$pass_hash', ";
 						$phonePassQuery = "`pass` = ''";
@@ -324,7 +324,7 @@
 							"pass" => $pass
 						);
 
-						array_push($update_array, "pass_hash" => $pass_hash, "pass" => $pass, "phone_pass" => $phone_pass);
+						$update_array = array_merge($update_array, array("pass_hash" => $pass_hash, "pass" => $pass, "phone_pass" => $phone_pass));
 						/*
 						$pass_query = "`pass_hash` = '$pass_hash', `pass` = '$pass', `phone_pass` = '$phone_pass', ";
 						$phonePassQuery = "`pass` = '$pass'";
@@ -347,7 +347,7 @@
 				}
 				
 				if($phone_login != NULL){
-					array_push($update_array, "phone_login" => $phone_login);
+					$update_array = array_merge($update_array, array("phone_login" => $phone_login));
 					//$phonelogin_query = "`phone_login` = '$phone_login', ";
 				}
 
@@ -386,7 +386,7 @@
 					//$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status $location_COL) VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive' $location_VAL)";
 				}
 
-				$justgovoip_array = Array("web_password" => $phone_pass);
+				$justgovoip_array = array("web_password" => $phone_pass);
 				$goDB->where ("carrier_id", $user_group);
 				$goDB->update ('justgovoip_sippy_info', $justgovoip_array);
 				/*

@@ -20,11 +20,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    @include_once ("goAPI.php");
  
     // POST or GET Variables
-      $user = explode(",",$_REQUEST['user']);
-      $phone_login = $_REQUEST['phone_login'];
+      $user = explode(",",$astDB->escape($_REQUEST['user']));
+      $phone_login = $astDB->escape($_REQUEST['phone_login']);
 
       // Phone Login Check optional when not null
       if($phone_login != NULL){

@@ -59,8 +59,7 @@ $kamDB = new MySQLiDB($VARDBgokam_server, $VARDBgokam_user, $VARDBgokam_pass, $V
 if (!$kamDB)
     {
     echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;
-    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+    echo "Debugging Error: " . $kamDB->getLastError() . PHP_EOL;
     exit;
     }
 ?>

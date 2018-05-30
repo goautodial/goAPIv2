@@ -58,8 +58,7 @@ $goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_dat
 if (!$goDB)
     {
     echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;
-    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+    echo "Debugging Error: " . $goDB->getLastError() . PHP_EOL;
     exit;
     }
 ?>
