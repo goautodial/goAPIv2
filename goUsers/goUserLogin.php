@@ -1,13 +1,26 @@
 <?php
-    #######################################################
-    #### Name: goUserLogin.php	                       ####
-    #### Description: API to get specific user	       ####
-    #### Version: 0.9                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2014      ####
-    #### Written by: Noel Umandap                      ####
-    #### License: AGPLv2                               ####
-    #######################################################
-    @include_once ("../goFunctions.php");
+/**
+ * @file        goUserLogin.php
+ * @brief       API used to login to application
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
+ * @author      Noel Umandap <noelumandap@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+    include_once ("goAPI.php");
     
     ### POST or GET Variables
 	$user_name = $astDB->escape($_REQUEST['user_name']);
