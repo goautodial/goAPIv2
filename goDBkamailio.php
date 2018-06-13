@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-include_once ("MySQLiDB.php");
+include_once ("includes/MySQLiDB.php");
 
 if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf";
