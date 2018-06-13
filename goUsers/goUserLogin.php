@@ -23,12 +23,13 @@
 	$qm_conf_ct = $astDB->getRowCount();
 	if ($qm_conf_ct > 0) {
 		//$rowp = mysqli_fetch_array($rsltp, MYSQLI_ASSOC);
-		$non_latin =            $rsltp['use_non_latin'];
-		$SSwebroot_writable =   $rsltp['webroot_writable'];
-		$SSpass_hash_enabled =  $rsltp['pass_hash_enabled'];
-		$SSpass_key =           $rsltp['pass_key'];
-		$SSpass_cost =          $rsltp['pass_cost'];
-		$SShosted_settings =    $rsltp['hosted_settings'];
+		$rowp =					$rsltp[0];
+		$non_latin =            $rowp['use_non_latin'];
+		$SSwebroot_writable =   $rowp['webroot_writable'];
+		$SSpass_hash_enabled =  $rowp['pass_hash_enabled'];
+		$SSpass_key =           $rowp['pass_key'];
+		$SSpass_cost =          $rowp['pass_cost'];
+		$SShosted_settings =    $rowp['hosted_settings'];
 	}
 	##### END SETTINGS LOOKUP #####
 	###########################################
