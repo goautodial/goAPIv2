@@ -20,13 +20,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-    include_once ("goAPI.php");
+    @include_once ("goAPI.php");
     
     // POST or GET Variables
-    $user_id = $_REQUEST['user_id'];
-	$user = $_REQUEST['user'];
+    $user_id = $astDB->escape($_REQUEST['user_id']);
+	$user = $astDB->escape($_REQUEST['user']);
 	//$action = $_REQUEST['action'];
-    $ip_address = $_REQUEST['hostname'];
+    $ip_address = $astDB->escape($_REQUEST['hostname']);
     
 	$log_user = $session_user;
 	$groupId = go_get_groupid($session_user, $astDB);
@@ -41,7 +41,7 @@
 		//$apiresults = array("result" => "Error: Set a value for User ID."); 
 	}else {
 		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "AND user_id=?";
 			$arr_ul = array($user_id);
 		} else { 

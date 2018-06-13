@@ -45,27 +45,27 @@
     /* Variables */
     
     if (isset($_GET["goAction"])) {
-            $goAction = $_GET["goAction"];
+            $goAction = $astDB->escape($_GET["goAction"]);
     } elseif (isset($_POST["goAction"])) {
-            $goAction = $_POST["goAction"];
+            $goAction = $astDB->escape($_POST["goAction"]);
     }
     
     if (isset($_GET["goUser"])) {
-            $goUser = $_GET["goUser"];
+            $goUser = $astDB->escape($_GET["goUser"]);
     } elseif (isset($_POST["goUser"])) {
-            $goUser = $_POST["goUser"];
+            $goUser = $astDB->escape($_POST["goUser"]);
     }
     
     if (isset($_GET["goPass"])) {
-            $goPass = $_GET["goPass"];
+            $goPass = $astDB->escape($_GET["goPass"]);
     } elseif (isset($_POST["goPass"])) {
-            $goPass = $_POST["goPass"];
+            $goPass = $astDB->escape($_POST["goPass"]);
     }
     
     if (isset($_GET["goURL"])) {
-            $goURL = $_GET["goURL"];
+            $goURL = $astDB->escape($_GET["goURL"]);
     } elseif (isset($_POST["goURL"])) {
-            $goURL = $_POST["goURL"];
+            $goURL = $astDB->escape($_POST["goURL"]);
     }
     
     define('DEFAULT_USERS', array('VDAD','VDCL'));

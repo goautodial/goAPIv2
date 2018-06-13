@@ -60,8 +60,7 @@ $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
 if (!$astDB)
     {
     echo "Error: Unable to connect to MySQL asterisk." . PHP_EOL;
-    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+    echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
     exit;
     //die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
     }

@@ -20,30 +20,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    @include_once ("goAPI.php");
 	include_once ("../licensed-conf.php");
 	
     // POST or GET Variables
-        $orig_user = $_REQUEST['user'];
-        $pass = $_REQUEST['pass'];
-        $orig_full_name = $_REQUEST['full_name'];
-        $phone_login = $_REQUEST['phone_login'];
+        $orig_user = $astDB->escape($_REQUEST['user']);
+        $pass = $astDB->escape($_REQUEST['pass']);
+        $orig_full_name = $astDB->escape($_REQUEST['full_name']);
+        $phone_login = $astDB->escape($_REQUEST['phone_login']);
         $phone_pass = $pass;
-        $user_group = $_REQUEST['user_group'];
-        $active = strtoupper($_REQUEST['active']);
-        $location = $_REQUEST['location_id'];
+        $user_group = $astDB->escape($_REQUEST['user_group']);
+        $active = $astDB->escape(strtoupper($_REQUEST['active']));
+        $location = $astDB->escape($_REQUEST['location_id']);
 		
 	if(isset($_REQUEST['seats']))
-		$seats = $_REQUEST['seats'];
+		$seats = $astDB->escape($_REQUEST['seats']);
 	else
 	    $seats = 1;
 		
-	$avatar = $_REQUEST['avatar'];
-	$goUser = $_REQUEST['goUser'];
-        $ip_address = $_REQUEST['hostname'];
+	$avatar = $astDB->escape($_REQUEST['avatar']);
+	$goUser = $astDB->escape($_REQUEST['goUser']);
+        $ip_address = $astDB->escape($_REQUEST['hostname']);
 		
 	$log_user = $session_user;
-	$log_group = $_REQUEST['log_group'];
+	$log_group = $astDB->escape($_REQUEST['log_group']);
 
     // Default values 
         $defActive = array("Y","N");
@@ -150,7 +150,7 @@
 				$add_num = $add_num + 1;
 				
 				$groupId = go_get_groupid($session_user, $astDB);
-				if (!checkIfTenant($groupId)) {
+				if (!checkIfTenant($groupId, $goDB)) {
 					$ulUser = "AND user= ?";
 					$arrUserCheck = array('VDAD', 'VDCL', 4, $phone_login, $phone_login, $user);
 

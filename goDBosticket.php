@@ -57,8 +57,7 @@ $ostDB = new MySQLiDB($VARDBost_server, $VARDBost_user, $VARDBost_pass, $VARDBos
 if (!$ostDB)
     {
     echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;
-    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+    echo "Debugging Error: " . $ostDB->getLastError() . PHP_EOL;
     exit;
     }
 ?>

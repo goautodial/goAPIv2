@@ -23,16 +23,16 @@
     include_once ("goAPI.php");
 
     // POST or GET Variables
-    $user_id = $_REQUEST['user_id'];
-    $user = $_REQUEST['user'];
+    $user_id = $astDB->escape($_REQUEST['user_id']);
+    $user = $astDB->escape($_REQUEST['user']);
     $filter = "default";
-    $filter = $_REQUEST['filter'];
+    $filter = $astDB->escape($_REQUEST['filter']);
     
-    $typeOf = mysqli_real_escape_string($link, $_REQUEST['type']);
+    $typeOf = $astDB->escape($_REQUEST['type']);
     
-    $ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $ip_address = $astDB->escape($_REQUEST['log_ip']);
+    $log_user = $astDB->escape($_REQUEST['log_user']);
+    $log_group = $astDB->escape($_REQUEST['log_group']);
         
     // Check user_id if its null or empty
     if($user_id == null && $user == null) {
@@ -40,7 +40,7 @@
         $apiresults = array("code" => "40001","result" => $err_msg);
     } else {
             
-			$groupId = go_get_groupid($goUser);
+			$groupId = go_get_groupid($goUser, $astDB);
             
         if (!checkIfTenant($groupId)) {
             if($user_id != NULL){
@@ -78,9 +78,9 @@
                             WHERE $ul
                             ";
                             
-        $rsltvGetUserInfo = mysqli_query($link, $query_GetUserInfo);
-        $fresults = mysqli_fetch_array($rsltvGetUserInfo, MYSQLI_ASSOC);
-        $num_users = mysqli_num_rows($rsltvGetUserInfo);   
+        $fresults = $astDB->rawQuery($query_GetUserInfo);
+        //$fresults = $rsltvGetUserInfo;
+        $num_users = $astDB->getRowCount();   
 		
 		if($num_users < 1){
 			$err_msg = error_handle("41004", "user. Doesn't exist!");
@@ -93,8 +93,8 @@
                                 FROM vicidial_live_agents 
                                 WHERE vicidial_live_agents.user_level != 4
                                 ";
-        $rsltvOnlineAgents = mysqli_query($link,$query_OnlineAgents);
-        $countResultOnlineAgents = mysqli_num_rows($rsltvOnlineAgents);                
+        $rsltvOnlineAgents = $astDB->rawQuery($query_OnlineAgents);
+        $countResultOnlineAgents = $astDB->getRowCount();
         
         // USER PROFILE (non-array)
         //count only calls with length_in_sec > 0
@@ -136,15 +136,15 @@
                                         AND length_in_sec > 0
                                         ";
         
-        $rsltvInCallsToday = mysqli_query($link,$query_InboundCallsTodayAgent);
-        $rsltvInSalesToday = mysqli_query($link,$query_InboundSalesTodayAgent);
-        $rsltvOutCallsToday = mysqli_query($link,$query_OutboundCallsTodayAgent);
-        $rsltvOutSalesToday = mysqli_query($link,$query_OutboundSalesTodayAgent);
+        $resultsincallstoday = $astDB->rawQuery($query_InboundCallsTodayAgent);
+        $resultsinsales = $astDB->rawQuery($query_InboundSalesTodayAgent);
+        $resultsoutcallstoday = $astDB->rawQuery($query_OutboundCallsTodayAgent);
+        $resultsoutsales = $astDB->rawQuery($query_OutboundSalesTodayAgent);
         
-        $resultsincallstoday = mysqli_fetch_assoc($rsltvInCallsToday);
-        $resultsoutcallstoday = mysqli_fetch_assoc($rsltvOutCallsToday);        
-        $resultsinsales = mysqli_fetch_assoc($rsltvInSalesToday);
-        $resultsoutsales = mysqli_fetch_assoc($rsltvOutSalesToday);        
+        //$resultsincallstoday = mysqli_fetch_assoc($rsltvInCallsToday);
+        //$resultsoutcallstoday = mysqli_fetch_assoc($rsltvOutCallsToday);        
+        //$resultsinsales = mysqli_fetch_assoc($rsltvInSalesToday);
+        //$resultsoutsales = mysqli_fetch_assoc($rsltvOutSalesToday);        
             
         
         if($user_id != NULL){
@@ -162,8 +162,8 @@
                                 ";
             }
                                 
-            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo) or die(mysqli_error($linkgo));
-            $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);      
+            $fresultsUserInfoGo = $goDB->rawQuery($queryUserInfoGo) or die($goDB->getLastError());
+            //$fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);
             
             if ($filter == "userInfo") {
                 if(!empty($fresultsUserInfoGo)) {
@@ -174,12 +174,12 @@
                 
                 $apiresults = array("result" => "success", "data" => $data);
                 
-                $result = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user_id='$user_id';");
-                $userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                $userInfo = $astDB->rawQuery("SELECT user FROM vicidial_users WHERE user_id='$user_id';");
+                //$userInfo = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 $user = $userInfo['user'];
                 
                 if($log_user == "" || $log_user == NULL) {
-                    $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
+                    $log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
                 } 
                 
             } else {
@@ -209,8 +209,8 @@
                 $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE name='$user';";
             }
             
-            $rsltvUserInfoGo = mysqli_query($linkgo, $queryUserInfoGo);
-            $fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);         
+            $fresultsUserInfoGo = $godB->rawQuery($queryUserInfoGo);
+            //$fresultsUserInfoGo = mysqli_fetch_array($rsltvUserInfoGo, MYSQLI_ASSOC);         
             
             $query_OnlineAgentsInCalls = "
                                         SELECT vicidial_live_agents.extension as 'vla_extension',vicidial_live_agents.user as 'vla_user',
@@ -232,9 +232,9 @@
                                         ORDER BY last_call_time
                                         ";
                                         
-            $rsltvOnlineAgentsInCalls = mysqli_query($link,$query_OnlineAgentsInCalls);
-            $rsltvInCalls = mysqli_query($link,$query_OnlineAgentsInCalls); 
-            $countResultOnlineAgentsInCalls = mysqli_num_rows($rsltvOnlineAgentsInCalls);             
+            $rsltvOnlineAgentsInCalls = $astDB->rawQuery($query_OnlineAgentsInCalls);
+            $countResultOnlineAgentsInCalls = $astDB->getRowCount();
+            $rsltvInCalls = $astDB->rawQuery($query_OnlineAgentsInCalls);              
             
             $query_OnlineAgentsNoCalls = "
                                         SELECT vicidial_live_agents.extension as 'vla_extension',vicidial_live_agents.user as 'vla_user',
@@ -257,12 +257,12 @@
                                         ORDER BY last_call_time
                                         ";          
                                         
-            $rsltvNoCalls = mysqli_query($link,$query_OnlineAgentsNoCalls);                                                                          
+            $rsltvNoCalls = $astDB->rawQuery($query_OnlineAgentsNoCalls);                                                                          
         
             if ($countResultOnlineAgentsInCalls > 0) {                                                      
                 
                 $dataInCalls = array();                
-                while($resultsInCalls = mysqli_fetch_array($rsltvInCalls, MYSQLI_ASSOC)){   
+                foreach ($rsltvInCalls as $resultsInCalls){   
                     $callerid = $resultsInCalls['vla_callerid'];
                     array_push($dataInCalls, $resultsInCalls);                                       
                 }
@@ -274,15 +274,10 @@
                                         LIMIT 1
                                         ";
                                         
-                $rsltvCallerIDsFromVAC = mysqli_query($link,$query_CallerIDsFromVAC);
-                
-                $dataParkedChannels = array();
-                while($resultsParkedChannels = mysqli_fetch_array($rsltvParkedChannels, MYSQLI_ASSOC)){               
-                    array_push($dataParkedChannels, $resultsParkedChannels);
-                }
+                $rsltvCallerIDsFromVAC = $astDB->rawQuery($query_CallerIDsFromVAC);
                 
                 $dataCallerIDsFromVAC = array();
-                while($resultsCallerIDsFromVAC = mysqli_fetch_array($rsltvCallerIDsFromVAC, MYSQLI_ASSOC)){               
+                foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAC) {
                     array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
                 }
                 
@@ -293,14 +288,19 @@
                                         WHERE channel_group='$callerid'
                                         ";
                                         
-                $rsltvParkedChannels = mysqli_query($link,$query_ParkedChannels);                                   
+                $rsltvParkedChannels = $astDB->rawQuery($query_ParkedChannels);      
+                
+                $dataParkedChannels = array();
+                foreach ($rsltvParkedChannels as $resultsParkedChannels){
+                    array_push($dataParkedChannels, $resultsParkedChannels);
+                }                             
                 
                 $data = $dataInCalls;
                 
             } else {
             
                 $dataNoCalls = array();
-                while($resultsNoCalls = mysqli_fetch_array($rsltvNoCalls, MYSQLI_ASSOC)){               
+                foreach ($rsltvNoCalls as $resultsNoCalls) {
                     array_push($dataNoCalls, $resultsNoCalls);
                 }    
                 
@@ -308,7 +308,7 @@
             
             }        
             
-            $log_id = log_action($linkgo, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
+            $log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
             
             $apiresults = array("result" => "success", "data" => $data, "parked" => $dataParkedChannels, "callerids" => $dataCallerIDsFromVAC, "dataGo" => $fresultsUserInfoGo);
             
