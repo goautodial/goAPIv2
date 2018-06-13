@@ -97,7 +97,7 @@
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
     //$rslt=mysqli_query($link, $query_user);
     $astDB->where("user", $goUser);
-    if($pass_hash_enabled > 0 )
+    if($system_settings['pass_hash_enabled'] > 0 )
     	$astDB->where("pass_hash", $pass_hash);
     else
 	   $astDB->where("pass", $pass);
