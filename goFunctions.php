@@ -1747,4 +1747,13 @@
             return "Failed to rebuild conf. Mysql_Error: ".$dbase->getLastError();
         }
     }
+	
+	function encrypt_passwd($pass, $cost, $salt = null) {
+		$pass_options = [
+			'cost' => $cost,
+			'salt' => base64_encode($salt)
+		];
+		$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
+		return substr($pass_hash, 29, 31);
+	}
 ?>

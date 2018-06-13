@@ -109,6 +109,8 @@
 			$rpasshash = $astDB->getOne("system_settings");
 			//$queryPassHash = "SELECT pass_hash_enabled from system_settings";
 			$pass_hash_enabled = $rpasshash['pass_hash_enabled'];
+			$pass_cost = $rpasshash['pass_cost'];
+			$pass_key = $rpasshash['pass_key'];
 
 			$get_last = preg_replace("/[^0-9]/","", $orig_user);
 			$last_num_user = intval($get_last);
@@ -222,9 +224,10 @@
 					
 						$pass_hash = '';
 						if ($pass_hash_enabled > 0) {
-							$cwd = $_SERVER['DOCUMENT_ROOT'];
-							$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-							$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+							//$cwd = $_SERVER['DOCUMENT_ROOT'];
+							//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+							//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+							$pass_hash = encrypt_passwd($pass, $pass_cost, $pass_key);
 							//$pass = '';
 						}
 						$data = array(

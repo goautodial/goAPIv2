@@ -274,15 +274,19 @@
 									"email" => $email, 
 									"agent_lead_search_override" => $agent_lead_search_override
 								);
-
-				// Password Encryption
-				$cwd = $_SERVER['DOCUMENT_ROOT'];
-				$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-				$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 				
 				if($pass != NULL){
-					$fetch_passhash = $astDB->getOne("system_settings", "pass_hash_enabled");
+					$fetch_passhash = $astDB->getOne("system_settings", "pass_hash_enabled,pass_key,pass_cost");
 					$pass_hash_enabled = $fetch_passhash["pass_hash_enabled"];
+					$pass_key = $fetch_passhash["pass_key"];
+					$pass_cost = $fetch_passhash["pass_cost"];
+					
+					// Password Encryption
+					//$cwd = $_SERVER['DOCUMENT_ROOT'];
+					//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+					//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+					$pass_hash = encrypt_passwd($pass, $pass_cost, $pass_key);
+					
 					/*
 					$query_passhash = "select pass_hash_enabled from system_settings";
 					*/

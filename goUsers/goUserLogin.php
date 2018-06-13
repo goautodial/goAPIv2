@@ -59,8 +59,9 @@
     $passSQL = "pass='$user_pass'";
 	if ($SSpass_hash_enabled > 0) {
 		if ($bcrypt < 1) {
-			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$user_pass");
-			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$user_pass");
+			//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			$pass_hash = encrypt_passwd($user_pass, $SSpass_cost, $SSpass_key);
 		} else {$pass_hash = $user_pass;}
 		$passSQL = "pass_hash='$pass_hash'";
 		//$aDB->where('pass_hash', $pass_hash);

@@ -82,13 +82,14 @@
 	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
 	
     //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
-    $pass_hash_enabled = $astDB->getValue("system_settings", "pass_hash_enabled", NULL);
+    $system_settings = $astDB->getOne("system_settings", "pass_hash_enabled,pass_cost,pass_key");
 
 	$passSQL = "pass='$pass'";
-	if ($pass_hash_enabled > 0) {
+	if ($system_settings['pass_hash_enabled'] > 0) {
 		if ($bcrypt < 1) {
-			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+			//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
 	}
