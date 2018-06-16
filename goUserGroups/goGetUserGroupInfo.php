@@ -55,7 +55,7 @@
 		$goQuery = $goDB->getOne("user_group", NULL, $cols2);
 		//$queryGL = "SELECT group_level,permissions FROM user_access_group WHERE user_group='$user_group';";
 		
-		$data = array_merge($astQuery, $goQuery);
+		$data = array($astQuery, $goQuery);
 		
 		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of User Group: $user_group", $groupId);
 		

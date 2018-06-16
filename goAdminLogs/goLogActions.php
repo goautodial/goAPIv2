@@ -35,8 +35,8 @@ if ($user === 'sess_expired') {
         $NOW = date("Y-m-d H:i:s");
         $NOWepoch = date("U");
         
-        $astDB->where('user' => $user);
-        $astDB->where('event' => 'LOGIN');
+        $astDB->where('user' = $user);
+        $astDB->where('event' = 'LOGIN');
         $astDB->orderBy('event_date', 'desc');
         $sessRslt = $astDB->getOne('vicidial_user_log', 'campaign_id');
         $campaign = $sessRslt['campaign_id'];
