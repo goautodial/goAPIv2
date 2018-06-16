@@ -178,7 +178,7 @@
 				}
 				
 				
-				$query = $astDB->rawQueryValue("SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;", $arrlug);
+				$query = $astDB->rawQuery("SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ulug ORDER BY user_group LIMIT 1;", $arrlug);
 				
 				if($query->count > 0) {
 
