@@ -24,14 +24,14 @@
 	include_once ("../licensed-conf.php");
 	
     // POST or GET Variables
-        $orig_user = $astDB->escape($_REQUEST['user']);
-        $pass = $astDB->escape($_REQUEST['pass']);
-        $orig_full_name = $astDB->escape($_REQUEST['full_name']);
-        $phone_login = $astDB->escape($_REQUEST['phone_login']);
-        $phone_pass = $pass;
-        $user_group = $astDB->escape($_REQUEST['user_group']);
-        $active = $astDB->escape(strtoupper($_REQUEST['active']));
-        $location = $astDB->escape($_REQUEST['location_id']);
+	$orig_user = $astDB->escape($_REQUEST['user']);
+	$pass = $astDB->escape($_REQUEST['pass']);
+	$orig_full_name = $astDB->escape($_REQUEST['full_name']);
+	$phone_login = $astDB->escape($_REQUEST['phone_login']);
+	$phone_pass = $pass;
+	$user_group = $astDB->escape($_REQUEST['user_group']);
+	$active = $astDB->escape(strtoupper($_REQUEST['active']));
+	$location = $astDB->escape($_REQUEST['location_id']);
 		
 	if(isset($_REQUEST['seats']))
 		$seats = $astDB->escape($_REQUEST['seats']);
@@ -40,13 +40,13 @@
 		
 	$avatar = $astDB->escape($_REQUEST['avatar']);
 	$goUser = $astDB->escape($_REQUEST['goUser']);
-        $ip_address = $astDB->escape($_REQUEST['hostname']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
 		
 	$log_user = $session_user;
 	$log_group = $astDB->escape($_REQUEST['log_group']);
 
     // Default values 
-        $defActive = array("Y","N");
+	$defActive = array("Y","N");
 
     // Error Checking
     if(empty($session_user)){
@@ -80,8 +80,7 @@
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
         //$apiresults = array("result" => "Error: Set a value for User Group.");
-    } else {
-	if(!in_array($active,$defActive) && $active != null) {
+    } elseif(!in_array($active,$defActive) && $active != null) {
 		$err_msg = error_handle("41006", "active");
 		$apiresults = array("code" => "41006", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
