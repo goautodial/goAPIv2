@@ -35,53 +35,17 @@
         $log_user = $session_user;
         $groupId = go_get_groupid($session_user, $astDB);
         
-        if (!checkIfTenant($groupId, $astDB)) {
-			$astDB->where("user_id", $user_id);
-    	} else {
-			$astDB->where("user_id", $user_id);
-            $astDB->where("user_group", $groupId); 
-		}
+        if (!checkIfTenant($groupId, $astDB)) { $astDB->where("user_id", $user_id); } 
+    	else { $astDB->where("user_id", $user_id); $astDB->where("user_group", $groupId); }
         
         $fresults = $astDB->getOne("vicidial_users", "user_id,user,full_name,email,user_group,active,user_level,phone_login,phone_pass,voicemail_id,hotkeys_active,vdc_agent_api_access,agent_choose_ingroups,vicidial_recording_override,vicidial_transfers,closer_default_blended,agentcall_manual,scheduled_callbacks,agentonly_callbacks,agent_lead_search_override");
         $fresultsgo = $goDB->getOne("users", "userid,avatar,gcal,calendar_apikey,calendar_id");
+                
+        $data = array_merge($fresults, $fresultsgo);        
+        $log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
         
-        $countResult = $astDB->count;
-        
-		if($countResult > 0) {						
-            $dataUserId = $fresults['user_id'];
-            $dataUser = $fresults['user'];
-            $dataFullname = $fresults['full_name'];
-            $dataEmail = $fresults['email'];
-            $dataUserGroup = $fresults['user_group'];
-            $dataUserLevel = $fresults['user_level'];
-            $dataActive = $fresults['active'];
-            $dataPhoneLogin = $fresults['phone_login'];
-            $dataPhonePass = $fresults['phone_pass'];
-            $dataVoicemailId = $fresults['voicemail_id'];
-            $dataHotkeysActive = $fresults['hotkeys_active'];
-            $dataVdcAgentApiAccess = $fresults['vdc_agent_api_access'];
-            $dataAgentChooseIngroup = $fresults['agent_choose_ingroups'];
-            $dataVicidialRecordingOverride = $fresults['vicidial_recording_override'];
-            $dataVicidialTransfers = $fresults['vicidial_transfers'];
-            $dataCloserDefaultBlended = $fresults['closer_default_blended'];
-            $dataAgentCallManual = $fresults['agentcall_manual'];
-            $dataScheduleCallbacks = $fresults['scheduled_callbacks'];
-            $dataAgentOnlyCallbacks = $fresults['agentonly_callbacks'];
-            $dataAgentLeadsearchOverride = $fresults['agent_lead_search_override'];
-         		
-			$datagoUserid = $fresultsgo['userid'];
-			$datagoAvatar = $fresultsgo['avatar'];
-			$datagoGcal = $fresultsgo['gcal'];
-			$datagoCalendarApiKey = $fresultsgo['calendar_apikey'];
-			$datagoCalendarId = $fresultsgo['calendar_id'];
-			
-            $apiresults = array("result" => "success", "user_id" => $dataUserId, "user" => $dataUser, "full_name" => $dataFullname, "email" => $dataEmail, "user_group" => $dataUserGroup, "user_level" => $dataUserLevel, "active" => $dataActive, "phone_login" => $dataPhoneLogin, "phone_pass" => $dataPhonePass, "voicemail_id" => $dataVoicemailId, "hotkeys_active" => $dataHotkeysActive, "vdc_agent_api_access" => $dataVdcAgentApiAccess, "agent_choose_ingroups" => $dataAgentChooseIngroup, "vicidial_recording_override" => $dataVicidialRecordingOverride, "vicidial_transfers" => $dataVicidialTransfers, "closer_default_blended" => $dataCloserDefaultBlended, "agentcall_manual" => $dataAgentCallManual, "scheduled_callbacks" => $dataScheduleCallbacks, "agentonly_callbacks" => $dataAgentOnlyCallbacks, "agent_lead_search_override" => $dataAgentLeadsearchOverride, "userid" => $datagoUserid, "avatar" => $datagoAvatar, "gcal" => $datagoGcal, "calendar_apikey" => $datagoCalendarApiKey, "calendar_id" => $datagoCalendarId);
-			
-			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
-		} else {
-			$apiresults = array("result" => "Error: User doesn't exist.");
-		}        
-                            
+		if(!empty($data)) { $apiresults = array("result" => "success", "data" => $data); } 
+		else { $apiresults = array("result" => "Error: User Group doesn't exist."); }                            
 	}
   
 
