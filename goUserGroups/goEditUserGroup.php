@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("../goFunctions.php");
+    include_once ("goAPI.php");
  
     // POST or GET Variables
 
@@ -41,7 +41,7 @@
     $defFTL = array('Y','N','ADMIN_EXEMPT');
     $defSE = array('OFF','START','ALL');
 
-    if(!isset$session_user) || is_null($session_user)){
+    if(!isset($session_user) || is_null($session_user)){
         $apiresults = array("result" => "Error: Missing Required Parameters.");
     }elseif(is_null($user_group)) {
         $apiresults = array("result" => "Error: Set a value for User Group.");
@@ -58,7 +58,7 @@
     } else {
     
         $groupId = $log_user;
-        if (!checkIfTenant($groupId, $goDB)) {
+        if (!checkIfTenant($groupId, $astDB)) {
             $astDB->where("user_group", $user_group);
             //$ul = "WHERE user_group='$user_group'";
         } else {
@@ -67,16 +67,16 @@
             //$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
         }
 
-        $fresuts = $astDB->getOne("vicidial_user_groups", "user_group, group_name, forced_timeclock_login, shift_enforcement, allowed_campaigns, admin_viewable_groups");
+        $fresults = $astDB->getOne("vicidial_user_groups", "user_group, group_name, forced_timeclock_login, shift_enforcement, allowed_campaigns, admin_viewable_groups");
         //$query = "SELECT user_group, group_name, forced_timeclock_login, shift_enforcement FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
         $countResult = $astDB->count;
 		if($countResult > 0) {
 			 //user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
-			if(is_null($group_name)){$group_name = $fresuts["group_name"];} 
-            if(is_null($forced_timeclock_login)){$forced_timeclock_login = $fresuts["forced_timeclock_login"];} 
-            if(is_null($shift_enforcement)){$shift_enforcement = $fresuts["shift_enforcement"];}
-            if(is_null($allowed_campaigns)){$allowed_campaigns = $fresuts["allowed_campaigns"];}
-            if(is_null($allowed_usergroups)){$allowed_usergroups = $fresuts["allowed_usergroups"];}
+			if(is_null($group_name)){$group_name = $fresults["group_name"];} 
+            if(is_null($forced_timeclock_login)){$forced_timeclock_login = $fresults["forced_timeclock_login"];} 
+            if(is_null($shift_enforcement)){$shift_enforcement = $fresults["shift_enforcement"];}
+            if(is_null($allowed_campaigns)){$allowed_campaigns = $fresults["allowed_campaigns"];}
+            if(is_null($allowed_usergroups)){$allowed_usergroups = $fresults["allowed_usergroups"];}
 
             $data = Array(
                         "group_name" => $group_name,
@@ -90,10 +90,10 @@
             $astUpdate = $astDB->update("vicidial_user_groups", $data);
 			//$query = "UPDATE vicidial_user_groups SET group_name='$group_name', forced_timeclock_login='$forced_timeclock_login', shift_enforcement='$shift_enforcement', allowed_campaigns='$allowed_campaigns', admin_viewable_groups='$allowed_usergroups' WHERE user_group='$user_group';";
 
-			$astDB->where("user_group", $user_group);
-            $GOresuts = $goDB->getOne("user_access_group", "group_level, permissions");
-            if(is_null($group_level)){$group_level = $GOresuts["group_level"];} 
-            if(is_null($permissions)){$permissions = $GOresuts["permissions"];} 
+			$goDB->where("user_group", $user_group);
+            $fresultsgo = $goDB->getOne("user_access_group", "group_level, permissions");
+            if(is_null($group_level)){$group_level = $fresultsgo["group_level"];} 
+            if(is_null($permissions)){$permissions = $fresultsgo["permissions"];} 
 
             $goData = Array(
                         "group_level" => $group_level,
