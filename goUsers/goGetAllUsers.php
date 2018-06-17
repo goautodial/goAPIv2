@@ -32,7 +32,7 @@
 		$user_level = $query_userlevel["user_level"];
 		$groupId = $query_userlevel["user_group"];
 		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $astDB)) {
 			$ul='';
 			if (strtoupper($groupId) != 'ADMIN') {
 				if ($user_level > 8) {
