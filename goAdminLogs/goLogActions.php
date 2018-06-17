@@ -1,12 +1,26 @@
 <?php
-####################################################
-#### Name: goLogActions.php                     ####
-#### Type: API for Logging Actions              ####
-#### Version: 0.9                               ####
-#### Copyright: GOAutoDial Inc. (c) 2011-2016   ####
-#### Written by: Christopher P. Lomuntad        ####
-#### License: AGPLv2                            ####
-####################################################
+/**
+ * @file        goAddUserGroup.php
+ * @brief       API to add new User Group 
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author      Christopher Lomuntad  <chris@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+    
+    include_once ("../goFunctions.php");
 
 if (isset($_GET['action'])) { $action = $astDB->escape($_GET['action']); }
     else if (isset($_POST['action'])) { $action = $astDB->escape($_POST['action']); }
@@ -25,7 +39,7 @@ if ($user === 'sess_expired') {
     $goDB->where('ip_address', $ip_address);
     $goDB->where('action', 'LOGIN');
     $goDB->orderBy('event_date', 'desc');
-    $rslt = $goDB->getOne('go_action_logs', 'user, user_group');
+    $rslt = $goDB->getOne('go_action_logs', 'user', 'user_group');
     
     $user = $rslt['user'];
     $user_group = $rslt['user_group'];
@@ -35,8 +49,8 @@ if ($user === 'sess_expired') {
         $NOW = date("Y-m-d H:i:s");
         $NOWepoch = date("U");
         
-        $astDB->where('user' = $user);
-        $astDB->where('event' = 'LOGIN');
+        $astDB->where('user', $user);
+        $astDB->where('event', 'LOGIN');
         $astDB->orderBy('event_date', 'desc');
         $sessRslt = $astDB->getOne('vicidial_user_log', 'campaign_id');
         $campaign = $sessRslt['campaign_id'];
