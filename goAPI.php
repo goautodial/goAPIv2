@@ -1,7 +1,7 @@
 <?php
 /**
- * @file    goAPI.php
- * @brief     API to handle every API
+ * @file    	goAPI.php
+ * @brief     	API to handle every API
  * @copyright   Copyright (C) GOautodial Inc.
  * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
  * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
@@ -20,13 +20,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-   
-    include_once ("goDBasterisk.php");
-    include_once ("goDBgoautodial.php");
-    include_once ("goDBkamailio.php");
-    include_once ("includes/goFunctions.php");
-    include_once ("includes/XMLParser.php");
-
+    include_once ("../goDBasterisk.php");
+    include_once ("../goDBgoautodial.php");
+    include_once ("../goDBkamailio.php");
+    include_once ("../goFunctions.php");
+    
     /* Check if DB variables are not set */
 	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
 	$VARDB_user     = (!isset($VARDB_user)) ? "asteriskDBu" : $VARDB_user;
@@ -47,27 +45,27 @@
     /* Variables */
     
     if (isset($_GET["goAction"])) {
-            $goAction = $_GET["goAction"];
+            $goAction = $astDB->escape($_GET["goAction"]);
     } elseif (isset($_POST["goAction"])) {
-            $goAction = $_POST["goAction"];
+            $goAction = $astDB->escape($_POST["goAction"]);
     }
     
     if (isset($_GET["goUser"])) {
-            $goUser = $_GET["goUser"];
+            $goUser = $astDB->escape($_GET["goUser"]);
     } elseif (isset($_POST["goUser"])) {
-            $goUser = $_POST["goUser"];
+            $goUser = $astDB->escape($_POST["goUser"]);
     }
     
     if (isset($_GET["goPass"])) {
-            $goPass = $_GET["goPass"];
+            $goPass = $astDB->escape($_GET["goPass"]);
     } elseif (isset($_POST["goPass"])) {
-            $goPass = $_POST["goPass"];
+            $goPass = $astDB->escape($_POST["goPass"]);
     }
     
     if (isset($_GET["goURL"])) {
-            $goURL = $_GET["goURL"];
+            $goURL = $astDB->escape($_GET["goURL"]);
     } elseif (isset($_POST["goURL"])) {
-            $goURL = $_POST["goURL"];
+            $goURL = $astDB->escape($_POST["goURL"]);
     }
     
     define('DEFAULT_USERS', array('VDAD','VDCL'));
@@ -84,13 +82,14 @@
 	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
 	
     //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
-    $pass_hash_enabled = $astDB->getValue("system_settings", "pass_hash_enabled", NULL);
+    $system_settings = $astDB->getOne("system_settings", "pass_hash_enabled,pass_cost,pass_key");
 
 	$passSQL = "pass='$pass'";
-	if ($pass_hash_enabled > 0) {
+	if ($system_settings['pass_hash_enabled'] > 0) {
 		if ($bcrypt < 1) {
-			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+			//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
 	}
@@ -98,13 +97,13 @@
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
     //$rslt=mysqli_query($link, $query_user);
     $astDB->where("user", $goUser);
-    if($pass_hash_enabled > 0 )
+    if($system_settings['pass_hash_enabled'] > 0 )
     	$astDB->where("pass_hash", $pass_hash);
     else
 	   $astDB->where("pass", $pass);
     $astDB->getOne("vicidial_users", "count(*) as sum");
     $check_result = $astDB->count;
-    
+	
     if ($check_result > 0) {
        
         if (file_exists($goAction . ".php" )) {
