@@ -87,8 +87,9 @@
 	$passSQL = "pass='$pass'";
 	if ($pass_hash_enabled > 0) {
 		if ($bcrypt < 1) {
-			$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-			$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+			//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
 	}
