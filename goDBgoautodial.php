@@ -39,8 +39,7 @@ if ( file_exists($conf_path) )
         if (preg_match("/^PATHweb/", $DBCline))
                 {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
         if (preg_match("/^VARserver_ip/", $DBCline))
-                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}
-                
+                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}                
         if (preg_match("/^VARDBgo_server/", $DBCline))
                 {$VARDBgo_server = $DBCline;   $VARDBgo_server = preg_replace("/.*=/","",$VARDBgo_server);}
         if (preg_match("/^VARDBgo_database/", $DBCline))
@@ -55,6 +54,7 @@ if ( file_exists($conf_path) )
     }
 
 $goDB = new MySQLiDB($VARDBgo_server, $VARDBgo_user, $VARDBgo_pass, $VARDBgo_database);
+
 if (!$goDB)
     {
     echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;
