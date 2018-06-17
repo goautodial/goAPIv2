@@ -3,6 +3,7 @@
  * @file 		goEditUser.php
  * @brief 		API to edit specific User Details
  * @copyright 	Copyright (C) GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho <demian@goautodial.com>
  * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
  *
  * @par <b>License</b>:

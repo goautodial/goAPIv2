@@ -3,7 +3,7 @@
  * @file        goGetUserInfoNew.php
  * @brief       API to get specific user details 
  * @copyright   Copyright (C) GOautodial Inc.
- * @author      Demian Lizandro Biscocho <demianb@goautodial.com>
+ * @author      Demian Lizandro A. Biscocho <demianb@goautodial.com>
  * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
  *
  * @par <b>License</b>:
