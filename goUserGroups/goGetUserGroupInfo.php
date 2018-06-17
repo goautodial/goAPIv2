@@ -52,10 +52,10 @@
 		
 		$cols2 = array("group_level", "permissions");
 		$goDB->where("user_group", $user_group);
-		$goQuery = $goDB->getOne("user_group", NULL, $cols2);
+		$goQuery = $goDB->getOne("user_access_group", NULL, $cols2);
 		//$queryGL = "SELECT group_level,permissions FROM user_access_group WHERE user_group='$user_group';";
 		
-		$data = array($astQuery, $goQuery);
+		$data = array_merge($astQuery, $goQuery);
 		
 		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of User Group: $user_group", $groupId);
 		
