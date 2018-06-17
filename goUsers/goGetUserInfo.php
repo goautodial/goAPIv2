@@ -25,11 +25,11 @@
     // POST or GET Variables
     $user_id = $astDB->escape($_REQUEST['user_id']);
     $user = $astDB->escape($_REQUEST['user']);
-    $filter = "default";
-    $filter = $astDB->escape($_REQUEST['filter']);
     
-    $typeOf = $astDB->escape($_REQUEST['type']);
+	if(isset($_REQUEST['filter'])) $filter = $astDB->escape($_REQUEST['filter']);
+	else $filter = "default"; 
     
+    $typeOf = $astDB->escape($_REQUEST['type']);    
     $ip_address = $astDB->escape($_REQUEST['log_ip']);
     $log_user = $astDB->escape($_REQUEST['log_user']);
     $log_group = $astDB->escape($_REQUEST['log_group']);
@@ -42,7 +42,7 @@
             
 			$groupId = go_get_groupid($goUser, $astDB);
             
-        if (!checkIfTenant($groupId)) {
+        if (!checkIfTenant($groupId, $astDB)) {
             if($user_id != NULL){
                 $ul = "vicidial_users.user_id='$user_id'";
                 $vul = "and vu.user_id='$user_id'";               
@@ -200,11 +200,7 @@
             $check_location = go_check_user_location($user, NULL);
             
             if($check_location !== 0){
-                $queryUserInfoGo = "
-                                SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description 
-                                FROM users us, locations lo
-                                WHERE us.location_id = lo.id AND us.name='$user'
-                                ";
+                $queryUserInfoGo = "SELECT us.avatar, us.gcal, us.calendar_apikey, us.calendar_id, lo.id as location_id, lo.name as location_name, lo.description as location_description FROM users us, locations lo WHERE us.location_id = lo.id AND us.name='$user';";
             }else{
                 $queryUserInfoGo = "SELECT avatar, gcal, calendar_apikey, calendar_id FROM users WHERE name='$user';";
             }

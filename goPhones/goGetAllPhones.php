@@ -46,7 +46,7 @@
 	   	
 		$groupId = go_get_groupid($session_user, $astDB);
 		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $astDB)) {
 			$ul='';
 		} else {
 			if ($groupId != 'ADMIN') {
