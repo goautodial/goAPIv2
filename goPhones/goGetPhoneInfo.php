@@ -44,7 +44,7 @@
 			//$ul = "WHERE extension='$extension' AND user_group='$groupId'";  
 		}
         $astDB->orderby("extension", "asc");
-        $fresults = $astDB->getOne("phones", "extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group")
+        $fresults = $astDB->getOne("phones", "extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group");
    		//$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT 1;";
 		$countResult = $astDB->count;
 

@@ -39,29 +39,27 @@
 		$err_msg = error_handle("40001");
         $apiresults = array("code" => "40001","result" => $err_msg);
     } else {
-            
-			$groupId = go_get_groupid($goUser, $astDB);
-            
+		$groupId = go_get_groupid($goUser, $astDB);            
         if (!checkIfTenant($groupId, $astDB)) {
-            if($user_id != NULL){
+            if($user_id != NULL && $user == null){
                 $ul = "vicidial_users.user_id='$user_id'";
                 $vul = "and vu.user_id='$user_id'";               
-            }else if($user != NULL){
+            }elseif($user != NULL && $user_id == null){
                 $ul = "vicidial_users.user='$user'";
             }
         } else {
-            if($user_id != NULL){
+           if($user_id != NULL && $user == null){
                 $ul = "vicidial_users.user_id='$user_id' AND vicidial_users.user_group='$groupId'";
-            }else if($user != NULL){
+            }elseif($user != NULL && $user_id == null){
                 $ul = "vicidial_users.user='$user' AND vicidial_users.user_group='$groupId'";   
             }
         }
         
-        if($user_id != NULL){
+        /*if($user_id != NULL){
             $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
         }else if($user != NULL){
             $notAdminSQL = "AND vicidial_live_agents.user_level != '9'";
-        }
+        }*/
         
         $NOW = date("Y-m-d");
         $query_date =  date('Y-m-d');
@@ -147,7 +145,7 @@
         //$resultsoutsales = mysqli_fetch_assoc($rsltvOutSalesToday);        
             
         
-        if($user_id != NULL){
+        if($user_id != NULL && $user == NULL){
             $check_location = go_check_user_location(NULL, $user_id);
             
             if($check_location !== 0){
@@ -195,7 +193,7 @@
             
         }
         
-        if ($user != NULL && $countResultOnlineAgents > 0 ){
+        if ($user_id == NULL && $user != NULL && $countResultOnlineAgents > 0 ){
             
             $check_location = go_check_user_location($user, NULL);
             

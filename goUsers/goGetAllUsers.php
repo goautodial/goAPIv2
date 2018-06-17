@@ -117,7 +117,7 @@
 		$query = $astDB->rawQuery("SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND (user_level != ?) $ul ORDER BY user != ?, user_id DESC", $getting_users);	
 		$countResult = $astDB->count;
 
-		$querygo = $goDB->query("SELECT userid, avatar FROM users ORDER BY userid DESC");
+		$querygo = $goDB->rawQuery("SELECT userid, avatar FROM users ORDER BY userid DESC");
 		$countResultgo = $goDB->count;
 		
 		// condition	
