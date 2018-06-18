@@ -22,18 +22,17 @@
 */
 	include_once ("goAPI.php");
     
-    $limit = $_REQUEST['limit'];
+    $limit = $astDB->escape($_REQUEST['limit']);
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
     //$groupId = go_get_groupid($session_user);
-    $groupId = $_REQUEST['group_id'];
+    $groupId = $astDB->escape($_REQUEST['group_id']);
     
-	if (checkIfTenant($groupId, $goDB)) {
-        $ul='';
-    } else {
+	if (!checkIfTenant($groupId, $goDB)) {
 		if($groupId !== "ADMIN")
 		$astDB->where("user_group", $groupId);
-		//$ul = "WHERE user_group='$groupId'";
+    } else {
+		$astDB->where("user_group", $groupId);
 	}
 
 	$group_type = "Default";

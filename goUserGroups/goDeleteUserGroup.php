@@ -19,14 +19,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    include_once ("../goFunctions.php");
+    include_once ("goAPI.php");
     
     // POST or GET Variables
-    $user_group = $_REQUEST['user_group'];
+    $user_group = $astDB->escape($_REQUEST['user_group']);
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user);
-	$ip_address = $_REQUEST['hostname'];
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
     
     if(!isset($session_user) || is_null($session_user)){
     	$apiresults = array("result" => "Error: Missing Required Parameters.");

@@ -2,7 +2,8 @@
 /**
  * @file        goAddUserGroup.php
  * @brief       API to add new User Group 
- * @copyright   Copyright (C) GOautodial Inc.
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho <demian@goautodial.com>
  * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
  *
  * @par <b>License</b>:
@@ -20,17 +21,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("../goFunctions.php");
+    include_once ("goAPI.php");
  
     // POST or GET Variables
-        $user_group= $_REQUEST['user_group'];
-        $group_name = $_REQUEST['group_name'];
-        $goUser = $_REQUEST['goUser'];
-	    $group_level = $_REQUEST['group_level'];
-		$ip_address = $_REQUEST['hostname'];
-	
-		$log_user = $session_user;
-		$log_group = go_get_groupid($session_user);
+	$user_group = $astDB->escape($_REQUEST['user_group']);
+	$group_name = $astDB->escape($_REQUEST['group_name']);
+	$goUser = $astDB->escape($_REQUEST['goUser']);
+	$group_level = $astDB->escape($_REQUEST['group_level']);
+	$ip_address = $astDB->escape($_REQUEST['hostname']);
+
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user);
 
     // Error checking
 	if(!isset($session_user) || is_null()){
@@ -47,15 +48,14 @@
 		$err_msg = error_handle("41004", "group_name");
 		$apiresults = array("code" => "41004","result" => $err_msg);
 	} else {
-		$groupId = $log_group;
 
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $user_group);
 			//$ul = "WHERE user_group='$user_group'";
 			$group_type = "Multi-tenant";
 		} else {
 			$astDB->where("user_group", $user_group);
-			$astDB->where("user_group", $groupId);
+			$astDB->where("user_group", $log_group);
 			//$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
 			$group_type = "Default";
 		}

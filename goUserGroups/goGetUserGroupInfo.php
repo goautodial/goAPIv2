@@ -2,7 +2,8 @@
 /**
  * @file 		goGetUserGroupInfo.php
  * @brief 		API to get specific User Group Details
- * @copyright 	Copyright (C) GOautodial Inc.
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho <demian@goautodial.com> 
  * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
  *
  * @par <b>License</b>:
@@ -23,7 +24,7 @@
 	include_once ("goAPI.php");
 	
     // POST or GET Variables
-    $user_group = $_REQUEST['user_group'];
+    $user_group = $astDB->escape($_REQUEST['user_group']);
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
