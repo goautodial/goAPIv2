@@ -35,7 +35,7 @@
         $log_user = $session_user;
         $groupId = go_get_groupid($session_user, $astDB);
         
-        if (!checkIfTenant($groupId)) {
+        if (!checkIfTenant($groupId, $astDB)) {
         	$astDB->where("extension", $extension);
             //$ul = "WHERE extension='$extension'";
     	} else {

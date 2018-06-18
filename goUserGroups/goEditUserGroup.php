@@ -57,8 +57,8 @@
         $apiresults = array("result" => "Error: Default value for shift_enforcement is OFF, START or ALL only.");
     } else {
     
-        $groupId = $log_user;
-        if (!checkIfTenant($groupId, $astDB)) {
+        $groupId = $log_group;
+        if (!checkIfTenant($groupId, $goDB)) {
             $astDB->where("user_group", $user_group);
             //$ul = "WHERE user_group='$user_group'";
         } else {
@@ -67,7 +67,8 @@
             //$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
         }
 
-        $fresults = $astDB->getOne("vicidial_user_groups", "user_group, group_name, forced_timeclock_login, shift_enforcement, allowed_campaigns, admin_viewable_groups");
+        $cols = array("user_group", "group_name", "forced_timeclock_login", "shift_enforcement", "allowed_campaigns", "admin_viewable_groups");
+        $fresults = $astDB->getOne("vicidial_user_groups", NULL, $cols);
         //$query = "SELECT user_group, group_name, forced_timeclock_login, shift_enforcement FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
         $countResult = $astDB->count;
 		if($countResult > 0) {
@@ -107,11 +108,11 @@
 			if(!$astUpdate){
 				$apiresults = array("result" => "Error: Failed Update, Check your details");
 			} else {
-				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $query);
-				$apiresults = array("result" => "success", "query" => $query);
+				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $astUpdate);
+				$apiresults = array("result" => "success", "query" => $astUpdate);
 			}
 		} else {
-			$apiresults = array("result" => "Error: User Group doesn't exist".$query);
+			$apiresults = array("result" => "Error: User Group doesn't exist".$astUpdate);
 		}
 	}
 ?>

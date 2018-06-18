@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("../goFunctions.php");
+	include_once ("goAPI.php");
     
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 100; } else { $limit = $limit; }
@@ -28,7 +28,7 @@
     //$groupId = go_get_groupid($session_user);
     $groupId = $_REQUEST['group_id'];
     
-	if (checkIfTenant($groupId, $astDB)) {
+	if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else {
 		if($groupId !== "ADMIN")

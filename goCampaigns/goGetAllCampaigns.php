@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 	$agent = get_settings('user', $astDB, $goUser);
 
 	if(!empty($agent)){
@@ -28,7 +29,7 @@
 			$astDB->where('user_group', $agent->user_group);
 			$allowedCamp = $astDB->getOne('vicidial_user_groups', "TRIM(REPLACE(allowed_campaigns,' -','')) AS allowed_campaigns");
 
-			if (checkIfTenant($agent->user_group)) {
+			if (checkIfTenant($agent->user_group, $astDB)) {
 				//do nothing
 			} else {
 				if($agent->user_group !== "ADMIN"){
