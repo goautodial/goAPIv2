@@ -29,7 +29,8 @@
     $group_name = $astDB->escape($_REQUEST['group_name']);
     $group_level = $astDB->escape($_REQUEST['group_level']);
     $allowed_campaigns = $astDB->escape($_REQUEST['allowed_campaigns']);
-    $allowed_usergroups = $astDB->escape($_REQUEST['allowed_usergroups']);
+    //$allowed_usergroups = $astDB->escape($_REQUEST['allowed_usergroups']);
+    //$permissions = $astDB->escape($_REQUEST['permissions']);
 	$permissions = stripslashes($astDB->escape($_REQUEST['permissions']));
     $forced_timeclock_login = strtoupper($astDB->escape($_REQUEST['forced_timeclock_login']));
     $shift_enforcement = strtoupper($astDB->escape($_REQUEST['shift_enforcement']));
@@ -94,7 +95,7 @@
 			$goDB->where("user_group", $user_group);
             $fresultsgo = $goDB->getOne("user_access_group", "group_level, permissions");
             if(is_null($group_level)){$group_level = $fresultsgo["group_level"];} 
-            if(is_null($permissions)){$permissions = $fresultsgo["permissions"];} 
+            if(is_null($permissions) || empty($permissions)){$permissions = $fresultsgo["permissions"];} 
 
             $goData = Array(
                         "group_level" => $group_level,
@@ -102,17 +103,17 @@
                     );
 
             $goDB->where("user_group", $user_group);
-			$goUpdate = $goDB->update("user_access_group", $goData);
-            //$queryGL = "UPDATE user_access_group SET group_level = '$group_level', permissions = '$permissions' WHERE user_group='$user_group';";
+			$goUpdate = $goDB->update("user_access_group", $goData);            
+            $query = array_merge($astUpdate, $goUpdate);
             
 			if(!$astUpdate){
 				$apiresults = array("result" => "Error: Failed Update, Check your details");
 			} else {
-				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $astUpdate);
-				$apiresults = array("result" => "success", "query" => $astUpdate);
+				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $query);
+				$apiresults = array("result" => "success", "query" => $query);
 			}
 		} else {
-			$apiresults = array("result" => "Error: User Group doesn't exist".$astUpdate);
+			$apiresults = array("result" => "Error: User Group doesn't exist".$query);
 		}
 	}
 ?>
