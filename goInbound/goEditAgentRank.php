@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	
-	include_once ("../goFunctions.php");
+	include_once ("goAPI.php");
 
 	$goItemRank	= $astDB->escape($_REQUEST['itemrank']);
 	$goIDgroup 	= $astDB->escape($_REQUEST['idgroup']);

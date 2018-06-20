@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("../goFunctions.php");
+    include_once ("goAPI.php");
     
     $limit = $_REQUEST['limit'];
     if($limit < 1){ $limit = 1000; } else { $limit = $limit; }

@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-  include_once ("../goFunctions.php");
+  include_once ("goAPI.php");
 
   // POST or GET Variables
   $did_pattern = $astDB->escape($_REQUEST['did_pattern']);
