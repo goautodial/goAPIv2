@@ -31,7 +31,7 @@
 	$ip_address = $astDB->escape($_REQUEST['hostname']);
 
 	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user);
+	$log_group = go_get_groupid($session_user, $astDB);
 
     // Error checking
 	if(!isset($session_user) || is_null()){
@@ -51,15 +51,13 @@
 
 		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $user_group);
-			//$ul = "WHERE user_group='$user_group'";
 			$group_type = "Multi-tenant";
 		} else {
 			$astDB->where("user_group", $user_group);
 			$astDB->where("user_group", $log_group);
-			//$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
 			$group_type = "Default";
 		}
-
+		
 		$astDB->getOne("vicidial_user_groups", "user_group");
 		//$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
 		

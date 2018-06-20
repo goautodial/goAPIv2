@@ -29,8 +29,6 @@
     $group_name = $astDB->escape($_REQUEST['group_name']);
     $group_level = $astDB->escape($_REQUEST['group_level']);
     $allowed_campaigns = $astDB->escape($_REQUEST['allowed_campaigns']);
-    //$allowed_usergroups = $astDB->escape($_REQUEST['allowed_usergroups']);
-    //$permissions = $astDB->escape($_REQUEST['permissions']);
 	$permissions = stripslashes($astDB->escape($_REQUEST['permissions']));
     $forced_timeclock_login = strtoupper($astDB->escape($_REQUEST['forced_timeclock_login']));
     $shift_enforcement = strtoupper($astDB->escape($_REQUEST['shift_enforcement']));
