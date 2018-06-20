@@ -48,7 +48,6 @@
 		$err_msg = error_handle("41004", "group_name");
 		$apiresults = array("code" => "41004","result" => $err_msg);
 	} else {
-
 		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $user_group);
 			$group_type = "Multi-tenant";

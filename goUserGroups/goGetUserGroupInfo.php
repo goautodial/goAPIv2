@@ -3,8 +3,8 @@
  * @file 		goGetUserGroupInfo.php
  * @brief 		API to get specific User Group Details
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author		Demian Lizandro A. Biscocho <demian@goautodial.com> 
- * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
-	$ip_address = $_REQUEST['log_ip'];
+	$ip_address =$_SERVER['REMOTE_ADDR'];
     
     if(!isset($session_user) || is_null($session_user)){
     	$apiresults = array("result" => "Error: Missing Required Parameters.");

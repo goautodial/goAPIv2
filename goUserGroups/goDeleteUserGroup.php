@@ -25,7 +25,7 @@
     $user_group = $astDB->escape($_REQUEST['user_group']);
 	
 	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user);
+	$log_group = go_get_groupid($session_user, $astDB);
 	$ip_address = $astDB->escape($_REQUEST['hostname']);
     
     if(!isset($session_user) || is_null($session_user)){
@@ -35,14 +35,13 @@
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Set a value for User Group."); 
 	} else {
-		$groupId = $log_group;
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $user_group);
 			//$ul = "WHERE user_group='$user_group'";
 		} else {
 			$astDB->where("user_group", $user_group);
-			$astDB->where("user_group", $groupId);
-			//$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";  
+			$astDB->where("user_group", $log_group);
+			//$ul = "WHERE user_group='$user_group' AND user_group='$log_group'";  
 		}
 		
 		$fresults = $astDB->getOne("vicidial_user_groups", "user_group");
@@ -60,9 +59,11 @@
 
 				$goDB->where("user_group", $dataUserGroup);
 				$goDB->where("user_group", "ADMIN", "!=");
-				$goDB->delete("user_access_group");
+				$deleteQuery = $goDB->delete("user_access_group");
 				//$deleteQueryA = "DELETE FROM user_access_group WHERE user_group='$dataUserGroup' AND user_group != 'ADMIN';";
-				
+
+				$apiresults = array("result" => "success");
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);				
 			} else {
 				$err_msg = error_handle("10010");
 				$apiresults = array("code" => "10010", "result" => $err_msg);
@@ -73,26 +74,6 @@
 			$err_msg = error_handle("41004", "user_group. Does not exist");
 			$apiresults = array("code" => "41004", "result" => $err_msg);
 			//$apiresults = array("result" => "Error: User Group doesn't exist.");
-		}
-		
-		if (!checkIfTenant($groupId)) {
-			$astDB->where("user_group", $user_group);
-		} else {
-			$astDB->where("user_group", $user_group);
-			$astDB->where("user_group", $groupId);
-		}
-
-		$astDB->getOne("vicidial_user_groups", "user_group");
-		//$query = "SELECT user_group FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
-		//$rsltv = mysqli_query($link, $query) or die(mysqli_error($link));
-		$countResult = $astDB->count;
-		
-		if($countResult > 0) {
-			$err_msg = error_handle("41004", "user_group");
-			$apiresults = array("code" => "41004", "result" => $err_msg);
-		}else{
-			$apiresults = array("result" => "success");
-			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
 		}
 	}//end
 ?>

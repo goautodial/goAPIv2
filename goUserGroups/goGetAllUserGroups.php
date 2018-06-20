@@ -2,9 +2,10 @@
 /**
  * @file        goGetUserGroupsList.php
  * @brief       API to get all user group details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Demian Lizandro A. Biscocho 
+ * @author      Alexander Jim H. Abenoja
+ * @author      Jeremiah Sebastian V. Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -22,17 +23,18 @@
 */
 	include_once ("goAPI.php");
     
-    $limit = $astDB->escape($_REQUEST['limit']);
-    if($limit < 1){ $limit = 100; } else { $limit = $limit; }
+    //$limit = $astDB->escape($_REQUEST['limit']);
+    //if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
-    //$groupId = go_get_groupid($session_user);
-    $groupId = $astDB->escape($_REQUEST['group_id']);
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
     
-	if (!checkIfTenant($groupId, $goDB)) {
-		if($groupId !== "ADMIN")
-		$astDB->where("user_group", $groupId);
+	if (!checkIfTenant($log_group, $goDB)) {
+		if($log_group !== "ADMIN")
+		$astDB->where("user_group", $log_group);
     } else {
-		$astDB->where("user_group", $groupId);
+		$astDB->where("user_group", $log_group);
+		$astDB->where("user_group", $log_group);
 	}
 
 	$group_type = "Default";
