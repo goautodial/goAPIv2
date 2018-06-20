@@ -24,15 +24,15 @@
  
     // POST or GET Variables
 
-    $ip_address = $_REQUEST['hostname'];
-    $user_group = $_REQUEST['user_group'];
-    $group_name = $_REQUEST['group_name'];
-    $group_level = $_REQUEST['group_level'];
-    $allowed_campaigns = $_REQUEST['allowed_campaigns'];
-    $allowed_usergroups = $_REQUEST['allowed_usergroups'];
-    $permissions = $_REQUEST['permissions'];
-    $forced_timeclock_login = strtoupper($_REQUEST['forced_timeclock_login']);
-    $shift_enforcement = strtoupper($_REQUEST['shift_enforcement']);
+    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    $user_group = $astDB->escape($_REQUEST['user_group']);
+    $group_name = $astDB->escape($_REQUEST['group_name']);
+    $group_level = $astDB->escape($_REQUEST['group_level']);
+    $allowed_campaigns = $astDB->escape($_REQUEST['allowed_campaigns']);
+    $allowed_usergroups = $astDB->escape($_REQUEST['allowed_usergroups']);
+	$permissions = stripslashes($astDB->escape($_REQUEST['permissions']));
+    $forced_timeclock_login = strtoupper($astDB->escape($_REQUEST['forced_timeclock_login']));
+    $shift_enforcement = strtoupper($astDB->escape($_REQUEST['shift_enforcement']));
 
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);

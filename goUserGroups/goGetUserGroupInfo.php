@@ -2,7 +2,8 @@
 /**
  * @file 		goGetUserGroupInfo.php
  * @brief 		API to get specific User Group Details
- * @copyright 	Copyright (C) GOautodial Inc.
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho <demian@goautodial.com> 
  * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
  *
  * @par <b>License</b>:
@@ -23,7 +24,7 @@
 	include_once ("goAPI.php");
 	
     // POST or GET Variables
-    $user_group = $_REQUEST['user_group'];
+    $user_group = $astDB->escape($_REQUEST['user_group']);
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
@@ -46,15 +47,15 @@
 		
 		$cols = array("user_group", "group_name", "allowed_campaigns", "forced_timeclock_login", "shift_enforcement", "admin_viewable_groups");
 		$astDB->orderBy("user_group","asc");
-		$astQuery = $astDB->getOne("vicidial_user_groups", NULL, $cols);
+		$astQuery = $astDB->get("vicidial_user_groups", NULL, $cols);
    		//$query = "SELECT user_group,group_name,forced_timeclock_login,shift_enforcement,allowed_campaigns,admin_viewable_groups FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";\
 		
 		$cols2 = array("group_level", "permissions");
 		$goDB->where("user_group", $user_group);
-		$goQuery = $goDB->getOne("user_access_group", NULL, $cols2);
+		$goQuery = $goDB->get("user_access_group", NULL, $cols2);
 		//$queryGL = "SELECT group_level,permissions FROM user_access_group WHERE user_group='$user_group';";
 		
-		$data = array($astQuery, $goQuery);
+		$data = array_merge($astQuery[0], $goQuery[0]);
 		
 		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of User Group: $user_group", $log_group);
 		

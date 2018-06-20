@@ -20,11 +20,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once("../goFunctions.php");
+    include_once ("goAPI.php");
         
     // POST or GET Variables
-        $extension = $_REQUEST['extension'];
-	    $ip_address = $_REQUEST['log_ip'];
+	$extension = $astDB->escape($_REQUEST['extension']);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
         
     // Check extension if its null or empty
     if(empty($session_user)){

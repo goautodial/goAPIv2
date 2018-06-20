@@ -20,10 +20,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("../goFunctions.php");
+    include_once ("goAPI.php");
  
     // POST or GET Variables
-    $user_group= $_REQUEST['user_group'];
+    $user_group= $astDB->escape($_REQUEST['user_group']);
     
     if(!isset($user_group) || is_null($user_group)){
       $apiresults = array("result" => "Error: Missing Required Parameters.");
