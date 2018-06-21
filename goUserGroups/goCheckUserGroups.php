@@ -1,7 +1,7 @@
 <?php
 /**
- * @file    goCheckUserGroups.php
- * @brief     API to check for existing user group data
+ * @file    	goCheckUserGroups.php
+ * @brief     	API to check for existing user group data
  * @copyright   Copyright (C) GOautodial Inc.
  * @author      Original Author <alex@goautodial.com>
  *

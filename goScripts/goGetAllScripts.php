@@ -20,14 +20,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	$agent = get_settings('user', $astDB, $goUser);
-	$userid = $astDB->escape($_REQUEST['userid']);
+	//$userid = $astDB->escape($_REQUEST['userid']);
 		
-    $groupId = go_get_groupid($goUser);
+    //$groupId = go_get_groupid($goUser, $astDB);
     
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);    
 
     //if (!checkIfTenant($groupId)) {
-	if ($agent->user_group != "ADMIN") {
-        $astDB->where('user_group', $agent->user_group);
+	if ($log_group != "ADMIN") {
+        $astDB->where('user_group', $log_group);
     }
 
 	// getting script count
@@ -57,7 +59,7 @@
 			}
 		}
 		
-		if($agent->user_group != "ADMIN"){
+		if($log_group != "ADMIN"){
 			$script_num = $script_num;
 		}else{
 			$script_num = "script".$script_num;
@@ -70,8 +72,8 @@
 		
 	// GETTING ACTUAL DATA //
 	//if (!checkIfTenant($groupId)) {
-	if ($agent->user_group != "ADMIN") {
-        $astDB->where('user_group', $agent->user_group);
+	if ($log_group != "ADMIN") {
+        $astDB->where('user_group', $log_group);
     }
 	$scripts = $astDB->get('vicidial_scripts', null, 'script_id, script_name, active, user_group');
 	

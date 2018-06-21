@@ -24,11 +24,13 @@
 	$agent = get_settings('user', $astDB, $goUser);
 	
     $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    $log_user = $astDB->escape($_REQUEST['log_user']);
-    $log_group = $astDB->escape($_REQUEST['log_group']);
-    $log_ip = $astDB->escape($_REQUEST['log_ip']);
-	$session_user = $astDB->escape($_REQUEST['session_user']);
-
+    //$log_user = $astDB->escape($_REQUEST['log_user']);
+    //$log_group = $astDB->escape($_REQUEST['log_group']);
+    //$log_ip = $astDB->escape($_REQUEST['log_ip']);
+	//$session_user = $astDB->escape($_REQUEST['session_user']);
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	
 	//variables
 	$campaign_type = '';
 	$numberoflines = '';
@@ -46,14 +48,12 @@
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg); 
 	} else {
-		
-		$groupId = go_get_groupid($session_user);
-		
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where('campaign_id', $campaign_id);
 		} else { 
 			$astDB->where('campaign_id', $campaign_id);
-			$astDB->where('user_group', $agent->user_group);  
+			$astDB->where('user_group', $log_group); 
+			//$astDB->where('user_group', $agent->user_group);  
 		}
 
 		$astDB->where('campaign_id', $campaign_id);
