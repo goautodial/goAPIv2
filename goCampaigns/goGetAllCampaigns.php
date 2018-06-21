@@ -29,7 +29,7 @@
 			$astDB->where('user_group', $agent->user_group);
 			$allowedCamp = $astDB->getOne('vicidial_user_groups', "TRIM(REPLACE(allowed_campaigns,' -','')) AS allowed_campaigns");
 
-			if (checkIfTenant($agent->user_group, $astDB)) {
+			if (checkIfTenant($agent->user_group, $goDB)) {
 				//do nothing
 			} else {
 				if($agent->user_group !== "ADMIN"){

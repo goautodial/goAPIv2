@@ -43,7 +43,8 @@
 	$ip_address = $astDB->escape($_REQUEST['hostname']);
 		
 	$log_user = $session_user;
-	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$log_group = go_get_groupid($session_user, $astDB); 
+	//$log_group = $astDB->escape($_REQUEST['log_group']);
 
     // Default values 
 	$defActive = array("Y","N");
@@ -87,7 +88,7 @@
 	} else {
 		// Check License Seats //		
 		$astDB->where("user", DEFAULT_USERS, "NOT IN");//DEFAULT_USERS = an array that is static, can be defined in goAPI.php
-		$astDB->where("user_level", 4, "IS NOT");
+		$astDB->where("user_level", 4, "!=");
 		$num_users = $astDB->getValue("vicidial_users", "count(*)", null);
 		//$license_query = mysqli_query($link, "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI') AND user_level != '4' ORDER BY user ASC");
 			

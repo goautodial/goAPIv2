@@ -22,19 +22,19 @@
     @include_once ("goAPI.php");
     include_once ("../licensed-conf.php");
 	
-	$user = $goUser;
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
 	
 	if(!empty($session_user)){
 		// get user_level
-		$astDB->where("user", $user);
+		$astDB->where("user", $log_user);
 		$query_userlevel = $astDB->getOne("vicidial_users", "user, user_group");
 		//$query_userlevel_sql = "SELECT user_level,user_group FROM vicidial_users WHERE user = '$user' LIMIT 1";
 		$user_level = $query_userlevel["user_level"];
-		$groupId = $query_userlevel["user_group"];
 		
-		if (!checkIfTenant($groupId, $astDB)) {
+		if (!checkIfTenant($log_group, $goDB)) {
 			$ul='';
-			if (strtoupper($groupId) != 'ADMIN') {
+			if (strtoupper($log_group) != 'ADMIN') {
 				if ($user_level > 8) {
 					$uQuery = "SELECT tenant_id FROM go_multi_tenant;";
 					$uRslt = mysqli_query($linkgo, $uQuery);
@@ -48,13 +48,13 @@
 						$ul .= ")";
 					}
 				} else {
-					$ul = "AND user_group='$groupId'";
+					$ul = "AND user_group='$log_group'";
 				}
 			}
 		} else { 
-			$ul = "AND user_group='$groupId'";  
+			$ul = "AND user_group='$log_group'";  
 		}
-		if ($groupId != 'ADMIN') {
+		if ($log_group != 'ADMIN') {
 			$notAdminSQL = "AND user_group != ?";
 			$arrLastPhoneLogin = array("VDAD", "VDCL", "goautodial", "goAPI", 4, "", "ADMIN");
 		}else{
