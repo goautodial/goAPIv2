@@ -56,14 +56,13 @@
         $apiresults = array("result" => "Error: Default value for shift_enforcement is OFF, START or ALL only.");
     } else {
     
-        $groupId = $log_group;
-        if (!checkIfTenant($groupId, $goDB)) {
+        if (!checkIfTenant($log_group, $goDB)) {
             $astDB->where("user_group", $user_group);
             //$ul = "WHERE user_group='$user_group'";
         } else {
             $astDB->where("user_group", $user_group);
-            $astDB->where("user_group", $groupId);
-            //$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
+            $astDB->where("user_group", $log_group);
+            //$ul = "WHERE user_group='$user_group' AND user_group='$log_group'";
         }
 
         $cols = array("user_group", "group_name", "forced_timeclock_login", "shift_enforcement", "allowed_campaigns", "admin_viewable_groups");
@@ -93,7 +92,7 @@
 			$goDB->where("user_group", $user_group);
             $fresultsgo = $goDB->getOne("user_access_group", "group_level, permissions");
             if(is_null($group_level)){$group_level = $fresultsgo["group_level"];} 
-            if(is_null($permissions) || empty($permissions)){$permissions = $fresultsgo["permissions"];} 
+            if(is_null($permissions) || ($permissions == 0)){$permissions = $fresultsgo["permissions"];} 
 
             $goData = Array(
                         "group_level" => $group_level,
