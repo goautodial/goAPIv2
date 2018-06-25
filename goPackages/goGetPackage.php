@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     $apiresults = array("result" => "success", "show_carrier_settings" => $VARBRINGOWNVOIP, "packagetype" => $VARPACKAGETYPE);
 ?>

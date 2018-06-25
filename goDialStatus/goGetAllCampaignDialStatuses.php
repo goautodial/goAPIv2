@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+    //$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
     
     //$query = "SELECT status,status_name
     //        FROM vicidial_campaign_statuses 

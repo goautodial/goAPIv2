@@ -28,7 +28,7 @@
 	if(!empty($session_user)){
 		// get user_level
 		$astDB->where("user", $log_user);
-		$query_userlevel = $astDB->getOne("vicidial_users", "user, user_group");
+		$query_userlevel = $astDB->getOne("vicidial_users", "user_level");
 		//$query_userlevel_sql = "SELECT user_level,user_group FROM vicidial_users WHERE user = '$user' LIMIT 1";
 		$user_level = $query_userlevel["user_level"];
 		
@@ -63,7 +63,7 @@
 		
 		// getting agent count
 		$userslist = array();
-		$userslist = array_merge($userslist, $default_users);
+		$userslist = array_merge($userslist, DEFAULT_USERS);
 		array_push($userslist, $user, 4);
 		$getLastCount = $astDB->rawQuery("SELECT user FROM vicidial_users WHERE user NOT IN (?,?,?,?,?) AND user_level != ? ORDER BY user ASC", $userslist);
 		$max = $astDB->count;

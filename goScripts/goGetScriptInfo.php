@@ -20,23 +20,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    $agent = get_settings('user', $astDB, $goUser);
+
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB); 
+	
     $script_id = $astDB->escape($_REQUEST["script_id"]); 
 
     if($script_id == null) {
             $apiresults = array("result" => "Error: Set a value for Script ID.");
     } else {
-        $groupId = go_get_groupid($goUser);
-
-        if (!checkIfTenant($groupId)) {
+        if (!checkIfTenant($log_group, $goDB)) {
             //do nothing
         } else { 
-            $astDB->where('user_group', $agent->user_group);  
+            $astDB->where("user_group", $log_group);  
         }
-        $astDB->where('script_id', $script_id);
-        $script = $astDB->getOne('vicidial_scripts', null, 'script_id, script_name, script_comments, active, user_group, script_text');
+        
+		$cols = array("script_id", "script_name", "script_comments", "active", "user_group", "script_text");
+        $astDB->where("script_id", $script_id);        
+        $script = $astDB->get("vicidial_scripts", null, $cols);
 		
-	    if($script){
+	    if ($script) {
             foreach($script as $fresults)
                 $apiresults = array(
                     "result" => "success", 
@@ -47,9 +50,8 @@
                     "user_group" => $fresults['user_group'], 
                     "script_text" => $fresults['script_text']
                 );
-            }
-        } else {
+		} else {
             $apiresults = array("result" => "Error: Script does not exist.");
     	}
-    }
+	}
 ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * @file        getAllCalltimes.php
+ * @file        goGetAllCalltimes.php
  * @brief       API to get all Calltime details
  * @copyright   Copyright (C) GOautodial Inc.
  * @author      Warren Ipac Briones   <warren@goautodial.com>
@@ -20,17 +20,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    $groupId = go_get_groupid($session_user, $astDB);
-    $log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
 
-	if (checkIfTenant($groupId)) {
-		$astDB->where("user_group", $groupId);
+	include_once ("goAPI.php");
+	
+	//$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+    $log_ip = $astDB->escape($link, $_REQUEST['log_ip']);
+
+	if (checkIfTenant($log_group, $goDB)) {
+		$astDB->where("user_group", $log_group);
 	}
 
 	$query = $astDB->get("vicidial_call_times");
 	//$query = "SELECT * FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
 
-	$log_id = log_action($goDB, 'VIEW', $session_user, $log_ip, "Viewed the Calltimes List", $groupId);
+	$log_id = log_action($goDB, 'VIEW', $session_user, $log_ip, "Viewed the Calltimes List", $log_group);
 	
 	foreach ($query as $fresults) {
 		$dataCalltimeID[] = $fresults['call_time_id'];
