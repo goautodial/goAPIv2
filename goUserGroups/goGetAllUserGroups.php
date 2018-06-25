@@ -22,11 +22,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	include_once ("goAPI.php");
-    
-    //$limit = $astDB->escape($_REQUEST['limit']);
-    //if($limit < 1){ $limit = 100; } else { $limit = $limit; }
  
-	$log_user = $session_user;
+	//$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
     
 	if (!checkIfTenant($log_group, $goDB)) {

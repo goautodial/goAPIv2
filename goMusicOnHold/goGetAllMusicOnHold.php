@@ -2,9 +2,10 @@
  /**
  * @file 		goGetAllMusicOnHold.php
  * @brief 		API for Getting All Music On Hold
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Demian Lizandro A. Biscocho
+ * @author		Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,21 +22,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $limit = $astDB->escape($_REQUEST['limit']);
-    if($limit < 1){ $limit = 20; } else { $limit = $limit; }
-
-    $groupId = go_get_groupid($goUser, $astDB);
+	include_once ("goAPI.php");
 	
-	if (!checkIfTenant($groupId, $goDB)) {
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	
+	if (isset($_REQUEST['limit'])) {
+			$limit = $astDB->escape($_REQUEST['limit']);
+	} else { $limit = 50; }
+	
+	if (!checkIfTenant($log_group, $goDB)) {
 		//$ul='';
 	} else {
-		//$ul = "AND user_group='$groupId'";
-		$astDB->where('user_group', $groupId);
+		//$ul = "AND user_group='$log_group'";
+		$astDB->where('user_group', $log_group);
 	}
 
    	//$query = "SELECT moh_id, moh_name, active, random, user_group FROM vicidial_music_on_hold WHERE remove='N' $ul ORDER BY moh_id LIMIT $limit;";
-	$astDB->where('remove', 'N');
-   	$rsltv = $astDB->get('vicidial_music_on_hold', $limit, 'moh_id, moh_name, active, random, user_group');
+   	$cols = array("moh_id", "moh_name", "active", "random", "user_group");
+	$astDB->where("remove", "N");
+   	$rsltv = $astDB->get("vicidial_music_on_hold", $limit, $cols);
 
 	foreach ($rsltv as $fresults){
 		$dataModId[] = $fresults['moh_id'];

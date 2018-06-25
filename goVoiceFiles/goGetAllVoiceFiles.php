@@ -1,6 +1,6 @@
 <?php
  /**
- * @file 		goGetVoiceFilesList.php
+ * @file 		goGetAllVoiceFiles.php
  * @brief 		API for Voice Files
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
@@ -21,36 +21,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$ul= "";
-$ul = "WHERE goDirectory = '$path_sounds'";
-
-// POST or GET Variables
-//$stmt = "SELECT count(*) as countuser from vicidial_users where user='$session_user' and user_level > 6;";
-$astDB->where('user', $session_user);
-$astDB->where('user_level', '6', '>');
-$rsltv = $astDB->get('vicidial_users');
-$allowed_user = $astDB->getRowCount();
-//die($allowed_user);
-if ($allowed_user < 1) {
-	$result = 'ERROR';
-	$result_reason = "sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST";
-	$apiresults = array("result" => "Error".$result_reason);
-} else {
-	//$query = "SELECT goFilename, goFileDate, goFilesize, goDirectory FROM sounds $ul";
-	$exec_query = $goDB->get('sounds', null, 'goFilename,goFileDate,goFilesize,goDirectory');
-	$count_sounds = $goDB->getRowCount();
+	include_once("goAPI.php");
 	
-	if($exec_query){
-		foreach ($exec_query as $rslt) {
-			$file_names[] = $rslt['goFilename'];
-			$file_dates[] = $rslt['goFileDate'];
-			$file_size[] = $rslt['goFilesize'];
-			$file_directory[] = $rslt['goDirectory'];
-		}
-		$apiresults = array("result" => "success", "file_name" => $file_names, "file_date" => $file_dates, "file_size" => $file_size, "file_directory" => $file_directory);
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	
+	if (isset($_REQUEST['limit'])) {
+			$limit = $astDB->escape($_REQUEST['limit']);
+	} else { $limit = 50; }
+	
+	if (!checkIfTenant($log_group, $goDB)) {
+		//$ul='';
 	} else {
-		$apiresults = array("result" => "Error");
+		//$ul = "AND user_group='$log_group'";
+		$astDB->where('user_group', $log_group);
 	}
+
+	// POST or GET Variables
+	//$stmt = "SELECT count(*) as countuser from vicidial_users where user='$session_user' and user_level > 6;";
+	$astDB->where("user", $session_user);
+	$astDB->where('user_level', '6', '>');
+	$rsltv = $astDB->get('vicidial_users');
+	$allowed_user = $astDB->getRowCount();
+	//die($allowed_user);
+	if ($allowed_user < 1) {
+		$result = 'ERROR';
+		$result_reason = "sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST";
+		$apiresults = array("result" => "Error".$result_reason);
+	} else {
+		//$query = "SELECT goFilename, goFileDate, goFilesize, goDirectory FROM sounds $ul";
+		//$exec_query = $goDB->get('sounds', null, 'goFilename,goFileDate,goFilesize,goDirectory');
+		$exec_query = $goDB->get('sounds');
+		$count_sounds = $goDB->getRowCount();
+		
+		if($count_sounds > 0){
+			foreach ($exec_query as $rslt) {
+				$file_names[] = $rslt['goFilename'];
+				$file_dates[] = $rslt['goFileDate'];
+				$file_size[] = $rslt['goFilesize'];
+				$file_directory[] = $rslt['goDirectory'];
+			}
+			$apiresults = array("result" => "Success", "file_name" => $file_names, "file_date" => $file_dates, "file_size" => $file_size, "file_directory" => $file_directory);
+		} else {
+			$apiresults = array("result" => "Error");
+		}
 	/*
 		$server_name = getenv("SERVER_NAME");
 		$server_port = getenv("SERVER_PORT");
