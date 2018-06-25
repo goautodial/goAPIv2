@@ -2,9 +2,10 @@
 /**
  * @file        goGetIVRInfo.php
  * @brief       API to get specific IVR Details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jerico James Milo  <jericojames@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Jerico James Milo
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,20 +24,22 @@
 
     include_once ("goAPI.php");
     
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);    
+    
     // POST or GET Variables
-    $menu_id = $_REQUEST['menu_id'];
+    $menu_id = $astDB->escape($_REQUEST['menu_id']);
     
 	if(empty($menu_id)) { 
 		$apiresults = array("result" => "Error: Set a value for Menu ID."); 
-	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
-    
-		if (checkIfTenant($groupId, $goDB)) {
-			$astDB->where("user_group", $groupId);
+	} else {    
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
     	}
 
     	$astDB->where("menu_id", $menu_id);
-    	$fresults = $astDB->where("menu_id", "defaultlog", "!=");
+    	$astDB->where("menu_id", "defaultlog", "!=");
+    	$fresults = $astDB->getOne("vicidial_call_menu");
    		//$query = "SELECT *	FROM vicidial_call_menu WHERE menu_id != 'defaultlog' $ul order by menu_id LIMIT 1;";
 		
 		if($fresults) {

@@ -1,10 +1,12 @@
 <?php
 /**
- * @file        goGetIVROptionsInfo.php
+ * @file        goGetIVROptions.php
  * @brief       API to get defined IVR Options
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Jerico James Milo
+ * @author      Alexander Jim Abenoja
+ * @author      Jeremiah Sebastian V. Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,19 +25,14 @@
 
     include_once ("goAPI.php");
     
+	$log_group = go_get_groupid($session_user, $astDB);
+	
     //POST or GET Variables
-    $menu_id = $_REQUEST['menu_id'];
+    $menu_id = $astDB->escape($_REQUEST['menu_id']);
     
 	if(empty($menu_id)) { 
 		$apiresults = array("result" => "Error: Set a value for Menu ID."); 
 	} else {
- 
-    	$groupId = go_get_groupid($goUser, $astDB);
-    
-		if (checkIfTenant($groupId, $goDB) {
-			$astDB->where("user_group", $groupId);
-		}
-
 		$astDB->where("menu_id", $menu_id);
 		$selectQuery = $astDB->get("vicidial_call_menu_options");
    		//$query = "SELECT *	FROM vicidial_call_menu_options WHERE $ul;";
@@ -49,6 +46,6 @@
 			$option_route_value_context[] = $fresults["option_route_value_context"];
 		}
 		
-		$apiresults = array( "result" => "success", "menu_id" => $id, "option_value" => $option_value, "option_description" => $option_description, "option_route" => $option_route, "option_route_value" => $option_route_value, "option_route_value_context" => $option_route_value_context, "query" => $query);	
+		$apiresults = array( "result" => "success", "menu_id" => $id, "option_value" => $option_value, "option_description" => $option_description, "option_route" => $option_route, "option_route_value" => $option_route_value, "option_route_value_context" => $option_route_value_context, "query" => $selectQuery);	
 	}
 ?>

@@ -2,9 +2,10 @@
  /**
  * @file        goGetIngroupInfo.php
  * @brief       API to get specific Ingroup Details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jerico James Milo  <jericojames@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Jerico James Milo
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify

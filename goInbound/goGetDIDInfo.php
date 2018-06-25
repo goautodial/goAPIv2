@@ -2,9 +2,10 @@
  /**
  * @file        goGetDIDInfo.php
  * @brief       API to get specific DID Details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Alexander Jim Abenoja
+ * @author      Jeremiah Sebastian V. Samatra 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -22,17 +23,17 @@
 */
 
     include_once ("goAPI.php");
+
+	$log_group = go_get_groupid($session_user, $astDB);    
     
     // POST or GET Variables
     $did_id = $_REQUEST['did_id'];
     
 	if(empty($did_id)) { 
 		$apiresults = array("result" => "Error: Set a value for DID ID."); 
-	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
-    
-		if (checkIfTenant($groupId, $goDB)) {
-            $astDB->where("user_group", $groupId);
+	} else {    
+		if (checkIfTenant($log_group, $goDB)) {
+            $astDB->where("group_id", $log_group);
 		}
 
         $astDB->where("did_id", $did_id);
