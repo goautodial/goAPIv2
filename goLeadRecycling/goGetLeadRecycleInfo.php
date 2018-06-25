@@ -37,7 +37,7 @@
         $astDB->where('campaign_id', $campaign_id);
         $astDB->where('status', $status);
         $astDB->orderBy('status', 'desc');
-        $rsltv = $astDB->get('vicidial_lead_recycle', 1);
+        $rsltv = $astDB->getOne('vicidial_lead_recycle');
         $exist = $astDB->getRowCount();
 
         if($exist >= 1) {

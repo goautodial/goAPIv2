@@ -23,23 +23,22 @@
 
 	include_once ("goAPI.php");
 	
-    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+    //$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+    $log_group = go_get_groupid($session_user, $astDB);
     
     if(empty($session_user)) {
         $err_msg = error_handle("40001", "session_user");
         $apiresults = array("code" => "40001", "result" => $err_msg);
         //$apiresults = array("result" => "Error: Set a value for Campaign ID.");
     } else {
-        $groupId = go_get_groupid($session_user, $astDB);
-
         //$query = "SELECT * FROM vicidial_lead_recycle ORDER BY recycle_id;";
         $astDB->orderBy('recycle_id', 'desc');
         $rsltv = $astDB->get('vicidial_lead_recycle');
-        $count = $astDB->getRowCount();
-        $x = 0;
+        //$count = $astDB->getRowCount();
+        //$x = 0;
         foreach ($rsltv as $fresults) {
             $output[] = array("recycle_id" => $fresults['recycle_id'], "campaign_id" => $fresults['campaign_id'], "status" => $fresults['status'], "attempt_delay" => $fresults['attempt_delay'], "attempt_maximum" => $fresults['attempt_maximum'],"active" => $fresults['active']);
-            $x++;
+            //$x++;
         }
         $apiresults = array("result" => "success", "data" => $output);
     }
