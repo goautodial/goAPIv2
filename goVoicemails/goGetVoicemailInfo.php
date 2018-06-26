@@ -36,27 +36,15 @@
 		}
 
 		//$query = "SELECT voicemail_id,pass,fullname,email,active,messages,old_messages,delete_vm_after_email,user_group FROM vicidial_voicemail WHERE voicemail_id='$voicemail_id' $ul ORDER BY voicemail_id LIMIT 1;";
-		$cols = array("voicemail_id", "fullname", "active", "messages", "old_messages", "delete_vm_after_email", "user_group");
+		$cols = array("voicemail_id", "pass", "fullname", "email", "active", "messages", "old_messages", "delete_vm_after_email", "user_group");
 		$astDB->where('voicemail_id', $voicemail_id);
 		$astDB->orderBy('voicemail_id', 'desc');
 		$rsltv = $astDB->getOne('vicidial_voicemail', $cols);
-		$exist = $astDB->getRowCount();
 
-		if($exist > 0) {
-			foreach ($rsltv as $fresults){									
-				$dataVoicemailID[] = $fresults['voicemail_id'];
-				$dataPassword[] = $fresults['pass'];
-				$dataFullname[] = $fresults['fullname'];
-				$dataEmail[] = $fresults['email'];
-				$dataActive[] = $fresults['active'];
-				$dataMessages[] = $fresults['messages'];
-				$dataOldMessages[] = $fresults['old_messages'];
-				$dataDeleteVMAfterEmail[] = $fresults['delete_vm_after_email'];
-				$dataUserGroup[] = $fresults['user_group'];
-				$apiresults = array("result" => "success", "voicemail_id" => $dataVoicemailID, "password"=> $dataPassword,"fullname" => $dataFullname, "email" => $dataEmail, "active" => $dataActive, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "delete_vm_after_email" => $dataDeleteVMAfterEmail, "user_group" => $dataUserGroup);
-			}
+		if(!empty($rsltv)) {
+			$apiresults = array("result" => "success", "data" => $rsltv);
 		} else {
-			$apiresults = array("result" => "Error: Lead Filter does not exist.");
+			$apiresults = array("result" => "Error: Server does not exist.");
 		}
 	}
 ?>

@@ -2,8 +2,9 @@
 /**
  * @file 		goGetAllUsers.php
  * @brief 		API to get all User Lists 
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Alexander Jim H. Abenoja <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author      Demian Lizandro A. Biscocho 
+ * @author     	Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -29,96 +30,81 @@
 		// get user_level
 		$astDB->where("user", $log_user);
 		$query_userlevel = $astDB->getOne("vicidial_users", "user_level");
-		//$query_userlevel_sql = "SELECT user_level,user_group FROM vicidial_users WHERE user = '$user' LIMIT 1";
 		$user_level = $query_userlevel["user_level"];
 		
 		if (!checkIfTenant($log_group, $goDB)) {
-			$ul='';
 			if (strtoupper($log_group) != 'ADMIN') {
 				if ($user_level > 8) {
-					$uQuery = "SELECT tenant_id FROM go_multi_tenant;";
-					$uRslt = mysqli_query($linkgo, $uQuery);
-					if (mysqli_num_rows($uRslt) > 0) {
-						$ul = "AND user_group NOT IN (";
-						$uListGroups = "";
-						while($uResults = mysqli_fetch_array($uRslt, MYSQLI_ASSOC)) {
-							$uListGroups = "'{$uResults['tenant_id']}',";
-						}
-						$ul .= rtrim($uListGroups, ',');
-						$ul .= ")";
-					}
-				} else {
-					$ul = "AND user_group='$log_group'";
+					$astDB->where("user_group", $log_group);
 				}
 			}
 		} else { 
-			$ul = "AND user_group='$log_group'";  
+			$astDB->where("user_group", $log_group);
 		}
-		if ($log_group != 'ADMIN') {
-			$notAdminSQL = "AND user_group != ?";
-			$arrLastPhoneLogin = array("VDAD", "VDCL", "goautodial", "goAPI", 4, "", "ADMIN");
-		}else{
-			$arrLastPhoneLogin = array("VDAD", "VDCL", "goautodial", "goAPI", 4, "");
-		}
-		
-		// getting agent count
-		$userslist = array();
-		$userslist = array_merge($userslist, DEFAULT_USERS);
-		array_push($userslist, $user, 4);
-		$getLastCount = $astDB->rawQuery("SELECT user FROM vicidial_users WHERE user NOT IN (?,?,?,?,?) AND user_level != ? ORDER BY user ASC", $userslist);
+		// getting agent count	
+		$astDB->where("user", DEFAULT_USERS, "NOT IN");
+		$astDB->where("user_level", 4, "!=");
+		$astDB->orderby("user", "asc");
+		$getLastCount = $astDB->get("vicidial_users", NULL, "user");
 		$max = $astDB->count;
 		//$getLastCount = "SELECT user FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL', 'goAPI', 'goautodial', '$user') AND user_level != '4' ORDER BY user ASC";
-		//$queryCount = mysqli_query($link, $getLastCount);
-		//$max = mysqli_num_rows($queryCount);
 			
-			// condition
-			for($i=0; $i < $max; $i++){
-				$userRow = $getLastCount[$i];
-				if(preg_match("/^agent/i", $userRow['user'])){
-					$get_last = preg_replace("/^agent/i", "", $userRow['user']);
-					$last_num[] = intval($get_last);
-				}
+		// condition
+		for($i=0; $i < $max; $i++){
+			$userRow = $getLastCount[$i];
+			if(preg_match("/^agent/i", $userRow['user'])){
+				$get_last = preg_replace("/^agent/i", "", $userRow['user']);
+				$last_num[] = intval($get_last);
 			}
+		}
 
-			// return data
-			$get_last = max($last_num);
-			$agent_num = $get_last + 1;
+		// return data
+		$get_last = max($last_num);
+		$agent_num = $get_last + 1;
 			
 		// getting phone login count
 		
-		$queryLastPhoneLogin = $astDB->rawQuery("SELECT phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND phone_login != ? $notAdminSQL ORDER BY phone_login DESC", $arrLastPhoneLogin);
-		//$queryPhoneLoginCount = mysqli_query($link, $getLastPhoneLogin);
-		//$max_phonelogins = mysqli_num_rows($queryPhoneLoginCount);
+		$astDB->where("user", DEFAULT_USERS, "NOT IN");
+		$astDB->where("user_level", 4, "!=");
+		$astDB->orderby("phone_login", "desc");
+		$queryLastPhoneLogin = $astDB->get("vicidial_users", NULL, "phone_login");		
+		//$queryLastPhoneLogin = $astDB->rawQuery("SELECT phone_login FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND user_level != ? AND phone_login != ? $notAdminSQL ORDER BY phone_login DESC", $arrLastPhoneLogin);
 		
-			// condition
-			if($astDB->count > 0){
-				for($i=0; $i < count($queryLastPhoneLogin);$i++){
-					$get_last_phonelogin = $queryLastPhoneLogin[$i];
-					if(preg_match("/^Agent/i", $get_last_phonelogin['phone_login'])){
-						$get_last_count = preg_replace("/^Agent/i", "", $get_last_phonelogin['phone_login']);
-						$last_pl[] = intval($get_last_count);
-					}else{
-						$get_last_count = $get_last_phonelogin['phone_login'];
-						$last_pl[] = intval($get_last_count);
-					}
+		// condition
+		if($astDB->count > 0){
+			for($i=0; $i < count($queryLastPhoneLogin);$i++){
+				$get_last_phonelogin = $queryLastPhoneLogin[$i];
+				if(preg_match("/^Agent/i", $get_last_phonelogin['phone_login'])){
+					$get_last_count = preg_replace("/^Agent/i", "", $get_last_phonelogin['phone_login']);
+					$last_pl[] = intval($get_last_count);
+				}else{
+					$get_last_count = $get_last_phonelogin['phone_login'];
+					$last_pl[] = intval($get_last_count);
 				}
-				// return data
-				$phonelogin_num = max($last_pl);
-				$phonelogin_num = $phonelogin_num + 1;
-				
-			}else{
-				// return data
-				$phonelogin_num = "0000001";
 			}
+			// return data
+			$phonelogin_num = max($last_pl);
+			$phonelogin_num = $phonelogin_num + 1;
+			
+		}else{
+			// return data
+			$phonelogin_num = "0000001";
+		}
 	
 		// getting all users
 		//	$query = "SELECT user_id, user, full_name, user_level, user_group, active FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ul $notAdminSQL ORDER BY user ASC;";
-		$getting_users = array("VDAD", "VDCL", "goAPI", "goautodial", 4, $user);
-		$query = $astDB->rawQuery("SELECT user_id, user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN (?,?,?,?) AND (user_level != ?) $ul ORDER BY user != ?, user_id DESC", $getting_users);	
-		$countResult = $astDB->count;
+		//$getting_users = array("VDAD", "VDCL", "goAPI", "goautodial", 4, $user);
+		$cols = array("user_id", "user", "full_name", "user_level", "user_group", "phone_login", "active");
+		$astDB->where("user", DEFAULT_USERS, "NOT IN");
+		$astDB->where("user_level", 4, "!=");
+		$astDB->orderby("user", "asc");
+		$query = $astDB->get("vicidial_users", NULL, $cols);
+		$countResult = $astDB->count;	
 
-		$querygo = $goDB->rawQuery("SELECT userid, avatar FROM users ORDER BY userid DESC");
+		$goDB->orderby("userid", "desc");
+		$querygo = $goDB->get("users", NULL, "userid,avatar");	
 		$countResultgo = $goDB->count;
+		//$querygo = $goDB->rawQuery("SELECT userid, avatar FROM users ORDER BY userid DESC");		
 		
 		// condition	
 		if($countResultgo > 0) {

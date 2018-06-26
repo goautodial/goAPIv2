@@ -26,15 +26,14 @@
     // POST or GET Variables
 	$user_group = $astDB->escape($_REQUEST['user_group']);
 	$group_name = $astDB->escape($_REQUEST['group_name']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
 	$group_level = $astDB->escape($_REQUEST['group_level']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
 
     // Error checking
-	if(!isset($session_user) || is_null()){
+	if(!isset($session_user) || is_null($session_user)){
 		$apiresults = array("result" => "Error: Session User Not Defined.");
 	}elseif(is_null($user_group) || $user_group == "") {
 		$apiresults = array("result" => "Error: User Group ID field is required."); 
@@ -50,11 +49,9 @@
 	} else {
 		if (!checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $user_group);
-			$group_type = "Multi-tenant";
 		} else {
 			$astDB->where("user_group", $user_group);
 			$astDB->where("user_group", $log_group);
-			$group_type = "Default";
 		}
 		
 		$astDB->getOne("vicidial_user_groups", "user_group");
@@ -66,8 +63,7 @@
 			$err_msg = error_handle("41004", "user_group. Already exists");
 			$apiresults = array("code" => "41004","result" => $err_msg);
 			//$apiresults = array("result" => "Error: User Group already exist.");
-		} else {
-			
+		} else {			
 			$data = Array("user_group" => $user_group, "group_name" => $group_name, "allowed_campaigns" => " -");
 			$mainQuery = $astDB->insert("vicidial_user_groups", $data);
 			//$query = "INSERT INTO vicidial_user_groups (user_group, group_name, allowed_campaigns) VALUES ('$user_group', '$group_name', ' -');";

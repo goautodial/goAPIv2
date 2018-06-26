@@ -2,9 +2,9 @@
 /**
  * @file        goGetAllCalltimes.php
  * @brief       API to get all Calltime details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Warren Ipac Briones   <warren@goautodial.com>
- * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Warren Ipac Briones 
+ * @author      Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify

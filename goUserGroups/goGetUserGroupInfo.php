@@ -28,7 +28,7 @@
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
-	$ip_address =$_SERVER['REMOTE_ADDR'];
+	$ip_address = $astDB->escape($_SERVER['REMOTE_ADDR']);
     
     if(!isset($session_user) || is_null($session_user)){
     	$apiresults = array("result" => "Error: Missing Required Parameters.");
@@ -37,25 +37,25 @@
 	} else {
 
 		if (!checkIfTenant($log_group, $goDB)) {
-			$astDB->where("user_group", $user_group);		
-            $group_type = "Multi-tenant";
+			$astDB->where("user_group", $user_group);	
+			$group_type = "Multi-tenant";
 		} else {
 			$astDB->where("user_group", $user_group);
-			$astDB->where("user_group", $log_group);			
-        	$group_type = "Default";
+			$astDB->where("user_group", $log_group);	
+			$group_type = "Default";
 		}
 		
 		$cols = array("user_group", "group_name", "allowed_campaigns", "forced_timeclock_login", "shift_enforcement", "admin_viewable_groups");
 		$astDB->orderBy("user_group","asc");
-		$astQuery = $astDB->get("vicidial_user_groups", NULL, $cols);
+		$astQuery = $astDB->getOne("vicidial_user_groups", $cols);
    		//$query = "SELECT user_group,group_name,forced_timeclock_login,shift_enforcement,allowed_campaigns,admin_viewable_groups FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";\
 		
 		$cols2 = array("group_level", "permissions");
 		$goDB->where("user_group", $user_group);
-		$goQuery = $goDB->get("user_access_group", NULL, $cols2);
+		$goQuery = $goDB->getOne("user_access_group", $cols2);
 		//$queryGL = "SELECT group_level,permissions FROM user_access_group WHERE user_group='$user_group';";
 		
-		$data = array_merge($astQuery[0], $goQuery[0]);
+		$data = array_merge($astQuery, $goQuery);
 		
 		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of User Group: $user_group", $log_group);
 		

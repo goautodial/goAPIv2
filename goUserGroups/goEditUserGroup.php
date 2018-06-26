@@ -24,12 +24,13 @@
  
     // POST or GET Variables
 
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    $ip_address = $astDB->escape($_REQUEST['log_ip']);
     $user_group = $astDB->escape($_REQUEST['user_group']);
     $group_name = $astDB->escape($_REQUEST['group_name']);
     $group_level = $astDB->escape($_REQUEST['group_level']);
     $allowed_campaigns = $astDB->escape($_REQUEST['allowed_campaigns']);
-	$permissions = stripslashes($astDB->escape($_REQUEST['permissions']));
+    $allowed_usergroups = $astDB->escape($_REQUEST['allowed_usergroups']);
+	$permissions = $astDB->escape($_REQUEST['permissions']);
     $forced_timeclock_login = strtoupper($astDB->escape($_REQUEST['forced_timeclock_login']));
     $shift_enforcement = strtoupper($astDB->escape($_REQUEST['shift_enforcement']));
 
@@ -58,24 +59,24 @@
     
         if (!checkIfTenant($log_group, $goDB)) {
             $astDB->where("user_group", $user_group);
-            //$ul = "WHERE user_group='$user_group'";
+            $group_type = "Multi-tenant";
         } else {
             $astDB->where("user_group", $user_group);
             $astDB->where("user_group", $log_group);
-            //$ul = "WHERE user_group='$user_group' AND user_group='$log_group'";
+            $group_type = "Default";
         }
 
         $cols = array("user_group", "group_name", "forced_timeclock_login", "shift_enforcement", "allowed_campaigns", "admin_viewable_groups");
-        $fresults = $astDB->getOne("vicidial_user_groups", NULL, $cols);
+        $fresults = $astDB->getOne("vicidial_user_groups", $cols);
         //$query = "SELECT user_group, group_name, forced_timeclock_login, shift_enforcement FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
         $countResult = $astDB->count;
-		if($countResult > 0) {
-			 //user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
+		if($countResult > 0) {		
+			//user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
+			if(is_null($allowed_usergroups) || empty($allowed_usergroups)){$allowed_usergroups = $fresults["user_group"];}
 			if(is_null($group_name)){$group_name = $fresults["group_name"];} 
             if(is_null($forced_timeclock_login)){$forced_timeclock_login = $fresults["forced_timeclock_login"];} 
             if(is_null($shift_enforcement)){$shift_enforcement = $fresults["shift_enforcement"];}
-            if(is_null($allowed_campaigns)){$allowed_campaigns = $fresults["allowed_campaigns"];}
-            if(is_null($allowed_usergroups)){$allowed_usergroups = $fresults["allowed_usergroups"];}
+            if(is_null($allowed_campaigns)){$allowed_campaigns = $fresults["allowed_campaigns"];}            
 
             $data = Array(
                         "group_name" => $group_name,
@@ -92,7 +93,7 @@
 			$goDB->where("user_group", $user_group);
             $fresultsgo = $goDB->getOne("user_access_group", "group_level, permissions");
             if(is_null($group_level)){$group_level = $fresultsgo["group_level"];} 
-            if(is_null($permissions) || ($permissions == 0)){$permissions = $fresultsgo["permissions"];} 
+            if(is_null($permissions)){$permissions = $fresultsgo["permissions"];} 
 
             $goData = Array(
                         "group_level" => $group_level,
@@ -101,12 +102,12 @@
 
             $goDB->where("user_group", $user_group);
 			$goUpdate = $goDB->update("user_access_group", $goData);            
-            $query = array_merge($astUpdate, $goUpdate);
+            $query = array($astUpdate, $goUpdate);
             
 			if(!$astUpdate){
 				$apiresults = array("result" => "Error: Failed Update, Check your details");
 			} else {
-				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $group", $log_group, $query);
+				$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $user_group", $log_group, $query);
 				$apiresults = array("result" => "success", "query" => $query);
 			}
 		} else {

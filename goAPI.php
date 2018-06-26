@@ -68,7 +68,7 @@
             $goURL = $astDB->escape($_POST["goURL"]);
     }
     
-    define('DEFAULT_USERS', array('VDAD','VDCL'));
+    define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI', 'goautodial'));
 
     $goCharset = "UTF-8";
     $goVersion = "4.0";
@@ -120,6 +120,7 @@
     }
     
     $userresponsetype = $_REQUEST["responsetype"];
+    $responsetype = $userresponsetype;
     
     if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
     	$userresponsetype = "xml";

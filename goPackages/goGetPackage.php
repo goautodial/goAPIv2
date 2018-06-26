@@ -2,9 +2,9 @@
  /**
  * @file 		goAPI.php
  * @brief 		API for Getting Packages
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Alexander Abenoja  <alex@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Alexander Abenoja
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
