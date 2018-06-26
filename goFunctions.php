@@ -1232,7 +1232,7 @@
 					'cost' => $SSpass_cost,
 					'salt' => base64_encode($SSpass_key)
 				];
-				$pass_hash = password_hash($password, PASSWORD_BCRYPT, $pass_options);
+				$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
 				$pass_hash = substr($pass_hash, 29, 31);				
             } else {$pass_hash = $pass;}
             //$passSQL = "pass_hash='$pass_hash'";
