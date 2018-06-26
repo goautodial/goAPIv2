@@ -1,37 +1,46 @@
 <?php
-    #######################################################
-    #### Name: goGetServerInfo.php 	             		####
-    #### Description: API to get specific Server       ####
-    #### Version: 4.0                                  ####
-    #### Copyright: GOAutoDial Inc. (c) 2011-2016      ####
-    #### Written by: Alexander Jim H. Abenoja			 ####
-    #### License: AGPLv2                               ####
-    #######################################################
-    
-    include_once ("../goFunctions.php");
+/**
+ * @file 		goGetServerInfo.php
+ * @brief 		API to get specific server
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author     	Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim Abenoja
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+	include_once ("goAPI.php");
 	
-    $server_id = mysqli_real_escape_string($link, $_REQUEST["server_id"]); 
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	$server_id = $astDB->escape($_REQUEST["server_id"]);
 
-        if($server_id == null) {
-                $apiresults = array("result" => "Error: Set a value for Server ID.");
-        } else {
-                $groupId = go_get_groupid($goUser);
+	if($server_id == null) {
+			$apiresults = array("result" => "Error: Set a value for Server ID.");
+	} else {
+		if (checkIfTenant($log_group, $goDB)) {
+			//$astDB->where('user_group', $log_group);
+		}
 
-                if (!checkIfTenant($groupId)) {
-                        $ul = "";
-                } else {
-                        $ul = "AND user_group='$groupId'";
-                }
-
-                $query = "SELECT * FROM servers $ul WHERE server_id ='$server_id' $ul LIMIT 1;";
-                $rsltv = mysqli_query($link, $query);
-				$exist = mysqli_num_rows($rsltv);
-				$data = mysqli_fetch_array($rsltv);
+		$astDB->where("server_id", $server_id);
+		$rsltv = $astDB->getOne('servers');	
 				
-			if($exist <= 1){
-				$apiresults = array("result" => "success", "data" => $data);
-	        } else {
-                $apiresults = array("result" => "Error: Server does not exist.");
-			}
-        	}
+		if(!empty($rsltv)) {
+			$apiresults = array("result" => "success", "data" => $rsltv);
+		} else {
+			$apiresults = array("result" => "Error: Server does not exist.");
+		}
+	}
 ?>

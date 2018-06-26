@@ -1,10 +1,11 @@
 <?php
 /**
- * @file        getCalltimesInfo.php
+ * @file        goGetCalltimeInfo.php
  * @brief       API to get specific Calltime details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Warren Ipac Briones   <warren@goautodial.com>
- * @author      Alexander Jim H. Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ $ @author		Demian Lizandro A. Biscocho
+ * @author      Alexander Jim H. Abenoja 
+ * @author      Warren Ipac Briones
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,17 +22,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $call_time_id = $_REQUEST["call_time_id"]; 
+    include_once ("goAPI.php");
+    
 	$log_user = $session_user;
-	$log_ip = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-
+	$log_group = go_get_groupid($session_user, $astDB);
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
+	$call_time_id = $astDB->escape($_REQUEST["call_time_id"]); 
+	
     if($call_time_id == null) {
         $apiresults = array("result" => "Error: Set a value for Calltime ID.");
     } else {
-		$groupId = go_get_groupid($session_user, $astDB);
-
-		if (checkIfTenant($groupId)) {
-			$astDB->where("user_group", $groupId);
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
 		}
 
 		$astDB->where("call_time_id", $call_time_id);
@@ -39,7 +41,7 @@
 		//$query = "SELECT * FROM vicidial_call_times WHERE call_time_id='$call_time_id' $ul $addedSQL ORDER BY call_time_id LIMIT 1;";
 		
 		if($astDB->count > 0){
-			$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of calltime id: {$call_time_id}", $groupId);
+			$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of calltime id: {$call_time_id}", $log_group);
 			
 			$apiresults = array_merge(array("result" => "success"), $results);
 	    } else {

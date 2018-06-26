@@ -1,10 +1,11 @@
 <?php
  /**
- * @file 		getVoicemailInfo.php
+ * @file 		goGetVoicemailInfo.php
  * @brief 		API for Voicemails
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Chris Lomuntad
+ * @author		Jeremiah Sebastian Samatra 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,43 +22,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
+	include_once ("goAPI.php");
+ 
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	$voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
    
-if($voicemail_id == null) {
-    $apiresults = array("result" => "Error: Set a value for Voicemail ID.");
-} else {
-    $groupId = go_get_groupid($goUser, $astDB);
-
-	if (!checkIfTenant($groupId, $goDB)) {
-		$ul = "";
+	if($voicemail_id == null) {
+		$apiresults = array("result" => "Error: Set a value for Voicemail ID.");
 	} else {
-		//$ul = "AND user_group='$groupId'";
-		//$addedSQL = "AND user_group='$groupId'";
-		//$addedSQL = "";
-		$astDB->where('user_group', $groupId);
-	}
-
-	//$query = "SELECT voicemail_id,pass,fullname,email,active,messages,old_messages,delete_vm_after_email,user_group FROM vicidial_voicemail WHERE voicemail_id='$voicemail_id' $ul ORDER BY voicemail_id LIMIT 1;";
-	$astDB->where('voicemail_id', $voicemail_id);
-	$astDB->orderBy('voicemail_id', 'desc');
-	$rsltv = $astDB->getOne('vicidial_voicemail', 'voicemail_id,pass,fullname,email,active,messages,old_messages,delete_vm_after_email,user_group');
-	$exist = $astDB->getRowCount();
-
-	if($exist > 0) {
-		foreach ($rsltv as $fresults){									
-			$dataVoicemailID[] = $fresults['voicemail_id'];
-			$dataPassword[] = $fresults['pass'];
-			$dataFullname[] = $fresults['fullname'];
-			$dataEmail[] = $fresults['email'];
-			$dataActive[] = $fresults['active'];
-			$dataMessages[] = $fresults['messages'];
-			$dataOldMessages[] = $fresults['old_messages'];
-			$dataDeleteVMAfterEmail[] = $fresults['delete_vm_after_email'];
-			$dataUserGroup[] = $fresults['user_group'];
-			$apiresults = array("result" => "success", "voicemail_id" => $dataVoicemailID, "password"=> $dataPassword,"fullname" => $dataFullname, "email" => $dataEmail, "active" => $dataActive, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "delete_vm_after_email" => $dataDeleteVMAfterEmail, "user_group" => $dataUserGroup);
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where('user_group', $log_group);
 		}
-	} else {
-		$apiresults = array("result" => "Error: Lead Filter does not exist.");
+
+		//$query = "SELECT voicemail_id,pass,fullname,email,active,messages,old_messages,delete_vm_after_email,user_group FROM vicidial_voicemail WHERE voicemail_id='$voicemail_id' $ul ORDER BY voicemail_id LIMIT 1;";
+		$cols = array("voicemail_id", "fullname", "active", "messages", "old_messages", "delete_vm_after_email", "user_group");
+		$astDB->where('voicemail_id', $voicemail_id);
+		$astDB->orderBy('voicemail_id', 'desc');
+		$rsltv = $astDB->getOne('vicidial_voicemail', $cols);
+		$exist = $astDB->getRowCount();
+
+		if($exist > 0) {
+			foreach ($rsltv as $fresults){									
+				$dataVoicemailID[] = $fresults['voicemail_id'];
+				$dataPassword[] = $fresults['pass'];
+				$dataFullname[] = $fresults['fullname'];
+				$dataEmail[] = $fresults['email'];
+				$dataActive[] = $fresults['active'];
+				$dataMessages[] = $fresults['messages'];
+				$dataOldMessages[] = $fresults['old_messages'];
+				$dataDeleteVMAfterEmail[] = $fresults['delete_vm_after_email'];
+				$dataUserGroup[] = $fresults['user_group'];
+				$apiresults = array("result" => "success", "voicemail_id" => $dataVoicemailID, "password"=> $dataPassword,"fullname" => $dataFullname, "email" => $dataEmail, "active" => $dataActive, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "delete_vm_after_email" => $dataDeleteVMAfterEmail, "user_group" => $dataUserGroup);
+			}
+		} else {
+			$apiresults = array("result" => "Error: Lead Filter does not exist.");
+		}
 	}
-}
 ?>

@@ -20,39 +20,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    
-    ### POST or GET Variables
-    $carrier_id = $astDB->escape($_REQUEST['carrier_id']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
+	include_once ("goAPI.php");
+	
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
 	$ip_address = $astDB->escape($_REQUEST['log_ip']);
+    $carrier_id = $astDB->escape($_REQUEST['carrier_id']);
     
     ### Check carrier_id if its null or empty
 	if($carrier_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for Carrier ID."); 
 	} else {
- 
-		$groupId = go_get_groupid($goUser, $astDB);
-
-		if (!checkIfTenant($groupId, $goDB)) {
-			//$ul = "WHERE carrier_id ='$carrier_id'";
-		} else { 
-			//$ul = "WHERE carrier_id ='$carrier_id' AND user_group='$groupId'";
-			$astDB->where('user_group', $groupId);
+		if (checkIfTenant($log_group, $goDB)) {
+			//$astDB->where('user_group', $log_group);
 		}
-	
+		
 		//$query = "SELECT carrier_id,carrier_name,carrier_description,server_ip,protocol,registration_string,active,user_group, account_entry, dialplan_entry, registration_string, globals_string FROM vicidial_server_carriers $ul ORDER BY carrier_id LIMIT 3;";
+		$cols = array("carrier_id", "carrier_name", "carrier_description", "server_ip", "protocol", "registration_string", "active", "user_group", "account_entry", "dialplan_entry", "registration_string", "globals_string");
 		$astDB->where('carrier_id', $carrier_id);
 		$astDB->orderBy('carrier_id', 'desc');
-		$rsltv = $astDB->get('vicidial_server_carriers', 3, 'carrier_id,carrier_name,carrier_description,server_ip,protocol,registration_string,active,user_group, account_entry, dialplan_entry, registration_string, globals_string');
-		$countResult = $astDB->getRowCount();
+		$rsltv = $astDB->getOne('vicidial_server_carriers', $cols);
 		
-		if($countResult > 0) {
-			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of carrier id: $carrier_id", $log_group);
-			
+		if(!empty($rsltv)) {
+			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of carrier id: $carrier_id", $log_group);			
 			$apiresults = array("result" => "success", "data" => $rsltv);
 		} else {
-			$apiresults = array("result" => "Error: Carrier doesn't exist.");
+			$apiresults = array("result" => "Error: Empty.");
 		}
 	}
 ?>
