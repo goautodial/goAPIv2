@@ -155,7 +155,7 @@ if (isset($goAction) && $goAction != "") {
 
 
         if ($auth < 1) {
-            $APIResult = array( "result" => "error", "message" => $err_message );
+            $APIResult = array( "result" => "error", "message" => $err_message, "auth_message" => $auth_message );
         } else {
             $astDB->where('user', $goUser);
             $rslt = $astDB->getOne('vicidial_users', 'vdc_agent_api_access');
