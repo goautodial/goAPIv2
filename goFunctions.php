@@ -1221,15 +1221,21 @@
         $user = preg_replace("/\'|\"|\\\\|;| /", "", $user);
         $pass = preg_replace("/\'|\"|\\\\|;| /", "", $pass);
 
-        $passSQL = "pass='$pass'";
+        //$passSQL = "pass='$pass'";
 
         $aDB->where('user', $user);
         if ($SSpass_hash_enabled > 0) {
             if ($bcrypt < 1) {
-                $pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-                $pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+                //$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
+                //$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
+				$pass_options = [
+					'cost' => $SSpass_cost,
+					'salt' => base64_encode($SSpass_key)
+				];
+				$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
+				$pass_hash = substr($pass_hash, 29, 31);				
             } else {$pass_hash = $pass;}
-            $passSQL = "pass_hash='$pass_hash'";
+            //$passSQL = "pass_hash='$pass_hash'";
             $aDB->where('pass_hash', $pass_hash);
         } else {
             $aDB->where('pass', $pass);
