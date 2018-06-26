@@ -21,33 +21,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	@include_once ("goAPI.php");
  
-	//$log_user = $session_user;
+	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
     
 	if (!checkIfTenant($log_group, $goDB)) {
 		if($log_group !== "ADMIN")
 		$astDB->where("user_group", $log_group);
+		$group_type = "Default";
     } else {
 		$astDB->where("user_group", $log_group);
-		$astDB->where("user_group", $log_group);
+		$astDB->where("user_group", $log_group);		
+		$group_type = "Multi-tenant";
 	}
-
-	$group_type = "Default";
+	
 	$cols = Array("user_group", "group_name", "forced_timeclock_login");
 	$select = $astDB->get("vicidial_user_groups", NULL, $cols);
    	//$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY group_name LIMIT $limit;";
    	
 	foreach($select as $fresults){
-		$group_type = 'Default';
+		/*$group_type = 'Default';
 		$goDB->where("tenant_id", $fresults["user_group"]);
-		$goDB->getOne("go_multi_tenant");
+		$goDB->get("go_multi_tenant");
 		//$gQuery = "SELECT * FROM go_multi_tenant WHERE tenant_id='{$fresults['user_group']}';";
 		
 		if ($goDB->count > 0) {
 			$group_type = 'Multi-tenant';
-		}
+		}*/
 
 		$dataUserGroup[] = $fresults['user_group'];
        	$dataGroupName[] = $fresults['group_name'];// .$fresults['dial_method'].$fresults['active'];
