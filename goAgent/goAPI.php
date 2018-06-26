@@ -135,7 +135,7 @@ if (isset($goAction) && $goAction != "") {
     if (preg_match("/$actions/", $goAction)) {
         $system = get_settings('system', $astDB);
         //$bcrypt = (isset($bcrypt)) ? $bcrypt : 0;
-        $bcrypt = (strlen($goPass) > 20) ? 1 : 0;
+        $bcrypt = (strlen($goPass) > 30) ? 1 : 0;
         $err_message = "Login incorrect, please try again";
         $auth_message = user_authorization($astDB, $goUser, $goPass, '', 1, $bcrypt, 0);
         if ($auth_message == 'GOOD')
