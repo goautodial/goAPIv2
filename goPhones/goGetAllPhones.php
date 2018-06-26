@@ -21,8 +21,9 @@
 */
     include_once ("goAPI.php");
     
-    $limit = $astDB->escape($_REQUEST['limit']);
-    if($limit < 1){ $limit = 1000; } else { $limit = $limit; }
+	if (isset($_REQUEST['limit'])) {
+			$limit = $astDB->escape($_REQUEST['limit']);
+	} else { $limit = 1000; }
 
 	if(empty($session_user)){
 		$apiresults = array("result" => "Error: Session User Not Defined.");
