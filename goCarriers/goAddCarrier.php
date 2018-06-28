@@ -167,19 +167,17 @@
 			}						
 		} else { $astDB->where('user_group', $log_group); }
 		
-		$astDB->getOne("vicidial_user_groups");
+		$select = $astDB->getOne("vicidial_user_groups");
 		$countResult = $astDB->getRowCount();
 
 		if($countResult <= 0 && $user_group != "---ALL---") {
 			$apiresults = array("result" => "Error: Invalid usergroup.");
 		} else {
 			$astDB->where('carrier_id', $carrier_id);
-			$astDB->getOne("vicidial_server_carriers");
-			//$select = $astDB->get("vicidial_server_carriers", NULL, $cols);	
-			$countCheck = $astDB->getRowCount();
+			$select = $astDB->getOne("vicidial_server_carriers");
 
-			if($countCheck > 0) {
-				$apiresults = array("result" => "Error: Carrier already exist.");
+			if ($astDB->count > 0) {
+				$apiresults = array("result" => "Error: Carrier already exist.", "data" => "Carrier ID: " . $select["carrier_id"] . " not available.");
 			} else {
 				$data = Array (
 							"carrier_id" 			=> $carrier_id,
@@ -194,7 +192,6 @@
 							"globals_string" 		=> $globals_string, 
 							"active" 				=> $active
 						);
-
 				$resultVSC = $astDB->insert("vicidial_server_carriers", $data);
 			
 				if($resultVSC) {			
