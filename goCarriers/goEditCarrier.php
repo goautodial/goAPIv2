@@ -74,7 +74,7 @@
 		
 				if($countResult > 0) {
 		
-					$items = explode("&",str_replace(";","",$values));
+					$items = explode("&",str_replace(";","",$rsltv));
 					foreach ($items as $item){
 						list($var,$val) = explode("=",$item,2);
 						//if (strlen($val) > 0)
