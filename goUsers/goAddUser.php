@@ -151,8 +151,7 @@
 				
 				$add_num = $add_num + 1;
 				
-				$groupId = go_get_groupid($session_user, $astDB);
-				if (!checkIfTenant($groupId, $goDB)) {
+				if (!checkIfTenant($log_group, $goDB)) {
 					$ulUser = "AND user= ?";
 					$arrUserCheck = array('VDAD', 'VDCL', 4, $phone_login, $phone_login, $user);
 
@@ -160,10 +159,10 @@
 					$arrlug = array($user_group);
 				} else {
 					$ulUser = "AND user=? AND user_group=?";
-					$arrUserCheck = array('VDAD', 'VDCL', 4, $phone_login, $phone_login, $user, $groupId);
+					$arrUserCheck = array('VDAD', 'VDCL', 4, $phone_login, $phone_login, $user, $log_group);
 
 					$ulug = "WHERE user_group=? AND user_group=?";
-					$arrlug = array($user_group, $groupId);
+					$arrlug = array($user_group, $log_group);
 				}
 
 				if(!empty($location)){
@@ -183,7 +182,7 @@
 				
 				if($query->count > 0) {
 
-					$queryUserCheck = $ast->rawQuery("SELECT user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN (?,?) AND user_level != ? AND ? = (SELECT phone_login FROM vicidial_users WHERE phone_login = ?)  $ulUser ORDER BY user ASC LIMIT 1;", $arrUserCheck);
+					$queryUserCheck = $astDB->rawQuery("SELECT user, full_name, user_level, user_group, phone_login, active FROM vicidial_users WHERE user NOT IN (?,?) AND user_level != ? AND ? = (SELECT phone_login FROM vicidial_users WHERE phone_login = ?)  $ulUser ORDER BY user ASC LIMIT 1;", $arrUserCheck);
 					//$rsltvCheck = mysqli_query($link, $queryUserCheck);
 					//$countCheckResult = mysqli_num_rows($rsltvCheck);
 					
@@ -332,7 +331,7 @@
 								"messages" => 0,
 								"old_messages" => 0
 							);
-							$queryInsertUser = $goDB->insert('phones', $data); // insert record in goautodial.users
+							$queryInsertUser = $astDB->insert('phones', $data); // insert record in goautodial.users
 							//$queryInsertUser = "INSERT INTO `phones` (`extension`,  `dialplan_number`,  `voicemail_id`,  `phone_ip`,  `computer_ip`,  `server_ip`,  `login`,  `pass`,  `status`,  `active`,  `phone_type`,  `fullname`,  `company`,  `picture`,  `protocol`,  `local_gmt`,  `outbound_cid`,  `template_id`,  `conf_override`,  `user_group`,  `conf_secret`,  `messages`,  `old_messages`) VALUES ('$phone_login',  '9999$phone_login',  '$phone_login',  '',  '', '$server_ip',  '$phone_login',  '$phone_pass',  'ACTIVE',  '$active',  '',  '$full_name',  '$user_group',  '',  'EXTERNAL',  '-5',  '0000000000',  '--NONE--',  '$conf_override',  '$user_group',  '$phone_pass',  '0',  '0');";
 							
 							$data = array(
