@@ -154,11 +154,11 @@
 				foreach ($fresults as $fetch_copy) {
 					$user_group = $fetch_copy["user_group"];
 					$protocol = $fetch_copy["protocol"];
-					$carrier_description = $astDB->escape($fetch_copy["carrier_description"]);
-					$registration_string = $astDB->escape($fetch_copy["registration_string"]);
-					$account_entry = $astDB->escape($fetch_copy["account_entry"]);
-					$globals_string = $astDB->escape($fetch_copy["globals_string"]);
-					$dialplan_entry = $astDB->escape($fetch_copy["dialplan_entry"]);				
+					$carrier_description = $fetch_copy["carrier_description"];
+					$registration_string = $fetch_copy["registration_string"];
+					$account_entry = $fetch_copy["account_entry"];
+					$globals_string = $fetch_copy["globals_string"];
+					$dialplan_entry = $fetch_copy["dialplan_entry"];				
 				}				
 				
 				$account_entry = str_replace('['.$source_carrier.']','['.$carrier_id.']',$account_entry);
