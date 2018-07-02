@@ -1,7 +1,7 @@
 <?php
 /**
- * @file    goCheckUser.php
- * @brief     API to check for existing user data
+ * @file    	goCheckUser.php
+ * @brief     	API to check for existing user data
  * @copyright   Copyright (C) GOautodial Inc.
  * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
  *
@@ -23,35 +23,29 @@
     @include_once ("goAPI.php");
  
     // POST or GET Variables
-      $user = explode(",",$astDB->escape($_REQUEST['user']));
-      $phone_login = $astDB->escape($_REQUEST['phone_login']);
+	$user = $astDB->escape($_REQUEST['user']);
+	$phone_login = $astDB->escape($_REQUEST['phone_login']);
 
-      // Phone Login Check optional when not null
-      if($phone_login != NULL){
-        $col = array("extension");
-        $astDB->where("extension", $phone_login);
-        $astDB->getOne("phones", null, $col);
-        //  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
-        $countCheckResult2 = $astDB->count;      
-          if($countCheckResult2 > 0) {
-            $apiresults = array("result" => "success");
-          }else{
-            $apiresults = array("result" => "fail", "phone_login" => "There is no phone that matches your input.");
-          }
-      }
-        
-      // User Duplicate Check
-      if($user != NULL){
-        $col2 = array("user");
-        $astDB->where("user", $user);
-        $astDB->get("vicidial_users", null, $col2);
-        //"SELECT user FROM vicidial_users WHERE user = '$user';";
-        $countCheckResult1 = $astDB->count;  
-          if($countCheckResult1 > 0) {
-            $validate1 = $validate1 + 1;
-            $apiresults = array("result" => "user", "user" => "There are 1 or more users with that User ID.");
-          }else{
-            $apiresults = array("result" => "success");
-          }
-      }
+	// User Duplicate Check
+	if ($user != NULL) {
+		$astDB->where("user", $user);
+		$astDB->get("vicidial_users", null, "user");
+		//"SELECT user FROM vicidial_users WHERE user = '$user';";
+	
+		if($astDB->count > 0) {
+			$apiresults = array("result" => "fail", "data" => "There are 1 or more users with that User ID.");
+		}else{
+			// Phone Login Check optional when not null
+			if($phone_login != NULL){
+				$astDB->where("extension", $phone_login);
+				$astDB->getOne("phones", null, "extension");
+				//  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
+				if($astDB->count > 0) {
+					$apiresults = array("result" => "fail", "data" => "Duplicate phone extension found.");
+				}
+			}		
+			$apiresults = array("result" => "success");
+		}
+	}
+	
 ?>

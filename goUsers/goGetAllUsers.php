@@ -42,14 +42,16 @@
 			$astDB->where("user_group", $log_group);
 		}
 		
+		// get users list
 		$cols = array("user_id", "user", "full_name", "user_level", "user_group", "phone_login", "active");
 		$astDB->where("user", DEFAULT_USERS, "NOT IN");
 		$astDB->where("user_level", 4, "!=");
 		$astDB->orderby("user", "asc");
 		$query = $astDB->get("vicidial_users", NULL, $cols);
 		$countResult = $astDB->count;	
-		
+
 		if($countResult > 0) {
+			$count = 0;
 			foreach($query as $fresults){				
 				$cols = array("userid", "avatar");
 				$goDB->where("userid", $fresults["user_id"]);
@@ -71,9 +73,19 @@
 				$dataUserGroup[] = $fresults['user_group'];
 				$dataPhone[] = $fresults['phone_login'];
 				$dataActive[]	= $fresults['active'];
+				
+				if(preg_match("/^agent/i", $fresults['user'])){
+					$get_last = preg_replace("/[^0-9]/","", $fresults['user']);
+					$last_num[] = intval($get_last);
+				}				
+							
 			}
 
-			$apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "phone_login" => $dataPhone, "active" => $dataActive, "avatar" => $dataAvatar, "useridgo" => $dataUserIDgo, "licensedSeats" => $config["licensedSeats"]);	
+			// return data
+			$get_last = max($last_num);
+			$agent_num = $get_last + 1;	
+				
+			$apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "phone_login" => $dataPhone, "active" => $dataActive, "avatar" => $dataAvatar, "useridgo" => $dataUserIDgo, "licensedSeats" => $config["licensedSeats"], "last_count" => $agent_num);	
 		} else {
 			$err_msg = error_handle("10010");
 			$apiresults = array("code" => "10010", "result" => $err_msg); 

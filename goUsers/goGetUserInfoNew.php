@@ -43,8 +43,11 @@
         
         $goDB->where("userid", $user_id);
         $fresultsgo = $goDB->getOne("users", "userid,avatar,gcal,calendar_apikey,calendar_id");
-                
-        $data = array_merge($fresults, $fresultsgo);        
+		
+		if ($goDB->count > 0) {
+			$data = array_merge($fresults, $fresultsgo); 
+		} else { $data = $fresults; }
+               
         $log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
         
 		if(!empty($data)) { $apiresults = array("result" => "success", "data" => $data); } 
