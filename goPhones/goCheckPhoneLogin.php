@@ -20,23 +20,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-include_once ("goAPI.php");
+	@include_once ("goAPI.php");
 
-// POST or GET Variables
-$extension = $_REQUEST['extension'];
+	// POST or GET Variables
+	$extension = $_REQUEST['extension'];
 
-if(!empty($extension) && !empty($session_user)){
-  $astDB->where("extension", $extension);
-  $astDB->getOne("phones", "extension");
-  //$query = "SELECT extension FROM phones WHERE extension='$extension';";
+	if(!empty($extension) && !empty($session_user)){
+		$astDB->where("extension", $extension);
+		$astDB->getOne("phones", "extension");
+		//$query = "SELECT extension FROM phones WHERE extension='$extension';";
 
-  if($astDB->count < 1) {
-    $apiresults = array("result" => "success");
-  }else{
-    $apiresults = array("result" => "Error: Phone already exist.");
-  }  
-}else{
-  $apiresults = array("result" => "Error: Missing parameters.");
-}
+		if($astDB->count < 1) {
+			$apiresults = array("result" => "success");
+		}else{
+			$apiresults = array("result" => "Error: Phone already exist.");
+		}  
+	}else{
+		$apiresults = array("result" => "Error: Missing parameters.");
+	}
 
 ?>

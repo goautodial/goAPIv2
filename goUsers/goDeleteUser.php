@@ -45,17 +45,12 @@
 			//$ul = "WHERE user_id='$user_id'";
 		} else {
 			//$astDB->where("user_id", $user_id);
-			//$astDB->where("user_group", $log_group);
+			$astDB->where("user_group", $log_group);
 		}		
 			
 		if ($action == "delete_selected") {
 			$error_count = 0;
 			foreach ($user_ids as $userid) {
-			//$user_id = explode(",",json_encode($user_ids));			
-			//$string_return = "";
-			//$test = array();	
-			
-			//for($i=0;$i < count($user_id);$i++) {
 				$user_id = $userid;
 				$astDB->where("user_id", $user_id);
 				$query = $astDB->getOne("vicidial_users");

@@ -111,7 +111,6 @@
 			$last_num_name = intval($get_last2);
 			
 			$arr_user = array();
-			//$test = array();
 			$add_num = 0;
 			for($i=0;$i < $seats;$i++){
 				$iterate_number1 = $last_num_user + $add_num;
@@ -142,10 +141,7 @@
 				$phone_login = $phone_login + $add_num;				
 				$add_num = $add_num + 1;
 				
-				if (!checkIfTenant($log_group, $goDB)) {
-					$astDB->where("user_group", $user_group);
-				} else {
-					$astDB->where("user_group", $user_group);
+				if (checkIfTenant($log_group, $goDB)) {
 					$astDB->where("user_group", $log_group);
 				}
 
@@ -162,6 +158,7 @@
 				}
 				
 				// check if existing user_group
+				$astDB->where("user_group", $user_group);
 				$astDB->getOne("vicidial_user_groups", "user_group");
 				
 				if($astDB->count > 0) {
@@ -173,7 +170,6 @@
 					
 					if($astDB->count <= 0) {
 						$rServerIP = $astDB->getOne("servers", "server_ip");
-						//$querygetserverip = "select server_ip from servers;";
 						$server_ip = $rServerIP['server_ip'];
 					
 						if(strtolower($user_group) == "admin"){
@@ -195,12 +191,11 @@
 							$random_digit = mt_rand(1000000000, 9999999999);
 							$astDB->where("phone_login", $random_digit);
 							$astDB->getOne("vicidial_users", "phone_login");
-							//$check_existing_phonelogins_query = "SELECT phone_login FROM vicidial_users WHERE phone_login = '$random_digit';";
 							
 							if($astDB->count <= 0){
 								$y = 1;
 								$phone_login = $random_digit;
-							} //else { $phone_login = $random_digit; }
+							}
 						}
 						
 						$pass_hash = '';
@@ -250,7 +245,7 @@
 							"outbound_cid" => "0000000000",
 							"template_id" => "--NONE--",
 							//"conf_override" => $conf_override,
-							"user_group" => $user_group,
+							//"user_group" => $user_group,
 							"conf_secret" => $phone_pass,
 							"messages" => 0,
 							"old_messages" => 0
@@ -302,16 +297,21 @@
 							//$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";							
 							$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 							
-							$datakam = array(
-								"username" => $phone_login,
-								"domain" => $domain,
-								"password" => $phone_pass,
-								"ha1" => $ha1,
-								"ha1b" => $ha1b
-							);
+							$goDB->where("settings", "GO_agent_sip_server");
+							$querygo = $goDB->getOne("settings", "value");
+							$sip_server = $querygo["value"];
+						
+							//if($sip_server === "kamailio"){
+								$datakam = array(
+									"username" => $phone_login,
+									"domain" => $domain,
+									"password" => $phone_pass,
+									"ha1" => $ha1,
+									"ha1b" => $ha1b
+								);							
 							
-							$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam); // insert record in kamilio.subscriber						
-							
+								$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam); // insert record in kamilio.subscriber						
+							//}
 							//$return_user = $user." (".$userid.")";
 							$return_user = $userid;
 							array_push($arr_user, $return_user);							
