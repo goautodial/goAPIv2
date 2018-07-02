@@ -1744,7 +1744,7 @@
         $data = Array("rebuild_conf_files" => "Y");
         $dbase->where('generate_vicidial_conf', "Y");
         $dbase->where('active_asterisk_server', "Y");
-        $dbase->where('server_ip', "Y");
+        $dbase->where('server_ip', $server_ip);
         $result = $dbase->update("servers", $data);
         
         if ($result) {
@@ -1762,4 +1762,9 @@
 		$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
 		return substr($pass_hash, 29, 31);
 	}
+	
+	function nl($string) {
+		if(isset($_SERVER['SHELL'])) return preg_replace('/\<br(\s*)?\/?\>/i', PHP_EOL, $string);
+		return nl2br($string);
+	}	
 ?>
