@@ -173,15 +173,15 @@
 						$server_ip = $rServerIP['server_ip'];
 					
 						if(strtolower($user_group) == "admin"){
-							$user_level = 9;
+							$user_level = "9";
 							$phone_pass = "";
 							$phone_login = "";
-							$agentcall_manual = 1;
-							$agentonly_callbacks = 1;
+							$agentcall_manual = "1";
+							$agentonly_callbacks = "1";
 						} else {
-							$user_level = 1;
-							$agentcall_manual = 1;
-							$agentonly_callbacks = 1;
+							$user_level = "1";
+							$agentcall_manual = "1";
+							$agentonly_callbacks = "1";
 						}
 					
 						# generate random phone login
@@ -204,51 +204,51 @@
 						}
 						
 						$dataUser = array(
-							"user" => $user,
-							"pass" => $pass,
-							"user_group" => $user_group,
-							"full_name" => $full_name,
-							"user_level" => $user_level,
-							"phone_login" => $phone_login,
-							"phone_pass" => $phone_pass,
-							"agentonly_callbacks" => $agentonly_callbacks,
-							"agentcall_manual" => $agentcall_manual,
-							"active" => $active,
-							"vdc_agent_api_access" => 1,
-							"pass_hash" => $pass_hash,
-							"agent_choose_ingroups" => 1,
-							"vicidial_recording" => 1,
-							"vicidial_transfers" => 1,
-							"closer_default_blended" => 1,
-							"scheduled_callbacks" => 1
+							"user" 						=> $user,
+							"pass" 						=> $pass,
+							"user_group" 				=> $user_group,
+							"full_name" 				=> $full_name,
+							"user_level" 				=> $user_level,
+							"phone_login" 				=> $phone_login,
+							"phone_pass" 				=> $phone_pass,
+							"agentonly_callbacks" 		=> $agentonly_callbacks,
+							"agentcall_manual" 			=> $agentcall_manual,
+							"active" 					=> $active,
+							"vdc_agent_api_access" 		=> "1",
+							"pass_hash" 				=> $pass_hash,
+							"agent_choose_ingroups" 	=> "1",
+							"vicidial_recording" 		=> "1",
+							"vicidial_transfers" 		=> "1",
+							"closer_default_blended" 	=> "1",
+							"scheduled_callbacks" 		=> "1"
 						);
 						
 						$q_insertUser = $astDB->insert('vicidial_users', $dataUser); // insert record in asterisk.vicidial_users
 
 						$dataPhones = array(
-							"extension" => $phone_login,
-							"dialplan_number" => "9999" . $phone_login,
-							"voicemail_id" => $phone_login,
-							"phone_ip" => "",
-							"computer_ip" => "",
-							"server_ip" => $server_ip,
-							"login" => $phone_login,
-							"pass" => $phone_pass,
-							"status" => "ACTIVE",
-							"active" => $active,
-							"phone_type" => "",
-							"fullname" => $full_name,
-							"company" => $user_group,
-							"picture" => "",
-							"protocol" => "EXTERNAL",
-							"local_gmt" => -5,
-							"outbound_cid" => "0000000000",
-							"template_id" => "--NONE--",
+							"extension" 				=> $phone_login,
+							"dialplan_number" 			=> "9999" . $phone_login,
+							"voicemail_id" 				=> $phone_login,
+							"phone_ip" 					=> "",
+							"computer_ip" 				=> "",
+							"server_ip" 				=> $server_ip,
+							"login" 					=> $phone_login,
+							"pass" 						=> $phone_pass,
+							"status" 					=> "ACTIVE",
+							"active" 					=> $active,
+							"phone_type" 				=> "",
+							"fullname" 					=> $full_name,
+							"company" 					=> $user_group,
+							"picture" 					=> "",
+							"protocol" 					=> "EXTERNAL",
+							"local_gmt" 				=> "-5",
+							"outbound_cid" 				=> "0000000000",
+							"template_id" 				=> "--NONE--",
 							//"conf_override" => $conf_override,
-							//"user_group" => $user_group,
-							"conf_secret" => $phone_pass,
-							"messages" => 0,
-							"old_messages" => 0
+							"user_group" 				=> $user_group,
+							"conf_secret" 				=> $phone_pass,
+							"messages" 					=> "0",
+							"old_messages" 				=> "0"
 						);
 						
 						$q_insertPhone = $astDB->insert('phones', $dataPhones); // insert record in goautodial.users
@@ -262,14 +262,14 @@
 							else { $goactive = "1"; }
 						
 						$datago = array(
-							"userid" => $userid,
-							"name" => $user,
-							"fullname" => $full_name,
-							"avatar" => $avatar,
-							"role" => $user_level,
-							"status" => $goactive,
-							"user_group" => $user_group,
-							"phone" => $phone_login
+							"userid" 					=> $userid,
+							"name" 						=> $user,
+							"fullname" 					=> $full_name,
+							"avatar" 					=> $avatar,
+							"role" 						=> $user_level,
+							"status" 					=> $goactive,
+							"user_group" 				=> $user_group,
+							"phone" 					=> $phone_login
 							//"location_id" => $location
 						);
 						
@@ -303,11 +303,11 @@
 						
 							//if($sip_server === "kamailio"){
 								$datakam = array(
-									"username" => $phone_login,
-									"domain" => $domain,
-									"password" => $phone_pass,
-									"ha1" => $ha1,
-									"ha1b" => $ha1b
+									"username" 				=> $phone_login,
+									"domain" 				=> $domain,
+									"password" 				=> $phone_pass,
+									"ha1" 					=> $ha1,
+									"ha1b" 					=> $ha1b
 								);							
 							
 								$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam); // insert record in kamilio.subscriber						

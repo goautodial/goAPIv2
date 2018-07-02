@@ -36,7 +36,7 @@
     $hotkeys_active = $astDB->escape($_REQUEST['hotkeys_active']);
     $user_level = $astDB->escape($_REQUEST['user_level']);
     $modify_same_user_level = strtoupper($astDB->escape($_REQUEST['modify_same_user_level']));
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    //$ip_address = $astDB->escape($_REQUEST['hostname']);
     $goUser = $astDB->escape($_REQUEST['goUser']);
     $voicemail = $astDB->escape($_REQUEST['voicemail']);
     $vdc_agent_api_access = $astDB->escape($_REQUEST['vdc_agent_api_access']);
@@ -49,8 +49,11 @@
     $agentonly_callbacks = $astDB->escape($_REQUEST['agentonly_callbacks']);
     $agent_lead_search_override = $astDB->escape($_REQUEST['agent_lead_search_override']);
     $avatar = $astDB->escape($_REQUEST['avatar']);
-    $location = $astDB->escape($_REQUEST['location_id']);    
-    $log_user = $session_user;
+    $location = $astDB->escape($_REQUEST['location_id']); 
+    
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB); 
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 	
     // Default Values
     $defActive = array("Y","N");
@@ -129,35 +132,41 @@
 		$location_VAL = ", '$location'";*/						
 	} 
 	
-	$groupId = go_get_groupid($session_user, $astDB);
 	
-	if (!checkIfTenant($groupId, $astDB)) {
-		$astDB->where("user_id", $userid);
-	} else {
-		$astDB->where("user_id", $userid);
-		$astDB->where("user	_group", $groupId);
-		//$ulUser = "AND user='$user' AND user_group='$groupId'";
+	if (checkIfTenant($log_group, $astDB)) {
+		$astDB->where("user	_group", $log_group);
 	}
-		
-	/*if ($userid != NULL) {
-		$astDB->where("user_id", $userid);
-		$fetch_userInfo = $astDB->getOne("vicidial_users", "user");
-		$user = $fetch_userInfo["user"];
-	}*/
 
 	if ($active == "N") { $goactive = "0"; } else { $goactive = "1"; }
 			
-	$updateUserGoArray = array("name" => $user, "fullname" => $full_name, "phone" => $phone_login, "email" => $email, "avatar" => $avatar, "user_group" => $user_group, "role" => $user_level, "status" => $goactive);
-	$insertUserGoArray = array("userid" => $userid, "name" => $user, "fullname" => $full_name, "phone" => $phone_login, "avatar" => $avatar, "user_group" => $user_group, "role" => $user_level, "status" => $goactive);
+	$updateUserGoArray = array(
+		"name" 			=> $user, 
+		"fullname" 		=> $full_name, 
+		"phone" 		=> $phone_login, 
+		"email" 		=> $email, 
+		"avatar" 		=> $avatar, 
+		"user_group" 	=> $user_group, 
+		"role" 			=> $user_level, 
+		"status" 		=> $goactive
+	);
+	
+	$insertUserGoArray = array(
+		"userid" 		=> $userid, 
+		"name" 			=> $user, 
+		"fullname" 		=> $full_name, 
+		"phone" 		=> $phone_login, 
+		"avatar" 		=> $avatar, 
+		"user_group"	=> $user_group, 
+		"role" 			=> $user_level, 
+		"status" 		=> $goactive
+	);
 	
 	$astDB->where("user_id", $userid);
 	$astDB->where("user", DEFAULT_USERS, "NOT IN");
-	$fresults = $astDB->getOne("vicidial_users", "user_id,user,full_name,email,user_group,active,user_level,phone_login,phone_pass,voicemail_id,hotkeys_active,vdc_agent_api_access,agent_choose_ingroups,vicidial_recording_override,vicidial_transfers,closer_default_blended,agentcall_manual,scheduled_callbacks,agentonly_callbacks,agent_lead_search_override");
-	
-	$countCheckResult = $astDB->count; 
+	$fresults = $astDB->getOne("vicidial_users");
 	/*$queryUserCheck = " SELECT * FROM vicidial_users WHERE user NOT IN ('VDAD','VDCL') AND user_level != '4' $ulUser ORDER BY user ASC LIMIT 1 "; */
 	
-	if($countCheckResult > 0) {
+	if($astDB->count > 0) {
 		//foreach ($rsltvCheck as $fresults){
 		$dataUser = $fresults['user'];
 		$data_phone_login = $fresults['phone_login'];
