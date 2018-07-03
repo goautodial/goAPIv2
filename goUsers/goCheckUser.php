@@ -34,18 +34,21 @@
 	
 		if($astDB->count > 0) {
 			$apiresults = array("result" => "fail", "data" => "There are 1 or more users with that User ID.");
-		}else{
-			// Phone Login Check optional when not null
-			if($phone_login != NULL){
-				$astDB->where("extension", $phone_login);
-				$astDB->getOne("phones", null, "extension");
-				//  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
-				if($astDB->count > 0) {
-					$apiresults = array("result" => "fail", "data" => "Duplicate phone extension found.");
-				}
-			}		
+		}else{		
 			$apiresults = array("result" => "success");
 		}
 	}
+	
+	// Phone Login Check optional when not null
+	if($phone_login != NULL){
+		$astDB->where("extension", $phone_login);
+		$astDB->getOne("phones", null, "extension");
+		//  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
+		if($astDB->count > 0) {
+			$apiresults = array("result" => "fail", "data" => "Duplicate phone extension found.");
+		}else{		
+			$apiresults = array("result" => "success");
+		}		
+	}	
 	
 ?>
