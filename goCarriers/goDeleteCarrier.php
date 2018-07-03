@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	@include_once ("goAPI.php");
 	
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);

@@ -42,32 +42,22 @@
 	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
     /* End of DB variables */
     
-    /* Variables */
+    /* Variables */    
+    if (isset($_GET["goAction"])) { $goAction = $astDB->escape($_GET["goAction"]); } 
+		elseif (isset($_POST["goAction"])) { $goAction = $astDB->escape($_POST["goAction"]); }
     
-    if (isset($_GET["goAction"])) {
-            $goAction = $astDB->escape($_GET["goAction"]);
-    } elseif (isset($_POST["goAction"])) {
-            $goAction = $astDB->escape($_POST["goAction"]);
-    }
+    if (isset($_GET["goUser"])) { $goUser = $astDB->escape($_GET["goUser"]); } 
+		elseif (isset($_POST["goUser"])) { $goUser = $astDB->escape($_POST["goUser"]); }
     
-    if (isset($_GET["goUser"])) {
-            $goUser = $astDB->escape($_GET["goUser"]);
-    } elseif (isset($_POST["goUser"])) {
-            $goUser = $astDB->escape($_POST["goUser"]);
-    }
+    if (isset($_GET["goPass"])) { $goPass = $astDB->escape($_GET["goPass"]); } 
+		elseif (isset($_POST["goPass"])) { $goPass = $astDB->escape($_POST["goPass"]); }
     
-    if (isset($_GET["goPass"])) {
-            $goPass = $astDB->escape($_GET["goPass"]);
-    } elseif (isset($_POST["goPass"])) {
-            $goPass = $astDB->escape($_POST["goPass"]);
-    }
+    if (isset($_GET["goURL"])) { $goURL = $astDB->escape($_GET["goURL"]); }
+		else if (isset($_POST["goURL"])) { $goURL = $astDB->escape($_POST["goURL"]); }
     
-    if (isset($_GET["goURL"])) {
-            $goURL = $astDB->escape($_GET["goURL"]);
-    } elseif (isset($_POST["goURL"])) {
-            $goURL = $astDB->escape($_POST["goURL"]);
-    }
-    
+	if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
+		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }    
+		
     define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI', 'goautodial'));
 
     $goCharset = "UTF-8";
@@ -87,8 +77,6 @@
 	$passSQL = "pass='$pass'";
 	if ($system_settings['pass_hash_enabled'] > 0) {
 		if ($bcrypt < 1) {
-			//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-			//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
@@ -104,52 +92,38 @@
     $astDB->getOne("vicidial_users", "count(*) as sum");
     $check_result = $astDB->count;
 	
-    if ($check_result > 0) {
-       
+    if ($check_result > 0) {       
         if (file_exists($goAction . ".php" )) {
             include $goAction . ".php";
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
     		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
-        }
-    
-    } else {
-        
-        $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );
-        
+        }    
+    } else {        
+        $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );        
     }
     
-    $userresponsetype = $_REQUEST["responsetype"];
-    $responsetype = $userresponsetype;
-    
-    if (( $userresponsetype != $responsetype && ( $userresponsetype != "xml" && $userresponsetype != "json" ) )) {
-    	$userresponsetype = "xml";
-    }
+	if (!isset($userResponseType) || strlen($userResponseType) < 1) {
+		$userResponseType = "xml";
+	}
     
     /* API OUTPUT */
     ob_start();
     
-    if (count( $apiresults )) {
-    	if ($userresponsetype == "json") {
-    		$apiresults = json_encode( $apiresults );
-    		echo $apiresults;
-    		exit();
-    	} else {
-    		if ($userresponsetype == "xml") {
-    			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $action .' "</action>\n" )';
+	if (count($apiresults)) {
+		if ($userResponseType == "json") {
+			$apiresults = json_encode( $apiresults );
+			echo $apiresults;
+			exit();
+		} else if ($userResponseType == "xml") {
+			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $action .' "</action>\n" )';
                 apiXMLOutput( $apiresults );
                 echo "</goautodialapi>";
-            } else {
-                if ($responsetype) {
-                    exit( "result=error;message=This API function can only return XML response format;" );
-                }
-
-                foreach ($apiresults as $k => $v) {
-                    echo "" . $k . "=" . $v . ";";
-                }
-            }
-        }
-    }
+		} else {
+			exit( "result=error;message=This API function only accepts XML or JSON value on responsetype;" );
+			//echo implode_recur(';', $apiresults);
+		}
+	}
 
     $apioutput = ob_get_contents();
     ob_end_clean();

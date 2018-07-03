@@ -20,66 +20,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once("goAPI.php");
+    @include_once("goAPI.php");
     
     // POST or GET Variables
-    $extension = $_REQUEST['extension'];
-	$action = $_REQUEST['action'];
-	$ip_address = $_REQUEST['hostname'];
+    $extensions = $_REQUEST['extension'];
+	$action = $astDB->escape($_REQUEST['action']);
+
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);	
     
     // Check campaign_id if its null or empty
 	if(empty($session_user)){
 		$apiresults = array("result" => "Error: Session User Not Defined.");
-	}elseif(empty($extension)) { 
+	}elseif(empty($extensions)) { 
 		$apiresults = array("result" => "Error: Set a value for Extension.");
 	} else {
-		$groupId = go_get_groupid($session_user, $astDB);
-		$log_user = $session_user;
-
-		if (!checkIfTenant($groupId)) {
-			$astDB->where("extension", $extension);
-			//$ul = "WHERE extension='$extension'";
-		} else {
-			$astDB->where("extension", $extension);
-			$astDB->where("user_group", $groupId);
-			//$ul = "WHERE extension='$extension' AND user_group='$groupId'";
-		}
-		
-		$exploded = explode(",",$extension);
-		$error_count = 0;
-		$string_return = "";
-		for($i=0;$i < count($exploded);$i++){
-			$astDB->where("extension", $exploded[$i]);
-			$fresults = $astDB->getOne("phones", "extension");
-			//$query = "SELECT extension  FROM phones WHERE extension='".$exploded[$i]."';";
-			$dataExtension = $fresults['extension'];
-			
-			$astDB->where("extension", $dataExtension);
-			$deleteQuery = $astDB->delete("phones");
-				//$deleteQuery = "DELETE FROM phones WHERE extension = '$dataExtension'"; 
-			
-			$kamDB->where("username", $dataExtension);
-			$kamDB->delete("subscriber");
-				//$deleteQueryB = "DELETE FROM subscriber where username= '$dataExtension'"; 
-			
-			$astDB->where("extension", $dataExtension);
-			$astDB->getOne("phones", "extension");
-				//$query = "SELECT extension  FROM phones  WHERE extension='".$dataExtension."';";
-			$countResult = $astDB->count;
-			
-			if($countResult > 0) {
-				$error_count = $error_count + 1;
-			}
-			
-			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Phone $extension", $groupId, $deleteQuery);
+		if ($action == "delete_selected") {
+			$error_count = 0;
+			foreach ($extensions as $extension) {
+				$phone_login = $extension;
 				
-		}
-		
-		if($error_count > 0) {
-			$apiresults = array("result" => "Error: Delete Failed. Number of Errors: ".$error_count);
-		} else {
-			$apiresults = array("result" => "success"); 
-		}
-			
+				if (checkIfTenant($log_group, $goDB)) {
+					$astDB->where("user_group", $log_group);
+				}
+				
+				$astDB->where("extension", $phone_login);
+				$astDB->getOne("phones");
+				
+				if($astDB->count > 0) {				
+					$astDB->where("extension", $phone_login);
+					$q_deletePhone = $astDB->delete("phones");
+					
+					$kamDB->where("username", $phone_login);
+					$qkam_deletePhone = $kamDB->delete("subscriber");
+					
+					$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Phone: $phone_login", $log_group, $q_deletePhone . $qkam_deletePhone);
+				} else {
+					$error_count = 1;
+				}
+				
+				if ($error_count == 0) { 
+					$apiresults = array("result" => "success"); 
+				}		
+				if ($error_count == 1) {
+					$err_msg = error_handle("10010");
+					$apiresults = array("code" => "10010", "result" => $err_msg, "data" => "$extensions");
+					//$apiresults = array("}result" => "Error: Delete Failed");
+				}
+			}
+		}			
 	}//end
 ?>

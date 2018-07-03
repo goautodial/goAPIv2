@@ -21,28 +21,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("../goFunctions.php");
+    @include_once("goAPI.php");
  
     // POST or GET Variables
-    $extension = $_REQUEST['extension'];
-    $server_ip = $_REQUEST['server_ip'];
-    $pass =    $_REQUEST['pass'];
-    $protocol = strtoupper($_REQUEST['protocol']);
-    $dialplan_number = $_REQUEST['dialplan_number'];
-    $voicemail_id = $_REQUEST['voicemail_id'];
-    $status = $_REQUEST['status'];
-    $active = strtoupper($_REQUEST['active']);
-    $fullname = $_REQUEST['fullname'];
-    $messages = $_REQUEST['messages'];
-    $old_messages = $_REQUEST['old_messages'];
-    $user_group = $_REQUEST['user_group'];
-    $ip_address = $_REQUEST['hostname'];
-
+    $extension = $astDB->escape($_REQUEST['extension']);
+    $server_ip = $astDB->escape($_REQUEST['server_ip']);
+    $pass =    $astDB->escape($_REQUEST['pass']);
+    $protocol = $astDB->escape($_REQUEST['protocol']);
+    $dialplan_number = $astDB->escape($_REQUEST['dialplan_number']);
+    $voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
+    $status = $astDB->escape($_REQUEST['status']);
+    $active = $astDB->escape($_REQUEST['active']);
+    $fullname = $astDB->escape($_REQUEST['fullname']);
+    $messages = !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
+    $old_messages = !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
+    $user_group = $astDB->escape($_REQUEST['user_group']);
+	$gmt = $astDB->escape($_REQUEST['gmt']);
+   
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);
+         
     // Default values 
-    $defActive = array("Y","N");
-	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
-    $defStatus = array('ACTIVE','SUSPENDED','CLOSED','PENDING','ADMIN');
+    $defActive 		= array("Y","N");
+	$defProtocol	= array('SIP','Zap','IAX2','EXTERNAL');
+    $defStatus 		= array('ACTIVE','SUSPENDED','CLOSED','PENDING','ADMIN');
 
+	if ($protocol == "EXTERNAL") { $phone_pass = ""; }
+		else { $phone_pass = $pass; }
+		
     //Error Checking Next
     if(!isset($session_user) || is_null($session_user)){
         $apiresults = array("result" => "Error: Session User Not Defined.");
@@ -72,81 +79,81 @@
         $apiresults = array("result" => "Error: Special characters found in old_messages");
     } elseif(preg_match('/[\'^£$%&*()}{@*~?><>,|=_+¬-]/', $user_group)){
         $apiresults = array("result" => "Error: Special characters found in user_group");
-    } else {
-        
-        $log_user = $session_user;
-        $groupId = go_get_groupid($session_user, $astDB);
-        
-        if (!checkIfTenant($groupId)) {
-            $astDB->where("extension", $extension);
-            //$ul = "WHERE extension='$extension'";
-        } else {
-            $astDB->where("extension", $extension);
-            $astDB->where("user_group", $groupId);
-            //$ul = "WHERE extension='$extension' AND user_group='$groupId'";
-        }
+    } else {       
+        if (checkIfTenant($log_group, $goDB)) { $astDB->where("user_group", $log_group); }
 
-        $astDB->orderBy('extension', 'asc');
-        $fresults = $astDB->getOne("phones", "extension,protocol,pass,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group");
-        //$query = "SELECT extension,protocol,pass,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT 1;";
+        $astDB->where("extension", $extension);
+        $fresults = $astDB->getOne("phones");
 
-    	$dataextension = $fresults['extension'];
-    	$dataprotocol = $fresults['protocol'];
-    	$datapass = $fresults['pass'];
-    	$dataserver_ip = $fresults['server_ip'];
-    	$datadialplan_number = $fresults['dialplan_number'];
-    	$datavoicemail_id = $fresults['voicemail_id'];
-    	$datastatus = $fresults['status'];
-    	$dataactive = $fresults['active'];
-    	$datafullname = $fresults['fullname'];
-    	$datamessages = $fresults['messages'];
-    	$dataold_messages = $fresults['old_messages'];
-    	$datauser_group = $fresults['user_group'];
+        if($astDB->count > 0) {
+			$rpasshash = $astDB->getOne("system_settings");
+			$pass_hash_enabled = $rpasshash["pass_hash_enabled"];
+			
+			if  ($pass != NULL) {
+				$data = Array(
+					"server_ip" => $server_ip,
+					"pass" => $phone_pass,
+					"protocol" => $protocol,
+					"dialplan_number" => $dialplan_number,
+					"voicemail_id" => $voicemail_id,
+					"status" => $status,
+					"active" => $active,
+					"fullname" => $fullname,
+					"messages" => $messages,
+					"old_messages" => $old_messages,
+					"user_group" => $user_group,
+					"conf_secret" => $phone_pass
+				);
+				
+				$goDB->where("setting", "GO_agent_wss_sip");
+				$querygo = $goDB->getOne("settings");
+				$realm = $querygo["value"];
+					
+				if ($pass_hash_enabled > 0) {
+					$ha1 = md5("{$extension}:{$realm}:{$pass}");
+					$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
+					$pass = '';
+				}	
+				
+				$datakam = array(
+					//"username" => $extension,
+					//"domain" => $domain,
+					"password" => $pass,
+					"ha1" => $ha1,
+					"ha1b" => $ha1b
+				);
+				
+				$kamDB->where("username", $extension);
+				$kam_update = $kamDB->update("subscriber", $datakam);
+				
+			} else {
+				$data = Array(
+					"server_ip" => $server_ip,
+					"protocol" => $protocol,
+					"dialplan_number" => $dialplan_number,
+					"voicemail_id" => $voicemail_id,
+					"status" => $status,
+					"active" => $active,
+					"fullname" => $fullname,
+					"messages" => $messages,
+					"old_messages" => $old_messages,
+					"user_group" => $user_group
+				);			
+			}
+			
+			$astDB->where("extension", $extension);
+			$main_update = $astDB->update("phones", $data);
 
-        $countResult = $astDB->count;
+			if ($protocol != "EXTERNAL") { $rebuild = rebuildconfQuery($astDB, $server_ip); }
 
-        if($countResult > 0) {
-    		if($dataextension != null){
-                if($server_ip ==  null){$server_ip = $dataserver_ip;} if($pass == null) {$pass = $datapass;} if($protocol == null){$protocol = $dataprotocol;} if($dialplan_number == null){$dialplan_number = $datadialplan_number;} if($voicemail_id == null){$voicemail_id = $datavoicemail_id;} if($status == null){$status = $datastatus;} if($active == null){$active = $dataactive;} if($fullname == null){$fullname = $datafullname;} if($messages == null) {$messages = $datamessages;} if($old_messages == null){$old_messages = $dataold_messages;} if($user_group == null){ $user_group = $datauser_group;}
-                
-                $data = Array(
-                            "server_ip" => $server_ip,
-                            "pass" => $pass,
-                            "protocol" => $protocol,
-                            "dialplan_number" => $dialplan_number,
-                            "voicemail_id" => $voicemail_id,
-                            "status" => $status,
-                            "active" => $active,
-                            "fullname" => $fullname,
-                            "messages" => $messages,
-                            "old_messages" => $old_messages,
-                            "user_group" => $user_group
-                        );
-                $astDB->where("extension", $extension);
-                $main_update = $astDB->update("phones", $data);
-                
-                $query = "UPDATE phones SET server_ip='$server_ip', pass='$pass', protocol='$protocol', dialplan_number='$dialplan_number', voicemail_id='$voicemail_id', status='$status', active='$active', fullname='$fullname', messages='$messages', old_messages='$old_messages', user_group='$user_group' WHERE extension='$extension';";
-    			
-                $dataUser = Array("phone_pass" => $passwd);
-                $astDB->where("phone_login", $extension);
-                $astDB->update("vicidial_users", $dataUser);
-                //$queryNew = "UPDATE vicidial_users SET phone_pass='$passwd' WHERE phone_login='$extension';";
+			// Admin logs
+			$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Phone: $extension", $log_group, $main_update . $kam_update);
 
-                rebuildconfQuery($astDB, $server_ip);
-    			//$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
-
-                // Admin logs
-                	$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Phone: $extension", $groupId, $query);
-
-                if($main_update){
-    				$apiresults = array("result" => "success");
-                }else{
-                    $apiresults = array("result" => "Error: Failed to Update");
-                }
-    		} else {
-    			$apiresults = array("result" => "Error: Failed to update");
-    		}
-
+			if($main_update){
+				$apiresults = array("result" => "success");
+			}else{
+				$apiresults = array("result" => "Error: Failed to Update");
+			}
     	} else {
             $apiresults = array("result" => "Error: Phone doesn't  exist.");
     	}
