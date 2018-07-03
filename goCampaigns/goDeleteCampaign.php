@@ -2,9 +2,10 @@
 /**
  * @file 		goDeleteCampaign.php
  * @brief 		API to delete campaign
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jerico James Milo  <jericojames@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
+ * @author		Jerico James Milo
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -19,89 +20,58 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-    // POST or GET Variables
-	$agent = get_settings('user', $astDB, $goUser);
+**/
 
-	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-	$action = strtolower($astDB->escape($_REQUEST['action']));
-    $goUser = $_REQUEST['goUser'];
-    $ip_address = $_REQUEST['hostname'];
-	$log_user = $_REQUEST['log_user'];
-	$log_group = $_REQUEST['log_group'];
+    @include_once ("goAPI.php");
+    
+    // POST or GET Variables
+	$campaign_ids = $_REQUEST['campaign_id'];
+	$action = $astDB->escape($_REQUEST['action']);
+	
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB);
+	$ip_address = $astDB->escape($_REQUEST['log_ip']);	
 	
     // Check campaign_id if its null or empty
-	if(empty($campaign_id) || empty($session_user)) {
+	if (empty($campaign_ids) || empty($session_user)) {
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg); 
-		//$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
-	} else {
-		$groupId = go_get_groupid($session_user);
-		if(!empty($action) && $action == strtolower("delete_selected")){
-			$exploded = explode(",",$campaign_id);
-			$error_count = 0;
-			for($i=0;$i < count($exploded);$i++){
-				$astDB->where('campaign_id', $exploded[$i]);
-				$deleteResult  = $astDB->delete('vicidial_campaigns');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
-
-				$astDB->where('campaign_id', $exploded[$i]);
-				$deleteResult2  = $astDB->delete('vicidial_campaigns_statuses');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
-				
-				$astDB->where('campaign_id', $exploded[$i]);
-				$deleteResult3  = $astDB->delete('vicidial_lead_recycle');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $exploded[$i]", $log_group, $astDB->getLastQuery());
-
-				if (!checkIfTenant($groupId)) {
-					$astDB->where('campaign_id', $campaign_id);
-				} else { 
-					$astDB->where('campaign_id', $campaign_id);
-					$astDB->where('user_group', $agent->user_group);  
-				}
-				$rsltvdel = $astDB->getOne('vicidial_campaigns', 'campaign_id');
-				
-				if($rsltvdel) {
-					$error_count = $error_count + 1;
-				}			
-			}
-				
-			if($error_count > 0) {
-				$err_msg = error_handle("10010");
-				$apiresults = array("code" => "10010", "result" => $err_msg); 
-				//$apiresults = array("result" => "Error: Delete Failed");
-			} else {
-				$apiresults = array("result" => "success"); 
-			}
-		}else{
-			if (!checkIfTenant($groupId)) {
-				$astDB->where('campaign_id', $campaign_id);
-			} else { 
-				$astDB->where('campaign_id', $campaign_id);
-				$astDB->where('user_group', $agent->user_group);  
-			}
-			$first_check = $astDB->getOne('vicidial_campaigns', 'campaign_id');
+		//$apiresults = array("result" => "Error: Set a value for Campaign ID.");
+	} elseif ($action == "delete_selected") {
+		$error_count = 0;
+		foreach ($campaign_ids as $campaignid) {
+			$campaign_id = $campaignid;
 			
-			if($first_check) {
-				$astDB->where('campaign_id', $campaign_id);
-				$deleteResult  = $astDB->delete('vicidial_campaigns');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->getOne("vicidial_campaigns");
+			
+			if ($astDB->count > 0) {					
+				$astDB->where("campaign_id", $campaign_id);
+				$astDB->delete("vicidial_campaigns");					
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$astDB->where('campaign_id', $campaign_id);
-				$deleteResult2  = $astDB->delete('vicidial_campaigns_statuses');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
+				$astDB->where("campaign_id", $campaign_id);
+				$q_deletePhone = $astDB->delete("vicidial_campaigns_statuses");					
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$astDB->where('campaign_id', $campaign_id);
-				$deleteResult3  = $astDB->delete('vicidial_lead_recycle');
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
-				
-				$apiresults = array("result" => "success");
+				$astDB->where("campaign_id", $campaign_id);
+				$qgo_deleteUser = $goDB->delete("vicidial_lead_recycle");					
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());					
+			
 			} else {
-				$err_msg = error_handle("41004", "campaign. Doesn't exist");
-				$apiresults = array("code" => "41004", "result" => $err_msg); 
-				//$apiresults = array("result" => "Error: Campaign doesn't exist.");
+				$error_count = 1;
+			}
+			
+			if ($error_count == 0) { 
+				$apiresults = array("result" => "success"); 
+			}		
+			if ($error_count == 1) {
+				$err_msg = error_handle("10010");
+				$apiresults = array("code" => "10010", "result" => $err_msg, "data" => $campaign_ids);
+				//$apiresults = array("}result" => "Error: Delete Failed");
 			}
 		}
-		
-	}//end
+	}
+	
+
 ?>

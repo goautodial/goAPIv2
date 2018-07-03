@@ -1,10 +1,10 @@
 <?php
 /**
- * @file    goCheckCampaign.php
- * @brief     API to check if campaign already exists
+ * @file    	goCheckCampaign.php
+ * @brief     	API to check if campaign already exists
  * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @author      Alexander Jim Abenoja 
+ * @author      Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,19 +20,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-   #####################################################
-   #### Name: goCheckCampaign.php	                ####
-   #### Description: API to check for existing data ####
-   #### Version: 4.0                                ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2016    ####
-   #### Written by: Alexander Jim H. Abenoja        ####
-   #### License: AGPLv2                             ####
-   #####################################################
-    ### POST or GET Variables
+
+	@include_once ("goAPI.php");
+	
     $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
     
     // Check exisiting status
-    if(!empty($_REQUEST['status'])){
+    if (!empty($_REQUEST['status'])) {
         $status = $astDB->escape($_REQUEST['status']);
             
         $rsltvCheck3 = 0;
@@ -42,19 +36,19 @@
             $rsltvCheck3 = $astDB->get('vicidial_campaign_statuses', null, 'status');
         }
 
-            $astDB->where('status', $status);
-            $rsltvCheck2 = $astDB->get('vicidial_statuses', null, 'status');
+		$astDB->where('status', $status);
+		$rsltvCheck2 = $astDB->get('vicidial_statuses', null, 'status');
 
-            $astDB->where('status', $status);
-            $astDB->where('campaign_id', $campaign_id);
-            $rsltvCheck1 = $astDB->get('vicidial_campaign_statuses', null, 'status');
+		$astDB->where('status', $status);
+		$astDB->where('campaign_id', $campaign_id);
+		$rsltvCheck1 = $astDB->get('vicidial_campaign_statuses', null, 'status');
                 
         if($rsltvCheck1 || $rsltvCheck2 || $rsltvCheck3) {
             $apiresults = array("result" => "fail", "status" => "There are 1 or more statuses with that specific input.");
         }else{
             $apiresults = array("result" => "success");
         }
-    }else{
+    } else {
         $astDB->where('campaign_id', $campaign_id);
         $rsltvCheck1 = $astDB->get('vicidial_campaigns', null, 'campaign_id');
 

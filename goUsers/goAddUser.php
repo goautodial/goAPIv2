@@ -24,25 +24,28 @@
     @include_once ("goAPI.php");
 	include_once ("../licensed-conf.php");
 	
+	$log_user 				= $session_user;
+	$log_group 				= go_get_groupid($session_user, $astDB); 
+	$ip_address 			= $astDB->escape($_REQUEST['log_ip']);	
+	
     // POST or GET Variables
-	$orig_user = $astDB->escape($_REQUEST['user']);
-	$pass = $astDB->escape($_REQUEST['pass']);
-	$orig_full_name = $astDB->escape($_REQUEST['full_name']);
-	$phone_login = $astDB->escape($_REQUEST['phone_login']);
-	$phone_pass = $pass;
-	$user_group = $astDB->escape($_REQUEST['user_group']);
-	$active = $astDB->escape(strtoupper($_REQUEST['active']));
+	$orig_user 				= $astDB->escape($_REQUEST['user']);
+	$pass 					= $astDB->escape($_REQUEST['pass']);
+	$orig_full_name 		= $astDB->escape($_REQUEST['full_name']);
+	$phone_login 			= $astDB->escape($_REQUEST['phone_login']);
+	$phone_pass 			= $pass;
+	$user_group 			= $astDB->escape($_REQUEST['user_group']);
+	$active 				= $astDB->escape(strtoupper($_REQUEST['active']));
 	//$location = $astDB->escape($_REQUEST['location_id']);
 		
-	if(isset($_REQUEST['seats'])) { $seats = $astDB->escape($_REQUEST['seats']); }
+	if(isset($_REQUEST['seats'])) { 
+		$seats 				= $astDB->escape($_REQUEST['seats']); }
 		else { $seats = 1; }
-	if(isset($_REQUEST['avatar'])) { $avatar = $astDB->escape($_REQUEST['avatar']); }
+	if(isset($_REQUEST['avatar'])) { 
+		$avatar 			= $astDB->escape($_REQUEST['avatar']); }
 		else { $avatar = NULL; }
 		
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB); 
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$defActive = array("Y","N");
+	$defActive 				= array("Y","N");
 
     // Error Checking
     if(empty($session_user)){

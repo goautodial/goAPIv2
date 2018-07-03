@@ -2,9 +2,10 @@
 /**
  * @file 		goAddCampaign.php
  * @brief 		API to add campaign
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho 
+ * @author     	Alexander Jim Abenoja 
+ * @author     	Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,135 +22,133 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-	$agent = get_settings('user', $astDB, $goUser);
+    @include_once ("goAPI.php");
 
-	/* POST or GET Variables */
-        $goUser = $_REQUEST['goUser'];
-        $ip_address = $_REQUEST['hostname'];
-		$log_user = $session_user;
-		$log_group = $_REQUEST['log_group'];
-	/* Inbound Campaign */
-	$campaign_id 	= $_REQUEST['campaign_id'];
-	$campaign_name 	= $_REQUEST['campaign_name'];
-	$campaign_type 	= strtoupper($_REQUEST['campaign_type']);
-	$active 	= $_REQUEST['active'];
-	$dial_method 	= $_REQUEST['dial_method'];
-	$dial_statuses 	= $_REQUEST['dial_statuses'];
-	$lead_order 	= $_REQUEST['lead_order'];
-	$allow_closers 	= $_REQUEST['allow_closers'];
-	$hopper_level 	= $_REQUEST['hopper_level'];
-	$auto_dial_level 	= $_REQUEST['auto_dial_level'];
-	$auto_dial_level_adv 	= $_REQUEST['auto_dial_level_adv'];
-	$dial_prefix 	= $_REQUEST['dial_prefix'];
-	$campaign_changedate 	= $_REQUEST['campaign_changedate'];
-	$campaign_stats_refresh 	= $_REQUEST['campaign_stats_refresh'];
-	$campaign_vdad_exten 	= $_REQUEST['campaign_vdad_exten'];
-	$campaign_recording 	= $_REQUEST['campaign_recording'];
-	$campaign_rec_filename 	= $_REQUEST['campaign_rec_filename'];
-	$scheduled_callbacks 	= $_REQUEST['scheduled_callbacks'];
-	$scheduled_callbacks_alert 	= $_REQUEST['scheduled_callbacks_alert'];
-	$no_hopper_leads_logins 	= $_REQUEST['no_hopper_leads_logins'];
-	$use_internal_dnc 	= $_REQUEST['use_internal_dnc'];
-	$use_campaign_dnc 	= $_REQUEST['use_campaign_dnc'];
-	$campaign_cid 	= $_REQUEST['campaign_cid'];
-	$user_group 	= $_REQUEST['user_group'];
-	$drop_call_seconds 	= $_REQUEST['drop_call_seconds'];
-	$goUsers 	= $_REQUEST['goUser'];
-	$values 	= $_REQUEST['items'];
-	$did_pattern 	= $_REQUEST['did_tfn_extension'];
-	$group_color 	= $_REQUEST['group_color'];
-	$call_route 	= $_REQUEST['call_route'];
-	$call_route_text 	= $_REQUEST['call_route_text'];
-	$survey_type 	= $_REQUEST['survey_type'];
-	$number_channels 	= $_REQUEST['no_channels'];
-	$copy_from_campaign 	= $_REQUEST['copy_from_campaign'];
-	$list_id 	= $_REQUEST['list_id'];
-	$country 	= $_REQUEST['country'];
-	$check_for_duplicates 	= $_REQUEST['check_for_duplicates'];			
-	$dial_prefix 	= $_REQUEST['dial_prefix'];
-	$custom_dial_prefix	= $_REQUEST['custom_dial_prefix'];
-	$status 	= $_REQUEST['status'];									
-	$script 	= $_REQUEST['script'];						
-	$answering_machine_detection 	= $_REQUEST['answering_machine_detection'];
-	if($answering_machine_detection == ""){
+	$log_user 					= $session_user;
+	$log_group 					= go_get_groupid($session_user, $astDB); 
+	$ip_address 				= $astDB->escape($_REQUEST['log_ip']);
+	
+	// POST or GET Variables
+	$campaign_id 				= $astDB->escape($_REQUEST['campaign_id']);
+	$campaign_name 				= $astDB->escape($_REQUEST['campaign_name']);
+	$campaign_type 				= $astDB->escape(strtoupper($_REQUEST['campaign_type']));
+	$active 					= $astDB->escape($_REQUEST['active']);
+	$dial_method 				= $astDB->escape($_REQUEST['dial_method']);
+	$dial_statuses 				= $astDB->escape($_REQUEST['dial_statuses']);
+	$lead_order 				= $astDB->escape($_REQUEST['lead_order']);
+	$allow_closers 				= $astDB->escape($_REQUEST['allow_closers']);
+	$hopper_level 				= $astDB->escape($_REQUEST['hopper_level']);
+	$auto_dial_level 			= $astDB->escape($_REQUEST['auto_dial_level']);
+	$auto_dial_level_adv 		= $astDB->escape($_REQUEST['auto_dial_level_adv']);
+	$dial_prefix 				= $astDB->escape($_REQUEST['dial_prefix']);
+	$campaign_changedate 		= $astDB->escape($_REQUEST['campaign_changedate']);
+	$campaign_stats_refresh 	= $astDB->escape($_REQUEST['campaign_stats_refresh']);
+	$campaign_vdad_exten 		= $astDB->escape($_REQUEST['campaign_vdad_exten']);
+	$campaign_recording 		= $astDB->escape($_REQUEST['campaign_recording']);
+	$campaign_rec_filename 		= $astDB->escape($_REQUEST['campaign_rec_filename']);
+	$scheduled_callbacks 		= $astDB->escape($_REQUEST['scheduled_callbacks']);
+	$scheduled_callbacks_alert 	= $astDB->escape($_REQUEST['scheduled_callbacks_alert']);
+	$no_hopper_leads_logins 	= $astDB->escape($_REQUEST['no_hopper_leads_logins']);
+	$use_internal_dnc 			= $astDB->escape($_REQUEST['use_internal_dnc']);
+	$use_campaign_dnc 			= $astDB->escape($_REQUEST['use_campaign_dnc']);
+	$campaign_cid 				= $astDB->escape($_REQUEST['campaign_cid']);
+	$user_group 				= $astDB->escape($_REQUEST['user_group']);
+	$drop_call_seconds 			= $astDB->escape($_REQUEST['drop_call_seconds']);
+	$goUsers 					= $astDB->escape($_REQUEST['goUser']);
+	$values 					= $astDB->escape($_REQUEST['items']);
+	$did_pattern 				= $astDB->escape($_REQUEST['did_tfn_extension']);
+	$group_color 				= $astDB->escape($_REQUEST['group_color']);
+	$call_route 				= $astDB->escape($_REQUEST['call_route']);
+	$call_route_text 			= $astDB->escape($_REQUEST['call_route_text']);
+	$survey_type 				= $astDB->escape($_REQUEST['survey_type']);
+	$number_channels 			= $astDB->escape($_REQUEST['no_channels']);
+	$copy_from_campaign 		= $astDB->escape($_REQUEST['copy_from_campaign']);
+	$list_id 					= $astDB->escape($_REQUEST['list_id']);
+	$country 					= $astDB->escape($_REQUEST['country']);
+	$check_for_duplicates 		= $astDB->escape($_REQUEST['check_for_duplicates']);			
+	$dial_prefix 				= $astDB->escape($_REQUEST['dial_prefix']);
+	$custom_dial_prefix			= $astDB->escape($_REQUEST['custom_dial_prefix']);
+	$status 					= $astDB->escape($_REQUEST['status']);									
+	$script 					= $astDB->escape($_REQUEST['script']);						
+	$ans_machine_detection 		= $astDB->escape($_REQUEST['answering_machine_detection']);
+	
+	if ($ans_machine_detection == "") {
 		if($dial_method == "MANUAL" && $dial_method == "INBOUND_MAN"){
-			$answering_machine_detection = '8368';
+			$ans_machine_detection = '8368';
 		}else{
-			$answering_machine_detection = '8369';
+			$ans_machine_detection = '8369';
 		}
 	}
-	$caller_id 	= $_REQUEST['caller_id']; 					
-	$force_reset_hopper 	= $_REQUEST['force_reset_hopper'];			
-	$inbound_man 	= $_REQUEST['inbound_man'];					
-	$phone_numbers 	= $_REQUEST['phone_numbers'];
-	$lead_file	= $_FILES['lead_file']['tmp_name'];
-	$leads	= $_FILES['leads']['tmp_name'];
 	
-	$call_time 		= $_REQUEST['call_time'];
-	$dial_status 		= $_REQUEST['dial_status'];
-	$list_order 		= $_REQUEST['list_order'];
-	$lead_filter 		= $_REQUEST['lead_filter'];
-	$dial_timeout 		= $_REQUEST['dial_timeout'];
-	$manual_dial_prefix 		= $_REQUEST['manual_dial_prefix'];
-	$call_launch 		= $_REQUEST['call_lunch'];
-	$answering_machine_message 		= $_REQUEST['answering_machine_message'];
-	$pause_codes 		= $_REQUEST['pause_codes'];
-	$manual_dial_filter 		= $_REQUEST['manual_dial_filter'];
-	$manual_dial_list_id 		= $_REQUEST['manual_dial_list_id'];
-	$availability_only_tally 		= $_REQUEST['availability_only_tally'];
-	$recording_filename 		= $_REQUEST['recording_filename'];
-	$next_agent_call 		= $_REQUEST['next_agent_call'];
-	$caller_id_3_way_call 		= $_REQUEST['caller_id_3_way_call'];
-	$dial_prefix_3_way_call 		= $_REQUEST['dial_prefix_3_way_call'];
-	$three_way_hangup_logging 		= $_REQUEST['three_way_hangup_logging'];
-	$three_way_hangup_seconds 		= $_REQUEST['three_way_hangup_seconds'];
-	$three_way_hangup_action 		= $_REQUEST['three_way_hangup_action'];
-	$reset_leads_on_hopper 		= $_REQUEST['reset_leads_on_hopper'];
-
-	$location = $astDB->escape($_REQUEST['location_id']);
+	$caller_id 					= $astDB->escape($_REQUEST['caller_id']); 					
+	$force_reset_hopper 		= $astDB->escape($_REQUEST['force_reset_hopper']);			
+	$inbound_man 				= $astDB->escape($_REQUEST['inbound_man']);					
+	$phone_numbers 				= $astDB->escape($_REQUEST['phone_numbers']);
+	$lead_file					= $_FILES['lead_file']['tmp_name'];
+	$leads						= $_FILES['leads']['tmp_name'];	
+	$call_time 					= $astDB->escape($_REQUEST['call_time']);
+	$dial_status 				= $astDB->escape($_REQUEST['dial_status']);
+	$list_order 				= $astDB->escape($_REQUEST['list_order']);
+	$lead_filter 				= $astDB->escape($_REQUEST['lead_filter']);
+	$dial_timeout 				= $astDB->escape($_REQUEST['dial_timeout']);
+	$manual_dial_prefix 		= $astDB->escape($_REQUEST['manual_dial_prefix']);
+	$call_launch 				= $astDB->escape($_REQUEST['call_lunch']);
+	$answering_machine_message 	= $astDB->escape($_REQUEST['answering_machine_message']);
+	$pause_codes 				= $astDB->escape($_REQUEST['pause_codes']);
+	$manual_dial_filter 		= $astDB->escape($_REQUEST['manual_dial_filter']);
+	$manual_dial_list_id 		= $astDB->escape($_REQUEST['manual_dial_list_id']);
+	$availability_only_tally 	= $astDB->escape($_REQUEST['availability_only_tally']);
+	$recording_filename 		= $astDB->escape($_REQUEST['recording_filename']);
+	$next_agent_call 			= $astDB->escape($_REQUEST['next_agent_call']);
+	$caller_id_3_way_call 		= $astDB->escape($_REQUEST['caller_id_3_way_call']);
+	$dial_prefix_3_way_call 	= $astDB->escape($_REQUEST['dial_prefix_3_way_call']);
+	$three_way_hangup_logging 	= $astDB->escape($_REQUEST['three_way_hangup_logging']);
+	$three_way_hangup_seconds 	= $astDB->escape($_REQUEST['three_way_hangup_seconds']);
+	$three_way_hangup_action 	= $astDB->escape($_REQUEST['three_way_hangup_action']);
+	$reset_leads_on_hopper 		= $astDB->escape($_REQUEST['reset_leads_on_hopper']);
+	$location 					= $astDB->escape($_REQUEST['location_id']);
 
 	/* Default values */ 
-    	$defActive = array("Y","N");
-    	$defType = array("OUTBOUND", "INBOUND", "BLENDED", "SURVEY", "COPY");
+	$defActive 					= array("Y","N");
+	$defType 					= array("OUTBOUND", "INBOUND", "BLENDED", "SURVEY", "COPY");
 		
-		
-		if($dial_prefix == "CUSTOM"){
-				$sippy_dial_prefix = $custom_dial_prefix;
-		}else{
-				$sippy_dial_prefix = $dial_prefix;
-		}
-		
-		if($dial_method == "MANUAL"){
+	if ($dial_prefix == "CUSTOM") {
+		$sippy_dial_prefix 		= $custom_dial_prefix;
+	} else {
+		$sippy_dial_prefix 		= $dial_prefix;
+	}
+	
+	if ($dial_method == "MANUAL") {
+		$autoDialLevel = 0;
+	} elseif ($dial_method == "ADAPT_TAPERED") {
+		$autoDialLevel = 1;
+	} else {
+		switch ($auto_dial_level) {
+			case "OFF":
 				$autoDialLevel = 0;
-		}elseif($dial_method == "ADAPT_TAPERED"){
+				break;
+			case "SLOW":
 				$autoDialLevel = 1;
-		}else{
-			switch($auto_dial_level){
-				case "OFF":
-					$autoDialLevel = 0;
-					break;
-				case "SLOW":
-					$autoDialLevel = 1;
-					break;
-				case "NORMAL":
-					$autoDialLevel = 2;
-					break;
-				case "HIGH":
-					$autoDialLevel = 4;
-					break;
-				case "MAX":
-					$autoDialLevel = 6;
-					break;
-				case "MAX_PREDICTIVE":
-					$autoDialLevel = 10;
-					break;
-				case "ADVANCE":
-					$autoDialLevel = $auto_dial_level_adv;
-					break;
-				default:
-					//DEFAULT HERE
-			}
-		}   
+				break;
+			case "NORMAL":
+				$autoDialLevel = 2;
+				break;
+			case "HIGH":
+				$autoDialLevel = 4;
+				break;
+			case "MAX":
+				$autoDialLevel = 6;
+				break;
+			case "MAX_PREDICTIVE":
+				$autoDialLevel = 10;
+				break;
+			case "ADVANCE":
+				$autoDialLevel = $auto_dial_level_adv;
+				break;
+			default:
+				//DEFAULT HERE
+		}
+	}  
 
     if($campaign_id == null ||  $campaign_type == null || $campaign_name == null) {
 		$err_msg = error_handle("40001");
@@ -160,10 +159,10 @@
 		$err_msg = error_handle("10003", "campaign_type");
 		$apiresults = array("code" => "10003", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Default value for campaign type is OUTBOUND, INBOUND, BLENDED and  SURVEY only.");
-    } elseif(strlen($campaign_id) < 8 ){
+    } elseif (strlen($campaign_id) < 8 ){
     	$err_msg = error_handle("41006", "campaign_id. Limit is 8 Characters.");
 		$apiresults = array("code" => "41006", "result" => $err_msg);
-    } else{
+    } else {
             if(!empty($location)){
 				$result_location = go_check_location($location, $user_group);
 				if($result_location < 1){
@@ -175,15 +174,14 @@
 				$location = "";
 			}
 
-			if (!checkIfTenant($groupId)) {
-				$astDB->where('campaign_id', $campaign_id);
-			} else { 
-				$astDB->where('campaign_id', $campaign_id);
-				$astDB->where('user_group', $agent->user_group);  
+			if (checkIfTenant($log_group, $goDB)) {
+				$astDB->where('user_group', $log_group);
 			}
-			$rsltvCampaign = $astDB->getOne('vicidial_campaigns', null, 'campaign_id,campaign_name,dial_method,active');
+			
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->getOne("vicidial_campaigns", "campaign_id");
 		    
-            if($rsltvCampaign) {
+            if ($astDB->count > 0) {
 				$err_msg = error_handle("10109");
                 $apiresults = array("result" => "$err_msg");
             } else {
@@ -194,14 +192,10 @@
 				
 				// Outbound Campaign here
 				if($campaign_type == "OUTBOUND"){
-				
-					//$groupId = go_get_groupid($goUser);
-					$groupId = go_get_groupid($session_user);
-
-					if (!checkIfTenant($groupId)) {
+					if (!checkIfTenant($log_group, $goDB)) {
 						$tenant_id = '---ALL---';
 					} else {
-						$tenant_id = "$groupId";
+						$tenant_id = "$log_group";
 					}
 
 					if ($campaign_id != 'undefined' && $campaign_id != ''){
@@ -239,15 +233,16 @@
 							'user_group' 					=> $tenant_id,	
 							'manual_dial_list_id' 			=> '${$tenant_id}998', 
 							'drop_call_seconds' 			=> 7, 
-							'campaign_vdad_exten' 			=> $answering_machine_detection, 
+							'campaign_vdad_exten' 			=> $ans_machine_detection, 
 							'disable_alter_custdata' 		=> 'N', 
 							'disable_alter_custphone' 		=> 'Y', 
 							'campaign_script' 				=> $script
 						);
-						$queryInsertOutbound = $astDB->insert('vicidial_campaigns', $data_outbound);
+						
+						$q_insertOutbound = $astDB->insert('vicidial_campaigns', $data_outbound);
 						$insertQuery = $astDB->getLastQuery();
 							
-						$allowed_campaigns = go_getall_allowed_campaigns($groupId);
+						$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
 
                         if (strlen($allowed_campaigns) < 1) { 
                         	$allowed_campaigns = " -"; 
@@ -257,19 +252,19 @@
 							'allowed_campaigns' =>  ' {$campaign_id}$allowed_campaigns'
 						);
 						$astDB->where('user_group', $tenant_id);
-						$updateQueryAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+						$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
 						
-						if($queryInsertOutbound) {
+						if($q_insertOutbound) {
 							$SQLdate = date("Y-m-d H:i:s");
-							$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Outbound Campaign: $campaign_id", $log_group, $insertQuery);
+							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Outbound Campaign: $campaign_id", $log_group, $insertQuery);
 							
-							$data_gocampaign = array(
-								'campaign_id' 	=> $campaign_id, 
-								'campaign_type' => $campaign_type
+							$datago_campaign = array(
+								'campaign_id' 				=> $campaign_id, 
+								'campaign_type' 			=> $campaign_type
 								// 'location_id' 	=> (!empty($location))? $location:''
 							);
-							$queryInsertgoCampaign = $goDB->insert('go_campaigns', $data_gocampaign);
-				
+							
+							$qgo_insertCampaign = $goDB->insert("go_campaigns", $datago_campaign);				
 							$apiresults = array("result" => "success");
 						} else {
 							$err_msg = error_handle("10010");
@@ -287,12 +282,11 @@
 					$campaign_desc = $astDB->escape(str_replace('+',' ',$campaign_name));
 					$SQLdate = date("Y-m-d H:i:s");
 					$NOW = date("Y-m-d");
-					//$groupId = go_get_groupid($goUser);
-					$groupId = go_get_groupid($session_user);
-					if (!checkIfTenant($groupId)){
+
+					if (!checkIfTenant($log_group, $goDB)){
 						$tenant_id = '---ALL---';
 					} else {
-						$tenant_id = "$groupId";
+						$tenant_id = "$log_group";
 					}
 
 					$local_call_time = "9am-9pm";
@@ -317,7 +311,7 @@
 						'campaign_stats_refresh' 		=> 'Y', 
 						'list_order_mix' 				=> 'DISABLED', 
 						'dial_timeout' 					=> 30, 
-						'campaign_vdad_exten' 			=> $answering_machine_detection, 
+						'campaign_vdad_exten' 			=> $ans_machine_detection, 
 						'campaign_recording' 			=> 'ALLFORCE', 
 						'campaign_rec_filename' 		=> 'FULLDATE_CUSTPHONE_CAMPAIGN_AGENT', 
 						'scheduled_callbacks' 			=> 'Y', 
@@ -344,12 +338,12 @@
 						'disable_alter_custphone' 		=> 'Y', 
 						'campaign_script' 				=> $script
 					);
-					$queryInsertInbound = $astDB->insert('vicidial_campaigns', $data_inbound);
+					$q_insertInbound = $astDB->insert('vicidial_campaigns', $data_inbound);
 					$insertQuery = $astDB->getLastQuery();
 
-					$queryInsertVCS = $astDB->insert('vicidial_campaign_stats', array('campaign_id' => $campaign_id));
+					$q_insertVCS = $astDB->insert('vicidial_campaign_stats', array('campaign_id' => $campaign_id));
 
-					$allowed_campaigns = go_getall_allowed_campaigns($groupId);
+					$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
 					
 					if (strlen($allowed_campaigns) < 1) { 
 						$allowed_campaigns = " -"; 
@@ -358,21 +352,22 @@
 					$update_data = array(
 						'allowed_campaigns' =>  ' {$campaign_id}$allowed_campaigns'
 					);
-					$astDB->where('user_group', $tenant_id);
-					$updateQueryAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
 					
-					if($queryInsertInbound) {
+					$astDB->where('user_group', $tenant_id);
+					$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+					
+					if($q_insertInbound) {
 						if ($callRoute != null){
 							// Call Route
 							$didDesc = $campaign_id." ".$campaign_type." DID";
 							$didPattern = $call_route_text;
 							
 							$astDB->where('did_pattern', $did_pattern);
-							$resultDID = $astDB->get('vicidial_inbound_dids', null, 'did_pattern');
+							$resultDID = $astDB->getOne('vicidial_inbound_dids', 'did_pattern');
 							$serverIP = $_SERVER['REMOTE_ADDR'];
-							switch ($callRoute){
+							switch ($callRoute) {
 								case "INGROUP":
-									if($resultDID){
+									if ($resultDID) {
 										$update_ing = array(
 											'did_description' 				=> $didDesc,
 											'did_active' 					=> 'Y',
@@ -386,9 +381,10 @@
 											'server_ip' 					=> $serverIP,
 											'user_group' 					=> $tenant_id
 										);
+										
 										$astDB->where('did_pattern', $did_pattern);
 										$astDB->update('vicidial_inbound_dids', $update_ing);	
-									}else{
+									} else {
 										$data_ing = array(
 											'did_pattern' 					=> $did_pattern,
 											'did_description' 				=> $didDesc,
@@ -402,15 +398,19 @@
 											'group_id' 						=> 'AGENTDIRECT',
 											'server_ip' 					=> $serverIP,
 											'user_group' 					=> $tenant_id
-										);	
+										);
+										
 										$astDB->insert('vicidial_inbound_dids', $data_ing);	
 									}
+									
 									$update_VC = array(
 										'xfer_groups' 		=> $call_route_text.' -', 
 										'closer_campaigns' 	=> $call_route_text.' -' 
 									);
+									
 									$astDB->where('campaign_id', $campaign_id);
-									$astDB->update('vicidial_campaigns', $update_VC);	
+									$astDB->update('vicidial_campaigns', $update_VC);
+									
 								break;
 	
 								case "IVR":
@@ -511,15 +511,15 @@
 						}
 	
 						$SQLdate = date("Y-m-d H:i:s");
-						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
 
-						$data_gocampaign = [
+						$datago_campaign = [
 							'campaign_id' 	=> $campaign_id, 
 							'campaign_type' => $campaign_type
 							// 'location_id' 	=> (!empty($location))? $location:''
 						];
-						$queryInsertgoCampaign = $goDB->insert('go_campaigns', $data_gocampaign);
 						
+						$qgo_insertCampaign = $goDB->insert('go_campaigns', $datago_campaign);						
 						$apiresults = array("result" => "success");
 					} else {
 						$err_msg = error_handle("10010");
@@ -547,14 +547,11 @@
 						if(!in_array($callRoute,$defCallRoute) || $callRoute == null) {
 							$err_msg = error_handle("10003", "call_route");
 							$apiresults = array("code" => "40001", "result" => $err_msg);
-						} else {
-							//$groupId = go_get_groupid($goUser);
-							$groupId = go_get_groupid($session_user);
-							
-							if (!checkIfTenant($groupId)){
+						} else {						
+							if (!checkIfTenant($log_group, $goDB)){
 								$tenant_id = "---ALL---";
 							} else {
-								$tenant_id = "$groupId";
+								$tenant_id = "$log_group";
 							}
 							
 							if ($campaign_id!='undefined' && $campaign_id!=''){
@@ -581,7 +578,7 @@
 									'call_time_id' 			=> $local_call_time,
 									'user_group' 			=> $tenant_id
 								);
-								$queryInsertInboundGroup = $astDB->insert('vicidial_inbound_groups', $data_inbound_group);
+								$q_insertInboundGroup = $astDB->insert('vicidial_inbound_groups', $data_inbound_group);
 									
 								// Insert new Inbound Campaign
 								$manualDialPrefix = '';
@@ -641,31 +638,31 @@
 									'disable_alter_custphone' 		=> 'Y', 
 									'campaign_script' 				=> $script
 								);
-								$queryInsertBlended = $astDB->insert('vicidial_campaigns', $data_blended);
+								$q_insertBlended = $astDB->insert('vicidial_campaigns', $data_blended);
 								$insertQuery = $astDB->getLastQuery();
 
-								$queryInsertVCS = $astDB->insert('vicidial_campaign_stats', array('campaign_id' => $campaign_id));
-								
-								$allowed_campaigns = go_getall_allowed_campaigns($groupId);
+								$q_insertVCS = $astDB->insert('vicidial_campaign_stats', array('campaign_id' => $campaign_id));								
+								$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
 								
 								if (strlen($allowed_campaigns) < 1) { 
 									$allowed_campaigns = " -"; 
 								}
 
 								$update_data = array(
-									'allowed_campaigns' =>  ' {$campaign_id}$allowed_campaigns'
+									'allowed_campaigns' 			=>  ' {$campaign_id}$allowed_campaigns'
 								);
-								$astDB->where('user_group', $tenant_id);
-								$updateQueryAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
 								
-								if($queryInsertBlended){
+								$astDB->where('user_group', $tenant_id);
+								$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+								
+								if($q_insertBlended){
 									if ($callRoute != null){
 										// Call Route
 										$didDesc = $campaign_id." ".$campaign_type." DID";
 										$didPattern = $call_route_text;
 										
 										$astDB->where('did_pattern', $did_pattern);
-										$resultDID = $astDB->getOne('vicidial_inbound_dids', null, 'did_pattern');
+										$resultDID = $astDB->getOne('vicidial_inbound_dids', 'did_pattern');
 										$serverIP = $_SERVER['REMOTE_ADDR'];
 										switch ($callRoute){
 											case "INGROUP":
@@ -811,15 +808,15 @@
 									}
 
 									$SQLdate = date("Y-m-d H:i:s");
-									$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
+									$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
 
-									$data_gocampaign = [
-										'campaign_id' 	=> $campaign_id, 
-										'campaign_type' => $campaign_type
+									$datago_campaign = array(
+										'campaign_id' 				=> $campaign_id, 
+										'campaign_type' 			=> $campaign_type
 										// 'location_id' 	=> (!empty($location))? $location:''
-									];
-									$queryInsertgoCampaign = $goDB->insert('go_campaigns', $data_gocampaign);
+									);
 									
+									$qgo_insertCampaign = $goDB->insert('go_campaigns', $datago_campaign);									
 									$apiresults = array("result" => "success");
 								}else{
 									$err_msg = error_handle("10010");
@@ -836,7 +833,7 @@
 
                 // Survey Campaign here
                 if($campaign_type == "SURVEY"){
-					$userID = $goUsers;
+					//$userID = $goUsers;
 					$campType = $campaign_type;
 					$campaign_id = $astDB->escape($campaign_id);
 					$surveyType = strtoupper($survey_type);
@@ -855,12 +852,12 @@
 							$err_msg = error_handle("10003", "no_channels");
 							$apiresults = array("code" => "10003", "result" => $err_msg);
 		                } else {
-		                //$groupId = go_get_groupid($goUser);
-							$groupId = go_get_groupid($session_user);
-							if (!checkIfTenant($groupId)) {
+		                //$log_group = go_get_groupid($goUser);
+							//$log_group = go_get_groupid($session_user);
+							if (!checkIfTenant($log_group, $goDB)) {
 								$tenant_id = "---ALL---";
 							} else {
-								$tenant_id = "$groupId";
+								$tenant_id = "$log_group";
 							}
 							
 							switch ($surveyType){
@@ -882,7 +879,7 @@
 								}
 
 								$astDB->where('campaign_id', $campaign_id);
-								$CheckCampaignIfExist = $astDB->getOne('vicidial_campaigns', null, 'campaign_id'); 
+								$CheckCampaignIfExist = $astDB->getOne('vicidial_campaigns', 'campaign_id'); 
 
 	                            if (!$CheckCampaignIfExist){
 	                            	$local_call_time = "9am-9pm";
@@ -948,25 +945,28 @@
 	                                	'disable_alter_custdata' 		=> 'N', 
 	                                	'disable_alter_custphone' 		=> 'Y'
 	                                );
-	                                $queryInsertSurvey = $astDB->insert('vicidial_campaigns', $data_survey);
+	                                
+	                                $q_insertSurvey = $astDB->insert('vicidial_campaigns', $data_survey);
 									$insertQuery = $astDB->getLastQuery();
 
-	                                $queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
-									$rsltvNew = mysqli_query($link, $queryNew);
+									$astDB->insert("vicidial_campaign_stats", array("campaign_id" => $campaign_id));
+	                                //$queryNew = "INSERT INTO vicidial_campaign_stats (campaign_id) values('$campaign_id')";
+									//$rsltvNew = mysqli_query($link, $queryNew);
 
-									$allowed_campaigns = go_getall_allowed_campaigns($groupId);
+									$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
 
 			                        if (strlen($allowed_campaigns) < 1) { 
 			                        	$allowed_campaigns = " -"; 
 			                        }
 										
 									$update_data = array(
-										'allowed_campaigns' =>  ' {$campaign_id}$allowed_campaigns'
+										'allowed_campaigns' 			=>  ' {$campaign_id}$allowed_campaigns'
 									);
+									
 									$astDB->where('user_group', $tenant_id);
-									$updateQueryAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+									$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
 
-									if($queryInsertSurvey){
+									if($q_insertSurvey){
 										if (preg_match("/\.(wav|mp3)$/i",$wavfile_orig)) {
 											$wavfile_dir = preg_replace("/ /",'\ ',$wavfile_dir);
 											$wavfile_dir = preg_replace("/@/",'\@',$wavfile_dir);
@@ -989,9 +989,9 @@
 													'goFilesize' 	=> $wavfile_size, 
 													'uploaded_by' 	=> $session_user
 												);
-												$queryInsertSounds = $goDB->insert('sounds', $data_sounds);
+												$q_insertSounds = $goDB->insert('sounds', $data_sounds);
 												
-												if(!$queryInsertSounds){
+												if(!$q_insertSounds){
 													$err_msg = error_handle("10008");
 													$apiresults = array("code" => "40001", "result" => $err_msg);
 												}
@@ -1000,7 +1000,6 @@
 
 										do {
 	                                        $agvar= mt_rand();
-
 	                                        $astDB->where('user', $agvar);
 	                                        $user_exist = $astDB->get('vicidial_users', null, 'user'); 
 	                                    }
@@ -1017,8 +1016,8 @@
 	                                    $agent_name = "Survey Agent - ".$campaign_id;
 	                                    $agent_phone = $agvar;
 
-	                                    $queryVRA = "INSERT INTO vicidial_remote_agents (user_start,number_of_lines,server_ip,conf_exten,status,campaign_id,closer_campaigns) values('$agent_user','$numChannels','$main_server_ip','8300','$remote_agent_status','$campaign_id','')";
-										$rsltvVRA = mysqli_query($link, $queryVRA);
+	                                    //$queryVRA = "INSERT INTO vicidial_remote_agents (user_start,number_of_lines,server_ip,conf_exten,status,campaign_id,closer_campaigns) values('$agent_user','$numChannels','$main_server_ip','8300','$remote_agent_status','$campaign_id','')";
+										//$rsltvVRA = mysqli_query($link, $queryVRA);
 
 										$data_vra = array(
 											'user_start' 		=> $agent_user,
@@ -1029,6 +1028,7 @@
 											'campaign_id' 		=> $campaign_id,
 											'closer_campaigns' 	=> ''
 										);
+										
 										$astDB->insert('vicidial_remote_agents', $data_vra);
 
 										if ($countAll < 1){
@@ -1045,15 +1045,15 @@
 	                                    }
 
 	                                    $SQLdate = date("Y-m-d H:i:s");
-										$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Survey Campaign: $campaign_id", $log_group, $insertQuery);
+										$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Survey Campaign: $campaign_id", $log_group, $insertQuery);
 										
-										$data_gocampaign = [
+										$datago_campaign = array(
 											'campaign_id' 	=> $campaign_id, 
 											'campaign_type' => $campaign_type
 											// 'location_id' 	=> (!empty($location))? $location:''
-										];
-										$queryInsertgoCampaign = $goDB->insert('go_campaigns', $data_gocampaign);
-							
+										);
+										
+										$qgo_insertCampaign = $goDB->insert('go_campaigns', $datago_campaign);							
 										$apiresults = array("result" => "success");
 									}else{
 										$err_msg = error_handle("10010");
@@ -1074,7 +1074,7 @@
 				
 				if($campaign_type == "COPY"){
 					$astDB->where('campaign_id', $copy_from_campaign);
-					$resultGetCopy = $astDB->getOne('vicidial_campaigns', null, '*');
+					$resultGetCopy = $astDB->getOne('vicidial_campaigns');
 					
 					$goDB->where('campaign_id', $copy_from_campaign);
 					$rsltGOCopy = $goDB->get('go_campaigns', null, '*');
@@ -1332,36 +1332,39 @@
 							'callback_useronly_move_minutes' 		=> $resultGetCopy['callback_useronly_move_minutes'], 
 							'ofcom_uk_drop_calc' 					=> $resultGetCopy['ofcom_uk_drop_calc']
 						);
-						$queryInsertCopy = $astDB->insert('vicidial_campaigns', $data_copy);
+						
+						$q_insertCopy = $astDB->insert('vicidial_campaigns', $data_copy);
 						$insertQuery = $astDB->getLastQuery();
 
-						$allowed_campaigns = go_getall_allowed_campaigns($groupId);
+						$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
 
                         if (strlen($allowed_campaigns) < 1) { 
                         	$allowed_campaigns = " -"; 
                         }
 							
 						$update_data = array(
-							'allowed_campaigns' =>  ' {$campaign_id}$allowed_campaigns'
+							'allowed_campaigns' 					=>  ' {$campaign_id}$allowed_campaigns'
 						);
+						
 						$astDB->where('user_group', $tenant_id);
-						$updateQueryAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+						$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
 
-						if($queryInsertCopy){
+						if($q_insertCopy){
 							foreach($rsltGOCopy as $sourceCamp){
 								$campType = $sourceCamp['campaign_type'];
 							}
 							
 							$SQLdate = date("Y-m-d H:i:s");
-							$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Copied campaign settings from $copy_from_campaign to $campaign_id", $log_group, $insertQuery);
+							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Copied campaign settings from $copy_from_campaign to $campaign_id", $log_group, $insertQuery);
 							
-							$data_gocampaign = [
+							$datago_campaign = array(
 								'campaign_id' 	=> $campaign_id, 
 								'campaign_type' => $campType
 								// 'location_id' 	=> (!empty($location))? $location:''
-							];
-							$queryInsertgoCampaign = $goDB->insert('go_campaigns', $data_gocampaign);
-				
+							);
+							
+							$qgo_insertCampaign = $goDB->insert('go_campaigns', $datago_campaign);
+							
 							$apiresults = array("result" => "success");
 						}else{
 							$err_msg = error_handle("10010");

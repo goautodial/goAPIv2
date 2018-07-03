@@ -31,60 +31,52 @@
 	$log_group = go_get_groupid($session_user, $astDB);
 	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 
-	if (empty($user_ids)) {
+	if (empty($user_ids) || empty($session_user)) {
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Set a value for User ID."); 
-	} elseif (empty($session_user)) {
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-		//$apiresults = array("result" => "Error: Set a value for User ID."); 
-	} else { 
-		if (!checkIfTenant($log_group, $goDB)) {
-			//$astDB->where("user_id", $user_id);
-			//$ul = "WHERE user_id='$user_id'";
-		} else {
-			//$astDB->where("user_id", $user_id);
+	} elseif ($action == "delete_selected") {
+		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
-		}		
+		}
+		
+		$error_count = 0;
+		foreach ($user_ids as $userid) {
+			$user_id = $userid;
+			$astDB->where("user_id", $user_id);
+			$query = $astDB->getOne("vicidial_users");
 			
-		if ($action == "delete_selected") {
-			$error_count = 0;
-			foreach ($user_ids as $userid) {
-				$user_id = $userid;
+			if($astDB->count > 0) {
+				$phone_login = $query['phone_login'];
+				
 				$astDB->where("user_id", $user_id);
-				$query = $astDB->getOne("vicidial_users");
-				//array_push($test, $selectQuery);
+				$astDB->delete("vicidial_users");
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User: $user_id", $log_group, $astDB->getLastQuery());
 				
-				if($astDB->count > 0) {
-					$phone_login = $query['phone_login'];
-					
-					$astDB->where("user_id", $user_id);
-					$q_deleteUser = $astDB->delete("vicidial_users");
-					
-					$astDB->where("extension", $phone_login);
-					$q_deletePhone = $astDB->delete("phones");
-					
-					$goDB->where("userid", $user_id);
-					$qgo_deleteUser = $goDB->delete("users");
-					
-					$kamDB->where("username", $phone_login);
-					$qkam_deletePhone = $kamDB->delete("subscriber");
-					
-					$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User: $user_id", $log_group, $q_deleteUser . $q_deletePhone . $qgo_deleteUser . $qkam_deletePhone);
-				} else {
-					$error_count = 1;
-				}
+				$astDB->where("extension", $phone_login);
+				$astDB->delete("phones");
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Phone: $phone_login", $log_group, $astDB->getLastQuery());
 				
-				if ($error_count == 0) { 
-					$apiresults = array("result" => "success"); 
-				}		
-				if ($error_count == 1) {
-					$err_msg = error_handle("10010");
-					$apiresults = array("code" => "10010", "result" => $err_msg, "data" => "$user_ids");
-					//$apiresults = array("}result" => "Error: Delete Failed");
-				}
+				$goDB->where("userid", $user_id);
+				$goDB->delete("users");
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User: $user_id", $log_group, $goDB->getLastQuery());
+				
+				$kamDB->where("username", $phone_login);
+				$kamDB->delete("subscriber");				
+				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Subscriber: $phone_login", $log_group, $kamDB->getLastQuery());
+			} else {
+				$error_count = 1;
+			}
+			
+			if ($error_count == 0) { 
+				$apiresults = array("result" => "success"); 
+			}		
+			if ($error_count == 1) {
+				$err_msg = error_handle("10010");
+				$apiresults = array("code" => "10010", "result" => $err_msg, "data" => "$user_ids");
+				//$apiresults = array("}result" => "Error: Delete Failed");
 			}
 		}
 	}
+
 ?>
