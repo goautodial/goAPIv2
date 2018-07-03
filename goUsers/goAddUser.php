@@ -126,7 +126,6 @@
 					}
 				}
 				
-				//array_push($test, $iterate_number1."=".$orig_user);				
 				if($iterate_number2 > 0) {
 					$full_name = str_replace($last_num_name,$iterate_number2,$orig_full_name);
 				}
@@ -198,9 +197,10 @@
 							}
 						}
 						
-						$pass_hash = '';
+						$pass_hash = "";
 						if ($pass_hash_enabled > 0) {
 							$pass_hash = encrypt_passwd($pass, $pass_cost, $pass_key);
+							$pass = "";
 						}
 						
 						$dataUser = array(
@@ -210,7 +210,7 @@
 							"full_name" 				=> $full_name,
 							"user_level" 				=> $user_level,
 							"phone_login" 				=> $phone_login,
-							"phone_pass" 				=> $phone_pass,
+							"phone_pass" 				=> $pass,
 							"agentonly_callbacks" 		=> $agentonly_callbacks,
 							"agentcall_manual" 			=> $agentcall_manual,
 							"active" 					=> $active,
@@ -233,7 +233,7 @@
 							"computer_ip" 				=> "",
 							"server_ip" 				=> $server_ip,
 							"login" 					=> $phone_login,
-							"pass" 						=> $phone_pass,
+							"pass" 						=> $pass,
 							"status" 					=> "ACTIVE",
 							"active" 					=> $active,
 							"phone_type" 				=> "",
@@ -246,7 +246,7 @@
 							"template_id" 				=> "--NONE--",
 							//"conf_override" => $conf_override,
 							"user_group" 				=> $user_group,
-							"conf_secret" 				=> $phone_pass,
+							"conf_secret" 				=> $pass,
 							"messages" 					=> "0",
 							"old_messages" 				=> "0"
 						);
@@ -297,28 +297,24 @@
 							//$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";							
 							$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 							
-							$goDB->where("settings", "GO_agent_sip_server");
+							/*$goDB->where("settings", "GO_agent_sip_server");
 							$querygo = $goDB->getOne("settings", "value");
-							$sip_server = $querygo["value"];
+							$sip_server = $querygo["value"];*/
 						
-							//if($sip_server === "kamailio"){
-								$datakam = array(
-									"username" 				=> $phone_login,
-									"domain" 				=> $domain,
-									"password" 				=> $phone_pass,
-									"ha1" 					=> $ha1,
-									"ha1b" 					=> $ha1b
-								);							
-							
-								$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam); // insert record in kamilio.subscriber						
-							//}
-							//$return_user = $user." (".$userid.")";
+							$datakam = array(
+								"username" 				=> $phone_login,
+								"domain" 				=> $domain,
+								"password" 				=> $phone_pass,
+								"ha1" 					=> $ha1,
+								"ha1b" 					=> $ha1b
+							);							
+						
+							$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam);
 							$return_user = $userid;
 							array_push($arr_user, $return_user);							
 						} else {
 							$err_msg = error_handle("41004", "user");
 							$apiresults = array("code" => "41004", "result" => $err_msg);
-							//$apiresults = array("result" => "Error: A problem occured while adding a user. Please Contact the System Administrator.");
 						}								
 					} else {				
 						$error_count = 1;

@@ -126,10 +126,7 @@
 			$apiresults = array("code" => "41006", "result" => $err_msg);
 		}
 		$updateUserGoArray = array_merge($updateUserGoArray, array("location_id" => $location));
-		$insertUserGoArray = array_merge($insertUserGoArray, array("location_id" => $location));
-		/*$location_SQL = ", `location_id` = '$location' ";
-		$location_COL = ", location_id";
-		$location_VAL = ", '$location'";*/						
+		$insertUserGoArray = array_merge($insertUserGoArray, array("location_id" => $location));					
 	} 
 	
 	
@@ -247,28 +244,35 @@
 			$err_msg = error_handle("41004", "user_group. Doesn't exist");
 			$apiresults = array("code" => "41004", "result" => $err_msg);
 		} else {
-			$update_array = array("full_name" => $full_name, "user_group" => $user_group, "active" => $active, "hotkeys_active" => $hotkeys_active, "user_level" => $user_level, "vdc_agent_api_access" => $vdc_agent_api_access, "agent_choose_ingroups" => $agent_choose_ingroups, "vicidial_recording_override" => $vicidial_recording_override, "vicidial_transfers" => $vicidial_transfers, "closer_default_blended" => $closer_default_blended, "agentcall_manual" => $agentcall_manual, "scheduled_callbacks" => $scheduled_callbacks, "agentonly_callbacks" => $agentonly_callbacks, "modify_same_user_level" => $modify_same_user_level, "email" => $email, "agent_lead_search_override" => $agent_lead_search_override);
+			$update_array = array(
+				"full_name" 					=> $full_name, 
+				"user_group" 					=> $user_group, 
+				"active" 						=> $active, 
+				"hotkeys_active" 				=> $hotkeys_active, 
+				"user_level" 					=> $user_level, 
+				"vdc_agent_api_access"			=> $vdc_agent_api_access, 
+				"agent_choose_ingroups" 		=> $agent_choose_ingroups, 
+				"vicidial_recording_override" 	=> $vicidial_recording_override, 
+				"vicidial_transfers" 			=> $vicidial_transfers, 
+				"closer_default_blended"		=> $closer_default_blended, 
+				"agentcall_manual" 				=> $agentcall_manual, 
+				"scheduled_callbacks" 			=> $scheduled_callbacks, 
+				"agentonly_callbacks" 			=> $agentonly_callbacks, 
+				"modify_same_user_level" 		=> $modify_same_user_level, 
+				"email" 						=> $email, 
+				"agent_lead_search_override" 	=> $agent_lead_search_override
+			);
 				
-			if  ($pass != NULL){
+			if ($pass != NULL) {
 				$fetch_passhash = $astDB->getOne("system_settings", "pass_hash_enabled,pass_key,pass_cost");
 				$pass_hash_enabled = $fetch_passhash["pass_hash_enabled"];
 				$pass_key = $fetch_passhash["pass_key"];
 				$pass_cost = $fetch_passhash["pass_cost"];
-				
-				// Password Encryption
-				//$cwd = $_SERVER['DOCUMENT_ROOT'];
-				//$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
-				//$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
 				$pass_hash = encrypt_passwd($pass, $pass_cost, $pass_key);
-				
-				/*
-				$query_passhash = "select pass_hash_enabled from system_settings";
-				*/
-				// if($fetch_pass_hash_enabled['pass_hash_enabled'] == "1"){
 
 				if ($pass_hash_enabled > 0){
-					$phones_array = array("conf_secret" => $pass, "pass" => "");
-					$update_array = array_merge($update_array, array("pass_hash" => $pass_hash, "pass" => "", "phone_pass" => $pass_hash));
+					$phones_array = array("conf_secret" => "", "pass" => "");
+					$update_array = array_merge($update_array, array("pass_hash" => $pass_hash, "pass" => "", "phone_pass" => ""));
 					/*
 					$pass_query = "`pass_hash` = '$pass_hash', `pass` = '', `phone_pass` = '$pass_hash', ";
 					$phonePassQuery = "`pass` = ''";
@@ -316,27 +320,16 @@
 
 				$astDB->where ("user", $user);
 				$queryUpdateUser = $astDB->update('vicidial_users', $update_array);
-				/*$queryUpdateUser = "UPDATE `vicidial_users`
-									SET $pass_query `full_name` = '$full_name',  $phonelogin_query  `user_group` = '$user_group',  `active` = '$active',
-										`hotkeys_active` = '$hotkeys_active',  `user_level` = '$user_level', `vdc_agent_api_access` = '$vdc_agent_api_access', 
-										`agent_choose_ingroups` = '$agent_choose_ingroups', `vicidial_recording_override` = '$vicidial_recording_override', 
-										`vicidial_transfers` = '$vicidial_transfers', `closer_default_blended` = '$closer_default_blended', `agentcall_manual` = '$agentcall_manual', 
-										`scheduled_callbacks` = '$scheduled_callbacks', `agentonly_callbacks` = '$agentonly_callbacks', 
-										`modify_same_user_level` = '$modify_same_user_level', `email` = '$email', `agent_lead_search_override` = '$agent_lead_search_override'  $voicemail_query 
-									WHERE `user` = '$user'";*/
 
 				$goDB->where("name", $user);
 				$fetch_userIDGo = $goDB->getOne("users", "userid");
-				$countResultGo = $goDB->count;
 				//$queryUserIDGo = "SELECT userid FROM users WHERE userid='$userid'";
 				
-				if ($countResultGo > 0){
+				if ($goDB->count > 0) {
 					$goDB->where("name", $user);
 					$queryUpdateUserGo = $goDB->update('users', $updateUserGoArray);
-					//$queryUpdateUserGo = "UPDATE users SET `name` = '$dataUser', `fullname` = '$full_name', `phone` = '$phone_login', `email` = '$email', `avatar` = '$avatar', `user_group` = '$user_group', `role` = '$user_level', `status` = '$goactive' $location_SQL WHERE name = '$user'";
 				} else {
 					$queryInsertUserGo = $goDB->insert('users', $insertUserGoArray); // insert record in goautodial.users
-					//$queryUpdateUserGo = "INSERT INTO users (userid, name, fullname, phone, email, avatar, user_group, role, status $location_COL) VALUES ('$userid', '$user', '$full_name', '$phone_login', '$email', '$avatar', '$user_group', '$user_level', '$goactive' $location_VAL)";
 				}
 
 				$justgovoip_array = array("web_password" => $phone_pass);
