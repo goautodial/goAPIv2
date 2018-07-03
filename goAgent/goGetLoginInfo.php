@@ -698,6 +698,11 @@ if ($userExist > 0) {
     $C_scheduled_callbacks = $campinfo['scheduled_callbacks'];
     unset($campinfo['scheduled_callbacks']);
     
+    $cbRslt = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'enable_callback_alert'");
+    if ($goDB->getRowCount() > 0) {
+        $addedCB_Columns = ",enable_callback_alert,cb_noexpire,cb_sendemail";
+    }
+    
     $goDB->where('campaign_id', $campinfo['campaign_id']);
     $rslt = $goDB->getOne('go_campaigns', 'custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
     $campinfo['custom_fields_launch'] = 'ONCALL';
@@ -706,6 +711,9 @@ if ($userExist > 0) {
     $campinfo['url_tab_first_url'] = '';
     $campinfo['url_tab_second_title'] = '';
     $campinfo['url_tab_second_url'] = '';
+    $campinfo['enable_callback_alert'] = 0;
+    $campinfo['cb_noexpire'] = 0;
+    $campinfo['cb_sendemail'] = 0;
     if ($goDB->getRowCount() > 0) {
         $campinfo['custom_fields_launch'] = $rslt['custom_fields_launch'];
         $campinfo['custom_fields_list_id'] = $rslt['custom_fields_list_id'];
@@ -713,6 +721,9 @@ if ($userExist > 0) {
         $campinfo['url_tab_first_url'] = $rslt['url_tab_first_url'];
         $campinfo['url_tab_second_title'] = $rslt['url_tab_second_title'];
         $campinfo['url_tab_second_url'] = $rslt['url_tab_second_url'];
+        $campinfo['enable_callback_alert'] = $rslt['enable_callback_alert'];
+        $campinfo['cb_noexpire'] = $rslt['cb_noexpire'];
+        $campinfo['cb_sendemail'] = $rslt['cb_sendemail'];
     }
     
     $default_group_alias_cid = '';
