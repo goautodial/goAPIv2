@@ -2,8 +2,9 @@
 /**
  * @file    	goCheckUserGroups.php
  * @brief     	API to check for existing user group data
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Original Author <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,23 +21,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    @include_once ("goAPI.php");
+ 
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
  
     // POST or GET Variables
-    $user_group= $astDB->escape($_REQUEST['user_group']);
+    $user_group							= $astDB->escape($_REQUEST['user_group']);
     
-    if(!isset($user_group) || is_null($user_group)){
-      $apiresults = array("result" => "Error: Missing Required Parameters.");
-    }else{
-      $astDB->where("user_group", $user_group);
-      $astDB->getOne("vicidial_user_groups", "user_group");
-      //$query = "SELECT user_group FROM vicidial_user_groups WHERE user_group='$user_group';";
-      $countResult = $astDB->count;
-      
-      if($countResult > 0) {
-          $apiresults = array("result" => "Error: User Group already exist.");
-      } else {
-          $apiresults = array("result" => "success");
-      }
+    if (!isset($user_group) || is_null($user_group)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Missing Required Parameters."
+		);
+    } else {
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+		}    
+		
+		$astDB->where("user_group", $user_group);
+		$astDB->getOne("vicidial_user_groups", "user_group");
+		//$query = "SELECT user_group FROM vicidial_user_groups WHERE user_group='$user_group';";
+		
+		if($astDB->count > 0) {
+			$apiresults 				= array(
+				"result" 					=> "Error: User Group already exist."
+			);
+		} else {
+			$apiresults 				= array(
+				"result" 					=> "success"
+			);
+		}
     }
 ?>
