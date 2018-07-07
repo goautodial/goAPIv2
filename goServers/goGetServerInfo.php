@@ -40,8 +40,9 @@
 		}
 
 		$astDB->where("server_id", $server_id);
-		$rsltv = $astDB->getOne('servers');	
-				
+		$rsltv 							= $astDB->getOne('servers');	
+		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed server ID: $server_id", $astDB->getLastQuery());
+		
 		if(!empty($rsltv)) {
 			$apiresults 				= array(
 				"result" 					=> "success", 

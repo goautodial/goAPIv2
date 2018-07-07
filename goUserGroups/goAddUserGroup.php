@@ -37,7 +37,7 @@
 		$apiresults 					= array(
 			"result" 						=> "Error: Session User Not Defined."
 		);
-	}elseif(is_null($user_group) || $user_group == "") {
+	} elseif(is_null($user_group) || $user_group == "") {
 		$apiresults 					= array(
 			"result" 						=> "Error: User Group ID field is required."
 		); 
