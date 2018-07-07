@@ -1,82 +1,98 @@
 <?php
-   ####################################################
-   #### Name: goAddServer.php                      ####
-   #### Description: API to add Servers	           ####
-   #### Version: 4.0                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Alexander Jim H. Abenoja       ####
-   #### License: AGPLv2                            ####
-   ####################################################
-    
-    include_once("../goFunctions.php");
- 
-    ### POST or GET Variables
-        $server_id = mysqli_real_escape_string($link, $_REQUEST['server_id']);
-        $server_description = mysqli_real_escape_string($link, $_REQUEST['server_description']);
-        $server_ip = mysqli_real_escape_string($link, $_REQUEST['server_ip']);
-        $active = $_REQUEST['active'];
-        $asterisk_version = mysqli_real_escape_string($link, $_REQUEST['asterisk_version']);
-		$max_vicidial_trunks = mysqli_real_escape_string($link, $_REQUEST['max_vicidial_trunks']);
-		$user_group = $_REQUEST['user_group'];
-		$local_gmt = "-5.00";
-        
-		$ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-		$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-		$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+ /**
+ * @file 		goAddServers.php
+ * @brief 		API to add servers
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
+    @include_once ("goAPI.php");
+ 
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);	
+	
+    ### POST or GET Variables
+	$server_id 							= $astDB->escape($_REQUEST['server_id']);
+	$server_description 				= $astDB->escape($_REQUEST['server_description']);
+	$server_ip 							= $astDB->escape($_REQUEST['server_ip']);
+	$active 							= $astDB->escape($_REQUEST['active']);
+	$asterisk_version 					= $astDB->escape($_REQUEST['asterisk_version']);
+	$max_vicidial_trunks 				= $astDB->escape($_REQUEST['max_vicidial_trunks']);
+	$user_group 						= $astDB->escape($_REQUEST['user_group']);
+	$local_gmt 							= "-5.00";
+	$defActive 							= array("Y","N");
+	
     ### ERROR CHECKING 
-        if($server_id == null) {
-                $apiresults = array("result" => "Error: Set a value for Script ID not less than 3 characters.");
-        } else {
-				if($server_description == null){
-							$apiresults = array("result" => "Error: Set a value for Server IP");
-				} else {
-						
-						$groupId = go_get_groupid($goUser);
-								
-						if (!checkIfTenant($groupId)) {
-								$ul = "";
-						} else {
-								$ul = "AND user_group='$groupId'";
-						}
-						
-						$queryCheck = "SELECT server_id FROM servers where server_id='$server_id' OR server_ip = '$server_ip';";
-						$sqlCheck = mysqli_query($link, $queryCheck);
-						$countCheck = mysqli_num_rows($sqlCheck);
-						
-						if($countCheck <= 0){
-						
-								# getting the usergroup of the agent logged in
-								$get_usergroup_query = "select user_group from vicidial_users where user='$user'";
-								$init_getquery = mysqli_query($link, $get_usergroup_query);
-								
-								$usergroup_result = mysqli_fetch_array($init_getquery);
-								$var_usergroup = $usergroup_result['user_group'];
-								
-								if($user != NULL){
-										$user_group = $var_usergroup;
-								}else {
-										$user_group = $groupId;
-								}
-												
-								$newQuery = "INSERT INTO servers(server_id, server_description, server_ip, active, asterisk_version, max_vicidial_trunks, local_gmt, user_group)
-								VALUES('$server_id', '$server_description', '$server_ip', '$active', '$asterisk_version', '$max_vicidial_trunks', '$local_gmt', '$user_group');";
-								$rsltv = mysqli_query($link, $newQuery);
-						
-								//$apiresults = array("usergroup" => $user_group, "query" => $newQuery);
-								
-								if($rsltv == false){
-										$apiresults = array("result" => "Error: Add failed, check your details");
-								} else {
-										$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Server: $server_id", $log_group, $newQuery);
-										$apiresults = array("result" => "success");
-								}
-							
-						}else {
-								$apiresults = array("result" => "Error: Add failed, Server already already exist!");
-		
-						}		
-				}
+	if($server_id == null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Server ID not less than 3 characters."
+		);
+	} elseif ($server_ip == null){
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Server IP"
+		);
+	} elseif (!in_array($active,$defActive) && $active != null) {
+		$err_msg 						= error_handle("41006", "active");
+		$apiresults 					= array(
+			"code" 							=> "41006", 
+			"result" 						=> $err_msg
+		);
+		//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
+	} else {					
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
 		}
+		
+		$astDB->where("server_id", $server_id);
+		$astDB->orWhere("server_ip", $server_ip);
+		$astDB->get("servers");
+		
+		if ($astDB->count > 0) {
+			$apiresults 				= array(
+				"result" 					=> "Error: Add failed, Server already already exist!"
+			);
+		} else {
+			$data 						= array(
+				"server_id"		 			=> $server_id, 
+				"server_description" 		=> $server_description,
+				"server_ip"					=> $server_ip, 
+				"active"					=> $active, 
+				"asterisk_version"			=> $asterisk_version, 
+				"max_vicidial_trunks"		=> $max_vicidial_trunks, 
+				"local_gmt"					=> $local_gmt,
+				"user_group"				=> $user_group
+			);
+			
+			$query = $astDB->insert("servers", $data);
+			$log_id 					= log_action($goDB, "ADD", $log_user, $ip_address, "Added New Server: $server_id", $log_group, $query);
+			
+			if($query){
+				$apiresults 			= array(
+					"result" 				=> "success",
+					"data" 					=> $query
+				);
+			} else {
+				$apiresults				= array(
+					"result" 				=> "Error: Add failed, check your details"
+				);
+			}
+		} 	
+	}
 
 ?>

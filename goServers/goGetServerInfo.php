@@ -23,24 +23,34 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
-	$server_id = $astDB->escape($_REQUEST["server_id"]);
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);
+	
+    ### POST or GET Variables
+	$server_id 							= $astDB->escape($_REQUEST['server_id']);	
 
 	if($server_id == null) {
-			$apiresults = array("result" => "Error: Set a value for Server ID.");
+			$apiresults 				= array(
+				"result" 					=> "Error: Set a value for Server ID."
+			);
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
-			//$astDB->where('user_group', $log_group);
+			$astDB->where('user_group', $log_group);
 		}
 
 		$astDB->where("server_id", $server_id);
 		$rsltv = $astDB->getOne('servers');	
 				
 		if(!empty($rsltv)) {
-			$apiresults = array("result" => "success", "data" => $rsltv);
+			$apiresults 				= array(
+				"result" 					=> "success", 
+				"data" 						=> $rsltv
+			);
 		} else {
-			$apiresults = array("result" => "Error: Server does not exist.");
+			$apiresults 				= array(
+				"result" 					=> "Error: Server does not exist."
+			);
 		}
 	}
 ?>
