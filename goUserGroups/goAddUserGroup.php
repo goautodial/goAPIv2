@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    @include_once ("goAPI.php");
+    include_once ("goAPI.php");
  
 	$log_user 							= $session_user;
 	$log_group 							= go_get_groupid($session_user, $astDB); 
@@ -81,8 +81,8 @@
 				"allowed_campaigns" 		=> " -"
 			);
 
-			$mainQuery 					= $astDB->insert("vicidial_user_groups", $data);
-			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $mainQuery);
+			$query 					= $astDB->insert("vicidial_user_groups", $data);
+			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $astDB->getLastQuery());
 			$default_permission 		= '{
 				"dashboard":{"dashboard_display":"Y"},
 				"user":{"user_create":"C","user_read":"R","user_update":"N","user_delete":"N"},
@@ -111,13 +111,14 @@
 				"permissions" 				=> $default_permission
 			);
 			
-			$subQuery 					= $goDB->insert("user_access_group", $subData);				
-			$log_id						= log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $subQuery);
-				
-			if($mainQuery) {
+			$querygo 					= $goDB->insert("user_access_group", $subData);				
+			$log_id						= log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $goDB->getLastQuery());
+			
+			if($query) {
 				$apiresults 			= array(
 					"result" 				=> "success", 
-					"data" 					=> $mainQuery . $subQuery);
+					"data" 					=> array($astDB->getLastQuery(), $goDB->getLastQuery())
+				);
 			} else {
 				$err_msg 				= error_handle("10010");
 				$apiresults 			= array(

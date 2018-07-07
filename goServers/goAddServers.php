@@ -79,8 +79,8 @@
 				"user_group"				=> $user_group
 			);
 			
-			$query = $astDB->insert("servers", $data);
-			$log_id 					= log_action($goDB, "ADD", $log_user, $ip_address, "Added New Server: $server_id", $log_group, $query);
+			$query 						= $astDB->insert("servers", $data);
+			$log_id 					= log_action($goDB, "ADD", $log_user, $ip_address, "Added New Server: $server_id", $log_group, $astDB->getLastQuery());
 			
 			if($query){
 				$apiresults 			= array(
