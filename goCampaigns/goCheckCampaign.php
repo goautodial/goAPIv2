@@ -21,9 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	@include_once ("goAPI.php");
+	include_once ("goAPI.php");
 	
-    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	//$ip_address 						= $astDB->escape($_REQUEST['log_ip']);		
+	
+    $campaign_id 						= $astDB->escape($_REQUEST['campaign_id']);
     
     // Check exisiting status
     if (!empty($_REQUEST['status'])) {

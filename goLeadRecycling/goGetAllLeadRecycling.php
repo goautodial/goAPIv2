@@ -21,25 +21,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+    include_once ("goAPI.php");
+ 
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	//$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);
 	
-    //$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    $log_group = go_get_groupid($session_user, $astDB);
+	$campaigns 							= go_getall_allowed_campaigns($log_group, $astDB);
+	$campaignsArr						= explode(' ', $campaigns);	
     
-    if(empty($session_user)) {
-        $err_msg = error_handle("40001", "session_user");
-        $apiresults = array("code" => "40001", "result" => $err_msg);
-        //$apiresults = array("result" => "Error: Set a value for Campaign ID.");
-    } else {
-        //$query = "SELECT * FROM vicidial_lead_recycle ORDER BY recycle_id;";
-        $astDB->orderBy('recycle_id', 'desc');
-        $rsltv = $astDB->get('vicidial_lead_recycle');
-        //$count = $astDB->getRowCount();
-        //$x = 0;
-        foreach ($rsltv as $fresults) {
-            $output[] = array("recycle_id" => $fresults['recycle_id'], "campaign_id" => $fresults['campaign_id'], "status" => $fresults['status'], "attempt_delay" => $fresults['attempt_delay'], "attempt_maximum" => $fresults['attempt_maximum'],"active" => $fresults['active']);
-            //$x++;
-        }
-        $apiresults = array("result" => "success", "data" => $output);
-    }
+    if (!isset($log_user) || is_null($log_user)) {
+    	$apiresults 					= array(
+			"result" 						=> "Error: Missing Required Parameters."
+		); 
+	} else {
+		if (is_array($campaignsArr)) {
+			if (!preg_match("/ALLCAMPAIGNS/",  $campaigns)) {
+				$astDB->where("campaign_id", $campaignsArr, "IN");
+			}
+
+			$astDB->orderBy("campaign_id", "desc");
+			$rsltv 							= $astDB->get('vicidial_lead_recycle');
+
+			if ($astDB->count > 0) {
+				foreach ($rsltv as $fresults) {
+					//$data[] 				= array(
+						$recycle_id[] 			= $fresults['recycle_id'];
+						$campaign_id[] 			= $fresults['campaign_id'];
+						$status[] 				= $fresults['status'];
+						$attempt_delay[] 		= $fresults['attempt_delay'];
+						$attempt_maximum[] 		= $fresults['attempt_maximum'];
+						$active[] 				= $fresults['active'];
+					//);
+				}
+				
+				$apiresults 				= array(
+					"result" 					=> "success", 
+					"recycle_id" 				=> $recycle_id,
+					"campaign_id"				=> $campaign_id,
+					"status"					=> $status,
+					"attempt_delay"				=> $attempt_delay,
+					"attempt_maximum"			=> $attempt_maximum,
+					"active"					=> $active
+				);        
+			} else {
+				$apiresults 				= array(
+					"result" 					=> "No data available."
+				);
+			}
+		} else {
+			$err_msg 				= error_handle("10108", "status. No campaigns available");
+			$apiresults				= array(
+				"code" 					=> "10108", 
+				"result" 				=> $err_msg
+			);		
+		}
+	}
 ?>
