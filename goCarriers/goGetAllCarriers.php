@@ -41,7 +41,6 @@
 			$astDB->orWhere("user_group", "---ALL---");
 		}
 
-
 		$astDB->orderBy('carrier_id', 'desc');
 		$rsltv 								= $astDB->get('vicidial_server_carriers', $limit);
 

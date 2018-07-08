@@ -116,18 +116,18 @@
 			);
 
             $astDB->where("user_group", $user_group);
-            $q_update				= $astDB->update("vicidial_user_groups", $data);
-			$log_id 				= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User Group: $user_group", $log_group, $astDB->getLastQuery());
+            $q_update					= $astDB->update("vicidial_user_groups", $data);
+			$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User Group: $user_group", $log_group, $astDB->getLastQuery());
 			
 			$goDB->where("user_group", $user_group);
-            $querygo 				= $goDB->getOne("user_access_group");           
+            $querygo 					= $goDB->getOne("user_access_group");           
             
             if ($goDB->count > 0) {
 				if (is_null($group_level)) {
 					$group_level 		= $querygo["group_level"];
 				}
 				
-				if (is_null($permissions)) {
+				if (is_null($permissions) || $log_group == "ADMIN" || $log_group == "AGENTS") {
 					$permissions 		= $querygo["permissions"];
 				} 
 

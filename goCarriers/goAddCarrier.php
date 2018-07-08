@@ -160,8 +160,7 @@
 		$apiresults 					= array(
 			"result" 						=> "Error: Session User Not Defined."
 		);
-	}	
-	if ($carrier_id == null && $carrier_type != "justgo") {
+	} elseif ($carrier_id == null && $carrier_type != "justgo") {
 		$apiresults 					= array(
 			"result" 						=> "Error: Set a value for Carrier ID."
 		);

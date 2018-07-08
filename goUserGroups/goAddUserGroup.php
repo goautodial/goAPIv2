@@ -81,7 +81,7 @@
 				"allowed_campaigns" 		=> " -"
 			);
 
-			$query 					= $astDB->insert("vicidial_user_groups", $data);
+			$query 						= $astDB->insert("vicidial_user_groups", $data);
 			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User Group: $user_group", $log_group, $astDB->getLastQuery());
 			$default_permission 		= '{
 				"dashboard":{"dashboard_display":"Y"},
