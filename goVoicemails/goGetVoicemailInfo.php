@@ -1,11 +1,11 @@
 <?php
- /**
- * @file 		goGetVoicemailInfo.php
- * @brief 		API for Voicemails
+/**
+ * @file 		goGetVoicemailinfo.php
+ * @brief 		API for getting voicemail details
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author     	Chris Lomuntad
- * @author		Jeremiah Sebastian Samatra 
+ * @author		Alexander Jim Abenoja
+ * @author     	Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,28 +23,53 @@
 */
 
 	include_once ("goAPI.php");
- 
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
-	$voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
+	
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);	
+	
+	### POST or GET Variables
+	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
+	$active								= $astDB->escape($_REQUEST['active']);
    
-	if($voicemail_id == null) {
-		$apiresults = array("result" => "Error: Set a value for Voicemail ID.");
+	### Default values
+    $defActive 							= array(
+		"Y",
+		"N"
+	);  
+
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif ($voicemail_id == null || strlen($voicemail_id) < 3) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Voicemail ID."
+		);
+	} elseif (!in_array($active,$defActive) && $active != null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Default value for active is Y or N only."
+		);
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where('user_group', $log_group);
+			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
 		}
 
-		//$query = "SELECT voicemail_id,pass,fullname,email,active,messages,old_messages,delete_vm_after_email,user_group FROM vicidial_voicemail WHERE voicemail_id='$voicemail_id' $ul ORDER BY voicemail_id LIMIT 1;";
-		$cols = array("voicemail_id", "pass", "fullname", "email", "active", "messages", "old_messages", "delete_vm_after_email", "user_group");
-		$astDB->where('voicemail_id', $voicemail_id);
-		$astDB->orderBy('voicemail_id', 'desc');
-		$rsltv = $astDB->getOne('vicidial_voicemail', $cols);
-
-		if(!empty($rsltv)) {
-			$apiresults = array("result" => "success", "data" => $rsltv);
+		$astDB->where("voicemail_id", $voicemail_id);
+		$astDB->orderBy("voicemail_id", "desc");
+		$rsltv 							= $astDB->getOne("vicidial_voicemail");
+		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed voicemail ID: $carrier_id", $astDB->getLastQuery());
+		
+		if ($astDB->count > 0) {						
+			$apiresults 				= array(
+				"result" 					=> "success",
+				"data"						=> $rsltv
+			);
 		} else {
-			$apiresults = array("result" => "Error: Server does not exist.");
+			$apiresults 				= array(
+				"result" 					=> "Error: Empty."
+			);
 		}
 	}
 ?>

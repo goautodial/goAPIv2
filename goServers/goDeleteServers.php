@@ -21,21 +21,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    @include_once ("goAPI.php");
+    include_once ("goAPI.php");
  
 	$log_user 						= $session_user;
 	$log_group 						= go_get_groupid($session_user, $astDB); 
-	$ip_address 					= $astDB->escape($_REQUEST['log_ip']);
+	$log_ip 						= $astDB->escape($_REQUEST['log_ip']);
     
 	### POST or GET Variables
 	$server_id 						= $astDB->escape($_REQUEST['server_id']);
 	
     ### Check Server ID if its null or empty
-	if($server_id == null) { 
-		$apiresults 				= array("result" => "Error: Set a value for Server ID."); 
-	} else {					
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif ($server_id == null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Server ID."
+		);
+	} else {		
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
 		}
 		
 		$astDB->where("server_id", $server_id);
@@ -45,7 +52,7 @@
 			$astDB->where("server_id", $server_id);
 			$astDB->delete("servers");
 			
-			$log_id 				= log_action($goDB, "DELETE", $log_user, $ip_address, "Deleted Server ID: $server_id", $log_group, $astDB->getLastQuery());			
+			$log_id 				= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Server ID: $server_id", $log_group, $astDB->getLastQuery());			
 			$apiresults 			= array("result" => "success");
 		} else {
 			$apiresults				= array("result" => "Error: Server doesn't exist.");

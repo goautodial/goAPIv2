@@ -1,12 +1,12 @@
 <?php
- /**
+/**
  * @file 		goGetAllVoicemails.php
- * @brief 		API for Voicemails
+ * @brief 		API for getting call carriers
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author     	Alexander Abenoja
- * @author     	Chris Lomuntad
- * @author		Jeremiah Sebastian Samatra
+ * @author		Alexander Jim Abenoja
+ * @author     	Chris Lomuntad 
+ * @author     	Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -24,34 +24,56 @@
 */
 
 	include_once ("goAPI.php");
- 
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
 	
-
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);	
+    
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} 
+	
+	if (isset($_REQUEST['limit'])) {
+		$limit 							= $astDB->escape($_REQUEST['limit']);
+	} else { 
+		$limit 							= "50"; 
+	} 
+	
 	if (checkIfTenant($log_group, $goDB)) {
-		$astDB->where('user_group', $log_group);
+		$astDB->where("user_group", $log_group);
+		$astDB->orWhere("user_group", "---ALL---");
 	}
 
-	//$query = "SELECT voicemail_id,fullname,active,messages,old_messages,delete_vm_after_email,user_group FROM vicidial_voicemail $ul $addedSQL ORDER BY voicemail_id;";
-	$cols = array("voicemail_id", "fullname", "active", "messages", "old_messages", "delete_vm_after_email", "user_group");
-	$astDB->orderBy("voicemail_id", "desc");
-	$rsltv = $astDB->get("vicidial_voicemail", NULL, $cols);
-	$countRsltv = $astDB->getRowCount();
-		
-	if($countRsltv > 0) {
-		foreach ($rsltv as $fresults){
-			$dataVoicemailID[] = $fresults['voicemail_id'];
-			$dataFullname[] = $fresults['fullname'];
-			$dataActive[] = $fresults['active'];
-			$dataMessages[] = $fresults['messages'];
-			$dataOldMessages[] = $fresults['old_messages'];
-			$dataDeleteVMAfterEmail[] = $fresults['delete_vm_after_email'];
-			$dataUserGroup[] = $fresults['user_group'];
-			$apiresults = array("result" => "success", "voicemail_id" => $dataVoicemailID, "fullname" => $dataFullname, "active" => $dataActive, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "delete_vm_after_email" => $dataDeleteVMAfterEmail, "user_group" => $dataUserGroup);
+	$astDB->orderBy('voicemail_id', 'desc');
+   	$rsltv 								= $astDB->get('vicidial_voicemail', $limit);
+
+   	if ($astDB->count > 0) {	
+		foreach ($rsltv as $fresults) {
+			$dataVoicemailID[] 			= $fresults['voicemail_id'];
+			$dataFullname[] 			= $fresults['fullname'];
+			$dataActive[] 				= $fresults['active'];
+			$dataMessages[] 			= $fresults['messages'];
+			$dataOldMessages[] 			= $fresults['old_messages'];
+			$dataDeleteVMAfterEmail[] 	= $fresults['delete_vm_after_email'];
+			$dataUserGroup[] 			= $fresults['user_group'];			
 		}
+		
+		$apiresults 					= array(
+			"result" 						=> "success", 
+			"voicemail_id" 					=> $dataVoicemailID, 
+			"fullname" 						=> $dataFullname, 
+			"active" 						=> $dataActive, 
+			"messages" 						=> $dataMessages, 
+			"old_messages" 					=> $dataOldMessages, 
+			"delete_vm_after_email" 		=> $dataDeleteVMAfterEmail, 
+			"user_group" 					=> $dataUserGroup
+		);
 	} else {
-		$apiresults = array("result" => "Empty");
+		$apiresults 					= array(
+			"result" 						=> "Empty"
+		);
 	}
 
 ?>

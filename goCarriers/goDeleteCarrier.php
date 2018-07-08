@@ -21,54 +21,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	@include_once ("goAPI.php");
+	include_once ("goAPI.php");
 	
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
+	$log_user 						= $session_user;
+	$log_group 						= go_get_groupid($session_user, $astDB); 
+	$log_ip 						= $astDB->escape($_REQUEST['log_ip']);
 	
     ### POST or GET Variables
-    $carrier_id = $astDB->escape($_REQUEST['carrier_id']);
-    $ip_address = $astDB->escape($_REQUEST['log_ip']);
+    $carrier_id 					= $astDB->escape($_REQUEST['carrier_id']);
     
-    ### Check campaign_id if its null or empty
-	if($carrier_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Carrier ID."); 
-	} else {
-		if (!checkIfTenant($log_group, $goDB)) {
-        	//$ul = "WHERE carrier_id='$carrier_id'";
-    	} else { 
-			//$ul = "WHERE carrier_id='$carrier_id' AND user_group='$log_group'";
-			$astDB->where('user_group', $log_group);
+    ### Check Carrier ID if its null or empty
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif ($carrier_id == null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Carrier ID."
+		);
+	} else {		
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
 		}
-
-   		//$query = "SELECT carrier_id, server_ip FROM vicidial_server_carriers $ul ORDER BY carrier_id LIMIT 1;";
+		
+		// check carrier ID if valid
 		$astDB->where('carrier_id', $carrier_id);
-   		$rsltv = $astDB->getOne('vicidial_server_carriers', 'carrier_id, server_ip');
-		$countResult = $astDB->getRowCount();
+   		$astDB->getOne('vicidial_server_carriers');
 
-		if($countResult > 0) {
-			$dataCarrierID = $rsltv['carrier_id'];
-			$server_ip = $rsltv['server_ip'];
-
-			if(!$dataCarrierID == null) {
-				//$deleteQuery = "DELETE FROM vicidial_server_carriers WHERE carrier_id = '$carrier_id';";
-				$astDB->where('carrier_id', $carrier_id);
-   				$deleteResult = $astDB->delete('vicidial_server_carriers');
-				
-				//$queryUpdate = "UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
-				$astDB->where('generate_vicidial_conf', 'Y');
-				$astDB->where('active_asterisk_server', 'Y');
-				$astDB->where('server_ip', $server_ip);
-				$astDB->update('servers', array('rebuild_conf_files' => 'Y'));
-
-				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Carrier ID: $carrier_id", $log_group, $deleteResult);
-				$apiresults = array("result" => "success");
-			} else {
-				$apiresults = array("result" => "Error: Carrier doesn't exist.");
-			}
-
+		if ($astDB->count > 0) {
+			$astDB->where('carrier_id', $carrier_id);
+			$astDB->delete('vicidial_server_carriers');
+			$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Carrier ID: $carrier_id", $log_group, $astDB->getLastQuery());
+			
+			// reload sip.conf
+			$astDB->where('generate_vicidial_conf', 'Y');
+			$astDB->where('active_asterisk_server', 'Y');
+			$astDB->where('server_ip', $carrier_id);
+			$astDB->update('servers', array('rebuild_conf_files' => 'Y'));
+			
+			$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Reloaded sip.conf for: $carrier_id", $log_group, $astDB->getLastQuery());
+			$apiresults 				= array(
+				"result" 					=> "success"
+			);
 		} else {
-			$apiresults = array("result" => "Error: Carrier doesn't exist.");
+			$apiresults					= array(
+				"result" 					=> "Error: Carrier doesn't exist."
+			);
 		}
-	}//end
+	}
 ?>

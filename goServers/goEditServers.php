@@ -66,6 +66,7 @@
 	} else {					
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
+			$astDB->orWhere('user_group', "---ALL---");
 		}
 		
 		$astDB->where("server_id", $server_id);

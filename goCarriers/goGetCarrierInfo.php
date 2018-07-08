@@ -47,7 +47,7 @@
 		$astDB->where("carrier_id", $carrier_id);
 		$astDB->orderBy("carrier_id", "desc");
 		
-		$rsltv 							= $astDB->getOne("vicidial_server_carriers", $cols);
+		$rsltv 							= $astDB->getOne("vicidial_server_carriers");
 		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed carrier ID: $carrier_id", $astDB->getLastQuery());
 		
 		if ($astDB->count > 0) {						
