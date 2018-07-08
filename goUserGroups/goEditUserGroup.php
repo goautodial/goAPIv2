@@ -24,15 +24,15 @@
  
 	$log_user 							= $session_user;
 	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);
+	$log_ip 							= $astDB->escape($_REQUEST['log_ip']);
  
     // POST or GET Variables
     $user_group 						= $astDB->escape($_REQUEST['user_group']);
     $group_name 						= $astDB->escape($_REQUEST['group_name']);
     $group_level 						= $astDB->escape($_REQUEST['group_level']);
-    $allowed_campaigns 					= $astDB->escape($_REQUEST['allowed_campaigns']);
-    $allowed_usergroups 				= $astDB->escape($_REQUEST['allowed_usergroups']);
-	$permissions						= $astDB->escape($_REQUEST['permissions']);
+    $allowed_campaigns 					= $_REQUEST['allowed_campaigns'];
+    $allowed_usergroups 				= $_REQUEST['allowed_usergroups'];
+	$permissions						= $_REQUEST['permissions'];
     $forced_timeclock_login 			= strtoupper($astDB->escape($_REQUEST['forced_timeclock_login']));
     $shift_enforcement 					= strtoupper($astDB->escape($_REQUEST['shift_enforcement']));
 
@@ -82,17 +82,8 @@
             $astDB->where("user_group", $log_group);
 		}
 
-        $cols = array(
-			"user_group", 
-			"group_name", 
-			"forced_timeclock_login", 
-			"shift_enforcement", 
-			"allowed_campaigns", 
-			"admin_viewable_groups"
-		);
-		
         $astDB->where("user_group", $user_group);
-        $query = $astDB->getOne("vicidial_user_groups", $cols);
+        $query 							= $astDB->getOne("vicidial_user_groups");
         
 		if ($astDB->count > 0) {		
 			//user_group, group_name, group_level, forced_timeclock_login, shift_enforcement
@@ -109,45 +100,47 @@
 			}
 			
             if (is_null($shift_enforcement)) {
-				$shift_enforcement 	= $query["shift_enforcement"];
+				$shift_enforcement 		= $query["shift_enforcement"];
 			}
 			
             if (is_null($allowed_campaigns)) {
-				$allowed_campaigns 	= $query["allowed_campaigns"];
+				$allowed_campaigns 		= $query["allowed_campaigns"];
 			}           
 
-            $data = array(
-                        "group_name" 				=> $group_name,
-                        "forced_timeclock_login" 	=> $forced_timeclock_login,
-                        "shift_enforcement" 		=> $shift_enforcement,
-                        "allowed_campaigns" 		=> $allowed_campaigns,
-                        "admin_viewable_groups" 	=> $allowed_usergroups
-                    );
+            $data 						= array(
+				"group_name" 				=> $group_name,
+				"forced_timeclock_login" 	=> $forced_timeclock_login,
+				"shift_enforcement" 		=> $shift_enforcement,
+				"allowed_campaigns" 		=> $allowed_campaigns,
+				"admin_viewable_groups" 	=> $allowed_usergroups
+			);
 
             $astDB->where("user_group", $user_group);
             $q_update				= $astDB->update("vicidial_user_groups", $data);
-			$log_id 				= log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $user_group", $log_group, $astDB->getLastQuery());
+			$log_id 				= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User Group: $user_group", $log_group, $astDB->getLastQuery());
 			
 			$goDB->where("user_group", $user_group);
-            $querygo 				= $goDB->getOne("user_access_group", "group_level, permissions");           
+            $querygo 				= $goDB->getOne("user_access_group");           
             
-            if (is_null($group_level)) {
-				$group_level 		= $querygo["group_level"];
-			}
-			
-            if (is_null($permissions)) {
-				$permissions 		= $querygo["permissions"];
-			} 
+            if ($goDB->count > 0) {
+				if (is_null($group_level)) {
+					$group_level 		= $querygo["group_level"];
+				}
+				
+				if (is_null($permissions)) {
+					$permissions 		= $querygo["permissions"];
+				} 
 
-            $datago 				= array(
-				"group_level" 			=> $group_level,
-				"permissions" 			=> $permissions
-			);
+				$datago 				= array(
+					"group_level" 			=> $group_level,
+					"permissions" 			=> $permissions
+				);
 
-            $goDB->where("user_group", $user_group);
-			$qgo_update				= $goDB->update("user_access_group", $datago); 
-			$log_id 				= log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified User Group: $user_group", $log_group, $goDB->getLastQuery());
-                        
+				$goDB->where("user_group", $user_group);
+				$qgo_update				= $goDB->update("user_access_group", $datago); 
+				$log_id 				= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User Group: $user_group", $log_group, $goDB->getLastQuery());
+            }
+            
 			if(!$q_update){
 				$apiresults 		= array(
 					"result" 			=> "Error: Failed Update, Check your details"

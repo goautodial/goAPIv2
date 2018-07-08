@@ -31,19 +31,20 @@
 	$server_id 							= $astDB->escape($_REQUEST['server_id']);	
 
 	if($server_id == null) {
-			$apiresults 				= array(
-				"result" 					=> "Error: Set a value for Server ID."
-			);
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Server ID."
+		);
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where('user_group', $log_group);
+			$astDB->orWhere('user_group', "---ALL---");
 		}
 
 		$astDB->where("server_id", $server_id);
 		$rsltv 							= $astDB->getOne('servers');	
 		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed server ID: $server_id", $astDB->getLastQuery());
 		
-		if(!empty($rsltv)) {
+		if ($rsltv) {
 			$apiresults 				= array(
 				"result" 					=> "success", 
 				"data" 						=> $rsltv

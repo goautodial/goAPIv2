@@ -57,7 +57,7 @@
 		
 		$astDB->where("user_group", $user_group);
 		$astDB->orderBy("user_group","asc");
-		$astDB->getOne("vicidial_user_groups", $cols);
+		$query 							= $astDB->getOne("vicidial_user_groups", $cols);
 		
 		$gocols							= array(
 			"group_level", 
@@ -65,11 +65,13 @@
 		);
 		
 		$goDB->where("user_group", $user_group);
-		$goDB->getOne("user_access_group", $gocols);		
+		$querygo 						= $goDB->getOne("user_access_group", $gocols);		
+		$data 							= array_merge($query, $querygo);
 		
 		if ($astDB->count > 0) {
             $apiresults 				= array(
-				"result" 					=> "success"
+				"result" 					=> "success", 
+				"data" 						=> $data
 			);
 		} else {
 			$apiresults 				= array(
