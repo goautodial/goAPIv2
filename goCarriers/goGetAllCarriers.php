@@ -26,7 +26,8 @@
 	
 	$log_user 							= $session_user;
 	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);	
+	$log_ip 							= $astDB->escape($_REQUEST['log_ip']);	
+    $limit 								= "50";
     
 	if (!isset($session_user) || is_null($session_user)){
 		$apiresults 					= array(
@@ -34,46 +35,43 @@
 		);
 	} elseif (isset($_REQUEST['limit'])) {
 		$limit 							= $astDB->escape($_REQUEST['limit']);
-	} else { 
-		$limit 							= "50"; 
-	} 
-	
-	if (checkIfTenant($log_group, $goDB)) {
-		$astDB->where("user_group", $log_group);
-		$astDB->orWhere("user_group", "---ALL---");
-	}
-
-
-	$astDB->orderBy('carrier_id', 'desc');
-   	$rsltv 								= $astDB->get('vicidial_server_carriers', $limit);
-
-   	if ($astDB->count > 0) {
-		foreach ($rsltv as $fresults){
-			$dataCarrierId[] 			= $fresults['carrier_id'];
-			$dataCarrierName[] 			= $fresults['carrier_name'];
-			$dataServerIp[] 			= $fresults['server_ip'];
-			$dataProtocol[] 			= $fresults['protocol'];
-			$dataRegistrationString[] 	= $fresults['registration_string'];
-			$dataActive[] 				= $fresults['active'];
-			$dataUserGroup[] 			= $fresults['user_group'];
-			$dataDialPlanEntry[] 		= $fresults['dialplan_entry'];   		
+	} else {	
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
 		}
-		
-		$apiresults 					= array(
-			"result" 						=> "success", 
-			"carrier_id" 					=> $dataCarrierId, 
-			"carrier_name" 					=> $dataCarrierName, 
-			"server_ip" 					=> $dataServerIp, 
-			"protocol" 						=> $dataProtocol, 
-			"registration_string" 			=> $dataRegistrationString, 
-			"active" 						=> $dataActive, 
-			"user_group" 					=> $dataUserGroup, 
-			"dialplan_entry" 				=> $dataDialPlanEntry
-		);
-	} else {
-		$apiresults 					= array(
-			"result" 						=> "Error: Empty."
-		);
-	}
 
+
+		$astDB->orderBy('carrier_id', 'desc');
+		$rsltv 								= $astDB->get('vicidial_server_carriers', $limit);
+
+		if ($astDB->count > 0) {
+			foreach ($rsltv as $fresults){
+				$dataCarrierId[] 			= $fresults['carrier_id'];
+				$dataCarrierName[] 			= $fresults['carrier_name'];
+				$dataServerIp[] 			= $fresults['server_ip'];
+				$dataProtocol[] 			= $fresults['protocol'];
+				$dataRegistrationString[] 	= $fresults['registration_string'];
+				$dataActive[] 				= $fresults['active'];
+				$dataUserGroup[] 			= $fresults['user_group'];
+				$dataDialPlanEntry[] 		= $fresults['dialplan_entry'];   		
+			}
+			
+			$apiresults 					= array(
+				"result" 						=> "success", 
+				"carrier_id" 					=> $dataCarrierId, 
+				"carrier_name" 					=> $dataCarrierName, 
+				"server_ip" 					=> $dataServerIp, 
+				"protocol" 						=> $dataProtocol, 
+				"registration_string" 			=> $dataRegistrationString, 
+				"active" 						=> $dataActive, 
+				"user_group" 					=> $dataUserGroup, 
+				"dialplan_entry" 				=> $dataDialPlanEntry
+			);
+		} else {
+			$apiresults 					= array(
+				"result" 						=> "Error: Empty."
+			);
+		}
+	}
 ?>
