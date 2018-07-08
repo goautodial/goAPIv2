@@ -127,7 +127,7 @@
 					$group_level 		= $querygo["group_level"];
 				}
 				
-				if (is_null($permissions) || $log_group == "ADMIN" || $log_group == "AGENTS") {
+				if (is_null($permissions) || $user_group == "ADMIN" || $user_group == "AGENTS") {
 					$permissions 		= $querygo["permissions"];
 				} 
 
