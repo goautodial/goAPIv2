@@ -25,7 +25,7 @@
  
 	$log_user 						= $session_user;
 	$log_group 						= go_get_groupid($session_user, $astDB); 
-	$ip_address 					= $astDB->escape($_REQUEST["log_ip"]);
+	$log_ip 					= $astDB->escape($_REQUEST["log_ip"]);
 	
 	if (isset($_REQUEST["limit"])) {
 		$limit 						= $astDB->escape($_REQUEST["limit"]);
