@@ -254,7 +254,8 @@
 							"old_messages" 				=> "0"
 						);
 						
-						$q_insertPhone = $astDB->insert('phones', $dataPhones); // insert record in goautodial.users
+						$astDB->insert('phones', $dataPhones); // insert record in goautodial.users
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $astDB->getLastQuery());
 						
 						$astDB->where("user", $user);
 						$query = $astDB->getOne("vicidial_users", "user_id");
@@ -276,10 +277,10 @@
 							//"location_id" => $location
 						);
 						
-						$qgo_insertUser = $goDB->insert('users', $datago); // insert record in goautodial.users
+						$goDB->insert('users', $datago); // insert record in goautodial.users
 						
 						// Admin logs
-						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $q_insertUser . $q_insertPhone);
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $goDB->getLastQuery());
 							
 						$astDB->where("user", $user);
 						$astDB->getOne("vicidial_users", "user");
@@ -312,7 +313,9 @@
 								"ha1b" 					=> $ha1b
 							);							
 						
-							$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam);
+							$kamDB->insert('subscriber', $datakam);
+							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $kamDB->getLastQuery());
+							
 							$return_user = $userid;
 							array_push($arr_user, $return_user);							
 						} else {

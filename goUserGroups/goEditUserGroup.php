@@ -51,7 +51,7 @@
 
     if (!isset($session_user) || is_null($session_user)){
         $apiresults 					= array(
-			"result" 						=> "Error: Missing Required Parameters."
+			"result" 						=> "Error: Session User Not Defined."
 		);
     } elseif (is_null($user_group)) {
         $apiresults 					= array(

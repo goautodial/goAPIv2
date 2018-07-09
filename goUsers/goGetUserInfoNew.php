@@ -29,7 +29,11 @@
 	$log_group = go_get_groupid($session_user, $astDB);
         
     // Check user_id if its null or empty
-    if($user_id == null) {
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif($user_id == null) {
 		$err_msg = error_handle("40001");
         $apiresults = array("code" => "40001","result" => $err_msg);
     } else {
