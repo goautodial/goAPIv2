@@ -60,7 +60,11 @@
     $defmodify_same_user_level = array("Y","N");	
 
     // Error Checking
-    if (empty($user) && empty($userid) || empty($session_user)) {
+	if(!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($user) && empty($userid)) {
 		$err_msg = error_handle("40002");
 		$apiresults = array("code" => "40002", "result" => $err_msg);
         //$apiresults = array("result" => "Error: Set a value for User ID.");

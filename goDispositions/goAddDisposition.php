@@ -174,8 +174,7 @@
 						$query 							= $astDB->get('vicidial_campaigns', NULL, 'campaign_id');
 						
 						foreach ($query as $row){
-							$campaign_id 				= $row['campaign_id'];
-							
+							$campaign_id 				= $row['campaign_id'];							
 							$data						= array(
 								"status"					=> $status, 	
 								"status_name"				=> $status_name,
@@ -192,8 +191,7 @@
 							);
 							
 							$q_insert					= $astDB->insert("vicidial_campaign_statuses", $data);
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
-							
+							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());							
 							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
 							$checkTable 				= $goDB->rawQuery($tableQuery);
 
@@ -214,56 +212,12 @@
 								"result" 					=> "success"
 							);
 						}
-					} else {
-						/*$multiple_campaigns 			= explode("-", $allowedCampaigns);
-						$allowedCampaignsx 				= $multiple_campaigns[0];
-						$campsWithSpaces 				= explode(" ",$allowedCampaignsx);
-						
-						//for($i=0; $i< count($campsWithSpaces); $i++){
-							//$campaign_id = $campsWithSpaces[$i];
-						foreach ($campsWithSpaces as $campsWithSpace) {
-							$campaign_id 				= $campsWithSpace;
-							
-							$data						= array(
-								"status"					=> $status, 	
-								"status_name"				=> $status_name,
-								"selectable"				=> $selectable, 
-								"campaign_id"				=> $campaign_id,
-								"human_answered"			=> $human_answered,
-								"category"					=> $category,
-								"sale"						=> $sale,
-								"dnc"						=> $dnc,
-								"customer_contact"			=> $customer_contact,
-								"not_interested"			=> $not_interested,
-								"unworkable"				=> $unworkable,
-								"scheduled_callback"		=> $scheduled_callback
-							);
-							
-							$q_insert					= $astDB->insert("vicidial_campaign_statuses", $data);
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
-							
-							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
-							$checkTable 				= $goDB->rawQuery($tableQuery);
-
-							if ($checkTable) {
-								$datago					= array(
-									"status"				=> $status, 	
-									"campaign_id"			=> $campaign_id,
-									"priority"				=> $priority,
-									"color"					=> $color,
-									"type"					=> $type
-								);
-								
-								$qgo_insert				= $goDB->insert("go_statuses", $datago);
-								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $goDB->getLastQuery());							
-							}*/
-							
-							$err_msg 						= error_handle("10108", "status. No campaigns available");
-							$apiresults						= array(
-								"code" 							=> "10108", 
-								"result" 						=> $err_msg
-							);
-						}
+					} else {		
+						$err_msg 						= error_handle("10108", "status. No campaigns available");
+						$apiresults						= array(
+							"code" 							=> "10108", 
+							"result" 						=> $err_msg
+						);
 					}
 				} else {
 					$data						= array(
@@ -310,16 +264,14 @@
 					"code" 							=> "41004", 
 					"result" 						=> $err_msg
 				);
-				//$apiresults = array("result" => "Error: Add failed, Campaign Status already already exists!");
 			}
-		/*} else {
+		} else {
 			$err_msg 							= error_handle("41004", "status. Status already exists in the default statuses");
 			$apiresults 						= array(
 				"code" 								=> "41004", 
 				"result" 							=> $err_msg
 			);
-			//$apiresults = array("result" => $query);
-		}*/
+		}
 	}
 	
 ?>

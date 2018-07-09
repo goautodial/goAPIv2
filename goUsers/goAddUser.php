@@ -48,10 +48,11 @@
 	$defActive 				= array("Y","N");
 
     // Error Checking
-    if(empty($session_user)){
-    	$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-    }elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_user)){
+	if (!isset($session_user) || is_null($session_user)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_user)){
 		$err_msg = error_handle("41004", "user");
 		$apiresults = array("code" => "41004", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Special characters found in user");

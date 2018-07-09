@@ -31,7 +31,12 @@
 	$log_group = go_get_groupid($session_user, $astDB);
 	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 
-	if (empty($user_ids) || empty($session_user)) {
+	
+	if (!isset($session_user) || is_null($session_user)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($user_ids)) {
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Set a value for User ID."); 

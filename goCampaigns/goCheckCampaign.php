@@ -35,16 +35,16 @@
             
         $rsltvCheck3 = 0;
         
-        if($campaign_id == "ALL"){
+        //if($campaign_id == "ALL"){
             $astDB->where('status', $status);
             $rsltvCheck3 = $astDB->get('vicidial_campaign_statuses', null, 'status');
-        }
+        //}
 
 		$astDB->where('status', $status);
 		$rsltvCheck2 = $astDB->get('vicidial_statuses', null, 'status');
 
 		$astDB->where('status', $status);
-		$astDB->where('campaign_id', $campaign_id);
+		//$astDB->where('campaign_id', $campaign_id);
 		$rsltvCheck1 = $astDB->get('vicidial_campaign_statuses', null, 'status');
                 
         if($rsltvCheck1 || $rsltvCheck2 || $rsltvCheck3) {
@@ -52,7 +52,7 @@
         }else{
             $apiresults = array("result" => "success");
         }
-    } else {
+    } elseif (!empty($_REQUEST['campaign_id']) && empty($_REQUEST['status'])) {
         $astDB->where('campaign_id', $campaign_id);
         $rsltvCheck1 = $astDB->get('vicidial_campaigns', null, 'campaign_id');
 
