@@ -2,9 +2,10 @@
  /**
  * @file 		goEditPauseCode.php
  * @brief 		API to edit specific Pause Code
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Noel Umandap  <noel@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author     	Noel Umandap
+ * @author     	Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,30 +22,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
  
-    ### POST or GET Variables
-    $camp = $_REQUEST['pauseCampID'];
-    $pause_code = $_REQUEST['pause_code'];
-    $pause_code_name = $_REQUEST['pause_code_name'];
-    $billable = strtoupper($_REQUEST['billable']);
+    include_once ("goAPI.php");
+ 
+	$log_user 								= $session_user;
+	$log_group 								= go_get_groupid($session_user, $astDB); 
+	$log_ip 								= $astDB->escape($_REQUEST["log_ip"]);
 	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
+	### POST or GET Variables
+	$campaign_id		 					= $astDB->escape($_REQUEST['pauseCampID']);
+	$pause_code 							= $astDB->escape($_REQUEST['pause_code']);
+	$pause_code_name 						= $astDB->escape($_REQUEST['pause_code_name']);
+	$billable 								= $astDB->escape(strtoupper($_REQUEST['billable']));	
 	
     ### Default values 
-		$defBill = array('NO','YES','HALF');
+	$defBill = array('NO','YES','HALF');
 
     ### ERROR CHECKING ...
-    if($camp == null || strlen($camp) < 3) {
-        $apiresults = array("result" => "Error: Set a value for CAMP ID not less than 3 characters.");
-    } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_co)){
-        $apiresults = array("result" => "Error: Special characters found in pause code and must not be empty");
-    } elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_codname)){
-        $apiresults = array("result" => "Error: Special characters found in pause code name and must not be empty");
-    } elseif(!in_array($billable,$defBill) && $billable != null) {
-        $apiresults = array("result" => "Error: Default value for billable is No, Yes or half only.");
-    } else {
-		$astDB->where('campaign_id', $camp);
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 						= array(
+			"result" 							=> "Error: Session User Not Defined."
+		);
+	} elseif ($campaign_id == null || strlen($campaign_id) < 3) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Set a value for CAMP ID not less than 3 characters."
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code) || $pause_code == null) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Special characters found in pause code and must not be empty"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code_name)) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Special characters found in pause code name"
+		);
+	} elseif(!in_array($billable,$defBill)) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Default value for billable is No, Yes or half only."
+		);
+	} else {
+		$astDB->where('campaign_id', $campaign_id);
     	$astDB->where('pause_code', $pause_code);
     	$checkPC = $astDB->get('vicidial_pause_codes', null, '*');
 		if($checkPC){
@@ -52,13 +67,13 @@
 				'pause_code_name' => $pause_code_name,  
 				'billable' => $billable
 			);
-			$astDB->where('campaign_id', $camp);
+			$astDB->where('campaign_id', $campaign_id);
     		$astDB->where('pause_code', $pause_code);
 			$pausecodeUpdate = $astDB->update('vicidial_pause_codes', $data_update);
 			$updateQuery = $astDB->getLastQuery();
 				
 			if($pausecodeUpdate){
-				$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified Pause Code $pause_code under Campaign ID $camp", $log_user, $updateQuery);
+				$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Pause Code $pause_code under Campaign ID $campaign_id", $log_user, $updateQuery);
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: Try updating Pause Code Again");
