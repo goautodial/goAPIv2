@@ -1,10 +1,11 @@
 <?php
  /**
- * @file 		getAllDispositions.php
+ * @file 		goGetAllDispositions.php
  * @brief 		API for Dispositions
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,74 +22,80 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    
-	$selectSQL = "";
-	$campSQL = "";
-	$select = $astDB->escape($_REQUEST['select']);
-	$camp = $astDB->escape($_REQUEST['campaign_id']);
-	$customRequest = $astDB->escape($_REQUEST['custom_request']);
-	$sortBy = $astDB->escape($_REQUEST['sortBy']);
-	$defCustom = "custom";
+    include_once ("goAPI.php");
+
+	$log_user 					= $session_user;
+	$log_group 					= go_get_groupid($session_user, $astDB); 
+	$customRequest				= $astDB->escape($_REQUEST['custom_request']);
 	
-	if(!empty($sortBy)){
-		$sortBy = $sortBy;
-	}else{
-		$sortBy = "status";
-	}
-	
-	if(empty($session_user)){
-		$err_msg = error_handle("40001");
-        $apiresults = array("code" => "40001","result" => $err_msg);
-	}elseif (!empty($customRequest) && $customRequest !== $defCustom){
-		$err_msg = error_handle("41006", "custom_request");
-        $apiresults = array("code" => "41006","result" => $err_msg);
-	}else{
-		//if ($select=="Y")
-		//	$selectSQL = "WHERE selectable='Y'";
-		//if (!is_null($camp))
-		//	$campSQL = "AND campaign_id='$camp'";
-		//if (is_null($camp)){
-		if(!empty($customRequest)){
-			$camps = go_getall_allowed_campaigns($session_user, $astDB);
-			
-			if ($select=="N"){
-				$campSQL = "WHERE campaign_id IN ($camps)";
-			}else{
-				$campSQL = "";
+	$campaigns 					= go_getall_allowed_campaigns($log_group, $astDB);
+	$campaignsArr				= explode(' ', $campaigns);
+		
+	if (empty($session_user)) {
+		$err_msg 				= error_handle("40001");
+        $apiresults 			= array("code" => "40001","result" => $err_msg);
+	} elseif (!empty($customRequest) && $customRequest === "custom") {
+		$query = "(
+			SELECT status,status_name FROM vicidial_campaign_statuses
+		) UNION (
+			SELECT status,status_name FROM vicidial_statuses 
+				ORDER BY status
+		)";
+		$fresults = $astDB->rawQuery($query);
+		
+		foreach ($fresults as $fresult) {
+			$dataStat[] 		= $fresult['status'];			
+			$dataStatName[] 	= $fresult['status_name'];
+		}	
+		
+		$apiresults 			= array(
+			"result" 				=> "success", 
+			"status" 				=> $dataStat, 
+			"status_name" 			=> $dataStatName
+		);	
+
+	} elseif (!empty($customRequest) && $customRequest === "campaign") {				
+		if (is_array($campaignsArr)) {
+			if (!preg_match("/ALLCAMPAIGNS/",  $campaigns)) {
+				$astDB->where("campaign_id", $campaignsArr, "IN");
 			}
-		}
-		
-		$groupId = go_get_groupid($session_user, $astDB);
-		
-		if (!checkIfTenant($groupId, $goDB)) {
-			$ul = "";
-		} else {
-			$ul = "AND user_group='$groupId'";
-			$addedSQL = "WHERE user_group='$groupId'";
-		}
-		
-		if($camp != NULL || $customRequest != NULL){
-			$query = "SELECT status,status_name,campaign_id FROM vicidial_campaign_statuses $campSQL ORDER BY campaign_id";
-		}else{
-			$query = "SELECT status, status_name FROM vicidial_campaign_statuses UNION  SELECT status, status_name FROM vicidial_statuses ORDER BY $sortBy;";
-		}
-		
-		$rsltv = $astDB->rawQuery($query);
-		foreach ($rsltv as $fresult){
-			$dataStat[] = $fresult['status'];			
-			$dataStatName[] = $fresult['status_name'];
 			
-			if($camp != NULL || $customRequest != NULL)
-				$dataCampID[] = $fresult['campaign_id'];
+			$cols 					= array(
+				"status", 
+				"status_name", 
+				"campaign_id"
+			);
+			
+			$astDB->orderBy("campaign_id");
+			$result 				= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
+			
+			if ($astDB->count > 0) {
+				foreach ($result as $fresults) {
+					$dataStat[] 		= $fresults["status"];			
+					$dataStatName[] 	= $fresults["status_name"];
+					$dataCampID[] 		= $fresults["campaign_id"];
+				}			
+				
+				$apiresults 			= array(
+					"result" 				=> "success", 
+					"campaign_id" 			=> $dataCampID, 
+					"status_name" 			=> $dataStatName, 
+					"status" 				=> $dataStat
+				);			
+			}	 		
+		} else {
+			$err_msg 				= error_handle("10108", "status. No campaigns available");
+			$apiresults				= array(
+				"code" 					=> "10108", 
+				"result" 				=> $err_msg
+			);
 		}
-		
-		if($camp != NULL || $customRequest != NULL){
-			$apiresults = array("result" => "success", "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat);
-			//$apiresults = array("result" => "success", "query" => $query, "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat);
-		}else{
-			$apiresults = array("result" => "success", "status" => $dataStat, "status_name" => $dataStatName);
-			//$apiresults = array("result" => "success", "query" => $query, "status" => $dataStat, "status_name" => $dataStatName);
-		}
+	} elseif (!empty($customRequest) && $customRequest !== "custom") {
+		$err_msg 					= error_handle("41006", "custom_request");
+        $apiresults 				= array(
+			"code" 						=> "41006",
+			"result" 					=> $err_msg
+		);
 	}
 	
 	

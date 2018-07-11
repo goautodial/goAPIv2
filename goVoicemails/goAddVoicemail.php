@@ -1,10 +1,11 @@
 <?php
- /**
+/**
  * @file 		goAddVoicemail.php
- * @brief 		API for Voicemails
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @brief 		API for adding voicemails
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Chris Lomuntad 
+ * @author     	Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,95 +22,88 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-### POST or GET Variables
-$voicemail_id = $_REQUEST['voicemail_id'];
-$pass = $_REQUEST['pass'];
-$fullname = $_REQUEST['fullname'];
-$email = $_REQUEST['email'];
-$user_group = $_REQUEST['user_group'];
-$active = strtoupper($_REQUEST['active']);
-$ip_address = $_REQUEST['hostname'];
-$goUser = $_REQUEST['goUser'];
+	include_once ("goAPI.php");
+	
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);	
 
-$voicemail_id = $astDB->escape($voicemail_id);
-$pass = $astDB->escape($pass);
-$fullname = $astDB->escape($fullname);
-$email = $astDB->escape($email);
-$user_group = $astDB->escape($user_group);
-$active = $astDB->escape($active);
+	### POST or GET Variables
+	$voicemail_id 						= $astDB->escape($_REQUEST['voicemail_id']);
+	$pass 								= $astDB->escape($_REQUEST['pass']);
+	$fullname 							= $astDB->escape($_REQUEST['fullname']);
+	$email 								= $astDB->escape($_REQUEST['email']);
+	$user_group 						= $astDB->escape($_REQUEST['user_group']);
+	$active 							= $astDB->escape(strtoupper($_REQUEST['active']));
 
-$log_user = $astDB->escape($_REQUEST['log_user']);
-$log_group = $astDB->escape($_REQUEST['log_group']);
-
-### Default values 
-$defActive = array("Y","N");
+	### Default values
+    $defActive 							= array(
+		"Y",
+		"N"
+	); 
 
 
-### ERROR CHECKING 
-if($voicemail_id == null || strlen($voicemail_id) < 3) {
-	$apiresults = array("result" => "Error: Set a value for VOICEMAIL ID not less than 3 characters.");
-} else {
-	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $fullname) || $fullname == null){
-		$apiresults = array("result" => "Error: Special characters found in fullname and must not be empty");
+	### ERROR CHECKING 					
+	if (!isset($session_user) || is_null($session_user)){
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif ($voicemail_id == null || strlen($voicemail_id) < 3) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Set a value for Voicemail ID."
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $voicemail_id)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Special characters found in voicemail ID"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $fullname) || $fullname == null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Special characters found in fullname and must not be empty"
+		);
+	} elseif (!in_array($active,$defActive) && $active != null) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Default value for active is Y or N only."
+		);
+	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Invalid email format."
+		);
 	} else {
-		if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $voicemail_id)){
-			$apiresults = array("result" => "Error: Special characters found in voicemail_id");
+		if (checkIfTenant($log_group, $goDB)) {
+			//$astDB->where("user_group", $log_group);
+		}					
+		
+		$astDB->where("voicemail_id", $voicemail_id);
+		$astDB->getOne("vicidial_voicemail");
+		
+		if ($astDB->count > 0) {
+			$apiresults 				= array(
+				"result" 					=> "Error: Add failed, Duplicate voicemail ID found!"
+			);
 		} else {
-			if(!in_array($active,$defActive)) {
-				$apiresults = array("result" => "Error: Default value for active is Y or N only.");
+			$data						= array(
+				'voicemail_id' 				=> $voicemail_id,
+				'pass' 						=> $pass,
+				'fullname' 					=> $fullname,
+				'active' 					=> $active,
+				'email' 					=> $email,
+				'user_group' 				=> $user_group
+			);
+			
+			$q_insert					= $astDB->insert('vicidial_voicemail', $data);			
+			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added new voicemail. ID: $voicemail_id", $log_group, $astDB->getLastQuery());
+			
+			if($q_insert){
+				$apiresults 			= array(
+					"result" 				=> "success",
+					"data" 					=> $q_insert
+				);
 			} else {
-				if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-					$apiresults = array("result" => "Error: Invalid email format.");
-				} else {
-					$groupId = go_get_groupid($goUser, $astDB);
-			
-					if (!checkIfTenant($groupId, $goDB)) {
-						//$ul = "";
-					} else {
-						//$ul = "AND user_group='$groupId'";
-						//$addedSQL = "WHERE user_group='$groupId'";
-						$astDB->where('user_group', $groupId);
-					}
-					
-					//$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups WHERE user_group='".$user_group."' $ul ORDER BY user_group LIMIT 1;";
-					$astDB->where('user_group', $user_group);
-					$astDB->orderBy('user_group', 'desc');
-					$rsltv = $astDB->getOne('vicidial_user_groups', 'user_group,group_name,forced_timeclock_login');
-					$countResult = $astDB->getRowCount();
-			
-					if($countResult > 0) {
-						//$queryCheck = "SELECT voicemail_id from vicidial_voicemail where voicemail_id='".$voicemail_id."';";
-						$astDB->where('voicemail_id', $voicemail_id);
-						$sqlCheck = $astDB->get('vicidial_voicemail');
-						$countCheck = $astDB->getRowCount();
-						if($countCheck <= 0) {
-							//$newQuery = "INSERT INTO vicidial_voicemail (voicemail_id, pass, fullname, active, email, user_group) VALUES ('".$voicemail_id."', '".$pass."', '".$fullname."', '".$active."', '".$email."', '".$user_group."');";
-							$insertData = array(
-								'voicemail_id' => $voicemail_id,
-								'pass' => $pass,
-								'fullname' => $fullname,
-								'active' => $active,
-								'email' => $email,
-								'user_group' => $user_group
-							);
-							$rsltv = $astDB->insert('vicidial_voicemail', $insertData);
-							
-							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New Voicemail: $voicemail_id", $log_group, $newQuery);
-							
-							if($rsltv == false) {
-								$apiresults = array("result" => "Error: Add failed, check your details");
-							} else {
-								$apiresults = array("result" => "success");
-							}
-						} else {
-							$apiresults = array("result" => "Error: Add failed, Voicemail already already exist!");
-						}
-					} else {
-						$apiresults = array("result" => "Error: Invalid User Group");
-					}
-				}
+				$apiresults				= array(
+					"result" 				=> "Error: Add failed, check your details"
+				);
 			}
 		}
 	}
-}
+
 ?>

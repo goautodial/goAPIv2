@@ -24,31 +24,35 @@
     @include_once ("goAPI.php");
 	include_once ("../licensed-conf.php");
 	
+	$log_user 				= $session_user;
+	$log_group 				= go_get_groupid($session_user, $astDB); 
+	$ip_address 			= $astDB->escape($_REQUEST['log_ip']);	
+	
     // POST or GET Variables
-	$orig_user = $astDB->escape($_REQUEST['user']);
-	$pass = $astDB->escape($_REQUEST['pass']);
-	$orig_full_name = $astDB->escape($_REQUEST['full_name']);
-	$phone_login = $astDB->escape($_REQUEST['phone_login']);
-	$phone_pass = $pass;
-	$user_group = $astDB->escape($_REQUEST['user_group']);
-	$active = $astDB->escape(strtoupper($_REQUEST['active']));
+	$orig_user 				= $astDB->escape($_REQUEST['user']);
+	$pass 					= $astDB->escape($_REQUEST['pass']);
+	$orig_full_name 		= $astDB->escape($_REQUEST['full_name']);
+	$phone_login 			= $astDB->escape($_REQUEST['phone_login']);
+	$phone_pass 			= $pass;
+	$user_group 			= $astDB->escape($_REQUEST['user_group']);
+	$active 				= $astDB->escape(strtoupper($_REQUEST['active']));
 	//$location = $astDB->escape($_REQUEST['location_id']);
 		
-	if(isset($_REQUEST['seats'])) { $seats = $astDB->escape($_REQUEST['seats']); }
+	if(isset($_REQUEST['seats'])) { 
+		$seats 				= $astDB->escape($_REQUEST['seats']); }
 		else { $seats = 1; }
-	if(isset($_REQUEST['avatar'])) { $avatar = $astDB->escape($_REQUEST['avatar']); }
+	if(isset($_REQUEST['avatar'])) { 
+		$avatar 			= $astDB->escape($_REQUEST['avatar']); }
 		else { $avatar = NULL; }
 		
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB); 
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$defActive = array("Y","N");
+	$defActive 				= array("Y","N");
 
     // Error Checking
-    if(empty($session_user)){
-    	$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-    }elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_user)){
+	if (!isset($session_user) || is_null($session_user)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
+	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_user)){
 		$err_msg = error_handle("41004", "user");
 		$apiresults = array("code" => "41004", "result" => $err_msg);
 		//$apiresults = array("result" => "Error: Special characters found in user");
@@ -251,7 +255,8 @@
 							"old_messages" 				=> "0"
 						);
 						
-						$q_insertPhone = $astDB->insert('phones', $dataPhones); // insert record in goautodial.users
+						$astDB->insert('phones', $dataPhones); // insert record in goautodial.users
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $astDB->getLastQuery());
 						
 						$astDB->where("user", $user);
 						$query = $astDB->getOne("vicidial_users", "user_id");
@@ -273,10 +278,10 @@
 							//"location_id" => $location
 						);
 						
-						$qgo_insertUser = $goDB->insert('users', $datago); // insert record in goautodial.users
+						$goDB->insert('users', $datago); // insert record in goautodial.users
 						
 						// Admin logs
-						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $q_insertUser . $q_insertPhone);
+						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $goDB->getLastQuery());
 							
 						$astDB->where("user", $user);
 						$astDB->getOne("vicidial_users", "user");
@@ -309,7 +314,9 @@
 								"ha1b" 					=> $ha1b
 							);							
 						
-							$qkam_insertSubscriber = $kamDB->insert('subscriber', $datakam);
+							$kamDB->insert('subscriber', $datakam);
+							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New User: $user", $log_group, $kamDB->getLastQuery());
+							
 							$return_user = $userid;
 							array_push($arr_user, $return_user);							
 						} else {

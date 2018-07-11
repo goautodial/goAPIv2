@@ -1,10 +1,10 @@
 <?php
 /**
- * @file    goUpdateCampaignDialStatus.php
- * @brief     API to update campaign dial status
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @file    	goUpdateCampaignDialStatus.php
+ * @brief     	API to update campaign dial status
+ * @copyright   Copyright (c) GOautodial Inc.
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,21 +20,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    $goUser = $astDB->escape($_REQUEST['goUser']);
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
-    $campaign_id  = $astDB->escape($_REQUEST['campaign_id']);
-    $dial_statuses  = $astDB->escape($_REQUEST['dial_status']);
-    $log_user = $astDB->escape($_REQUEST['log_user']);
-    $log_group  = $astDB->escape($_REQUEST['log_group']);
-    
-    if($campaign_id != null) {
-        $astDB->where('campaign_id', $campaign_id);
-        $updateQuery = $astDB->update('vicidial_campaigns', array('dial_statuses' => $dial_status));
 
-        $log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Updated Dial Statuses for Campaign ID: $campaign_id", $log_group, $updateQuery);
+	@include_once ("goAPI.php");
+	
+    $log_user 			= $astDB->escape($_REQUEST['log_user']);
+    $log_group 			= $astDB->escape($_REQUEST['log_group']);
+	$ip_address 		= $astDB->escape($_REQUEST['log_ip']);
+	  
+    $campaign_id  		= $astDB->escape($_REQUEST['campaign_id']);
+    $dial_statuses  	= $astDB->escape($_REQUEST['dial_statuses']);
+    
+    if ($campaign_id != null) {
+        $astDB->where('campaign_id', $campaign_id);
+        $updateQuery = $astDB->update('vicidial_campaigns', array('dial_statuses' => $dial_statuses));
+
+        $log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Updated Dial Statuses for Campaign ID: $campaign_id", $log_group, $updateQuery);
         
         $apiresults = array("result" => "success");
-    }else{
+    } else {
         $apiresults = array("result" => "Error: Campaign doens't exist.");
     }
     

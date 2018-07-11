@@ -2,9 +2,9 @@
  /**
  * @file        goDeletePauseCode.php
  * @brief       API to delete specific pause code
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noel@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,30 +20,39 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    ### POST or GET Variables
-	$camp = $_REQUEST['pauseCampID'];
-	$code = $_REQUEST['pause_code'];
-	$ip_address = $_REQUEST['hostname'];
+
+    include_once ("goAPI.php");
+ 
+	$log_user 								= $session_user;
+	$log_group 								= go_get_groupid($session_user, $astDB); 
+	$log_ip 								= $astDB->escape($_REQUEST["log_ip"]);
 	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+	### POST or GET Variables
+	$campaign_id		 					= $astDB->escape($_REQUEST['pauseCampID']);
+	$pause_code 							= $astDB->escape($_REQUEST['pause_code']);
     
     ### Check Voicemail ID if its null or empty
-	if($camp == null || $code == null) { 
-		$apiresults = array("result" => "Error: Set a value for Campaign ID and Pause Code."); 
+	if($campaign_id == null || $pause_code == null) { 
+		$apiresults 						= array(
+			"result" 							=> "Error: Set a value for Campaign ID and Pause Code."
+		); 
 	} else {
-        $astDB->where('campaign_id', $camp);
-        $astDB->where('pause_code', $code);
-        $checkPC = $astDB->get('vicidial_pause_codes', null, 'pause_code, campaign_id');
+		$cols 								= array(
+			"pause_code", 
+			"campaign_id"
+		);
+		
+        $astDB->where('campaign_id', $campaign_id);
+        $astDB->where('pause_code', $pause_code);
+        $checkPC 							= $astDB->get('vicidial_pause_codes', null, $cols);
 
-		if($checkPC) {
-                $astDB->where('campaign_id', $camp);
-                $astDB->where('pause_code', $code);
-                $astDB->delete('vicidial_pause_codes');
-                $deleteQuery = $astDB->getLastQuery();
+		if ($checkPC) {
+			$astDB->where('campaign_id', $campaign_id);
+			$astDB->where('pause_code', $pause_code);
+			$astDB->delete('vicidial_pause_codes');
 
-				$log_id = log_action($linkgo, 'DELETE', $log_user, $ip_address, "Deleted Pause Code $code from Campaign ID $camp", $log_group, $deleteQuery);
-				$apiresults = array("result" => "success");
+			$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Pause Code $pause_code from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
+			$apiresults = array("result" => "success");
 		} else {
 			$apiresults = array("result" => "Error: Pause Code doesn't exist.");
 		}

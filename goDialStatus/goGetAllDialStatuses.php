@@ -35,7 +35,6 @@
 		$query = "SELECT status,status_name
 					FROM vicidial_campaign_statuses
 					$selectable
-					AND campaign_id='$campaign_id'
 					ORDER BY status";
 		$rsltv = $astDB->rawQuery($query);
 		

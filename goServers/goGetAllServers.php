@@ -21,33 +21,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+    include_once ("goAPI.php");
+ 
+	$log_user 						= $session_user;
+	$log_group 						= go_get_groupid($session_user, $astDB); 
+	$log_ip 					= $astDB->escape($_REQUEST["log_ip"]);
 	
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
-	
-	if (isset($_REQUEST['limit'])) {
-			$limit = $astDB->escape($_REQUEST['limit']);
+	if (isset($_REQUEST["limit"])) {
+		$limit 						= $astDB->escape($_REQUEST["limit"]);
 	} else { $limit = 50; }
     
 	if (checkIfTenant($log_group, $goDB)) {
-        //$astDB->where('user_group', $log_group);
+        $astDB->where("user_group", $log_group);
     }
 
-   	$cols = array("server_id", "server_description", "server_ip", "active", "asterisk_version", "max_vicidial_trunks", "local_gmt");;
-	$astDB->orderBy('server_ip', 'desc');
-   	$rsltv = $astDB->get('servers', $limit, $cols);
+   	$cols							= array(
+		"server_id", 
+		"server_description", 
+		"server_ip", 
+		"active", 
+		"asterisk_version", 
+		"max_vicidial_trunks", 
+		"local_gmt"
+	);
+	
+	$astDB->orderBy("server_ip", "desc");
+   	$rsltv 							= $astDB->get("servers", $limit, $cols);
    	
 	foreach ($rsltv as $fresults){
-		$dataID[] = $fresults['server_id'];
-		$dataDesc[] = $fresults['server_description'];
-		$dataServerIP[] = $fresults['server_ip'];
-		$dataActive[] = $fresults['active'];
-		$dataAsterisk[] = $fresults['asterisk_version'];
-		$dataTrunks[] = $fresults['max_vicidial_trunks'];
-		$dataGMT[] = $fresults['local_gmt'];
+		$dataID[] 					= $fresults["server_id"];
+		$dataDesc[] 				= $fresults["server_description"];
+		$dataServerIP[] 			= $fresults["server_ip"];
+		$dataActive[]				= $fresults["active"];
+		$dataAsterisk[] 			= $fresults["asterisk_version"];
+		$dataTrunks[] 				= $fresults["max_vicidial_trunks"];
+		$dataGMT[] 					= $fresults["local_gmt"];
 	}
 	
-	$apiresults = array("result" => "success", "server_id" => $dataID, "server_description" => $dataDesc, "server_ip" => $dataServerIP, "active" => $dataActive, "asterisk_version" => $dataAsterisk, "max_vicidial_trunks" => $dataTrunks, "local_gmt" => $dataGMT);
+	$apiresults 					= array(
+		"result" 						=> "success", 
+		"server_id"						=> $dataID, 
+		"server_description" 			=> $dataDesc, 
+		"server_ip" 					=> $dataServerIP, 
+		"active" 						=> $dataActive, 
+		"asterisk_version" 				=> $dataAsterisk, 
+		"max_vicidial_trunks" 			=> $dataTrunks, 
+		"local_gmt" 					=> $dataGMT
+	);
 
 ?>

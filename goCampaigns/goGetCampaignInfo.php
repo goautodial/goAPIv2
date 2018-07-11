@@ -2,9 +2,10 @@
 /**
  * @file 		goGetCampaignInfo.php
  * @brief 		API for Carriers
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jerico James Milo  <jericojames@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho 
+ * @author     	Alexander Jim Abenoja 
+ * @author     	Jerico James Milo
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,16 +21,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    // POST or GET Variables
-	$agent = get_settings('user', $astDB, $goUser);
+
+	@include_once ("goAPI.php");
 	
+    // POST or GET Variables	
     $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    //$log_user = $astDB->escape($_REQUEST['log_user']);
-    //$log_group = $astDB->escape($_REQUEST['log_group']);
-    //$log_ip = $astDB->escape($_REQUEST['log_ip']);
-	//$session_user = $astDB->escape($_REQUEST['session_user']);
+
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
 	
 	//variables
 	$campaign_type = '';
@@ -48,16 +48,12 @@
 		$err_msg = error_handle("40001");
 		$apiresults = array("code" => "40001", "result" => $err_msg); 
 	} else {
-		if (!checkIfTenant($log_group, $goDB)) {
-			$astDB->where('campaign_id', $campaign_id);
-		} else { 
-			$astDB->where('campaign_id', $campaign_id);
-			$astDB->where('user_group', $log_group); 
-			//$astDB->where('user_group', $agent->user_group);  
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where('user_group', $log_group);
 		}
 
 		$astDB->where('campaign_id', $campaign_id);
-		$result = $astDB->get('vicidial_campaigns', null, '*');
+		$result = $astDB->get('vicidial_campaigns');
 		
 		if($result) {
 			$location_id_COL = '';
@@ -75,7 +71,7 @@
 			}
 			
 			$goDB->where('campaign_id', $campaign_id);
-			$rsltvGoCampaign = $goDB->get('go_campaigns', null, 'campaign_type,custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url');
+			$rsltvGoCampaign = $goDB->get('go_campaigns');
 
 			foreach((array)$rsltvGoCampaign as $typeresults){
 				$campaign_type = $typeresults['campaign_type'];
@@ -109,6 +105,7 @@
 			$url_tab_second_url = (gettype($url_tab_second_url) != 'NULL') ? $url_tab_second_url : '';
 			$location_id = (gettype($location_id) != 'NULL') ? $location_id : '';
 			$dynamic_cid = (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
+			
 			$apiresults = array(
 								"result" 				=> "success",
 								"data" 					=> array_shift($result),

@@ -2,8 +2,9 @@
  /**
  * @file 		goGetAllScripts.php
  * @brief 		API to get all scripts
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author      Demian Lizandro A. Biscocho 
+ * @author     	Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -19,43 +20,37 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	$agent = get_settings('user', $astDB, $goUser);
-	//$userid = $astDB->escape($_REQUEST['userid']);
-		
-    //$groupId = go_get_groupid($goUser, $astDB);
-    
+
+	@include_once ("goAPI.php");	 
+ 
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB);    
 
     //if (!checkIfTenant($groupId)) {
-	if ($log_group != "ADMIN") {
-        $astDB->where('user_group', $log_group);
-    }
+	if ($log_group != "ADMIN") { $astDB->where("user_group", $log_group); }
 
 	// getting script count
-	$resultGetScript = $astDB->getOne('vicidial_scripts', null, 'script_id');
+	$resultGetScript = $astDB->getOne('vicidial_scripts', 'script_id');
 	
 	// condition
-	if(count($resultGetScript) > 0){
-		foreach($resultGetScript as $get_last_script){
-			if(preg_match("/^script/i", $get_last_script['script_id'])){
-				$get_last_count = preg_replace("/^script/i", "", $get_last_script['script_id']);
-				$last_pl[] = intval($get_last_count);
-			}else{
-				$get_last_count = $get_last_script['script_id'];
-				$last_pl[] = intval($get_last_count);
-			}
+	if ($astDB->count > 0) {
+		if (preg_match("/^script/i", $resultGetScript['script_id'])) {
+			$get_last_count = preg_replace("/^script/i", "", $resultGetScript['script_id']);
+			$last_pl[] = intval($get_last_count);
+		} else {
+			$get_last_count = $resultGetScript['script_id'];
+			$last_pl[] = intval($get_last_count);
 		}
-		
+
 		// return data
 		$script_num = max($last_pl);
 		$script_num = $script_num + 1;
 		
 		if($script_num < 100){
 			if($script_num < 10){
-					$script_num = "00".$script_num;
+				$script_num = "00".$script_num;
 			}else{
-					$script_num = "0".$script_num;
+				$script_num = "0".$script_num;
 			}
 		}
 		
@@ -64,7 +59,7 @@
 		}else{
 			$script_num = "script".$script_num;
 		}
-	}else{
+	} else {
 		// return data
 		$script_num = "script001";
 	}
@@ -72,12 +67,12 @@
 		
 	// GETTING ACTUAL DATA //
 	//if (!checkIfTenant($groupId)) {
-	if ($log_group != "ADMIN") {
-        $astDB->where('user_group', $log_group);
-    }
-	$scripts = $astDB->get('vicidial_scripts', null, 'script_id, script_name, active, user_group');
+	if ($log_group != "ADMIN") { $astDB->where('user_group', $log_group); }
+    
+	$cols = array("script_id", "script_name", "active", "user_group");
+	$scripts = $astDB->get('vicidial_scripts', NULL, $cols);
 	
-	foreach($scripts as $script){
+	foreach ($scripts as $script) {
 		$dataScriptID[] 	= $script['script_id'];
 		$dataScriptName[] 	= $script['script_name'];
 		$dataActive[] 		= $script['active'];

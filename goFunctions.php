@@ -117,7 +117,7 @@
 			$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
 			
 			$allAllowedCampaigns = implode("",$allowedCampaigns);
-			$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
+			//$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
 		}else{
 			$allAllowedCampaigns = '';
 		}
