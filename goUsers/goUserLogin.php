@@ -126,6 +126,10 @@
 			}
 			### End checker
 			
+			$goDB->where('setting', 'GO_agent_use_wss');
+			$rsltw = $goDB->getOne('settings', 'value');
+			$use_webrtc = (!is_null($rsltw['value']) || $rsltw['value'] !== '') ? $rsltw['value'] : 0;
+			
 			$apiresults = array(
 				"result" => "success",
 				"user_group" => $dataUserGroup,
@@ -142,7 +146,8 @@
 				"phone_login" => $dataPhone_login,
 				"phone_pass" => $dataPhone_pass,
 				"avatar" => $dataAvatar,
-				"realm" => $realm
+				"realm" => $realm,
+				"use_webrtc" => $use_webrtc
 			);
 		}
 	} else {
