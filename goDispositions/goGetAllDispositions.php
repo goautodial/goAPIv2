@@ -2,7 +2,7 @@
  /**
  * @file 		goGetAllDispositions.php
  * @brief 		API for Dispositions
- * @copyright 	Copyright (c) GOautodial Inc.
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author     	Jeremiah Sebastian Samatra
  * @author     	Chris Lomuntad

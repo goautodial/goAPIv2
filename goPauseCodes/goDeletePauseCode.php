@@ -31,8 +31,8 @@
 	$campaign_id		 					= $astDB->escape($_REQUEST['pauseCampID']);
 	$pause_code 							= $astDB->escape($_REQUEST['pause_code']);
     
-    ### Check Voicemail ID if its null or empty
-	if($campaign_id == null || $pause_code == null) { 
+    ### Check Campaign ID if its null or empty
+	if(empty($campaign_id) || empty($pause_code)) { 
 		$apiresults 						= array(
 			"result" 							=> "Error: Set a value for Campaign ID and Pause Code."
 		); 
