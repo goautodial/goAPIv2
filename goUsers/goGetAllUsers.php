@@ -23,75 +23,110 @@
     @include_once ("goAPI.php");
     include_once ("../licensed-conf.php");
 	
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
+	$log_user 								= $session_user;
+	$log_group 								= go_get_groupid($session_user, $astDB);
 	
-	if(!empty($session_user)){
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Session User Not Defined."
+		);
+	} else {
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+		}
+		
 		// get user_level
 		$astDB->where("user", $log_user);
-		$query_userlevel = $astDB->getOne("vicidial_users", "user_level");
-		$user_level = $query_userlevel["user_level"];
+		$query_userlevel 					= $astDB->getOne("vicidial_users", "user_level");
+		$user_level 						= $query_userlevel["user_level"];
 		
-		if (!checkIfTenant($log_group, $goDB)) {
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+		} else {
 			if (strtoupper($log_group) != 'ADMIN') {
 				if ($user_level > 8) {
 					$astDB->where("user_group", $log_group);
 				}
-			}
-		} else { 
-			$astDB->where("user_group", $log_group);
+			}		
+			
 		}
 		
 		// get users list
-		$cols = array("user_id", "user", "full_name", "user_level", "user_group", "phone_login", "active");
+		$cols 								= array(
+			"user_id", 
+			"user", 
+			"full_name", 
+			"user_level", 
+			"user_group", 
+			"phone_login", 
+			"active"
+		);
+		
 		$astDB->where("user", DEFAULT_USERS, "NOT IN");
 		$astDB->where("user_level", 4, "!=");
 		$astDB->orderby("user", "asc");
-		$query = $astDB->get("vicidial_users", NULL, $cols);
-		$countResult = $astDB->count;	
+		$query 								= $astDB->get("vicidial_users", NULL, $cols);
 
-		if($countResult > 0) {
-			$count = 0;
-			foreach($query as $fresults){				
-				$cols = array("userid", "avatar");
+		if ($astDB->count > 0) {
+			$count 							= 0;
+			
+			foreach ($query as $fresults) {				
+				$cols 						= array(
+					"userid", 
+					"avatar"
+				);
+				
 				$goDB->where("userid", $fresults["user_id"]);
 				$goDB->orderby("userid", "desc");
-				$querygo = $goDB->get("users", NULL, $cols);	
-				$countResultgo = $goDB->count;				
+				$querygo 					= $goDB->get("users", NULL, $cols);	
 				
-				if ($countResultgo > 0) {
+				if ($goDB->count > 0) {
 					foreach($querygo as $fresultsgo){
-						$dataUserIDgo[] = $fresultsgo['userid'];
-						$dataAvatar[] = $fresultsgo['avatar'];		
+						$dataUserIDgo[] 	= $fresultsgo['userid'];
+						$dataAvatar[] 		= $fresultsgo['avatar'];		
 					}
 				}
 				
-				$dataUserID[] = $fresults['user_id'];
-				$dataUser[] = $fresults['user'];
-				$dataFullName[] = $fresults['full_name'];
-				$dataUserLevel[] = $fresults['user_level'];
-				$dataUserGroup[] = $fresults['user_group'];
-				$dataPhone[] = $fresults['phone_login'];
-				$dataActive[]	= $fresults['active'];
+				$dataUserID[] 				= $fresults['user_id'];
+				$dataUser[] 				= $fresults['user'];
+				$dataFullName[] 			= $fresults['full_name'];
+				$dataUserLevel[] 			= $fresults['user_level'];
+				$dataUserGroup[] 			= $fresults['user_group'];
+				$dataPhone[] 				= $fresults['phone_login'];
+				$dataActive[]				= $fresults['active'];
 				
-				if(preg_match("/^agent/i", $fresults['user'])){
-					$get_last = preg_replace("/[^0-9]/","", $fresults['user']);
-					$last_num[] = intval($get_last);
+				if (preg_match("/^agent/i", $fresults['user'])) {
+					$get_last 				= preg_replace("/[^0-9]/","", $fresults['user']);
+					$last_num[] 			= intval($get_last);
 				}				
 							
 			}
 
 			// return data
-			$get_last = max($last_num);
-			$agent_num = $get_last + 1;	
+			$get_last 						= max($last_num);
+			$agent_num 						= $get_last + 1;	
 				
-			$apiresults = array("result" => "success", "user_id" => $dataUserID,"user_group" => $dataUserGroup, "user" => $dataUser, "full_name" => $dataFullName, "user_level" => $dataUserLevel, "phone_login" => $dataPhone, "active" => $dataActive, "avatar" => $dataAvatar, "useridgo" => $dataUserIDgo, "licensedSeats" => $config["licensedSeats"], "last_count" => $agent_num);	
+			$apiresults 					= array(
+				"result" 						=> "success", 
+				"user_id" 						=> $dataUserID,
+				"user_group" 					=> $dataUserGroup, 
+				"user" 							=> $dataUser, 
+				"full_name" 					=> $dataFullName, 
+				"user_level" 					=> $dataUserLevel, 
+				"phone_login" 					=> $dataPhone, 
+				"active" 						=> $dataActive, 
+				"avatar" 						=> $dataAvatar, 
+				"useridgo" 						=> $dataUserIDgo, 
+				"licensedSeats" 				=> $config["licensedSeats"], 
+				"last_count" 					=> $agent_num);	
+				
 		} else {
-			$err_msg = error_handle("10010");
-			$apiresults = array("code" => "10010", "result" => $err_msg); 
+			$err_msg 						= error_handle("10010");
+			$apiresults 					= array(
+				"code" 							=> "10010", 
+				"result" 						=> $err_msg
+			); 
 		}
-	}else{
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg); 
 	}
+
 ?>

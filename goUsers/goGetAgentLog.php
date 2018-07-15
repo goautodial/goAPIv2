@@ -19,136 +19,176 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    @include_once ("../goFunctions.php");
+
+    include_once ("goAPI.php");
+    
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB); 
+	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
     
     // POST or GET Variables
-    $user = $astDB->escape($_REQUEST['user']);
-    $start_date = $astDB->escape($_REQUEST['start_date']);
-	$end_date = $astDB->escape($_REQUEST['end_date']);
+    $user 										= $astDB->escape($_REQUEST['user']);
+    $start_date 								= $astDB->escape($_REQUEST['start_date']);
+	$end_date 									= $astDB->escape($_REQUEST['end_date']);
+	$agentlog 									= $astDB->escape($_REQUEST['agentlog']);
 	
     // Check user_id if its null or empty
-    if(empty($user)) { 
-        $apiresults = array("result" => "Error: Incomplete data passed."); 
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($user)) {
+		$err_msg 								= error_handle("40002");
+		$apiresults 							= array(
+			"code" 									=> "40002", 
+			"result" 								=> $err_msg
+		);
+        //$apiresults = array("result" => "Error: Set a value for User ID.");        
     } else {
-        $groupId = go_get_groupid($session_user, $astDB);
-		$ip_address = $_REQUEST['log_ip'];
-		
-        if (checkIfTenant($groupId, $goDB)) {
-        	//$ul = "user='$user'";
-			$ul = "user=?";
-			$arrul = array($user);
-			$arrul2 = array($user);
-        } else {
-			if($groupId !== "ADMIN"){
-				//$ul = "user='$user' AND user_group='$groupId'";
-				$ul = "user=? AND user_group=?";
-				$arrul = array($user, $groupId);
-				$arrul2 = array($user, $groupId);
-			}else{
-				//$ul = "user='$user'";
-				$ul = "user=?";
-				$arrul = array($user);
-				$arrul2 = array($user);
+        if (checkIfTenant($log_group, $goDB)) {
+        	$astDB->where("user_group", $log_group);
+        } else {        
+			if (strtoupper($log_group) != 'ADMIN') {
+				if ($user_level > 8) {
+					$astDB->where("user_group", $log_group);
+				}
 			}
         }
 		
-		$date = date("Y-m-d");
-		if($start_date !== ""){
-			$start_date .= " 00:00:00";
-			$end_date .= " 23:59:59";
-			$daterange = "AND (date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			array_push($arrul, $start_date, $end_date);
-			$limit = "LIMIT 10000";
-		}else{
-			$start_date = "00:00:00";
-			$end_date = "23:59:59";
-			//$daterange = "AND (date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$date $start_date' AND '$date $end_date')";
-			$daterange = "AND (date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			$var1 = $date." ".$start_date;
-			$var2 = $date." ".$end_date;
-			array_push($arrul, $var1, $var2);
-			$limit = "LIMIT 100";
+		$limit 									= "200";
+		$date 									= date("Y-m-d");
+		
+		if (!empty($start_date)) {
+			$start_date 						= $start_date . " 00:00:00";
+			$end_date 							= $end_date . " 23:59:59";
+		} else {
+			$start_date 						= $date . "00:00:00";
+			$end_date 							= $date . "23:59:59";
 		}
 		
-		//$query = "SELECT DISTINCT(val.agent_log_id), val.user, val.event_time, val.status, val.sub_status, vl.phone_number, val.campaign_id, val.user_group, vl.list_id, val.lead_id, vl.term_reason FROM vicidial_agent_log val, vicidial_log vl WHERE val.uniqueid = vl.uniqueid $ul $daterange ORDER BY val.event_time DESC $limit;";
-		$outbound_query = $astDB->rawQuery("SELECT uniqueid, lead_id, list_id, campaign_id, call_date, start_epoch, end_epoch, length_in_sec, status, phone_code, phone_number, user, comments, processed, user_group, term_reason, alt_dial FROM vicidial_log WHERE $ul $daterange ORDER BY call_date DESC LIMIT 10000;", $arrul);
-		//$outbound_query = "SELECT uniqueid, lead_id, list_id, campaign_id, call_date, start_epoch, end_epoch, length_in_sec, status, phone_code, phone_number, user, comments, processed, user_group, term_reason, alt_dial FROM vicidial_log WHERE $ul $daterange ORDER BY call_date DESC LIMIT 10000;";
-		//$exec_outbound_query = mysqli_query($link, $outbound_query);
+		//$daterange 								= "date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date'";
 		
-		foreach ($outbound_query as $outbound_fetch){
-			$agent_user[] = $outbound_fetch['user'];
-			$event_time[] = $outbound_fetch['call_date'];
-			$status[] = $outbound_fetch['status'];
-			$phone_number[] = $outbound_fetch['phone_number'];
-			$campaign_id[] = $outbound_fetch['campaign_id'];
-			$user_group[] = $outbound_fetch['user_group'];
-			$list_id[] = $outbound_fetch['list_id'];
-			$lead_id[] = $outbound_fetch['lead_id'];
-			$term_reason[] = $outbound_fetch['term_reason'];
-		}
-		$outbound_array = array("user" => $agent_user, "event_time" => $event_time, "status" => $status, "phone_number" => $phone_number, "campaign_id" => $campaign_id, "user_group" => $user_group, "list_id" => $list_id, "lead_id" => $lead_id, "term_reason" => $term_reason);
+		$astDB->where("user", $user);
+		$astDB->where("date_format(call_date, '%Y-%m-%d %H:%i:%s')", array($start_date, $end_date), "BETWEEN");
+		$outbound_query  						= $astDB->get("vicidial_log", $limit);
 		
-		$closerlog_query = $astDB->rawQuery("SELECT closecallid,lead_id,list_id,campaign_id,call_date,start_epoch,end_epoch,length_in_sec,status,phone_code,phone_number,user,comments,processed,queue_seconds,user_group,xfercallid,term_reason,uniqueid,agent_only FROM vicidial_closer_log WHERE $ul $daterange ORDER BY call_date DESC LIMIT 10000;", $arrul);
-		//$closerlog_query = mysqli_query($link, "SELECT closecallid,lead_id,list_id,campaign_id,call_date,start_epoch,end_epoch,length_in_sec,status,phone_code,phone_number,user,comments,processed,queue_seconds,user_group,xfercallid,term_reason,uniqueid,agent_only FROM vicidial_closer_log WHERE $ul $daterange ORDER BY call_date DESC LIMIT 10000;");
+		if ($astDB->count > 0) {		
+			foreach ($outbound_query as $outbound_fetch) {
+				$agent_user[] 					= $outbound_fetch['user'];
+				$event_time[] 					= $outbound_fetch['call_date'];
+				$status[] 						= $outbound_fetch['status'];
+				$phone_number[] 				= $outbound_fetch['phone_number'];
+				$campaign_id[] 					= $outbound_fetch['campaign_id'];
+				$user_group[] 					= $outbound_fetch['user_group'];
+				$list_id[] 						= $outbound_fetch['list_id'];
+				$lead_id[] 						= $outbound_fetch['lead_id'];
+				$term_reason[] 					= $outbound_fetch['term_reason'];
+			}
 			
-		foreach ($closerlog_query as $closerlog_fetch){
-			$closerlog_call_date[] = $closerlog_fetch['call_date'];
-			$closerlog_length_in_sec[] = gmdate("H:i:s", $closerlog_fetch['length_in_sec']);
-			$closerlog_status[] = $closerlog_fetch['status'];
-			$closerlog_user[] = $closerlog_fetch['user'];
-			$closerlog_campaign_id[] = $closerlog_fetch['campaign_id'];
-			$closerlog_list_id[] = $closerlog_fetch['list_id'];
-			$closerlog_queue_seconds[] = $closerlog_fetch['queue_seconds'];
-			$closerlog_term_reason[] = $closerlog_fetch['term_reason'];
+			$outbound_array 					= array(
+				"user" 								=> $agent_user, 
+				"call_date" 						=> $event_time, 
+				"status" 							=> $status, 
+				"phone_number" 						=> $phone_number, 
+				"campaign_id" 						=> $campaign_id, 
+				"user_group" 						=> $user_group, 
+				"list_id" 							=> $list_id, 
+				"lead_id" 							=> $lead_id, 
+				"term_reason" 						=> $term_reason
+			);
 		}
-		$closerlog_array = array("call_date" => $closerlog_call_date, "length_in_sec" => $closerlog_length_in_sec, "status" => $closerlog_status, "user" => $closerlog_user, "campaign_id" => $closerlog_campaign_id, "list_id" => $closerlog_list_id, "queue_seconds" => $closerlog_queue_seconds, "term_reason" => $closerlog_term_reason);
 		
-		if($start_date !== ""){
-			//$start_date .= " 00:00:00";
-			//$end_date .= " 23:59:59";
-			$daterange1 = "AND (date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			$daterange2 = "AND (date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			$limit = "LIMIT 10000";
-			array_push($arrul2, $start_date, $end_date);
-		}else{
-			$start_date = "00:00:00";
-			$end_date = "23:59:59";
-			$daterange1 = "AND (date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			$daterange2 = "AND (date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN ? AND ?)";
-			$limit = "LIMIT 100";
-			$var1 = $date." ".$start_date;
-			$var2 = $date." ".$end_date;
-			array_push($arrul2, $var1, $var2);
+        if (checkIfTenant($log_group, $goDB)) {
+        	$astDB->where("user_group", $log_group);
+        } else {        
+			if (strtoupper($log_group) != 'ADMIN') {
+				if ($user_level > 8) {
+					$astDB->where("user_group", $log_group);
+				}
+			}
+        }
+        
+		$astDB->where("user", $user);
+		$astDB->where("date_format(call_date, '%Y-%m-%d %H:%i:%s')", array($start_date, $end_date), "BETWEEN");
+		$closerlog_query  						= $astDB->get("vicidial_closer_log", $limit);
+		
+		if ($astDB->count > 0) {
+			foreach ($closerlog_query as $closerlog_fetch){
+				$closerlog_call_date[] 				= $closerlog_fetch['call_date'];
+				$closerlog_length_in_sec[] 			= gmdate("H:i:s", $closerlog_fetch['length_in_sec']);
+				$closerlog_status[] 				= $closerlog_fetch['status'];
+				$closerlog_user[] 					= $closerlog_fetch['user'];
+				$closerlog_user_group[] 			= $closerlog_fetch['user_group'];
+				$closerlog_campaign_id[] 			= $closerlog_fetch['campaign_id'];
+				$closerlog_list_id[] 				= $closerlog_fetch['list_id'];
+				$closerlog_queue_seconds[] 			= $closerlog_fetch['queue_seconds'];
+				$closerlog_term_reason[] 			= $closerlog_fetch['term_reason'];
+				$closerlog_phone_number[] 			= $closerlog_fetch['phone_number'];
+			}
+			
+			$closerlog_array 						= array(
+				"call_date" 							=> $closerlog_call_date, 
+				"length_in_sec" 						=> $closerlog_length_in_sec, 
+				"status" 								=> $closerlog_status, 
+				"user_group" 							=> $closerlog_user_group, 
+				"campaign_id" 							=> $closerlog_campaign_id, 
+				"list_id" 								=> $closerlog_list_id, 
+				"queue_seconds" 						=> $closerlog_queue_seconds, 
+				"term_reason" 							=> $closerlog_term_reason,
+				"phone_number"							=> $closerlog_phone_number
+			);
 		}
-		$userlog_query = $astDB->rawQuery("(SELECT agent_log_id, user, sub_status, event_time, campaign_id, user_group FROM vicidial_agent_log WHERE $ul and sub_status IS NOT NULL $daterange1) UNION (SELECT user_log_id, user, event, event_date, campaign_id, user_group FROM vicidial_user_log WHERE $ul $daterange2) ORDER BY event_time DESC;");
-		// $userlog_query = "(SELECT agent_log_id, user, sub_status, event_time, campaign_id, user_group FROM vicidial_agent_log WHERE $ul and sub_status != 'NULL' $daterange1) UNION (SELECT user_log_id, user, event, event_date, campaign_id, user_group FROM vicidial_user_log WHERE $ul $daterange2) ORDER BY event_time DESC;";
-		//SELECT user_log_id, event, event_date, campaign_id, user_group FROM vicidial_user_log WHERE $ul $daterange ORDER BY event_date DESC LIMIT 10000;
 		
-		foreach($userlog_query as $userlog_fetch){
-			$userlog_log_id[] = $userlog_fetch['agent_log_id'];
-			$userlog_event[] = $userlog_fetch['sub_status'];
-			$userlog_event_date[] = $userlog_fetch['event_time'];
-			$userlog_campaign_id[] = $userlog_fetch['campaign_id'];
-			$userlog_user_group[] = $userlog_fetch['user_group'];
+		$query = "
+			SELECT agent_log_id, user, sub_status, event_time, campaign_id, user_group FROM vicidial_agent_log 
+				WHERE user = '$user' AND sub_status IS NOT NULL AND (date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date') 
+		 UNION 
+			SELECT user_log_id, user, event, event_date as event_time, campaign_id, user_group FROM vicidial_user_log 
+				WHERE user = '$user' AND (date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date') 
+				ORDER BY event_time DESC LIMIT $limit 
+		";
+		
+		$userlog_query 							= $astDB->rawQuery($query);
+		//$rowCount 								= $astDB->getRowCount();
+		
+		if ($userlog_query > 0) {
+			foreach($userlog_query as $userlog_fetch){
+				$userlog_log_id[] 				= $userlog_fetch['agent_log_id'];
+				$userlog_user[] 				= $userlog_fetch['user'];
+				$userlog_event[] 				= $userlog_fetch['sub_status'];
+				$userlog_event_date[] 			= $userlog_fetch['event_time'];
+				$userlog_campaign_id[] 			= $userlog_fetch['campaign_id'];
+				$userlog_user_group[] 			= $userlog_fetch['user_group'];
+				//$userlog_lead_id[] 			= $userlog_fetch['lead_id'];
+				//$userlog_comments[] 			= $userlog_fetch['comments'];
+			}
+			
+			$userlog_array 						= array(
+				"agent_log_id" 						=> $userlog_log_id, 
+				"user" 								=> $userlog_user, 
+				"sub_status" 						=> $userlog_event, 
+				"event_time" 						=> $userlog_event_date, 
+				"campaign_id" 						=> $userlog_campaign_id, 
+				"user_group" 						=> $userlog_user_group
+				//"lead_id"							=> $userlog_lead_id,
+				//"comments"							=> $userlog_comments
+			);
 		}
-		$userlog_array = array("user_log_id" => $userlog_log_id, "user" => $userlog_user, "event" => $userlog_event, "event_date" => $userlog_event_date, "campaign_id" => $userlog_campaign_id, "user_group" => $userlog_user_group);
-		/*
-		while($agentlog_fetch = mysqli_fetch_array($exec_outbound_query)){
-			$agent_log_id[] = $agentlog_fetch['agent_log_id'];
-			$agent_user[] = $agentlog_fetch['user'];
-			$event_time[] = $agentlog_fetch['event_time'];
-			$status[] = $agentlog_fetch['status'];
-			$phone_number[] = $agentlog_fetch['phone_number'];
-			$campaign_id[] = $agentlog_fetch['campaign_id'];
-			$user_group[] = $agentlog_fetch['user_group'];
-			$list_id[] = $agentlog_fetch['list_id'];
-			$lead_id[] = $agentlog_fetch['lead_id'];
-			$term_reason[] = $agentlog_fetch['term_reason'];
-		}*/
 		
-		$apiresults = array("result" => "success", "query" => $userlog_query, "outbound" => $outbound_array, "inbound" => $closerlog_array, "userlog" => $userlog_array);
+		if ($agentlog == "outbound") {
+			$data								= $outbound_array;
+		} elseif ($agentlog == "inbound") {
+			$data								= $inbound_array;
+		} elseif ($agentlog == "userlog") {
+			$data								= $userlog_array;
+		}
 		
-		$log_id = log_action($goDB, 'VIEW', $user, $ip_address, "Viewed the agent log of Agent: $user", $groupId);
+		$apiresults 							= array(
+			"result" 								=> "success", 
+			"data"	 								=> $data
+		);
+		
+		//$log_id 							= log_action($goDB, 'VIEW', $user, $log_ip, "Viewed the agent log of Agent: $user", $log_group);
 	}
 ?>
 

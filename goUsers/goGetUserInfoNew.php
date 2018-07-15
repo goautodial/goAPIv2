@@ -21,41 +21,86 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     @include_once ("goAPI.php");
+    
+	$log_user 								= $session_user;
+	$log_group 								= go_get_groupid($session_user, $astDB);    
 
     // POST or GET Variables
-    $user_id = $astDB->escape($_REQUEST['user_id']);
-    $ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);
+    $user_id 								= $astDB->escape($_REQUEST['user_id']);
+    //$log_ip = $astDB->escape($_REQUEST['log_ip']);
+
         
     // Check user_id if its null or empty
-	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
-			"result" 						=> "Error: Session User Not Defined."
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Session User Not Defined."
 		);
-	} elseif($user_id == null) {
-		$err_msg = error_handle("40001");
-        $apiresults = array("code" => "40001","result" => $err_msg);
+	} elseif (empty($user_id) || is_null($user_id)) {
+		$err_msg 							= error_handle("40001");
+        $apiresults 						= array(
+			"code" 								=> "40001",
+			"result" 							=> $err_msg
+		);
     } else {
         if (checkIfTenant($log_group, $goDB)) { 
 			$astDB->where("user_group", $log_group); 
 		}
         
+        $cols 								= array(
+			"user_id",
+			"user",
+			"full_name",
+			"email",
+			"user_group",
+			"active",
+			"user_level",
+			"phone_login",
+			"phone_pass",
+			"voicemail_id",
+			"hotkeys_active",
+			"vdc_agent_api_access",	
+			"agent_choose_ingroups",
+			"vicidial_recording_override",
+			"vicidial_transfers",
+			"closer_default_blended",
+			"agentcall_manual",
+			"scheduled_callbacks",
+			"agentonly_callbacks",
+			"agent_lead_search_override"        
+        );
+        
         $astDB->where("user_id", $user_id);
-        $fresults = $astDB->getOne("vicidial_users", "user_id,user,full_name,email,user_group,active,user_level,phone_login,phone_pass,voicemail_id,hotkeys_active,vdc_agent_api_access,agent_choose_ingroups,vicidial_recording_override,vicidial_transfers,closer_default_blended,agentcall_manual,scheduled_callbacks,agentonly_callbacks,agent_lead_search_override");
-        $user = $fresults["user"];
+        $fresults 							= $astDB->getOne("vicidial_users", $cols);
+        //$user 							= $fresults["user"];
+        
+        $colsgo 							= array(
+			"userid",
+			"avatar",
+			"gcal",
+			"calendar_apikey",
+			"calendar_id"        
+        );
         
         $goDB->where("userid", $user_id);
-        $fresultsgo = $goDB->getOne("users", "userid,avatar,gcal,calendar_apikey,calendar_id");
+        $fresultsgo 						= $goDB->getOne("users", $colsgo);
 		
 		if ($goDB->count > 0) {
-			$data = array_merge($fresults, $fresultsgo); 
-		} else { $data = $fresults; }
-               
-        $log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of User $user", $log_group);
+			$data 							= array_merge($fresults, $fresultsgo); 
+		} else { 
+			$data 							= $fresults; 
+		}               
+        //$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed info of User $user", $log_group);
         
-		if(!empty($data)) { $apiresults = array("result" => "success", "data" => $data); } 
-		else { $apiresults = array("result" => "Error: User Group doesn't exist."); }                            
+		if (!empty($data)) { 
+			$apiresults 					= array(
+				"result" 						=> "success", 
+				"data" 							=> $data
+			); 
+		} else { 
+			$apiresults 					= array(
+				"result" 						=> "Error: User Group doesn't exist."
+			); 
+		} 
 	}
 
 ?>

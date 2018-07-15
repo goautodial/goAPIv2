@@ -21,34 +21,54 @@
 **/
     
     @include_once ("goAPI.php");
+    
+	$log_user 								= $session_user;
+	$log_group 								= go_get_groupid($session_user, $astDB); 
  
     // POST or GET Variables
-	$user = $astDB->escape($_REQUEST['user']);
-	$phone_login = $astDB->escape($_REQUEST['phone_login']);
+	$user 									= $astDB->escape($_REQUEST['user']);
+	$phone_login 							= $astDB->escape($_REQUEST['phone_login']);
 
-	// User Duplicate Check
-	if ($user != NULL) {
-		$astDB->where("user", $user);
-		$astDB->get("vicidial_users", null, "user");
-		//"SELECT user FROM vicidial_users WHERE user = '$user';";
-	
-		if($astDB->count > 0) {
-			$apiresults = array("result" => "fail", "data" => "There are 1 or more users with that User ID.");
-		}else{		
-			$apiresults = array("result" => "success");
+    // Error Checking
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 						= array(
+			"result" 							=> "Error: Session User Not Defined."
+		);
+	} else {
+		// User Duplicate Check
+		if ($user != NULL) {
+			$astDB->where("user", $user);
+			$astDB->get("vicidial_users", null, "user");
+			//"SELECT user FROM vicidial_users WHERE user = '$user';";
+		
+			if($astDB->count > 0) {
+				$apiresults 				= array(
+					"result" 					=> "fail", 
+					"data" 						=> "There are 1 or more users with that User ID."
+				);
+			}else{		
+				$apiresults 				= array(
+					"result" 					=> "success"
+				);
+			}
 		}
-	}
-	
-	// Phone Login Check optional when not null
-	if($phone_login != NULL){
-		$astDB->where("extension", $phone_login);
-		$astDB->getOne("phones", null, "extension");
-		//  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
-		if($astDB->count > 0) {
-			$apiresults = array("result" => "fail", "data" => "Duplicate phone extension found.");
-		}else{		
-			$apiresults = array("result" => "success");
-		}		
-	}	
+		
+		// Phone Login Check optional when not null
+		if ($phone_login != NULL) {
+			$astDB->where("extension", $phone_login);
+			$astDB->getOne("phones", null, "extension");
+			//  $queryPhoneCheck = "SELECT extension FROM phones WHERE extension = '$phone_login';";
+			if ($astDB->count > 0) {
+				$apiresults 				= array(
+					"result" 					=> "fail", 
+					"data" 						=> "Duplicate phone extension found."
+				);
+			} else {		
+				$apiresults 				= array(
+					"result" 					=> "success"
+				);
+			}		
+		}	
+	}		
 	
 ?>
