@@ -21,51 +21,79 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     include_once ("goAPI.php");
-        
+    
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);    
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	
     // POST or GET Variables
-	$extension = $astDB->escape($_REQUEST['extension']);
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
+	$extension 										= $astDB->escape($_REQUEST['extension']);	
         
-    // Check extension if its null or empty
-    if(empty($session_user)){
-        $apiresults = array("result" => "Error: Session User Not Defined.");
-    }elseif(is_null($extension)) { 
-		$apiresults = array("result" => "Error: Set a value for EXTEN ID."); 
-	} else {
-        $log_user = $session_user;
-        $groupId = go_get_groupid($session_user, $astDB);
-        
-        if (!checkIfTenant($groupId, $astDB)) {
-        	$astDB->where("extension", $extension);
-            //$ul = "WHERE extension='$extension'";
-    	} else {
-            $astDB->where("extension", $extension);
-            $astDB->where("user_group", $groupId); 
-			//$ul = "WHERE extension='$extension' AND user_group='$groupId'";  
-		}
+    // Error Checking
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($extension) || is_null($extension)) { 
+		$apiresults									= array(
+			"result" 									=> "Error: Set a value for EXTEN ID."
+		); 
+	} else {        
+        if (checkIfTenant($log_group, $astDB)) {
+        	$astDB->where("user_group", $log_group); 
+    	}
+		
+		$cols 										= array(
+			"extension",
+			"protocol",
+			"server_ip",
+			"dialplan_number",
+			"voicemail_id",
+			"status",
+			"active",
+			"fullname",
+			"messages",
+			"old_messages",
+			"user_group"
+		);
+		
+		$astDB->where("extension", $extension);
         $astDB->orderby("extension", "asc");
-        $fresults = $astDB->getOne("phones", "extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group");
-   		//$query = "SELECT extension,protocol,server_ip,dialplan_number,voicemail_id,status,active,fullname,messages,old_messages,user_group FROM phones $ul ORDER BY extension LIMIT 1;";
-		$countResult = $astDB->count;
+        $fresults 									= $astDB->getOne("phones", $cols);
 
-		if($countResult > 0) {
-            $dataExtension = $fresults['extension'];
-            $dataProtocol = $fresults['protocol'];
-            $dataServerIp = $fresults['server_ip'];
-            $dataDialplanNumber = $fresults['dialplan_number'];
-            $dataVoicemailId = $fresults['voicemail_id'];
-            $dataStatus = $fresults['status'];
-            $dataActive = $fresults['active'];
-            $dataFullname = $fresults['fullname'];
-            $dataMessages = $fresults['messages'];
-            $dataOldMessages = $fresults['old_messages'];
-            $dataUserGroup = $fresults['user_group'];
+		if ($astDB->count > 0) {
+            $dataExtension 							= $fresults['extension'];
+            $dataProtocol 							= $fresults['protocol'];
+            $dataServerIp 							= $fresults['server_ip'];
+            $dataDialplanNumber 					= $fresults['dialplan_number'];
+            $dataVoicemailId 						= $fresults['voicemail_id'];
+            $dataStatus 							= $fresults['status'];
+            $dataActive 							= $fresults['active'];
+            $dataFullname 							= $fresults['fullname'];
+            $dataMessages 							= $fresults['messages'];
+            $dataOldMessages 						= $fresults['old_messages'];
+            $dataUserGroup 							= $fresults['user_group'];
 
-            $apiresults = array("result" => "success", "extension" => $dataExtension, "protocol" => $dataProtocol, "server_ip" => $dataServerIp, "dialplan_number" => $dataDialplanNumber, "voicemail_id" => $dataVoicemailId, "status" => $dataStatus, "active" => $dataActive, "fullname" => $dataFullname, "messages" => $dataMessages, "old_messages" => $dataOldMessages, "user_group" => $dataUserGroup);
+            $apiresults 							= array(
+				"result" 								=> "success", 
+				"extension" 							=> $dataExtension, 
+				"protocol" 								=> $dataProtocol, 
+				"server_ip" 							=> $dataServerIp, 
+				"dialplan_number" 						=> $dataDialplanNumber, 
+				"voicemail_id" 							=> $dataVoicemailId, 
+				"status" 								=> $dataStatus, 
+				"active" 								=> $dataActive, 
+				"fullname" 								=> $dataFullname, 
+				"messages" 								=> $dataMessages, 
+				"old_messages" 							=> $dataOldMessages, 
+				"user_group" 							=> $dataUserGroup
+			);
 			
-			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of Phone: $exten_id", $groupId);
+			$log_id 								= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of Phone: $exten_id", $log_group);
 		} else {
-			$apiresults = array("result" => "Error: Phone doesn't exist.");
+			$apiresults 							= array(
+				"result" 								=> "Error: Phone doesn't exist."
+			);
 		}
 	}
 ?>

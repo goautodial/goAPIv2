@@ -37,7 +37,7 @@
     $messages = !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
     $old_messages = !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
     $user_group = $astDB->escape($_REQUEST['user_group']);
-    $ip_address = $astDB->escape($_REQUEST['log_ip']);
+    $log_ip = $astDB->escape($_REQUEST['log_ip']);
 	$gmt = $astDB->escape($_REQUEST['gmt']);
 	
 	if(isset($_REQUEST['seats'])) { $seats = $astDB->escape($_REQUEST['seats']); }
@@ -47,7 +47,7 @@
 		
 	$log_user = $session_user;
 	$log_group = go_get_groupid($session_user, $astDB); 
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
 	
 	$defStatus = array('ACTIVE','SUSPENDED','CLOSED','PENDING,ADMIN');
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
@@ -167,7 +167,9 @@
 						if ($pass_hash_enabled > 0) {
 							$ha1 = md5("{$extension}:{$realm}:{$pass}");
 							$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
-							$pass = '';
+							$password = '';
+						} else {
+							$password = $pass;
 						}
 
 						$goDB->where("setting", "GO_agent_domain");
@@ -183,7 +185,7 @@
 						$datakam = array(
 							"username" => $extension,
 							"domain" => $domain,
-							"password" => $pass,
+							"password" => $password,
 							"ha1" => $ha1,
 							"ha1b" => $ha1b
 						);							
@@ -191,7 +193,7 @@
 						//}
 						
 						if ($protocol != "EXTERNAL") { $rebuild = rebuildconfQuery($astDB, $server_ip); }
-						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New Phone: $extension", $log_group, $q_insertPhone . $qkam_insertSubscriber);
+						$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Phone: $extension", $log_group, $q_insertPhone . $qkam_insertSubscriber);
 						
 						$return_extension = $extension;
 						array_push($arr_phone, $return_extension);						
