@@ -238,17 +238,19 @@
 						$pass_hash 					= "";
 						if ($pass_hash_enabled > 0) {
 							$pass_hash 				= encrypt_passwd($pass, $pass_cost, $pass_key);
-							$pass 					= "";
+							$password 				= "";
+						} else {
+							$password				= $pass;
 						}
 						
 						$dataUser 					= array(
 							"user" 						=> $user,
-							"pass" 						=> $pass,
+							"pass" 						=> $password,
 							"user_group" 				=> $user_group,
 							"full_name" 				=> $full_name,
 							"user_level" 				=> $user_level,
 							"phone_login" 				=> $phone_login,
-							"phone_pass" 				=> $pass,
+							"phone_pass" 				=> $password,
 							"agentonly_callbacks" 		=> $agentonly_callbacks,
 							"agentcall_manual" 			=> $agentcall_manual,
 							"active" 					=> $active,
@@ -262,7 +264,8 @@
 						);
 						
 						$q_insertUser 				= $astDB->insert('vicidial_users', $dataUser); // insert record in asterisk.vicidial_users
-
+						$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
+						
 						$dataPhones 				= array(
 							"extension" 				=> $phone_login,
 							"dialplan_number" 			=> "9999" . $phone_login,
@@ -271,7 +274,7 @@
 							"computer_ip" 				=> "",
 							"server_ip" 				=> $server_ip,
 							"login" 					=> $phone_login,
-							"pass" 						=> $pass,
+							"pass" 						=> $password,
 							"status" 					=> "ACTIVE",
 							"active" 					=> $active,
 							"phone_type" 				=> "",
@@ -284,7 +287,7 @@
 							"template_id" 				=> "--NONE--",
 							//"conf_override" => $conf_override,
 							"user_group" 				=> $user_group,
-							"conf_secret" 				=> $pass,
+							"conf_secret" 				=> $password,
 							"messages" 					=> "0",
 							"old_messages" 				=> "0"
 						);
