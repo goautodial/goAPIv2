@@ -24,99 +24,110 @@
 
     include_once ("goAPI.php");
 
-	$log_user 						= $session_user;
-	$log_group 						= go_get_groupid($session_user, $astDB); 
-	$log_ip 						= $astDB->escape($_REQUEST['log_ip']);
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
 	
 	// POST or GET Variables
-	$goUser 						= $astDB->escape($_REQUEST['goUser']);
-	$campaign_id 					= $astDB->escape($_REQUEST['campaign_id']);
-	$campaign_name 					= $astDB->escape($_REQUEST['campaign_name']);
-	$campaign_desc 					= $astDB->escape($_REQUEST['campaign_desc']);
-	$active 						= $astDB->escape(strtoupper($_REQUEST['active']));
-	$dial_method 					= $astDB->escape(strtoupper($_REQUEST['dial_method']));
-	$auto_dial_level				= $astDB->escape($_REQUEST['auto_dial_level']);
-	$auto_dial_level_adv 			= $astDB->escape($_REQUEST['auto_dial_level_adv']);
-	$dial_prefix 					= $astDB->escape($_REQUEST['dial_prefix']);
-	$custom_prefix 					= $astDB->escape($_REQUEST['custom_prefix']);
-	$campaign_script 				= $astDB->escape($_REQUEST['campaign_script']);
-	$webform						= $astDB->escape($_REQUEST['web_form_address']);
-	$campaign_cid 					= $astDB->escape($_REQUEST['campaign_cid']);
-	$campaign_recording 			= $astDB->escape($_REQUEST['campaign_recording']);
-	$campaign_vdad_exten 			= $astDB->escape($_REQUEST['campaign_vdad_exten']);
-	$local_call_time 				= $astDB->escape($_REQUEST['local_call_time']);
-	$hopper_level 					= $astDB->escape($_REQUEST['hopper_level']);
-	$force_reset_hopper 			= $astDB->escape($_REQUEST['force_reset_hopper']);
-	$dial_status 					= $astDB->escape($_REQUEST['dial_status']);
-	$lead_order 					= $astDB->escape($_REQUEST['lead_order']);
-	$lead_order_secondary 			= $astDB->escape($_REQUEST['lead_order_secondary']);
-	$lead_filter 					= $astDB->escape($_REQUEST['lead_filter']);
-	$dial_timeout 					= $astDB->escape($_REQUEST['dial_timeout']);
-	$manual_dial_prefix 			= $astDB->escape($_REQUEST['manual_dial_prefix']);
-	$get_call_launch 				= $astDB->escape($_REQUEST['get_call_launch']);
-	$am_message_exten 				= $astDB->escape($_REQUEST['am_message_exten']);
-	$am_message_chooser 			= $astDB->escape($_REQUEST['am_message_chooser']);
-	$agent_pause_codes_active 		= $astDB->escape($_REQUEST['agent_pause_codes_active']);
-	$manual_dial_filter 			= $astDB->escape($_REQUEST['manual_dial_filter']);
-	$use_internal_dnc 				= $astDB->escape($_REQUEST['use_internal_dnc']);
-	$use_campaign_dnc 				= $astDB->escape($_REQUEST['use_campaign_dnc']);
-	$manual_dial_list_id 			= $astDB->escape($_REQUEST['manual_dial_list_id']);
-	$available_only_ratio_tally 	= $astDB->escape($_REQUEST['available_only_ratio_tally']);
-	$campaign_rec_filename 			= $astDB->escape($_REQUEST['campaign_rec_filename']);
-	$next_agent_call 				= $astDB->escape($_REQUEST['next_agent_call']);
-	$xferconf_a_number 				= $astDB->escape($_REQUEST["xferconf_a_number"]);
-	$xferconf_b_number 				= $astDB->escape($_REQUEST["xferconf_b_number"]);
-	$three_way_call_cid 			= $astDB->escape($_REQUEST['three_way_call_cid']);
-	$three_way_dial_prefix 			= $astDB->escape($_REQUEST['three_way_dial_prefix']);
-	$customer_3way_hangup_logging 	= $astDB->escape($_REQUEST['customer_3way_hangup_logging']);
-	$customer_3way_hangup_seconds 	= $astDB->escape($_REQUEST['customer_3way_hangup_seconds']);
-	$customer_3way_hangup_action 	= $astDB->escape($_REQUEST['customer_3way_hangup_action']);
-	$inbound_man 					= $astDB->escape($_REQUEST['inbound_man']);
-	$campaign_allow_inbound			= $astDB->escape($_REQUEST['campaign_allow_inbound']);
-	$closer_campaigns				= $astDB->escape($_REQUEST['closer_campaigns']);
-	$xfer_groups					= $astDB->escape($_REQUEST['xfer_groups']);
-	$custom_fields_launch			= $astDB->escape($_REQUEST['custom_fields_launch']);
-	$campaign_type					= $astDB->escape($_REQUEST['campaign_type']);
-	$custom_fields_list_id			= $astDB->escape($_REQUEST['custom_fields_list_id']);
-	$per_call_notes 				= $astDB->escape($_REQUEST['per_call_notes']);
-	$url_tab_first_title			= $astDB->escape($_REQUEST['url_tab_first_title']);
-	$url_tab_first_url				= $astDB->escape($_REQUEST['url_tab_first_url']);
-	$url_tab_second_title			= $astDB->escape($_REQUEST['url_tab_second_title']);
-	$url_tab_second_url				= $astDB->escape($_REQUEST['url_tab_second_url']);
-	$agent_lead_search				= $astDB->escape($_REQUEST['agent_lead_search']);
-	$agent_lead_search_method 		= $astDB->escape($_REQUEST['agent_lead_search_method']);
-    $omit_phone_code 				= $astDB->escape($_REQUEST['omit_phone_code']);
-	$alt_number_dialing 			= $astDB->escape($_REQUEST['alt_number_dialing']);
-	$dynamic_cid 					= $astDB->escape($_REQUEST['dynamic_cid']);
-	$nextdial_seconds 				= $astDB->escape($_REQUEST['nextdial_seconds']);
-	$my_callback_option 			= $astDB->escape($_REQUEST['my_callback_option']);
-	$survey_first_audio_file 		= $astDB->escape($_REQUEST['survey_first_audio_file']);
-	$survey_method 					= $astDB->escape($_REQUEST['survey_method']);
-	$survey_menu_id 				= $astDB->escape($_REQUEST['survey_menu_id']);
-	$survey_dtmf_digits 			= $astDB->escape($_REQUEST['survey_dtmf_digits']);
-	$survey_xfer_exten 				= $astDB->escape($_REQUEST['survey_xfer_exten']);
-	$survey_ni_digit 				= $astDB->escape($_REQUEST['survey_ni_digit']);
-	$survey_ni_audio_file 			= $astDB->escape($_REQUEST['survey_ni_audio_file']);
-	$survey_ni_status 				= $astDB->escape($_REQUEST['survey_ni_status']);
-	$survey_third_digit 			= $astDB->escape($_REQUEST['survey_third_digit']);
-	$survey_third_audio_file 		= $astDB->escape($_REQUEST['survey_third_audio_file']);
-	$survey_third_status 			= $astDB->escape($_REQUEST['survey_third_status']);
-	$survey_third_exten 			= $astDB->escape($_REQUEST['survey_third_exten']);
-	$survey_fourth_digit 			= $astDB->escape($_REQUEST['survey_fourth_digit']);
-	$survey_fourth_audio_file 		= $astDB->escape($_REQUEST['survey_fourth_audio_file']);
-	$survey_fourth_status 			= $astDB->escape($_REQUEST['survey_fourth_status']);
-	$survey_fourth_exten 			= $astDB->escape($_REQUEST['survey_fourth_exten']);
-    $no_channels 					= $astDB->escape($_REQUEST['no_channels']);
-    $disable_alter_custdata 		= $astDB->escape($_REQUEST['disable_alter_custdata']);
-    $disable_alter_custphone 		= $astDB->escape($_REQUEST['disable_alter_custphone']);
-	$amd_send_to_vmx 				= $astDB->escape($_REQUEST['amd_send_to_vmx']);
-	$waitforsilence_options 		= $astDB->escape($_REQUEST['waitforsilence_options']);
-	$location 						= $astDB->escape($_REQUEST['location_id']);
+	$goUser 										= $astDB->escape($_REQUEST['goUser']);
+	$campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
+	$campaign_name 									= $astDB->escape($_REQUEST['campaign_name']);
+	$campaign_desc 									= $astDB->escape($_REQUEST['campaign_desc']);
+	$active 										= $astDB->escape(strtoupper($_REQUEST['active']));
+	$dial_method 									= $astDB->escape(strtoupper($_REQUEST['dial_method']));
+	$auto_dial_level								= $astDB->escape($_REQUEST['auto_dial_level']);
+	$auto_dial_level_adv 							= $astDB->escape($_REQUEST['auto_dial_level_adv']);
+	$dial_prefix 									= $astDB->escape($_REQUEST['dial_prefix']);
+	$custom_prefix 									= $astDB->escape($_REQUEST['custom_prefix']);
+	$campaign_script 								= $astDB->escape($_REQUEST['campaign_script']);
+	$webform										= $astDB->escape($_REQUEST['web_form_address']);
+	$campaign_cid 									= $astDB->escape($_REQUEST['campaign_cid']);
+	$campaign_recording 							= $astDB->escape($_REQUEST['campaign_recording']);
+	$campaign_vdad_exten 							= $astDB->escape($_REQUEST['campaign_vdad_exten']);
+	$local_call_time 								= $astDB->escape($_REQUEST['local_call_time']);
+	$hopper_level 									= $astDB->escape($_REQUEST['hopper_level']);
+	$force_reset_hopper 							= $astDB->escape($_REQUEST['force_reset_hopper']);
+	$dial_status 									= $astDB->escape($_REQUEST['dial_status']);
+	$lead_order 									= $astDB->escape($_REQUEST['lead_order']);
+	$lead_order_secondary 							= $astDB->escape($_REQUEST['lead_order_secondary']);
+	$lead_filter 									= $astDB->escape($_REQUEST['lead_filter']);
+	$dial_timeout 									= $astDB->escape($_REQUEST['dial_timeout']);
+	$manual_dial_prefix 							= $astDB->escape($_REQUEST['manual_dial_prefix']);
+	$get_call_launch 								= $astDB->escape($_REQUEST['get_call_launch']);
+	$am_message_exten 								= $astDB->escape($_REQUEST['am_message_exten']);
+	$am_message_chooser 							= $astDB->escape($_REQUEST['am_message_chooser']);
+	$agent_pause_codes_active 						= $astDB->escape($_REQUEST['agent_pause_codes_active']);
+	$manual_dial_filter 							= $astDB->escape($_REQUEST['manual_dial_filter']);
+	$use_internal_dnc 								= $astDB->escape($_REQUEST['use_internal_dnc']);
+	$use_campaign_dnc 								= $astDB->escape($_REQUEST['use_campaign_dnc']);
+	$manual_dial_list_id 							= $astDB->escape($_REQUEST['manual_dial_list_id']);
+	$available_only_ratio_tally 					= $astDB->escape($_REQUEST['available_only_ratio_tally']);
+	$campaign_rec_filename 							= $astDB->escape($_REQUEST['campaign_rec_filename']);
+	$next_agent_call 								= $astDB->escape($_REQUEST['next_agent_call']);
+	$xferconf_a_number 								= $astDB->escape($_REQUEST["xferconf_a_number"]);
+	$xferconf_b_number 								= $astDB->escape($_REQUEST["xferconf_b_number"]);
+	$three_way_call_cid 							= $astDB->escape($_REQUEST['three_way_call_cid']);
+	$three_way_dial_prefix 							= $astDB->escape($_REQUEST['three_way_dial_prefix']);
+	$customer_3way_hangup_logging 					= $astDB->escape($_REQUEST['customer_3way_hangup_logging']);
+	$customer_3way_hangup_seconds 					= $astDB->escape($_REQUEST['customer_3way_hangup_seconds']);
+	$customer_3way_hangup_action 					= $astDB->escape($_REQUEST['customer_3way_hangup_action']);
+	$inbound_man 									= $astDB->escape($_REQUEST['inbound_man']);
+	$campaign_allow_inbound							= $astDB->escape($_REQUEST['campaign_allow_inbound']);
+	$closer_campaigns								= $astDB->escape($_REQUEST['closer_campaigns']);
+	$xfer_groups									= $astDB->escape($_REQUEST['xfer_groups']);
+	$custom_fields_launch							= $astDB->escape($_REQUEST['custom_fields_launch']);
+	$campaign_type									= $astDB->escape($_REQUEST['campaign_type']);
+	$custom_fields_list_id							= $astDB->escape($_REQUEST['custom_fields_list_id']);
+	$per_call_notes 								= $astDB->escape($_REQUEST['per_call_notes']);
+	$url_tab_first_title							= $astDB->escape($_REQUEST['url_tab_first_title']);
+	$url_tab_first_url								= $astDB->escape($_REQUEST['url_tab_first_url']);
+	$url_tab_second_title							= $astDB->escape($_REQUEST['url_tab_second_title']);
+	$url_tab_second_url								= $astDB->escape($_REQUEST['url_tab_second_url']);
+	$agent_lead_search								= $astDB->escape($_REQUEST['agent_lead_search']);
+	$agent_lead_search_method 						= $astDB->escape($_REQUEST['agent_lead_search_method']);
+    $omit_phone_code 								= $astDB->escape($_REQUEST['omit_phone_code']);
+	$alt_number_dialing 							= $astDB->escape($_REQUEST['alt_number_dialing']);
+	$dynamic_cid 									= $astDB->escape($_REQUEST['dynamic_cid']);
+	$nextdial_seconds 								= $astDB->escape($_REQUEST['nextdial_seconds']);
+	$my_callback_option 							= $astDB->escape($_REQUEST['my_callback_option']);
+	$survey_first_audio_file 						= $astDB->escape($_REQUEST['survey_first_audio_file']);
+	$survey_method 									= $astDB->escape($_REQUEST['survey_method']);
+	$survey_menu_id 								= $astDB->escape($_REQUEST['survey_menu_id']);
+	$survey_dtmf_digits 							= $astDB->escape($_REQUEST['survey_dtmf_digits']);
+	$survey_xfer_exten 								= $astDB->escape($_REQUEST['survey_xfer_exten']);
+	$survey_ni_digit 								= $astDB->escape($_REQUEST['survey_ni_digit']);
+	$survey_ni_audio_file 							= $astDB->escape($_REQUEST['survey_ni_audio_file']);
+	$survey_ni_status 								= $astDB->escape($_REQUEST['survey_ni_status']);
+	$survey_third_digit 							= $astDB->escape($_REQUEST['survey_third_digit']);
+	$survey_third_audio_file 						= $astDB->escape($_REQUEST['survey_third_audio_file']);
+	$survey_third_status 							= $astDB->escape($_REQUEST['survey_third_status']);
+	$survey_third_exten 							= $astDB->escape($_REQUEST['survey_third_exten']);
+	$survey_fourth_digit 							= $astDB->escape($_REQUEST['survey_fourth_digit']);
+	$survey_fourth_audio_file 						= $astDB->escape($_REQUEST['survey_fourth_audio_file']);
+	$survey_fourth_status 							= $astDB->escape($_REQUEST['survey_fourth_status']);
+	$survey_fourth_exten 							= $astDB->escape($_REQUEST['survey_fourth_exten']);
+    $no_channels 									= $astDB->escape($_REQUEST['no_channels']);
+    $disable_alter_custdata 						= $astDB->escape($_REQUEST['disable_alter_custdata']);
+    $disable_alter_custphone 						= $astDB->escape($_REQUEST['disable_alter_custphone']);
+	$amd_send_to_vmx 								= $astDB->escape($_REQUEST['amd_send_to_vmx']);
+	$waitforsilence_options 						= $astDB->escape($_REQUEST['waitforsilence_options']);
+	$location 										= $astDB->escape($_REQUEST['location_id']);
    	//$apiresults = array("data" => $_REQUEST); 
 
     // Default values 
-    $defActive = array("Y","N");
-    $defDialMethod = array("MANUAL","RATIO","ADAPT_HARD_LIMIT","ADAPT_TAPERED","ADAPT_AVERAGE","INBOUND_MAN");
+    $defActive 										= array(
+		"Y",
+		"N"
+	);
+    
+    $defDialMethod 									= array(
+		"MANUAL",
+		"RATIO",
+		"ADAPT_HARD_LIMIT",
+		"ADAPT_TAPERED",
+		"ADAPT_AVERAGE",
+		"INBOUND_MAN"
+	);
     
     // Check campaign_id if its null or empty
 	if (empty($log_user) || is_null($log_user)) {

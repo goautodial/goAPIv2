@@ -41,7 +41,7 @@
 			//$addedSQL = "AND user_group='$user_group'";
 		}
 		if (!is_null($find_user)) {
-			$astDB->where("user", $find_user, "RLIKE")
+			$astDB->where("user", $find_user, "RLIKE");
 			//$findSQL = "AND user RLIKE '$find_user'";
 		}
 		

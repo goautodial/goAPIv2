@@ -38,7 +38,7 @@
 	$defBill = array('NO','YES','HALF');
 
     ### ERROR CHECKING ...
-	if (!isset($session_user) || is_null($session_user)){
+	if (!isset($log_user) || is_null($log_user)){
 		$apiresults 						= array(
 			"result" 							=> "Error: Session User Not Defined."
 		);

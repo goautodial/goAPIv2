@@ -34,7 +34,7 @@
 	$query = $astDB->get("vicidial_call_times");
 	//$query = "SELECT * FROM vicidial_call_times $ul $addedSQL ORDER BY call_time_id;";
 
-	$log_id = log_action($goDB, 'VIEW', $session_user, $log_ip, "Viewed the Calltimes List", $log_group);
+	//$log_id = log_action($goDB, 'VIEW', $session_user, $log_ip, "Viewed the Calltimes List", $log_group);
 	
 	foreach ($query as $fresults) {
 		$dataCalltimeID[] = $fresults['call_time_id'];

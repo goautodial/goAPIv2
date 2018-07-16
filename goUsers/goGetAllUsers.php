@@ -42,10 +42,12 @@
 		
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
 		} else {
 			if (strtoupper($log_group) != 'ADMIN') {
 				if ($user_level > 8) {
 					$astDB->where("user_group", $log_group);
+					$astDB->orWhere("user_group", "---ALL---");
 				}
 			}		
 			
