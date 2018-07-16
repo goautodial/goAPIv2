@@ -68,7 +68,7 @@
 	} else {
 		$astDB->where('campaign_id', $campaign_id);
 		$astDB->where('hotkey', $hotkey);
-		$astDB->orwhere('status', $status);
+		//$astDB->orwhere('status', $status);
 		$hotkeys 						= $astDB->get('vicidial_campaign_hotkeys');
 		
 		if (count($hotkeys) > 0) {
