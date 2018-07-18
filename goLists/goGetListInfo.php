@@ -20,14 +20,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    //////////////////////////////////////////////////////
-    /// Name: goGetListInfo.php 		///
-    /// Description: API to get specific List 		///
-    /// Version: 0.9 		///
-    /// Copyright: GOAutoDial Inc. (c) 2011-2014 		///
-    /// Written by: Jermiah Sebastian Samatra 		///
-    /// License: AGPLv2 		///
-    //////////////////////////////////////////////////////
     
     // POST or GET Variables
     $list_id = $astDB->escape($_REQUEST['list_id']);
