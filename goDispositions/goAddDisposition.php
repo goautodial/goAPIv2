@@ -4,8 +4,8 @@
  * @brief 		API for Dispositions
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author     	Jeremiah Sebastian Samatra
  * @author     	Chris Lomuntad
+ * @author     	Jeremiah Sebastian Samatra 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@
 
 
     // ERROR CHECKING 
-	if (!isset($session_user) || is_null($session_user)){
+	if (!isset($log_user) || is_null($log_user)){
 		$apiresults 					= array(
 			"result" 						=> "Error: Session User Not Defined."
 		);

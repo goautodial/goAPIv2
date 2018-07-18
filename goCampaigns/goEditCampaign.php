@@ -83,6 +83,9 @@
 	$url_tab_first_url								= $astDB->escape($_REQUEST['url_tab_first_url']);
 	$url_tab_second_title							= $astDB->escape($_REQUEST['url_tab_second_title']);
 	$url_tab_second_url								= $astDB->escape($_REQUEST['url_tab_second_url']);
+	$enable_callback_alert							= $astDB->escape($_REQUEST['enable_callback_alert']);
+	$cb_noexpire									= $astDB->escape($_REQUEST['cb_noexpire']);
+	$cb_sendemail									= $astDB->escape($_REQUEST['cb_sendemail']);
 	$agent_lead_search								= $astDB->escape($_REQUEST['agent_lead_search']);
 	$agent_lead_search_method 						= $astDB->escape($_REQUEST['agent_lead_search_method']);
     $omit_phone_code 								= $astDB->escape($_REQUEST['omit_phone_code']);
@@ -119,6 +122,11 @@
 		"Y",
 		"N"
 	);
+	
+    $defEnable 										= array(
+		0,
+		1
+	);	
     
     $defDialMethod 									= array(
 		"MANUAL",
@@ -270,11 +278,12 @@
 				);
 			}
 				
-			if($campaign_type != 'SURVEY' && $dial_method != "INBOUND_MAN") {
+			if ($campaign_type != 'SURVEY' && $dial_method != "INBOUND_MAN") {
 				$data_array02 						= array(
 					'use_internal_dnc' 					=> (!empty($use_internal_dnc)) ? $use_internal_dnc : $resultGet['use_internal_dnc'],
 					'use_campaign_dnc' 					=> (!empty($use_campaign_dnc)) ? $use_campaign_dnc : $resultGet['use_campaign_dnc'],
-					'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'], 
+					'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
+					//'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : "",
 					'manual_dial_list_id' 				=> (!empty($manual_dial_list_id)) ? $manual_dial_list_id : $resultGet['manual_dial_list_id'], 
 					'hopper_level' 						=> (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
 					'alt_number_dialing' 				=> (!empty($alt_number_dialing)) ? $alt_number_dialing : $resultGet['alt_number_dialing']
@@ -296,12 +305,14 @@
 				'dial_status_a' 						=> (!empty($dial_status)) ? $dial_status : $resultGet['dial_status'], 
 				'lead_filter_id' 						=> (!empty($lead_filter)) ? $lead_filter : $resultGet['lead_filter_id'],
 				'dial_timeout' 							=> (!empty($dial_timeout)) ? $dial_timeout : $resultGet['dial_timeout'], 
-				'manual_dial_prefix' 					=> (!empty($manual_dial_prefix)) ? $manual_dial_prefix : $resultGet['manual_dial_prefix'], 
+				//'manual_dial_prefix' 					=> (!empty($manual_dial_prefix)) ? $manual_dial_prefix : $resultGet['manual_dial_prefix'],
+				'manual_dial_prefix' 					=> $manual_dial_prefix,
 				'get_call_launch' 						=> (!empty($get_call_launch)) ? $get_call_launch : $resultGet['get_call_launch'], 
 				'next_agent_call' 						=> (!empty($next_agent_call)) ? $next_agent_call : $resultGet['next_agent_call'], 
 				'xferconf_a_number' 					=> (!empty($xferconf_a_number)) ? $xferconf_a_number : $resultGet['xferconf_a_number'], 
 				'xferconf_b_number' 					=> (!empty($xferconf_b_number)) ? $xferconf_b_number : $resultGet['xferconf_b_number'], 
-				'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'], 
+				//'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'],
+				'three_way_dial_prefix' 				=> $three_way_dial_prefix,
 				'closer_campaigns' 						=> (!empty($closer_campaigns)) ? $closer_campaigns : $resultGet['closer_campaigns'],
 				'xfer_groups' 							=> (!empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
 				'survey_first_audio_file' 				=> (!empty($survey_first_audio_file)) ? $survey_first_audio_file : $resultGet['survey_first_audio_file'],
@@ -352,7 +363,10 @@
 					'url_tab_first_title' 				=> (!empty($url_tab_first_title)) ? $url_tab_first_title : $resultGet['url_tab_first_title'],
 					'url_tab_first_url' 				=> (!empty($url_tab_first_url)) ? $url_tab_first_url : $resultGet['url_tab_first_url'],
 					'url_tab_second_title' 				=> (!empty($url_tab_second_title)) ? $url_tab_second_title : $resultGet['url_tab_second_title'],
-					'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url']
+					'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
+					'enable_callback_alert' 			=> (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
+					'cb_noexpire' 						=> (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
+					'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail']					
 				);
 				
 				$goDB->where('campaign_id', $campaign_id);
@@ -370,7 +384,10 @@
 					'url_tab_first_title' 				=> (!empty($url_tab_first_title)) ? $url_tab_first_title : $resultGet['url_tab_first_title'],
 					'url_tab_first_url' 				=> (!empty($url_tab_first_url)) ? $url_tab_first_url : $resultGet['url_tab_first_url'],
 					'url_tab_second_title' 				=> (!empty($url_tab_second_title)) ? $url_tab_second_title : $resultGet['url_tab_second_title'],
-					'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url']
+					'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
+					'enable_callback_alert' 			=> (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
+					'cb_noexpire' 						=> (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
+					'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail']	
 				);
 
 				$goDB->insert('go_campaigns', $data_insert_go);
