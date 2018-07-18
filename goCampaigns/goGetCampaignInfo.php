@@ -89,6 +89,9 @@
 					$url_tab_first_url 				= $fresults['url_tab_first_url'];
 					$url_tab_second_title 			= $fresults['url_tab_second_title'];
 					$url_tab_second_url 			= $fresults['url_tab_second_url'];
+					$enable_callback_alert			= $fresults['enable_callback_alert'];
+					$cb_noexpire 					= $fresults['cb_noexpire'];
+					$cb_sendemail					= $fresults['cb_sendemail'];
 					
 					if ($location_id_COL !== '') {
 						$location_id 				= $fresults['location_id'];
@@ -116,6 +119,9 @@
 				$url_tab_first_url 					= (gettype($url_tab_first_url) != 'NULL') ? $url_tab_first_url : '';
 				$url_tab_second_title 				= (gettype($url_tab_second_title) != 'NULL') ? $url_tab_second_title : '';
 				$url_tab_second_url 				= (gettype($url_tab_second_url) != 'NULL') ? $url_tab_second_url : '';
+				$enable_callback_alert 				= (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : '';
+				$cb_noexpire 						= (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : '';
+				$cb_sendemail 						= (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : '';				
 				$location_id 						= (gettype($location_id) != 'NULL') ? $location_id : '';
 				$dynamic_cid 						= (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
 				
@@ -129,6 +135,9 @@
 					'url_tab_first_url' 				=> $url_tab_first_url,
 					'url_tab_second_title' 				=> $url_tab_second_title,
 					'url_tab_second_url' 				=> $url_tab_second_url,
+					'enable_callback_alert'				=> $enable_callback_alert,
+					'cb_noexpire'						=> $cb_noexpire,
+					'cb_sendemail'						=> $cb_sendemail,
 					'number_of_lines' 					=> $numberoflines,
 					'location_id' 						=> $location_id,
 					'dynamic_cid' 						=> $dynamic_cid
