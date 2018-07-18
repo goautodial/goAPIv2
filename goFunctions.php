@@ -1766,5 +1766,14 @@
 	function nl($string) {
 		if(isset($_SERVER['SHELL'])) return preg_replace('/\<br(\s*)?\/?\>/i', PHP_EOL, $string);
 		return nl2br($string);
+	}
+	
+	// escape existing special characters already in the database
+	function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
+		$escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c", "	");
+		$replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b", " ");
+		$result = str_replace($escapers, $replacements, $value);
+
+		return $result;
 	}	
 ?>
