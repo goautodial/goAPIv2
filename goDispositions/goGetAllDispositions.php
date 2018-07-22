@@ -24,16 +24,18 @@
 
     include_once ("goAPI.php");
 
-	$log_user 					= $session_user;
-	$log_group 					= go_get_groupid($session_user, $astDB); 
-	$customRequest				= $astDB->escape($_REQUEST['custom_request']);
+	$log_user 							= $session_user;
+	$log_group 							= go_get_groupid($session_user, $astDB); 
+	$customRequest						= $astDB->escape($_REQUEST['custom_request']);
 	
-	$campaigns 					= go_getall_allowed_campaigns($log_group, $astDB);
-	$campaignsArr				= explode(' ', $campaigns);
+	$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);
 		
 	if (empty($session_user)) {
-		$err_msg 				= error_handle("40001");
-        $apiresults 			= array("code" => "40001","result" => $err_msg);
+		$err_msg 						= error_handle("40001");
+        $apiresults 					= array(
+			"code" 							=> "40001",
+			"result" 						=> $err_msg
+		);
 	} elseif (!empty($customRequest) && $customRequest === "custom") {
 		$query = "(
 			SELECT status,status_name FROM vicidial_campaign_statuses
@@ -55,19 +57,21 @@
 		);	
 
 	} elseif (!empty($customRequest) && $customRequest === "campaign") {				
-		if (is_array($campaignsArr)) {
-			if (!preg_match("/ALLCAMPAIGNS/",  $campaigns)) {
-				$astDB->where("campaign_id", $campaignsArr, "IN");
+		if (is_array($campaigns)) {
+			$campaignsArr				= array();
+			foreach ($campaigns["campaign_id"] as $key => $value) {
+				array_push($campaignsArr, $value);
 			}
 			
-			$cols 					= array(
+			$cols 						= array(
 				"status", 
 				"status_name", 
 				"campaign_id"
 			);
 			
-			$astDB->orderBy("campaign_id");
-			$result 				= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
+			$astDB->where("campaign_id", $campaignsArr, "IN");
+			$astDB->orderBy("campaign_id", "desc");			
+			$result 					= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults) {
@@ -84,17 +88,17 @@
 				);			
 			}	 		
 		} else {
-			$err_msg 				= error_handle("10108", "status. No campaigns available");
-			$apiresults				= array(
-				"code" 					=> "10108", 
-				"result" 				=> $err_msg
+			$err_msg 					= error_handle("10108", "status. No campaigns available");
+			$apiresults					= array(
+				"code" 						=> "10108", 
+				"result" 					=> $err_msg
 			);
 		}
 	} elseif (!empty($customRequest) && $customRequest !== "custom") {
-		$err_msg 					= error_handle("41006", "custom_request");
-        $apiresults 				= array(
-			"code" 						=> "41006",
-			"result" 					=> $err_msg
+		$err_msg 						= error_handle("41006", "custom_request");
+        $apiresults 					= array(
+			"code" 							=> "41006",
+			"result" 						=> $err_msg
 		);
 	}
 	

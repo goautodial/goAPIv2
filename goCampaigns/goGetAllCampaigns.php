@@ -32,7 +32,7 @@
 			"result" 							=> "Error: Session User Not Defined."
 		);
 	} else {	
-		if (checkIfTenant($log_group, $goDB)) {
+		/*if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere('user_group', "---ALL---");
 		} else {
@@ -40,9 +40,10 @@
 				$astDB->where('user_group', $log_group);
 				$astDB->orWhere('user_group', "---ALL---");
 			}
-		}
+		}*/
 		
-		//$campaigns 						= go_getall_allowed_campaigns($log_group, $astDB);
+		$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);			
+		$apiresults							= $campaigns;
 		//$campaignsArr					= explode(' ', $campaigns);
 		
 		/*if (is_array($campaignsArr)) {
@@ -50,7 +51,7 @@
 				$astDB->where('campaign_id', $campaignsArr, 'IN');
 			}*/
 
-		$cols 								= array(
+		/*$cols 								= array(
 			"campaign_id",
 			"campaign_name",
 			"dial_method",

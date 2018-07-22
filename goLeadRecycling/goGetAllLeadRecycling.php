@@ -27,19 +27,21 @@
 	$log_group 							= go_get_groupid($session_user, $astDB); 
 	//$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);
 	
-	$campaigns 							= go_getall_allowed_campaigns($log_group, $astDB);
-	$campaignsArr						= explode(' ', $campaigns);	
-    
+	$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);
+
     if (!isset($log_user) || is_null($log_user)) {
     	$apiresults 					= array(
 			"result" 						=> "Error: Missing Required Parameters."
 		); 
 	} else {
-		if (is_array($campaignsArr)) {
-			if (!preg_match("/ALLCAMPAIGNS/",  $campaigns)) {
-				$astDB->where("campaign_id", $campaignsArr, "IN");
+		if (is_array($campaigns)) {
+			$campaignsArr				= array();
+			foreach ($campaigns["campaign_id"] as $key => $value) {
+				array_push($campaignsArr, $value);
 			}
-
+			//echo "<pre>";
+			//var_dump($campaignsArr);			
+			$astDB->where("campaign_id", $campaignsArr, "IN");
 			$astDB->orderBy("campaign_id", "desc");
 			$rsltv 							= $astDB->get('vicidial_lead_recycle');
 
