@@ -125,7 +125,48 @@
 		return $allAllowedCampaigns;
     }
 
+    function allowed_campaigns($log_group, $goDB, $astDB) {
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+			$astDB->orWhere('user_group', "---ALL---");
+		} else {
+			if($log_group !== "ADMIN"){
+				$astDB->where('user_group', $log_group);
+				$astDB->orWhere('user_group', "---ALL---");
+			}
+		}    
 
+		$cols 								= array(
+			"campaign_id",
+			"campaign_name",
+			"dial_method",
+			"active"
+		);
+		
+		$astDB->orderBy('campaign_id', 'asc');
+		$result 							= $astDB->get('vicidial_campaigns', NULL, $cols);
+		
+		if ($astDB->count > 0) {
+			foreach($result as $fresults){
+				$dataCampID[] 				= $fresults['campaign_id'];
+				$dataCampName[] 			= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
+				$dataDialMethod[] 			= $fresults['dial_method'];
+				$dataActive[] 				= $fresults['active'];
+			}
+
+			$campaigns	 					= array(
+				"result" 						=> "success", 
+				"campaign_id" 					=> $dataCampID, 
+				"campaign_name" 				=> $dataCampName, 
+				"dial_method" 					=> $dataDialMethod, 
+				"active" 						=> $dataActive
+			);			
+		} else {
+			$campaigns 					= "";
+		}
+		
+		return $campaigns;
+    }
 
 
     
