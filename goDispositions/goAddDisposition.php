@@ -24,252 +24,250 @@
 
     include_once ("goAPI.php");
  
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$log_ip 							= $astDB->escape($_REQUEST['log_ip']);    
- 
-    // POST or GET Variables
-	$category 							= "UNDEFINED"; //$_REQUEST['category'];
-	$userid 							= $astDB->escape($_REQUEST['userid']);
-	$status 							= $astDB->escape($_REQUEST['status']);
-	$campaign_id 						= $astDB->escape($_REQUEST['campaign_id']);
-	$status_name 						= $astDB->escape($_REQUEST['status_name']);
-	$selectable 						= $astDB->escape($_REQUEST['selectable']);
-	$human_answered 					= $astDB->escape($_REQUEST['human_answered']);
-	$sale								= $astDB->escape($_REQUEST['sale']);
-	$dnc 								= $astDB->escape($_REQUEST['dnc']);
-	$customer_contact 					= $astDB->escape($_REQUEST['customer_contact']);
-	$not_interested 					= $astDB->escape($_REQUEST['not_interested']);
-	$unworkable 						= $astDB->escape($_REQUEST['unworkable']);
-	$scheduled_callback 				= $astDB->escape($_REQUEST['scheduled_callback']);
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);    
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 	
-	$color 								= $astDB->escape($_REQUEST['color']);
-	$priority 							= $astDB->escape($_REQUEST['priority']);
-	$type 								= $astDB->escape($_REQUEST['type']);
+    // POST or GET Variables
+    $campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
+	$category 										= "UNDEFINED"; //$_REQUEST['category'];
+	$userid 										= $astDB->escape($_REQUEST['userid']);
+	$status 										= $astDB->escape($_REQUEST['status']);	
+	$status_name 									= $astDB->escape($_REQUEST['status_name']);
+	$selectable 									= $astDB->escape($_REQUEST['selectable']);
+	$human_answered 								= $astDB->escape($_REQUEST['human_answered']);
+	$sale											= $astDB->escape($_REQUEST['sale']);
+	$dnc 											= $astDB->escape($_REQUEST['dnc']);
+	$customer_contact 								= $astDB->escape($_REQUEST['customer_contact']);
+	$not_interested 								= $astDB->escape($_REQUEST['not_interested']);
+	$unworkable 									= $astDB->escape($_REQUEST['unworkable']);
+	$scheduled_callback 							= $astDB->escape($_REQUEST['scheduled_callback']);
+	
+	$color 											= $astDB->escape($_REQUEST['color']);
+	$priority 										= $astDB->escape($_REQUEST['priority']);
+	$type 											= $astDB->escape($_REQUEST['type']);
 
     // Default values 
-    $defVal 							= array(
+    $defVal 										= array(
 		"Y",
 		"N"
 	);
 	
 	if (!$color) { 
-		$color 							= "#b5b5b5"; 
+		$color 										= "#b5b5b5"; 
 	}
 	if (!$priority) { 
-		$priority 						= 1; 
+		$priority 									= 1; 
 	}
 	if (!$type) { 
-		$type 							= 'CUSTOM'; 
+		$type 										= 'CUSTOM'; 
 	}
 
 
     // ERROR CHECKING 
 	if (!isset($log_user) || is_null($log_user)){
-		$apiresults 					= array(
-			"result" 						=> "Error: Session User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
-	} elseif ($campaign_id == null) {
-		$err_msg = error_handle("40001");
-		$apiresults 					= array("
-			code" 							=> "40001", 
-			"result" 						=> $err_msg
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Set a value for Campaign ID.");
-	} elseif ($status == null) {
-		$err_msg 						= error_handle("40001");
-		$apiresults 					= array(
-			"code" 							=> "40001", 
-			"result" 						=> $err_msg
+    }  elseif (empty($status) || is_null($status)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Set a value for status."
 		);
-		//$apiresults = array("result" => "Error: Set a value for status.");
 	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status_name) || $status_name == null){
-		$err_msg 						= error_handle("10003", "status_name");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "status_name");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Special characters found in status name and must not be empty");
+		//$apiresults = array("result" 			=> "Error: Special characters found in status name and must not be empty");
 	} elseif (!in_array($scheduled_callback,$defVal)) {
-		$err_msg 						= error_handle("10003", "scheduled_callback");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "scheduled_callback");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for scheduled_callback is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for scheduled_callback is Y or N only.");
 	} elseif (!in_array($unworkable,$defVal)) {
-		$err_msg 						= error_handle("10003", "unworkable");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "unworkable");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for unworkable is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for unworkable is Y or N only.");
 	} elseif (!in_array($selectable,$defVal)) {
-		$err_msg 						= error_handle("10003", "selectable");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "selectable");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for selectable is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for selectable is Y or N only.");
 	} elseif (!in_array($human_answered,$defVal)) {
-		$err_msg 						= error_handle("10003", "human_answered");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "human_answered");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for human_answered is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for human_answered is Y or N only.");
 	} elseif (!in_array($sale,$defVal)) {
-		$err_msg 						= error_handle("10003", "sale");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "sale");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for sale is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for sale is Y or N only.");
 	} elseif (!in_array($dnc,$defVal)) {
-		$err_msg 						= error_handle("10003", "dnc");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "dnc");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for dnc is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for dnc is Y or N only.");
 	} elseif (!in_array($customer_contact,$defVal)) {
-		$err_msg 						= error_handle("10003", "customer_contact");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "customer_contact");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for customer_contact is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for customer_contact is Y or N only.");
 	} elseif (!in_array($not_interested,$defVal)) {
-		$err_msg 						= error_handle("10003", "not_interested");
-		$apiresults 					= array(
-			"code" 							=> "10003", 
-			"result" 						=> $err_msg
+		$err_msg 									= error_handle("10003", "not_interested");
+		$apiresults 								= array(
+			"code" 										=> "10003", 
+			"result" 									=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Default value for not_interested is Y or N only.");
+		//$apiresults = array("result" 			=> "Error: Default value for not_interested is Y or N only.");
 	} else {			
-		//check status if unique
-		$astDB->where('status', $status);
-		$astDB->getOne('vicidial_statuses', 'status');
+		$campaignsArr								= array();
+		foreach ($campaigns["campaign_id"] as $key => $value) {
+			array_push($campaignsArr, $value);
+		}
 		
-		if ($astDB->count <= 0) {
+		if (in_array($campaign_id, $campaignsArr) || $campaign_id == 'ALL') {			
 			$astDB->where('status', $status);
-			$astDB->where('campaign_id', $campaign_id);
-			$astDB->getOne('vicidial_campaign_statuses', 'status');
+			$astDB->get('vicidial_statuses', null, 'status');
 			
-			if ($astDB->count <= 0){
-				if ($campaign_id == "ALL") {
-					$allowedCampaigns					= go_getall_allowed_campaigns($log_group, $astDB);
-					$campaignsArr						= explode(' ', $allowedCampaigns);
+			if ($astDB->count <= 0) {
+				if ($campaign_id == 'ALL') {
+					$astDB->where("status", $status);
+					$astDB->get("vicidial_campaign_statuses", NULL, "status");
 					
-					if (is_array($campaignsArr)) {
-						if (!preg_match("/ALLCAMPAIGNS/",  $allowedCampaigns)) {
-							$astDB->where('campaign_id', $campaignsArr, 'IN');
-						}
-						
-						if (checkIfTenant($log_group, $goDB)) {
-							$astDB->where('user_group', $log_group);
-							$astDB->orWhere('user_group', "---ALL---");
-						}
-						
-						$query 							= $astDB->get('vicidial_campaigns', NULL, 'campaign_id');
-						
-						foreach ($query as $row){
-							$campaign_id 				= $row['campaign_id'];							
-							$data						= array(
-								"status"					=> $status, 	
-								"status_name"				=> $status_name,
-								"selectable"				=> $selectable, 
-								"campaign_id"				=> $campaign_id,
-								"human_answered"			=> $human_answered,
-								"category"					=> $category,
-								"sale"						=> $sale,
-								"dnc"						=> $dnc,
-								"customer_contact"			=> $customer_contact,
-								"not_interested"			=> $not_interested,
-								"unworkable"				=> $unworkable,
-								"scheduled_callback"		=> $scheduled_callback
+					if($astDB->count <= 0) {
+						foreach ($campaigns["campaign_id"] as $key => $campaignid) {
+							$data					= array(
+								"status"				=> $status, 	
+								"status_name"			=> $status_name,
+								"selectable"			=> $selectable, 
+								"campaign_id"			=> $campaignid,
+								"human_answered"		=> $human_answered,
+								"category"				=> $category,
+								"sale"					=> $sale,
+								"dnc"					=> $dnc,
+								"customer_contact"		=> $customer_contact,
+								"not_interested"		=> $not_interested,
+								"unworkable"			=> $unworkable,
+								"scheduled_callback"	=> $scheduled_callback
 							);
 							
-							$q_insert					= $astDB->insert("vicidial_campaign_statuses", $data);
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());							
+							$astDB->insert("vicidial_campaign_statuses", $data);
+							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $astDB->getLastQuery());							
+							
 							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
 							$checkTable 				= $goDB->rawQuery($tableQuery);
 
 							if ($checkTable) {
 								$datago					= array(
 									"status"				=> $status, 	
-									"campaign_id"			=> $campaign_id,
+									"campaign_id"			=> $campaignid,
 									"priority"				=> $priority,
 									"color"					=> $color,
 									"type"					=> $type
 								);
 								
 								$qgo_insert				= $goDB->insert("go_statuses", $datago);
-								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $goDB->getLastQuery());							
+								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
 							}
-							
-							$apiresults 				= array(
-								"result" 					=> "success"
-							);
-						}
-					} else {		
-						$err_msg 						= error_handle("10108", "status. No campaigns available");
-						$apiresults						= array(
-							"code" 							=> "10108", 
-							"result" 						=> $err_msg
+						}					
+											
+						$apiresults 				= array(
+							"result" 					=> "success"
+						);						
+					} else {
+						$err_msg 					= error_handle("41004", "status. Campaign Status already exists");
+						$apiresults					= array(
+							"code" 						=> "41004", 
+							"result" 					=> $err_msg
 						);
-					}
+					}						
 				} else {
-					$data						= array(
-						"status"					=> $status, 	
-						"status_name"				=> $status_name,
-						"selectable"				=> $selectable, 
-						"campaign_id"				=> $campaign_id,
-						"human_answered"			=> $human_answered,
-						"category"					=> $category,
-						"sale"						=> $sale,
-						"dnc"						=> $dnc,
-						"customer_contact"			=> $customer_contact,
-						"not_interested"			=> $not_interested,
-						"unworkable"				=> $unworkable,
-						"scheduled_callback"		=> $scheduled_callback
-					);
+					$astDB->where("campaign_id", $campaign_id);
+					$astDB->where("status", $status);
+					$astDB->get("vicidial_campaign_statuses", NULL, "status");
 					
-					$q_insert					= $astDB->insert("vicidial_campaign_statuses", $data);
-					$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
-					
-					$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
-					$checkTable 				= $goDB->rawQuery($tableQuery);
-
-					if ($checkTable) {
-						$datago					= array(
-							"status"				=> $status, 	
-							"campaign_id"			=> $campaign_id,
-							"priority"				=> $priority,
-							"color"					=> $color,
-							"type"					=> $type
+					if($astDB->count <= 0) {						
+						$data						= array(
+							"status"					=> $status, 	
+							"status_name"				=> $status_name,
+							"selectable"				=> $selectable, 
+							"campaign_id"				=> $campaign_id,
+							"human_answered"			=> $human_answered,
+							"category"					=> $category,
+							"sale"						=> $sale,
+							"dnc"						=> $dnc,
+							"customer_contact"			=> $customer_contact,
+							"not_interested"			=> $not_interested,
+							"unworkable"				=> $unworkable,
+							"scheduled_callback"		=> $scheduled_callback
 						);
 						
-						$qgo_insert				= $goDB->insert("go_statuses", $datago);
-						$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $goDB->getLastQuery());							
-					}
-					
-					$apiresults 				= array(
-						"result" 					=> "success"
-					);
+						$astDB->insert("vicidial_campaign_statuses", $data);
+						$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $astDB->getLastQuery());							
+						
+						$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
+						$checkTable 				= $goDB->rawQuery($tableQuery);
+
+						if ($checkTable) {
+							$datago					= array(
+								"status"				=> $status, 	
+								"campaign_id"			=> $campaign_id,
+								"priority"				=> $priority,
+								"color"					=> $color,
+								"type"					=> $type
+							);
+							
+							$qgo_insert				= $goDB->insert("go_statuses", $datago);
+							$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaign_id", $log_group, $goDB->getLastQuery());							
+						}
+						
+						$apiresults 				= array(
+							"result" 					=> "success"
+						);
+					} else {
+						$err_msg 					= error_handle("41004", "status. Campaign Status already exists");
+						$apiresults					= array(
+							"code" 						=> "41004", 
+							"result" 					=> $err_msg
+						);
+					}					
 				}
 			} else {
-				$err_msg 						= error_handle("41004", "status. Campaign Status already exists");
-				$apiresults						= array(
-					"code" 							=> "41004", 
-					"result" 						=> $err_msg
+				$err_msg 							= error_handle("41004", "status. Status already exists in the default statuses");
+				$apiresults 						= array(
+					"code" 								=> "41004", 
+					"result" 							=> $err_msg
 				);
 			}
-		} else {
-			$err_msg 							= error_handle("41004", "status. Status already exists in the default statuses");
-			$apiresults 						= array(
-				"code" 								=> "41004", 
-				"result" 							=> $err_msg
+		} else {		
+			$err_msg 								= error_handle("10108", "status. No campaigns available");
+			$apiresults								= array(
+				"code" 									=> "10108", 
+				"result" 								=> $err_msg
 			);
 		}
 	}

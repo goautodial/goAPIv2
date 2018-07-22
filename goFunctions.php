@@ -143,7 +143,7 @@
 			"active"
 		);
 		
-		$astDB->orderBy('campaign_id', 'asc');
+		$astDB->orderBy('campaign_id', 'desc');
 		$result 							= $astDB->get('vicidial_campaigns', NULL, $cols);
 		
 		if ($astDB->count > 0) {

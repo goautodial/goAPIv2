@@ -29,10 +29,11 @@
 	
 	$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);
 
-    if (!isset($log_user) || is_null($log_user)) {
-    	$apiresults 					= array(
-			"result" 						=> "Error: Missing Required Parameters."
-		); 
+    ### ERROR CHECKING
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 					= array(
+			"result" 						=> "Error: Session User Not Defined."
+		);
 	} else {
 		if (is_array($campaigns)) {
 			$campaignsArr				= array();

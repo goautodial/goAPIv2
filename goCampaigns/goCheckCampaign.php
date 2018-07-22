@@ -2,7 +2,8 @@
 /**
  * @file    	goCheckCampaign.php
  * @brief     	API to check if campaign already exists
- * @copyright   Copyright (C) GOautodial Inc.
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
  * @author      Alexander Jim Abenoja 
  * @author      Jeremiah Sebastian Samatra
  *
@@ -23,43 +24,102 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	//$ip_address 						= $astDB->escape($_REQUEST['log_ip']);		
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']);		
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 	
-    $campaign_id 						= $astDB->escape($_REQUEST['campaign_id']);
+	// POST or GET Variables
+    $campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
+    $status 										= $astDB->escape($_REQUEST['status']);
     
     // Check exisiting status
-    if (!empty($_REQUEST['status'])) {
-        $status = $astDB->escape($_REQUEST['status']);
-            
-        $rsltvCheck3 = 0;
-        
-        //if($campaign_id == "ALL"){
-            $astDB->where('status', $status);
-            $rsltvCheck3 = $astDB->get('vicidial_campaign_statuses', null, 'status');
-        //}
+	if (!isset($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
+		);
+    } else {
+		if (!empty($status)) {
+			$campaignsArr							= array();
+			foreach ($campaigns["campaign_id"] as $key => $value) {
+				array_push($campaignsArr, $value);
+			}
+			
+			if (in_array($campaign_id, $campaignsArr) || $campaign_id == 'ALL') {			
+				$astDB->where('status', $status);
+				$astDB->get('vicidial_statuses', null, 'status');
+				
+				if ($astDB->count <= 0) {
+					if ($campaign_id == 'ALL') {
+						foreach ($campaigns["campaign_id"] as $key => $campaignid) {
+							$astDB->where("campaign_id", $campaignid);
+							$astDB->where("status", $status);
+							$astDB->get("vicidial_campaign_statuses", NULL, "status");
+							
+							if($astDB->count <= 0) {
+								$apiresults 			= array(
+									"result" 				=> "success"
+								);						
+							} else {
+								$err_msg 					= error_handle("41004", "status. Campaign Status already exists");
+								$apiresults					= array(
+									"code" 						=> "41004", 
+									"result" 					=> $err_msg
+								);
+							}							
+						}					
+					} else {
+						$astDB->where("campaign_id", $campaign_id);
+						$astDB->where("status", $status);
+						$astDB->get("vicidial_campaign_statuses", NULL, "status");
+						
+						if($astDB->count <= 0) {
+							$apiresults 			= array(
+								"result" 				=> "success"
+							);						
+						} else {
+							$err_msg 					= error_handle("41004", "status. Campaign Status already exists");
+							$apiresults					= array(
+								"code" 						=> "41004", 
+								"result" 					=> $err_msg
+							);
+						}					
+					}
+				} else {
+					$err_msg 						= error_handle("41004", "status. Status already exists in the default statuses");
+					$apiresults 					= array(
+						"code" 							=> "41004", 
+						"result" 						=> $err_msg
+					);
+				}
+			} else {		
+				$err_msg 							= error_handle("10108", "status. No campaigns available");
+				$apiresults							= array(
+					"code" 								=> "10108", 
+					"result" 							=> $err_msg
+				);
+			}
+		} elseif (!empty($campaign_id) && empty($status)) {
+			$astDB->where('campaign_id', $campaign_id);
+			$astDB->get('vicidial_campaigns', null, 'campaign_id');
 
-		$astDB->where('status', $status);
-		$rsltvCheck2 = $astDB->get('vicidial_statuses', null, 'status');
-
-		$astDB->where('status', $status);
-		//$astDB->where('campaign_id', $campaign_id);
-		$rsltvCheck1 = $astDB->get('vicidial_campaign_statuses', null, 'status');
-                
-        if($rsltvCheck1 || $rsltvCheck2 || $rsltvCheck3) {
-            $apiresults = array("result" => "fail", "status" => "There are 1 or more statuses with that specific input.");
-        }else{
-            $apiresults = array("result" => "success");
-        }
-    } elseif (!empty($_REQUEST['campaign_id']) && empty($_REQUEST['status'])) {
-        $astDB->where('campaign_id', $campaign_id);
-        $rsltvCheck1 = $astDB->get('vicidial_campaigns', null, 'campaign_id');
-
-        if($rsltvCheck1) {
-            $apiresults = array("result" => "fail", "status" => "Campaign already exist.");
-        }else{
-            $apiresults = array("result" => "success");
-        }
-    }
+			if ($astDB->count > 0) {
+				$apiresults 					= array(
+					"result" 						=> "fail", 
+					"status" 						=> "Campaign already exist."
+				);
+			} else {
+				$apiresults 					= array(
+					"result" 						=> "success"
+				);
+			}
+		}
+	}
+	
 ?>

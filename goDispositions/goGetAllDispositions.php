@@ -24,39 +24,21 @@
 
     include_once ("goAPI.php");
 
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$customRequest						= $astDB->escape($_REQUEST['custom_request']);
-	
-	$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 		
-	if (empty($session_user)) {
-		$err_msg 						= error_handle("40001");
-        $apiresults 					= array(
-			"code" 							=> "40001",
-			"result" 						=> $err_msg
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
-	} elseif (!empty($customRequest) && $customRequest === "custom") {
-		$query = "(
-			SELECT status,status_name FROM vicidial_campaign_statuses
-		) UNION (
-			SELECT status,status_name FROM vicidial_statuses 
-				ORDER BY status
-		)";
-		$fresults = $astDB->rawQuery($query);
-		
-		foreach ($fresults as $fresult) {
-			$dataStat[] 		= $fresult['status'];			
-			$dataStatName[] 	= $fresult['status_name'];
-		}	
-		
-		$apiresults 			= array(
-			"result" 				=> "success", 
-			"status" 				=> $dataStat, 
-			"status_name" 			=> $dataStatName
-		);	
-
-	} elseif (!empty($customRequest) && $customRequest === "campaign") {				
+	} elseif (empty($campaigns) || is_null($campaigns)) {
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
+		);
+    } else {
 		if (is_array($campaigns)) {
 			$campaignsArr				= array();
 			foreach ($campaigns["campaign_id"] as $key => $value) {
@@ -93,14 +75,8 @@
 				"code" 						=> "10108", 
 				"result" 					=> $err_msg
 			);
-		}
-	} elseif (!empty($customRequest) && $customRequest !== "custom") {
-		$err_msg 						= error_handle("41006", "custom_request");
-        $apiresults 					= array(
-			"code" 							=> "41006",
-			"result" 						=> $err_msg
-		);
-	}
+		}    
+    }
 	
 	
 ?>

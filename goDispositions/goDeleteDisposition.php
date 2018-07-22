@@ -2,9 +2,10 @@
  /**
  * @file 		goDeleteDisposition.php
  * @brief 		API for Dispositions
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,71 +22,94 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    ### POST or GET Variables
-	$campaign_id = $astDB->escape($_REQUEST["campaign_id"]);
-	//$campaign_id = $astDB->escape($campaign_id);
+    include_once ("goAPI.php");
+    
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 	
-	$statuses = $astDB->escape($_REQUEST["statuses"]);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
+    ### POST or GET Variables
+	$campaign_id 									= $astDB->escape($_REQUEST["campaign_id"]);	
+	$statuses 										= $astDB->escape($_REQUEST["statuses"]);
+
     
     ### Check Campaign ID if its null or empty
-	if( empty($campaign_id) && empty($statuses)) { 
-		$apiresults = array("result" => "Error: Set a value for Campaign ID."); 
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
+		);
 	} else {
- 
-		$groupId = go_get_groupid($goUser, $astDB);
-
-		if (!checkIfTenant($groupId, $goDB)) {
-			//$ul = "";
-		} else {
-			//$ul = "AND user_group='$groupId'";
-			//$addedSQL = "WHERE user_group='$groupId'";
-			$astDB->where('user_group', $groupId);
-		}
+		if (is_array($campaigns)) {
+			$campaignsArr							= array();
+			foreach ($campaigns["campaign_id"] as $key => $value) {
+				array_push($campaignsArr, $value);
+			}
 		
-   		//$queryOne = "SELECT campaign_id, status FROM vicidial_campaign_statuses $ul where campaign_id='$campaign_id';";
-		$astDB->where('campaign_id', $campaign_id);
-   		$rsltvOne = $astDB->get('vicidial_campaign_statuses', null, 'campaign_id, status');
-		$countResult = $astDB->getRowCount();
+			if (in_array($campaign_id, $campaignsArr)) {
+				$astDB->where("campaign_id", $campaign_id);
+				$astDB->get("vicidial_campaign_statuses");
+				
+				if($astDB->count > 0) {
+					if  (empty($statuses) || is_null($statuses)) {
+						$astDB->where("campaign_id", $campaign_id);
+						$astDB->delete("vicidial_campaign_statuses");
+						$log_id 					= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted custom statuses from Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
+						
+						$apiresults 				= array(
+							"result" 					=> "success"
+						);						
+					} else {
+						// check if custom status/disposition exists
+						$astDB->where("status", $statuses);
+						$astDB->where("campaign_id", $campaign_id);
+						$astDB->get("vicidial_campaign_statuses");
+						
+						if($astDB->count > 0) {
+							$astDB->where("status", $statuses);
+							$astDB->where("campaign_id", $campaign_id);
+							$astDB->delete("vicidial_campaign_statuses");
+							$log_id 				= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted status: $statuses from Campaign: $campaign_id", $log_group, $astDB->getLastQuery());							
 
-		if($countResult > 0) {
-			
-			if($statuses != NULL){
-				//$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id' AND status = '$statuses' LIMIT 1;";
-				$astDB->where('status', $statuses);
-				$astDB->where('campaign_id', $campaign_id);
-   				$deleteResult = $astDB->delete('vicidial_campaign_statuses', 1);			
-			}else{
-				//$deleteQuery = "DELETE FROM vicidial_campaign_statuses WHERE campaign_id='$campaign_id';";
-				$astDB->where('campaign_id', $campaign_id);
-   				$deleteResult = $astDB->delete('vicidial_campaign_statuses');
-				//echo $deleteQuery;
+							$goDB->rawQuery("SHOW tables LIKE 'go_statuses';");
+							
+							if ($goDB->count > 0) {
+								$goDB->where("campaign_id", $campaign_id);
+								$goDB->where("status", $statuses);
+								$goDB->delete("go_statuses");
+								$log_id 			= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted status: $statuses from Campaign: $campaign_id", $log_group, $goDB->getLastQuery());
+							}				
+							
+							$apiresults 			= array(
+								"result" 				=> "success"
+							);
+						} else {
+							$apiresults 			= array(
+								"result" 				=> "Error: Status doesn't exist"
+							);
+						}
+					}									
+				} else {
+					$apiresults 					= array(
+						"result" 						=> "Error: Campaign doesn't exist"
+					);
+				}			
+			} else {
+				$apiresults 						= array(
+					"result" 							=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
+				);
 			}
-			
-			$tableQuery = "SHOW tables LIKE 'go_statuses';";
-			$checkTable = $goDB->rawQuery($tableQuery);
-			$tableExist = $goDB->getRowCount();
-			if ($tableExist > 0) {
-				//$statusQuery = "DELETE FROM go_statuses WHERE campaign_id='$campaign_id' AND status='$statuses';";
-				$goDB->where('campaign_id', $campaign_id);
-				$goDB->where('status', $statuses);
-				$statusRslt = $goDB->delete('go_statuses');
-			}
-			
-        ### Admin logs
-			//$SQLdate = date("Y-m-d H:i:s");
-			//$queryLog = "INSERT INTO go_action_logs (user,ip_address,event_date,action,details,db_query) values('$goUser','$ip_address','$SQLdate','DELETE','Deleted Status $statuses from Campaign $campaign_id','DELETE FROM vicidial_campaign_statuses  WHERE status IN ($statuses) AND campaign_id=$campaign_id;');";
-			//$rsltvLog = mysqli_query($linkgo, $queryLog);
-			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Status $statuses from Campaign $campaign_id", $log_group, $deleteQuery);
-
-			
-			$apiresults = array("result" => "success");
-
 		} else {
-			$apiresults = array("result" => "Error: Campaign statuses doesn't exist.");
+			$apiresults 							= array(
+				"result" 								=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
+			);
 		}
-	}//end
+	}
 
 ?>
