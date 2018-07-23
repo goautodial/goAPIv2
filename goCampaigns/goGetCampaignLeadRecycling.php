@@ -1,0 +1,77 @@
+<?php
+ /**
+ * @file 		goGetCampaignLeadRecycling.php
+ * @brief 		API for getting lead recycling for specific campaigns
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+    include_once ("goAPI.php");
+
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	
+	$campaign_id 									= $astDB->escape($_REQUEST["campaign_id"]);
+		
+    // Check campaign_id if its null or empty
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
+		);
+    } else {
+		$astDB->where("campaign_id", $campaign_id);
+		$astDB->orderBy("campaign_id");
+		$fresultsv 									= $astDB->get("vicidial_lead_recycle");	
+			
+		if ($astDB->count > 0) {
+			foreach ($fresultsv as $fresults) {
+				$recycle_id[] 						= $fresults['recycle_id'];
+				//$campaign_id[] 						= $fresults['campaign_id'];
+				$status[] 							= $fresults['status'];
+				$attempt_delay[] 					= $fresults['attempt_delay'];
+				$attempt_maximum[] 					= $fresults['attempt_maximum'];
+				$active[] 							= $fresults['active'];		
+			}
+			
+			$apiresults 							= array(
+				"result" 								=> "success", 
+				"recycle_id" 							=> $recycle_id,
+				"campaign_id"							=> $campaign_id,
+				"status"								=> $status,
+				"attempt_delay"							=> $attempt_delay,
+				"attempt_maximum"						=> $attempt_maximum,
+				"active"								=> $active
+			);
+			
+			//$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group); 		
+		} else {
+			$err_msg 								= error_handle("10108", "status. No campaigns available");
+			$apiresults								= array(
+				"code" 									=> "10108", 
+				"result" 								=> $err_msg
+			);
+		}
+	} 
+	
+?>
+
