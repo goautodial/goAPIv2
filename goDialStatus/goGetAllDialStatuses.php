@@ -22,43 +22,64 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    
-	$hotkeys_only = $astDB->escape($_REQUEST['hotkeys_only']);
-	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
+    include_once ("goAPI.php");
+
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 	
-	$selectable = '';
-	if ($hotkeys_only === "1") {
-		$selectable = "WHERE selectable='Y'";
-	}
+	$hotkeys_only 									= $astDB->escape($_REQUEST['hotkeys_only']);
+	$campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
 	
-	if (strlen($selectable) > 0 && strlen($campaign_id) > 0) {
-		$query = "SELECT status,status_name
-					FROM vicidial_campaign_statuses
-					$selectable
-					ORDER BY status";
-		$rsltv = $astDB->rawQuery($query);
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} else {
+		if ($hotkeys_only === "1") {
+			$astDB->where("selectable", "Y");
+		}
 		
-		foreach ($rsltv as $fresults){
-			$dataStatus[] = $fresults['status'];
-			$dataStatusName[] = $fresults['status_name'];
+		if (strlen($hotkeys_only) > 0 && strlen($campaign_id) > 0) {
+			$cols 									= array(
+				"status", 
+				"status_name"
+			);
+			
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->orderBy("status", "desc");			
+			$rsltv 									= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
+					
+			if ($astDB->count > 0) {
+				foreach ($rsltv as $fresults){
+					$dataStatus[] 					= $fresults['status'];
+					$dataStatusName[] 				= $fresults['status_name'];
+				}		
+			}
+			
+
+		}
+		
+		$cols 										= array(
+			"status", 
+			"status_name"
+		);
+		
+		$astDB->orderBy("status", "desc");			
+		$rsltv 										= $astDB->get("vicidial_statuses", NULL, $cols);
+		
+		if ($astDB->count > 0) {
+			foreach ($rsltv as $fresults){
+				$dataStatus[] 						= $fresults['status'];
+				$dataStatusName[] 					= $fresults['status_name'];
+			}
+			
+			$apiresults 							= array(
+				"result" 								=> "success",
+				"status" 								=> $dataStatus,
+				"status_name" 							=> $dataStatusName
+			);		
 		}
 	}
-	
-    $query = "SELECT status,status_name
-				FROM vicidial_statuses
-				$selectable
-				ORDER BY status";
-   	$rsltv = $astDB->rawQuery($query);
-    
-    foreach ($rsltv as $fresults){
-		$dataStatus[] = $fresults['status'];
-       	$dataStatusName[] = $fresults['status_name'];
-	}
-	
-	$apiresults = array(
-		"result" => "success",
-		"status" => $dataStatus,
-		"status_name" => $dataStatusName,
-		"test" => $query
-	);
+
 ?>
