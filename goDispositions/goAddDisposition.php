@@ -143,13 +143,8 @@
 			"result" 									=> $err_msg
 		);
 		//$apiresults = array("result" 			=> "Error: Default value for not_interested is Y or N only.");
-	} else {			
-		$campaignsArr								= array();
-		foreach ($campaigns["campaign_id"] as $key => $value) {
-			array_push($campaignsArr, $value);
-		}
-		
-		if (in_array($campaign_id, $campaignsArr) || $campaign_id == 'ALL') {			
+	} else {					
+		if (in_array($campaign_id, $campaigns) || $campaign_id == 'ALL') {			
 			$astDB->where('status', $status);
 			$astDB->get('vicidial_statuses', null, 'status');
 			
@@ -176,22 +171,22 @@
 							);
 							
 							$astDB->insert("vicidial_campaign_statuses", $data);
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $astDB->getLastQuery());							
+							$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $astDB->getLastQuery());							
 							
-							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
-							$checkTable 				= $goDB->rawQuery($tableQuery);
+							$tableQuery 			= "SHOW tables LIKE 'go_statuses';";
+							$checkTable 			= $goDB->rawQuery($tableQuery);
 
 							if ($checkTable) {
-								$datago					= array(
-									"status"				=> $status, 	
-									"campaign_id"			=> $campaignid,
-									"priority"				=> $priority,
-									"color"					=> $color,
-									"type"					=> $type
+								$datago				= array(
+									"status"			=> $status, 	
+									"campaign_id"		=> $campaignid,
+									"priority"			=> $priority,
+									"color"				=> $color,
+									"type"				=> $type
 								);
 								
-								$qgo_insert				= $goDB->insert("go_statuses", $datago);
-								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
+								$qgo_insert			= $goDB->insert("go_statuses", $datago);
+								$log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
 							}
 						}					
 											

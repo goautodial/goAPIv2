@@ -26,68 +26,15 @@
 	$log_user 								= $session_user;
 	$log_group 								= go_get_groupid($session_user, $astDB); 
 	//$log_ip 								= $astDB->escape($_REQUEST['log_ip']);	
+    $campaigns 								= allowed_campaigns($log_group, $goDB, $astDB, "all");
     
 	if (empty($log_user) || is_null($log_user)){
 		$apiresults 						= array(
-			"result" 							=> "Error: Session User Not Defined."
+			"result" 						=> "Error: Session User Not Defined."
 		);
-	} else {	
-		/*if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("user_group", $log_group);
-			$astDB->orWhere('user_group', "---ALL---");
-		} else {
-			if($log_group !== "ADMIN"){
-				$astDB->where('user_group', $log_group);
-				$astDB->orWhere('user_group', "---ALL---");
-			}
-		}*/
-		
-		$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);			
-		$apiresults							= $campaigns;
-		//$campaignsArr					= explode(' ', $campaigns);
-		
-		/*if (is_array($campaignsArr)) {
-			if (!preg_match("/ALLCAMPAIGNS/",  $campaigns)) {
-				$astDB->where('campaign_id', $campaignsArr, 'IN');
-			}*/
+	} else {					
+		$apiresults 						= array_merge(array("result" => "success"), $campaigns);
 
-		/*$cols 								= array(
-			"campaign_id",
-			"campaign_name",
-			"dial_method",
-			"active"
-		);
-		
-		$astDB->orderBy('campaign_id', 'asc');
-		$result 							= $astDB->get('vicidial_campaigns', NULL, $cols);
-
-		if ($astDB->count > 0) {
-			foreach($result as $fresults){
-				$dataCampID[] 				= $fresults['campaign_id'];
-				$dataCampName[] 			= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
-				$dataDialMethod[] 			= $fresults['dial_method'];
-				$dataActive[] 				= $fresults['active'];
-			}
-
-			$apiresults 					= array(
-				"result" 						=> "success", 
-				"campaign_id" 					=> $dataCampID, 
-				"campaign_name" 				=> $dataCampName, 
-				"dial_method" 					=> $dataDialMethod, 
-				"active" 						=> $dataActive
-			);			
-		} else {
-			$apiresults 					= array(
-				"result" 						=> "success"
-			);					
-		}
-		/*} else {
-			$err_msg 					= error_handle("40001");
-			$apiresults 				= array(
-				"code" 						=> "40001", 
-				"result" 					=> $err_msg
-			);
-		}*/
 	}
 	
 ?>

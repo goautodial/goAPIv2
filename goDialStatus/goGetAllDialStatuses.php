@@ -2,10 +2,11 @@
  /**
  * @file 		goGetAllDialStatuses.php
  * @brief 		API for Dial Status
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Noel Umandap  <noel@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Noel Umandap
+ * @author     	Chris Lomuntad 
+ * @author     	Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -35,7 +36,7 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} else {
+	} elseif (in_array($campaign_id, $campaigns)) {			
 		if ($hotkeys_only === "1") {
 			$astDB->where("selectable", "Y");
 		}
@@ -55,9 +56,7 @@
 					$dataStatus[] 					= $fresults['status'];
 					$dataStatusName[] 				= $fresults['status_name'];
 				}		
-			}
-			
-
+			}			
 		}
 		
 		$cols 										= array(
@@ -80,6 +79,12 @@
 				"status_name" 							=> $dataStatusName
 			);		
 		}
+	} else {
+		$err_msg 									= error_handle("10108", "status. No campaigns available");
+		$apiresults									= array(
+			"code" 										=> "10108", 
+			"result" 									=> $err_msg
+		);
 	}
 
 ?>

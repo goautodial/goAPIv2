@@ -21,31 +21,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$groupId = go_get_groupid($session_user, $astDB);
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);    
+	$campaigns										= allowed_campaigns($log_group, $goDB, $astDB);
 	
-        if (checkIfTenant($groupId, $goDB)) {
-            $ul = "";
-        } else {
-            $stringv = go_getall_allowed_campaigns($groupId, $astDB);
-			if($stringv !== "'ALLCAMPAIGNS'")
-				$ul = " and vl.campaign_id IN ($stringv) ";
-			else
-				$ul = "";
+    // ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} else {		
+		$astDB->where("vl.campaign_id", $campaigns, "IN");	
+	    
+        $query = "SELECT COUNT(vh.campaign_id) as mycnt, vl.campaign_id, vl.campaign_name,vl.local_call_time, vl.user_group FROM vicidial_hopper as vh RIGHT OUTER JOIN vicidial_campaigns as vl ON (vl.campaign_id=vh.campaign_id) RIGHT OUTER JOIN vicidial_call_times as vct ON (call_time_id=local_call_time) where vl.active='Y' and vl.campaign_id AND ct_default_start BETWEEN 'SELECT NOW ();' AND ct_default_stop > 'SELECT NOW ();' GROUP BY vl.campaign_id HAVING COUNT(vh.campaign_id) < '200' ORDER BY mycnt DESC , campaign_id ASC LIMIT 100";
+        $rsltv = $astDB->rawQuery($query); 
+		
+		$data 										= array();
+        if($astDB->count > 0) {
+            //$data = array();
+            
+			foreach ($rsltv as $fresults){
+				array_push($data, $fresults);
+			}						
         }
-    
-        #$query = "CALL get_HopperLeadsWarning()";
-        $query = "SELECT COUNT(vh.campaign_id) as mycnt, vl.campaign_id, vl.campaign_name,vl.local_call_time, vl.user_group FROM vicidial_hopper as vh RIGHT OUTER JOIN vicidial_campaigns as vl ON (vl.campaign_id=vh.campaign_id) RIGHT OUTER JOIN vicidial_call_times as vct ON (call_time_id=local_call_time) where vl.active='Y' $ul AND ct_default_start BETWEEN 'SELECT NOW ();' AND ct_default_stop > 'SELECT NOW ();' GROUP BY vl.campaign_id HAVING COUNT(vh.campaign_id) < '100' ORDER BY mycnt DESC , campaign_id ASC LIMIT 1000";
-        $rsltv = $astDB->rawQuery($query);
-        $countResult = $astDB->getRowCount();
-        //echo "<pre>";
-        //var_dump($rsltv);   
-                    
-        if($countResult > 0) {
-            $data = array();
-                foreach ($rsltv as $fresults){
-                    array_push($data, $fresults);
-                }
-                $apiresults = array("result" => "success", "data" => $data, "query" => $query);
-        }
+        
+        $apiresults 								= array(
+			"result" 									=> "success", 
+			"data" 										=> $data
+			//"query" 									=> $query
+		);
+	}
 
 ?>

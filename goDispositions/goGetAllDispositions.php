@@ -39,41 +39,36 @@
 			"result" 									=> $err_msg
 		);
     } else {
-		if (is_array($campaigns)) {
-			$campaignsArr				= array();
-			foreach ($campaigns["campaign_id"] as $key => $value) {
-				array_push($campaignsArr, $value);
-			}
-			
-			$cols 						= array(
+		if (is_array($campaigns)) {			
+			$cols 									= array(
 				"status", 
 				"status_name", 
 				"campaign_id"
 			);
 			
-			$astDB->where("campaign_id", $campaignsArr, "IN");
+			$astDB->where("campaign_id", $campaigns, "IN");
 			$astDB->orderBy("campaign_id", "desc");			
-			$result 					= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
+			$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults) {
-					$dataStat[] 		= $fresults["status"];			
-					$dataStatName[] 	= $fresults["status_name"];
-					$dataCampID[] 		= $fresults["campaign_id"];
+					$dataStat[] 					= $fresults["status"];			
+					$dataStatName[] 				= $fresults["status_name"];
+					$dataCampID[] 					= $fresults["campaign_id"];
 				}			
 				
-				$apiresults 			= array(
-					"result" 				=> "success", 
-					"campaign_id" 			=> $dataCampID, 
-					"status_name" 			=> $dataStatName, 
-					"status" 				=> $dataStat
+				$apiresults 						= array(
+					"result" 							=> "success", 
+					"campaign_id" 						=> $dataCampID, 
+					"status_name" 						=> $dataStatName, 
+					"status" 							=> $dataStat
 				);			
 			}	 		
 		} else {
-			$err_msg 					= error_handle("10108", "status. No campaigns available");
-			$apiresults					= array(
-				"code" 						=> "10108", 
-				"result" 					=> $err_msg
+			$err_msg 								= error_handle("10108", "status. No campaigns available");
+			$apiresults								= array(
+				"code" 									=> "10108", 
+				"result" 								=> $err_msg
 			);
 		}    
     }

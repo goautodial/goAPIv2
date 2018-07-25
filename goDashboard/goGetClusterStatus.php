@@ -21,21 +21,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $query = "SELECT s.server_id, s.server_description, s.server_ip, s.active, s.sysload, s.channels_total, s.cpu_idle_percent, s.disk_usage, su.last_update as s_time,UNIX_TIMESTAMP(su.last_update) as u_time FROM servers s, server_updater su WHERE s.server_ip=su.server_ip LIMIT 100";
-
-    $rsltv = $astDB->rawQuery($query);
-    $countResult = $astDB->getRowCount();
-
-    if($countResult > 0){
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']);  
     
-        $data = array();
-        
-        foreach ($rsltv as $fresults){
-            array_push($data, $fresults);
-        }
-        
-        $apiresults = array("result" => "success", "data" => $data);
-    } 
+    ### ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} else {
+		$query = "SELECT s.server_id, s.server_description, s.server_ip, s.active, s.sysload, s.channels_total, s.cpu_idle_percent, s.disk_usage, su.last_update as s_time,UNIX_TIMESTAMP(su.last_update) as u_time FROM servers s, server_updater su WHERE s.server_ip=su.server_ip LIMIT 100";
 
+		$rsltv = $astDB->rawQuery($query);
+		$countResult = $astDB->getRowCount();
+
+		if($countResult > 0){
+		
+			$data = array();
+			
+			foreach ($rsltv as $fresults){
+				array_push($data, $fresults);
+			}
+			
+			$apiresults = array("result" => "success", "data" => $data);
+		} 
+	}
 
 ?>

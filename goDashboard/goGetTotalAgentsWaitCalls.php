@@ -22,17 +22,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
-    
-    if (checkIfTenant($groupId, $goDB)) {
-		$ul = " and user_level != '4'";
-    } else { 
-        $stringv = go_getall_allowed_users($groupId, $astDB);
-		$ul = " and user IN ($stringv) and user_level != '4'";
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	
+    // ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} else {		
+		$ready										= array(
+			"READY", 
+			"CLOSER"
+		);
+		
+		$astDB->where("campaign_id", $campaigns, "IN");
+		$astDB->where("status", $ready, "IN");
+		$data										= $astDB->getValue("vicidial_live_agents", "count(*)");
+		
+		$apiresults 								= array(
+			"result" 									=> "success", 
+			"data" 										=> $data
+		);
     }
-    
-    $query = "SELECT count(*) as getTotalAgentsWaitCalls FROM vicidial_live_agents WHERE status IN ('READY','CLOSER') $ul"; 
-    $data = $astDB->rawQuery($query);
-    //$data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data);
 ?>

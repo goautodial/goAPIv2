@@ -45,12 +45,7 @@
 		);
 	} else {
 		if (is_array($campaigns)) {
-			$campaignsArr							= array();
-			foreach ($campaigns["campaign_id"] as $key => $value) {
-				array_push($campaignsArr, $value);
-			}
-		
-			if (in_array($campaign_id, $campaignsArr)) {
+			if (in_array($campaign_id, $campaigns)) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->get("vicidial_lead_recycle");
 				

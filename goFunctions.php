@@ -125,7 +125,7 @@
 		return $allAllowedCampaigns;
     }
 
-    function allowed_campaigns($log_group, $goDB, $astDB) {
+    function allowed_campaigns($log_group, $goDB, $astDB, $type=null) {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere('user_group', "---ALL---");
@@ -136,7 +136,7 @@
 			}
 		}    
 
-		$cols 								= array(
+		$cols 									= array(
 			"campaign_id",
 			"campaign_name",
 			"dial_method",
@@ -144,25 +144,40 @@
 		);
 		
 		$astDB->orderBy('campaign_id', 'desc');
-		$result 							= $astDB->get('vicidial_campaigns', NULL, $cols);
+		$result 								= $astDB->get('vicidial_campaigns', NULL, $cols);
+		$campaigns								= "";
 		
 		if ($astDB->count > 0) {
 			foreach($result as $fresults){
-				$dataCampID[] 				= $fresults['campaign_id'];
-				$dataCampName[] 			= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
-				$dataDialMethod[] 			= $fresults['dial_method'];
-				$dataActive[] 				= $fresults['active'];
+				$dataCampID[] 					= $fresults['campaign_id'];
+				$dataCampName[] 				= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
+				$dataDialMethod[] 				= $fresults['dial_method'];
+				$dataActive[] 					= $fresults['active'];
 			}
-
-			$campaigns	 					= array(
-				"result" 						=> "success", 
-				"campaign_id" 					=> $dataCampID, 
-				"campaign_name" 				=> $dataCampName, 
-				"dial_method" 					=> $dataDialMethod, 
-				"active" 						=> $dataActive
-			);			
-		} else {
-			$campaigns 					= "";
+			
+		}
+		
+        switch ($type) {
+            case "all":		
+				$campaigns	 					= array(
+					"campaign_id" 					=> $dataCampID, 
+					"campaign_name" 				=> $dataCampName, 
+					"dial_method" 					=> $dataDialMethod, 
+					"active" 						=> $dataActive
+				);
+				
+                break;
+                
+            case "status":		
+				$campaigns	 					= array(
+					"campaign_id" 					=> $dataCampID, 
+					"active" 						=> $dataActive
+				);
+				
+                break;                
+            
+            default: 
+				$campaigns	 					= $dataCampID;
 		}
 		
 		return $campaigns;

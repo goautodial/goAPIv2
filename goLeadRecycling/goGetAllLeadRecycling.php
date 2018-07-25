@@ -22,61 +22,55 @@
 */
 
     include_once ("goAPI.php");
- 
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	//$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);
+
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	//$log_ip	 									= $astDB->escape($_REQUEST["log_ip"]);
 	
-	$campaigns 							= allowed_campaigns($log_group, $goDB, $astDB);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 
     ### ERROR CHECKING
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 					= array(
-			"result" 						=> "Error: Session User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
 	} else {
-		if (is_array($campaigns)) {
-			$campaignsArr				= array();
-			foreach ($campaigns["campaign_id"] as $key => $value) {
-				array_push($campaignsArr, $value);
-			}
-			//echo "<pre>";
-			//var_dump($campaignsArr);			
-			$astDB->where("campaign_id", $campaignsArr, "IN");
+		if (is_array($campaigns)) {			
+			$astDB->where("campaign_id", $campaigns, "IN");
 			$astDB->orderBy("campaign_id", "desc");
-			$rsltv 							= $astDB->get('vicidial_lead_recycle');
+			$rsltv 									= $astDB->get('vicidial_lead_recycle');
 
 			if ($astDB->count > 0) {
 				foreach ($rsltv as $fresults) {
 					//$data[] 				= array(
-						$recycle_id[] 			= $fresults['recycle_id'];
-						$campaign_id[] 			= $fresults['campaign_id'];
-						$status[] 				= $fresults['status'];
-						$attempt_delay[] 		= $fresults['attempt_delay'];
-						$attempt_maximum[] 		= $fresults['attempt_maximum'];
-						$active[] 				= $fresults['active'];
+					$recycle_id[] 					= $fresults['recycle_id'];
+					$campaign_id[] 					= $fresults['campaign_id'];
+					$status[] 						= $fresults['status'];
+					$attempt_delay[] 				= $fresults['attempt_delay'];
+					$attempt_maximum[] 				= $fresults['attempt_maximum'];
+					$active[] 						= $fresults['active'];
 					//);
 				}
 				
-				$apiresults 				= array(
-					"result" 					=> "success", 
-					"recycle_id" 				=> $recycle_id,
-					"campaign_id"				=> $campaign_id,
-					"status"					=> $status,
-					"attempt_delay"				=> $attempt_delay,
-					"attempt_maximum"			=> $attempt_maximum,
-					"active"					=> $active
+				$apiresults 						= array(
+					"result" 							=> "success", 
+					"recycle_id" 						=> $recycle_id,
+					"campaign_id"						=> $campaign_id,
+					"status"							=> $status,
+					"attempt_delay"						=> $attempt_delay,
+					"attempt_maximum"					=> $attempt_maximum,
+					"active"							=> $active
 				);        
 			} else {
-				$apiresults 				= array(
-					"result" 					=> "No data available."
+				$apiresults 						= array(
+					"result" 							=> "No data available."
 				);
 			}
 		} else {
-			$err_msg 				= error_handle("10108", "status. No campaigns available");
-			$apiresults				= array(
-				"code" 					=> "10108", 
-				"result" 				=> $err_msg
+			$err_msg 								= error_handle("10108", "status. No campaigns available");
+			$apiresults								= array(
+				"code" 									=> "10108", 
+				"result" 								=> $err_msg
 			);		
 		}
 	}

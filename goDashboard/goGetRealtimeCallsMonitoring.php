@@ -22,28 +22,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($goUser, $astDB);
-
-    if (!checkIfTenant($groupId, $goDB)) {
-        $ul = "";
-    } else {
-        $stringv = go_getall_allowed_campaigns($goUser, $astDB);
-        $ul = " where campaign_id IN ('$stringv') ";
-    }   
-        
-    //$query = "SELECT status,phone_number,call_type,UNIX_TIMESTAMP(call_time) as 'call_time',vac.campaign_id from vicidial_auto_calls as vac, vicidial_campaigns as vc, vicidial_inbound_groups as vig where (vac.campaign_id=vc.campaign_id OR vac.campaign_id=vig.group_id) $ul GROUP BY status,call_type,phone_number";
-    $query = "SELECT status,phone_number,call_type,UNIX_TIMESTAMP(call_time) as 'call_time',vac.campaign_id from vicidial_auto_calls as vac, vicidial_campaigns as vc, vicidial_inbound_groups as vig $ul GROUP BY status,call_type,phone_number";
-    $rsltv = $astDB->rawQuery($query);
-    $countResult = $astDB->getRowCount();
-    //echo "<pre>";
-    //var_dump($rsltv);   
-        
-    if($countResult > 0) {
-        $data = array();
-        foreach ($rsltv as $fresults){       
-            array_push($data, $fresults);
-        }
-        $apiresults = array("result" => "success", "data" => $data);
-    } 
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	
+    // ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} else {	
+		$cols										= array(
+			"status",
+			"phone_number",
+			"call_type",
+			"UNIX_TIMESTAMP(call_time) as call_time",
+			"vac.campaign_id"
+		);
+		
+		$table 										= "
+			vicidial_auto_calls as vac, 
+			vicidial_campaigns as vc, 
+			vicidial_inbound_groups as vig
+		";
+		
+		$astDB->where("vac.campaign_id", $campaigns, "IN");
+		$astDB->groupBy("status,call_type,phone_number");		
+		$rsltv										= $astDB->get($table, NULL, $cols);
+			
+		//echo "<pre>";
+		//var_dump($astDB->getLastQuery());
+		
+		if($astDB->count > 0) {
+			$data 									= array();
+			
+			foreach ($rsltv as $fresults){       
+				array_push($data, $fresults);
+			}
+			
+			$apiresults 							= array(
+				"result" 								=> "success", 
+				"data" 									=> $data
+			);
+		}
+		
+		$apiresults 							= array(
+			"result" 								=> "success", 
+			"data" 									=> ""
+		);		
+	}
     
 ?>

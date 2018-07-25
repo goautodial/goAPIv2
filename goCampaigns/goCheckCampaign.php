@@ -46,12 +46,7 @@
 		);
     } else {
 		if (!empty($status)) {
-			$campaignsArr							= array();
-			foreach ($campaigns["campaign_id"] as $key => $value) {
-				array_push($campaignsArr, $value);
-			}
-			
-			if (in_array($campaign_id, $campaignsArr) || $campaign_id == 'ALL') {			
+			if (in_array($campaign_id, $campaigns) || $campaign_id == 'ALL') {			
 				$astDB->where('status', $status);
 				$astDB->get('vicidial_statuses', null, 'status');
 				
