@@ -38,7 +38,7 @@
 		$NOW 										= date("Y-m-d");
 
 		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'");		
+		$astDB->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");		
 		$data										= $astDB->getValue("vicidial_campaign_stats", "sum(answers_today)");
 		
 		$apiresults 								= array(

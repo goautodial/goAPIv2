@@ -22,35 +22,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$type	 										= $astDB->escape($_REQUEST["type"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
     
-    if (checkIfTenant($groupId, $goDB)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
-		if($stringv !== "'ALLCAMPAIGNS'")
-			$ul = " AND campaign_id IN ($stringv)";
-		else
-			$ul = "";
-    }
-
-    $NOW = date("Y-m-d");
-
-    $queryTotalcalls = "select sum(calls_today) as getTotalCalls from vicidial_campaign_stats where calls_today > -1 and update_time BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    
-    $queryInboundcalls = "select count(call_date) as getTotalInboundCalls from vicidial_closer_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    
-    $queryOutboundcalls = "select count(call_date) as getTotalOutboundCalls from vicidial_log where call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59' $ul";
-    
-    $dataTotalCalls = $astDB->rawQuery($queryTotalcalls);
-    $dataIncalls = $astDB->rawQuery($queryInboundcalls);
-    $dataOutcalls = $astDB->rawQuery($queryOutboundcalls);
-	
-	//$dataTotalCalls = mysqli_fetch_array($rsltvTotalcalls,MYSQLI_ASSOC);
-	//$dataIncalls = mysqli_fetch_array($rsltvIncalls,MYSQLI_ASSOC);
-	//$dataOutcalls = mysqli_fetch_array($rsltvOutcalls,MYSQLI_ASSOC);
-	
-    $data = array("getTotalCalls" => $dataTotalCalls['getTotalCalls'], "getTotalInboundCalls" => $dataIncalls['getTotalInboundCalls'], "getTotalOutboundCalls" => $dataOutcalls['getTotalOutboundCalls']);
-	
-    $apiresults = array("result" => "success", "data" => $data, "query" => $queryOutboundcalls ); 
+    // ERROR CHECKING 
+	if ( !isset($log_user) || is_null($log_user) ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (is_array($campaigns)) {
+		if ( !isset($_REQUEST["type"]) ) {	
+			$type									= "all";
+		}
+		
+		$NOW 										= date("Y-m-d");
+		$astDB->where("campaign_id", $campaigns, "IN");
+		
+		switch ($type) {
+			case "outbound":
+			
+			$astDB->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+			$data = $astDB->getValue("vicidial_log", "count(call_date)");
+				
+			break;
+			
+			case "inbound":
+			
+			$astDB->where("call_date", array("$NOW 00:00:00", "'$NOW 23:59:59'"), "BETWEEN");
+			$data = $astDB->getValue("vicidial_closer_log", "count(call_date)");
+				
+			break;
+			
+			case "all":
+			
+			$astDB->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+			$data = $astDB->getValue("vicidial_campaign_stats", "sum(calls_today)");
+			
+			break;
+		}
+				
+		$apiresults 								= array(
+			"result" 									=> "success",
+			//"query"									=> $astDB->getLastQuery(),
+			"data" 										=> $data			 
+		); 	
+	}
 ?>
