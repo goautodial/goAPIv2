@@ -2,10 +2,10 @@
  /**
  * @file 		goGetIncomingQueue.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra <jeremiah@goautodial.com>
- * @author     	Demian Lizandro A. Biscocho  <demian@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author     	Demian Lizandro A. Biscocho 
+ * @author      Jeremiah Sebastian Samatra 
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -22,22 +22,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$groupId = go_get_groupid($session_user, $astDB);
-    
-    if (checkIfTenant($groupId, $goDB)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
-		if($stringv !== "'ALLCAMPAIGNS'")
-			$ul = " and campaign_id IN ($stringv)";
-		else
-			$ul = "";
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+
+	// ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (is_array($campaigns)) {
+		$data										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("status", array("XFER"), "NOT IN")
+			->where("call_type", "IN", "=")		
+			->getValue("vicidial_auto_calls", "count(*)");
+		
+		$apiresults 								= array(
+			"result" 									=> "success",
+			//"query"										=> $astDB->getLastQuery(),
+			"data" 										=> $data
+		);
     }
 
-    $NOW = date("Y-m-d");
-
-    $query = "select count(*) AS getIncomingQueue from vicidial_auto_calls where status NOT IN('XFER') and call_type = 'IN' $ul";
-    $data = $astDB->rawQuery($query);
-    //$data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data);
 ?>

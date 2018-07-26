@@ -35,7 +35,7 @@
 		);
 	} elseif (is_array($campaigns)) {
 		if ( !isset($_REQUEST["type"]) ) {	
-			$type									= "all";
+			$type									= "all-daily";
 		}
 		
 		$status										= "SALE";

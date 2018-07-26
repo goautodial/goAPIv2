@@ -2,9 +2,10 @@
  /**
  * @file 		goGetRingingCalls.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jerimiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author     	Demian Lizandro A. Biscocho 
+ * @author      Jeremiah Sebastian Samatra 
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
