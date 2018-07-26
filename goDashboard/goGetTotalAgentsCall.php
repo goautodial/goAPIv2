@@ -41,9 +41,10 @@
 			'PARK'
 		);
 		
-		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("status", $calls, "IN");
-		$data										= $astDB->getValue("vicidial_live_agents", "count(*)");
+		$data										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("status", $calls, "IN")
+			->getValue("vicidial_live_agents", "count(*)");
 		
 		$apiresults 								= array(
 			"result" 									=> "success", 

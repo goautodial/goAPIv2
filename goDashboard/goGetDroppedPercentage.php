@@ -2,9 +2,10 @@
  /**
  * @file 		goGetDroppedPercentage.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author		Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -36,18 +37,14 @@
 	} else {
 		$NOW 										= date("Y-m-d");
 
-		if (checkIfTenant($log_group, $goDB)) {
-			//$astDB->where("campaign_id", $campaigns, "IN");
-		}		
-		
-		
-		//$astDB->where("calls_today", "-1", ">");
-		$astDB->where("update_time", array("'$NOW 00:00:00'", "'$NOW 23:59:59'"), "BETWEEN");
-		$data										= $astDB->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
+		$data 										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+			->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
 				
 		$apiresults 								= array(
 			"result" 									=> "success",
-			//"query"										=> $astDB->getLastQuery(),
+			"query"										=> $astDB->getLastQuery(),
 			"data" 										=> $data
 		);
 	}

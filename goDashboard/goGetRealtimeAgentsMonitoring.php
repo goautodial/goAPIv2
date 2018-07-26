@@ -35,15 +35,12 @@
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} else {
-		//if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("campaign_id", $campaigns, "IN");
-		//}
-		
-		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("user_level < 8");
-		$astDB->where("user_level != 4");
-		
-		$query_OnlineAgents							= $astDB->getValue("vicidial_live_agents", "count(*)");		
+		// online agents
+		$query_OnlineAgents							= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("user_level < 8")
+			->where("user_level != 4")
+			->getValue("vicidial_live_agents", "count(*)");		
 		
 		$cols 										= array(
 			"channel as 'pc_channel'",
@@ -56,22 +53,18 @@
 		
 		$rsltvParkedChannels						= $astDB->get("parked_channels", NULL, $cols);		
 		
-		//if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("campaign_id", $campaigns, "IN");
-		//}
-		
+		// parked channels
 		$cols 										= array(
 			"callerid as 'vac_callerid'",
 			"lead_id as 'vac_lead_id'",
 			"phone_number as 'vac_phone_number'"
 		);
 		
-		$rsltvCallerIDsFromVAC						= $astDB->get("vicidial_auto_calls", NULL, $cols);
+		$rsltvCallerIDsFromVAC						= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->get("vicidial_auto_calls", NULL, $cols);
 		
-		//if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("vicidial_campaigns.campaign_id", $campaigns, "IN");
-		//}
-		
+		// waiting for calls
 		$cols 										= array(
 			"vicidial_live_agents.extension as 'vla_extension'",
 			"vicidial_live_agents.user as 'vla_user'",
@@ -103,19 +96,17 @@
 			vicidial_campaigns
 		";
 		
-		$astDB->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id");
-		$astDB->where("vicidial_live_agents.user = vicidial_users.user");
-		$astDB->where("vicidial_live_agents.lead_id = 0");
-		$astDB->where("vicidial_live_agents.user_level != 4");
-		$astDB->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id");
-		$astDB->orderBy("last_call_time");
+		$rsltvNoCalls 								= $astDB
+			->where("vicidial_campaigns.campaign_id", $campaigns, "IN")
+			->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
+			->where("vicidial_live_agents.user = vicidial_users.user")
+			->where("vicidial_live_agents.lead_id = 0")
+			->where("vicidial_live_agents.user_level != 4")
+			->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
+			->orderBy("last_call_time")		
+			->get($table, NULL, $cols);
 		
-		$rsltvNoCalls 								= $astDB->get($table, NULL, $cols);
-		
-		//if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("vicidial_campaigns.campaign_id", $campaigns, "IN");
-		//}
-		
+		// live call
 		$cols 										= array(
 			"vicidial_live_agents.extension as 'vla_extension'",
 			"vicidial_live_agents.user as 'vla_user'",
@@ -148,14 +139,15 @@
 			vicidial_campaigns
 		";
 		
-		$astDB->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id");
-		$astDB->where("vicidial_live_agents.user = vicidial_users.user");
-		$astDB->where("vicidial_live_agents.lead_id = vicidial_list.lead_id");
-		$astDB->where("vicidial_live_agents.user_level != 4");
-		$astDB->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id");
-		$astDB->orderBy("last_call_time");
-		
-		$rsltvInCalls 								= $astDB->get($table, NULL, $cols);		
+		$rsltvInCalls 								= $astDB
+			->where("vicidial_campaigns.campaign_id", $campaigns, "IN")
+			->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
+			->where("vicidial_live_agents.user = vicidial_users.user")
+			->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
+			->where("vicidial_live_agents.user_level != 4")
+			->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
+			->orderBy("last_call_time")		
+			->get($table, NULL, $cols);		
 		
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -192,16 +184,16 @@
 			$data 									= array_merge($dataInCalls, $dataNoCalls);
 			$apiresults 							= array(
 				"result" 								=> "success", 
+				//"query" 								=> $astDB->getLastQuery(),
 				"data" 									=> $data, 
 				"dataGo" 								=> $dataGo, 
 				"parked" 								=> $dataParkedChannels, 
-				"callerids" 							=> $dataCallerIDsFromVAC
-				//"query" 								=> $query_OnlineAgents
+				"callerids" 							=> $dataCallerIDsFromVAC				
 			);		
 		} else {
 			$apiresults 							= array(
 				"result" 								=> "success", 
-				"data" 									=> ""
+				"data" 									=> 0
 			);		
 		}
 	}

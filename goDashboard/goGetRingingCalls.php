@@ -1,6 +1,6 @@
 <?php
  /**
- * @file 		goGetRingingCalles.php
+ * @file 		goGetRingingCalls.php
  * @brief 		API for Dashboard
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author     	Jerimiah Sebastian Samatra  <jeremiah@goautodial.com>
@@ -33,16 +33,16 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} elseif (is_array($campaigns)) {	
-		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("status", array("XFER"), "NOT IN");
-		$astDB->where("call_type", "OUT", "RLIKE");
-		
-		$data										= $astDB->getValue("vicidial_auto_calls", "count(*)");
+	} elseif (is_array($campaigns)) {
+		$data										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("status", array("XFER"), "NOT IN")
+			->where("call_type", "OUT", "RLIKE")		
+			->getValue("vicidial_auto_calls", "count(*)");
 		
 		$apiresults 								= array(
 			"result" 									=> "success",
-			"query"										=> $astDB->getLastQuery(),
+			//"query"										=> $astDB->getLastQuery(),
 			"data" 										=> $data
 		);
     }

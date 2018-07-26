@@ -37,10 +37,10 @@
 	} elseif (is_array($campaigns)) {	
 		$NOW 										= date("Y-m-d");
 		
-		$astDB->where("campaign_id", $campaigns, "IN");
-		//$astDB->where("calls_today >= 1");
-		$astDB->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
-		$data 										= $astDB->getValue("vicidial_campaign_stats", "sum(drops_today)");
+		$data 										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+			->getValue("vicidial_campaign_stats", "sum(drops_today)");
 				
 		$apiresults 								= array(
 			"result" 									=> "success", 

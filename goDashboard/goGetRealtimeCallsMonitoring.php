@@ -1,11 +1,11 @@
 <?php
  /**
- * @file 		goGetRealtimeCallesMonitoring.php
+ * @file 		goGetRealtimeCallsMonitoring.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author      Jericho James Milo  <james@goautodial.com>
- * @author     	Demian Lizandro A. Biscocho  <demian@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author      Jericho James Milo
+ * @author     	Demian Lizandro A. Biscocho
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -65,13 +65,14 @@
 			
 			$apiresults 							= array(
 				"result" 								=> "success", 
+				//"query"									=> $astDB->getLastQuery(),
 				"data" 									=> $data
 			);
 		}
 		
-		$apiresults 							= array(
-			"result" 								=> "success", 
-			"data" 									=> ""
+		$apiresults 								= array(
+			"result" 									=> "success", 
+			"data" 										=> 0
 		);		
 	}
     

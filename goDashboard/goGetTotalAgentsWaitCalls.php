@@ -40,9 +40,10 @@
 			"CLOSER"
 		);
 		
-		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("status", $ready, "IN");
-		$data										= $astDB->getValue("vicidial_live_agents", "count(*)");
+		$data										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("status", $ready, "IN")
+			->getValue("vicidial_live_agents", "count(*)");
 		
 		$apiresults 								= array(
 			"result" 									=> "success", 

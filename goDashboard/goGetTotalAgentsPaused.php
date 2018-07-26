@@ -35,9 +35,10 @@
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} elseif (is_array($campaigns)) {	
-		$astDB->where("campaign_id", $campaigns, "IN");
-		$astDB->where("status", array($agentstatus), "IN");		
-		$data										= $astDB->getValue("vicidial_live_agents", "count(*)");
+		$data										= $astDB
+			->where("campaign_id", $campaigns, "IN")
+			->where("status", array($agentstatus), "IN")
+			->getValue("vicidial_live_agents", "count(*)");
 		
 		$apiresults 								= array(
 			"result" 									=> "success", 

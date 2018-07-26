@@ -26,16 +26,23 @@
 	$log_user 										= $session_user;
 	$log_group 										= go_get_groupid($session_user, $astDB); 
 	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);    
-	$campaigns										= allowed_campaigns($log_group, $goDB, $astDB);
 	
     // ERROR CHECKING 
 	if (!isset($log_user) || is_null($log_user)) {
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} else {		
-		$astDB->where("vl.campaign_id", $campaigns, "IN");	
-	    
+	} else {			    
+		if (checkIfTenant($log_group, $goDB)) {
+			$ul 									= "WHERE vl.user_group = '$log_group' or vl.user_group = '---ALL---' ";
+		} else {
+			if($log_group !== "ADMIN"){
+				$ul 								= "WHERE vl.user_group = '$log_group' or vl.user_group = '---ALL---' ";
+			} else {
+				$ul 								= "";
+			}
+		}
+		
         $query 										= "
 			SELECT 
 				COUNT(vh.campaign_id) as mycnt, 
@@ -54,8 +61,9 @@
 				vicidial_call_times as vct 
 			ON (
 				call_time_id=local_call_time
-			) 
-			WHERE
+			)
+			$ul
+			AND
 				vl.active='Y'
 			AND 
 				ct_default_start 
