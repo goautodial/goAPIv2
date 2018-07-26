@@ -2,9 +2,10 @@
 /**
  * @file        goGetAllLeadsOnHopper.php
  * @brief       API to get all leads on hopper
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -26,9 +27,9 @@
 	$log_user 										= $session_user;
 	$log_group 										= go_get_groupid($session_user, $astDB); 
 	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
-	$limit 											= 100;
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
-	//$list_id 										= $astDB->escape($_REQUEST['list_id']);
+	$limit 											= 100;
     
     // Check campaign_id if its null or empty
 	if (empty($log_user) || is_null($log_user)) {
@@ -41,41 +42,38 @@
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		);
-	} else {		
+	} elseif (in_array($campaign_id, $campaigns)) {
 		if (isset($_REQUEST['limit'])) {
 			$limit 									= $astDB->escape($_REQUEST['limit']);
 		} 
     
-		$query 											= "SELECT
-			vicidial_hopper.lead_id,
-			vicidial_list.phone_number,
-			vicidial_hopper.state,
-			vicidial_list.status,
-			vicidial_list.called_count,
-			vicidial_hopper.gmt_offset_now,
-			vicidial_hopper.hopper_id,
-			vicidial_hopper.alt_dial,
-			vicidial_hopper.list_id,
-			vicidial_hopper.priority,
-			vicidial_hopper.source
-		FROM vicidial_hopper,vicidial_list
-		WHERE vicidial_hopper.lead_id = vicidial_list.lead_id
-		AND vicidial_hopper.campaign_id = '$campaign_id'
-		ORDER BY vicidial_hopper.hopper_id
-		LIMIT $limit;";
+		$query 										= "
+			SELECT
+				vicidial_hopper.lead_id,
+				vicidial_list.phone_number,
+				vicidial_hopper.state,
+				vicidial_list.status,
+				vicidial_list.called_count,
+				vicidial_hopper.gmt_offset_now,
+				vicidial_hopper.hopper_id,
+				vicidial_hopper.alt_dial,
+				vicidial_hopper.list_id,
+				vicidial_hopper.priority,
+				vicidial_hopper.source
+			FROM 
+				vicidial_hopper,vicidial_list
+			WHERE 
+				vicidial_hopper.lead_id = vicidial_list.lead_id
+			AND 
+				vicidial_hopper.campaign_id = '$campaign_id'
+			ORDER BY 
+				vicidial_hopper.hopper_id
+			LIMIT $limit;
+		";
 		
 		$rsltv 											= $astDB->rawQuery($query);
 		
-		if($astDB->getRowCount() > 0) {
-			if (checkIfTenant($log_group, $astDB)) {
-				$astDB->where("user_group", $log_group);
-				$astDB->orWhere('user_group', "---ALL---");
-			} else {
-				if ($log_group != 'ADMIN') {
-					$astDB->where("user_group", $log_group);
-					$astDB->orWhere('user_group', "---ALL---");
-				}
-			}    
+		if($astDB->count > 0) {  
 			//$queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaigns WHERE campaign_id = '$campaign_id';";
 			$astDB->where('campaign_id', $campaign_id);
 			$resultQuery 								= $astDB->getOne('vicidial_campaigns', 'dial_statuses');

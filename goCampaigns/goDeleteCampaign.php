@@ -62,7 +62,7 @@
 			$campaign_id = $campaignid;
 			
 			$astDB->where("campaign_id", $campaign_id);
-			$astDB->getOne("vicidial_campaigns");
+			$astDB->getOne("vicidial_campaigns", "campaign_id");
 			
 			if ($astDB->count > 0) {					
 				$astDB->where("campaign_id", $campaign_id);

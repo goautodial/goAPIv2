@@ -24,7 +24,7 @@
 
 	$log_user 										= $session_user;
 	$log_group 										= go_get_groupid($session_user, $astDB); 
-	
+	$campaigns										= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_id 									= $astDB->escape($_REQUEST["campaign_id"]);
 		
     // Check campaign_id if its null or empty
@@ -38,7 +38,7 @@
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		);
-    } else {
+    } elseif (in_array($campaign_id, $campaigns)) {
 		$astDB->where("campaign_id", $campaign_id);
 		$astDB->orderBy("campaign_id");
 		$fresultsv 									= $astDB->get("vicidial_campaign_statuses");	
@@ -83,7 +83,13 @@
 				"result" 								=> $err_msg
 			);
 		}
-	} 
+	} else {
+		$err_msg 									= error_handle("10001", "Insufficient permision");
+		$apiresults 								= array(
+			"code" 										=> "10001", 
+			"result" 									=> $err_msg
+		);			
+	}
 	
 ?>
 

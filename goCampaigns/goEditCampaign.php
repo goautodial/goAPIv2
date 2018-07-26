@@ -166,10 +166,10 @@
 	} else {
 		// check campaign_id if it exists
 		$astDB->where('campaign_id', $campaign_id);
-		$astDB->get('vicidial_campaigns');
+		$astDB->getOne('vicidial_campaigns', 'campaign_id');
 				
 		if ($astDB->count > 0) {
-			//check if user has sufficient for campaign_id
+			//check if user has sufficient rights for campaign_id
 			if (in_array($campaign_id, $allowed_campaigns)) {						
 				$dynamic_cid_SQL 						= "";
 				$dynamic_cid_COL 						= "";

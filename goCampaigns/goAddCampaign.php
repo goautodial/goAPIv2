@@ -197,7 +197,7 @@
 	} else {
 		$location = "";
 
-		if (checkIfTenant($log_group, $goDB)) {
+		/*if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere('user_group', "---ALL---");
 		} else {
@@ -205,8 +205,9 @@
 				$astDB->where('user_group', $log_group);
 				$astDB->orWhere('user_group', "---ALL---");
 			}
-		}
+		}*/
 		
+		// check if already existing in whole system
 		$astDB->where("campaign_id", $campaign_id);
 		$astDB->getOne("vicidial_campaigns", "campaign_id");
 		    
