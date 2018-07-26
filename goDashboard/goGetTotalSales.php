@@ -21,40 +21,100 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$type	 										= $astDB->escape($_REQUEST["type"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
     
-    if (checkIfTenant($groupId, $goDB)) {
-        $ul_vcl = "";
-		$ul_vl = "";
-    } else { 
-		if($groupId !== "ADMIN"){
-			$ul_vcl = "and val.user_group = '$groupId'";
-			$ul_vl = "and vl.user_group = '$groupId'";
-		}else{
-			$ul_vcl = "";
-			$ul_vl = "";
+    // ERROR CHECKING 
+	if ( !isset($log_user) || is_null($log_user) ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (is_array($campaigns)) {
+		if ( !isset($_REQUEST["type"]) ) {	
+			$type									= "all";
 		}
-    }
+		
+		$status										= "SALE";
+		$datetoday									= date("Y-m-d");
+		$datehourly	 								= date('Y-m-d H');
+		//$datestartday								= date("Y-m-d") . " 00:00:00";
+		//$dateendday									= date("Y-m-d") . " 23:59:59";
+		
+		switch ($type) {
+			case "out-daily":
 
-    $NOW = date('Y-m-d');    
-    $YESTERDAY = date('Y-m-d',strtotime('-1 days'));
-    
-    $status = "SALE";
-    $date = "call_date BETWEEN '$NOW 00:00:00' AND '$NOW 23:59:59'";
-    $dateY = "call_date BETWEEN '$YESTERDAY 00:00:00' AND '$YESTERDAY 23:59:59'";
-    $dateLW = "call_date BETWEEN NOW() - INTERVAL DAYOFWEEK(NOW())+6 DAY AND NOW() - INTERVAL DAYOFWEEK(NOW())-1 DAY";
-   
-    $query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' $ul_vcl and $date ) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' $ul_vl and $date ) as TotalSales";
-    $queryY = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul_vcl) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateY $ul_vl) as TotalSalesYesterday";
-    $queryLW = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul_vcl) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid and val.status='$status' and $dateLW $ul_vl) as TotalSalesLastWeek";
-    
-    //	$query = "select (select count(*) from vicidial_closer_log vcl,vicidial_agent_log val where vcl.uniqueid=val.uniqueid ) + (select count(*) from vicidial_log vl,vicidial_agent_log val where vl.uniqueid=val.uniqueid ) as TotalSales;";
-    //$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
-    $fresults = $astDB->rawQuery($query);
-    $fresultsY =  $astDB->rawQuery($queryY);
-    $fresultsLW =  $astDB->rawQuery($queryLW);
-    //$fresults = mysqli_fetch_assoc($rsltv);
-    //$fresultsY = mysqli_fetch_assoc($rsltvY);
-    //$fresultsLW = mysqli_fetch_assoc($rsltvLW);
-    $apiresults = array_merge( array( "result" => "success", "query" => $query), $fresults, $fresultsY, $fresultsLW);
+				$data 								= $astDB
+					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+					->where("vlog.status", $status)
+					->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+					->where("vlog.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_log as vlog", "count(*)");
+				
+			break;
+			
+			case "out-hourly":
+
+				$data 								= $astDB
+					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+					->where("vlog.status", $status)
+					->where("vlog.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+					->where("vlog.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_log as vlog", "count(*)");
+				
+			break;
+			
+			case "in-daily":
+			
+				$data 								= $astDB
+					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+					->where("vcl.status", $status)
+					->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+					->where("vcl.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_closer_log  vcl", "count(*)");
+					
+			break;
+			
+			case "in-hourly":
+			
+				$data 								= $astDB
+					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+					->where("vcl.status", $status)
+					->where("vcl.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+					->where("vcl.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_closer_log  vcl", "count(*)");
+					
+			break;			
+			
+			case "all-daily":
+			
+				$outsales							= $astDB
+					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+					->where("vlog.status", $status)
+					->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+					->where("vlog.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_log as vlog", "count(*)");
+			
+				$insales 							= $astDB
+					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+					->where("vcl.status", $status)
+					->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+					->where("vcl.campaign_id", $campaigns, "IN")
+					->getValue("vicidial_closer_log  vcl", "count(*)");
+				
+				$data 								= $insales + $outsales;
+			
+			break;
+		}
+				
+		$apiresults 								= array(
+			"result" 									=> "success",
+			//"query"									=> $astDB->getLastQuery(),
+			"data" 										=> $data			 
+		); 
+	}
+
 ?>
