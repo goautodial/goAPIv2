@@ -65,7 +65,7 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Default value for Active is Y or N only."
 		);
-	} else {
+	} elseif (is_array($campaigns)) {
 		if (empty($attempt_delay)) {
 			$attempt_delay 							= "1800";
 		}
@@ -78,58 +78,63 @@
 			$active 								= "Y";
 		}
 		
-		if (is_array($campaigns)) {
-			$astDB->where('campaign_id', $campaigns, 'IN');
-			$astDB->getOne("vicidial_campaign_statuses", "status");
-			$countCheck1							= $astDB->getRowCount();
-						
-			$astDB->getOne("vicidial_statuses", "status");
-			$countCheck2							= $astDB->getRowCount();
-						
-			if ($countCheck1 > 0 || $countCheck2 >0) {
-				if ($campaign_id == "ALL") {					
-					$astDB->where('campaign_id', $campaigns, 'IN');
-					$query 							= $astDB->get('vicidial_campaigns', NULL, 'campaign_id');
+		$astDB->where('campaign_id', $campaigns, 'IN');
+		$astDB->getOne("vicidial_campaign_statuses", "status");
+		$countCheck1							= $astDB->getRowCount();
+					
+		$astDB->getOne("vicidial_statuses", "status");
+		$countCheck2							= $astDB->getRowCount();
+					
+		if ($countCheck1 > 0 || $countCheck2 >0) {
+			if ($campaign_id == "ALL") {					
+				$astDB->where('campaign_id', $campaigns, 'IN');
+				$query 							= $astDB->get('vicidial_campaigns', NULL, 'campaign_id');
 
-					foreach ($query as $row){
-						$campaign_id 				= $row['campaign_id'];
-						
-						$data						= array( 
-							"campaign_id"				=> $campaign_id,
-							"status"					=> $status,
-							"attempt_delay"				=> $attempt_delay,
-							"attempt_maximum"			=> $attempt_maximum,
-							"active"					=> $active
-						);
-						
-						$astDB->insert("vicidial_lead_recycle", $data);
-						$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
-					}
-						
-					$apiresults 					= array(
-						"result" 						=> "success"
-					);						
-				} else {
-					$data							= array( 
-						"campaign_id"					=> $campaign_id,
-						"status"						=> $status,
-						"attempt_delay"					=> $attempt_delay,
-						"attempt_maximum"				=> $attempt_maximum,
-						"active"						=> $active
+				foreach ($query as $row){
+					$campaign_id 				= $row['campaign_id'];
+					
+					$data						= array( 
+						"campaign_id"				=> $campaign_id,
+						"status"					=> $status,
+						"attempt_delay"				=> $attempt_delay,
+						"attempt_maximum"			=> $attempt_maximum,
+						"active"					=> $active
 					);
 					
 					$astDB->insert("vicidial_lead_recycle", $data);
-					$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
-					
-					$apiresults 					= array(
-						"result" 						=> "success"
-					);
+					$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				}
+					
+				$apiresults 					= array(
+					"result" 						=> "success"
+				);						
 			} else {
-				$apiresults 						= array(
-					"result" 							=> "Error: Campaign ID or Status does not exist."
+				$data							= array( 
+					"campaign_id"					=> $campaign_id,
+					"status"						=> $status,
+					"attempt_delay"					=> $attempt_delay,
+					"attempt_maximum"				=> $attempt_maximum,
+					"active"						=> $active
+				);
+				
+				$astDB->insert("vicidial_lead_recycle", $data);
+				$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Recycling under Status: $status in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
+				
+				$apiresults 					= array(
+					"result" 						=> "success"
 				);
 			}
+		} else {
+			$apiresults 						= array(
+				"result" 							=> "Error: Campaign ID or Status does not exist."
+			);
 		}
+	} else {
+		$err_msg 								= error_handle("10001", "Insufficient permision");
+		$apiresults 							= array(
+			"code" 									=> "10001", 
+			"result" 								=> $err_msg
+		);			
 	}
+
 ?>

@@ -2,9 +2,9 @@
  /**
  * @file 		goGetTotalAgentsPaused.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Demian Lizandro A. Biscocho  <demian@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} else {	
+	} elseif (is_array($campaigns)) {	
 		$astDB->where("campaign_id", $campaigns, "IN");
 		$astDB->where("status", array($agentstatus), "IN");		
 		$data										= $astDB->getValue("vicidial_live_agents", "count(*)");

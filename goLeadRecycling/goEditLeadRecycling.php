@@ -65,78 +65,80 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Default value for active is N for No and Y for Yes only."
 		);
-	} else {
-		if (is_array($campaigns)) {
-			if (in_array($campaign_id, $campaigns)) {
-				$astDB->where("campaign_id", $campaign_id);
+	} elseif (is_array($campaigns)) {
+		if (in_array($campaign_id, $campaigns)) {
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->where('recycle_id', $recycle_id);
+			//$astDB->getOne("vicidial_lead_recycle", "campaign_id");
+			$sqlCheck 							= $astDB->get('vicidial_lead_recycle');
+	
+			if ($astDB->count > 0) {
+				foreach ($sqlCheck as $fresults){
+					$dataAttemptDelay 			= $fresults['attempt_delay'];
+					$dataAttemptMaximum 		= $fresults['attempt_maximum'];
+					$dataCampID 				= $fresults['campaign_id'];
+					$dataActive 				= $fresults['active'];			
+				}
+
+				if (empty($status)) {
+					$status 					= $dataStatus;
+				}
+				
+				if (empty($attempt_delay)) {
+					$attempt_delay 				= $dataAttemptDelay;
+				}
+				
+				if (empty($attempt_maximum)) {
+					$attempt_maximum 			= $dataAttemptMaximum;
+				}
+				
+				if (empty($campaign_id)) {
+					$campaign_id 				= $dataCampID;
+				}
+				
+				if (empty($active)) {
+					$active 					= $dataActive;
+				}
+
+				$updateData 					= array(
+					'attempt_delay' 				=> $attempt_delay,
+					'attempt_maximum' 				=> $attempt_maximum,
+					'active' 						=> $active
+				);
+					
 				$astDB->where('recycle_id', $recycle_id);
-				//$astDB->getOne("vicidial_lead_recycle", "campaign_id");
-				$sqlCheck 							= $astDB->get('vicidial_lead_recycle');
-		
-				if ($astDB->count > 0) {
-					foreach ($sqlCheck as $fresults){
-						$dataAttemptDelay 			= $fresults['attempt_delay'];
-						$dataAttemptMaximum 		= $fresults['attempt_maximum'];
-						$dataCampID 				= $fresults['campaign_id'];
-						$dataActive 				= $fresults['active'];			
-					}
-
-					if (empty($status)) {
-						$status 					= $dataStatus;
-					}
-					
-					if (empty($attempt_delay)) {
-						$attempt_delay 				= $dataAttemptDelay;
-					}
-					
-					if (empty($attempt_maximum)) {
-						$attempt_maximum 			= $dataAttemptMaximum;
-					}
-					
-					if (empty($campaign_id)) {
-						$campaign_id 				= $dataCampID;
-					}
-					
-					if (empty($active)) {
-						$active 					= $dataActive;
-					}
-
-					$updateData 					= array(
-						'attempt_delay' 				=> $attempt_delay,
-						'attempt_maximum' 				=> $attempt_maximum,
-						'active' 						=> $active
+				$astDB->where('campaign_id', $campaign_id);
+				
+				$rsltv1 						= $astDB->update('vicidial_lead_recycle', $updateData);
+				$log_id 						= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());					
+				
+				if ($rsltv1) {
+					$apiresults 				= array(
+						"result" 					=> "success"
 					);
-						
-					$astDB->where('recycle_id', $recycle_id);
-					$astDB->where('campaign_id', $campaign_id);
-					
-					$rsltv1 						= $astDB->update('vicidial_lead_recycle', $updateData);
-					$log_id 						= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());					
-					
-					if ($rsltv1) {
-						$apiresults 				= array(
-							"result" 					=> "success"
-						);
-					} else {
-						$apiresults 				= array(
-							"result" 					=> "Error: Try updating Lead Recycling again"
-						);				
-					}
 				} else {
-					$apiresults 					= array(
-						"result" 						=> "Error: Lead Recycle ID does not exist!"
-					);
+					$apiresults 				= array(
+						"result" 					=> "Error: Try updating Lead Recycling again"
+					);				
 				}
 			} else {
-				$apiresults 						= array(
-					"result" 							=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
+				$apiresults 					= array(
+					"result" 						=> "Error: Lead Recycle ID does not exist!"
 				);
 			}
 		} else {
-			$apiresults 							= array(
-				"result" 								=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
-			);
+			$err_msg 							= error_handle("10001", "Insufficient permision");
+			$apiresults 						= array(
+				"code" 								=> "10001", 
+				"result" 							=> $err_msg
+			);			
 		}
+	} else {
+		$err_msg 								= error_handle("10001", "Insufficient permision");
+		$apiresults 							= array(
+			"code" 									=> "10001", 
+			"result" 								=> $err_msg
+		);			
 	}
 		
 ?>

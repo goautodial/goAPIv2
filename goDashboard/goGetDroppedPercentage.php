@@ -41,12 +41,13 @@
 		}		
 		
 		
-		$astDB->where("calls_today", "-1", ">");
-		$astDB->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+		//$astDB->where("calls_today", "-1", ">");
+		$astDB->where("update_time", array("'$NOW 00:00:00'", "'$NOW 23:59:59'"), "BETWEEN");
 		$data										= $astDB->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
 				
 		$apiresults 								= array(
-			"result" 									=> "success", 
+			"result" 									=> "success",
+			//"query"										=> $astDB->getLastQuery(),
 			"data" 										=> $data
 		);
 	}

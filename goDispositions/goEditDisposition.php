@@ -102,142 +102,140 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Default value for not_interested is Y or N only."
 		);
-	} else {
-		if (is_array($campaigns)) {
-			if (in_array($campaign_id, $campaigns)) {
-				$astDB->where("campaign_id", $campaign_id);
+	} elseif (is_array($campaigns)) {
+		if (in_array($campaign_id, $campaigns)) {
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->where('status', $status);
+			//$astDB->getOne("vicidial_campaign_statuses", "campaign_id");
+			$sqlCheck 							= $astDB->get('vicidial_campaign_statuses');
+	
+			if ($astDB->count > 0) {
+				foreach ($sqlCheck as $fresults){
+					$dataStat 					= $fresults['status'];
+					$dataStatName 				= $fresults['status_name'];
+					$dataSel 					= $fresults['selectable'];
+					$dataCamp 					= $fresults['campaign_id'];
+					$dataHumAns 				= $fresults['human_answered'];
+					$dataCat 					= $fresults['category'];
+					$dataSale 					= $fresults['sale'];
+					$dataDNC 					= $fresults['dnc'];
+					$dataCusCon 				= $fresults['customer_contact'];
+					$dataNotInt 				= $fresults['not_interested'];
+					$dataUnwork 				= $fresults['unworkable'];
+					$dataSched 					= $fresults['scheduled_callback'];				
+				}		
+
+				if ($status_name == null) {
+					$status_name 				= $dataStatName;
+				}
+				
+				if ($selectable == null) { 
+					$selectable 				= $dataSel;
+				}
+				
+				if ($human_answered == null) { 
+					$human_answered 			= $dataHumAns;
+				}
+				
+				if ($sale == null) { 
+					$sale 						= $dataSale;
+				}
+				
+				if ($dnc == null) {
+					$dnc 						= $dataDNC;
+				}
+				
+				if ($customer_contact == null) {
+					$customer_contact 			= $dataCusCon;
+				}
+				
+				if ($not_interested == null) {
+					$not_interested 			= $dataNotInt;
+				}
+				
+				if ($unworkable == null) {
+					$unworkable 				= $dataUnwork;
+				}
+				
+				if ($scheduled_callback == null) {
+					$scheduled_callback 		= $dataSched;
+				}
+
+				$updateData 					= array(
+					'status_name' 					=> $status_name,
+					'selectable' 					=> $selectable,
+					'human_answered' 				=> $human_answered,
+					'category' 						=> 'UNDEFINED',
+					'sale' 							=> $sale,
+					'dnc' 							=> $dnc,
+					'customer_contact' 				=> $customer_contact,
+					'not_interested' 				=> $not_interested,
+					'unworkable' 					=> $unworkable,
+					'scheduled_callback' 			=> $scheduled_callback
+				);
+				
 				$astDB->where('status', $status);
-				//$astDB->getOne("vicidial_campaign_statuses", "campaign_id");
-				$sqlCheck 							= $astDB->get('vicidial_campaign_statuses');
-		
-				if ($astDB->count > 0) {
-					foreach ($sqlCheck as $fresults){
-						$dataStat 					= $fresults['status'];
-						$dataStatName 				= $fresults['status_name'];
-						$dataSel 					= $fresults['selectable'];
-						$dataCamp 					= $fresults['campaign_id'];
-						$dataHumAns 				= $fresults['human_answered'];
-						$dataCat 					= $fresults['category'];
-						$dataSale 					= $fresults['sale'];
-						$dataDNC 					= $fresults['dnc'];
-						$dataCusCon 				= $fresults['customer_contact'];
-						$dataNotInt 				= $fresults['not_interested'];
-						$dataUnwork 				= $fresults['unworkable'];
-						$dataSched 					= $fresults['scheduled_callback'];				
-					}		
-
-					if ($status_name == null) {
-						$status_name 				= $dataStatName;
-					}
-					
-					if ($selectable == null) { 
-						$selectable 				= $dataSel;
-					}
-					
-					if ($human_answered == null) { 
-						$human_answered 			= $dataHumAns;
-					}
-					
-					if ($sale == null) { 
-						$sale 						= $dataSale;
-					}
-					
-					if ($dnc == null) {
-						$dnc 						= $dataDNC;
-					}
-					
-					if ($customer_contact == null) {
-						$customer_contact 			= $dataCusCon;
-					}
-					
-					if ($not_interested == null) {
-						$not_interested 			= $dataNotInt;
-					}
-					
-					if ($unworkable == null) {
-						$unworkable 				= $dataUnwork;
-					}
-					
-					if ($scheduled_callback == null) {
-						$scheduled_callback 		= $dataSched;
-					}
-
-					$updateData 					= array(
-						'status_name' 					=> $status_name,
-						'selectable' 					=> $selectable,
-						'human_answered' 				=> $human_answered,
-						'category' 						=> 'UNDEFINED',
-						'sale' 							=> $sale,
-						'dnc' 							=> $dnc,
-						'customer_contact' 				=> $customer_contact,
-						'not_interested' 				=> $not_interested,
-						'unworkable' 					=> $unworkable,
-						'scheduled_callback' 			=> $scheduled_callback
+				$astDB->where('campaign_id', $campaign_id);
+				
+				$rsltv1 								= $astDB->update('vicidial_campaign_statuses', $updateData);
+				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $astDB->getLastQuery());
+				
+				if ($rsltv1 == false) {
+					$apiresults 						= array(
+						"result" 							=> "Error: Try updating Disposition Again"
+					);
+				} else {
+					$apiresults 						= array(
+						"result" 							=> "success"
 					);
 					
-					$astDB->where('status', $status);
-					$astDB->where('campaign_id', $campaign_id);
+					$statusRslt 						= $goDB->rawQuery("SHOW TABLES LIKE 'go_statuses'");
 					
-					$rsltv1 								= $astDB->update('vicidial_campaign_statuses', $updateData);
-					$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $astDB->getLastQuery());
-					
-					if ($rsltv1 == false) {
-						$apiresults 						= array(
-							"result" 							=> "Error: Try updating Disposition Again"
-						);
-					} else {
-						$apiresults 						= array(
-							"result" 							=> "success"
-						);
-						
-						$statusRslt 						= $goDB->rawQuery("SHOW TABLES LIKE 'go_statuses'");
+					if ($goDB->count > 0) {
+						$goDB->where('status', $status);
+						$goDB->where('campaign_id', $campaign_id);
+						$goDB->get('go_statuses');
 						
 						if ($goDB->count > 0) {
+							$updateData 				= array(
+								'priority' 					=> $priority,
+								'color' 					=> $color,
+								'type' 						=> $type
+							);
+							
 							$goDB->where('status', $status);
 							$goDB->where('campaign_id', $campaign_id);
-							$goDB->get('go_statuses');
+							$goDB->update('go_statuses', $updateData);
+							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
 							
-							if ($goDB->count > 0) {
-								$updateData 				= array(
-									'priority' 					=> $priority,
-									'color' 					=> $color,
-									'type' 						=> $type
-								);
-								
-								$goDB->where('status', $status);
-								$goDB->where('campaign_id', $campaign_id);
-								$goDB->update('go_statuses', $updateData);
-								$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
-								
-							} else {
-								$insertData 				= array(
-									'status' 					=> $status,
-									'campaign_id' 				=> $campaign_id,
-									'priority' 					=> $priority,
-									'color' 					=> $color,
-									'type' 						=> $type
-								);
-								
-								$goDB->insert('go_statuses', $insertData);
-								$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
-							}
-						}														
-					}
-				} else {
-					$apiresults 							= array(
-						"result" 								=> "Error: Campaign Status doesn't exist"
-					);
+						} else {
+							$insertData 				= array(
+								'status' 					=> $status,
+								'campaign_id' 				=> $campaign_id,
+								'priority' 					=> $priority,
+								'color' 					=> $color,
+								'type' 						=> $type
+							);
+							
+							$goDB->insert('go_statuses', $insertData);
+							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
+						}
+					}														
 				}
 			} else {
-				$apiresults 								= array(
-					"result" 									=> "Error: Campaign Status doesn't exist"
+				$apiresults 							= array(
+					"result" 								=> "Error: Campaign Status doesn't exist"
 				);
 			}
 		} else {
-			$apiresults 									= array(
-				"result" 										=> "Error: Campaign doesn't exist."
+			$apiresults 								= array(
+				"result" 									=> "Error: Campaign Status doesn't exist"
 			);
 		}
+	} else {
+		$apiresults 									= array(
+			"result" 										=> "Error: Campaign doesn't exist."
+		);
 	}
 
 ?>

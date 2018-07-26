@@ -43,57 +43,59 @@
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		);
-	} else {
-		if (is_array($campaigns)) {
-			if (in_array($campaign_id, $campaigns)) {
-				$astDB->where("campaign_id", $campaign_id);
-				$astDB->get("vicidial_lead_recycle");
-				
-				if($astDB->count > 0) {
-					if  (empty($recycle_id) || is_null($recycle_id)) {
-						$astDB->where("campaign_id", $campaign_id);
-						$astDB->delete("vicidial_lead_recycle");
-						$log_id 					= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted All Lead Recycling under Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
-						
-						$apiresults 				= array(
-							"result" 					=> "success"
-						);						
-					} else {
-						// check lead recycle id if it exists
+	} elseif (is_array($campaigns)) {
+		if (in_array($campaign_id, $campaigns)) {
+			$astDB->where("campaign_id", $campaign_id);
+			$astDB->get("vicidial_lead_recycle");
+			
+			if($astDB->count > 0) {
+				if  (empty($recycle_id) || is_null($recycle_id)) {
+					$astDB->where("campaign_id", $campaign_id);
+					$astDB->delete("vicidial_lead_recycle");
+					$log_id 					= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted All Lead Recycling under Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
+					
+					$apiresults 				= array(
+						"result" 					=> "success"
+					);						
+				} else {
+					// check lead recycle id if it exists
+					$astDB->where("recycle_id", $recycle_id);
+					$astDB->where("campaign_id", $campaign_id);
+					$astDB->get("vicidial_lead_recycle");
+					
+					if($astDB->count > 0) {
 						$astDB->where("recycle_id", $recycle_id);
 						$astDB->where("campaign_id", $campaign_id);
-						$astDB->get("vicidial_lead_recycle");
-						
-						if($astDB->count > 0) {
-							$astDB->where("recycle_id", $recycle_id);
-							$astDB->where("campaign_id", $campaign_id);
-							$astDB->delete("vicidial_lead_recycle");
-							$log_id 				= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Lead Recycling ID: $recycle_id", $log_group, $astDB->getLastQuery());						
+						$astDB->delete("vicidial_lead_recycle");
+						$log_id 				= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Lead Recycling ID: $recycle_id", $log_group, $astDB->getLastQuery());						
 
-							$apiresults 			= array(
-								"result" 				=> "success"
-							);							
-						} else {
-							$apiresults 			= array(
-								"result" 				=> "Error: Lead Recycling ID doesn't exist"
-							);						
-						}
-					}										
-				} else {
-					$apiresults 					= array(
-						"result" 						=> "Error: Campaign doesn't exist"
-					);
-				}
+						$apiresults 			= array(
+							"result" 				=> "success"
+						);							
+					} else {
+						$apiresults 			= array(
+							"result" 				=> "Error: Lead Recycling ID doesn't exist"
+						);						
+					}
+				}										
 			} else {
-				$apiresults 						= array(
-					"result" 							=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
+				$apiresults 					= array(
+					"result" 						=> "Error: Campaign doesn't exist"
 				);
 			}
 		} else {
-			$apiresults 							= array(
-				"result" 								=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
-			);
+			$err_msg 							= error_handle("10001", "Insufficient permision");
+			$apiresults 						= array(
+				"code" 								=> "10001", 
+				"result" 							=> $err_msg
+			);			
 		}
+	} else {
+		$err_msg 								= error_handle("10001", "Insufficient permision");
+		$apiresults 							= array(
+			"code" 									=> "10001", 
+			"result" 								=> $err_msg
+		);			
 	}
 	
 ?>

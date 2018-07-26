@@ -21,22 +21,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
-    
-    if (checkIfTenant($groupId, $goDB)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
-		if($stringv !== "'ALLCAMPAIGNS'")
-			$ul = " and campaign_id IN ($stringv)";
-		else
-			$ul = "";
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+
+	// ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (is_array($campaigns)) {	
+		$astDB->where("campaign_id", $campaigns, "IN");
+		$astDB->where("status", array("XFER"), "NOT IN");
+		$astDB->where("call_type", "OUT", "RLIKE");
+		
+		$data										= $astDB->getValue("vicidial_auto_calls", "count(*)");
+		
+		$apiresults 								= array(
+			"result" 									=> "success",
+			"query"										=> $astDB->getLastQuery(),
+			"data" 										=> $data
+		);
     }
-
-    $NOW = date("Y-m-d");
-
-    $query = "select count(*) AS getRingingCalls from vicidial_auto_calls where status NOT IN('XFER') $ul and call_type RLIKE 'OUT' ";
-    $data = $astDB->rawQuery($query);
-    //$data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data, "query" => $query);
 ?>

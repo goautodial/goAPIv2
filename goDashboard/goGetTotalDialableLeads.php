@@ -2,9 +2,10 @@
  /**
  * @file 		goGetTotalDialableLeads.php
  * @brief 		API for Dashboard
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author		Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,17 +22,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    include_once ("goAPI.php");
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	//$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
     
-    if (checkIfTenant($groupId, $goDB)) {
-        $ul='';
-    } else { 
-        $stringv = go_getall_allowed_users($groupId, $astDB);
-        $ul = " where campaign_id IN ($stringv)";
+    // ERROR CHECKING 
+	if (!isset($log_user) || is_null($log_user)){
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (is_array($campaigns)) {
+		$astDB->where("campaign_id", $campaigns, "IN");
+		$data 										= $astDB->getValue("vicidial_campaign_stats", "sum(dialable_leads)");
+				
+		$apiresults 								= array(
+			"result" 									=> "success",
+			//"query"									=> $astDB->getLastQuery(),
+			"data" 										=> $data
+		);
     }
-    $query = "SELECT sum(dialable_leads) as getTotalDialableLeads FROM vicidial_campaign_stats $ul"; 
-    $fresults = $astDB->rawQuery($query);
-    //$fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
 
 ?>
