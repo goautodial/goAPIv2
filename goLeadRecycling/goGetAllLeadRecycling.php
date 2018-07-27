@@ -30,14 +30,14 @@
 	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 
     ### ERROR CHECKING
-	if (empty($log_user) || is_null($log_user)) {
+	if ( empty($log_user) || is_null($log_user) ) {
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} else {
-		if (is_array($campaigns)) {			
-			$astDB->where("campaign_id", $campaigns, "IN");
-			$astDB->orderBy("campaign_id", "desc");
+		if ( is_array($campaigns) ) {			
+			$astDB->where( "campaign_id", $campaigns, "IN" );
+			$astDB->orderBy( "campaign_id", "desc" );
 			$rsltv 									= $astDB->get('vicidial_lead_recycle');
 
 			if ($astDB->count > 0) {
