@@ -2,9 +2,10 @@
 /**
  * @file        goEditList.php
  * @brief       API to edit specific list
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author      Jeremiah Sebastian Samatra
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
