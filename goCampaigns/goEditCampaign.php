@@ -165,8 +165,9 @@
 		//$apiresults = array("result" => "Error: Default value for dial method are MANUAL,RATIO,ADAPT_HARD_LIMIT,ADAPT_TAPERED,ADAPT_AVERAGE,INBOUND_MAN only."); 
 	} else {
 		// check campaign_id if it exists
-		$astDB->where('campaign_id', $campaign_id);
-		$astDB->getOne('vicidial_campaigns', 'campaign_id');
+		$resultGet									= $astDB
+			->where('campaign_id', $campaign_id)
+				->getOne('vicidial_campaigns', 'campaign_id');
 				
 		if ($astDB->count > 0) {
 			//check if user has sufficient rights for campaign_id

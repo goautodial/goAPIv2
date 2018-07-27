@@ -22,11 +22,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-    include_once ("goAPI.php");
+    include_once( "goAPI.php" );
 
 	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	$log_group 										= go_get_groupid( $session_user, $astDB ); 
+	$log_ip 										= $astDB->escape( $_REQUEST['log_ip'] );
+    $allowed_campaigns								= allowed_campaigns($log_group, $goDB, $astDB);
     
     // POST or GET Variables
 	$campaign_ids 									= $_REQUEST["campaign_id"];
@@ -45,35 +46,24 @@
 			"result" 									=> $err_msg
 		);
     } elseif ($action == "delete_selected") {
-		if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("user_group", $log_group);
-			$astDB->orWhere("user_group", "---ALL---");
-		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
-				if ($user_level > 8) {
-					$astDB->where("user_group", $log_group);
-					$astDB->orWhere("user_group", "---ALL---");
-				}
-			}		
+		if ( !array_diff( $campaign_id, $allowed_campaigns ) ) {
+
+		//foreach ($campaign_ids as $campaignid) {
+			//$campaign_id = $campaignid;
 			
-		}	
-	
-		foreach ($campaign_ids as $campaignid) {
-			$campaign_id = $campaignid;
-			
-			$astDB->where("campaign_id", $campaign_id);
+			$astDB->where("campaign_id", $campaign_ids, "IN");
 			$astDB->getOne("vicidial_campaigns", "campaign_id");
 			
 			if ($astDB->count > 0) {					
-				$astDB->where("campaign_id", $campaign_id);
+				$astDB->where("campaign_id", $campaign_ids, "IN");
 				$astDB->delete("vicidial_campaigns");					
 				$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$astDB->where("campaign_id", $campaign_id);
+				$astDB->where("campaign_id", $campaign_ids, "IN");
 				$astDB->delete("vicidial_campaign_statuses");					
 				$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());
 				
-				$astDB->where("campaign_id", $campaign_id);
+				$astDB->where("campaign_id", $campaign_ids, "IN");
 				$goDB->delete("vicidial_lead_recycle");					
 				$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery());					
 			
@@ -87,11 +77,13 @@
 					"result" 							=> "Error: Campaign doesn't exist."
 				);
 			}
+		} else {
+			$err_msg 									= error_handle("10001", "Insufficient permision");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);			
 		}
-		
-		$apiresults 								= array(
-			"result" 									=> "success"
-		);
 	}
 	
 
