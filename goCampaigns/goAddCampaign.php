@@ -1019,7 +1019,7 @@
 							$astDB->where('campaign_id', $campaign_id);
 							$astDB->getOne('vicidial_campaigns', 'campaign_id'); 
 
-							if ($astDB->count > 0) {
+							if ($astDB->count < 1) {
 								$local_call_time 			= "9am-9pm";
 								$auth_user 					= $goUsers;								
 								$wavfile_name 				= $_FILES["uploaded_wav"]['name'];
@@ -1073,12 +1073,12 @@
 									'agent_lead_search' 			=> 'ENABLED',
 									'use_internal_dnc' 				=> 'Y',
 									'use_campaign_dnc' 				=> 'Y',
-									'campaign_cid' 					=> 5164536886,
+									'campaign_cid' 					=> 5164569886,
 									'user_group' 					=> $tenant_id,
-									'manual_dial_list_id' 			=> '{$tenant_id}998',
+									'manual_dial_list_id' 			=> $tenant_id.'998',
 									'drop_call_seconds' 			=> 7,
 									'survey_opt_in_audio_file' 		=> '',
-									'survey_first_audio_file' 		=> '$wavfile_name', 
+									'survey_first_audio_file' 		=> $wavfile_name, 
 									'survey_method' 				=> 'EXTENSION', 
 									'disable_alter_custdata' 		=> 'N', 
 									'disable_alter_custphone' 		=> 'Y'
