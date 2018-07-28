@@ -127,6 +127,7 @@
 			"vicidial_users.user_id as 'vu_user_id'",
 			"vicidial_users.user as 'vu_user'",
 			"vicidial_live_agents.callerid as 'vla_callerid'",
+			"vicidial_list.phone_number as 'vl_phone_number'",
 			"vicidial_agent_log.sub_status as 'vla_pausecode'", 
 			"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
 		);
