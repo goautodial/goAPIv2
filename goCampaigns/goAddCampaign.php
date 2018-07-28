@@ -252,7 +252,7 @@
 						'campaign_cid' 					=> 5164536886, 
 						'manual_dial_filter' 			=> 'DNC_ONLY', 
 						'user_group' 					=> $tenant_id,	
-						'manual_dial_list_id' 			=> $tenant_id.998, 
+						'manual_dial_list_id' 			=> $tenant_id.'998', 
 						'drop_call_seconds' 			=> 7, 
 						'campaign_vdad_exten' 			=> $ans_machine_detection, 
 						'disable_alter_custdata' 		=> 'N', 
@@ -344,7 +344,7 @@
 					'campaign_cid' 						=> 5164536886, 
 					'manual_dial_filter' 				=> 'DNC_ONLY', 
 					'user_group' 						=> $tenant_id, 
-					'manual_dial_list_id' 				=> $tenant_id.998, 
+					'manual_dial_list_id' 				=> $tenant_id.'998', 
 					'drop_call_seconds' 				=> 7, 
 					'manual_dial_prefix' 				=> $manual_dial_prefix, 
 					'am_message_exten' 					=> $answering_machine_message, 
@@ -367,7 +367,7 @@
 				$log_id 							= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
 				
 				if ( $q_insertInbound ) {
-					if ( $callRoute != nul l){
+					if ( $callRoute != null ){
 						// Call Route
 						$didDesc 					= $campaign_id." ".$campaign_type." DID";
 						$didPattern 				= $call_route_text;
