@@ -49,8 +49,7 @@
 					$astDB->where("user_group", $log_group);
 					$astDB->orWhere("user_group", "---ALL---");
 				}
-			}		
-			
+			}					
 		}
 		
 		// get users list

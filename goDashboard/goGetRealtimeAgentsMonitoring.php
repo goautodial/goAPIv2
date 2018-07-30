@@ -51,7 +51,9 @@
 			"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
 		);
 		
-		$rsltvParkedChannels						= $astDB->get("parked_channels", NULL, $cols);		
+		$rsltvParkedChannels						= $astDB
+			->where("channel", 0, ">")
+			->get("parked_channels", NULL, $cols);		
 		
 		// parked channels
 		$cols 										= array(
