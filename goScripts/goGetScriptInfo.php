@@ -1,10 +1,11 @@
 <?php
  /**
  * @file        goGetScriptInfo.php
- * @brief       API for Dial Status
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @brief       API for Getting Script Info
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Jeremiah Sebastian V. Samatra
+ * @author      Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,37 +22,66 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB); 
+	include_once ("goAPI.php");	 
+ 
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB);    
+	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
 	
-    $script_id = $astDB->escape($_REQUEST["script_id"]); 
-
-    if($script_id == null) {
-            $apiresults = array("result" => "Error: Set a value for Script ID.");
+	$script_id 									= $astDB->escape($_REQUEST["script_id"]); 
+	
+	if ( empty($log_user) || is_null($log_user) ) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
+		);
+	} elseif ( empty($script_id) || is_null($script_id) ) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Set a value for Script ID."
+		);
     } else {
-        if (!checkIfTenant($log_group, $goDB)) {
-            //do nothing
-        } else { 
-            $astDB->where("user_group", $log_group);  
-        }
-        
-		$cols = array("script_id", "script_name", "script_comments", "active", "user_group", "script_text");
+		// check if script ID exists
         $astDB->where("script_id", $script_id);        
-        $script = $astDB->get("vicidial_scripts", null, $cols);
+		$astDB->getOne("vicidial_scripts", "script_id");
 		
-	    if ($script) {
-            foreach($script as $fresults)
-                $apiresults = array(
-                    "result" => "success", 
-                    "script_id" => $fresults['script_id'], 
-                    "script_name" => $fresults['script_name'], 
-                    "script_comments" => $fresults['script_comments'], 
-                    "active" => $fresults['active'], 
-                    "user_group" => $fresults['user_group'], 
-                    "script_text" => $fresults['script_text']
-                );
+		if ($astDB->count > 0) {
+			// check if script exists with conditions below:
+			if ( checkIfTenant($log_group, $goDB) ) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere('user_group', "---ALL---");
+			} else {
+				if ($log_group !== "ADMIN"){
+					$astDB->where('user_group', $log_group);
+					$astDB->orWhere('user_group', "---ALL---");
+				}
+			}
+        
+			$astDB->where("script_id", $script_id);        
+			$script 								= $astDB->get("vicidial_scripts");
+			
+			if ($script) {
+				foreach ($script as $fresults) {
+					$apiresults 					= array(
+						"result" 						=> "success", 
+						"script_id" 					=> $fresults['script_id'], 
+						"script_name" 					=> $fresults['script_name'], 
+						"script_comments" 				=> $fresults['script_comments'], 
+						"active" 						=> $fresults['active'], 
+						"user_group" 					=> $fresults['user_group'], 
+						"script_text" 					=> $fresults['script_text']
+					);
+				}
+			} else {
+				$err_msg 							= error_handle( "10001", "Insufficient permision" );
+				$apiresults 						= array(
+					"code" 								=> "10001", 
+					"result" 							=> $err_msg
+				);			
+			}				
 		} else {
-            $apiresults = array("result" => "Error: Script does not exist.");
-    	}
+			$apiresults 							= array(
+				"result" 								=> "Error: Script doesn't exist"
+			);
+		}
 	}
+	
 ?>

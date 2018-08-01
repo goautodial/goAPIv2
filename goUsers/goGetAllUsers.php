@@ -20,11 +20,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    @include_once ( "goAPI.php" );
+    include_once ( "goAPI.php" );
     include_once ( "../licensed-conf.php" );
 	
 	$log_user 								= $session_user;
 	$log_group 								= go_get_groupid ( $session_user, $astDB );
+	$log_ip 								= $astDB->escape ( $_REQUEST['log_ip'] );
 	
 	if ( empty ( $log_user ) || is_null ( $log_user ) ) {
 		$apiresults 						= array (

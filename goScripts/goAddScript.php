@@ -1,78 +1,107 @@
 <?php
-   ####################################################
-   #### Name: goAddScript.php                      ####
-   #### Description: API to add Script	           ####
-   #### Version: 0.9                               ####
-   #### Copyright: GOAutoDial Ltd. (c) 2011-2015   ####
-   #### Written by: Jeremiah Sebastian V. Samatra  ####
-   #### License: AGPLv2                            ####
-   ####################################################
-    ### POST or GET Variables
-	$agent = get_settings('user', $astDB, $goUser);
-	
-	$script_type = mysqli_real_escape_string($link, $_REQUEST['script_type']);
-    $script_id = mysqli_real_escape_string($link, $_REQUEST['script_id']);
-    $script_name = mysqli_real_escape_string($link, $_REQUEST['script_name']);
-    $script_comments = mysqli_real_escape_string($link, $_REQUEST['script_comments']);
-    $script_text = $_REQUEST['script_text'];
-    $active = mysqli_real_escape_string($link, $_REQUEST['active']);
-    //$campaign_id = $_REQUEST['campaign_id'];
-	$user = mysqli_real_escape_string($link, $_REQUEST['user']);
-	$user_group = mysqli_real_escape_string($link, $_REQUEST['user_group']);
-    $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-    $goUser = mysqli_real_escape_string($link, $_REQUEST['goUser']);
-	
-	$log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-	$log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+ /**
+ * @file        goAddScript.php
+ * @brief       API for Adding Scripts
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Jeremiah Sebastian V. Samatra
+ * @author      Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-    ### Default values 
-    $defActive = array("Y","N");
-
-    ### ERROR CHECKING 
-    if($script_id == null) {
-        $apiresults = array("result" => "Error: Set a value for Script ID not less than 3 characters.");
+	include_once ("goAPI.php");	 
+ 
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);    
+	$log_ip 										= $astDB->escape($_REQUEST["log_ip"]);
+	
+	$script_id 										= $astDB->escape($_REQUEST["script_id"]); 
+	$script_type 									= $astDB->escape($_REQUEST["script_type"]);
+    $script_name 									= $astDB->escape($_REQUEST["script_name"]); 
+    $script_comments 								= $astDB->escape($_REQUEST["script_comments"]);
+    $script_text 									= $astDB->escape($_REQUEST["script_text"]);
+    $user_group 									= $astDB->escape($_REQUEST["user_group"]);
+    $active 										= $astDB->escape($_REQUEST["active"]);
+    
+    ### Default values
+    $defActive 										= array("Y","N");    
+    
+	if ( empty($log_user) || is_null($log_user) ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif ( empty($script_id) || is_null($script_id) ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Set a value for Script ID."
+		);
+	} elseif ( preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/",$script_name) && $script_name != null ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Special characters found in script name"
+		);
+	} elseif ( !in_array($active,$defActive) && $active != null ) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Default value for active is Y or N only."
+		);
     } else {
-		if($script_text == null){
-					$apiresults = array("result" => "Error: Set a value for Script Text");
-		} else {
-			$groupId = go_get_groupid($goUser);
-
-			$astDB->where('script_id', $script_id);
-    		$script = $astDB->getOne('vicidial_scripts', null, 'script_id');
-			
-			if($script){
-				if($script_type == "default"){
-					$subscript = 0;
-				}else{
-					$subscript = 1;
-				}		
-					$queryColumn = "SHOW COLUMNS FROM `vicidial_scripts` LIKE 'subscript';";
-					$resultColumn = mysqli_query($link, $queryColumn);	
-					$resultCpulumnNumRows = mysqli_num_rows($resultColumn);
-
-					if($resultCpulumnNumRows > 0){
-						$data_script = array('subscript' => subscript);
-					}
-					$data_script = array(
-						'script_id' 		=> $script_id, 
-						'script_comments' 	=> $script_comments, 
-						'script_name' 		=> $script_name, 
-						'active' 			=> $active, 
-						'user_group' 		=> $user_group, 
-						'script_text' 		=> $script_text
-					);
-					$insertScript = $astDB->insert('vicidial_scripts', $data_script);
-					$insertQuery = $astDB->getLastQuery();
-				if(!$insertScript){
-						$apiresults = array("result" => "Error: Add failed, check your details");
-				} else {
-						$log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added New Script: $script_id", $log_group, $insertQuery);
-						$apiresults = array("result" => "success");
-				}
-			}else {
-				$apiresults = array("result" => "Error: Add failed, Script already already exist!");
+		// check if script ID exists
+        $astDB->where("script_id", $script_id);        
+		$astDB->getOne("vicidial_scripts", "script_id");
+				
+		if ($astDB->count < 0) {
+			if ($script_type == "default") {
+				$subscript 							= 0;
+			} else {
+				$subscript 							= 1;
 			}		
-		}
+			
+			$queryColumn 							= "SHOW COLUMNS FROM `vicidial_scripts` LIKE 'subscript'";
+			$resultColumn 							= $astDB->rawQuery($queryColumn);	
+
+			if ($resultColumn) {
+				$data_script 						= array(
+					"subscript" 						=> $subscript
+				);
+			}
+			
+			$data_script 							= array(
+				"script_id" 							=> $script_id, 
+				"script_comments" 						=> $script_comments, 
+				"script_name" 							=> $script_name, 
+				"active" 								=> $active, 
+				"user_group" 							=> $user_group, 
+				"script_text" 							=> $script_text
+			);
+			
+			$insertScript 							= $astDB->insert("vicidial_scripts", $data_script);
+				
+			if (!$insertScript) {
+				$apiresults 						= array(
+					"result" 							=> "Error: Add failed, check your details"
+				);
+			} else {
+				$log_id 							= log_action( $goDB, "ADD", $log_user, $log_ip, "Added New Script: $script_id", $log_group, $astDB->getLastQuery() );
+				$apiresults 						= array(
+					"result" 							=> "success"
+				);
+			}
+		} else {
+			$apiresults	 							= array(
+				"result" 								=> "Error: Add failed, Script already already exist!"
+			);
+		}		
 	}
 
 ?>
