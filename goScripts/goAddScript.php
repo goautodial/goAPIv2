@@ -33,12 +33,13 @@
     $script_name 									= $astDB->escape($_REQUEST["script_name"]); 
     $script_comments 								= $astDB->escape($_REQUEST["script_comments"]);
     $script_text 									= $astDB->escape($_REQUEST["script_text"]);
+    $script_text 									= str_replace('\n','',$script_text);
     $user_group 									= $astDB->escape($_REQUEST["user_group"]);
     $active 										= $astDB->escape($_REQUEST["active"]);
     
     ### Default values
     $defActive 										= array("Y","N");    
-    
+
 	if ( empty($log_user) || is_null($log_user) ) {
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
@@ -56,11 +57,14 @@
 			"result" 									=> "Error: Default value for active is Y or N only."
 		);
     } else {
+		if ( empty($user_group) ) {
+			$user_group								= "---ALL---";
+		}    
 		// check if script ID exists
         $astDB->where("script_id", $script_id);        
-		$astDB->getOne("vicidial_scripts", "script_id");
+		$results 									= $astDB->getOne("vicidial_scripts", "script_id");
 				
-		if ($astDB->count < 0) {
+		if (!$results) {
 			if ($script_type == "default") {
 				$subscript 							= 0;
 			} else {
@@ -92,7 +96,7 @@
 					"result" 							=> "Error: Add failed, check your details"
 				);
 			} else {
-				$log_id 							= log_action( $goDB, "ADD", $log_user, $log_ip, "Added New Script: $script_id", $log_group, $astDB->getLastQuery() );
+				$log_id 							= log_action($goDB, "ADD", $log_user, $log_ip, "Added New Script: $script_id", $log_group, $astDB->getLastQuery());
 				$apiresults 						= array(
 					"result" 							=> "success"
 				);

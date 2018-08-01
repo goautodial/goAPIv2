@@ -43,12 +43,13 @@
 		}
 		
 		// getting script count
+		$astDB->orderBy('script_id', 'desc');
 		$resultGetScript						= $astDB->getOne('vicidial_scripts', 'script_id');
 		
 		// condition
-		if ($astDB->count > 0) {
+		if ($resultGetScript) {
 			if ( preg_match("/^script/i", $resultGetScript['script_id']) ) {
-				$get_last_count 				= preg_replace("/^script/i", "", $resultGetScript['script_id']);
+				$get_last_count 				= str_replace("script", "", $resultGetScript['script_id']);
 				$last_pl[] 						= intval($get_last_count);
 			} else {
 				$get_last_count 				= $resultGetScript['script_id'];
