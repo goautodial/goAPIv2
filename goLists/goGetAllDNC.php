@@ -35,7 +35,9 @@
 	} else {
 		if (is_array($campaigns)) {	
 			$campaign_ids								= implode(",", $campaigns);
-			
+			$campaign_ids								= str_replace(",", "','", $campaign_ids);
+			//echo "<pre>";
+			//var_dump ($campaign_ids);
 			$query = "(
 				SELECT 
 					a.phone_number as phone_number, 
@@ -47,7 +49,7 @@
 					b.campaign_id as campaign_id
 					FROM vicidial_campaign_dnc b
 					WHERE phone_number LIKE '%$search%'
-					AND campaign_id IN ($campaign_ids)
+					AND campaign_id IN ('$campaign_ids')
 					LIMIT 100
 			)";
 
