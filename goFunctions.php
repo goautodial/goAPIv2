@@ -1591,7 +1591,7 @@
 			
 		switch($code){
 			case "10001";
-				$err_msg = "Error: You do not have permission to view this page.";
+				$err_msg = "Error: You do not have permission to view this page ";
 				if(!empty($param))
 				$err_msg .= " in ".$param;
 			break;
@@ -1601,7 +1601,7 @@
 				$err_msg .= " in ".$param;
 			break;
 			case "10004";
-				$err_msg = "Error: No such resource or access is restricted.";
+				$err_msg = "Error: No such resource or access is restricted ";
 				if(!empty($param))
 				$err_msg .= " in ".$param;
 			break;
@@ -1621,7 +1621,7 @@
 				$err_msg .= " in ".$param;
 			break;
 			case "10008";
-				$err_msg = "Error: File upload failed! Possible mismatch file type!";
+				$err_msg = "Error: File upload failed! Possible mismatch file type ";
 				if(!empty($param))
 				$err_msg .= " in ".$param;
 			break;
@@ -1685,6 +1685,11 @@
 				if(!empty($param))
 				$err_msg .= "in ".$param;
 			break;
+			case "10117";
+				$err_msg = "Error: Invalid phone number ";
+				if(!empty($param))
+				$err_msg .= "in ".$param;
+			break;			
 			
 			case "40001";
 				$err_msg = "Error: Missing required parameters ";
