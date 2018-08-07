@@ -35,13 +35,14 @@
        
     }
 
-    function remove_empty($array) {
+    // moved to goFunctions.php
+    /*function remove_empty($array) {
 	   return array_filter($array, '_remove_empty_internal');
     }
 
     function _remove_empty_internal($value) {
         return !empty($value) || $value === 0;
-    }
+    }*/
     
     function go_get_dates($d1, $d2)
     {

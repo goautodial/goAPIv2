@@ -20,67 +20,98 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-ini_set('memory_limit', '2048M');
-
-	include_once("goReportsFunctions.php");	
+    include_once("goAPI.php");
+	include_once("goReportsFunctions.php");
+	
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} 
 
 	// need function go_sec_convert();
-    $pageTitle = strtolower($astDB->escape($_REQUEST['pageTitle']));
-    $fromDate = $astDB->escape($_REQUEST['fromDate']);
-    if(empty($fromDate))
-    	$fromDate = date("Y-m-d")." 00:00:00";
-    $toDate = $astDB->escape($_REQUEST['toDate']);
-    if(empty($toDate))
-    	$toDate = date("Y-m-d")." 23:59:59";
-    $campaignID = $astDB->escape($_REQUEST['campaignID']);
-    $request = $astDB->escape($_REQUEST['request']);
-    $userID = $astDB->escape($_REQUEST['userID']);
-    $userGroup = $astDB->escape($_REQUEST['userGroup']);
-	$dispo_stats = $astDB->escape($_REQUEST['statuses']);
+    $pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
+    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
+    $toDate 										= $astDB->escape($_REQUEST['toDate']);
+    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
+    $request 										= $astDB->escape($_REQUEST['request']);
+	$dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
 	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$log_ip = $astDB->escape($_REQUEST['log_ip']);
-	
-	$userGroup = go_get_groupid($goUser, $astDB);
-	
-	$defPage = array("stats", "agent_detail", "agent_pdetail", "dispo", "call_export_report", "sales_agent", "sales_tracker", "inbound_report");
+    if (empty($fromDate)) {
+    	$fromDate 									= date("Y-m-d")." 00:00:00";
+	}
+    
+    if(empty($toDate)) {
+    	$toDate 									= date("Y-m-d")." 23:59:59";
+	}
+		
+	$defPage 										= array(
+		"stats", 
+		"agent_detail", 
+		"agent_pdetail", 
+		"dispo", 
+		"call_export_report", 
+		"sales_agent", 
+		"sales_tracker", 
+		"inbound_report"
+	);
 
-	if(empty($session_user) && empty($goUser)){
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-	}elseif(empty($fromDate) && empty($toDate)){
-		$fromDate = date("Y-m-d")." 00:00:00";
-		$toDate = date("Y-m-d")." 23:59:59";
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($fromDate) && empty($toDate)) {
+		$fromDate 									= date("Y-m-d") . " 00:00:00";
+		$toDate 									= date("Y-m-d") . " 23:59:59";
 		//die($fromDate." - ".$toDate);
-	}elseif($pageTitle == "sales_tracker" && empty($request)){
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-	}elseif($pageTitle == "sales_agent" && empty($request)){
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-	}elseif(!in_array($pageTitle, $defPage)){
-	 	$err_msg = error_handle("10004");
-		$apiresults = array("code" => "10004", "result" => $err_msg);
-	}elseif($pageTitle == "call_export_report"){
-		$campaigns = $astDB->escape($_REQUEST['campaigns']);
-		$inbounds = $astDB->escape($_REQUEST['inbounds']);
-		$lists = $astDB->escape($_REQUEST['lists']);
-		$custom_fields = $astDB->escape($_REQUEST['custom_fields']);
-		$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
-		$rec_location = $astDB->escape($_REQUEST['rec_location']);
+	} elseif ($pageTitle == "sales_tracker" && empty($request)) {
+		$err_msg 									= error_handle("40001");
+		$apiresults 								= array(
+			"code" 										=> "40001", 
+			"result" 									=> $err_msg
+		);
+	} elseif ($pageTitle == "sales_agent" && empty($request)) {
+		$err_msg 									= error_handle("40001");
+		$apiresults 								= array(
+			"code" 										=> "40001", 
+			"result" 									=> $err_msg
+		);
+	} elseif (!in_array($pageTitle, $defPage)) {
+	 	$err_msg 									= error_handle("10004");
+		$apiresults 								= array(
+			"code" 										=> "10004", 
+			"result" 									=> $err_msg
+		);
+	} elseif ($pageTitle == "call_export_report") {
+		$campaigns 									= $astDB->escape($_REQUEST['campaigns']);
+		$inbounds 									= $astDB->escape($_REQUEST['inbounds']);
+		$lists 										= $astDB->escape($_REQUEST['lists']);
+		$custom_fields 								= $astDB->escape($_REQUEST['custom_fields']);
+		$per_call_notes 							= $astDB->escape($_REQUEST['per_call_notes']);
+		$rec_location 								= $astDB->escape($_REQUEST['rec_location']);
 		
-		$goReportsReturn = go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $userGroup, $link);
+		$goReportsReturn 							= go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $log_group, $astDB);
 		
-		$apiresults = array("result" => "success", "getReports" => $goReportsReturn);
-	}else{
-		$goReportsReturn = go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup,$link, $dispo_stats, $linkgo);
-		$apiresults = array("result" => "success", "getReports" => $goReportsReturn);
+		$apiresults 								= array(
+			"result" 									=> "success", 
+			"getReports" 								=> $goReportsReturn
+		);
+	} else {
+		$goReportsReturn 							= go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group,$astDB, $dispo_stats, $goDB);
+		$apiresults 								= array(
+			"result" 									=> "success", 
+			"getReports" 								=> $goReportsReturn
+		);
 	}
    
-	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$userGroup, $link){
+	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$log_group, $astDB) {
 		
-		if(!empty($campaigns))
+		if (!empty($campaigns))
 			$campaigns = explode(",",$campaigns);
 		if(!empty($inbounds))
 		    $inbounds = explode(",",$inbounds);
@@ -99,7 +130,7 @@ ini_set('memory_limit', '2048M');
 		$list_ct = count($lists);
 		$status_ct = count($dispo_stats);
 
-		if($campaigns != ""){
+		if ($campaigns != "") {
 			$i=0;
 			$array_campaign = Array();
 
@@ -159,7 +190,7 @@ ini_set('memory_limit', '2048M');
 					$camp_id = $campaigns[$i];
 					$astDB->where("campaign_id", $camp_id);
 					$selectQuery = $astDB->getValue("vicidial_lists", "list_id");
-					//$query_list = mysqli_query($link,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
+					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
 					foreach($selectQuery as $fetch_list){
 						$array_list[] = $fetch_list["list_id"];
 					}
@@ -197,8 +228,8 @@ ini_set('memory_limit', '2048M');
 			}
 		}
 		
-		if($userGroup !== "ADMIN"){
-			$stringv = go_getall_allowed_users($userGroup);
+		if($log_group !== "ADMIN"){
+			$stringv = go_getall_allowed_users($log_group);
 			$user_group_SQL = "AND vl.user IN ($stringv)";
 		}else{
 			$user_group_SQL = "";
@@ -248,7 +279,7 @@ ini_set('memory_limit', '2048M');
 		if($custom_fields == "Y")	{
 		    for($i = 0 ; $i < count($array_list); $i++){
 				$list_id = $array_list[$i];
-				//$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
+				//$query_CF_list = mysqli_query($astDB, "DESC custom_$list_id;");
 				$cflist_data = Array("custom_".$list_id);
 				$query_CF_list = rawQuery("DESC ?;", $cflist_data);
 				if($query_CF_list){
@@ -288,7 +319,7 @@ ini_set('memory_limit', '2048M');
 			if($per_call_notes == "Y"){
 				$astDB->where("lead_id", $lead_id);
 				$fetch_callnotes = $astDB->getValue("vicidial_call_notes", "call_notes");
-				//$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
+				//$query_callnotes = mysqli_query($astDB, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
 				$notes_ct = $astDB->count;
 				if ($notes_ct > 0){
 					$notes_data =	$fetch_callnotes["call_notes"];
@@ -311,7 +342,7 @@ ini_set('memory_limit', '2048M');
 				}
 				$astDB->where("lead_id", $lead_id);
 				$fetch_recording = $astDB->getValue("recording_log", "location");	
-				//$query_recordings = mysqli_query($link, "SELECT location from recording_log where lead_id='$lead_id' $condition_SQL LIMIT 1;");
+				//$query_recordings = mysqli_query($astDB, "SELECT location from recording_log where lead_id='$lead_id' $condition_SQL LIMIT 1;");
 				$rec_ct = mysqli_num_rows($query_recordings);
 				if ($rec_ct > 0){
 					$rec_data =	$fetch_recording["location"];
@@ -374,14 +405,14 @@ ini_set('memory_limit', '2048M');
 		$campFilter = (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
 		$inbFilter  = (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
 		$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
-		$log_id = log_action($linkgo, 'DOWNLOAD', $log_user, $ip_address, "Exported Call Reports starting from $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
+		$log_id = log_action($astDBgo, 'DOWNLOAD', $log_user, $ip_address, "Exported Call Reports starting from $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 		
 		$return = array("query" => $query, "header" => $csv_header, "rows" => $csv_row, "return_this" => $query);
 		
 		return $return;
 	}
 	
-	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $userID, $userGroup, $link, $dispo_stats, $linkgo){
+	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group, $astDB, $dispo_stats, $astDBgo){
 		
 		if (!empty($campaignID) || $pageTitle == 'call_export_report'){
 			$date1=new DateTime($fromDate);
@@ -395,16 +426,16 @@ ini_set('memory_limit', '2048M');
 			if ($pageTitle!='inbound_report') {
 				$astDB->where("campaign_id", $campaignID);
 				$resultu = $astDB->getValue("vicidial_campaigns", "campaign_name");
-				//$query = mysqli_query($link, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'") or die(mysqli_error($link));
+				//$query = mysqli_query($astDB, "select campaign_name from vicidial_campaigns where campaign_id='$campaignID'") or die(mysqli_error($astDB));
 				//$num_query = mysqli_num_rows($query);
 				if($astDB->count > 0){
 					$err_msg = error_handle("41004", "campaignID. Doesn't exist");
 					$apiresults = array("code" => "41006", "result" => $err_msg); 
 				}
 			} else {
-				$astDB->where("uniqueid_status_prefix", $userGroup);
+				$astDB->where("uniqueid_status_prefix", $log_group);
 				$resultu = $astDB->getValue("vicidial_inbound_groups", "group_name as campaign_name");
-				//$query = mysqli_query($link, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$userGroup."'") or die(mysqli_error($link));
+				//$query = mysqli_query($astDB, "select group_name as campaign_name from vicidial_inbound_groups where uniqueid_status_prefix='".$log_group."'") or die(mysqli_error($astDB));
 			}
             
 				$return['campaign_name'] = $resultu['campaign_name'];
@@ -419,7 +450,7 @@ ini_set('memory_limit', '2048M');
 				
 				$astDB->where("sale", "Y");
 				$query = $astDB->getValue("vicidial_statuses", "status");
-				//$query = mysqli_query($link, "SELECT status FROM vicidial_statuses WHERE sale='Y'") or die(mysqli_error($link));
+				//$query = mysqli_query($astDB, "SELECT status FROM vicidial_statuses WHERE sale='Y'") or die(mysqli_error($astDB));
 				$sstatusRX = "";
 				$sstatuses = array();
 				
@@ -437,7 +468,7 @@ ini_set('memory_limit', '2048M');
 				$astDB->where("sale", "Y");
 				$astDB->where("campaign_id", $campaignID);
 				$query = $astDB->get("vicidial_campaign_statuses", "status");
-				//$query2 = mysqli_query($link, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'") or die(mysqli_error($link));
+				//$query2 = mysqli_query($astDB, "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y' AND campaign_id='$campaignID'") or die(mysqli_error($astDB));
 				
 				$cstatusRX = "";
 				$cstatuses = array();
@@ -471,13 +502,13 @@ ini_set('memory_limit', '2048M');
 				if ($pageTitle=='stats'){
 					
 					if ($return['request']=='daily') {
-						$stringv = go_getall_closer_campaigns($campaignID, $link);
+						$stringv = go_getall_closer_campaigns($campaignID, $astDB);
 						$closerCampaigns = " and campaign_id IN ('$stringv') ";
 						$vcloserCampaigns = " and vclog.campaign_id IN ('$stringv') ";
-						$call_time = go_get_calltimes($campaignID, $link);
+						$call_time = go_get_calltimes($campaignID, $astDB);
 						
-						if($userGroup !== "ADMIN")
-						$ul = "AND user_group = '$userGroup'";
+						if($log_group !== "ADMIN")
+						$ul = "AND user_group = '$log_group'";
 						else
 						$ul = "";
 						
@@ -491,7 +522,7 @@ ini_set('memory_limit', '2048M');
 						
 						// Total Calls Made
 						$query_total_calls_made = "select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where length_in_sec>'0' $ul and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cdate $MunionSQL) t group by cdate;";
-						$query = mysqli_query($link, $query_total_calls_made);
+						$query = mysqli_query($astDB, $query_total_calls_made);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$cdate[] = $row['cdate'];
 							$hour0[] = $row['Hour0'];
@@ -521,19 +552,19 @@ ini_set('memory_limit', '2048M');
 						}
 						$data_calls = array("cdate" => $cdate, "hour0" => $hour0, "hour1" => $hour1, "hour2" => $hour2, "hour3" => $hour3, "hour4" => $hour4, "hour5" => $hour5, "hour6" => $hour6, "hour7" => $hour7, "hour8" => $hour8, "hour9" => $hour9, "hour10" => $hour10, "hour11" => $hour11, "hour12" => $hour12, "hour13" => $hour13, "hour14" => $hour14, "hour15" => $hour15, "hour16" => $hour16, "hour17" => $hour17, "hour18" => $hour18, "hour19" => $hour19, "hour20" => $hour20, "hour21" => $hour21, "hour22" => $hour22, "hour23" => $hour23);
 						
-						$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
+						$query = mysqli_query($astDB, "select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
 						$total_calls = mysqli_num_rows($query);
 						
 						// Total Number of Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
 						$total_leads = mysqli_num_rows($query);
 						
 						// Total Number of New Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.status='NEW'");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.status='NEW'");
 						$total_new = mysqli_num_rows($query);
 						
 						// Total Agents Logged In
-						$query = mysqli_query($link, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cuser");
+						$query = mysqli_query($astDB, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cuser");
 						$total_agents = mysqli_num_rows($query);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$cdate[] = $row['cdate'];
@@ -542,10 +573,10 @@ ini_set('memory_limit', '2048M');
 						$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 						
 						// Disposition of Calls
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($astDB, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						$total_status = mysqli_num_rows($query);
 						
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($astDB, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$status[] = $row['status'];
 							$ccount[] = $row['ccount'];
@@ -554,14 +585,14 @@ ini_set('memory_limit', '2048M');
 							$var_status = $row['status'];
 							
 								# in default statuses
-								$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_default_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
 								if($query_default_statusname){
 									$fetch_statusname = mysqli_fetch_array($query_default_statusname);
 								}
 								
 								if(!isset($fetch_statusname) || $fetch_statusname == NULL){
 								# in custom statuses
-								$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_custom_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
 									$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
 								}
 							
@@ -572,7 +603,7 @@ ini_set('memory_limit', '2048M');
 					}
 					
 					if ($return['request']=='weekly') {
-						$stringv = go_getall_closer_campaigns($campaignID, $link);
+						$stringv = go_getall_closer_campaigns($campaignID, $astDB);
 						$closerCampaigns = " and campaign_id IN ('$stringv') ";
 						$vcloserCampaigns = " and vclog.campaign_id IN ('$stringv') ";
 	
@@ -583,7 +614,7 @@ ini_set('memory_limit', '2048M');
 						}
 						
 						// Total Calls Made
-						$query = mysqli_query($link, "select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by weekno $MunionSQL) t group by weekno;");
+						$query = mysqli_query($astDB, "select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by weekno $MunionSQL) t group by weekno;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$weekno[] = "Week ".$row['weekno'];
 							$day0[] = $row['Day0'];
@@ -596,19 +627,19 @@ ini_set('memory_limit', '2048M');
 						}
 						$data_calls = array("weekno" => $weekno, "Day0" => $day0, "Day1" => $day1, "Day2" => $day2, "Day3" => $day3, "Day4" => $day4, "Day5" => $day5, "Day6" => $day6);
 						
-						$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
+						$query = mysqli_query($astDB, "select phone_number from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
 						$total_calls = mysqli_num_rows($query);
 						
 						// Total Number of Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
 						$total_leads = mysqli_num_rows($query);
 						
 						// Total Number of New Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.list_id='NEW'");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.list_id='NEW'");
 						$total_new = mysqli_num_rows($query);
 						
 						// Total Agents Logged In
-						$query = mysqli_query($link, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cuser");
+						$query = mysqli_query($astDB, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cuser");
 						$total_agents = mysqli_num_rows($query);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$cdate[] = $row['cdate'];
@@ -617,7 +648,7 @@ ini_set('memory_limit', '2048M');
 						$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 						
 						// Disposition of Calls
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($astDB, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
 						$total_status = mysqli_num_rows($query);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$status[] = $row['status'];
@@ -627,14 +658,14 @@ ini_set('memory_limit', '2048M');
 							$var_status = $row['status'];
 							
 								# in default statuses
-								$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_default_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
 								if($query_default_statusname){
 									$fetch_statusname = mysqli_fetch_array($query_default_statusname);
 								}
 								
 								if(!isset($fetch_statusname) || $fetch_statusname == NULL){
 								# in custom statuses
-								$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_custom_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
 									$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
 								}
 							
@@ -645,7 +676,7 @@ ini_set('memory_limit', '2048M');
 					}
 					
 					if ($return['request']=='monthly') {
-						$stringv = go_getall_closer_campaigns($campaignID, $link);
+						$stringv = go_getall_closer_campaigns($campaignID, $astDB);
 						$closerCampaigns = " and campaign_id IN ('$stringv') ";
 						$vcloserCampaigns = " and vclog.campaign_id IN ('$stringv') ";
 	
@@ -658,7 +689,7 @@ ini_set('memory_limit', '2048M');
 						}
 	
 						// Total Calls Made
-						$query = mysqli_query($link, "select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by monthname $MunionSQL) t group by monthname;");
+						$query = mysqli_query($astDB, "select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by monthname $MunionSQL) t group by monthname;");
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$monthname[] = $row['monthname'];
 							$month0[] = $row['Month1'];
@@ -676,19 +707,19 @@ ini_set('memory_limit', '2048M');
 						}
 						$data_calls = array("monthname" => $monthname, "Month1" => $month0, "Month2" => $month1, "Month3" => $month2, "Month4" => $month3, "Month5" => $month4, "Month6" => $month5, "Month7" => $month6, "Month8" => $month7, "Month9" => $month8, "Month10" => $month9, "Month11" => $month10, "Month12" => $month11);
 						
-						$query = mysqli_query($link, "select phone_number from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
+						$query = mysqli_query($astDB, "select phone_number from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
 						$total_calls = mysqli_num_rows($query);
 						
 						// Total Number of Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id");
 						$total_leads = mysqli_num_rows($query);
 						
 						// Total Number of New Leads
-						$query = mysqli_query($link, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.list_id='NEW'");
+						$query = mysqli_query($astDB, "select * from vicidial_list as vl, vicidial_lists as vlo where vlo.campaign_id='$campaignID' and vl.list_id=vlo.list_id and vl.list_id='NEW'");
 						$total_new = mysqli_fetch_array($query, MYSQLI_ASSOC);
 						
 						// Total Agents Logged In
-						$query = mysqli_query($link, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and MONTH(event_time) between MONTH('$fromDate') and MONTH('$toDate') group by cuser");
+						$query = mysqli_query($astDB, "select date_format(event_time, '%Y-%m-%d') as cdate,user as cuser from vicidial_agent_log where campaign_id='$campaignID' and MONTH(event_time) between MONTH('$fromDate') and MONTH('$toDate') group by cuser");
 						$total_agents = mysqli_num_rows($query);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$cdate[] = $row['cdate'];
@@ -697,7 +728,7 @@ ini_set('memory_limit', '2048M');
 						$data_agents = array("cdate" => $cdate, "cuser" => $cuser);
 						
 						// Disposition of Calls
-						$query = mysqli_query($link, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
+						$query = mysqli_query($astDB, "select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
 						$total_status = mysqli_num_rows($query);
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
 							$status[] = $row['status'];
@@ -707,14 +738,14 @@ ini_set('memory_limit', '2048M');
 							$var_status = $row['status'];
 							
 								# in default statuses
-								$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_default_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
 								if($query_default_statusname){
 									$fetch_statusname = mysqli_fetch_array($query_default_statusname);
 								}
 								
 								if(!isset($fetch_statusname) || $fetch_statusname == NULL){
 								# in custom statuses
-								$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_custom_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
 									$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
 								}
 							
@@ -732,13 +763,13 @@ ini_set('memory_limit', '2048M');
 				// Agent Time Detail
 				if ($pageTitle=="agent_detail") {
 
-					if($userGroup !== "ADMIN")
-						$ul = "AND user_group = '$userGroup'";
+					if($log_group !== "ADMIN")
+						$ul = "AND user_group = '$log_group'";
 					else
 						$ul = "";
 
 					// BEGIN gather user IDs and names for matching up later
-					$query = mysqli_query($link, "SELECT full_name,user FROM vicidial_users ORDER BY user LIMIT 100000");
+					$query = mysqli_query($astDB, "SELECT full_name,user FROM vicidial_users ORDER BY user LIMIT 100000");
 					$user_ct = mysqli_num_rows($query);
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -749,7 +780,7 @@ ini_set('memory_limit', '2048M');
 					// END gather user IDs and names for matching up later
 				
 					// BEGIN gather timeclock records per agent
-					$query = mysqli_query($link, "SELECT user,SUM(login_sec) AS login_sec FROM vicidial_timeclock_log WHERE event IN('LOGIN','START') AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' GROUP BY user LIMIT 10000000");
+					$query = mysqli_query($astDB, "SELECT user,SUM(login_sec) AS login_sec FROM vicidial_timeclock_log WHERE event IN('LOGIN','START') AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' GROUP BY user LIMIT 10000000");
 					$timeclock_ct = mysqli_num_rows($query);
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -772,7 +803,7 @@ ini_set('memory_limit', '2048M');
 					$PCusersARY=$MT;
 					$PCuser_namesARY=$MT;
 					
-					$query = mysqli_query($link, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
+					$query = mysqli_query($astDB, "SELECT user,SUM(pause_sec) AS pause_sec,sub_status FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND pause_sec > 0 AND pause_sec < 65000 $ul and campaign_id='$campaignID' GROUP BY user,sub_status ORDER BY user,sub_status DESC LIMIT 10000000");
 					$pause_sec_ct = mysqli_num_rows($query);
 			
 					$i=0;$a=1;
@@ -799,7 +830,7 @@ ini_set('memory_limit', '2048M');
 					}
 					
 					//# BEGIN Gather all agent time records and parse through them in PHP to save on DB load
-					$query = mysqli_query($link, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul and campaign_id='$campaignID' LIMIT 10000000");
+					$query = mysqli_query($astDB, "SELECT user,wait_sec,talk_sec,dispo_sec,pause_sec,lead_id,status,dead_sec FROM vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' $ul and campaign_id='$campaignID' LIMIT 10000000");
 					$agent_time_ct = mysqli_num_rows($query);
 					$j=0;
 					$k=0;
@@ -958,7 +989,7 @@ ini_set('memory_limit', '2048M');
 				
 						// Check if the user had an AUTOLOGOUT timeclock event during the time period
 						$TCuserAUTOLOGOUT = ' ';
-						$query = mysqli_query($link, "SELECT COUNT(*) as cnt FROM vicidial_timeclock_log WHERE event='AUTOLOGOUT' AND user='$Suser[$m]' AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'");
+						$query = mysqli_query($astDB, "SELECT COUNT(*) as cnt FROM vicidial_timeclock_log WHERE event='AUTOLOGOUT' AND user='$Suser[$m]' AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'");
 						$timeclock_ct = mysqli_num_rows($query);
 						
 						if ($autologout_results > 0){
@@ -1132,15 +1163,15 @@ ini_set('memory_limit', '2048M');
 					$usersARY[0]='';
 					$user_namesARY[0]='';
 					$k=0;
-					//if (inner_checkIfTenant($userGroup, $linkgo))
-					if($userGroup !== "ADMIN")
-						$userGroupSQL = "and vicidial_users.user_group='$userGroup'";
+					//if (inner_checkIfTenant($log_group, $astDBgo))
+					if($log_group !== "ADMIN")
+						$log_groupSQL = "and vicidial_users.user_group='$log_group'";
 					if($date_diff <= 0){
 						$filters = "and pause_sec<65000 and wait_sec<65000 and talk_sec<65000 and dispo_sec<65000 ";
 					}
 					
-					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' group by user,full_name,status order by full_name,user,status desc limit 500000";
-					$query = mysqli_query($link, $perfdetails_sql);
+					$perfdetails_sql = "select count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $log_groupSQL and campaign_id='$campaignID' group by user,full_name,status order by full_name,user,status desc limit 500000";
+					$query = mysqli_query($astDB, $perfdetails_sql);
 					
 					$rows_to_print = mysqli_num_rows($query);
 					
@@ -1170,14 +1201,14 @@ ini_set('memory_limit', '2048M');
 								$var_status = $status[$i];
 							
 								# in default statuses
-								$query_default_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_default_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_statuses WHERE status = '$var_status' LIMIT 1;");
 								if($query_default_statusname){
 									$fetch_statusname = mysqli_fetch_array($query_default_statusname);
 								}
 								
 								if(!isset($fetch_statusname) || $fetch_statusname == NULL){
 								# in custom statuses
-								$query_custom_statusname = mysqli_query($link, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
+								$query_custom_statusname = mysqli_query($astDB, "SELECT status_name FROM vicidial_campaign_statuses WHERE status = '$var_status' LIMIT 1;");
 									$fetch_statusname = mysqli_fetch_array($query_custom_statusname);
 								}
 							
@@ -1451,7 +1482,7 @@ ini_set('memory_limit', '2048M');
 					$PCusersARY=$MT;
 					$PCuser_namesARY=$MT;
 					$k=0;
-					$query = mysqli_query($link, "select full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sub_status,sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $userGroupSQL and campaign_id='$campaignID' and pause_sec<65000 group by user,full_name,sub_status order by full_name,user,sub_status desc limit 100000");
+					$query = mysqli_query($astDB, "select full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sub_status,sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec from vicidial_users,vicidial_agent_log where date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vicidial_users.user=vicidial_agent_log.user $log_groupSQL and campaign_id='$campaignID' and pause_sec<65000 group by user,full_name,sub_status order by full_name,user,sub_status desc limit 100000");
 					$subs_to_print = mysqli_num_rows($query);
 					
 					$i=0;             
@@ -1697,7 +1728,7 @@ ini_set('memory_limit', '2048M');
 					$total_all=($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
 					
 					if (isset($list_ids) && $list_ids[0] == "ALL") {
-						$query = mysqli_query($link, "SELECT list_id FROM vicidial_lists WHERE campaign_id='$campaignID' ORDER BY list_id");
+						$query = mysqli_query($astDB, "SELECT list_id FROM vicidial_lists WHERE campaign_id='$campaignID' ORDER BY list_id");
 		
 						$i=0;
 						while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -1707,7 +1738,7 @@ ini_set('memory_limit', '2048M');
 					}
 					$list = "'".implode("','",$list_ids)."'";
 					// grab names of global statuses and statuses in the selected campaign
-					$query = mysqli_query($link, "SELECT status,status_name from vicidial_statuses order by status");
+					$query = mysqli_query($astDB, "SELECT status,status_name from vicidial_statuses order by status");
 					//$statuses_to_print = $query->num_rows();
 					$statuses_to_print = mysqli_num_rows($query);
 					
@@ -1716,10 +1747,10 @@ ini_set('memory_limit', '2048M');
 					}
 			
 					$query_list = "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID'; ";
-					$query = mysqli_query($link, $query_list);
+					$query = mysqli_query($astDB, $query_list);
 					
 					while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
-						$query_name = mysqli_query($link, "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID' and list_id");
+						$query_name = mysqli_query($astDB, "SELECT status, status_name FROM vicidial_campaign_statuses WHERE campaign_id = '$campaignID' and list_id");
 						$statuses_list[$row['status']] = $row['status_name'];
 					}
 					# end grab status names
@@ -1729,7 +1760,7 @@ ini_set('memory_limit', '2048M');
 					$leads_in_list_Y = 0;
 					
 					$queryx = "SELECT status, if(called_count >= 10, 10, called_count) as called_count, count(*) as count from vicidial_list where list_id IN(".$list.") and status NOT IN('DC','DNCC','XDROP') group by status, if(called_count >= 10, 10, called_count) order by status,called_count";
-					$query = mysqli_query($link, $queryx);
+					$query = mysqli_query($astDB, $queryx);
 					$status_called_to_print = mysqli_num_rows($query);
 					
 					$sts=0;
@@ -1835,7 +1866,7 @@ ini_set('memory_limit', '2048M');
 					$TOPsorted_output .= "</tfoot></table>";
 					
 					$queryforBot = "SELECT DISTINCT gmt_offset_now FROM vicidial_list WHERE list_id IN (".$list.");";
-					$sqlBot = mysqli_query($link, $queryforBot);
+					$sqlBot = mysqli_query($astDB, $queryforBot);
 					$numBot = mysqli_num_rows($sqlBot);
 					
 					$BOTsorted_output = "<TABLE class='table table-striped table-bordered table-hover' id='dispo_bot'>";
@@ -1848,12 +1879,12 @@ ini_set('memory_limit', '2048M');
 						while($rowBot = mysqli_fetch_array($sqlBot)){
 							$timezone_now = $rowBot['gmt_offset_now'];
 							$CALLEDsql = "SELECT count(gmt_offset_now) as Clead_count FROM vicidial_list WHERE list_id IN (".$list.") AND status != 'NEW' AND gmt_offset_now = '$timezone_now'";
-							$queryCALLED = mysqli_query($link, $CALLEDsql);
+							$queryCALLED = mysqli_query($astDB, $CALLEDsql);
 							$fetchCalled = mysqli_fetch_array($queryCALLED);
 							$called_leadCount = $fetchCalled['Clead_count'];
 							
 							$NOTCALLEDsql = "SELECT count(gmt_offset_now) as NClead_count FROM vicidial_list WHERE list_id IN (".$list.") AND status = 'NEW' AND gmt_offset_now = '$timezone_now'";
-                                                        $queryNOTCALLED = mysqli_query($link, $NOTCALLEDsql);
+                                                        $queryNOTCALLED = mysqli_query($astDB, $NOTCALLEDsql);
                                                         $fetchCalled = mysqli_fetch_array($queryNOTCALLED);
 							$notcalled_leadCount = $fetchCalled['NClead_count'];
 	
@@ -1875,15 +1906,15 @@ ini_set('memory_limit', '2048M');
 				
 				// SALES PER AGENT
 				if ($pageTitle == "sales_agent") {
-					if($userGroup !== "ADMIN")
-					$ul = "AND us.user_group = '$userGroup'";
+					if($log_group !== "ADMIN")
+					$ul = "AND us.user_group = '$log_group'";
 					else
 					$ul = "";
 					if($request == "outbound"){
 						// Outbound Sales //
 						
 						$outbound_query = "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl WHERE us.user = vlog.user and vl.phone_number = vlog.phone_number and vl.lead_id = vlog.lead_id and vlog.length_in_sec > '0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlog.campaign_id='$campaignID' $ul group by us.full_name";
-						$query = mysqli_query($link, $outbound_query) or die(mysqli_error($link));
+						$query = mysqli_query($astDB, $outbound_query) or die(mysqli_error($astDB));
 						
 						$TOPsorted_output = "";
 						$total_out_sales = "";
@@ -1906,7 +1937,7 @@ ini_set('memory_limit', '2048M');
 					if($request == "inbound"){
 						// Inbound Sales //
 						$inbound_query = "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='".$campaignID."' ORDER BY campaign_id";
-						$query = mysqli_query($link, $inbound_query) or die(mysqli_error($link));
+						$query = mysqli_query($astDB, $inbound_query) or die(mysqli_error($astDB));
 						$row = mysqli_fetch_array($query);
 						$closer_camp_array=explode(" ",$row['closer_campaigns']);
 						$num=count($closer_camp_array);
@@ -1920,7 +1951,7 @@ ini_set('memory_limit', '2048M');
 						}
 						$campaign_inb_query="vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 						
-						$query = mysqli_query($link, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query $ul group by us.full_name");
+						$query = mysqli_query($astDB, "SELECT us.full_name AS full_name, us.user AS user, SUM(IF(vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl WHERE us.user=vlog.user and vl.phone_number=vlog.phone_number and vl.lead_id=vlog.lead_id and vlog.length_in_sec>'0' and vlog.status in ('$statuses') and date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query $ul group by us.full_name");
 						
 						$BOTsorted_output = "";
 						$total_in_sales = "";
@@ -1947,13 +1978,13 @@ ini_set('memory_limit', '2048M');
 				
 				// SALES TRACKER
 				if ($pageTitle == "sales_tracker") {
-					if($userGroup !== "ADMIN")
-					$ul = "AND us.user_group = '$userGroup'";
+					if($log_group !== "ADMIN")
+					$ul = "AND us.user_group = '$log_group'";
 					else
 					$ul = "";
 					if ($request == 'outbound') {
 						$outbound_query = "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vlo.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and vlo.status in ('$statuses') and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and vlo.campaign_id='$campaignID' $ul order by vlo.call_date ASC limit 2000";
-						$query = mysqli_query($link, $outbound_query);
+						$query = mysqli_query($astDB, $outbound_query);
 						$outbound_result = "";
 						$sale_num_value = 1;
 						while($row = mysqli_fetch_array($query)){
@@ -1977,7 +2008,7 @@ ini_set('memory_limit', '2048M');
 					}
 				
 					if ($request == 'inbound') {
-						$query = mysqli_query($link, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='$campaignID' ORDER BY campaign_id");
+						$query = mysqli_query($astDB, "SELECT closer_campaigns FROM vicidial_campaigns WHERE campaign_id='$campaignID' ORDER BY campaign_id");
 						$row = mysqli_fetch_array($query);
 						$closer_camp_array = explode(" ",$row['closer_campaigns']);
 						$num = count($closer_camp_array);
@@ -1992,7 +2023,7 @@ ini_set('memory_limit', '2048M');
 						
 						$campaign_inb_query="vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 					
-						$query = mysqli_query($link, "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') $ul order by vlo.call_date ASC limit 2000");
+						$query = mysqli_query($astDB, "select distinct(vl.phone_number) as phone_number, vl.lead_id as lead_id, vlo.call_date as call_date,us.full_name as agent, 	vl.first_name as first_name,vl.last_name as last_name,vl.address1 as address,vl.city as city,vl.state as state, vl.postal_code as postal,vl.email as email,vl.alt_phone as alt_phone,vl.comments as comments,vl.lead_id from vicidial_closer_log as vlo, vicidial_list as vl, vicidial_users as us where us.user=vl.user and vl.phone_number=vlo.phone_number and vl.lead_id=vlo.lead_id and vlo.length_in_sec > '0' and date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' and $campaign_inb_query and vlo.status in ('$statuses') $ul order by vlo.call_date ASC limit 2000");
 						$inbound_result = "";
 						$sale_num_value = 1;
 						while($row = mysqli_fetch_array($query)){
@@ -2032,7 +2063,7 @@ ini_set('memory_limit', '2048M');
 					}
 					
 					$inbound_report_query = "SELECT * FROM vicidial_closer_log WHERE campaign_id = '$campaignID' $ul AND date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'";
-					$query = mysqli_query($link, $inbound_report_query);
+					$query = mysqli_query($astDB, $inbound_report_query);
 					$TOPsorted_output = "";
 					$number = 1;
 					while($row = mysqli_fetch_array($query)){
