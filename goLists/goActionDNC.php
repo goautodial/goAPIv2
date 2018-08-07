@@ -71,9 +71,9 @@
 				$cdnc_exist 						= $astDB
 					->where('phone_number', $dnc)
 					->where('campaign_id', $campaign_id)
-					->get('vicidial_campaign_dnc', null, 'phone_number');
+					->get('vicidial_campaign_dnc');
 					
-				if (!$cdnc_exist) {
+				if ($astDB->count <= 0) {
 					$error_count 					= 0;
 					$data							= array(
 						'phone_number' 					=> $dnc,
@@ -136,17 +136,16 @@
 				$cdnc_exist 						= $astDB
 					->where('phone_number', $dnc)
 					->where('campaign_id', $campaign_id)
-					->get('vicidial_campaign_dnc', null, 'phone_number');
+					->get('vicidial_campaign_dnc');
 					
-				if ($cdnc_exist) {
+				if ($astDB->count > 0) {
 					$error_count 					= 0;
-					$data							= array(
-						'phone_number' 					=> $dnc,
-						'campaign_id'					=> $campaign_id
-					);
-					
-					$astDB->delete('vicidial_campaign_dnc', $data);
-					
+
+					$delete 						= $astDB
+						->where('phone_number', $dnc)
+						->where('campaign_id', $campaign_id)
+						->delete('vicidial_campaign_dnc');					
+										
 					$log_id 						= log_action($goDB, $stage, $log_user, $log_ip, "$dnc removed from campaign ID: $campaign_id DNC list", $log_group, $astDB->getLastQuery());
 					
 				} else {

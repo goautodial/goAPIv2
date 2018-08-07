@@ -21,47 +21,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    // POST or GET Variables
-        $lead_id = $astDB->escape($_REQUEST['lead_id']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-		
-    // Check user_id if its null or empty
-        if($lead_id == null) {
-		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
-		//$apiresults = array("result" => "Error: Set a value for Lead ID.");
-        } else {
-                $groupId = go_get_groupid($goUser, $astDB);
-                
-		if (!checkIfTenant($groupId, $goDB)) {
-			$ul = "AND user='$user_id'";
-                } else {
-			$ul = "AND user='$user_id' AND user_group='$groupId'";
-                }
-		
-                if ($groupId != 'ADMIN') {
-                        $notAdminSQL = "AND user_group != 'ADMIN'";
-                }
-				
-                //$query = "DELETE FROM vicidial_list WHERE lead_id='$lead_id'";
-                //$querygo = "DELETE FROM go_customers WHERE lead_id='$lead_id'";
-		$goDB->where('lead_id', $lead_id);
-                $rsltvg = $goDB->delete('go_customers');
-		$astDB->where('lead_id', $lead_id);
-                $rsltv = $astDB->delete('vicidial_list');
-                $countResult = $astDB->getRowCount();
 
-                if($rsltv != false){
-                        $log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Lead ID: $lead_id", $log_group, $query, $querygo);
-			
-                        $apiresults = array("result" => "success");
-                }else{
-			$err_msg = error_handle("10010");
-			$apiresults = array("code" => "10010", "result" => $err_msg);
-			//$apiresults = array("result" => "Error: Lead ID does not exist.");
-                }
+    include_once ("goAPI.php");
+ 
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB); 
+	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
+	
+    // POST or GET Variables
+    $lead_id 									= $astDB->escape($_REQUEST['lead_id']);
+
 		
-        }
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($lead_id) || is_null($lead_id)) {
+		$err_msg 								= error_handle("40001");
+		$apiresults 							= array(
+			"code" 									=> "40001", 
+			"result" 								=> $err_msg
+		);
+	} else {	
+		// check lead_id if it exists
+		$astDB->where("lead_id", $lead_id);
+		$fresults 								= $astDB->getOne("vicidial_list", "lead_id");
+		
+		if ($fresults) {                
+			// check if customer
+			$goDB->where("lead_id", $lead_id);
+			$fresultsgo 						= $goDB->getOne("go_customers", "lead_id");
+			
+			if ($fresultsgo) { 
+				$goDB->where("lead_id", $lead_id);
+				$goDB->delete('go_customers');
+				
+				$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
+			}
+				
+			$astDB->where('lead_id', $lead_id);
+            $astDB->delete('vicidial_list');
+
+			$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
+			
+			$apiresults							= array(
+				"result" 							=> "success"
+			);
+		} else {
+			$err_msg 							= error_handle("10010");
+			$apiresults 						= array(
+				"code" 								=> "10010", 
+				"result" 							=> $err_msg
+			);
+			//$apiresults = array("result" => "Error: Lead ID does not exist.");
+		}		
+	}
+	
 ?>

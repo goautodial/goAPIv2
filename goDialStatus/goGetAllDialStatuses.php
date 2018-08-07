@@ -36,7 +36,7 @@
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} elseif (in_array($campaign_id, $campaigns)) {			
+	} elseif (in_array($campaign_id, $campaigns) || preg_match("/ALL/", $campaign_id)) {			
 		if ($hotkeys_only === "1") {
 			$astDB->where("selectable", "Y");
 		}
@@ -47,7 +47,10 @@
 				"status_name"
 			);
 			
-			$astDB->where("campaign_id", $campaign_id);
+			if (!preg_match("/ALL/", $campaign_id)) {
+				$astDB->where("campaign_id", $campaign_id);
+			}
+			
 			$astDB->orderBy("status", "desc");			
 			$rsltv 									= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
 					

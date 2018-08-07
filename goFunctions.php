@@ -1836,5 +1836,13 @@
 		$result = str_replace($escapers, $replacements, $value);
 
 		return $result;
-	}	
+	}
+	
+    function remove_empty($array) {
+    	return array_filter($array, '_remove_empty_internal');
+    }
+
+    function _remove_empty_internal($value) {
+		return !empty($value) || $value === 0;
+    }	
 ?>
