@@ -31,7 +31,7 @@
 		$apiresults 							= array(
 			"result" 								=> "Error: Session User Not Defined."
 		);
-	} elseif (empty($user_id) && empty($user)) {
+	} elseif (empty($_REQUEST['user_id']) && empty($_REQUEST['user'])) {
 		$err_msg 								= error_handle("40002");
 		$apiresults 							= array(
 			"code" 									=> "40002", 
