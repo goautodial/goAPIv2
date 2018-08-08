@@ -20,124 +20,124 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ( "goAPI.php" );
+    include_once ("goAPI.php");
     
 	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid ( $session_user, $astDB );    
-	$log_ip 									= $astDB->escape ( $_REQUEST['log_ip'] );
+	$log_group 									= go_get_groupid($session_user, $astDB);    
+	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
 	$filter 									= "default";
 	
-	if ( empty ( $log_user ) || is_null( $log_user ) ) {
+	if (empty($log_user) || is_null($log_user)) {
 		$apiresults 							= array(
 			"result" 								=> "Error: Session User Not Defined."
 		);
-	} elseif ( empty ( $user_id ) && empty ( $user ) ) {
-		$err_msg 								= error_handle( "40002" );
+	} elseif (empty($user_id) && empty($user)) {
+		$err_msg 								= error_handle("40002");
 		$apiresults 							= array(
 			"code" 									=> "40002", 
 			"result" 								=> $err_msg
 		);
     } else {
-		if ( isset ( $_REQUEST['user_id'] )  && isset ( $_REQUEST['user'] ) ) {
-			$user_id 							= $astDB->escape ( $_REQUEST['user_id'] );
-			$user 								= $astDB->escape ( $_REQUEST['user'] );
+		if (isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])) {
+			$user_id 							= $astDB->escape($_REQUEST['user_id']);
+			$user 								= $astDB->escape($_REQUEST['user']);
 		} 
 		
-		if ( isset ( $_REQUEST['user_id'] )  && !isset ( $_REQUEST['user'] ) ){
-			$user_id 							= $astDB->escape ( $_REQUEST['user_id'] );
+		if (isset($_REQUEST['user_id'])  && !isset($_REQUEST['user'])){
+			$user_id 							= $astDB->escape($_REQUEST['user_id']);
 		} 
 		
-		if ( !isset ( $_REQUEST['user_id'] )  && isset ( $_REQUEST['user'] ) ){
-			$user								= $astDB->escape ( $_REQUEST['user'] );
+		if (!isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])){
+			$user								= $astDB->escape($_REQUEST['user']);
 		} 
 		
-		if ( isset ( $_REQUEST['filter'] ) ) {
-			$filter 							= $astDB->escape ( $_REQUEST['filter'] );
+		if (isset($_REQUEST['filter'])) {
+			$filter 							= $astDB->escape($_REQUEST['filter']);
 		}
 		
-		if ( !empty ( $user_id ) && empty ( $user ) ) { // Am I (agent/user) alive in whole system?
-			$astDB->where ( "user_id", $user_id );
+		if (!empty($user_id) && empty($user)) { // Am I (agent/user) alive in whole system?
+			$astDB->where("user_id", $user_id);
 		} else {
-			$astDB->where ( "user", $user );			
+			$astDB->where("user", $user);			
 		}
 				
-		$userinfo								= $astDB->getOne ( "vicidial_users", "user_id, user");
+		$userinfo								= $astDB->getOne("vicidial_users", "user_id, user");
 		$user_id								= $userinfo["user_id"];
 		$user									= $userinfo["user"];
 		
-		if ( $astDB->count > 0 ) { // Yes, I am!	
-			if ( checkIfTenant ( $log_group, $goDB ) ) { // I have some conditions for you..
-				$astDB->where ( "user_group", $log_group ); 
-			} elseif ( strtoupper($log_group) != 'ADMIN' ) {
-				if ( $user_level > 8 ) {
-					$astDB->where ( "user_group", $log_group );
+		if ($astDB->count > 0) { // Yes, I am!	
+			if (checkIfTenant($log_group, $goDB)) { // I have some conditions for you..
+				$astDB->where("user_group", $log_group); 
+			} elseif (strtoupper($log_group) != 'ADMIN') {
+				if ($user_level > 8) {
+					$astDB->where("user_group", $log_group);
 				}
 			}				
 					
 			$userinfo							= $astDB // Are you powerful enough to access me?
-				->where ( "user", $user )
-				->where ( "user", DEFAULT_USERS, "NOT IN" )
-				->getOne ( "vicidial_users" ); 
+				->where("user", $user)
+				->where("user", DEFAULT_USERS, "NOT IN")
+				->getOne("vicidial_users"); 
 					
-			if ( $astDB->count > 0 ) { // Yes, you are!
-				$check_location 				= go_check_user_location ( NULL, $user_id );
+			if ($astDB->count > 0) { // Yes, you are!
+				$check_location 				= go_check_user_location(NULL, $user_id);
 				
-				if ( $check_location !== 0 ) {
+				if ($check_location !== 0) {
 					$usergo						= $goDB
-						->where ( "us.name", $user)
-						->where ( "us.location_id = lo.id" )
-						->getOne ( "users us, locations lo" );					
+						->where("us.name", $user)
+						->where("us.location_id = lo.id")
+						->getOne("users us, locations lo");					
 				} else {
 					$usergo						= $goDB
-						->where ( "name", $user )
-						->getOne ( "users" ); 
+						->where("name", $user)
+						->getOne("users"); 
 				}
 							
 				$onlineako 						= $astDB // Am I logged-in and online?
-					->where ( "user", $user )
-					->getOne ( "vicidial_live_agents", "user,status" );
+					->where("user", $user)
+					->getOne("vicidial_live_agents", "user,status");
 				
-				$datetoday 						=  date ( "Y-m-d" );
+				$datetoday 						=  date ("Y-m-d");
 				$status							= "SALE";
 				
-				if ( $astDB->count > 0 ) { // Yes, I am!							
+				if ($astDB->count > 0) { // Yes, I am!							
 					$incallstoday				= $astDB
-						->where ( "vu.user = $user" )
-						->where ( "vcl.user = vu.user" )
-						->where ( "vcl.call_date", array ( "$datetoday 00:00:00", "$datetoday 23:59:59" ), "BETWEEN" )
-						->where ( "vcl.uniqueid = cl.uniqueid" )
-						->where ( "vcl.length_in_sec", 0, ">" )
-						->getValue ( "vicidial_closer_log as vcl, vicidial_users as vu, call_log as cl", "count(vcl.lead_id)" );
+						->where("vu.user = $user")
+						->where("vcl.user = vu.user")
+						->where("vcl.call_date", array ("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vcl.uniqueid = cl.uniqueid")
+						->where("vcl.length_in_sec", 0, ">")
+						->getValue ("vicidial_closer_log as vcl, vicidial_users as vu, call_log as cl", "count(vcl.lead_id)");
 						
-					$incallstoday 				= ( $incallstoday ) ? $incallstoday : "";
+					$incallstoday 				= ($incallstoday) ? $incallstoday : "";
 														
 					$insalestoday				= $astDB			
-						->where ( "vu.user = $user" )
-						->where ( "vcl.user = vu.user" )
-						->where ( "vcl.status", $status )
-						->where ( "vcl.call_date", array ( "$datetoday 00:00:00", "$datetoday 23:59:59" ), "BETWEEN" )					
-						->getValue ( "vicidial_closer_log as vcl, vicidial_users as vu", "count(distinct lead_id)" );					
+						->where("vu.user = $user")
+						->where("vcl.user = vu.user")
+						->where("vcl.status", $status)
+						->where("vcl.call_date", array ("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")					
+						->getValue ("vicidial_closer_log as vcl, vicidial_users as vu", "count(distinct lead_id)");					
 					
-					$insalestoday 				= ( $insalestoday ) ? $insalestoday : "";
+					$insalestoday 				= ($insalestoday) ? $insalestoday : "";
 					
 					$outcallstoday				= $astDB
-						->where ( "vu.user = $user" )
-						->where ( "vl.user = vu.user" )
-						->where ( "vl.call_date", array( "$datetoday 00:00:00", "$datetoday 23:59:59" ), "BETWEEN" )
-						->where ( "vl.uniqueid = cl.uniqueid" )
-						->where ( "vl.length_in_sec", 0, ">" )
-						->getValue ( "vicidial_log as vl, vicidial_users as vu, call_log as cl", "count(vl.lead_id)" );
+						->where("vu.user = $user")
+						->where("vl.user = vu.user")
+						->where("vl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vl.uniqueid = cl.uniqueid")
+						->where("vl.length_in_sec", 0, ">")
+						->getValue ("vicidial_log as vl, vicidial_users as vu, call_log as cl", "count(vl.lead_id)");
 
-					$outcallstoday 				= ( $outcallstoday ) ? $outcallstoday : "";
+					$outcallstoday 				= ($outcallstoday) ? $outcallstoday : "";
 									
 					$outsalestoday				= $astDB				
-						->where ( "vu.user = $user" )
-						->where ( "vl.user = vu.user" )
-						->where ( "vl.status", $status )
-						->where ( "vl.call_date", array( "$datetoday 00:00:00", "$datetoday 23:59:59" ), "BETWEEN" )					
-						->getValue ("vicidial_log as vl, vicidial_users as vu", "count(distinct lead_id)" );
+						->where("vu.user = $user")
+						->where("vl.user = vu.user")
+						->where("vl.status", $status)
+						->where("vl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")					
+						->getValue ("vicidial_log as vl, vicidial_users as vu", "count(distinct lead_id)");
 					
-					$outsalestoday				= ( $outsalestoday ) ? $outsalestoday : "";
+					$outsalestoday				= ($outsalestoday) ? $outsalestoday : "";
 					
 					$cols 						= array (
 						"vicidial_live_agents.extension as vla_extension",
@@ -163,7 +163,7 @@
 						"vicidial_campaigns.campaign_name as vla_campaign_name"
 					);
 					
-					if ( strstr( "/READY|PAUSED|CLOSER/", $onlineako["status"] ) ) { // I'm waiting for calls..
+					if (strstr("/READY|PAUSED|CLOSER/", $onlineako["status"])) { // I'm waiting for calls..
 						$table					= "
 							vicidial_live_agents,
 							vicidial_users,
@@ -172,17 +172,17 @@
 						";	
 						
 						$yesnocalls				= $astDB
-							->where ( "vicidial_live_agents.user", $user )
-							->where ( "vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id" )
-							->where ( "vicidial_live_agents.user = vicidial_users.user" )
-							->where ( "vicidial_live_agents.lead_id = 0" )
-							->where ( "vicidial_live_agents.user_level != 4" )
-							->where ( "vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id" )
-							->orderBy ( "last_call_time" )		
-								->get ( $table, null, $cols );
+							->where("vicidial_live_agents.user", $user)
+							->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
+							->where("vicidial_live_agents.user = vicidial_users.user")
+							->where("vicidial_live_agents.lead_id = 0")
+							->where("vicidial_live_agents.user_level != 4")
+							->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
+							->orderBy ("last_call_time")		
+								->get ($table, null, $cols);
 					}
 					
-					if ( strstr ( "/INCALL|QUEUE|PARK|3-WAY/", $onlineako["status"] ) ) { // I'm on a call..
+					if (strstr ("/INCALL|QUEUE|PARK|3-WAY/", $onlineako["status"])) { // I'm on a call..
 						$table					= "
 							vicidial_live_agents,
 							vicidial_users,
@@ -192,29 +192,29 @@
 						";
 						
 						$yesnocalls				= $astDB
-							->where ( "vicidial_live_agents.user", $user )
-							->where ( "vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id" )
-							->where ( "vicidial_live_agents.user = vicidial_users.user" )
-							->where ( "vicidial_live_agents.lead_id = vicidial_list.lead_id" )
-							->where ( "vicidial_live_agents.user_level != 4" )
-							->where ( "vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id" )
-							->orderBy ( "last_call_time" )		
-								->get ( $table, null, $cols );	
+							->where("vicidial_live_agents.user", $user)
+							->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
+							->where("vicidial_live_agents.user = vicidial_users.user")
+							->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
+							->where("vicidial_live_agents.user_level != 4")
+							->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
+							->orderBy ("last_call_time")		
+								->get ($table, null, $cols);	
 								
-						foreach ( $yesnocalls as $yescalls ) {
+						foreach ($yesnocalls as $yescalls) {
 							$callerid 			= $yescalls['vla_callerid'];								                    
 						}
 						
 						$callerids				= $astDB
-							->where ( "callerid", $callerid )
-								->get ( "vicidial_auto_calls" );
+							->where("callerid", $callerid)
+								->get ("vicidial_auto_calls");
 								
 						$parked					= $astDB
-							->where ( "channel_group", $callerid )
-								->get ( "parked_channels" );			
+							->where("channel_group", $callerid)
+								->get ("parked_channels");			
 					}
 					
-					$salestoday					= array ( 
+					$salestoday					= array (
 						"insalestoday" 				=> $insalestoday, 
 						"outsalestoday" 			=> $outsalestoday 
 					);
@@ -224,7 +224,7 @@
 						"outcallstoday" 			=> $outcallstoday 
 					);
 					
-					$onlinedata					= array_merge ( $yesnocalls, $salestoday, $callstoday );
+					$onlinedata					= array_merge ($yesnocalls, $salestoday, $callstoday);
 					
 					$apiresults 				= array (
 						"result" 					=> "success", 
@@ -234,21 +234,21 @@
 						"callerids" 				=> $callerids				
 					);								
 				} else { // I'm offline.
-					if ( !empty($usergo) ) {
-						$data 					= array_merge ( $userinfo, $usergo );
+					if (!empty($usergo)) {
+						$data 					= array_merge ($userinfo, $usergo);
 					} else {
 						$data 					= $userinfo;
 					}	
 					
-					$apiresults 				= array ( // Since I'm offline, here's what you get..
+					$apiresults 				= array (// Since I'm offline, here's what you get..
 						"result" 					=> "success", 
 						"data" 						=> $data
 					);					
 				}
 				
-				if ( $filter == "userInfo" ) { // Oh.. you know me..
-					if ( !empty ( $usergo ) ) {
-						$data 					= array_merge ( $userinfo, $usergo );
+				if ($filter == "userInfo") { // Oh.. you know me..
+					if (!empty($usergo)) {
+						$data 					= array_merge ($userinfo, $usergo);
 					} else {
 						$data 					= $userinfo;
 					}	
@@ -259,14 +259,14 @@
 					);            
 				}            
 			} else { // No, you're not powerful enough!
-				$err_msg 						= error_handle ( "10001", "Insufficient permission." );
+				$err_msg 						= error_handle ("10001", "Insufficient permission.");
 				$apiresults						= array (
 					"code" 							=> "10001",
 					"result" 						=> $err_msg
 				);		
 			}
 		} else { // No, I'm not alive. :(		
-			$err_msg 								= error_handle ( "41004", "user. Doesn't exist" );
+			$err_msg 								= error_handle ("41004", "user. Doesn't exist");
 			$apiresults								= array (
 				"code" 									=> "41004",
 				"result" 								=> $err_msg

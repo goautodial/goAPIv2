@@ -23,38 +23,47 @@
 
     include_once ("goAPI.php");
  
-	$log_user 								= $session_user;
-	$log_group 								= go_get_groupid($session_user, $astDB); 
-	$log_ip 								= $astDB->escape($_REQUEST["log_ip"]); 
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB); 
+	$log_ip 									= $astDB->escape($_REQUEST["log_ip"]); 
 	
 	### POST or GET Variables
-	$campaign_id 							= $astDB->escape($_REQUEST["campaign_id"]);	
-    $hotkeys 								= $astDB->escape($_REQUEST["hotkey"]);
+	$campaign_id 								= $astDB->escape($_REQUEST["campaign_id"]);	
+    $hotkeys 									= $astDB->escape($_REQUEST["hotkey"]);
     
     ### Check Campaign ID if its null or empty
-	if (empty($campaign_id) || empty($hotkeys)) { 
-		$apiresults 						= array(
-			"result" 							=> "Error: Set a value for Campaign ID and Hotkey."
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || empty($hotkeys)) { 
+		$apiresults 							= array(
+			"result" 								=> "Error: Set a value for Campaign ID and Hotkey."
 		); 
 	} else {
-		$cols 								= array(
+		$cols 									= array(
 			"campaign_id", 
 			"hotkey"
 		);
 	
         $astDB->where("campaign_id", $campaign_id);
         $astDB->where("hotkey", $hotkeys);
-        $checkPC							= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
+        $checkPC								= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
         
 		if ($checkPC) {
 			$astDB->where("campaign_id", $campaign_id);
 			$astDB->where("hotkey", $hotkeys);
 			$astDB->delete("vicidial_campaign_hotkeys");
 
-			$log_id = log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Hotkey: $hotkeys from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
-			$apiresults = array("result" => "success");
+			$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Hotkey: $hotkeys from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
+			
+			$apiresults 						= array(
+				"result" 							=> "success"
+			);
 		} else {
-			$apiresults = array("result" => "Error: Hotkey doesn't exist.");
+			$apiresults 						= array(
+				"result" 							=> "Error: Hotkey doesn't exist."
+			);
 		}
 	}
 ?>

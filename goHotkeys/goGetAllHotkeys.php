@@ -24,28 +24,22 @@
 
     include_once ("goAPI.php");
 
-	$log_user 						= $session_user;
-	$log_group 						= go_get_groupid($session_user, $astDB); 
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB); 
 
 	### POST or GET Variables
-	$campaign_id 					= $astDB->escape($_REQUEST["campaign_id"]);
+	$campaign_id 								= $astDB->escape($_REQUEST["campaign_id"]);
 
-	if (empty($session_user)) {
-		$err_msg 					= error_handle("40001");
-        $apiresults 				= array(
-			"code" 						=> "40001",
-			"result" 					=> $err_msg
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
 		);
 	} elseif(empty($campaign_id)) {
-		$apiresults 				= array(
-			"result" 					=> "Error: Set a value for Campaign ID."
+		$apiresults 							= array(
+			"result" 								=> "Error: Set a value for Campaign ID."
 		);
 	} else {
-		/*if (checkIfTenant($log_group, $goDB)) {
-            $astDB->where("user_group", $log_group);
-        }*/
-        
-        $cols 						= array(
+        $cols 									= array(
 			"status",
 			"hotkey",
 			"status_name",
@@ -55,28 +49,28 @@
 		
         $astDB->where("campaign_id", $campaign_id);
         $astDB->orderBy("hotkey");
-        $hotkeys 					= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
+        $hotkeys 								= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
 
-        if($hotkeys){
-        	foreach($hotkeys as $fresults){
-				$dataStatus[] 		= $fresults["status"];
-				$dataHotkey[] 		= $fresults["hotkey"];
-				$dataStatusName[] 	= $fresults["status_name"];
-				$dataSelectable[] 	= $fresults["selectable"];
-				$dataCampaignID[] 	= $fresults["campaign_id"];
+        if ($hotkeys) {
+        	foreach($hotkeys as $fresults) {
+				$dataStatus[] 					= $fresults["status"];
+				$dataHotkey[] 					= $fresults["hotkey"];
+				$dataStatusName[] 				= $fresults["status_name"];
+				$dataSelectable[] 				= $fresults["selectable"];
+				$dataCampaignID[] 				= $fresults["campaign_id"];
 
-				$apiresults 		= array(
-					"result" 			=> "success",
-					"status" 			=> $dataStatus,
-					"hotkey" 			=> $dataHotkey,
-					"status_name" 		=> $dataStatusName,
-					"selectable" 		=> $dataSelectable,
-					"campaign_id" 		=> $dataCampaignID
+				$apiresults 					= array(
+					"result" 						=> "success",
+					"status" 						=> $dataStatus,
+					"hotkey" 						=> $dataHotkey,
+					"status_name" 					=> $dataStatusName,
+					"selectable" 					=> $dataSelectable,
+					"campaign_id" 					=> $dataCampaignID
 				);
 			}
-        }else{
-        	$apiresults = array(
-				"result" 				=> "error"
+        } else {
+        	$apiresults 						= array(
+				"result" 							=> "error"
 			);
         }
         
