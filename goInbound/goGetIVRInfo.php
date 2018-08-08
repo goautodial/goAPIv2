@@ -24,28 +24,39 @@
 
     include_once ("goAPI.php");
     
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB);    
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB);    
     
     // POST or GET Variables
-    $menu_id = $astDB->escape($_REQUEST['menu_id']);
+    $menu_id 									= $astDB->escape($_REQUEST['menu_id']);
     
-	if(empty($menu_id)) { 
-		$apiresults = array("result" => "Error: Set a value for Menu ID."); 
-	} else {    
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 							= array(
+			"result" 								=> "Error: Session User Not Defined."
+		);
+	} elseif (empty$menu_id($id) || is_null($menu_id)) {
+        $apiresults 							= array(
+			"result" 								=> "Error: Inbound ID Not Defined."
+		);
+    } else {  
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
+			$astDB->orWhere("user_group", "---ALL---");
     	}
 
     	$astDB->where("menu_id", $menu_id);
     	$astDB->where("menu_id", "defaultlog", "!=");
-    	$fresults = $astDB->getOne("vicidial_call_menu");
-   		//$query = "SELECT *	FROM vicidial_call_menu WHERE menu_id != 'defaultlog' $ul order by menu_id LIMIT 1;";
+    	$fresults 								= $astDB->getOne("vicidial_call_menu");
 		
-		if($fresults) {
-			$apiresults = array( "result" => "success", "data" => $fresults);
+		if ($fresults) {
+			$apiresults 						= array(
+				"result" 							=> "success", 
+				"data" 								=> $fresults
+			);
 		} else {
-			$apiresults = array("result" => "Error: IVR Menu doesn't exist.");
+			$apiresults 						= array(
+				"result" 							=> "Error: IVR Menu doesn't exist."
+			);
 		}
 	}
 ?>
