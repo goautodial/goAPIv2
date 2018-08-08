@@ -92,7 +92,11 @@
 						->where("name", $user)
 						->getOne("users"); 
 				}
-							
+				
+				$avatar							= $goDB
+					->where("user_id", $user_id)
+					->getOne("go_avatars", "data");
+				
 				$onlineako 						= $astDB // Am I logged-in and online?
 					->where("user", $user)
 					->getOne("vicidial_live_agents", "user,status");
@@ -224,31 +228,33 @@
 						"outcallstoday" 			=> $outcallstoday 
 					);
 					
-					$onlinedata					= array_merge ($yesnocalls, $salestoday, $callstoday);
+					$onlinedata					= array_merge($yesnocalls, $salestoday, $callstoday);
 					
 					$apiresults 				= array (
 						"result" 					=> "success", 
 						"data" 						=> $onlinedata,
 						"dataGo" 					=> $usergo,
+						"avatar"					=> $avatar,
 						"parked" 					=> $parked, 
 						"callerids" 				=> $callerids				
 					);								
 				} else { // I'm offline.
 					if (!empty($usergo)) {
-						$data 					= array_merge ($userinfo, $usergo);
+						$data 					= array_merge($userinfo, $usergo);
 					} else {
 						$data 					= $userinfo;
 					}	
 					
 					$apiresults 				= array (// Since I'm offline, here's what you get..
 						"result" 					=> "success", 
-						"data" 						=> $data
+						"data" 						=> $data,
+						"avatar"					=> $avatar
 					);					
 				}
 				
 				if ($filter == "userInfo") { // Oh.. you know me..
 					if (!empty($usergo)) {
-						$data 					= array_merge ($userinfo, $usergo);
+						$data 					= array_merge($userinfo, $usergo);
 					} else {
 						$data 					= $userinfo;
 					}	
