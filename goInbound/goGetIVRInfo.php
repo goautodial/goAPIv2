@@ -34,7 +34,7 @@
 		$apiresults 							= array(
 			"result" 								=> "Error: Session User Not Defined."
 		);
-	} elseif (empty$menu_id($id) || is_null($menu_id)) {
+	} elseif (empty($menu_id) || is_null($menu_id)) {
         $apiresults 							= array(
 			"result" 								=> "Error: Inbound ID Not Defined."
 		);

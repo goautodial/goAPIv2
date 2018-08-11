@@ -21,19 +21,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	
-	include_once ("goAPI.php");
+    include_once ("goAPI.php");
 
-	$goItemRank	= $astDB->escape($_REQUEST['itemrank']);
-	$goIDgroup 	= $astDB->escape($_REQUEST['idgroup']);
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+
+	$goItemRank										= $astDB->escape($_REQUEST['itemrank']);
+	$goIDgroup 										= $astDB->escape($_REQUEST['idgroup']);
 	
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	
-	if(empty($goIDgroup)) {
-		$apiresults = array(  "result" => "Error: Set a value for group_id");
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($goIDgroup) || is_null($goIDgroup)) {
+        $apiresults 								= array(
+			"result" 									=> "Error: Set a value for Group ID."
+		);
 	} else {
 		$itemsumitexplode = explode('&', $goItemRank);
 		$group_id = $goIDgroup;
-		$log_user = $goUser;
 
 		for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
 			$itemsumitsplit = split('=', $itemsumitexplode[$i]);
@@ -104,7 +111,7 @@
 				//$query5 = "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
 			}
 			
-			$log_id = log_action($goDB, "MODIFY", $log_user, $ip_address, "Modified Agent Rank(s) on Group $group_id", $log_group);
+			$log_id = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Agent Rank(s) on Group $group_id", $log_group);
 			$apiresults = array("result" => "success");
 		}
 	}

@@ -24,26 +24,39 @@
 
     include_once ("goAPI.php");
 
-	$log_group = go_get_groupid($session_user, $astDB);    
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB);   
     
     // POST or GET Variables
-    $did_id = $_REQUEST['did_id'];
+    $did_id 										= $astDB->escape($_REQUEST['did_id']);
     
-	if(empty($did_id)) { 
-		$apiresults = array("result" => "Error: Set a value for DID ID."); 
-	} else {    
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($did_id) || is_null($did_id)) {
+        $apiresults 								= array(
+			"result" 									=> "Error: DID ID Not Defined."
+		);
+    } else {    
 		if (checkIfTenant($log_group, $goDB)) {
-            $astDB->where("group_id", $log_group);
+            $astDB->where("user_group", $log_group);
+            $astDB->orWhere("user_group", "---ALL---");
 		}
 
         $astDB->where("did_id", $did_id);
-        $fresults = $astDB->getOne("vicidial_inbound_dids");
+        $fresults 									= $astDB->getOne("vicidial_inbound_dids");
    		//$query = "SELECT * FROM vicidial_inbound_dids $ul order by did_pattern LIMIT 1;";
    		
-		if($astDB->count > 0) {
-			$apiresults = array( "result" => "success", "data" => $fresults);
+		if ($astDB->count > 0) {
+			$apiresults 							= array(
+				"result" 								=> "success", 
+				"data" 									=> $fresults
+			);
 		} else {
-			$apiresults = array("result" => "Error: DID doesn't exist.");
+			$apiresults 							= array(
+				"result" 								=> "Error: DID doesn't exist."
+			);
 		}
 	}
 ?>
