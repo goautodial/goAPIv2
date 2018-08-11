@@ -2,9 +2,10 @@
 /**
  * @file        goAddIVR.php
  * @brief       API to add new IVR
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jerico James Milo  <jerico@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho 
+ * @author      Jerico James Milo
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify

@@ -25,27 +25,48 @@
 
     include_once ("goAPI.php");
     
-	$log_group = go_get_groupid($session_user, $astDB);
+	$log_user 										= $session_user;
+	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$log_ip 										= $astDB->escape($_REQUEST['log_ip']); 
 	
     //POST or GET Variables
-    $menu_id = $astDB->escape($_REQUEST['menu_id']);
+    $menu_id 										= $astDB->escape($_REQUEST['menu_id']);
     
-	if(empty($menu_id)) { 
-		$apiresults = array("result" => "Error: Set a value for Menu ID."); 
+	if (empty($log_user) || is_null($log_user)) {
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($menu_id) || is_null($menu_id)) {
+        $apiresults 								= array(
+			"result" 									=> "Error: Set a value for Menu ID."
+		);
 	} else {
 		$astDB->where("menu_id", $menu_id);
-		$selectQuery = $astDB->get("vicidial_call_menu_options");
-   		//$query = "SELECT *	FROM vicidial_call_menu_options WHERE $ul;";
+		$selectQuery 								= $astDB->get("vicidial_call_menu_options");
 		
-		foreach($selectQuery as $fresults){
-			$id[] = $fresults["menu_id"];
-			$option_value[] = $fresults["option_value"];
-			$option_description[] = $fresults["option_description"];
-			$option_route[] = $fresults["option_route"];
-			$option_route_value[] = $fresults["option_route_value"];
-			$option_route_value_context[] = $fresults["option_route_value_context"];
+		if ($astDB->count > 0) {
+			foreach($selectQuery as $fresults){
+				$id[] 								= $fresults["menu_id"];
+				$option_value[] 					= $fresults["option_value"];
+				$option_description[] 				= $fresults["option_description"];
+				$option_route[] 					= $fresults["option_route"];
+				$option_route_value[] 				= $fresults["option_route_value"];
+				$option_route_value_context[] 		= $fresults["option_route_value_context"];
+			}	
+			
+			$apiresults 							= array(
+				"result" 								=> "success", 
+				"menu_id" 								=> $id, 
+				"option_value" 							=> $option_value, 
+				"option_description" 					=> $option_description, 
+				"option_route" 							=> $option_route, 
+				"option_route_value" 					=> $option_route_value, 
+				"option_route_value_context" 			=> $option_route_value_context
+				//"query" 								=> $selectQuery
+			);
 		}
+
 		
-		$apiresults = array( "result" => "success", "menu_id" => $id, "option_value" => $option_value, "option_description" => $option_description, "option_route" => $option_route, "option_route_value" => $option_route_value, "option_route_value_context" => $option_route_value_context, "query" => $selectQuery);	
+			
 	}
 ?>
