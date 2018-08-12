@@ -70,7 +70,7 @@
 		$query 								= $astDB->get("vicidial_users", NULL, $cols);
 
 		if ($astDB->count > 0) {
-			$count 							= 0;
+			//$agent_num 						= 0;
 			
 			foreach ($query as $fresults) {
 				$dataUserID[] 				= $fresults['user_id'];
@@ -98,22 +98,18 @@
 						$dataUserIDgo[] 	= $fresultsgo['userid'];
 						$dataAvatar[] 		= $fresultsgo['avatar'];		
 					}
-				}
+				}												
 				
-				
-				$agent_num 					=  1;
-				
-				if (preg_match ("/^agent/i", $fresults['user'])) {
-					$get_last 				= preg_replace ("/[^0-9]/","", $fresults['user']);
-					$last_num[] 			= intval ($get_last);
-					
-					// return data
-					$get_last 				= max ($last_num);
-					$agent_num 				= $get_last + 1;				
-				}				
-							
+				if (preg_match("/^agent/i", $fresults['user'])) {
+					$get_last 				= preg_replace("/[^0-9]/","", $fresults['user']);
+					$last_num[] 			= intval($get_last);									
+				}															
 			}
 				
+			// return data
+			$get_last 						= max($last_num);
+			$agent_num 						= $get_last + 1;
+			
 			$apiresults 					= array(
 				"result" 						=> "success", 
 				"user_id" 						=> $dataUserID,
