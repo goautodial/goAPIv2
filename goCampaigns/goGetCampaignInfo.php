@@ -145,8 +145,12 @@
 				
 				$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
 							
+			} else {
+				$apiresults 						= array(
+					"result" 							=> "success",
+					"data" 								=> array_shift($result)
+				);			
 			}
-
 		} else {
 			$err_msg 								= error_handle("41004", "campaign_id");
 			$apiresults 							= array(
