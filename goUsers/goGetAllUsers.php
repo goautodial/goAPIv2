@@ -101,7 +101,7 @@
 				}
 				
 				
-				$agent_num 					=  0;
+				$agent_num 					=  1;
 				
 				if (preg_match ("/^agent/i", $fresults['user'])) {
 					$get_last 				= preg_replace ("/[^0-9]/","", $fresults['user']);
