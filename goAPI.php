@@ -58,7 +58,7 @@
 	if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
 		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }    
 		
-    define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI', 'goautodial'));
+    define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI'));
 
     $goCharset = "UTF-8";
     $goVersion = "4.0";

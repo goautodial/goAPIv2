@@ -20,41 +20,41 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    include_once ( "goAPI.php" );
-    include_once ( "../licensed-conf.php" );
+    include_once ("goAPI.php");
+    include_once ("../licensed-conf.php");
 	
 	$log_user 								= $session_user;
-	$log_group 								= go_get_groupid ( $session_user, $astDB );
-	$log_ip 								= $astDB->escape ( $_REQUEST['log_ip'] );
+	$log_group 								= go_get_groupid($session_user, $astDB);
+	$log_ip 								= $astDB->escape($_REQUEST['log_ip']);
 	
-	if ( empty ( $log_user ) || is_null ( $log_user ) ) {
-		$apiresults 						= array (
+	if (empty ($log_user) || is_null ($log_user)) {
+		$apiresults 						= array(
 			"result" 							=> "Error: Session User Not Defined."
 		);
 	} else {
-		if ( checkIfTenant ( $log_group, $goDB ) ) {
-			$astDB->where ( "user_group", $log_group );
+		if (checkIfTenant ($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
 		}
 		
 		// get user_level
-		$astDB->where ( "user", $log_user );
-		$query_userlevel 					= $astDB->getOne ( "vicidial_users", "user_level" );
+		$astDB->where("user", $log_user);
+		$query_userlevel 					= $astDB->getOne("vicidial_users", "user_level");
 		$user_level 						= $query_userlevel["user_level"];
 		
-		if ( checkIfTenant ( $log_group, $goDB ) ) {
-			$astDB->where ( "user_group", $log_group );
-			$astDB->orwhere ( "user_group", "---ALL---" );
+		if (checkIfTenant ($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+			$astDB->orwhere("user_group", "---ALL---");
 		} else {
-			if ( strtoupper ( $log_group ) != 'ADMIN') {
-				if ( $user_level > 8 ) {
-					$astDB->where ( "user_group", $log_group );
-					$astDB->orwhere ( "user_group", "---ALL---" );
+			if (strtoupper ($log_group) != 'ADMIN') {
+				if ($user_level > 8) {
+					$astDB->where("user_group", $log_group);
+					$astDB->orwhere("user_group", "---ALL---");
 				}
 			}					
 		}
 		
 		// get users list
-		$cols 								= array (
+		$cols 								= array(
 			"user_id", 
 			"user", 
 			"full_name", 
@@ -64,51 +64,57 @@
 			"active"
 		);
 		
-		$astDB->where ( "user", DEFAULT_USERS, "NOT IN" );
-		$astDB->where ( "user_level", 4, "!=" );
-		$astDB->orderby ( "user", "asc" );
-		$query 								= $astDB->get ( "vicidial_users", NULL, $cols );
+		$astDB->where("user", DEFAULT_USERS, "NOT IN");
+		$astDB->where("user_level", 4, "!=");
+		$astDB->orderby("user", "asc");
+		$query 								= $astDB->get("vicidial_users", NULL, $cols);
 
-		if ( $astDB->count > 0 ) {
+		if ($astDB->count > 0) {
 			$count 							= 0;
 			
-			foreach ( $query as $fresults ) {				
-				$cols 						= array (
-					"userid", 
-					"avatar"
-				);
-				
-				$goDB->where ( "userid", $fresults["user_id"] );
-				$goDB->orderby ( "userid", "desc" );
-				$querygo 					= $goDB->get ( "users", NULL, $cols );	
-				
-				if ( $goDB->count > 0 ) {
-					foreach ( $querygo as $fresultsgo ){
-						$dataUserIDgo[] 	= $fresultsgo['userid'];
-						$dataAvatar[] 		= $fresultsgo['avatar'];		
-					}
-				}
-				
+			foreach ($query as $fresults) {
 				$dataUserID[] 				= $fresults['user_id'];
 				$dataUser[] 				= $fresults['user'];
 				$dataFullName[] 			= $fresults['full_name'];
 				$dataUserLevel[] 			= $fresults['user_level'];
 				$dataUserGroup[] 			= $fresults['user_group'];
 				$dataPhone[] 				= $fresults['phone_login'];
-				$dataActive[]				= $fresults['active'];
+				$dataActive[]				= $fresults['active'];			
+			
+				$cols 						= array(
+					"userid", 
+					"avatar"
+				);
 				
-				if ( preg_match ( "/^agent/i", $fresults['user'] ) ) {
-					$get_last 				= preg_replace ( "/[^0-9]/","", $fresults['user'] );
-					$last_num[] 			= intval ( $get_last);
+				$goDB->where("userid", $fresults["user_id"]);
+				$goDB->orderby("userid", "desc");
+				$querygo 					= $goDB->get("users", NULL, $cols);	
+				
+				$dataUserIDgo				= "";
+				$dataAvatar					= "";
+				
+				if ($goDB->count > 0) {
+					foreach ($querygo as $fresultsgo) {
+						$dataUserIDgo[] 	= $fresultsgo['userid'];
+						$dataAvatar[] 		= $fresultsgo['avatar'];		
+					}
+				}
+				
+				
+				$agent_num 					=  0;
+				
+				if (preg_match ("/^agent/i", $fresults['user'])) {
+					$get_last 				= preg_replace ("/[^0-9]/","", $fresults['user']);
+					$last_num[] 			= intval ($get_last);
+					
+					// return data
+					$get_last 				= max ($last_num);
+					$agent_num 				= $get_last + 1;				
 				}				
 							
 			}
-
-			// return data
-			$get_last 						= max ( $last_num );
-			$agent_num 						= $get_last + 1;	
 				
-			$apiresults 					= array (
+			$apiresults 					= array(
 				"result" 						=> "success", 
 				"user_id" 						=> $dataUserID,
 				"user_group" 					=> $dataUserGroup, 
@@ -120,11 +126,12 @@
 				"avatar" 						=> $dataAvatar, 
 				"useridgo" 						=> $dataUserIDgo, 
 				"licensedSeats" 				=> $config["licensedSeats"], 
-				"last_count" 					=> $agent_num );	
+				"last_count" 					=> $agent_num 
+			);	
 				
 		} else {
-			$err_msg 						= error_handle ( "10010" );
-			$apiresults 					= array (
+			$err_msg 						= error_handle("10010");
+			$apiresults 					= array(
 				"code" 							=> "10010", 
 				"result" 						=> $err_msg
 			); 
