@@ -37,18 +37,18 @@ include_once('./includes/XMLParser.php');
 
 ### Check if DB variables are not set ###
 $VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-$VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
-$VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
+$VARDB_user     = (!isset($VARDB_user)) ? "asterisku" : $VARDB_user;
+$VARDB_pass     = (!isset($VARDB_pass)) ? "asterisku1234" : $VARDB_pass;
 $VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
 
 $VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
 $VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
+$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialu1234" : $VARDBgo_pass;
 $VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
 
 $VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailio" : $VARDBgokam_user;
-$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiorw" : $VARDBgokam_pass;
+$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
+$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
 $VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
 ### End of DB variables ###
 

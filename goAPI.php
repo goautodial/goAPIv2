@@ -27,18 +27,18 @@
     
     /* Check if DB variables are not set */
 	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-	$VARDB_user     = (!isset($VARDB_user)) ? "asteriskDBu" : $VARDB_user;
-	$VARDB_pass     = (!isset($VARDB_pass)) ? "asteriskDBpw" : $VARDB_pass;
+	$VARDB_user     = (!isset($VARDB_user)) ? "asterisku" : $VARDB_user;
+	$VARDB_pass     = (!isset($VARDB_pass)) ? "asterisku1234" : $VARDB_pass;
 	$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
 
 	$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialDBu" : $VARDBgo_user;
-	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialDBpw" : $VARDBgo_pass;
+	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
+	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialu1234" : $VARDBgo_pass;
 	$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
 
 	$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailioDBu" : $VARDBgokam_user;
-	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailioDBpw" : $VARDBgokam_pass;
+	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
+	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
 	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
     /* End of DB variables */
     
