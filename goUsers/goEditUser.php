@@ -162,7 +162,7 @@
 	} 
 		
 	if (checkIfTenant( $log_group, $astDB ) ) {
-		$astDB->where ( "user	_group", $log_group );
+		$astDB->where ( "user_group", $log_group );
 	}
 
 	if ( $active == "N" ) { 

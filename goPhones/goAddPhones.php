@@ -21,34 +21,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-	@include_once ("goAPI.php");
-	include_once ("../licensed-conf.php");
+	include_once("goAPI.php");
+	include_once("../licensed-conf.php");
+	
+	$log_user 									= $session_user;
+	$log_group 									= go_get_groupid($session_user, $astDB); 
+	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);	
 	
 	// POST or GET Variables
-    $orig_extension = $astDB->escape($_REQUEST['extension']);
-    $server_ip = $astDB->escape($_REQUEST['server_ip']);
-    $pass =    $astDB->escape($_REQUEST['pass']);
-    $protocol = $astDB->escape($_REQUEST['protocol']);
-    $dialplan_number = $astDB->escape($_REQUEST['dialplan_number']);
-    $voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
-    $status = $astDB->escape($_REQUEST['status']);
-    $active = $astDB->escape($_REQUEST['active']);
-    $fullname = $astDB->escape($_REQUEST['fullname']);
-    $messages = !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
-    $old_messages = !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
-    $user_group = $astDB->escape($_REQUEST['user_group']);
-    $log_ip = $astDB->escape($_REQUEST['log_ip']);
-	$gmt = $astDB->escape($_REQUEST['gmt']);
+    $orig_extension 							= $astDB->escape($_REQUEST['extension']);
+    $server_ip 									= $astDB->escape($_REQUEST['server_ip']);
+    $pass 										= $astDB->escape($_REQUEST['pass']);
+    $protocol 									= $astDB->escape($_REQUEST['protocol']);
+    $dialplan_number 							= $astDB->escape($_REQUEST['dialplan_number']);
+    $voicemail_id 								= $astDB->escape($_REQUEST['voicemail_id']);
+    $status 									= $astDB->escape($_REQUEST['status']);
+    $active 									= $astDB->escape($_REQUEST['active']);
+    $fullname 									= $astDB->escape($_REQUEST['fullname']);
+    $messages 									= !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
+    $old_messages 								= !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
+    $user_group 								= $astDB->escape($_REQUEST['user_group']);
+	$gmt 										= $astDB->escape($_REQUEST['gmt']);
 	
-	if(isset($_REQUEST['seats'])) { $seats = $astDB->escape($_REQUEST['seats']); }
-		else { $seats = 1; }
-	if ($protocol == "EXTERNAL") { $phone_pass = ""; }
-		else { $phone_pass = $pass; }
-		
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB); 
-	$log_ip = $astDB->escape($_REQUEST['log_ip']);
+	if(isset($_REQUEST['seats'])) { 
+		$seats 									= $astDB->escape($_REQUEST['seats']); 
+	} else { 
+		$seats 									= 1; 
+	}
 	
+	if ($protocol == "EXTERNAL") { 
+		$phone_pass 							= ""; 
+	} else { 
+		$phone_pass 							= $pass; 
+	}
+			
 	$defStatus = array('ACTIVE','SUSPENDED','CLOSED','PENDING,ADMIN');
 	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
 	$defActive = array("Y","N");

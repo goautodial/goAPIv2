@@ -183,9 +183,55 @@
 		return $campaigns;
     }
 
+	function go_getall_closer_campaigns($campaign_id, $astDB){
+		/*$query_date =  date('Y-m-d');
+		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaign_id' order by campaign_id";
+		$query = mysqli_query($link, $query_text);
+		$resultsu = mysqli_fetch_array($query);*/
+		
+		$resultsu = $astDB
+			->where("campaign_id", $campaign_id)
+			->orderBy("campaign_id")
+			->getValue("vicidial_campaigns", "trim(closer_campaigns)");
+		
+		if (count($resultsu) > 0) {
+			//$fresults = $resultsu['qresult'];
+			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
+			$allCloserCampaigns = implode("','",$closerCampaigns);
+		} else {
+			$allCloserCampaigns = '';
+		}
+		  
+		return $allCloserCampaigns;
+	}
+    
+	function go_get_calltimes($campaign_id, $astDB){		
+		/*$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$campaign_id'";
+		$query_result = mysqli_query($link, $query);
+		$fetch_result = mysqli_fetch_array($query_result);
+		$call_time = $fetch_result['call_time'];*/
+		
+		$call_time = $astDB
+			->where("campaign_id", $campaign_id)
+			->getValue("vicidial_campaigns", "local_call_time");		
 
-    
-    
+		if (strlen($call_time) > 0){
+			/*$query = "SELECT ct_default_start, ct_default_stop FROM vicidial_call_times WHERE call_time_id='$call_time'";
+			$result_query = mysqli_query($link, $query);
+			$fetch_result = mysqli_fetch_array($result_query);
+			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];*/
+			
+			$fetch_result = $astDB
+				->where("call_time_id", $call_time)
+				->getOne("vicidial_call_times", "ct_default_start, ct_default_stop");
+				
+			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];
+				
+		}
+
+		return $result;
+	}
+	
     #### Jerico James Flores Milo ####
     #### My APIxmlOuput           #### 
     function apiXMLOutput($val, $lastk = "") {
