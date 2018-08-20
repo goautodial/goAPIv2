@@ -183,6 +183,8 @@
 			foreach ($rlog_query as $rlog_fetch) {
 				$rlog_start_time[] 					= $rlog_fetch['start_time'];
 				$rlog_length_in_sec[] 				= gmdate("H:i:s", $rlog_fetch['length_in_sec']);
+				$rlog_start_epoch[] 				= $rlog_fetch['start_epoch'];
+				$rlog_end_epoch[] 					= $rlog_fetch['end_epoch'];
 				$rlog_recording_id[] 				= $rlog_fetch['recording_id'];
 				$rlog_filename[] 					= $rlog_fetch['filename'];
 				$rlog_location[] 					= $rlog_fetch['location'];
