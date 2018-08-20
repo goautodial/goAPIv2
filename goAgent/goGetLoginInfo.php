@@ -1,6 +1,6 @@
 <?php
 /**
- * @file 		goGetLoginInfo-new.php
+ * @file 		goGetLoginInfo.php
  * @brief 		API for Agent UI
  * @copyright 	Copyright (C) GOautodial Inc.
  * @author     	Chris Lomuntad
@@ -34,12 +34,12 @@
 	$SIP_server 									= (!isset($SIP_server)) ? 'kamailio' : $SIP_server;
 
 	if (empty($log_user) || is_null($log_user)) {
-		$APIResult 								= array(
+		$APIResult 									= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($user) || is_null($user)) {
 		$err_msg 									= error_handle("40001");
-        $APIResult 								= array(
+        $APIResult 									= array(
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		);
