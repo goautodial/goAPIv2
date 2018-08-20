@@ -2,7 +2,7 @@
 /**
  * @file 		goGetLoginInfo.php
  * @brief 		API for Agent UI
- * @copyright 	Copyright (C) GOautodial Inc.
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author     	Chris Lomuntad
  * @author		Demian Lizandro A. Biscocho
  *
