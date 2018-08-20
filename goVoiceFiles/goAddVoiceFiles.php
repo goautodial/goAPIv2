@@ -70,8 +70,9 @@
 				$goDB->where('goDirectory', $path_sounds );
 				$exec_get_sounds				= $goDB->get( 'sounds' );
 				$count_sounds 					= $goDB->getRowCount();
+				$NOW							= date("Y-m-d H:i:s");
 				
-				if ( $count_sounds <= 0 ) {
+				if ( $count_sounds < 1 ) {
 					copy( $audiofile_dir, "$path_sounds/$audiofile_name" );
 					chmod( "$path_sounds/$audiofile_name", 0644 );
 					if ( file_exists("$path_sounds/$audiofile_name") ) {
@@ -79,9 +80,9 @@
 						$insertData 			= array(
 							'goFilename' 			=> $audiofile_name,
 							'goDirectory' 			=> $path_sounds,
-							'goFileDate' 			=> 'NOW()',
+							'goFileDate' 			=> $NOW,
 							'goFilesize' 			=> $audio_filesize,
-							'uploaded_by' 			=> $session_user
+							'uploaded_by' 			=> $log_user
 						);
 						
 						$exec_sounds 			= $goDB->insert('sounds', $insertData);
