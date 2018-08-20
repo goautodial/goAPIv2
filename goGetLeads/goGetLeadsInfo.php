@@ -192,7 +192,9 @@
 			}
 			
 			$rlog_data	 							= array(
-				"start_time"							=> $rlog_start_time, 
+				"start_time"							=> $rlog_start_time,
+				"start_epoch"							=> $rlog_start_epoch,
+				"end_epoch"								=> $rlog_end_epoch,
 				"length_in_sec" 						=> $rlog_length_in_sec, 
 				"recording_id" 							=> $rlog_recording_id, 
 				"filename" 								=> $rlog_filename,
