@@ -123,7 +123,7 @@
         }
     }
     
-	function go_getall_closer_campaigns($campaignID, $link){
+	/*function go_getall_closer_campaigns($campaignID, $link){
 		$query_date =  date('Y-m-d');
 		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaignID' order by campaign_id";
 		$query = mysqli_query($link, $query_text);
@@ -138,9 +138,9 @@
 		}
 		  
 		return $allCloserCampaigns;
-	}
+	}*/
 	
-	function go_get_calltimes($camp, $link){
+	/*function go_get_calltimes($camp, $link){
 		
 		$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$camp'";
 		$query_result = mysqli_query($link, $query);
@@ -155,7 +155,7 @@
 		}
 
 		return $result;
-	}
+	}*/
 	
 	function go_get_statuses($camp, $link){
 	# grab names of global statuses and statuses in the selected campaign
