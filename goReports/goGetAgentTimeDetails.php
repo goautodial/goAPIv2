@@ -101,6 +101,8 @@
 				}					
 			}
 			
+			$TOTtimeTC								= array();
+			
 			$timeclock_ct 							= $astDB
 				->where("event", array("LOGIN", "START"), "IN")
 				->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
@@ -110,7 +112,9 @@
 			if ($astDB->count > 0) {
 				foreach ($timeclock_ct as $row) {
 					$TCuser 						= $row['user'];
-					$TCtime 						= $row['login_sec'];					
+					$TCtime 						= $row['login_sec'];
+					
+					array_push($TOTtimeTC, $TCtime);
 				}
 			}
 			
@@ -159,7 +163,6 @@
 				foreach ($apause_sec as $row) {
 					$PCfull_name					= $row['full_name'];
 					$PCuser 						= $row['user'];
-					//$PCpause_sec 					= gmdate('H:i:s', $row['pause_sec']);
 					$PCpause_sec 					= $row['pause_sec'];
 					$sub_status 					= $row['sub_status'];
 					
@@ -220,12 +223,7 @@
 				
 			$usercount								= $astDB->getRowCount();
 				
-			if ($astDB->count >0) {				
-				//echo "<pre>";
-				//print_r($agenttd);
-				//echo "\n";
-				//print_r($apause_sec);
-				//die("dd");
+			if ($astDB->count >0) {	
 				$TOTwait 							= array();
 				$TOTtalk 							= array();
 				$TOTdispo 							= array();
@@ -233,7 +231,6 @@
 				$TOTdead 							= array();
 				$TOTcustomer 						= array();
 				$TOTALtime 							= array();
-				//$TOTtimeTC 							= gmdate('H:i:s', array_push($TOTtimeTC));
 				$TOT_AGENTS							= $usercount;
 				$TOTcalls							= array();
 				
@@ -266,7 +263,10 @@
 					if ($talk > 65000) { $talk		= 0; }
 					if ($dispo > 65000) { $dispo	= 0; }
 					if ($pause > 65000) { $pause	= 0; }
-					if ($dead_sec > 65000) { $dead_sec		= 0; }
+					
+					if ($dead_sec > 65000) { 
+						$dead_sec					= 0; 
+					}
 					
 					//$customer 						= ($talk - $dead_sec);
 					
@@ -302,21 +302,13 @@
 				$TOTdead 							= gmdate('H:i:s', array_sum($TOTdead));
 				$TOTcustomer 						= gmdate('H:i:s', array_sum($TOTcustomer));
 				$TOTALtime 							= gmdate('H:i:s', array_sum($TOTALtime));
-				//$TOTtimeTC 							= gmdate('H:i:s', array_push($TOTtimeTC));
+				$TOTtimeTC 							= gmdate('H:i:s', array_sum($TOTtimeTC));
 				$TOT_AGENTS 						= 'AGENTS: '.$usercount;
 				$TOTcalls							= array_sum($TOTcalls);
 			}
 					
-		
 				// Check if the user had an AUTOLOGOUT timeclock event during the time period
 				$TCuserAUTOLOGOUT 					= ' ';
-				/*$query 								= "
-					SELECT COUNT(*) as cnt FROM vicidial_timeclock_log 
-					WHERE event='AUTOLOGOUT' AND user = '$Suser' 
-					AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
-				";
-				
-				$timeclock_ct 						= $astDB->rawQuery($query);*/
 								
 				$timeclock_ct						= $astDB						
 					->where("event", "AUTOLOGOUT")
@@ -327,12 +319,7 @@
 				if ($timeclock_ct > 0) {
 					$TCuserAUTOLOGOUT 				= '*';
 					//$AUTOLOGOUTflag++;
-				}
-				
-				// END loop through each status //					
-				if (is_null($calls)) {
-					$calls 					= 0;
-				}
+				}				
 
 				$Toutput 							= array(
 					"name" 								=> $nameARY, 
