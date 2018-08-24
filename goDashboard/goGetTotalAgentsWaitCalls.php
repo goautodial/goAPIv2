@@ -43,6 +43,7 @@
 		$data										= $astDB
 			->where("campaign_id", $campaigns, "IN")
 			->where("status", $ready, "IN")
+			->where("user_level", 4, "!=")
 			->getValue("vicidial_live_agents", "count(*)");
 		
 		$apiresults 								= array(
