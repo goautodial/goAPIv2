@@ -29,22 +29,22 @@
    #### License: AGPLv2                             ####
    #####################################################
     $list_id            = $astDB->escape($_REQUEST['list_id']);
-    $field_id           = $_REQUEST['field_id'];
-    $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
-    $field_label_old    = str_replace(" ","_",trim($_REQUEST['field_label_old']));
-    $field_name         = $_REQUEST['field_name'];
-    $field_description  = $_REQUEST['field_description'];
-    $field_rank         = $_REQUEST['field_rank'];
-    $field_help         = (isset($_REQUEST['field_help'])) ? $_REQUEST['field_help']:"";
-    $field_type         = $_REQUEST['field_type'];
-    $field_options      = $_REQUEST['field_options'];
-    $field_size         = $_REQUEST['field_size'];
-    $field_max          = $_REQUEST['field_max'];
-    $field_default      = $_REQUEST['field_default'];
-    $field_required     = $_REQUEST['field_required'];
-    $multi_position     = $_REQUEST['field_option_position'];
-    $name_position      = $_REQUEST['field_position'];
-    $field_order        = $_REQUEST['field_order'];
+    $field_id           = $astDB->escape($_REQUEST['field_id']);
+    $field_label        = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label'])));
+    $field_label_old    = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label_old'])));
+    $field_name         = $astDB->escape($_REQUEST['field_name']);
+    $field_description  = $astDB->escape($_REQUEST['field_description']);
+    $field_rank         = $astDB->escape($_REQUEST['field_rank']);
+    $field_help         = (isset($_REQUEST['field_help'])) ? $astDB->escape($_REQUEST['field_help']):"";
+    $field_type         = $astDB->escape($_REQUEST['field_type']);
+    $field_options      = $astDB->escape($_REQUEST['field_options']);
+    $field_size         = $astDB->escape($_REQUEST['field_size']);
+    $field_max          = $astDB->escape($_REQUEST['field_max']);
+    $field_default      = $astDB->escape($_REQUEST['field_default']);
+    $field_required     = $astDB->escape($_REQUEST['field_required']);
+    $multi_position     = $astDB->escape($_REQUEST['field_option_position']);
+    $name_position      = $astDB->escape($_REQUEST['field_position']);
+    $field_order        = $astDB->escape($_REQUEST['field_order']);
 	
 	$ip_address			= $astDB->escape($_REQUEST['hostname']);
 	$log_user			= $astDB->escape($_REQUEST['log_user']);

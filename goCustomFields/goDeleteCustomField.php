@@ -21,17 +21,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     $list_id        = $astDB->escape($_REQUEST['list_id']);
-    $field_label    = str_replace(" ","_",trim($_REQUEST['field_label']));
-    $field_id       = $_REQUEST['field_id'];
+    $field_label    = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label'])));
+    $field_id       = $astDB->escape($_REQUEST['field_id']);
     
     $selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
-    $queryResult = mysqli_query($link, $selectTable);
-    $countResult = mysqli_num_rows($queryResult);
+    $queryResult = $astDB->rawQuery($selectTable);
+    $countResult = $astDB->getRowCount();
     
     if($countResult > 0){
         $selectColumns = "SHOW COLUMNS FROM `custom_$list_id` LIKE '$field_label';";
-        $queryResult1 = mysqli_query($link, $selectColumns);
-        $countResult1 = mysqli_num_rows($queryResult1);
+        $queryResult1 = $astDB->rawQuery($selectColumns);
+        $countResult1 = $astDB->getRowCount();
         
         if($countResult1 > 0 && $field_label != "lead_id"){
             $table_name = 'custom_'.$list_id;
