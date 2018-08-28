@@ -63,7 +63,7 @@
             
             if($checkField){
                 $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
-                $queryCheckTable = mysqli_query($link, $checkTable);
+                $queryCheckTable = $astDB->rawQuery($checkTable);
                 
                 if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
                     $field_options_array = explode("\n",$field_options);
@@ -140,7 +140,7 @@
                 
                 $field_sql .= ";";
                 $stmtCUSTOM="$field_sql";
-                $rslt = mysqli_query($link, $stmtCUSTOM);
+                $rslt = $astDB->rawQuery($stmtCUSTOM);
 
                 $data_update = array(
                     'field_label'       => $field_label,
@@ -165,7 +165,7 @@
                 $updateQuery = $astDB->getLastQuery();
 
                 if($queryUpdate){
-                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $updateQuery);
+                    $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $updateQuery);
                    
                     $output[] = "success";
                 }else{
@@ -210,8 +210,8 @@
             if(!$checkField){
                 $tableName = "custom_".$list_to;
                 $tableCheck="SHOW TABLES LIKE '$tableName'";
-                $tableCheckResult = mysqli_query($link, $tableCheck);
-                $tableExist = mysqli_num_rows($tableCheckResult);
+                $tableCheckResult = $astDB->rawQuery($tableCheck);
+                $tableExist = $astDB->getRowCount();
                 
                 if ($tableExist < 1) {
                     $field_sql .= "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";      
@@ -301,7 +301,7 @@
                 }
                 $stmtCUSTOM="$field_sql";
                 $output1[] = $field_sql;
-                $rslt = mysqli_query($link, $stmtCUSTOM);
+                $rslt = $astDB->rawQuery($stmtCUSTOM);
                 // $output[] = mysqli_error($link);
 
                 $data_insert = array(
@@ -326,7 +326,7 @@
 
                 if($queryInsert){
                     $SQLdate = date("Y-m-d H:i:s");
-                    $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
+                    $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
                    
                     $output[] = "success";
                 }else{
@@ -343,16 +343,16 @@
     }elseif($copy_option == "REPLACE"){
         //delete first existing
         $selectTable = "SHOW TABLES LIKE 'custom_$list_to'";
-        $queryResult = mysqli_query($link, $selectTable);
-        $countResult = mysqli_num_rows($queryResult);
+        $queryResult = $astDB->rawQuery($selectTable);
+        $countResult = $astDB->getRowCount();
         
         if($queryResult > 0){
             $deleteColumnTable = "ALTER TABLE `custom_$list_to`";
-            $queryDelete = mysqli_query($link, $deleteColumnTable);
+            $queryDelete = $astDB->rawQuery($deleteColumnTable);
             
             $deleteAllColumn = "DELETE FROM vicidial_lists_fields
                             WHERE list_id='$list_to';";
-            $query = mysqli_query($link, $deleteAllColumn);
+            $query = $astDB->rawQuery($deleteAllColumn);
             //$result = mysqli_num_rows($query);
             
             if($query){
@@ -378,13 +378,13 @@
                     $field_order       = $fresults['field_order'];
                     
                     $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_to' and field_label='$field_label';";
-                    $counterresult = mysqli_query($link, $counterquery);
+                    $counterresult = $astDB->rawQuery($counterquery);
             
                     if($counterresult){
                         $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
-                        $queryCheckTable = mysqli_query($link, $checkTable);
+                        $queryCheckTable = $astDB->rawQuery($checkTable);
                         
-                        if($queryCheckTable->num_rows){
+                        if($astDB->getRowCount()){
                             $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
                         }else{
                             $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
@@ -464,13 +464,13 @@
                             $field_sql .="";  
                         }
                         
-                        if ($queryCheckTable->num_rows) {
+                        if ($astDB->getRowCount()) {
                             $field_sql .= ";";
                         } else {
                             $field_sql .= ");";
                         }
                         $stmtCUSTOM="$field_sql";
-                        $rslt = mysqli_query($link, $stmtCUSTOM);
+                        $rslt = $astDB->rawQuery($stmtCUSTOM);
         
                         $data_insert = array(
                             'field_label'       => $field_label,
@@ -492,7 +492,7 @@
                         $queryInsert = $astDB->insert('vicidial_lists_fields', $data_insert);
                         $insertQuery = $astDB->getLastQuery();
                         if($queryInsert){
-                            $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
+                            $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_to", $log_group, $insertQuery);
                            
                             $fullData[] = "success";
                         }else{

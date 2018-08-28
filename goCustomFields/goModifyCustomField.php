@@ -29,22 +29,22 @@
    #### License: AGPLv2                             ####
    #####################################################
     $list_id            = $astDB->escape($_REQUEST['list_id']);
-    $field_id           = $_REQUEST['field_id'];
-    $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
-    $field_label_old    = str_replace(" ","_",trim($_REQUEST['field_label_old']));
-    $field_name         = $_REQUEST['field_name'];
-    $field_description  = $_REQUEST['field_description'];
-    $field_rank         = $_REQUEST['field_rank'];
-    $field_help         = (isset($_REQUEST['field_help'])) ? $_REQUEST['field_help']:"";
-    $field_type         = $_REQUEST['field_type'];
-    $field_options      = $_REQUEST['field_options'];
-    $field_size         = $_REQUEST['field_size'];
-    $field_max          = $_REQUEST['field_max'];
-    $field_default      = $_REQUEST['field_default'];
-    $field_required     = $_REQUEST['field_required'];
-    $multi_position     = $_REQUEST['field_option_position'];
-    $name_position      = $_REQUEST['field_position'];
-    $field_order        = $_REQUEST['field_order'];
+    $field_id           = $astDB->escape($_REQUEST['field_id']);
+    $field_label        = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label'])));
+    $field_label_old    = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label_old'])));
+    $field_name         = $astDB->escape($_REQUEST['field_name']);
+    $field_description  = $astDB->escape($_REQUEST['field_description']);
+    $field_rank         = $astDB->escape($_REQUEST['field_rank']);
+    $field_help         = (isset($_REQUEST['field_help'])) ? $astDB->escape($_REQUEST['field_help']):"";
+    $field_type         = $astDB->escape($_REQUEST['field_type']);
+    $field_options      = $astDB->escape($_REQUEST['field_options']);
+    $field_size         = $astDB->escape($_REQUEST['field_size']);
+    $field_max          = $astDB->escape($_REQUEST['field_max']);
+    $field_default      = $astDB->escape($_REQUEST['field_default']);
+    $field_required     = $astDB->escape($_REQUEST['field_required']);
+    $multi_position     = $astDB->escape($_REQUEST['field_option_position']);
+    $name_position      = $astDB->escape($_REQUEST['field_position']);
+    $field_order        = $astDB->escape($_REQUEST['field_order']);
 	
 	$ip_address			= $astDB->escape($_REQUEST['hostname']);
 	$log_user			= $astDB->escape($_REQUEST['log_user']);
@@ -55,15 +55,15 @@
     if($field_label_old != $field_label){
         $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
     }else{
-	$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
-    	$goCheckrslt = mysqli_query($link, $goCheckSQL);
-	$countGoCheckrslt = mysqli_num_rows($goCheckrslt);
-
-	if($countGoCheckrslt > 0) {
-	     	$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
-	} else {
-	     	$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
-	}
+		$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
+		$goCheckrslt = $astDB->rawQuery($goCheckSQL);
+		$countGoCheckrslt = $astDB->getRowCount();
+	
+		if($countGoCheckrslt > 0) {
+			$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+		} else {
+			$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+		}
     }
     
     $field_options_ENUM='';
@@ -140,7 +140,7 @@
         //  do nothing      
     } else {
         $stmtCUSTOM="$field_sql";
-		$rslt = mysqli_query($link, $stmtCUSTOM);
+		$rslt = $astDB->rawQuery($stmtCUSTOM);
     }
     
     $data_cf = array(
@@ -166,7 +166,7 @@
     $updateQuery = $astDB->getLastQuery();
     
     if($cfUpdate){
-		$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $updateQuery);
+		$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $updateQuery);
 		
         $apiresults = array("result" => "success");
     }else{
