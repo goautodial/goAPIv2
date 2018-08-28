@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+    $list_id = $astDB->escape($_REQUEST['list_id']);
     
 	if(!empty($list_id)) {
 		$astDB->where('list_id', $list_id);

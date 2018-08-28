@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $list_id            = mysqli_real_escape_string($link, $_REQUEST['list_id']);
+    $list_id            = $astDB->escape($_REQUEST['list_id']);
     $field_label        = str_replace(" ","_",trim($_REQUEST['field_label']));
     $field_name         = $_REQUEST['field_name'];
     $field_description  = $_REQUEST['field_description'];
@@ -38,9 +38,9 @@
     $field_order        = $_REQUEST['field_order'];
     
     $goUser = $_REQUEST['goUser'];
-    $ip_address = mysqli_real_escape_string($link, $_REQUEST['hostname']);
-    $log_user = mysqli_real_escape_string($link, $_REQUEST['log_user']);
-    $log_group = mysqli_real_escape_string($link, $_REQUEST['log_group']);
+    $ip_address = $astDB->escape($_REQUEST['hostname']);
+    $log_user = $astDB->escape($_REQUEST['log_user']);
+    $log_group = $astDB->escape($_REQUEST['log_group']);
  
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
@@ -51,10 +51,10 @@
         //$apiresults = array("result" => "ERROR: You must enter a field label, field name and field size  - ".$list_id." | ".$field_label." | ".$field_name." | ".$field_size);
     }else{
         
-        $counterquery = "SELECT count(*) as countchecking from vicidial_lists_fields where list_id='$list_id' and field_label='$field_label';";
-        $counterresult = mysqli_query($link, $counterquery);
+        $counterquery = "SELECT * from vicidial_lists_fields where list_id='$list_id' and field_label='$field_label';";
+        $counterresult = $astDB->rawQuery($counterquery);
 		$field_sql=''; $field_cost='';
-        if(!$counterresult){
+        if($astDB->getRowCount() > 0){
             $err_msg = error_handle("41004", "");
             $apiresults = array("code" => "41004", "result" => $err_msg);
             $apiresults = array("result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label);
@@ -62,7 +62,7 @@
             $tableName = "custom_".$list_id;
             #$tableCheck="SHOW TABLES LIKE '$tableName'";
             $tableCheck="DESC $tableName;";
-            $tableCheckResult = mysqli_query($link, $tableCheck);
+            $tableCheckResult = $astDB->rawQuery($tableCheck);
             //$countTable = mysqli_num_rows($tableCheckResult);
             
 /*            if (!$tableCheckResult) {
@@ -155,7 +155,7 @@
                 //do nothing
             }else{
                 $stmtCUSTOM="$field_sql";
-                $rslt = mysqli_query($link, $stmtCUSTOM);
+                $rslt = $astDB->rawQuery($stmtCUSTOM);
             }
 
             $data_cf = array(
@@ -179,7 +179,7 @@
             $insertCF = $astDB->insert('vicidial_lists_fields', $data_cf);
             $insertQuery = $astDB->getLastQuery();
             
-            if($insertCF){
+            if($astDB->getInsertId()){
                 $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
                
                 $apiresults = array("result" => "success");
