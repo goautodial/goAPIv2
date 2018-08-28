@@ -180,7 +180,7 @@
             $insertQuery = $astDB->getLastQuery();
             
             if($astDB->getInsertId()){
-                $log_id = log_action($linkgo, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
+                $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
                
                 $apiresults = array("result" => "success");
             }else{

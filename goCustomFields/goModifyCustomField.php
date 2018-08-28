@@ -55,15 +55,15 @@
     if($field_label_old != $field_label){
         $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
     }else{
-	$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
-    	$goCheckrslt = mysqli_query($link, $goCheckSQL);
-	$countGoCheckrslt = mysqli_num_rows($goCheckrslt);
-
-	if($countGoCheckrslt > 0) {
-	     	$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
-	} else {
-	     	$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
-	}
+		$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
+		$goCheckrslt = $astDB->rawQuery($goCheckSQL);
+		$countGoCheckrslt = $astDB->getRowCount();
+	
+		if($countGoCheckrslt > 0) {
+			$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+		} else {
+			$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+		}
     }
     
     $field_options_ENUM='';
@@ -140,7 +140,7 @@
         //  do nothing      
     } else {
         $stmtCUSTOM="$field_sql";
-		$rslt = mysqli_query($link, $stmtCUSTOM);
+		$rslt = $astDB->rawQuery($stmtCUSTOM);
     }
     
     $data_cf = array(
@@ -166,7 +166,7 @@
     $updateQuery = $astDB->getLastQuery();
     
     if($cfUpdate){
-		$log_id = log_action($linkgo, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $updateQuery);
+		$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $updateQuery);
 		
         $apiresults = array("result" => "success");
     }else{
