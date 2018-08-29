@@ -88,13 +88,16 @@
 				vicidial_users as vu,
 				vicidial_agent_log as val,
 				vicidial_campaigns as vc,
+				online as ol,
 				vicidial_live_agents as vla
 			";
 			
 			$onlineAgents 							= $astDB
 				->join("vicidial_list as vl", "vla.lead_id = vl.lead_id", "LEFT")
-				->join("online as ol", "ol.name = vla.callerid", "LEFT")
-				->joinOrWhere("online as ol", "ol.conference", "vla.conf_exten")			
+				//->join("online as ol", "ol.name = vla.callerid", "LEFT")
+				//->joinOrWhere("online as ol", "ol.conference", "vla.conf_exten")			
+				->where("ol.name = vla.callerid")
+				->orWhere("ol.conference = vla.conf_exten")
 				->where("vla.campaign_id", $campaigns, "IN")
 				->where("vla.campaign_id = vc.campaign_id")
 				->where("vla.user = vu.user")
@@ -116,7 +119,7 @@
 				
 				$apiresults 						= array(
 					"result" 							=> "success", 
-					//"query" 							=> $astDB->getLastQuery(),
+					"query" 							=> $astDB->getLastQuery(),
 					"data" 								=> $onlineAgents, 
 					"dataGo" 							=> $dataGo,
 					"parked" 							=> $dataPCs
