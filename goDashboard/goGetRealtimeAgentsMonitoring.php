@@ -71,7 +71,7 @@
 		
 		if ($checkTable) {
 			$ol_callerids							= $astDB
-				->where("member_id", 2 "=")
+				->where("member_id", 2, "=")
 				->get("online", NULL, "conference, name");	
 		}
 			
