@@ -116,7 +116,7 @@
 				
 				$apiresults 						= array(
 					"result" 							=> "success", 
-					"query" 							=> $astDB->getLastQuery(),
+					//"query" 							=> $astDB->getLastQuery(),
 					"data" 								=> $onlineAgents, 
 					"dataGo" 							=> $dataGo,
 					"parked" 							=> $dataPCs
