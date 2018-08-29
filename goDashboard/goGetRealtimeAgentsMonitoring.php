@@ -66,6 +66,15 @@
 			->where("campaign_id", $campaigns, "IN")
 			->get("vicidial_auto_calls", NULL, $cols);
 		
+		$tableQuery 								= "SHOW tables LIKE 'online';";
+		$checkTable 								= $goDB->rawQuery($tableQuery);
+		
+		if ($checkTable) {
+			$ol_callerids							= $astDB
+				->where("member_id", 2 "=")
+				->get("online", NULL, "conference, name");	
+		}
+			
 		// waiting for calls
 		$cols 										= array(
 			"vicidial_live_agents.extension as 'vla_extension'",
@@ -108,17 +117,6 @@
 			->orderBy("last_call_time")		
 			->get($table, NULL, $cols);
 		
-		$ol_callerid								= "vicidial_campaigns.campaign_name as 'vla_campaign_name'";
-		$onlinetable								= "vicidial_campaigns";
-		
-		$tableQuery 								= "SHOW tables LIKE 'online';";
-		$checkTable 								= $goDB->rawQuery($tableQuery);
-		
-		if ($checkTable) {
-			$ol_callerid							= "vicidial_campaigns.campaign_name as 'vla_campaign_name', online.name as 'ol_callerid'";
-			$onlinetable							= "vicidial_campaigns,online";
-		}
-		
 		// live call
 		$cols 										= array(
 			"vicidial_live_agents.extension as 'vla_extension'",
@@ -142,7 +140,7 @@
 			"vicidial_live_agents.callerid as 'vla_callerid'",
 			"vicidial_list.phone_number as 'vl_phone_number'",
 			"vicidial_agent_log.sub_status as 'vla_pausecode'", 
-			"$ol_callerid"
+			"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
 		);
 		
 		$table										= "
@@ -150,7 +148,7 @@
 			vicidial_users,
 			vicidial_list,
 			vicidial_agent_log,
-			$onlinetable
+			vicidial_campaigns
 		";
 		
 		$rsltvInCalls 								= $astDB
@@ -162,20 +160,6 @@
 			->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
 			->orderBy("last_call_time")		
 			->get($table, NULL, $cols);		
-		
-		if ($checkTable) {
-			$rsltvInCalls 							= $astDB
-				->where("vicidial_campaigns.campaign_id", $campaigns, "IN")
-				->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
-				->where("vicidial_live_agents.user = vicidial_users.user")
-				->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
-				->where("vicidial_live_agents.user_level != 4")
-				->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
-				->where("vicidial_live_agents.conf_exten = online.conference")
-				->where("online.member_id = 1")
-				->orderBy("last_call_time")		
-				->get($table, NULL, $cols);	
-		}
 		
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -216,7 +200,8 @@
 				"data" 									=> $data, 
 				"dataGo" 								=> $dataGo, 
 				"parked" 								=> $dataParkedChannels, 
-				"callerids" 							=> $dataCallerIDsFromVAC
+				"callerids" 							=> $dataCallerIDsFromVAC,
+				"ol_callerids"							=> $ol_callerids
 			);		
 		} else {
 			$apiresults 							= array(
