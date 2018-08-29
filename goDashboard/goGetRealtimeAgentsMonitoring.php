@@ -153,7 +153,7 @@
 			->where("vicidial_live_agents.user_level != 4")
 			->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
 			->where("vicidial_live_agents.conf_exten = online.conference")
-			->where("vicidial_live_agents.callerid = online.name")
+			->where("online.member_id = 1")
 			->orderBy("last_call_time")		
 			->get($table, NULL, $cols);		
 		
