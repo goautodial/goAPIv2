@@ -131,7 +131,9 @@
 			"vicidial_live_agents.callerid as 'vla_callerid'",
 			"vicidial_list.phone_number as 'vl_phone_number'",
 			"vicidial_agent_log.sub_status as 'vla_pausecode'", 
-			"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
+			"vicidial_campaigns.campaign_name as 'vla_campaign_name'",
+			"online.conference as 'ol_conference'",
+			"online.name as 'ol_callerid'"
 		);
 		
 		$table										= "
@@ -139,7 +141,8 @@
 			vicidial_users,
 			vicidial_list,
 			vicidial_agent_log,
-			vicidial_campaigns
+			vicidial_campaigns,
+			online
 		";
 		
 		$rsltvInCalls 								= $astDB
@@ -149,6 +152,7 @@
 			->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
 			->where("vicidial_live_agents.user_level != 4")
 			->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
+			->where("vicidial_live_agents.conf_exten = online.conference")
 			->orderBy("last_call_time")		
 			->get($table, NULL, $cols);		
 		
@@ -191,7 +195,7 @@
 				"data" 									=> $data, 
 				"dataGo" 								=> $dataGo, 
 				"parked" 								=> $dataParkedChannels, 
-				"callerids" 							=> $dataCallerIDsFromVAC				
+				"callerids" 							=> $dataCallerIDsFromVAC
 			);		
 		} else {
 			$apiresults 							= array(
