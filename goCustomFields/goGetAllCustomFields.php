@@ -24,9 +24,7 @@
     
 	if(!empty($list_id)) {
 		$astDB->where('list_id', $list_id);
-		$astDB->orderBy('field_rank');
-		$astDB->orderBy('field_order');
-		$astDB->orderBy('field_label');
+		$astDB->orderBy('field_rank,field_order,field_label');
 		$rsltv = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
 		
 		foreach($rsltv as $fresults){

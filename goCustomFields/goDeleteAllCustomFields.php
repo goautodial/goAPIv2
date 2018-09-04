@@ -24,8 +24,8 @@
   #$selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
   $goTableName = "custom_".$list_id;
   $selectTable = "DESC $goTableName;";
-  $queryResult = mysqli_query($link, $selectTable);
-  $countResult = mysqli_num_rows($queryResult);
+  $queryResult = $astDB->rawQuery($selectTable);
+  $countResult = $astDB->getRowCount();
   
   if($countResult > 0){
       $astDB->where('list_id', $list_id);

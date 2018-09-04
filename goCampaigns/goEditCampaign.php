@@ -328,7 +328,7 @@
 					'survey_fourth_status' 					=> ( !empty($survey_fourth_status) ) ? $survey_fourth_status : $resultGet['survey_fourth_status'],
 					'survey_fourth_exten' 					=> ( !empty($survey_fourth_exten) ) ? $survey_fourth_exten : $resultGet['survey_fourth_exten'],
 					'amd_send_to_vmx' 						=> ( !empty($amd_send_to_vmx) ) ? $amd_send_to_vmx : $resultGet['amd_send_to_vmx'],
-					'waitforsilence_options' 				=> ( !empty($waitforsilence_options) ) ? $waitforsilence_options : $resultGet['waitforsilence_options'],
+					'waitforsilence_options' 				=> ( gettype($waitforsilence_options) != NULL) ? $waitforsilence_options : $resultGet['waitforsilence_options'],
 					'agent_lead_search' 					=> ( !empty($agent_lead_search) ) ? $agent_lead_search : $resultGet['agent_lead_search'],
 					'agent_lead_search_method' 				=> ( !empty($agent_lead_search_method) ) ? $agent_lead_search_method : $resultGet['agent_lead_search_method'],
 					'omit_phone_code' 						=> ( !empty($omit_phone_code) ) ? $omit_phone_code : $resultGet['omit_phone_code'],
