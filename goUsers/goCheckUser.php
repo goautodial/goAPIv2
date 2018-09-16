@@ -28,6 +28,7 @@
     // POST or GET Variables
 	$user 											= $astDB->escape($_REQUEST['user']);
 	$phone_login 									= $astDB->escape($_REQUEST['phone_login']);
+	$type											= $astDB->escape($_REQUEST['type']);
 
     // Error Checking
 	if (empty($log_user) || is_null($log_user)) {
@@ -35,25 +36,8 @@
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} else {
-		if ($user != NULL && $phone_login != NULL) {
-			$astDB->where("extension", $phone_login);
-			$astDB->get("phones", null, "extension");
-
-			if ($astDB->count > 0) {
-				$apiresults 						= array (
-					"result" 							=> "success"
-					//"data" 								=> "Phone extension found." 
-				);
-			} else {		
-				$apiresults 						= array (
-					"result" 							=> "fail",
-					"data" 								=> "Phone extension not found."
-				);
-			}		
-		}
-		
 		// User Duplicate Check
-		if ($user != NULL && $phone_login == NULL) {
+		if ($user != NULL && $type == "new") {
 			$astDB->where("user", $user);
 			$astDB->get("vicidial_users", null, "user");
 		
@@ -70,7 +54,7 @@
 		}
 		
 		// Phone Login Check optional when not null
-		if ($phone_login != NULL && $user == NULL) {
+		if ($phone_login != NULL && $type == "new") {
 			$astDB->where("extension", $phone_login);
 			$astDB->get("phones", null, "extension");
 
@@ -84,7 +68,24 @@
 					"result" 							=> "success"
 				);
 			}		
-		}	
+		}
+		
+		if ($phone_login != NULL && $type == "edit") {
+			$astDB->where("extension", $phone_login);
+			$astDB->get("phones", null, "extension");
+
+			if ($astDB->count > 0) {
+				$apiresults 						= array (
+					"result" 							=> "success"
+					//"data" 								=> "Phone extension found." 
+				);
+			} else {		
+				$apiresults 						= array (
+					"result" 							=> "fail",
+					"data" 								=> "Phone extension not found."
+				);
+			}		
+		}		
 	}		
 	
 ?>
