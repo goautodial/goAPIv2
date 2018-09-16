@@ -55,7 +55,7 @@
 		// Phone Login Check optional when not null
 		if ($phone_login != NULL) {
 			$astDB->where("extension", $phone_login);
-			$astDB->getOne("phones", null, "extension");
+			$astDB->get("phones", null, "extension");
 
 			if ($astDB->count > 0) {
 				$apiresults 						= array (
