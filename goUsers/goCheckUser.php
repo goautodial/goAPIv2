@@ -41,8 +41,8 @@
 
 			if ($astDB->count > 0) {
 				$apiresults 						= array (
-					"result" 							=> "success", 
-					"data" 								=> "Phone extension found."
+					"result" 							=> "success"
+					//"data" 								=> "Phone extension found."
 				);
 			} else {		
 				$apiresults 						= array (
