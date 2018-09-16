@@ -35,8 +35,25 @@
 			"result" 									=> "Error: Session User Not Defined."
 		);
 	} else {
+		if ($user != NULL && $phone_login != NULL) {
+			$astDB->where("extension", $phone_login);
+			$astDB->get("phones", null, "extension");
+
+			if ($astDB->count > 0) {
+				$apiresults 						= array (
+					"result" 							=> "success", 
+					"data" 								=> "Phone extension found."
+				);
+			} else {		
+				$apiresults 						= array (
+					"result" 							=> "fail",
+					"data" 								=> "Phone extension not found."
+				);
+			}		
+		}
+		
 		// User Duplicate Check
-		if ($user != NULL) {
+		if ($user != NULL && $phone_login == NULL) {
 			$astDB->where("user", $user);
 			$astDB->get("vicidial_users", null, "user");
 		
@@ -53,7 +70,7 @@
 		}
 		
 		// Phone Login Check optional when not null
-		if ($phone_login != NULL) {
+		if ($phone_login != NULL && $user == NULL) {
 			$astDB->where("extension", $phone_login);
 			$astDB->get("phones", null, "extension");
 
