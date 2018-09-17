@@ -28,9 +28,7 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));		
-    
-    $campaigns 											= allowed_campaigns($log_group, $goDB, $astDB, "all");
-    
+        
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
