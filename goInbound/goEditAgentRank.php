@@ -23,96 +23,142 @@
 	
     include_once ("goAPI.php");
 
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 
-	$goItemRank										= $astDB->escape($_REQUEST['itemrank']);
-	$goIDgroup 										= $astDB->escape($_REQUEST['idgroup']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass'])); 	
+	$goItemRank											= $astDB->escape($_REQUEST['itemrank']);
+	$goIDgroup 											= $astDB->escape($_REQUEST['idgroup']);
 	
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($goIDgroup) || is_null($goIDgroup)) {
-        $apiresults 								= array(
-			"result" 									=> "Error: Set a value for Group ID."
+        $apiresults 									= array(
+			"result" 										=> "Error: Set a value for Group ID."
 		);
 	} else {
-		$itemsumitexplode = explode('&', $goItemRank);
-		$group_id = $goIDgroup;
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {			
+			$itemsumitexplode 							= explode('&', $goItemRank);
+			$group_id 									= $goIDgroup;
 
-		for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
-			$itemsumitsplit = split('=', $itemsumitexplode[$i]);
-	 		$showval = htmlspecialchars(urldecode($itemsumitsplit[0]));
-			$datavals = htmlspecialchars(urldecode($itemsumitsplit[1]));
-			$finalvalues = $showval."||".$datavals.""; 
+			for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
 
-			if(preg_match("/CHECK/i", "$itemsumitexplode[$i]")) {
-				
-				if (preg_match("/YES/i", "$itemsumitexplode[$i]")) {
-					$checked = $itemsumitexplode[$i]."\n";	
-					$repcheck = str_replace("CHECK_", "", $itemsumitexplode[$i]);
-					$user = str_replace("=YES", "", $repcheck);
+				$itemsumitsplit 						= explode('=', $itemsumitexplode[$i]);
+				$showval 								= htmlspecialchars(urldecode($itemsumitsplit[0]));
+				$datavals 								= htmlspecialchars(urldecode($itemsumitsplit[1]));
+				$finalvalues 							= $showval."||".$datavals.""; 
+
+				if(preg_match("/CHECK/i", "$itemsumitexplode[$i]")) {					
+					if (preg_match("/YES/i", "$itemsumitexplode[$i]")) {
+						$checked 						= $itemsumitexplode[$i]."\n";	
+						$repcheck 						= str_replace("CHECK_", "", $itemsumitexplode[$i]);
+						$user 							= str_replace("=YES", "", $repcheck);
+						
+						$astDB->where("user", $user);
+						$closer_campaigns 				= $astDB->getValue("vicidial_users", "closer_campaigns");
+						//$query = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
+						$closer_campaigns 				= rtrim($closer_campaigns,"-");
+						$closer_campaigns 				= str_replace(" $group_id", "", $closer_campaigns);
+						$closer_campaigns 				= trim($closer_campaigns);
+						
+						if (strlen($closer_campaigns) > 1) {
+							$closer_campaigns 			= " $closer_campaigns";
+						}
+						
+						$NEWcloser_campaigns 			= " $group_id{$closer_campaigns} -";
+					} else {
+						$checked 						= $itemsumitexplode[$i]."\n";	
+						$repcheck						= str_replace("CHECK_", "", $itemsumitexplode[$i]);
+						$user 							= str_replace("=NO", "", $repcheck);
+						
+						$astDB->where("user", $user);
+						$closer_campaigns 				= $astDB->getValue("vicidial_users", "closer_campaigns");
+						//$query2 = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
+						$closer_campaigns 				= rtrim($closer_campaigns,"-");
+						$closer_campaigns 				= str_replace(" $group_id", "", $closer_campaigns);
+						$closer_campaigns 				= trim($closer_campaigns);
+						$NEWcloser_campaigns 			= "{$closer_campaigns} -";
+					}
+					
+					$datum 								= array(
+						"closer_campaigns" 					=> $NEWcloser_campaigns
+					);
 					
 					$astDB->where("user", $user);
-					$closer_campaigns = $astDB->getValue("vicidial_users", "closer_campaigns");
-					//$query = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
-					$closer_campaigns = rtrim($closer_campaigns,"-");
-					$closer_campaigns = str_replace(" $group_id", "", $closer_campaigns);
-					$closer_campaigns = trim($closer_campaigns);
-					if (strlen($closer_campaigns) > 1)
-						$closer_campaigns = " $closer_campaigns";
-					$NEWcloser_campaigns = " $group_id{$closer_campaigns} -";
-				} else {
-					$checked = $itemsumitexplode[$i]."\n";	
-					$repcheck = str_replace("CHECK_", "", $itemsumitexplode[$i]);
-					$user = str_replace("=NO", "", $repcheck);
+					$astDB->update("vicidial_users", $datum);
+					//$query3 = "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';";
+				}
+				
+				if (preg_match("/RANK/i", "$itemsumitexplode[$i]")) {
+					$itemsumitsplit1 					= explode('=', $itemsumitexplode[$i]);
+					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
+					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
 					
-					$astDB->where("user", $user);
-					$closer_campaigns = $astDB->getValue("vicidial_users", "closer_campaigns");
-					//$query2 = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
-					$closer_campaigns = rtrim($closer_campaigns,"-");
-					$closer_campaigns = str_replace(" $group_id", "", $closer_campaigns);
-					$closer_campaigns = trim($closer_campaigns);
-					$NEWcloser_campaigns = "{$closer_campaigns} -";
+					$data 								= array(
+						"group_rank" 						=> $datavals1, 
+						"group_weight" 						=> $datavals1
+					);
+					
+					$astDB->where("user", "{$itemsexplode[1]}"); //CHECK
+					$astDB->where("group_id", $group_id); //CHECK
+					$astDB->update("vicidial_inbound_group_agents", $data);
+					//$query4 = "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+					
+					if ($datavals1 != 0) {
+						$ranknotzero 					.= $itemsumitexplode[$i]."\n";
+					}
 				}
-				$datum = Array("closer_campaigns" => $NEWcloser_campaigns);
-				$astDB->where("user", $user);
-				$astDB->update("vicidial_users");
-				//$query3 = "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';";
-			}
-			
-			if(preg_match("/RANK/i", "$itemsumitexplode[$i]")) {
-				$itemsumitsplit1 = split('=', $itemsumitexplode[$i]);
-				$datavals1 = htmlspecialchars(urldecode($itemsumitsplit1[1]));
 				
-				$itemsexplode = explode("_",$itemsumitsplit1[0]);
-				$data = Array("group_rank" => $datavals1, "group_weight" => $datavals1);
-				$astDB->where("user", "{$itemsexplode[1]}"); //CHECK
-				$astDB->where("group_id", $group_id); //CHECK
-				$astDB->update("vicidial_inbound_group_agents");
-				//$query4 = "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
-				
-				if($datavals1 != 0){
-					$ranknotzero .= $itemsumitexplode[$i]."\n";
+				if (preg_match("/GRADE/i", "$itemsumitexplode[$i]")) {
+					$itemsumitsplit1 					= explode('=', $itemsumitexplode[$i]);
+					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
+					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
+					
+					$datum 								= array(
+						"group_grade" 						=> $datavals1
+					);
+					
+					$astDB->where("user", "{$itemsexplode[1]}");
+					$astDB->where("group_id", $group_id);
+					$astDB->update("vicidial_inbound_group_agents", $datum);
+					//$query5 = "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
 				}
-			}
-			
-			if(preg_match("/GRADE/i", "$itemsumitexplode[$i]")) {
-				$itemsumitsplit1 = split('=', $itemsumitexplode[$i]);
-				$datavals1 = htmlspecialchars(urldecode($itemsumitsplit1[1]));
 				
-				$itemsexplode = explode("_",$itemsumitsplit1[0]);
-				$datum = Array("group_grade" => $datavals1);
-				$astDB->where("user", "{$itemsexplode[1]}");
-				$astDB->where("group_id", $group_id);
-				$astDB->update("vicidial_inbound_group_agents");
-				//$query5 = "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
+				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Agent Rank(s) on Group $group_id", $log_group);
+				
+				$apiresults 							= array(
+					"result" 								=> "success"
+				);
 			}
-			
-			$log_id = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Agent Rank(s) on Group $group_id", $log_group);
-			$apiresults = array("result" => "success");
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>
