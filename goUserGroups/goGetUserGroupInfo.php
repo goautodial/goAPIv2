@@ -23,60 +23,99 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip		 										= $astDB->escape($_REQUEST["log_ip"]);
+	$goUser												= $astDB->escape($_REQUEST["goUser"]);
+	$goPass												= (isset($_REQUEST["log_pass"]) ? $astDB->escape($_REQUEST["log_pass"]) : $astDB->escape($_REQUEST["goPass"]));
 	
     // POST or GET Variables
-    $user_group 						= $astDB->escape($_REQUEST["user_group"]);	
+    $user_group 										= $astDB->escape($_REQUEST["user_group"]);	
     
-    if (!isset($session_user) || is_null($session_user)) {
-    	$apiresults 					= array(
-			"result" 						=> "Error: Missing Required Parameters."
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-    } elseif (is_null($user_group)) { 
-		$apiresults 					= array(
-			"result" 						=> "Error: Set a value for User Group."
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($user_group) || is_null($user_group)) { 
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for User Group."
 		); 
 	} else {
-		if (!checkIfTenant($log_group, $goDB)) {
-			$group_type 				= "Default";
-		} else {			
-			$astDB->where("user_group", $log_group);				
-			$group_type 				= "Multi-tenant";
-		}
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		$cols							= array(
-			"user_group", 
-			"group_name", 
-			"allowed_campaigns", 
-			"forced_timeclock_login", 
-			"shift_enforcement", 
-			"admin_viewable_groups"
-		);
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-		$astDB->where("user_group", $user_group);
-		$astDB->orderBy("user_group","asc");
-		$query 							= $astDB->getOne("vicidial_user_groups", $cols);
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+			} else {
+				if (strtoupper($log_group) != "ADMIN") {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+					}
+				}	
+			}	
 		
-		$gocols							= array(
-			"group_level", 
-			"permissions"
-		);
-		
-		$goDB->where("user_group", $user_group);
-		$querygo 						= $goDB->getOne("user_access_group", $gocols);		
-		$data 							= array_merge($query, $querygo);
-		
-		if ($astDB->count > 0) {
-            $apiresults 				= array(
-				"result" 					=> "success", 
-				"data" 						=> $data
+			$cols										= array(
+				"user_group", 
+				"group_name", 
+				"allowed_campaigns", 
+				"forced_timeclock_login", 
+				"shift_enforcement", 
+				"admin_viewable_groups"
 			);
+			
+			$query 										= $astDB
+				->where("user_group", $user_group)
+				->orderBy("user_group","asc")
+				->getOne("vicidial_user_groups", $cols);
+			
+			$querygo 									= $goDB
+				->where("user_group", $user_group)
+				->getOne("user_access_group", "group_level,permissions");		
+			
+			if ($goDB->count > 0) {
+				$data 									= array_merge($query, $querygo);
+			} else {
+				$data									= $query;
+			}
+			
+			
+			if ($astDB->count > 0) {
+				$apiresults 							= array(
+					"result" 								=> "success", 
+					"data" 									=> $data
+				);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: User Group doesn't exist."
+				);
+			}
 		} else {
-			$apiresults 				= array(
-				"result" 					=> "Error: User Group doesn't exist."
-			);
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>

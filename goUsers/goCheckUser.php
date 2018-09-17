@@ -22,70 +22,97 @@
     
     include_once ("goAPI.php");
     
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));			
  
     // POST or GET Variables
-	$user 											= $astDB->escape($_REQUEST['user']);
-	$phone_login 									= $astDB->escape($_REQUEST['phone_login']);
-	$type											= $astDB->escape($_REQUEST['type']);
+	$user 												= $astDB->escape($_REQUEST['user']);
+	$phone_login 										= $astDB->escape($_REQUEST['phone_login']);
+	$type												= $astDB->escape($_REQUEST['type']);
 
     // Error Checking
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array (
-			"result" 									=> "Error: Session User Not Defined."
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
-		// User Duplicate Check
-		if ($user != NULL && $type == "new") {
-			$astDB->where("user", $user);
-			$astDB->get("vicidial_users", null, "user");
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-			if ($astDB->count > 0) {
-				$apiresults 						= array (
-					"result" 							=> "fail", 
-					"data" 								=> "There are 1 or more users with that User ID."
-				);
-			} else {		
-				$apiresults 						= array (
-					"result" 							=> "success"
-				);
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			// User Duplicate Check
+			if ($user != NULL && $type == "new") {
+				$astDB->where("user", $user);
+				$astDB->get("vicidial_users", null, "user");
+			
+				if ($astDB->count > 0) {
+					$apiresults 						= array (
+						"result" 							=> "fail", 
+						"data" 								=> "There are 1 or more users with that User ID."
+					);
+				} else {		
+					$apiresults 						= array (
+						"result" 							=> "success"
+					);
+				}
 			}
-		}
-		
-		// Phone Login Check optional when not null
-		if ($phone_login != NULL && $type == "new") {
-			$astDB->where("extension", $phone_login);
-			$astDB->get("phones", null, "extension");
+			
+			// Phone Login Check optional when not null
+			if ($phone_login != NULL && $type == "new") {
+				$astDB->where("extension", $phone_login);
+				$astDB->get("phones", null, "extension");
 
-			if ($astDB->count > 0) {
-				$apiresults 						= array (
-					"result" 							=> "fail", 
-					"data" 								=> "Duplicate phone extension found."
-				);
-			} else {		
-				$apiresults 						= array (
-					"result" 							=> "success"
-				);
-			}		
-		}
-		
-		if ($phone_login != NULL && $type == "edit") {
-			$astDB->where("extension", $phone_login);
-			$astDB->get("phones", null, "extension");
+				if ($astDB->count > 0) {
+					$apiresults 						= array (
+						"result" 							=> "fail", 
+						"data" 								=> "Duplicate phone extension found."
+					);
+				} else {		
+					$apiresults 						= array (
+						"result" 							=> "success"
+					);
+				}		
+			}
+			
+			if ($phone_login != NULL && $type == "edit") {
+				$astDB->where("extension", $phone_login);
+				$astDB->get("phones", null, "extension");
 
-			if ($astDB->count > 0) {
-				$apiresults 						= array (
-					"result" 							=> "success"
-					//"data" 								=> "Phone extension found." 
-				);
-			} else {		
-				$apiresults 						= array (
-					"result" 							=> "fail",
-					"data" 								=> "Phone extension not found."
-				);
+				if ($astDB->count > 0) {
+					$apiresults 						= array (
+						"result" 							=> "success"
+						//"data" 								=> "Phone extension found." 
+					);
+				} else {		
+					$apiresults 						= array (
+						"result" 							=> "fail",
+						"data" 								=> "Phone extension not found."
+					);
+				}		
 			}		
-		}		
-	}		
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}
 	
 ?>
