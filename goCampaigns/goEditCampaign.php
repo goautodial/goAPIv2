@@ -39,7 +39,7 @@
 	$campaign_name 										= $astDB->escape($_REQUEST['campaign_name']);
 	$campaign_desc 										= $astDB->escape($_REQUEST['campaign_desc']);
 	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));
-	$dial_method 										= $astDB->escape(strtoupper($_REQUEST['dial_method']));
+	$dial_method 										= $astDB->escape($_REQUEST['dial_method']);
 	$auto_dial_level									= $astDB->escape($_REQUEST['auto_dial_level']);
 	$auto_dial_level_adv 								= $astDB->escape($_REQUEST['auto_dial_level_adv']);
 	$dial_prefix 										= $astDB->escape($_REQUEST['dial_prefix']);
@@ -158,7 +158,6 @@
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
 		); 
-		//$apiresults = array("result" => "Error: Default value for dial method are MANUAL,RATIO,ADAPT_HARD_LIMIT,ADAPT_TAPERED,ADAPT_AVERAGE,INBOUND_MAN only."); 
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -211,9 +210,7 @@
 					}
 
 					if ( $campaign_type == "SURVEY" ) {
-						if (!empty($dial_method)) {
-							$dial_method 				= $dial_method;
-						} else {
+						if (empty($dial_method)) {
 							$dial_method 				= "RATIO";
 						}
 					}
@@ -271,7 +268,8 @@
 							$autoDialLevel 				= $auto_dial_level_adv;
 							break;
 							
-							//default:
+							default:
+							$autoDialLevel 				= 1;
 							//DEFAULT HERE
 						}
 					}
@@ -309,7 +307,7 @@
 						'campaign_name' 						=> (!empty($campaign_name)) ? $campaign_name : $resultGet['campaign_name'],
 						'campaign_description' 					=> (!empty($campaign_desc)) ? $campaign_desc : $resultGet['campaign_desc'], 
 						'active' 								=> (!empty($active)) ? $active : $resultGet['active'], 
-						'dial_method' 							=> (!empty($dial_method)) ? $dial_method : $resultGet['dial_method'], 
+						'dial_method' 							=> (gettype($dial_method) != NULL) ? $dial_method : $resultGet['dial_method'], 
 						'auto_dial_level' 						=> $autoDialLevel, 
 						'dial_prefix' 							=> $dialprefix,
 						'web_form_address' 						=> (!empty($webform)) ? $webform : $resultGet['web_form_address'], 
@@ -361,8 +359,12 @@
 					
 					if ( $campaign_type == 'SURVEY' ) {
 						$data_update						= $data_array03;
-					} else { 
-						$data_update 						= array_merge( $data_array01, $data_array02, $data_array03 );
+					} else {
+						if (gettype($data_array02) == "array" ) {
+							$data_update 					= array_merge( $data_array01, $data_array02, $data_array03 );
+						} else {
+							$data_update 					= array_merge( $data_array01, $data_array03 );
+						}
 					}
 					
 					$astDB->where( 'campaign_id', $campaign_id );
