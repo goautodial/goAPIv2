@@ -2,9 +2,10 @@
 /**
  * @file        goGetStatusesWithCountCalledNCalled.php
  * @brief       API to get timezones with called and not called
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,27 +22,67 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    $list_id = $astDB->escape($_REQUEST['list_id']);
-    // GROUP BY gmt_offset_now,called_since_last_reset
-    $query = "SELECT
-				gmt_offset_now,
-				called_since_last_reset,
-				count(*) as counttlist
-			FROM vicidial_list
-			WHERE list_id='$list_id'
-			GROUP BY gmt_offset_now 
-			ORDER BY gmt_offset_now,called_since_last_reset;";
-	$rsltv = $astDB->rawQuery($query);
+    include_once ("goAPI.php");
+
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
+    $list_id 											= $astDB->escape($_REQUEST['list_id']);
     
-    foreach ($rsltv as $fresults) {
-		$dataGMT[]                	=  $fresults['gmt_offset_now'];
-        $dataCalledSinceLastReset[] =  $fresults['called_since_last_reset'];
-        $dataCountTLists[]          =  $fresults['counttlist'];
-	}
-    $apiresults = array(
-            "result"                    => "success",
-            "gmt_offset_now"            => $dataGMT,
-            "called_since_last_reset"   => $dataCalledSinceLastReset,
-            "counttlist"                => $dataCountTLists
-        );
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($list_id) || is_null($list_id)) {
+		$err_msg 										= error_handle("40001");
+        $apiresults 									= array(
+			"code" 											=> "40001",
+			"result" 										=> $err_msg
+		);
+    } else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			// GROUP BY gmt_offset_now,called_since_last_reset
+			$query 										= "SELECT gmt_offset_now, called_since_last_reset, count(*) as counttlist FROM vicidial_list WHERE list_id='$list_id' GROUP BY gmt_offset_now ORDER BY gmt_offset_now,called_since_last_reset;";				
+			$rsltv 										= $astDB->rawQuery($query);
+			
+			foreach ($rsltv as $fresults) {
+				$dataGMT[]                				=  $fresults['gmt_offset_now'];
+				$dataCalledSinceLastReset[] 			=  $fresults['called_since_last_reset'];
+				$dataCountTLists[]          			=  $fresults['counttlist'];
+			}
+			
+			$apiresults 								= array(
+				"result"                    				=> "success",
+				"gmt_offset_now"           				 	=> $dataGMT,
+				"called_since_last_reset"   				=> $dataCalledSinceLastReset,
+				"counttlist"                				=> $dataCountTLists
+			);
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}			
 ?>

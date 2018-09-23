@@ -31,7 +31,7 @@
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$limit 												= isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100;
+	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

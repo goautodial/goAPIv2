@@ -155,13 +155,6 @@
 			"result" 										=> $err_msg
 		);
 		//$apiresults = array("result" => "Error: Special characters found in campaign_cid_override");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $web_form_address)) {
-		$err_msg 									 	= error_handle("41004", "web_form_address");
-		$apiresults									 	= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-			);
-		//$apiresults = array("result" => "Error: Special characters found in web_form_address");
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -176,7 +169,7 @@
 			$rsltv_check 								= $astDB
 				->where("list_id", $list_id)
 				//->where("campaign_id", $campaigns, "IN")
-				->getOne("vicidial_lists");
+				->get("vicidial_lists");
 		
 			if ($astDB->count > 0) {
 				foreach ($rsltv_check as $fresults) {

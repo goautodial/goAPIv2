@@ -33,7 +33,6 @@
     // POST or GET Variables
     $list_id 											= $astDB->escape($_REQUEST['list_id']);
 
-
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -114,20 +113,20 @@
 			$rsltv 										= $astDB->rawQuery($query);
 			$countResult 								= $astDB->getRowCount();
 
-			if($countResult > 0) {
+			if ($countResult > 0) {
 				foreach ($rsltv as $fresults) {
-					$dataListId[] 						=  $fresults['list_id'];
-					$dataListName[] 					=  $fresults['list_name'];
-					$dataActive[] 						=  $fresults['active'];
-					$dataListLastcallDate[] 			=  $fresults['list_lastcalldate'];
-					$dataTally[] 						=  $fresults['tally'];
-					$dataCFCount[] 						=  $fresults['cf_count'];
-					$dataCampaignId[] 					=  $fresults['campaign_id'];
-					$datareset_called_lead_status[] 	=  $fresults['reset_called_lead_status'];
-					$dataweb_form_address[] 			=  $fresults['web_form_address'];
-					$dataagent_script_override[] 		=  $fresults['agent_script_override'];
-					$datacampaign_cid_override[] 		=  $fresults['campaign_cid_override'];
-					$datadrop_inbound_group_override[] 	=  $fresults['drop_inbound_group_override'];
+					$dataListId[] 						= $fresults['list_id'];
+					$dataListName[] 					= $fresults['list_name'];
+					$dataActive[] 						= $fresults['active'];
+					$dataListLastcallDate[] 			= $fresults['list_lastcalldate'];
+					$dataTally[] 						= $fresults['tally'];
+					$dataCFCount[] 						= $fresults['cf_count'];
+					$dataCampaignId[] 					= $fresults['campaign_id'];
+					$datareset_called_lead_status[] 	= $fresults['reset_called_lead_status'];
+					$dataweb_form_address[] 			= $fresults['web_form_address'];
+					$dataagent_script_override[] 		= $fresults['agent_script_override'];
+					$datacampaign_cid_override[] 		= $fresults['campaign_cid_override'];
+					$datadrop_inbound_group_override[] 	= $fresults['drop_inbound_group_override'];
 					$datareset_time[] 					= $fresults['reset_time'];
 					$datalist_desc[] 					= $fresults['list_description'];
 					$dataxferconf_a_number[] 			= $fresults['xferconf_a_number'];
