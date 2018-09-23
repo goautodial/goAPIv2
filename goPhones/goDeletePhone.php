@@ -23,70 +23,105 @@
     
     include_once("goAPI.php");
     
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);	
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
     // POST or GET Variables
-    $extensions 									= $_REQUEST['extension'];
-	$action 										= $astDB->escape($_REQUEST['action']);
+    $extensions 										= $_REQUEST['extension'];
+	$action 											= $astDB->escape($_REQUEST['action']);
     
     // Error Checking
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($extensions) || is_null($extensions)) { 
-		$apiresults									= array(
-			"result" 									=> "Error: Set a value for EXTEN ID."
+		$apiresults										= array(
+			"result" 										=> "Error: Set a value for EXTEN ID."
 		); 
 	} else {
-		if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where("user_group", $log_group);
-		}
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if ($action == "delete_selected") {
-			$error_count 							= 0;
-			foreach ($extensions as $extension) {
-				$phone_login 						= $extension;
-				
-				if (checkIfTenant($log_group, $goDB)) {
-					$astDB->where("user_group", $log_group);
-				}
-				
-				$astDB->where("extension", $phone_login);
-				$astDB->getOne("phones");
-				
-				if($astDB->count > 0) {				
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			if ($action == "delete_selected") {
+				$error_count 							= 0;
+				foreach ($extensions as $extension) {
+					$phone_login 						= $extension;
+					
+					// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+					// every time we need to filter out requests
+					$tenant								=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+					
+					if ($tenant) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					} else {
+						if (strtoupper($log_group) != 'ADMIN') {
+							if ($userlevel > 8) {
+								$astDB->where("user_group", $log_group);
+								$astDB->orWhere("user_group", "---ALL---");
+							}
+						}					
+					}
+					
 					$astDB->where("extension", $phone_login);
-					$astDB->delete("phones");
+					$astDB->getOne("phones");
 					
-					$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $astDB->getLastQuery());
+					if($astDB->count > 0) {				
+						$astDB->where("extension", $phone_login);
+						$astDB->delete("phones");
+						
+						$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $astDB->getLastQuery());
+						
+						$kamDB->where("username", $phone_login);
+						$kamDB->delete("subscriber");
+						
+						$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $kamDB->getLastQuery());
+					} else {
+						$error_count 					= 1;
+					}
 					
-					$kamDB->where("username", $phone_login);
-					$kamDB->delete("subscriber");
+					if ($error_count == 0) { 
+						$apiresults 					= array(
+							"result" 						=> "success"
+						); 
+					}
 					
-					$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $kamDB->getLastQuery());
-				} else {
-					$error_count 					= 1;
+					if ($error_count == 1) {
+						$err_msg 						= error_handle("10010");
+						$apiresults 					= array(
+							"code" 							=> "10010", 
+							"result" 						=> $err_msg, 
+							"data" 							=> "$extensions"
+						);
+					}
 				}
-				
-				if ($error_count == 0) { 
-					$apiresults 					= array(
-						"result" 						=> "success"
-					); 
-				}
-				
-				if ($error_count == 1) {
-					$err_msg 						= error_handle("10010");
-					$apiresults 					= array(
-						"code" 							=> "10010", 
-						"result" 						=> $err_msg, 
-						"data" 							=> "$extensions"
-					);
-					//$apiresults = array("}result" => "Error: Delete Failed");
-				}
-			}
-		}			
-	}//end
+			}			
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}
+	
 ?>

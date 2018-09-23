@@ -24,76 +24,106 @@
 
 	include_once ("goAPI.php");	 
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB);    
-	$log_ip 									= $astDB->escape($_REQUEST["log_ip"]);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);	
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
-	$script_id 									= $astDB->escape($_REQUEST["script_id"]); 
+	$script_id 											= $astDB->escape($_REQUEST["script_id"]); 
 	
-	if ( empty($log_user) || is_null($log_user) ) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+    // Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif ( empty($script_id) || is_null($script_id) ) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Set a value for Script ID."
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($script_id) || is_null($script_id) ) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for Script ID."
 		);
     } else {
-		// check if script ID exists
-        $astDB->where("script_id", $script_id);        
-		$astDB->getOne("vicidial_scripts", "script_id");
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-	    if ($astDB->count > 0) {
-			// check if script exists with conditions below:
-			if ( checkIfTenant($log_group, $goDB) ) {
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if ($log_group !== "ADMIN"){
-					$astDB->where("user_group", $log_group);
-					$astDB->orWhere("user_group", "---ALL---");
-				}
-			}	
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}
+			
+			// check if script ID exists
+			$astDB->where("script_id", $script_id);        
+			$astDB->getOne("vicidial_scripts", "script_id");
 			
 			if ($astDB->count > 0) {        
 				$astDB->where("script_id", $script_id);
-				$getScripts 					= $astDB->getOne("vicidial_scripts", "script_id");
+				$getScripts 							= $astDB->getOne("vicidial_scripts", "script_id");
 
 				if($getScripts) {
 					$astDB->where("script_id", $script_id);
 					$astDB->delete("vicidial_scripts");
-					$deleteQuery 				= $astDB->getLastQuery();
 
+					$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Script ID: $script_id", $log_group, $astDB->getLastQuery());
+					
 					$astDB->where("script_id", $script_id);
 					$astDB->delete("go_scripts");
 
-					$data_update 				= array(
-						"campaign_script" 			=> ""
+					$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Script ID: $script_id", $log_group, $astDB->getLastQuery());
+					
+					$data_update 						= array(
+						"campaign_script" 					=> ""
 					);
 					
 					$astDB->where("campaign_script", $script_id);
 					$astDB->update("vicidial_campaigns", $data_update);
 
-					$log_id 					= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Script ID: $script_id", $log_group, $deleteQuery);
+					$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Script ID: $script_id", $log_group, $astDB->getLastQuery());
 
-					$apiresults 				= array(
-						"result" 					=> "success"
+					$apiresults 						= array(
+						"result" 						=> "success"
 					);
 				} else {
-					$apiresults 				= array(
-						"result" 					=> "Error: Script doesn't exist."
+					$apiresults 						= array(
+						"result" 							=> "Error: Script doesn't exist."
 					);
 				}
 			} else {
-				$err_msg 						= error_handle( "10001", "Insufficient permision" );
-				$apiresults 					= array(
-					"code" 							=> "10001", 
-					"result" 						=> $err_msg
+				$err_msg 								= error_handle( "10001", "Insufficient permision" );
+				$apiresults 							= array(
+					"code" 									=> "10001", 
+					"result" 								=> $err_msg
 				);			
 			}
 		} else {
-			$apiresults 						= array(
-				"result" 							=> "Error: Script doesn't exist."
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
 			);		
 		}
 	}

@@ -23,40 +23,74 @@
 
 	include_once ("goAPI.php");	 
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB);    
-	//$log_ip 									= $astDB->escape($_REQUEST["log_ip"]);
-	
-	if ( empty($log_user) || is_null($log_user) ) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+		
+    // Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
     } else {
-		if ( checkIfTenant($log_group, $goDB) ) {
-			$astDB->where("user_group", $log_group);
-			$astDB->orWhere("user_group", "---ALL---");
-		} else {
-			if ($log_group !== "ADMIN"){
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
-			}
-		}	
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}	
 			
-		$astDB->where('subscript' , 1);
-		$subScripts 							= $astDB->get('vicidial_scripts', null, 'script_id, script_name, script_text');
-		
-		foreach ($subScripts as $fresults) {
-			$script_id[] 						= $fresults['script_id'];
-			$script_name[] 						= $fresults['script_name'];
-			$script_text[] 						= $fresults['script_text'];
-		}
+			$astDB->where('subscript' , 1);
+			$subScripts 								= $astDB->get('vicidial_scripts', null, 'script_id, script_name, script_text');
+			
+			foreach ($subScripts as $fresults) {
+				$script_id[] 							= $fresults['script_id'];
+				$script_name[] 							= $fresults['script_name'];
+				$script_text[] 							= $fresults['script_text'];
+			}
 
-		$apiresults 							= array(
-			"result" 								=> "success", 
-			"script_id" 							=> $script_id, 
-			"script_name" 							=> $script_name, 
-			"script_text" 							=> $script_text
-		);
+			$apiresults 								= array(
+				"result" 									=> "success", 
+				"script_id" 								=> $script_id, 
+				"script_name" 								=> $script_name, 
+				"script_text" 								=> $script_text
+			);
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
 	}
 	
 ?>

@@ -23,90 +23,126 @@
 
 	include_once ("goAPI.php");	 
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB);    
-	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
-	if ( empty($log_user) || is_null($log_user) ) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
-		if ( checkIfTenant($log_group, $goDB) ) {
-			$astDB->where("user_group", $log_group);
-			$astDB->orWhere('user_group', "---ALL---");
-		} else {
-			if ($log_group !== "ADMIN"){
-				$astDB->where('user_group', $log_group);
-				$astDB->orWhere('user_group', "---ALL---");
-			}
-		}
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		// getting script count
-		$astDB->orderBy('script_id', 'desc');
-		$resultGetScript						= $astDB->getOne('vicidial_scripts', 'script_id');
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-		// condition
-		if ($resultGetScript) {
-			if ( preg_match("/^script/i", $resultGetScript['script_id']) ) {
-				$get_last_count 				= str_replace("script", "", $resultGetScript['script_id']);
-				$last_pl[] 						= intval($get_last_count);
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				$get_last_count 				= $resultGetScript['script_id'];
-				$last_pl[] 						= intval($get_last_count);
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
 			}
-
-			// return data
-			$script_num 						= max($last_pl);
-			$script_num 						= $script_num + 1;
+		
+			// getting script count
+			$astDB->orderBy('script_id', 'desc');
+			$resultGetScript							= $astDB->getOne('vicidial_scripts', 'script_id');
 			
-			if ($script_num < 100) {
-				if ($script_num < 10) {
-					$script_num = "00".$script_num;
+			// condition
+			if ($resultGetScript) {
+				if ( preg_match("/^script/i", $resultGetScript['script_id']) ) {
+					$get_last_count 					= str_replace("script", "", $resultGetScript['script_id']);
+					$last_pl[] 							= intval($get_last_count);
 				} else {
-					$script_num = "0".$script_num;
+					$get_last_count 					= $resultGetScript['script_id'];
+					$last_pl[] 							= intval($get_last_count);
 				}
+
+				// return data
+				$script_num 							= max($last_pl);
+				$script_num 							= $script_num + 1;
+				
+				if ($script_num < 100) {
+					if ($script_num < 10) {
+						$script_num			 			= "00".$script_num;
+					} else {
+						$script_num 					= "0".$script_num;
+					}
+				}
+				
+				if ($log_group != "ADMIN") {
+					$script_num 						= $script_num;
+				}else{
+					$script_num 						= "script".$script_num;
+				}
+			} else {
+				// return data
+				$script_num 							= "script001";
+			}
+				
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
 			}
 			
-			if ($log_group != "ADMIN") {
-				$script_num 					= $script_num;
-			}else{
-				$script_num 					= "script".$script_num;
-			}
-		} else {
-			// return data
-			$script_num 						= "script001";
-		}
+			$scripts 									= $astDB->get('vicidial_scripts');
 			
-		if ( checkIfTenant($log_group, $goDB) ) {
-			$astDB->where("user_group", $log_group);
-			$astDB->orWhere('user_group', "---ALL---");
+			if ($astDB->count > 0) {
+				foreach ($scripts as $script) {
+					$dataScriptID[] 					= $script['script_id'];
+					$dataScriptName[] 					= $script['script_name'];
+					$dataActive[] 						= $script['active'];
+					$dataUserGroup[] 					= $script['user_group'];
+				}		
+			} 
+			
+			$apiresults 								= array(
+				"result" 									=> "success",
+				"script_id" 								=> $dataScriptID,
+				"script_name" 								=> $dataScriptName,
+				"active" 									=> $dataActive,
+				"user_group" 								=> $dataUserGroup,
+				"script_count" 								=> $script_num
+			);
 		} else {
-			if ($log_group !== "ADMIN"){
-				$astDB->where('user_group', $log_group);
-				$astDB->orWhere('user_group', "---ALL---");
-			}
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
-		
-		$scripts 								= $astDB->get('vicidial_scripts');
-		
-		if ($astDB->count > 0) {
-			foreach ($scripts as $script) {
-				$dataScriptID[] 				= $script['script_id'];
-				$dataScriptName[] 				= $script['script_name'];
-				$dataActive[] 					= $script['active'];
-				$dataUserGroup[] 				= $script['user_group'];
-			}		
-		} 
-		
-		$apiresults 							= array(
-			"result" 								=> "success",
-			"script_id" 							=> $dataScriptID,
-			"script_name" 							=> $dataScriptName,
-			"active" 								=> $dataActive,
-			"user_group" 							=> $dataUserGroup,
-			"script_count" 							=> $script_num
-		);
 	}
 
 ?>

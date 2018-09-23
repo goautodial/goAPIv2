@@ -359,12 +359,12 @@
 					$astDB->where("extension", $phone_login);
 					$astDB->update("phones", $phones_array);
 
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery());
 					
 					$kamDB->where("username", $phone_login);
 					$kamDB->update("subscriber", $subscriber_array);
 
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $kamDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $kamDB->getLastQuery());
 				}
 					
 				if ($phone_login != null) {
@@ -376,7 +376,7 @@
 				$astDB->where("user", $user);
 				$queryUpdateUser 						= $astDB->update('vicidial_users', $update_array);
 				
-				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $astDB->getLastQuery ());
+				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $astDB->getLastQuery());
 				
 				$goDB->where("name", $user);
 				$fetch_userIDGo 						= $goDB->getOne("users", "userid");
@@ -385,10 +385,10 @@
 					$goDB->where("name", $user);
 					$goDB->update('users', $updateUserGoArray);
 					
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $goDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $goDB->getLastQuery());
 				} else {
 					$goDB->insert('users', $insertUserGoArray); // insert record in goautodial.users
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $goDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified User: $user", $log_group, $goDB->getLastQuery());
 				}
 
 				$justgovoip_array						= array(
@@ -398,7 +398,7 @@
 				$goDB->where("carrier_id", $user_group);
 				$goDB->update('justgovoip_sippy_info', $justgovoip_array);	
 				
-				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_pass", $log_group, $goDB->getLastQuery ());
+				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_pass", $log_group, $goDB->getLastQuery());
 					
 				if ($queryUpdateUser) {
 					$apiresults 						= array(

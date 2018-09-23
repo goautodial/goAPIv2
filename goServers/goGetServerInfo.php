@@ -23,36 +23,80 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);	
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
-    ### POST or GET Variables
-	$server_id 							= $astDB->escape($_REQUEST['server_id']);	
-
-	if($server_id == null) {
-		$apiresults 					= array(
-			"result" 						=> "Error: Set a value for Server ID."
+	### POST or GET Variables
+	$server_id 											= $astDB->escape($_REQUEST['server_id']);
+	
+    ### Check Server ID if its null or empty
+	if (empty ($goUser) || is_null ($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} else {
-		if (checkIfTenant($log_group, $goDB)) {
-			$astDB->where('user_group', $log_group);
-			$astDB->orWhere('user_group', "---ALL---");
-		}
-
-		$astDB->where("server_id", $server_id);
-		$rsltv 							= $astDB->getOne('servers');	
-		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed server ID: $server_id", $astDB->getLastQuery());
+	} elseif (empty ($goPass) || is_null ($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty ($log_user) || is_null ($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty ($server_id) || is_null ($server_id)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for Server ID not less than 3 characters."
+		);
+	} else {		
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if ($rsltv) {
-			$apiresults 				= array(
-				"result" 					=> "success", 
-				"data" 						=> $rsltv
-			);
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}
+
+			$astDB->where("server_id", $server_id);
+			$rsltv 										= $astDB->getOne('servers');
+			$log_id 									= log_action($goDB, "VIEW", $log_user, $log_ip, "Viewed server ID: $server_id", $astDB->getLastQuery());
+			
+			if ($rsltv) {
+				$apiresults 							= array(
+					"result" 								=> "success", 
+					"data" 									=> $rsltv
+				);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: Server does not exist."
+				);
+			}
 		} else {
-			$apiresults 				= array(
-				"result" 					=> "Error: Server does not exist."
-			);
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>

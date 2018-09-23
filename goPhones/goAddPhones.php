@@ -24,204 +24,269 @@
 	include_once("goAPI.php");
 	include_once("../licensed-conf.php");
 	
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB); 
-	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);	
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
 	// POST or GET Variables
-    $orig_extension 							= $astDB->escape($_REQUEST['extension']);
-    $server_ip 									= $astDB->escape($_REQUEST['server_ip']);
-    $pass 										= $astDB->escape($_REQUEST['pass']);
-    $protocol 									= $astDB->escape($_REQUEST['protocol']);
-    $dialplan_number 							= $astDB->escape($_REQUEST['dialplan_number']);
-    $voicemail_id 								= $astDB->escape($_REQUEST['voicemail_id']);
-    $status 									= $astDB->escape($_REQUEST['status']);
-    $active 									= $astDB->escape($_REQUEST['active']);
-    $fullname 									= $astDB->escape($_REQUEST['fullname']);
-    $messages 									= !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
-    $old_messages 								= !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
-    $user_group 								= $astDB->escape($_REQUEST['user_group']);
-	$gmt 										= $astDB->escape($_REQUEST['gmt']);
-	
-	if(isset($_REQUEST['seats'])) { 
-		$seats 									= $astDB->escape($_REQUEST['seats']); 
-	} else { 
-		$seats 									= 1; 
-	}
-	
-	if ($protocol == "EXTERNAL") { 
-		$phone_pass 							= ""; 
-	} else { 
-		$phone_pass 							= $pass; 
-	}
+    $orig_extension 									= $astDB->escape($_REQUEST['extension']);
+    $server_ip 											= $astDB->escape($_REQUEST['server_ip']);
+    $pass 												= $astDB->escape($_REQUEST['pass']);
+    $protocol 											= $astDB->escape($_REQUEST['protocol']);
+    $dialplan_number 									= $astDB->escape($_REQUEST['dialplan_number']);
+    $voicemail_id 										= $astDB->escape($_REQUEST['voicemail_id']);
+    $status 											= $astDB->escape($_REQUEST['status']);
+    $active 											= $astDB->escape($_REQUEST['active']);
+    $fullname 											= $astDB->escape($_REQUEST['fullname']);
+    $messages 											= !isset($_REQUEST['messages']) ? 0 : $astDB->escape($_REQUEST['messages']);
+    $old_messages 										= !isset($_REQUEST['old_messages']) ? 0 : $astDB->escape($_REQUEST['old_messages']);
+    $user_group 										= $astDB->escape($_REQUEST['user_group']);
+	$gmt 												= $astDB->escape($_REQUEST['gmt']);
+	$seats												= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
+	$phone_pass											= ($protocol == "EXTERNAL") ? "" : $pass;
 			
-	$defStatus = array('ACTIVE','SUSPENDED','CLOSED','PENDING,ADMIN');
-	$defProtocol = array('SIP','Zap','IAX2','EXTERNAL');
-	$defActive = array("Y","N");
-
-  	if(empty($session_user)){
-  		$apiresults = array("result" => "Error: Session User Not Defined.");
-  	}elseif(empty($orig_extension)) {
-		$apiresults = array("result" => "Error: Set a value for Extension.");
-	} elseif(!in_array($status,$defStatus)) {
-		$apiresults = array("result" => "Error: Default value for status is ACTIVE, SUSPENDED, CLOSED, PENDING, ADMIN only.");
-	} elseif(!in_array($active,$defActive)) {
-		$apiresults = array("result" => "Error: Default value for active is Y or N only.");
-	} elseif(!in_array($protocol,$defProtocol)) {
-		$apiresults = array("result" => "Error: Default value for protocol is SIP, Zap, IAX2, EXTERNAL.");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_extension)){
-		$apiresults = array("result" => "Error: Special characters found in extension");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $server_ip) || $server_ip == null){
-		$apiresults = array("result" => "Error: Special characters found in server_ip or must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass) || $pass == null){
-		$apiresults = array("result" => "Error: Special characters found in password and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $dialplan_number) || $dialplan_number == null){
-		$apiresults = array("result" => "Error: Special characters found in dialplan_number and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $voicemail_id) || $voicemail_id == null){
-		$apiresults = array("result" => "Error: Special characters found in voicemail_id and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status) || $status == null){
-		$apiresults = array("result" => "Error: Special characters found in status and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $fullname) || $fullname == null){
-		$apiresults = array("result" => "Error: Special characters found in fullname and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $messages) || $messages == null){
-		$apiresults = array("result" => "Error: Special characters found in messages and must not be null");
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $old_messages) || $old_messages == null){
-		$apiresults = array("result" => "Error: Special characters found in old_messages and must not be null");
+	$defStatus 											= array('ACTIVE','SUSPENDED','CLOSED','PENDING,ADMIN');
+	$defProtocol 										= array('SIP','Zap','IAX2','EXTERNAL');
+	$defActive 											= array("Y","N");
+	
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($orig_extension) || is_null($orig_extension)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for Extension."
+		);
+	} elseif (!in_array($status,$defStatus)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Default value for status is ACTIVE, SUSPENDED, CLOSED, PENDING, ADMIN only."
+		);
+	} elseif (!in_array($active,$defActive)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Default value for active is Y or N only."
+		);
+	} elseif (!in_array($protocol,$defProtocol)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2, EXTERNAL."
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_extension)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in extension"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $server_ip) || $server_ip == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in server_ip or must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass) || $pass == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in password and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $dialplan_number) || $dialplan_number == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in dialplan_number and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $voicemail_id) || $voicemail_id == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in voicemail_id and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status) || $status == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in status and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $fullname) || $fullname == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in fullname and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $messages) || $messages == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in messages and must not be null"
+		);
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $old_messages) || $old_messages == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in old_messages and must not be null"
+		);
 	} else {
-		// Check License Seats //		
-		$astDB->where("user", DEFAULT_USERS, "NOT IN");
-		$astDB->where("user_level", 4, "!=");
-		$num_users = $astDB->getValue("vicidial_users", "count(*)", null);
-			
-		// Check if DB Licensed Seats Exists //
-		$goDB->where("setting", "GO_licensed_seats");
-		$fetch_license = $goDB->getOne("settings");
-		//$check_db_license = "SELECT * FROM settings WHERE setting = 'GO_licensed_seats' LIMIT 1;";	
-				
-		if ($goDB->count > 0) { $licensedSeats = $fetch_license['value']; }	
-		else { $licensedSeats = $config["licensedSeats"]; }			
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		$error_count = 0;
-		if ($num_users <= $licensedSeats || $licensedSeats == "0") {		
-			$rpasshash = $astDB->getOne("system_settings");
-			$pass_hash_enabled = $rpasshash["pass_hash_enabled"];
-			$arr_phone = array();
-			$add_num = 0;
-			
-			for ($i=0;$i < $seats;$i++){
-				//$a = 1;
-				$iterate_number1 = $orig_extension + $add_num;
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// Check License Seats //
+			$num_users 									= $astDB
+				->where("user", DEFAULT_USERS, "NOT IN")
+				->where("user_level", 4, "!=")
+				->getValue("vicidial_users", "count(*)", null);
 				
-				if ($iterate_number1 > $orig_extension) {
-					$extension = $iterate_number1;
-				} else {
-					$extension = $orig_extension;
-					if($last_num_phone === 0 && $seats > 0){
-						$orig_extension = $orig_extension."1";
-						$last_num_phone = 1;
+			// Check if DB Licensed Seats Exists //
+			$fetch_license 								= $goDB
+				->where("setting", "GO_licensed_seats")
+				->getOne("settings");
+					
+			if ($goDB->count > 0) { 
+				$licensedSeats 							= $fetch_license['value']; 
+			} else { 
+				$licensedSeats 							= $config["licensedSeats"]; }			
+			
+			$error_count 								= 0;
+			
+			if ($num_users <= $licensedSeats || $licensedSeats == "0") {		
+				$rpasshash 								= $astDB->getOne("system_settings");
+				$pass_hash_enabled 						= $rpasshash["pass_hash_enabled"];
+				$arr_phone 								= array();
+				$add_num 								= 0;
+				
+				for ($i=0;$i < $seats;$i++) {
+					$iterate_number1					= $orig_extension + $add_num;
+					
+					if ($iterate_number1 > $orig_extension) {
+						$extension 						= $iterate_number1;
+					} else {
+						$extension 						= $orig_extension;
+						if($last_num_phone === 0 && $seats > 0) {
+							$orig_extension				= $orig_extension."1";
+							$last_num_phone 			= 1;
+						}
+					}
+					
+					$add_num 							= $add_num + 1;					
+					// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+					// every time we need to filter out requests
+					$tenant								=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+					
+					if ($tenant) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					} else {
+						if (strtoupper($log_group) != 'ADMIN') {
+							if ($userlevel > 8) {
+								$astDB->where("user_group", $log_group);
+								$astDB->orWhere("user_group", "---ALL---");
+							}
+						}					
+					}
+						
+					$astDB->where("extension", $extension);
+					$astDB->getOne("phones", "extension");
+						
+					if ($astDB->count < 1) {
+						$a				 				= 0;
+						
+						$dataPhones 					= array(
+							"extension" 					=> $extension,
+							"dialplan_number" 				=> "9999" . $extension,
+							"voicemail_id" 					=> $extension,
+							"phone_ip"			 			=> "",
+							"computer_ip" 					=> "",
+							"server_ip" 					=> $server_ip,
+							"login" 						=> $extension,
+							"pass" 							=> $phone_pass,
+							"status" 						=> $status,
+							"active" 						=> $active,
+							"phone_type" 					=> "",
+							"fullname" 						=> $fullname,
+							"company" 						=> $user_group,
+							"picture" 						=> "",
+							"protocol" 						=> "EXTERNAL",
+							"local_gmt" 					=> -5,
+							"outbound_cid" 					=> "0000000000",
+							"template_id" 					=> "--NONE--",
+							//"conf_override" 				=> $conf_override,
+							//"user_group" 					=> $user_group,
+							"conf_secret" 					=> $phone_pass,
+							"messages" 						=> $messages,
+							"old_messages" 					=> $old_messages
+						);
+							
+						$astDB->insert('phones', $dataPhones);
+						$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Phone: $extension", $log_group, $astDB->getLastQuery());
+						
+						### ADDING IN KAMAILIO DB
+						$querygo 						= $goDB
+							->where("setting", "GO_agent_wss_sip")
+							->getOne("settings");
+							
+						$realm 							= $querygo["value"];
+						
+						if ($pass_hash_enabled > 0) {
+							$ha1 						= md5("{$extension}:{$realm}:{$pass}");
+							$ha1b 						= md5("{$extension}@{$realm}:{$realm}:{$pass}");
+							$password 					= '';
+						} else {
+							$password 					= $pass;
+						}
+
+						$rowd 							= $goDB
+							->where("setting", "GO_agent_domain")
+							->getOne("settings");
+							
+						$domain 						= (!is_null($rowd["value"]) || $rowd["value"] !== '') ? $rowd["value"] : 'goautodial.com';	
+						
+						//if ($sip_server == "kamailio") {
+						$datakam 						= array(
+							"username" 						=> $extension,
+							"domain" 						=> $domain,
+							"password"						=> $password,
+							"ha1" 							=> $ha1,
+							"ha1b" 							=> $ha1b
+						);
+						
+						$kamDB->insert("subscriber", $datakam);												
+						$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Phone: $extension", $log_group, $kamDB->getLastQuery());
+						
+						if ($protocol != "EXTERNAL") { 
+							$rebuild 					= rebuildconfQuery($astDB, $server_ip); 
+						}
+						
+						$return_extension 				= $extension;
+						array_push($arr_phone, $return_extension);						
+					} else {
+						$error_count 					= 1;
+						$i 								= $i - 1;
 					}
 				}
 				
-				$add_num = $add_num + 1;
-				
-				//while ($a >= 1) {
-					if (checkIfTenant($log_group, $goDB)) {
-						$astDB->where("user_group", $log_group);
-					}
-					
-					$astDB->where("extension", $extension);
-					$astDB->getOne("phones", "extension");
-					
-					if ($astDB->count < 1) {
-						$a = 0;	
-						$dataPhones = array(
-							"extension" => $extension,
-							"dialplan_number" => "9999" . $extension,
-							"voicemail_id" => $extension,
-							"phone_ip" => "",
-							"computer_ip" => "",
-							"server_ip" => $server_ip,
-							"login" => $extension,
-							"pass" => $phone_pass,
-							"status" => $status,
-							"active" => $active,
-							"phone_type" => "",
-							"fullname" => $fullname,
-							"company" => $user_group,
-							"picture" => "",
-							"protocol" => "EXTERNAL",
-							"local_gmt" => -5,
-							"outbound_cid" => "0000000000",
-							"template_id" => "--NONE--",
-							//"conf_override" => $conf_override,
-							//"user_group" => $user_group,
-							"conf_secret" => $phone_pass,
-							"messages" => $messages,
-							"old_messages" => $old_messages
-						);
-							
-						$q_insertPhone = $astDB->insert('phones', $dataPhones); // insert record in asterisk.phones
-						
-						### ADDING IN KAMAILIO DB			
-						$goDB->where("setting", "GO_agent_wss_sip");
-						$querygo = $goDB->getOne("settings");
-						$realm = $querygo["value"];
-						/*
-						$queryg = "SELECT value FROM settings WHERE setting='GO_agent_wss_sip';";
-						*/
-
-						if ($pass_hash_enabled > 0) {
-							$ha1 = md5("{$extension}:{$realm}:{$pass}");
-							$ha1b = md5("{$extension}@{$realm}:{$realm}:{$pass}");
-							$password = '';
-						} else {
-							$password = $pass;
-						}
-
-						$goDB->where("setting", "GO_agent_domain");
-						$rowd = $goDB->getOne("settings");
-						//$queryd = "SELECT value FROM settings WHERE setting='GO_agent_domain';";							
-						$domain = (!is_null($rowd["value"]) || $rowd["value"] !== '') ? $rowd["value"] : 'goautodial.com';	
-						
-						//$goDB->where("settings", "GO_agent_sip_server");
-						//$rowsip = $goDB->getOne("settings");
-						//$sip_server = $rowsip["value"];
-
-						//if ($sip_server == "kamailio") {
-						$datakam = array(
-							"username" => $extension,
-							"domain" => $domain,
-							"password" => $password,
-							"ha1" => $ha1,
-							"ha1b" => $ha1b
-						);							
-						$qkam_insertSubscriber = $kamDB->insert("subscriber", $datakam);
-						//}
-						
-						if ($protocol != "EXTERNAL") { $rebuild = rebuildconfQuery($astDB, $server_ip); }
-						$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Phone: $extension", $log_group, $q_insertPhone . $qkam_insertSubscriber);
-						
-						$return_extension = $extension;
-						array_push($arr_phone, $return_extension);						
-					} else {
-						$error_count = 1;
-						$i = $i - 1;
-					}
-					//$extension = $extension + $a;
-				//}
-			}
-			
-			if ($error_count == 0) {
-				$apiresults = array("result" => "success", "rebuild_conf_status" => $rebuild);
-			} elseif ($error_count == 1) {
-				$err_msg = error_handle("10116");
-				$apiresults = array("code" => "10116", "result" => $err_msg);
-				//$apiresults = array("result" => "Error: Phone already exist.");
-			}
+				if ($error_count == 0) {
+					$apiresults 						= array(
+						"result" 							=> "success", 
+						"rebuild_conf_status" 				=> $rebuild
+					);
+				} elseif ($error_count == 1) {
+					$err_msg 							= error_handle("10116");
+					$apiresults 						= array(
+						"code" 								=> "10116", 
+						"result" 							=> $err_msg
+					);
+				}
+			} else {
+				$err_msg 								= error_handle("10004", "seats. Reached Maximum Licensed Seats!");
+				$apiresults 							= array(
+					"code" 									=> "10004", 
+					"result" 								=> $err_msg
+				);
+			}			
 		} else {
-			$err_msg = error_handle("10004", "seats. Reached Maximum Licensed Seats!");
-			$apiresults = array("code" => "10004", "result" => $err_msg);
-			//$apiresults = array("result" => "Error: Reached Maximum Licensed Seats!");
-		}			
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
 	}
+	
 ?>
