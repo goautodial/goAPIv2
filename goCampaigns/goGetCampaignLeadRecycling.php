@@ -90,13 +90,7 @@
 					"code" 									=> "10108", 
 					"result" 								=> $err_msg
 				);
-			}
-		} else {
-			$err_msg 									= error_handle("10001", "Insufficient permision");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
-				"result" 									=> $err_msg
-			);			
+			}			
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(

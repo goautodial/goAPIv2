@@ -21,6 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
  
+	ini_set('memory_limit', '2048M');
 	include_once ("goAPI.php");
 	
 	$log_user 											= $session_user;
@@ -28,8 +29,7 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	$listid 											= $astDB->escape($_REQUEST["list_id"]);
-	//ini_set('memory_limit', '2048M');
+	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -69,7 +69,7 @@
 			$added_custom_SQL4 							= "";	
 		
 			if ($custom_fields_enabled > 0) {
-				$custom_table 							= "custom_".$listid;
+				$custom_table 							= "custom_".$list_id;
 				$cllist_query 							= "SHOW COLUMNS FROM $custom_table;";
 				$cllist 								= $astDB->rawQuery($cllist_query);
 				$clcount 								= $astDB->getRowCount();
@@ -89,10 +89,10 @@
 				}
 			}
 			
-			if ($added_custom_SQL3 !== "") {
-				$stmt 									= "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} WHERE vl.list_id='{$listid}';";
+			if ($added_custom_SQL3 != "") {
+				$stmt 									= "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} WHERE vl.list_id='{$list_id}';";
 			} else {
-				$stmt 									= "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list WHERE list_id='$listid'; ";
+				$stmt 									= "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list WHERE list_id='$list_id'; ";
 			}
 			
 			$dllist 									= $astDB->rawQuery($stmt);
@@ -106,7 +106,7 @@
 				$array_fetch 							= $fetch_row[$header[0]];
 				$u 										= $u+1;
 				
-				while($u < $count_header){
+				while ($u < $count_header) {
 					$array_fetch 						.= "|".utf8_encode($fetch_row[$header[$u]]);
 					$u++;
 				}
