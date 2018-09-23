@@ -23,55 +23,82 @@
     include_once ("goAPI.php");
 
 	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid( $session_user, $astDB );
-	//$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
 	$search 											= $astDB->escape($_REQUEST['search']);
 	
-	if ( empty($log_user) || is_null($log_user) ) {
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
-		if (is_array($campaigns)) {	
-			$campaign_ids								= implode(",", $campaigns);
-			$campaign_ids								= str_replace(",", "','", $campaign_ids);
-			//echo "<pre>";
-			//var_dump ($campaign_ids);
-			$query = "(
-				SELECT 
-					a.phone_number as phone_number, 
-					'' as campaign_id
-					FROM vicidial_dnc a
-			) UNION (
-				SELECT 
-					b.phone_number as phone_number,
-					b.campaign_id as campaign_id
-					FROM vicidial_campaign_dnc b
-					WHERE phone_number LIKE '%$search%'
-					AND campaign_id IN ('$campaign_ids')
-					LIMIT 100
-			)";
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			if (is_array($campaigns)) {	
+				$campaign_ids							= implode(",", $campaigns);
+				$campaign_ids							= str_replace(",", "','", $campaign_ids);
+				//echo "<pre>";
+				//var_dump ($campaign_ids);
+				$query = "(
+					SELECT 
+						a.phone_number as phone_number, 
+						'' as campaign_id
+						FROM vicidial_dnc a
+				) UNION (
+					SELECT 
+						b.phone_number as phone_number,
+						b.campaign_id as campaign_id
+						FROM vicidial_campaign_dnc b
+						WHERE phone_number LIKE '%$search%'
+						AND campaign_id IN ('$campaign_ids')
+						LIMIT 100
+				)";
 
-			$rsltv 											= $astDB->rawQuery($query);
-			$countResult = $astDB->getRowCount();
-			
-			if ($rsltv) {
-				foreach ($rsltv as $fresults) {
-					$dataPhoneNumber[]       				= $fresults['phone_number'];
-					$dataCampaign[]       					= $fresults['campaign_id'];
-				}
+				$rsltv 									= $astDB->rawQuery($query);
 				
-				$apiresults 								= array(
-					"result"            						=> "success",
-					"phone_number"      						=> $dataPhoneNumber,
-					"campaign"									=> $dataCampaign
-				);
-			} else {
-				$apiresults 								= array(
-					"result" 									=> "Error: No record found."
-				);
+				if ($rsltv) {
+					foreach ($rsltv as $fresults) {
+						$dataPhoneNumber[]       		= $fresults['phone_number'];
+						$dataCampaign[]       			= $fresults['campaign_id'];
+					}
+					
+					$apiresults 						= array(
+						"result"            				=> "success",
+						"phone_number"      				=> $dataPhoneNumber,
+						"campaign"							=> $dataCampaign
+					);
+				} else {
+					$apiresults 						= array(
+						"result" 							=> "Error: No record found."
+					);
+				}
 			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
 	

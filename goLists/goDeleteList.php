@@ -23,63 +23,89 @@
 	
     include_once ("goAPI.php");
     
-	$log_user 								= $session_user;
-	$log_group 								= go_get_groupid($session_user, $astDB);
-	$log_ip 								= $astDB->escape($_REQUEST['log_ip']);    
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));   
     
     // POST or GET Variables
-    $list_ids 								= $_REQUEST['list_id'];
-	//$action 								= strtolower($astDB->escape($_REQUEST['action']));
-	$action									= "delete_selected";
+    $list_ids 											= $_REQUEST['list_id'];
+	//$action 											= strtolower($astDB->escape($_REQUEST['action']));
+	$action												= "delete_selected";
     
-    ### ERROR CHECKING
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 						= array(
-			"result" 							=> "Error: Session User Not Defined."
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($list_ids) || is_null($list_ids)) {
-		$err_msg 							= error_handle("10107");
-		$apiresults 						= array(
-			"code" 								=> "10107", 
-			"result" 							=> $err_msg
-		);
-		//$apiresults = array("result" => "Error: Set a value for List ID."); 
+		$err_msg 										= error_handle("10107");
+		$apiresults 									= array(
+			"code" 											=> "10107", 
+			"result" 										=> $err_msg
+		); 
 	} elseif ($action == "delete_selected") {
-		foreach ($list_ids as $list_id) {
-			$listid							= $list_id;
-			
-			$astDB->where('list_id', $listid);
-			$astDB->getOne('vicidial_lists', 'list_id');
-			
-			if($astDB->count > 0) {
-				$astDB->where('list_id', $listid);
-				$astDB->delete('vicidial_lists');
-				
-				$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
-				
-				$astDB->where('list_id', $listid);
-				$astDB->delete('vicidial_list');
-				
-				$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
-				
-				$astDB->where('list_id', $listid);
-				$astDB->delete('vicidial_lists_fields', 1);					
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-				$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			foreach ($list_ids as $list_id) {
+				$listid									= $list_id;
 				
-				$apiresults 				= array(
-					"result" 					=> "success"
-				);
-			} else {				
-				$apiresults 				= array(
-					"result" 					=> "Error: List doesn't exist."
-				);
+				$astDB->where('list_id', $listid);
+				$astDB->getOne('vicidial_lists', 'list_id');
+				
+				if ($astDB->count > 0) {
+					$astDB->where('list_id', $listid);
+					$astDB->delete('vicidial_lists');
+					
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
+					
+					$astDB->where('list_id', $listid);
+					$astDB->delete('vicidial_list');
+					
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
+					
+					$astDB->where('list_id', $listid);
+					$astDB->delete('vicidial_lists_fields', 1);					
+			
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
+					
+					$apiresults 						= array(
+						"result" 							=> "success"
+					);
+				} else {				
+					$apiresults 						= array(
+						"result" 							=> "Error: List doesn't exist."
+					);
+				}
 			}
+			
+			$apiresults 								= array(
+				"result" 									=> "success"
+			);			
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
-		
-		$apiresults 						= array(
-			"result" 							=> "success"
-		);			
 	}
 
 ?>

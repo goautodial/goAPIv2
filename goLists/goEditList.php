@@ -26,6 +26,8 @@
 	$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB);
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
 	// POST or GET Variables
@@ -50,7 +52,16 @@
 	// Default values 
 	$defActive 											= array("Y","N");
 
-	if (empty($log_user) || is_null($log_user)) {
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Session User Not Defined."
 		);
@@ -151,115 +162,131 @@
 			"result" 										=> $err_msg
 			);
 		//$apiresults = array("result" => "Error: Special characters found in web_form_address");
-	} elseif (is_array($campaigns)) {
-		$rsltv_check 								 	= $astDB
-			->where("list_id", $list_id)
-			->where("campaign_id", $campaigns, "IN")
-			->get("vicidial_lists");
-	
-		if ($astDB->count > 0) {
-			foreach ($rsltv_check as $fresults) {
-				$data_list_name 						= $fresults['list_name'];
-				$data_list_description 					= $fresults['list_description'];
-				$data_campaign_id 						= $fresults['campaign_id'];
-				$data_active 							= $fresults['active'];
-				$data_reset_time 						= $fresults['reset_time'];
-				$data_xferconf_a_number 				= $fresults['xferconf_a_number'];
-				$data_xferconf_b_number 				= $fresults['xferconf_b_number'];
-				$data_xferconf_c_number 				= $fresults['xferconf_c_number'];
-				$data_xferconf_d_number 				= $fresults['xferconf_d_number'];
-				$data_xferconf_e_number 				= $fresults['xferconf_e_number'];
-				$data_agent_script_override 			= $fresults['agent_script_override'];
-				$data_drop_inbound_group_override 		= $fresults['drop_inbound_group_override'];
-				$data_campaign_cid_override				= $fresults['campaign_cid_override'];
-				$data_web_form_address 					= $fresults['web_form_address'];
-				$data_reset_list 						= $fresults['reset_list'];
-			}
-			
-			if (empty($list_name))
-				$list_name 								= $data_list_name;
-			if (empty($list_description))
-				$list_description 						= $data_list_description;
-			if (empty($campaign_id))
-				$campaign_id 							= $data_campaign_id;
-			if (empty($active))
-				$active 								= $data_active;
-			if (empty($reset_time))
-				$reset_time 							= $data_reset_time;
-			if (empty($xferconf_a_number))
-				$xferconf_a_number 						= $data_xferconf_a_number;
-			if (empty($xferconf_b_number))
-				$xferconf_b_number 						= $data_xferconf_b_number;
-			if (empty($xferconf_c_number))
-				$xferconf_c_number 						= $data_xferconf_c_number;
-			if (empty($xferconf_d_number))
-				$xferconf_d_number 						= $data_xferconf_d_number;
-			if (empty($xferconf_e_number))
-				$xferconf_e_number 						= $data_xferconf_e_number;
-			if (empty($agent_script_override))
-				$agent_script_override 					= $data_agent_script_override;
-			if (empty($drop_inbound_group_override))
-				$drop_inbound_group_override 			= $data_drop_inbound_group_override;
-			if (empty($campaign_cid_override))
-				$campaign_cid_override 					= $data_campaign_cid_override;
-			if (empty($web_form_address))
-				$web_form_address 						= $data_web_form_address;
-			if (empty($reset_list))
-				$reset_list 							= $data_reset_list;
-			
-			$astDB->where('list_id', $list_id);
-			$astDB->update('vicidial_list', array('called_since_last_reset' => $reset_list));
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-			$updateData 								= array(
-				'list_name' 								=> $list_name,
-				'list_description' 							=> $list_description,
-				'campaign_id' 								=> $campaign_id,
-				'active' 									=> $active,
-				'reset_time' 								=> $reset_time,
-				'xferconf_a_number' 						=> $xferconf_a_number,
-				'xferconf_b_number' 						=> $xferconf_b_number,
-				'xferconf_c_number' 						=> $xferconf_c_number,
-				'xferconf_d_number' 						=> $xferconf_d_number,
-				'xferconf_e_number' 						=> $xferconf_e_number,
-				'agent_script_override' 					=> $agent_script_override,
-				'drop_inbound_group_override' 				=> $drop_inbound_group_override,
-				'campaign_cid_override' 					=> $campaign_cid_override,
-				'web_form_address' 							=> $web_form_address
-			);
-			
-			$astDB->where('list_id', $list_id);
-			$resultQuery 								= $astDB->update('vicidial_lists', $updateData);
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-			if ($resultQuery == false ) {
-				$err_msg 								= error_handle("10010");
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			$rsltv_check 								= $astDB
+				->where("list_id", $list_id)
+				//->where("campaign_id", $campaigns, "IN")
+				->getOne("vicidial_lists");
+		
+			if ($astDB->count > 0) {
+				foreach ($rsltv_check as $fresults) {
+					$data_list_name 					= $fresults['list_name'];
+					$data_list_description 				= $fresults['list_description'];
+					$data_campaign_id 					= $fresults['campaign_id'];
+					$data_active 						= $fresults['active'];
+					$data_reset_time 					= $fresults['reset_time'];
+					$data_xferconf_a_number 			= $fresults['xferconf_a_number'];
+					$data_xferconf_b_number 			= $fresults['xferconf_b_number'];
+					$data_xferconf_c_number 			= $fresults['xferconf_c_number'];
+					$data_xferconf_d_number 			= $fresults['xferconf_d_number'];
+					$data_xferconf_e_number 			= $fresults['xferconf_e_number'];
+					$data_agent_script_override 		= $fresults['agent_script_override'];
+					$data_drop_inbound_group_override 	= $fresults['drop_inbound_group_override'];
+					$data_campaign_cid_override			= $fresults['campaign_cid_override'];
+					$data_web_form_address 				= $fresults['web_form_address'];
+					$data_reset_list 					= $fresults['reset_list'];
+				}
+				
+				if (empty($list_name))
+					$list_name 							= $data_list_name;
+				if (empty($list_description))
+					$list_description 					= $data_list_description;
+				if (empty($campaign_id))
+					$campaign_id 						= $data_campaign_id;
+				if (empty($active))
+					$active 							= $data_active;
+				if (empty($reset_time))
+					$reset_time 						= $data_reset_time;
+				if (empty($xferconf_a_number))
+					$xferconf_a_number 					= $data_xferconf_a_number;
+				if (empty($xferconf_b_number))
+					$xferconf_b_number 					= $data_xferconf_b_number;
+				if (empty($xferconf_c_number))
+					$xferconf_c_number 					= $data_xferconf_c_number;
+				if (empty($xferconf_d_number))
+					$xferconf_d_number 					= $data_xferconf_d_number;
+				if (empty($xferconf_e_number))
+					$xferconf_e_number 					= $data_xferconf_e_number;
+				if (empty($agent_script_override))
+					$agent_script_override 				= $data_agent_script_override;
+				if (empty($drop_inbound_group_override))
+					$drop_inbound_group_override 		= $data_drop_inbound_group_override;
+				if (empty($campaign_cid_override))
+					$campaign_cid_override 				= $data_campaign_cid_override;
+				if (empty($web_form_address))
+					$web_form_address 					= $data_web_form_address;
+				if (empty($reset_list))
+					$reset_list 						= $data_reset_list;
+				
+				$astDB->where('list_id', $list_id);
+				$astDB->update('vicidial_list', array('called_since_last_reset' => $reset_list));
+			
+				$updateData 							= array(
+					'list_name' 							=> $list_name,
+					'list_description' 						=> $list_description,
+					'campaign_id' 							=> $campaign_id,
+					'active' 								=> $active,
+					'reset_time' 							=> $reset_time,
+					'xferconf_a_number' 					=> $xferconf_a_number,
+					'xferconf_b_number' 					=> $xferconf_b_number,
+					'xferconf_c_number' 					=> $xferconf_c_number,
+					'xferconf_d_number' 					=> $xferconf_d_number,
+					'xferconf_e_number' 					=> $xferconf_e_number,
+					'agent_script_override' 				=> $agent_script_override,
+					'drop_inbound_group_override' 			=> $drop_inbound_group_override,
+					'campaign_cid_override' 				=> $campaign_cid_override,
+					'web_form_address' 						=> $web_form_address
+				);
+				
+				$astDB->where('list_id', $list_id);
+				$resultQuery 							= $astDB->update('vicidial_lists', $updateData);
+			
+				if ($resultQuery == false ) {
+					$err_msg 							= error_handle("10010");
+					$apiresults 						= array(
+						"code" 								=> "10010", 
+						"result" 							=> $err_msg
+					);
+				} else {
+					$SQLdate 							= date("Y-m-d H:i:s");
+					
+					//$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
+					$astDB->where('list_id', $list_id);
+					$astDB->update('vicidial_lists', array('list_changedate' => $SQLdate));
+					
+					//$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
+					$astDB->where('list_id', $list_id);
+					$astDB->update('vicidial_list', array('called_since_last_reset', 'N'));
+					
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified the List ID: $list_id", $log_group, $astDB->getLastQuery());
+					
+					$apiresults 						= array(
+						"result" 							=> "success"
+					);
+				}				
+			} else {
+				$err_msg 								= error_handle("41004", "list_id. Doesn't exist");
 				$apiresults 							= array(
-					"code" 									=> "10010", 
+					"code" 									=> "41004", 
 					"result" 								=> $err_msg
 				);
-			} else {
-				$SQLdate 								= date("Y-m-d H:i:s");
-				
-				//$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
-				$astDB->where('list_id', $list_id);
-				$astDB->update('vicidial_lists', array('list_changedate' => $SQLdate));
-				
-				//$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
-				$astDB->where('list_id', $list_id);
-				$astDB->update('vicidial_list', array('called_since_last_reset', 'N'));
-				
-				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified the List ID: $list_id", $log_group, $astDB->getLastQuery());
-				
-				$apiresults 							= array(
-					"result" 								=> "success"
-				);
 			}
-			
 		} else {
-			$err_msg 									= error_handle("41004", "list_id. Doesn't exist");
+			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
-				"code" 										=> "41004", 
+				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);
+			);		
 		}
 	}
 
