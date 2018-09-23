@@ -21,46 +21,94 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    ### POST or GET Variables
-    $moh_id = $astDB->escape($_REQUEST['moh_id']);
+	include_once ("goAPI.php");
 	
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+	
+    ### POST or GET Variables
+    $moh_id 											= $astDB->escape($_REQUEST['moh_id']);
     
-    ### Check moh_id if its null or empty
-	if($moh_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for MOH ID."); 
-	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
-    
-		if (!checkIfTenant($groupId, $goDB)) {
-        	//$ul = "";
-    	} else { 
-			//$ul = "AND user_group='$groupId'";
-			$astDB->where('user_group', $groupId);
-		}
-
-   		//$query = "SELECT moh_id, moh_name, active, random, user_group FROM vicidial_music_on_hold WHERE remove='N' AND moh_id='$moh_id' $ul ORDER BY moh_id LIMIT 1;";
-		$astDB->where('remove', 'N');
-		$astDB->where('moh_id', $moh_id);
-		$astDB->orderBy('moh_id', 'desc');
-   		$rsltv = $astDB->getOne('vicidial_music_on_hold', 'moh_id, moh_name, active, random, user_group');
-		$countResult = $astDB->getRowCount();
-
-		if($countResult > 0) {
-			foreach ($rsltv as $fresults){
-				$dataModId[] = $fresults['moh_id'];
-				$dataMohName[] = $fresults['moh_name'];
-				$dataActive[] = $fresults['active'];
-				$dataRandom[] = $fresults['random'];
-				$dataUserGroup[] = $fresults['user_group'];
-				$apiresults = array("result" => "success", "moh_id" => $dataModId, "moh_name" => $dataMohName, "active" => $dataActive, "random" => $dataRandom, "user_group" => $dataUserGroup);
-			}
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif ($moh_id == null || strlen($moh_id) < 3) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for MOH ID not less than 3 characters."
+		);
+    } else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 			
-			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of Music On-Hold: $moh_id", $log_group);
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+					}
+				}					
+			}
+
+			$astDB->where('moh_id', $moh_id);
+			$rsltv 										= $astDB->get('vicidial_music_on_hold');
+			$countResult = $astDB->getRowCount();
+
+			if ($countResult > 0) {
+				foreach ($rsltv as $fresults){
+					$dataModId[] 						= $fresults['moh_id'];
+					$dataMohName[] 						= $fresults['moh_name'];
+					$dataActive[] 						= $fresults['active'];
+					$dataRandom[] 						= $fresults['random'];
+					$dataUserGroup[] 					= $fresults['user_group'];
+					
+					$apiresults 						= array(
+						"result" 							=> "success", 
+						"moh_id" 							=> $dataModId, 
+						"moh_name" 							=> $dataMohName, 
+						"active" 							=> $dataActive, 
+						"random" 							=> $dataRandom, 
+						"user_group" 						=> $dataUserGroup
+					);
+				}
+				
+				//$log_id 								= log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of Music On-Hold: $moh_id", $log_group);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: MOH doesn't exist."
+				);
+			}
 		} else {
-			$apiresults = array("result" => "Error: MOH doesn't exist.");
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>

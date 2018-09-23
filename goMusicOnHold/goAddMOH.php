@@ -2,9 +2,10 @@
  /**
  * @file 		goAddMOH.php
  * @brief 		API for Adding Music On Hold
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho 
+ * @author		Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,118 +22,128 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+	include_once ("goAPI.php");
+	
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+	
     ### POST or GET Variables
-	$moh_id = $astDB->escape($_REQUEST['moh_id']);
-	$moh_name = $astDB->escape($_REQUEST['moh_name']);
-	$user_group = $astDB->escape($_REQUEST['user_group']);
-	$active = strtoupper($astDB->escape($_REQUEST['active']));
-	$random = strtoupper($astDB->escape($_REQUEST['random']));
-	$values = $astDB->escape($_REQUEST['item']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
+	$moh_id 											= $astDB->escape($_REQUEST['moh_id']);
+	$moh_name 											= $astDB->escape($_REQUEST['moh_name']);
+	$user_group 										= $astDB->escape($_REQUEST['user_group']);
+	$active 											= strtoupper($astDB->escape($_REQUEST['active']));
+	$random 											= strtoupper($astDB->escape($_REQUEST['random']));
+	$values 											= $astDB->escape($_REQUEST['item']);
 	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
-
     ### Default values 
-    $defActive = array("Y","N");
-    $defRandom = array("Y","N");
+    $defActive 											= array("Y","N");
+    $defRandom 											= array("Y","N");
 
-
-    ### ERROR CHECKING 
-    if($moh_id == null || strlen($moh_id) < 3) {
-            $apiresults = array("result" => "Error: Set a value for MOH ID not less than 3 characters.");
-    } else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_name) || $moh_name == null) {
-            $apiresults = array("result" => "Error: Special characters found in moh_name and must not be empty");
-        } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_id)) {
-                $apiresults = array("result" => "Error: Special characters found in moh_id");
-			} else {
-                if(!in_array($active,$defActive)) {
-                    $apiresults = array("result" => "Error: Default value for active is Y or N only.");
-                } else {
-					if(!in_array($random,$defRandom)) {
-                        $apiresults = array("result" => "Error: Default value for random is Y or N only.");
-					} else {
-						$groupId = go_get_groupid($goUser, $astDB);
-						
-						if (!checkIfTenant($groupId, $goDB)) {
-							//$ul = "WHERE user_group='$user_group'";
-							$group_type = "Multi-tenant";
-							$astDB->where('user_group', $user_group);
-						} else {
-							//$ul = "WHERE user_group='$user_group' AND user_group='$groupId'";
-							$group_type = "Default";
-							$astDB->where('user_group', $user_group);
-							$astDB->where('user_group', $groupId);
-						}
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif ($moh_id == null || strlen($moh_id) < 3) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for MOH ID not less than 3 characters."
+		);
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_name) || $moh_name == null) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in moh_name and must not be empty"
+		);
+	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_id)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Special characters found in moh_id"
+		);
+	} elseif (!in_array($active,$defActive)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Default value for active is Y or N only."
+		);
+	} elseif (!in_array($random,$defRandom)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Default value for random is Y or N only."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-						//$query = "SELECT user_group,group_name,forced_timeclock_login FROM vicidial_user_groups $ul ORDER BY user_group LIMIT 1;";
-						$astDB->orderBy('user_group', 'desc');
-						$rsltv = $astDB->getOne('vicidial_user_groups', 'user_group,group_name,forced_timeclock_login');
-						$countResult = $astDB->getRowCount();
-						
-						if($user_group == "---ALL---") {  // temporary
-							$countResult = 1;
-						}
-						
-						if($countResult > 0) {
-							/*
-							$items = $values;
-							$itemSQL = "INSERT INTO vicidial_music_on_hold SET ";
-							foreach (explode("&",$items) as $item)
-							{
-									$itemX = explode("=",$item);
-	
-									if ($itemX[0]=="moh_id")
-											$moh_id = $itemX[1];
-	
-									$itemSQL .= $itemX[0]."='".str_replace("+"," ",$itemX[1])."',";
-							}
-							$itemSQL = rtrim($itemSQL,",");
-							*/
-							//$newQuery = "INSERT INTO vicidial_music_on_hold SET moh_id = '$moh_id', moh_name = '$moh_name', user_group = '$user_group', active = '$active', random = '$random';";
-							$insertData = array(
-								'moh_id' => $moh_id,
-								'moh_name' => $moh_name,
-								'user_group' => $user_group,
-								'active' => $active,
-								'random' => $random
-							);
-							$rsltv = $astDB->insert('vicidial_music_on_hold', $insertData);
-							
-							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added Music On-Hold: $moh_id", $log_group, $newQuery);
-	
-							if($rsltv == false){
-								$apiresults = array("result" => "Error: Add failed, check your details");
-							} else {
-	
-								//$insertQuery = "INSERT INTO vicidial_music_on_hold_files SET filename='conf',rank='1',moh_id='$moh_id';";
-								$insertData = array(
-									'filename' => 'conf',
-									'rank' => '1',
-									'moh_id' => $moh_id
-								);
-								$insertResult = $astDB->insert('vicidial_music_on_hold_files', $insertData);
-								//$updateQuery = "UPDATE servers SET rebuild_conf_files='Y',rebuild_music_on_hold='Y',sounds_update='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
-								$updateData = array(
-									'rebuild_conf_files' => 'Y',
-									'rebuild_music_on_hold' => 'Y',
-									'sounds_update' => 'Y'
-								);
-								$astDB->where('generate_vicidial_conf', 'Y');
-								$astDB->where('active_asterisk_server', 'Y');
-								$astDB->update('servers', $updateData);
-								$apiresults = array("result" => "success");
-							}
-						} else {
-							$apiresults = array("result" => "Error: Invalid User Group");
-						}
-					}
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			# check MOH ID if it exists
+			$astDB->where('moh_id', $moh_id);
+			$astDB->getOne('vicidial_music_on_hold');
+			$countResult 								= $astDB->getRowCount();
+			
+			if ($countResult > 0) {
+				$apiresults 							= array(
+					"result" 								=> "Error: MOH ID already exists."
+				);	
+			} else {			
+				$insertData 							= array(
+					'moh_id' 								=> $moh_id,
+					'moh_name' 								=> $moh_name,
+					'user_group' 							=> $user_group,
+					'active' 								=> $active,
+					'random' 								=> $random
+				);
+				
+				$rsltv 									= $astDB->insert('vicidial_music_on_hold', $insertData);				
+				$log_id 								= log_action($goDB, 'ADD', $log_user, $log_ip, "Added Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+
+				if ($rsltv == false) {
+					$apiresults 						= array(
+						"result" 							=> "Error: Add failed, check your details"
+					);
+				} else {
+					$insertData 						= array(
+						'filename' 							=> 'conf',
+						'rank' 								=> '1',
+						'moh_id' 							=> $moh_id
+					);
+					
+					$insertResult 						= $astDB->insert('vicidial_music_on_hold_files', $insertData);
+					$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+
+					$updateData 						= array(
+						'rebuild_conf_files' 				=> 'Y',
+						'rebuild_music_on_hold' 			=> 'Y',
+						'sounds_update' 					=> 'Y'
+					);
+					
+					$astDB->where('generate_vicidial_conf', 'Y');
+					$astDB->where('active_asterisk_server', 'Y');
+					$astDB->update('servers', $updateData);
+					
+					$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+					$apiresults 						= array(
+						"result" 							=> "success"
+					);
 				}
 			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+
 ?>

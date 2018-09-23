@@ -91,19 +91,19 @@
 					
 					$astDB->where("user_id", $user_id) ;
 					$astDB->delete("vicidial_users");
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted User: $user_id", $log_group, $astDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted User: $user_id", $log_group, $astDB->getLastQuery());
 					
 					$astDB->where("extension", $phone_login);
 					$astDB->delete("phones");
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $astDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Phone: $phone_login", $log_group, $astDB->getLastQuery());
 					
 					$goDB->where("userid", $user_id);
 					$goDB->delete("users");
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted User: $user_id", $log_group, $goDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted User: $user_id", $log_group, $goDB->getLastQuery());
 					
 					$kamDB->where("username", $phone_login);
 					$kamDB->delete("subscriber");				
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Subscriber: $phone_login", $log_group, $kamDB->getLastQuery ());
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Subscriber: $phone_login", $log_group, $kamDB->getLastQuery());
 				
 				} else {
 					$error_count 						= 1;

@@ -2,9 +2,10 @@
  /**
  * @file 		goDeleteMOH.php
  * @brief 		API for Deleting Music On Hold
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author		Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Chris Lomuntad  <chris@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho 
+ * @author		Jeremiah Sebastian Samatra
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,56 +22,87 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    ### POST or GET Variables
-    $moh_id = $astDB->escape($_REQUEST['moh_id']);
+	include_once ("goAPI.php");
 	
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
     
-    ### Check campaign_id if its null or empty
-	if($moh_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for MOH ID."); 
-	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
+    ### POST or GET Variables
+    $moh_id 											= $astDB->escape($_REQUEST['moh_id']);
+    
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif ($moh_id == null || strlen($moh_id) < 3) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for MOH ID not less than 3 characters."
+		);
+    } else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if (!checkIfTenant($groupId, $goDB)) {
-        	//$ul = "AND moh_id='$moh_id'";
-			$astDB->where('moh_id', $moh_id);
-    	} else {
-			//$ul = "AND moh_id='$moh_id' AND user_group='$groupId'";
-			$astDB->where('moh_id', $moh_id);
-			$astDB->where('user_group', $groupId);
-		}
-
-   		//$query = "SELECT moh_id FROM vicidial_music_on_hold WHERE remove='N' $ul ORDER BY moh_id LIMIT 1";
-		$astDB->where('remove', 'N');
-		$astDB->orderBy('moh_id', 'desc');
-   		$rsltv = $astDB->getOne('vicidial_music_on_hold', 'moh_id');
-		$countResult = $astDB->getRowCount();
-
-		if($countResult > 0) {
-			$dataMOHID = $rsltv['moh_id'];
-
-			if(!$dataMOHID == null) {
-				//$deleteQueryA = "DELETE FROM vicidial_music_on_hold WHERE moh_id IN ('$dataMOHID')";
-				$astDB->where('moh_id', array($dataMOHID), 'in');
-   				$astDB->delete('vicidial_music_on_hold');
-				$deleteResultA = $astDB->getLastQuery();
-				//$deleteQueryB = "DELETE FROM vicidial_music_on_hold_files WHERE moh_id IN ('$dataMOHID')";
-				$astDB->where('moh_id', array($dataMOHID), 'in');
-   				$astDB->delete('vicidial_music_on_hold_files');
-				$deleteResultB = $astDB->getLastQuery();
-				//echo $deleteQuery;
-				
-				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $dataMOHID", $log_group, $deleteQueryA);
-				
-				$apiresults = array("result" => "success");
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {		
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				$apiresults = array("result" => "Error: MOH doesn't exist.");
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}
+
+			$astDB->where('moh_id', $moh_id);
+			$astDB->getOne('vicidial_music_on_hold');
+
+			if ($astDB->count > 0) {
+				$astDB->where('moh_id', $moh_id);
+				$astDB->delete('vicidial_music_on_hold');
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+				
+				$astDB->where('moh_id', $moh_id);
+				$astDB->delete('vicidial_music_on_hold_files');
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+				
+				$apiresults 							= array(
+					"result" 								=> "success"
+				);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: MOH doesn't exist."
+				);
 			}
 		} else {
-			$apiresults = array("result" => "Error: MOH doesn't exist.");
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
 ?>
