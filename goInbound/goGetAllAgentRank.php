@@ -2,9 +2,10 @@
 /**
  * @file        goGetAllAgentRank.php
  * @brief       API to all agent rank info
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jerico James F. Milo  <jericojames@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
+ * @author      Jerico James F. Milo
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +27,6 @@
 	$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB);
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));    
     $limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
@@ -63,7 +63,7 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);

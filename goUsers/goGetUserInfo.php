@@ -64,17 +64,13 @@
 				$user 									= $astDB->escape($_REQUEST['user']);
 			} 
 			
-			if (isset($_REQUEST['user_id'])  && !isset($_REQUEST['user'])){
+			if (isset($_REQUEST['user_id'])  && !isset($_REQUEST['user'])) {
 				$user_id 								= $astDB->escape($_REQUEST['user_id']);
 			} 
 			
-			if (!isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])){
+			if (!isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])) {
 				$user									= $astDB->escape($_REQUEST['user']);
-			} 
-			
-/*			if (isset($_REQUEST['filter'])) {
- 				$filter 								= $astDB->escape($_REQUEST['filter']);
-			}*/
+			}
 			
 			if (!empty($user_id) && empty($user)) { // Am I (agent/user) alive in whole system?
 				$astDB->where("user_id", $user_id);
@@ -89,7 +85,7 @@
 			if ($astDB->count > 0) { // Yes, I am!					
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
-				$tenant									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+				$tenant									= (checkIfTenant($log_group, $goDB) ? 1 : 0);
 				
 				if ($tenant) { // I have some conditions for you..
 					$astDB->where("user_group", $log_group); 

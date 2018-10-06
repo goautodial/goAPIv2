@@ -2,9 +2,10 @@
 /**
  * @file        goEditAgentRank.php
  * @brief       API to Update Ingroup Agents 
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jerico James F. Milo  <jerico@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
+ * @author      Jerico James F. Milo
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +27,6 @@
 	$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB);
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass'])); 	
 	$goItemRank											= $astDB->escape($_REQUEST['itemrank']);
@@ -78,7 +78,6 @@
 						
 						$astDB->where("user", $user);
 						$closer_campaigns 				= $astDB->getValue("vicidial_users", "closer_campaigns");
-						//$query = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
 						$closer_campaigns 				= rtrim($closer_campaigns,"-");
 						$closer_campaigns 				= str_replace(" $group_id", "", $closer_campaigns);
 						$closer_campaigns 				= trim($closer_campaigns);
@@ -95,7 +94,6 @@
 						
 						$astDB->where("user", $user);
 						$closer_campaigns 				= $astDB->getValue("vicidial_users", "closer_campaigns");
-						//$query2 = "SELECT closer_campaigns FROM vicidial_users WHERE user='$user'";
 						$closer_campaigns 				= rtrim($closer_campaigns,"-");
 						$closer_campaigns 				= str_replace(" $group_id", "", $closer_campaigns);
 						$closer_campaigns 				= trim($closer_campaigns);
@@ -108,7 +106,6 @@
 					
 					$astDB->where("user", $user);
 					$astDB->update("vicidial_users", $datum);
-					//$query3 = "UPDATE vicidial_users set closer_campaigns='$NEWcloser_campaigns' where user='$user';";
 				}
 				
 				if (preg_match("/RANK/i", "$itemsumitexplode[$i]")) {
@@ -124,7 +121,6 @@
 					$astDB->where("user", "{$itemsexplode[1]}"); //CHECK
 					$astDB->where("group_id", $group_id); //CHECK
 					$astDB->update("vicidial_inbound_group_agents", $data);
-					//$query4 = "UPDATE vicidial_inbound_group_agents SET group_rank='$datavals1',group_weight='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
 					
 					if ($datavals1 != 0) {
 						$ranknotzero 					.= $itemsumitexplode[$i]."\n";
@@ -143,7 +139,6 @@
 					$astDB->where("user", "{$itemsexplode[1]}");
 					$astDB->where("group_id", $group_id);
 					$astDB->update("vicidial_inbound_group_agents", $datum);
-					//$query5 = "UPDATE vicidial_inbound_group_agents SET group_grade='$datavals1' WHERE user='{$itemsexplode[1]}' AND group_id='$group_id';";
 				}
 				
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Agent Rank(s) on Group $group_id", $log_group);

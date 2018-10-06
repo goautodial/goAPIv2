@@ -2,9 +2,10 @@
  /**
  * @file        goGetAllDID.php
  * @brief       API to get all DID Details
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Jeremiah Sebastian V. Samatra  <jeremiah@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
+ * @author      Jeremiah Sebastian V. Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,27 +24,78 @@
 
     include_once ("goAPI.php");
     
-    $limit = $_REQUEST['limit'];
-    if($limit < 1){ $limit = 1000; } else { $limit = $limit; }
-
-    $groupId = go_get_groupid($goUser, $astDB);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB);
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));     
+	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
     
-    if (checkIfTenant($groupId, $goDB)) {
-        $astDB->where("user_group", $groupId);
-        //$ul = "WHERE user_group='$user_group'"; 
-    }
+	// Error Checking
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}
 
-    $cols = Array("did_id", "did_pattern", "did_description", "did_active", "did_route");
-    $selectQuery = $astDB->get("vicidial_inbound_dids", $limit, $cols);
-    //$query = "SELECT did_id,did_pattern,did_description,did_active,did_route from vicidial_inbound_dids $ul order by did_pattern LIMIT $limit";
-    
-	foreach($selectQuery as $fresults){
-    	$dataDidID[] = $fresults['did_id'];
-    	$dataDidPattern[] =  $fresults['did_pattern'];
-    	$dataDidDescription[] =  $fresults['did_description'];
-    	$dataActive[] =  $fresults['did_active'];
-    	$dataDidRoute[] =  $fresults['did_route'];
-	}
-
-    $apiresults = array( "result" => "success","did_id" => $dataDidID,  "did_pattern" => $dataDidPattern, "did_description" => $dataDidDescription, "active" => $dataActive, "did_route" => $dataDidRoute);
+			$cols 										= array("did_id", "did_pattern", "did_description", "did_active", "did_route");
+			$selectQuery 								= $astDB->get("vicidial_inbound_dids", $limit, $cols);
+			
+			foreach ($selectQuery as $fresults) {
+				$dataDidID[] 							= $fresults['did_id'];
+				$dataDidPattern[] 						= $fresults['did_pattern'];
+				$dataDidDescription[] 					= $fresults['did_description'];
+				$dataActive[] 							= $fresults['did_active'];
+				$dataDidRoute[] 						= $fresults['did_route'];
+			}
+			
+			$apiresults 								= array(
+				"result" 									=> "success",
+				"did_id" 									=> $dataDidID, 
+				"did_pattern" 								=> $dataDidPattern, 
+				"did_description" 							=> $dataDidDescription, 
+				"active" 									=> $dataActive, 
+				"did_route" 								=> $dataDidRoute
+			);
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}			
 ?>
