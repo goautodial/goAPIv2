@@ -24,57 +24,84 @@
 
     include_once ("goAPI.php");
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB); 
-	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
     // POST or GET Variables
-    $lead_id 									= $astDB->escape($_REQUEST['lead_id']);
+    $lead_id 											= $astDB->escape($_REQUEST['lead_id']);
 
-		
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($lead_id) || is_null($lead_id)) {
-		$err_msg 								= error_handle("40001");
-		$apiresults 							= array(
-			"code" 									=> "40001", 
-			"result" 								=> $err_msg
+		$err_msg 										= error_handle("40001");
+		$apiresults 									= array(
+			"code" 											=> "40001", 
+			"result" 										=> $err_msg
 		);
-	} else {	
-		// check lead_id if it exists
-		$astDB->where("lead_id", $lead_id);
-		$fresults 								= $astDB->getOne("vicidial_list", "lead_id");
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if ($fresults) {                
-			// check if customer
-			$goDB->where("lead_id", $lead_id);
-			$fresultsgo 						= $goDB->getOne("go_customers", "lead_id");
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// check lead_id if it exists
+			$astDB->where("lead_id", $lead_id);
+			$fresults 									= $astDB->getOne("vicidial_list", "lead_id");
 			
-			if ($fresultsgo) { 
+			if ($fresults) {                
+				// check if customer
 				$goDB->where("lead_id", $lead_id);
-				$goDB->delete('go_customers');
+				$fresultsgo 							= $goDB->getOne("go_customers", "lead_id");
 				
-				$log_id 						= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
-			}
-				
-			$astDB->where('lead_id', $lead_id);
-            $astDB->delete('vicidial_list');
+				if ($fresultsgo) { 
+					$goDB->where("lead_id", $lead_id);
+					$goDB->delete('go_customers');
+					
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
+				}
+					
+				$astDB->where('lead_id', $lead_id);
+				$astDB->delete('vicidial_list');
 
-			$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
-			
-			$apiresults							= array(
-				"result" 							=> "success"
-			);
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
+				
+				$apiresults								= array(
+					"result" 								=> "success"
+				);
+			} else {
+				$err_msg 								= error_handle("10010");
+				$apiresults 							= array(
+					"code" 									=> "10010", 
+					"result" 								=> $err_msg
+				);
+				//$apiresults = array("result" => "Error: Lead ID does not exist.");
+			}		
 		} else {
-			$err_msg 							= error_handle("10010");
-			$apiresults 						= array(
-				"code" 								=> "10010", 
-				"result" 							=> $err_msg
-			);
-			//$apiresults = array("result" => "Error: Lead ID does not exist.");
-		}		
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
 	}
 	
 ?>

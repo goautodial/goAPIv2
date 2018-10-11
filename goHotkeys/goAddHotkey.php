@@ -2,9 +2,9 @@
 /**
  * @file        goAddHotkey.php
  * @brief       API to add new hotkey
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,77 +23,105 @@
 
     include_once ("goAPI.php");
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB); 
-	$log_ip 									= $astDB->escape($_REQUEST['log_ip']); 
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
 	
 	### POST or GET Variables
-	$campaign_id 								= $astDB->escape($_REQUEST["campaign_id"]);	
-    $hotkey         							= $astDB->escape($_REQUEST['hotkey']);
-    $status         							= $astDB->escape($_REQUEST['status']);
-    $status_name    							= $astDB->escape($_REQUEST['status_name']);
+	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
+    $hotkey         									= $astDB->escape($_REQUEST['hotkey']);
+    $status         									= $astDB->escape($_REQUEST['status']);
+    $status_name    									= $astDB->escape($_REQUEST['status_name']);
 
     
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (empty($campaign_id)) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Set a value for Campaign ID."
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
 		);
-	} elseif (empty($hotkey)) {
-		$err_msg 								= error_handle("40001");
-		$apiresults 							= array(
-			"code" 									=> "40001", 
-			"result" 								=> $err_msg
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for Campaign ID."
+		);
+	} elseif (empty($hotkey) || is_null($hotkey)) {
+		$err_msg 										= error_handle("40001");
+		$apiresults 									= array(
+			"code" 											=> "40001", 
+			"result" 										=> $err_msg
 		);
 		//$apiresults = array("result" => "Error: Set a value for hotkey.");
-	} elseif (empty($status)) {
-		$err_msg 								= error_handle("40001");
-		$apiresults 							= array(
-			"code" 									=> "40001", 
-			"result" 								=> $err_msg
+	} elseif (empty($status) || is_null($status)) {
+		$err_msg 										= error_handle("40001");
+		$apiresults 									= array(
+			"code" 											=> "40001", 
+			"result" 										=> $err_msg
 		);
 		//$apiresults = array("result" => "Error: Set a value for status.");
 	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status_name) || empty($status_name)) {
-		$err_msg 								= error_handle("10003", "status_name");
-		$apiresults 							= array(
-			"code" 									=> "10003", 
-			"result" 								=> $err_msg
+		$err_msg 										= error_handle("10003", "status_name");
+		$apiresults 									= array(
+			"code" 											=> "10003", 
+			"result" 										=> $err_msg
 		);
-		//$apiresults = array("result" => "Error: Special characters found in status name and must not be empty");
 	} else {
-		$astDB->where('campaign_id', $campaign_id);
-		$astDB->where('hotkey', $hotkey);
-		//$astDB->orwhere('status', $status);
-		$hotkeys 								= $astDB->get('vicidial_campaign_hotkeys');
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if (count($hotkeys) > 0) {
-			$apiresults 						= array(
-				"result" 							=> "Duplicate Hotkey!");
-		} else {
-			$data_insert 						= array(
-				'status'        					=> $status,
-				'hotkey'        					=> $hotkey,
-				'status_name'   					=> $status_name,
-				'selectable'    					=> 'Y',
-				'campaign_id'   					=> $campaign_id
-			);
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			$astDB->where('campaign_id', $campaign_id);
+			$astDB->where('hotkey', $hotkey);
+			//$astDB->orwhere('status', $status);
+			$hotkeys 									= $astDB->get('vicidial_campaign_hotkeys');
 			
-			$insertHotkey 						= $astDB->insert('vicidial_campaign_hotkeys', $data_insert);
-			
-			if ($insertHotkey) {
-				$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Hotkey $hotkey on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
-				
-				$apiresults 					= array(
-					"result" 						=> "success"
-				);
+			if (count($hotkeys) > 0) {
+				$apiresults 							= array(
+					"result" 								=> "Duplicate Hotkey!");
 			} else {
-				$apiresults 					= array(
-					"result" 						=> "Error: Failed to add campaign hotkey."
+				$data_insert 							= array(
+					'status'        						=> $status,
+					'hotkey'        						=> $hotkey,
+					'status_name'   						=> $status_name,
+					'selectable'    						=> 'Y',
+					'campaign_id'   						=> $campaign_id
 				);
+				
+				$insertHotkey 							= $astDB->insert('vicidial_campaign_hotkeys', $data_insert);
+				
+				if ($insertHotkey) {
+					$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Hotkey $hotkey on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
+					
+					$apiresults 						= array(
+						"result" 							=> "success"
+					);
+				} else {
+					$apiresults 						= array(
+						"result" 							=> "Error: Failed to add campaign hotkey."
+					);
+				}
 			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>

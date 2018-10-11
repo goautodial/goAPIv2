@@ -23,47 +23,82 @@
 
     include_once ("goAPI.php");
  
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($session_user, $astDB); 
-	$log_ip 									= $astDB->escape($_REQUEST["log_ip"]); 
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	
 	### POST or GET Variables
-	$campaign_id 								= $astDB->escape($_REQUEST["campaign_id"]);	
-    $hotkeys 									= $astDB->escape($_REQUEST["hotkey"]);
+	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
+    $hotkeys 											= $astDB->escape($_REQUEST["hotkey"]);
     
-    ### Check Campaign ID if its null or empty
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
-			"result" 								=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (empty($campaign_id) || empty($hotkeys)) { 
-		$apiresults 							= array(
-			"result" 								=> "Error: Set a value for Campaign ID and Hotkey."
-		); 
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} elseif (empty($campaign_id) || is_null($campaign_id)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for Campaign ID."
+		);
+	} elseif (empty($hotkeys) || is_null($hotkeys)) {
+		$err_msg 										= error_handle("40001");
+		$apiresults 									= array(
+			"code" 											=> "40001", 
+			"result" 										=> $err_msg
+		);
+		//$apiresults = array("result" => "Error: Set a value for hotkey.");
 	} else {
-		$cols 									= array(
-			"campaign_id", 
-			"hotkey"
-		);
-	
-        $astDB->where("campaign_id", $campaign_id);
-        $astDB->where("hotkey", $hotkeys);
-        $checkPC								= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
-        
-		if ($checkPC) {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			$cols 										= array(
+				"campaign_id", 
+				"hotkey"
+			);
+		
 			$astDB->where("campaign_id", $campaign_id);
 			$astDB->where("hotkey", $hotkeys);
-			$astDB->delete("vicidial_campaign_hotkeys");
-
-			$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Hotkey: $hotkeys from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
+			$checkPC									= $astDB->get("vicidial_campaign_hotkeys", null, $cols);
 			
-			$apiresults 						= array(
-				"result" 							=> "success"
-			);
+			if ($checkPC) {
+				$astDB->where("campaign_id", $campaign_id);
+				$astDB->where("hotkey", $hotkeys);
+				$astDB->delete("vicidial_campaign_hotkeys");
+
+				$log_id 								= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Hotkey: $hotkeys from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
+				
+				$apiresults 							= array(
+					"result" 								=> "success"
+				);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: Hotkey doesn't exist."
+				);
+			}
 		} else {
-			$apiresults 						= array(
-				"result" 							=> "Error: Hotkey doesn't exist."
-			);
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
+	
 ?>

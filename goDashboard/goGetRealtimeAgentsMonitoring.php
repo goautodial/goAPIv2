@@ -3,7 +3,7 @@
  * @file 		goGetRealtimeAgentsMonitoring.php
  * @brief 		API for Dashboard
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author		Jericho James Milo
+ * @author		Jerico James Milo
  * @author     	Demian Lizandro A. Biscocho
  * @author     	Chris Lomuntad
  *

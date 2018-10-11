@@ -28,8 +28,8 @@
 	$log_group 											= go_get_groupid($session_user, $astDB);
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$limit 												= (isset($_REQUEST['limit'])) ? $astDB->escape($_REQUEST['limit']) : 1000;
 
 	
 	// Error Checking

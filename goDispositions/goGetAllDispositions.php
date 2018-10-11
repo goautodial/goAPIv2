@@ -24,55 +24,83 @@
 
     include_once ("goAPI.php");
 
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 		
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($campaigns) || is_null($campaigns)) {
-		$err_msg 									= error_handle("40001");
-        $apiresults 								= array(
-			"code" 										=> "40001",
-			"result" 									=> $err_msg
+		$err_msg 										= error_handle("40001");
+        $apiresults 									= array(
+			"code" 											=> "40001",
+			"result" 										=> $err_msg
 		);
     } else {
-		if (is_array($campaigns)) {			
-			$cols 									= array(
-				"status", 
-				"status_name", 
-				"campaign_id"
-			);
-			
-			$astDB->where("campaign_id", $campaigns, "IN");
-			$astDB->orderBy("campaign_id", "desc");			
-			$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
-			
-			if ($astDB->count > 0) {
-				foreach ($result as $fresults) {
-					$dataStat[] 					= $fresults["status"];			
-					$dataStatName[] 				= $fresults["status_name"];
-					$dataCampID[] 					= $fresults["campaign_id"];
-				}			
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {    
+			if (is_array($campaigns)) {			
+				$cols 									= array(
+					"status", 
+					"status_name", 
+					"campaign_id"
+				);
 				
-				$apiresults 						= array(
-					"result" 							=> "success", 
-					"campaign_id" 						=> $dataCampID, 
-					"status_name" 						=> $dataStatName, 
-					"status" 							=> $dataStat
-				);			
-			}	 		
+				$astDB->where("campaign_id", $campaigns, "IN");
+				$astDB->orderBy("campaign_id", "desc");			
+				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
+				
+				if ($astDB->count > 0) {
+					foreach ($result as $fresults) {
+						$dataStat[] 					= $fresults["status"];			
+						$dataStatName[] 				= $fresults["status_name"];
+						$dataCampID[] 					= $fresults["campaign_id"];
+					}			
+					
+					$apiresults 						= array(
+						"result" 							=> "success", 
+						"campaign_id" 						=> $dataCampID, 
+						"status_name" 						=> $dataStatName, 
+						"status" 							=> $dataStat
+					);			
+				}	 		
+			} else {
+				$err_msg 								= error_handle("10108", "status. No campaigns available");
+				$apiresults								= array(
+					"code" 									=> "10108", 
+					"result" 								=> $err_msg
+				);
+			}    
 		} else {
-			$err_msg 								= error_handle("10108", "status. No campaigns available");
-			$apiresults								= array(
-				"code" 									=> "10108", 
-				"result" 								=> $err_msg
-			);
-		}    
-    }
-	
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}
 	
 ?>
 
