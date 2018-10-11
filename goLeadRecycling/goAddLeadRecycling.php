@@ -28,15 +28,15 @@
 	$log_group 											= go_get_groupid($session_user, $astDB); 
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
 	
 	// POST or GET Variables
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	$status 											= $astDB->escape($_REQUEST['status']);	
-	$attempt_delay										= (!empty($_REQUEST['attempt_delay']) ? $astDB->escape($_REQUEST['attempt_delay']) : 1800);
-	$attempt_maximum									= (!empty($_REQUEST['attempt_maximum']) ? $astDB->escape($_REQUEST['attempt_maximum']) : 2);
-	$active												= (!empty($_REQUEST['active']) ? $astDB->escape(strtoupper($_REQUEST['active'])) : "Y");
+	$attempt_delay										= (!empty($_REQUEST['attempt_delay'])) ? $astDB->escape($_REQUEST['attempt_delay']) : 1800;
+	$attempt_maximum									= (!empty($_REQUEST['attempt_maximum'])) ? $astDB->escape($_REQUEST['attempt_maximum']) : 2;
+	$active												= (!empty($_REQUEST['active'])) ? $astDB->escape(strtoupper($_REQUEST['active'])) : "Y";
     $defActive 											= array("Y", "N");
 	
 	// ERROR CHECKING 

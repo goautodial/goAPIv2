@@ -70,17 +70,30 @@
 				}					
 			}
 
-    $cols = Array("menu_id", "menu_name", "menu_prompt", "menu_timeout");
-    $astDB->where("menu_id", "defaultlog", "!=");
-    $selectQuery = $astDB->get("vicidial_call_menu", $limit, $cols);
-    //$query = "SELECT menu_id,menu_name,menu_prompt,menu_timeout from vicidial_call_menu WHERE menu_id!='defaultlog' $ul order by menu_id LIMIT $limit";
-    
-	foreach($selectQuery as $fresults){
-    	$dataMenuId[] =  $fresults['menu_id'];
-    	$dataMenuName[] =  $fresults['menu_name'];
-    	$dataMenuPrompt[] =  $fresults['menu_prompt'];
-    	$dataMenuTimeout[] =  $fresults['menu_timeout'];
-	}
+			$cols 										= array("menu_id", "menu_name", "menu_prompt", "menu_timeout");
+			$astDB->where("menu_id", "defaultlog", "!=");
+			$selectQuery 								= $astDB->get("vicidial_call_menu", $limit, $cols);
+			
+			foreach($selectQuery as $fresults) {
+				$dataMenuId[] 							= $fresults['menu_id'];
+				$dataMenuName[] 						= $fresults['menu_name'];
+				$dataMenuPrompt[] 						= $fresults['menu_prompt'];
+				$dataMenuTimeout[] 						= $fresults['menu_timeout'];
+			}
 
-    $apiresults = array( "result" => "success", "menu_id" => $dataMenuId, "menu_name" => $dataMenuName, "menu_prompt" => $dataMenuPrompt, "menu_timeout" => $dataMenuTimeout);
+			$apiresults 								= array(
+				"result" 									=> "success", 
+				"menu_id" 									=> $dataMenuId, 
+				"menu_name" 								=> $dataMenuName, 
+				"menu_prompt" 								=> $dataMenuPrompt, 
+				"menu_timeout" 								=> $dataMenuTimeout
+			);
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}			
 ?>

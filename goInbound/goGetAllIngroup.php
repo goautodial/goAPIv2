@@ -73,7 +73,7 @@
 			$cols 										= array("group_id", "group_name", "queue_priority", "active", "call_time_id");
 			$selectQuery 								= $astDB->get("vicidial_inbound_groups", $limit, $cols);
 			
-			foreach ($selectQuery as $fresults {
+			foreach ($selectQuery as $fresults) {
 				$dataGroupId[] 							= $fresults['group_id'];
 				$dataGroupName[]						= $fresults['group_name'];
 				$dataQueuePriority[] 					= $fresults['queue_priority'];

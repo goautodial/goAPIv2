@@ -25,69 +25,98 @@
 
     include_once ("goAPI.php");
 
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
+	$hotkeys_only 										= $astDB->escape($_REQUEST['hotkeys_only']);
+	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	
-	$hotkeys_only 									= $astDB->escape($_REQUEST['hotkeys_only']);
-	$campaign_id 									= $astDB->escape($_REQUEST['campaign_id']);
-	
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (in_array($campaign_id, $campaigns) || preg_match("/ALL/", $campaign_id)) {			
-		if ($hotkeys_only === "1") {
-			$astDB->where("selectable", "Y");
-		}
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if (strlen($hotkeys_only) > 0 && strlen($campaign_id) > 0) {
-			$cols 									= array(
-				"status", 
-				"status_name"
-			);
-			
-			if (!preg_match("/ALL/", $campaign_id)) {
-				$astDB->where("campaign_id", $campaign_id);
-			}
-			
-			$astDB->orderBy("status", "desc");			
-			$rsltv 									= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {			
+				if ($hotkeys_only === "1") {
+					$astDB->where("selectable", "Y");
+				}
+				
+				if (strlen($hotkeys_only) > 0 && strlen($campaign_id) > 0) {
+					$cols 								= array(
+						"status", 
+						"status_name"
+					);
 					
-			if ($astDB->count > 0) {
-				foreach ($rsltv as $fresults){
-					$dataStatus[] 					= $fresults['status'];
-					$dataStatusName[] 				= $fresults['status_name'];
-				}		
-			}			
-		}
-		
-		$cols 										= array(
-			"status", 
-			"status_name"
-		);
-		
-		$astDB->orderBy("status", "desc");			
-		$rsltv 										= $astDB->get("vicidial_statuses", NULL, $cols);
-		
-		if ($astDB->count > 0) {
-			foreach ($rsltv as $fresults){
-				$dataStatus[] 						= $fresults['status'];
-				$dataStatusName[] 					= $fresults['status_name'];
+					if (!preg_match("/ALL/", $campaign_id)) {
+						$astDB->where("campaign_id", $campaign_id);
+					}
+					
+					$astDB->orderBy("status", "desc");			
+					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
+							
+					if ($astDB->count > 0) {
+						foreach ($rsltv as $fresults){
+							$dataStatus[] 				= $fresults['status'];
+							$dataStatusName[] 			= $fresults['status_name'];
+						}		
+					}			
+				}
+				
+				$cols 									= array(
+					"status", 
+					"status_name"
+				);
+				
+				$astDB->orderBy("status", "desc");			
+				$rsltv 									= $astDB->get("vicidial_statuses", NULL, $cols);
+				
+				if ($astDB->count > 0) {
+					foreach ($rsltv as $fresults){
+						$dataStatus[] 					= $fresults['status'];
+						$dataStatusName[] 				= $fresults['status_name'];
+					}
+					
+					$apiresults 						= array(
+						"result" 							=> "success",
+						"status" 							=> $dataStatus,
+						"status_name" 						=> $dataStatusName
+					);		
+				}
+			} else {
+				$err_msg 								= error_handle("10108", "status. No campaigns available");
+				$apiresults								= array(
+					"code" 									=> "10108", 
+					"result" 								=> $err_msg
+				);
 			}
-			
-			$apiresults 							= array(
-				"result" 								=> "success",
-				"status" 								=> $dataStatus,
-				"status_name" 							=> $dataStatusName
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
 			);		
 		}
-	} else {
-		$err_msg 									= error_handle("10108", "status. No campaigns available");
-		$apiresults									= array(
-			"code" 										=> "10108", 
-			"result" 									=> $err_msg
-		);
 	}
-
 ?>
