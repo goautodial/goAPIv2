@@ -22,62 +22,43 @@
 */
 
     include_once("goAPI.php");
-	
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
 
-	// need function go_sec_convert();
-    $pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
-    $request 										= $astDB->escape($_REQUEST['request']);
-	//$dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    $log_user 				= $session_user;
+    $log_group 				= go_get_groupid($session_user, $astDB);
+    $log_ip 				= $astDB->escape($_REQUEST['log_ip']);
+
+    // need function go_sec_convert();
+    $fromDate 				= $astDB->escape($_REQUEST['fromDate'])." 00:00:00";
+    $toDate 				= $astDB->escape($_REQUEST['toDate'])." 23:59:59";
+    $campaignID				= $astDB->escape($_REQUEST['campaignID']);
+    $request 				= $astDB->escape($_REQUEST['request']);
+    //dispo_stats 			= $astDB->escape($_REQUEST['statuses']);
 	
     if (empty($fromDate)) {
-    	$fromDate 									= date("Y-m-d")." 00:00:00";
-	}
+    	$fromDate			= date("Y-m-d")." 00:00:00";
+    }
     
     if (empty($toDate)) {
-    	$toDate 									= date("Y-m-d")." 23:59:59";
-	}
+    	$toDate 			= date("Y-m-d")." 23:59:59";
+    }
 		
-	$defPage 										= array(
-		"stats", 
-		"agent_detail", 
-		"agent_pdetail", 
-		"dispo", 
-		"call_export_report", 
-		"sales_agent", 
-		"sales_tracker", 
-		"inbound_report"
-	);
-
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+		$apiresults = array(
+			"result" => "Error: Session User Not Defined."
 		);
-	} elseif ( empty($campaign_id) || is_null($campaign_id) ) {
-		$err_msg 									= error_handle("40001");
-        $apiresults 								= array(
-			"code" 										=> "40001",
-			"result" 									=> $err_msg
+	} elseif ( empty($campaignID) || is_null($campaignID) ) {
+		$err_msg = error_handle("40001");
+        	$apiresults = array(
+			"code" => "40001",
+			"result" => $err_msg
 		);
 	} elseif (empty($fromDate) && empty($toDate)) {
-		$fromDate 									= date("Y-m-d") . " 00:00:00";
-		$toDate 									= date("Y-m-d") . " 23:59:59";
-		//die($fromDate." - ".$toDate);									=> $err_msg
-	} elseif (!in_array($pageTitle, $defPage)) {
-	 	$err_msg 									= error_handle("10004");
-		$apiresults 								= array(
-			"code" 										=> "10004", 
-			"result" 									=> $err_msg
-		);
+		$fromDate = date("Y-m-d") . " 00:00:00";
+		$toDate = date("Y-m-d") . " 23:59:59";
 	} else {            
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
-		$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+		$tenant	= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 		
 		if ($tenant) {
 			$astDB->where("user_group", $log_group);
@@ -90,105 +71,154 @@
 		}
 			
 		// SALES PER AGENT
-		if ($pageTitle == "sales_agent") {
-			if ($log_group !== "ADMIN") {
-				$ul 							= "AND us.user_group = '$log_group'";
-			} else {
-				$ul 							= "";
-			}
+		if ($log_group !== "ADMIN") {
+			$ul = "AND us.user_group = '$log_group'";
+		} else {
+			$ul = "";
+		}
+		
+		$Qstatus = $astDB
+			->where("sale", "Y")
+			->get("vicidial_statuses", NULL, "status");
+				
+		$sstatusRX = "";
+		$sstatuses = array();			
+		$a = 0;
 			
-			if ($request == "outbound") {
-				// Outbound Sales //					
-				$outbound_query 				= "
-					SELECT us.full_name AS full_name, us.user AS user, 
-						SUM(if (vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale 
-					FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl 
-					WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
-					AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0' 
-					AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
-					AND vlog.campaign_id = '$campaignID' $ul 
-					GROUP BY us.full_name
+		if ($astDB->count > 0) {
+			foreach ($Qstatus as $rowQS) {
+				$goTempStatVal = $rowQS['status'];
+				$sstatuses[$a] = $rowQS['status'];
+				$sstatusRX .= "{$goTempStatVal}|";
+				$a++;
+			}			
+		}
+			
+		if (!empty($sstatuses))
+			$sstatuses = implode("','",$sstatuses);
+			
+		$Qstatus2 = $astDB
+			->where("sale", "Y")
+			->where("campaign_id", $campaignID)
+			->get("vicidial_campaign_statuses", NULL, "status");
+			
+		$cstatusRX = "";
+		$cstatuses = array();			
+		$b = 0;
+			
+		if ($astDB->count > 0) {
+			foreach ($Qstatus2 as $rowQS2) {
+				$goTempStatVal = $rowQS2['status'];
+				$cstatuses[$b] = $rowQS2['status'];
+				$cstatusRX .= "{$goTempStatVal}|";
+				$b++;
+			}			
+		}
+			
+		if (!empty($cstatuses)) {
+			$cstatuses = implode("','",$cstatuses);
+		}
+			
+		if (count($sstatuses) > 0 && count($cstatuses) > 0) {
+			$statuses = "{$sstatuses}','{$cstatuses}";
+			$statusRX = "{$sstatusRX}{$cstatusRX}";
+		} else {
+			$statuses = (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
+			$statusRX = (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+		}
+			
+		$statusRX = trim($statusRX, "|");
+
+		$TOPsorted_output                               = "";
+		$BOTsorted_output                               = "";
+		$total_in_sales                                 = "";
+		$total_out_sales                                = "";
+
+		if (strtolower($request) == "outbound") {
+			// Outbound Sales //
+			$outbound_query = "
+				SELECT us.full_name AS full_name, us.user AS user, 
+				SUM(if (vlog.status REGEXP '^(".$statusRX.")$', 1, 0)) AS sale 
+				FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl 
+				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
+				AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0' 
+				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '".$fromDate."' AND '".$toDate."' 
+				AND vlog.campaign_id = '".$campaignID."' $ul 
+				GROUP BY us.full_name;
+			";
+			$outbound_sql = $astDB->rawQuery($outbound_query);
+			
+			if ($astDB->count > 0) {
+				$total_sales				= 0;
+				
+				foreach($outbound_sql as $row){	
+				//while ($row = $astDB->rawQuery($outbound_query)) {
+					$TOPsorted_output	 	.= "<tr>";
+					$TOPsorted_output 		.= "<td nowrap>".$row['full_name']."</td>";
+					$TOPsorted_output 		.= "<td nowrap>".$row['user']."</td>";
+					$TOPsorted_output		.= "<td nowrap>".$row['sale']."</td>";
+					$TOPsorted_output 		.= "</tr>";
+					$total_out_sales		 = $total_out_sales+$row['sale'];							
+				}
+			}
+		}
+		if (strtolower($request) == "inbound") {
+			// Inbound Sales //
+			$inbound_query = "
+				SELECT closer_campaigns FROM vicidial_campaigns 
+				WHERE campaign_id='".$campaignID."' 
+				ORDER BY campaign_id
+			";
+				
+			$row1 			= $astDB->rawQuery($inbound_query);
+			$closer_camp_array	= explode(" ",$row1['closer_campaigns']);
+			$num 			= count($closer_camp_array);				
+			$x			= 0;
+				
+			while ($x<$num) {
+				if ($closer_camp_array[$x]!="-") {
+					$closer_campaigns[$x] 	= $closer_camp_array[$x];
+				}
+					
+				$x++;
+			}
+				
+			$campaign_inb_query = "vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
+				
+			$query = "
+				SELECT us.full_name AS full_name, us.user AS user, 
+				SUM(if (vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale 
+				FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl 
+				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
+				AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0'  
+				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
+				AND $campaign_inb_query $ul 
+				GROUP BY us.full_name
 				";
 				
-				$TOPsorted_output 				= "";
-				$total_out_sales 				= "";
-				
-				if ($query) {
-					$total_sales				= 0;
+			if ($query) {
+				$total_sales				= 0;
 					
-					while ($row = $astDB->rawQuery($outbound_query)) {
-						$TOPsorted_output	 	.= "<tr>";
-						$TOPsorted_output 		.= "<td nowrap>".$row['full_name']."</td>";
-						$TOPsorted_output 		.= "<td nowrap>".$row['user']."</td>";
-						$TOPsorted_output		.= "<td nowrap>".$row['sale']."</td>";
-						$TOPsorted_output 		.= "</tr>";
-						$total_out_sales		 = $total_out_sales+$row['sale'];							
-					}
+				foreach($astDB->rawQuery($query) as $row) {
+				//while ($row = $astDB->rawQuery($inbound_query)) {
+					$BOTsorted_output 		.= "<tr>";
+					$BOTsorted_output 		.= "<td nowrap> ".$row['full_name']." </td>";
+					$BOTsorted_output 		.= "<td nowrap> ".$row['user']." </td>";
+					$BOTsorted_output 		.= "<td nowrap> ".$row['sale']." </td>";
+					$BOTsorted_output 		.= "</tr>";
+					$total_in_sales 		= $total_in_sales + $row['sale'];
 				}
 			}
-			
-			if ($request == "inbound") {
-				// Inbound Sales //
-				$inbound_query 					= "
-					SELECT closer_campaigns FROM vicidial_campaigns 
-					WHERE campaign_id='".$campaignID."' 
-					ORDER BY campaign_id
-				";
-				
-				$row1 							= $astDB->rawQuery($inbound_query);
-				$closer_camp_array				= explode(" ",$row1['closer_campaigns']);
-				$num 							= count($closer_camp_array);				
-				$x								= 0;
-				
-				while ($x<$num) {
-					if ($closer_camp_array[$x]!="-") {
-						$closer_campaigns[$x] 	= $closer_camp_array[$x];
-					}
-					
-					$x++;
-				}
-				
-				$campaign_inb_query				= "vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
-				
-				$query 							= "
-					SELECT us.full_name AS full_name, us.user AS user, 
-						SUM(if (vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale 
-						FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl 
-						WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
-						AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0'  
-						AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
-						AND $campaign_inb_query $ul 
-						GROUP BY us.full_name
-					";
-				
-				$BOTsorted_output 				= "";
-				$total_in_sales 				= "";
-				
-				if ($query) {
-					$total_sales				= 0;
-					
-					//foreach($query->result() as $row) {
-					while ($row = $astDB->rawQuery($inbound_query)) {
-						$BOTsorted_output 		.= "<tr>";
-						$BOTsorted_output 		.= "<td nowrap> ".$row['full_name']." </td>";
-						$BOTsorted_output 		.= "<td nowrap> ".$row['user']." </td>";
-						$BOTsorted_output 		.= "<td nowrap> ".$row['sale']." </td>";
-						$BOTsorted_output 		.= "</tr>";
-						$total_in_sales 		= $total_in_sales + $row['sale'];
-					}
-				}
-			}
-			
-			$apiresults 						= array(
-				"TOPsorted_output" 					=> $TOPsorted_output, 
-				"BOTsorted_output" 					=> $BOTsorted_output, 
-				"TOToutbound" 						=> $total_out_sales, 
-				"TOTinbound" 						=> $total_in_sales, 
-				"query" 							=> $outbound_query
-			);
+		}
+		$apiresults = array(
+			"result"		=> "success",
+			"TOPsorted_output"	=> $TOPsorted_output, 
+			"BOTsorted_output"	=> $BOTsorted_output, 
+			"TOToutbound" 		=> $total_out_sales, 
+			"TOTinbound" 		=> $total_in_sales, 
+		);
 			
 			return $apiresults;
-		}
 	}
 
 ?>

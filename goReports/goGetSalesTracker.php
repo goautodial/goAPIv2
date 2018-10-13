@@ -23,42 +23,30 @@
 
     include_once("goAPI.php");
 	
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+    $log_user 										= $session_user;
+    $log_group 										= go_get_groupid($session_user, $astDB);
+    $log_ip 										= $astDB->escape($_REQUEST['log_ip']);
 
 	// need function go_sec_convert();
-    $pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
+    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
     $request 										= $astDB->escape($_REQUEST['request']);
 	//$dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
 	
     if (empty($fromDate)) {
     	$fromDate 									= date("Y-m-d")." 00:00:00";
-	}
+    }
     
     if (empty($toDate)) {
     	$toDate 									= date("Y-m-d")." 23:59:59";
-	}
+    }
 		
-	$defPage 										= array(
-		"stats", 
-		"agent_detail", 
-		"agent_pdetail", 
-		"dispo", 
-		"call_export_report", 
-		"sales_agent", 
-		"sales_tracker", 
-		"inbound_report"
-	);
-
 	if (empty($log_user) || is_null($log_user)) {
 		$apiresults 								= array(
 			"result" 									=> "Error: Session User Not Defined."
 		);
-	} elseif ( empty($campaign_id) || is_null($campaign_id) ) {
+	} elseif ( empty($campaignID) || is_null($campaignID) ) {
 		$err_msg 									= error_handle("40001");
         $apiresults 								= array(
 			"code" 										=> "40001",
@@ -68,12 +56,6 @@
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
 		//die($fromDate." - ".$toDate);									=> $err_msg
-	} elseif (!in_array($pageTitle, $defPage)) {
-	 	$err_msg 									= error_handle("10004");
-		$apiresults 								= array(
-			"code" 										=> "10004", 
-			"result" 									=> $err_msg
-		);
 	} else {            
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
@@ -90,14 +72,69 @@
 		}
 			
 		// SALES TRACKER
-		if ($pageTitle == "sales_tracker") {
-			if ($log_group !== "ADMIN") {
-				$ul 							= "AND us.user_group = '$log_group'";
-			} else {
-				$ul 							= "";
-			}
+		if ($log_group !== "ADMIN") {
+			$ul = "AND us.user_group = '$log_group'";
+		} else {
+			$ul = "";
+		}
 			
-			if ($request == 'outbound') {
+		$Qstatus = $astDB
+                    ->where("sale", "Y")
+                    ->get("vicidial_statuses", NULL, "status");
+
+            $sstatusRX = "";
+            $sstatuses = array();
+            $a = 0;
+
+            if ($astDB->count > 0) {
+                    foreach ($Qstatus as $rowQS) {
+                            $goTempStatVal = $rowQS['status'];
+                            $sstatuses[$a] = $rowQS['status'];
+                            $sstatusRX .= "{$goTempStatVal}|";
+                            $a++;
+                    }
+            }
+
+            if (!empty($sstatuses))
+                    $sstatuses = implode("','",$sstatuses);
+
+            $Qstatus2 = $astDB
+                    ->where("sale", "Y")
+                    ->where("campaign_id", $campaignID)
+                    ->get("vicidial_campaign_statuses", NULL, "status");
+
+            $cstatusRX = "";
+            $cstatuses = array();
+            $b = 0;
+
+            if ($astDB->count > 0) {
+                    foreach ($Qstatus2 as $rowQS2) {
+                            $goTempStatVal = $rowQS2['status'];
+                            $cstatuses[$b] = $rowQS2['status'];
+                            $cstatusRX .= "{$goTempStatVal}|";
+                            $b++;
+                    }
+            }
+
+            if (!empty($cstatuses)) {
+                    $cstatuses = implode("','",$cstatuses);
+            }
+
+            if (count($sstatuses) > 0 && count($cstatuses) > 0) {
+                    $statuses = "{$sstatuses}','{$cstatuses}";
+                    $statusRX = "{$sstatusRX}{$cstatusRX}";
+            } else {
+                    $statuses = (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
+                    $statusRX = (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+            }
+			
+			$statusRX = trim($statusRX, "|");
+			$TOPsorted_output                               = "";
+			$BOTsorted_output                               = "";
+			$total_in_sales                                 = "";
+			$total_out_sales                                = "";
+	
+			if (strtolower($request) === 'outbound') {
 				$outbound_query 				= "
 					SELECT distinct(vl.phone_number) as phone_number, 
 						vl.lead_id as lead_id, 
@@ -121,42 +158,38 @@
 					limit 2000
 				";
 				
-				$query 							= $outbound_query;
-				$outbound_result 				= "";
-				$sale_num_value 				= 1;
+				$outbound_sql 	= $astDB->rawQuery($outbound_query);
+				$outbound_result	= "";
+				$sale_num_value		= 1;
 				
-				while ($row = $astDB->rawQuery($query)) {
+				foreach ($outbound_sql as $row) {
 					$sale_num[] 				= $sale_num_value;
 					$outbound_result 			= $row['phone_number'];
 					$call_date[] 				= $row['call_date'];
-					$agent[] 					= $row['agent'];
-					$lead_id[] 					= $row['lead_id'];
+					$agent[] 				= $row['agent'];
+					$lead_id[] 				= $row['lead_id'];
 					$phone_number[] 			= $row['phone_number'];
 					$first_name[] 				= $row['first_name'];
 					$last_name[] 				= $row['last_name'];
-					$address[] 					= $row['address'];
-					$city[] 					= $row['city'];
-					$state[] 					= $row['state'];
-					$postal[] 					= $row['postal'];
-					$email[] 					= $row['email'];
+					$address[] 				= $row['address'];
+					$city[] 				= $row['city'];
+					$state[] 				= $row['state'];
+					$postal[] 				= $row['postal'];
+					$email[] 				= $row['email'];
 					$alt_phone[] 				= $row['alt_phone'];
 					$comments[] 				= $row['comments'];
 					$sale_num_value++;
 				}
 			}
 		
-			if ($request == 'inbound') {
-				$query 							= "
-					SELECT closer_campaigns FROM vicidial_campaigns 
-					WHERE campaign_id = '$campaignID' 
-					ORDER BY campaign_id
-				";
-				
-				$row 							= $astDB->rawQuery($query);
-				$closer_camp_array 				= explode(" ",$row['closer_campaigns']);
-				$num 							= count($closer_camp_array);				
+			if (strtolower($request) === 'inbound') {
+				$astDB->where("campaign_id", $campaignID);
+				$astDB->orderBy("campaign_id");
+				$closer_camps = $astDB->getOne("vicidial_campaigns");
+				$closer_camp_array 	= explode(" ",$closer_camps['closer_campaigns']);
+				$num 			= count($closer_camp_array);				
 				$x								= 0;
-				
+	
 				while ($x<$num) {
 					if ($closer_camp_array[$x]!="-") {
 						$closer_campaigns[$x]	= $closer_camp_array[$x];
@@ -165,9 +198,9 @@
 					$x++;
 				}
 				
-				$campaign_inb_query				= "vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
+				$campaign_inb_query = "vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
 			
-				$query 							= "
+				$inbound_query 	= "
 					SELECT distinct(vl.phone_number) as phone_number, 
 						vl.lead_id as lead_id, 
 						vlo.call_date as call_date,
@@ -194,53 +227,51 @@
 					limit 2000
 				";
 				
-				$inbound_result 				= "";
-				$sale_num_value 				= 1;
+				$inbound_sql = $astDB->rawQuery($inbound_query);
+				$inbound_result = "";
+				$sale_num_value = 1;
 				
-				while ($row = $astDB->rawQuery($query)) {
+				foreach ($inbound_sql as $row) {
 					$sale_num[] 				= $sale_num_value;
 					$inbound_result 			= $row['phone_number'];
 					$call_date[] 				= $row['call_date'];
-					$agent[] 					= $row['agent'];
-					$lead_id[] 					= $row['lead_id'];
+					$agent[] 				= $row['agent'];
+					$lead_id[]				= $row['lead_id'];
 					$phone_number[] 			= $row['phone_number'];
 					$first_name[] 				= $row['first_name'];
 					$last_name[] 				= $row['last_name'];
-					$address[] 					= $row['address'];
-					$city[] 					= $row['city'];
-					$state[] 					= $row['state'];
-					$postal[] 					= $row['postal'];
-					$email[] 					= $row['email'];
+					$address[] 				= $row['address'];
+					$city[] 				= $row['city'];
+					$state[] 				= $row['state'];
+					$postal[] 				= $row['postal'];
+					$email[] 				= $row['email'];
 					$alt_phone[] 				= $row['alt_phone'];
 					$comments[] 				= $row['comments'];
 					$sale_num_value++;
 				}
 			}
-			
-			//$return['TOPsorted_output']		= $TOPsorted_output;
-			//$return['file_output']			= $file_output;
-			$apiresults 						= array(
-				"outbound_result" 					=> $outbound_result, 
-				"inbound_result" 					=> $inbound_result, 
-				"sale_num" 							=> $sale_num, 
-				"call_date" 						=> $call_date, 
-				"agent" 							=> $agent, 
-				"phone_number" 						=> $phone_number, 
-				"lead_id" 							=> $lead_id, 
-				"first_name" 						=> $first_name, 
-				"last_name" 						=> $last_name,
-				"address" 							=> $address, 
-				"city" 								=> $city, 
-				"state" 							=> $state, 
-				"postal" 							=> $postal, 
-				"email" 							=> $email, 
-				"alt_phone" 						=> $alt_phone, 
-				"comments" 							=> $comments,
-				"query" 							=> $outbound_query
+		
+			$apiresults = array(
+				"result" => "success",
+				"outbound_result" 				=> $outbound_result, 
+				"inbound_result" 				=> $inbound_result, 
+				"sale_num" 					=> $sale_num, 
+				"call_date" 					=> $call_date, 
+				"agent" 					=> $agent, 
+				"phone_number" 					=> $phone_number, 
+				"lead_id" 					=> $lead_id, 
+				"first_name" 					=> $first_name, 
+				"last_name" 					=> $last_name,
+				"address" 					=> $address, 
+				"city" 						=> $city, 
+				"state" 					=> $state, 
+				"postal" 					=> $postal, 
+				"email" 					=> $email, 
+				"alt_phone" 					=> $alt_phone, 
+				"comments" 					=> $comments,
 			);
 			
-			return $apiresults;
-		}
+		return $apiresults;
 	}
 
 ?>
