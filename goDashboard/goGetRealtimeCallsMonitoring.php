@@ -24,56 +24,75 @@
 
     include_once ("goAPI.php");
  
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
-	
-    // ERROR CHECKING 
-	if (!isset($log_user) || is_null($log_user)){
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} else {	
-		$cols										= array(
-			"status",
-			"phone_number",
-			"call_type",
-			"UNIX_TIMESTAMP(call_time) as call_time",
-			"vac.campaign_id"
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
 		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		$table 										= "
-			vicidial_auto_calls as vac, 
-			vicidial_campaigns as vc, 
-			vicidial_inbound_groups as vig
-		";
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-		$astDB->where("vac.campaign_id", $campaigns, "IN");
-		$astDB->groupBy("status,call_type,phone_number");		
-		$rsltv										= $astDB->get($table, NULL, $cols);
-			
-		//echo "<pre>";
-		//var_dump($astDB->getLastQuery());
-		
-		if($astDB->count > 0) {
-			$data 									= array();
-			
-			foreach ($rsltv as $fresults){       
-				array_push($data, $fresults);
-			}
-			
-			$apiresults 							= array(
-				"result" 								=> "success", 
-				//"query"									=> $astDB->getLastQuery(),
-				"data" 									=> $data
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			$cols										= array(
+				"status",
+				"phone_number",
+				"call_type",
+				"UNIX_TIMESTAMP(call_time) as call_time",
+				"vac.campaign_id"
 			);
+			
+			$table 										= "vicidial_auto_calls as vac, vicidial_campaigns as vc, vicidial_inbound_groups as vig ";
+			$rsltv										= $astDB
+				->where("vac.campaign_id", $campaigns, "IN")
+				->groupBy("status,call_type,phone_number")	
+				->get($table, 1000, $cols);
+			
+			if ($astDB->count > 0) {
+				$data 									= array();				
+				foreach ($rsltv as $fresults) {       
+					array_push($data, $fresults);
+				}
+				
+				$apiresults 							= array(
+					"result" 								=> "success", 
+					//"query"								=> $astDB->getLastQuery(),
+					"data" 									=> $data
+				);
+			} else {			
+				$apiresults 							= array(
+					"result" 								=> "success", 
+					"data" 									=> 0
+				);		
+			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
-		
-		$apiresults 								= array(
-			"result" 									=> "success", 
-			"data" 										=> 0
-		);		
 	}
     
 ?>

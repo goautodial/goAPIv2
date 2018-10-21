@@ -23,98 +23,125 @@
 
     include_once ("goAPI.php");
  
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	$type	 										= $astDB->escape($_REQUEST["type"]);
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
-    
-    // ERROR CHECKING 
-	if ( !isset($log_user) || is_null($log_user) ) {
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$type												= (!isset($_REQUEST["type"])) ? "all-daily" : $astDB->escape($_REQUEST['type']);
+	$NOW 												= date("Y-m-d");
+	
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (is_array($campaigns)) {
-		if ( !isset($_REQUEST["type"]) ) {	
-			$type									= "all-daily";
-		}
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		$status										= "SALE";
-		$datetoday									= date("Y-m-d");
-		$datehourly	 								= date('Y-m-d H');
-		//$datestartday								= date("Y-m-d") . " 00:00:00";
-		//$dateendday									= date("Y-m-d") . " 23:59:59";
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-		switch ($type) {
-			case "out-daily":
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			if (is_array($campaigns)) {
+				$status									= "SALE";
+				$datetoday								= date("Y-m-d");
+				$datehourly	 							= date('Y-m-d H');
+				//$datestartday							= date("Y-m-d") . " 00:00:00";
+				//$dateendday							= date("Y-m-d") . " 23:59:59";
+				
+				switch ($type) {
+					case "out-daily":
 
-				$data 								= $astDB
-					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
-					->where("vlog.status", $status)
-					->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
-					->where("vlog.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_log as vlog", "count(*)");
-				
-			break;
-			
-			case "out-hourly":
+					$data 								= $astDB
+						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+						->where("vlog.status", $status)
+						->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vlog.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_log as vlog", "count(*)");
+						
+					break;
+					
+					case "out-hourly":
 
-				$data 								= $astDB
-					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
-					->where("vlog.status", $status)
-					->where("vlog.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
-					->where("vlog.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_log as vlog", "count(*)");
-				
-			break;
-			
-			case "in-daily":
-			
-				$data 								= $astDB
-					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
-					->where("vcl.status", $status)
-					->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
-					->where("vcl.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_closer_log  vcl", "count(*)");
+					$data 								= $astDB
+						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+						->where("vlog.status", $status)
+						->where("vlog.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+						->where("vlog.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_log as vlog", "count(*)");
+						
+					break;
 					
-			break;
-			
-			case "in-hourly":
-			
-				$data 								= $astDB
-					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
-					->where("vcl.status", $status)
-					->where("vcl.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
-					->where("vcl.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_closer_log  vcl", "count(*)");
+					case "in-daily":
 					
-			break;			
-			
-			case "all-daily":
-			
-				$outsales							= $astDB
-					->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
-					->where("vlog.status", $status)
-					->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
-					->where("vlog.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_log as vlog", "count(*)");
-			
-				$insales 							= $astDB
-					->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
-					->where("vcl.status", $status)
-					->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
-					->where("vcl.campaign_id", $campaigns, "IN")
-					->getValue("vicidial_closer_log  vcl", "count(*)");
+					$data 								= $astDB
+						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+						->where("vcl.status", $status)
+						->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vcl.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_closer_log  vcl", "count(*)");
+							
+					break;
+					
+					case "in-hourly":
+					
+					$data 								= $astDB
+						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+						->where("vcl.status", $status)
+						->where("vcl.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+						->where("vcl.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_closer_log  vcl", "count(*)");
+							
+					break;			
+					
+					case "all-daily":
+					
+					$outsales							= $astDB
+						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
+						->where("vlog.status", $status)
+						->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vlog.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_log as vlog", "count(*)");
 				
-				$data 								= $insales + $outsales;
-			
-			break;
+					$insales 							= $astDB
+						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
+						->where("vcl.status", $status)
+						->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vcl.campaign_id", $campaigns, "IN")
+						->getValue("vicidial_closer_log  vcl", "count(*)");
+					
+					$data 								= $insales + $outsales;
+					
+					break;
+				}
+						
+				$apiresults 								= array(
+					"result" 									=> "success",
+					//"query"									=> $astDB->getLastQuery(),
+					"data" 										=> $data			 
+				); 
+			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
-				
-		$apiresults 								= array(
-			"result" 									=> "success",
-			//"query"									=> $astDB->getLastQuery(),
-			"data" 										=> $data			 
-		); 
 	}
 
 ?>

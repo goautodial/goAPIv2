@@ -24,29 +24,55 @@
 
     include_once ("goAPI.php");
  
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']); 
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']); 
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+    $NOW 												= date("Y-m-d");
     
-    ### ERROR CHECKING 
-	if (!isset($log_user) || is_null($log_user)){
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
-		$NOW 										= date("Y-m-d");
-
-		$data 										= $astDB
-			->where("campaign_id", $campaigns, "IN")
-			->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
-			->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
-				
-		$apiresults 								= array(
-			"result" 									=> "success",
-			"query"										=> $astDB->getLastQuery(),
-			"data" 										=> $data
-		);
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {		
+			$data 										= $astDB
+				->where("campaign_id", $campaigns, "IN")
+				->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+				->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
+					
+			$apiresults 								= array(
+				"result" 									=> "success",
+				//"query"									=> $astDB->getLastQuery(),
+				"data" 										=> $data
+			);
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
 	}
     
 ?>

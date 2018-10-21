@@ -23,34 +23,57 @@
 
     include_once ("goAPI.php");
  
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB); 
-	//$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
-	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
-		
-    // ERROR CHECKING 
-	if (!isset($log_user) || is_null($log_user)){
-		$apiresults 								= array(
-			"result" 									=> "Error: Session User Not Defined."
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (is_array($campaigns)) {		
-		$calls 										= array(
-			'INCALL', 
-			'QUEUE', 
-			'3-WAY', 
-			'PARK'
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
 		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		$data										= $astDB
-			->where("campaign_id", $campaigns, "IN")
-			->where("status", $calls, "IN")
-			->where("user_level", 4, "!=")
-			->getValue("vicidial_live_agents", "count(*)");
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
 		
-		$apiresults 								= array(
-			"result" 									=> "success", 
-			"data" 										=> $data
-		);	
-	}    
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			if (is_array($campaigns)) {	
+				$calls 									= array( 'INCALL', 'QUEUE', '3-WAY', 'PARK' );		
+				$data									= $astDB
+					->where("campaign_id", $campaigns, "IN")
+					->where("status", $calls, "IN")
+					->where("user_level", 4, "!=")
+					->getValue("vicidial_live_agents", "count(*)");
+				
+				$apiresults 							= array(
+					"result" 								=> "success", 
+					"data" 									=> $data
+				);	
+			}
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
+		}
+	}
     
 ?>
