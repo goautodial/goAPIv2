@@ -28,9 +28,7 @@
 	$log_group 											= go_get_groupid($session_user, $astDB); 	
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
-	
-	### POST or GET Variables
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	$carrier_type 										= $astDB->escape($_REQUEST['carrier_type']);
 	
 	if ($carrier_type == "justgo") {

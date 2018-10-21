@@ -30,8 +30,6 @@
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	
-	// POST or GET Variables
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
     $status 											= $astDB->escape($_REQUEST['status']);
     

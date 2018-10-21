@@ -30,11 +30,7 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
-	
 	$allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
-	
-	// POST or GET Variables
-	$goUser 											= $astDB->escape($_REQUEST['goUser']);
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	$campaign_name 										= $astDB->escape($_REQUEST['campaign_name']);
 	$campaign_desc 										= $astDB->escape($_REQUEST['campaign_desc']);

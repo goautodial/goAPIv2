@@ -28,9 +28,7 @@
 	$log_group 											= go_get_groupid( $session_user, $astDB ); 
 	$log_ip 											= $astDB->escape( $_REQUEST['log_ip'] );
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
-	
-	// POST or GET Variables
+	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 	$campaign_id 										= $astDB->escape( $_REQUEST['campaign_id'] );
 	$campaign_name 										= $astDB->escape( $_REQUEST['campaign_name'] );
 	$campaign_type 										= $astDB->escape( strtoupper($_REQUEST['campaign_type']) );

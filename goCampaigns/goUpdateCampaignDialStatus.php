@@ -28,8 +28,7 @@
 	$log_ip 											= $astDB->escape( $_REQUEST['log_ip'] );
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
-    $campaigns 											= allowed_campaigns( $log_group, $goDB, $astDB );
-	  
+    $campaigns 											= allowed_campaigns( $log_group, $goDB, $astDB );	  
     $campaign_id  										= $astDB->escape( $_REQUEST['campaign_id'] );
     $dial_statuses  									= $astDB->escape( $_REQUEST['dial_statuses'] );
     

@@ -29,8 +29,6 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
- 
-    ### POST or GET Variables
     $carrier_id 										= $astDB->escape($_REQUEST['carrier_id']);
     $carrier_name 										= $astDB->escape($_REQUEST['carrier_name']);
     $carrier_description 								= $astDB->escape($_REQUEST['carrier_description']);

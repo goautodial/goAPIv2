@@ -21,42 +21,82 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    // POST or GET Variables
-    $call_time_id = $_REQUEST['call_time_id'];
-	$ip_address = $_REQUEST['log_ip'];
-	$log_user = $session_user;
-    $groupId = go_get_groupid($session_user, $astDB);
+	include_once ("goAPI.php");
+	
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
 
-    // Check Voicemail ID if its null or empty
-	if(empty($call_time_id)) { 
-		$apiresults = array("result" => "Error: Set a value for Calltime ID."); 
+    // ERROR CHECKING 
+	if (empty ($goUser) || is_null ($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty ($goPass) || is_null ($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty ($log_user) || is_null ($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
 	} else {
-
-        if (checkIfTenant($groupId, $goDB)) {
-            $astDB->where("user_group", $groupId);
-            //$ul = "AND user_group='$groupId'";
-        }
-
-        $astDB->where("call_time_id", $call_time_id);
-        $astDB->getOne("vicidial_call_times", "call_time_id");
-   		//$queryOne = "SELECT call_time_id FROM vicidial_call_times $ul where call_time_id='".$call_time_id."';";
-   		$countResult = $astDB->count;
-
-		if($countResult > 0) {
-            $astDB->where("call_time_id", $call_time_id);
-            $deleteQuery = $astDB->delete("vicidial_call_times");
-            //$deleteQuery = "DELETE FROM vicidial_call_times WHERE call_time_id = '$call_time_id';"; 
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {    
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
-            $log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID: $call_time_id", $groupId);
+			if ($tenant) {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
+					}
+				}					
+			}
 
-            if($deleteQuery){
-                $apiresults = array("result" => "success");
-            }else{
-                $astDB->getLastError();
-            }
+			$astDB->where("call_time_id", $call_time_id);
+			$astDB->getOne("vicidial_call_times", "call_time_id");
 
+			if ($astDB->count > 0) {
+				$astDB->where("call_time_id", $call_time_id);
+				$deleteQuery 							= $astDB->delete("vicidial_call_times");				
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID: $call_time_id", $log_group, $astDB->getLastQuery());
+
+				if ($deleteQuery) {
+					$apiresults 						= array(
+						"result" 							=> "success"
+					);
+				} else {
+					$astDB->getLastError();
+				}
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: Calltime doesn't exist."
+				);
+			}
 		} else {
-			$apiresults = array("result" => "Error: Calltime doesn't exist.");
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
-	}//end
+	}
+	
 ?>

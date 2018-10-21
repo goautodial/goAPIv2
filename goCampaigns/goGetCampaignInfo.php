@@ -29,8 +29,6 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
-	
-    // POST or GET Variables	
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 
 	//variables
