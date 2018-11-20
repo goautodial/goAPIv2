@@ -31,20 +31,17 @@
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));			
 	
     // POST or GET Variables
-	#$orig_user 										= $astDB->escape($_REQUEST['user']);
 	$orig_user 											= (isset($_REQUEST['user']) ? $astDB->escape($_REQUEST['user']) : "agent001");
 	$pass 												= $astDB->escape($_REQUEST['pass']);
-	#$orig_full_name 									= $astDB->escape($_REQUEST['full_name']);
 	$orig_full_name 									= (isset($_REQUEST['full_name']) ? $astDB->escape($_REQUEST['full_name']) : "Agent 001");
 	$phone_login 										= $astDB->escape($_REQUEST['phone_login']);
-	#$phone_login 										= (isset($_REQUEST['phone_login']) ? $astDB->escape($_REQUEST['phone_login']) : "Agent 001");
 	$phone_pass 										= $pass;
 	$user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));
-	$defActive 											= array("Y", "N");	
+	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));		
 	$avatar 											= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);	
 	$seats 												= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
-					
+	$defActive 											= array("Y", "N");
+
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -143,13 +140,10 @@
 				$pass_hash_enabled 						= $rpasshash['pass_hash_enabled'];
 				$pass_cost 								= $rpasshash['pass_cost'];
 				$pass_key 								= $rpasshash['pass_key'];
-
 				$get_last 								= preg_replace("/[^0-9]/","", $orig_user);
-				$last_num_user 							= intval($get_last);
-				
+				$last_num_user 							= intval($get_last);				
 				$get_last2 								= preg_replace("/[^0-9]/","", $orig_full_name);
-				$last_num_name 							= intval($get_last2);
-				
+				$last_num_name 							= intval($get_last2);				
 				$arr_user 								= array();
 				$add_num 								= 0;
 				
