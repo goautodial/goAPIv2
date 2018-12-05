@@ -23,158 +23,189 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$log_ip 							= $astDB->escape($_REQUEST['log_ip']);	
-	$limit 								= "50";
+	$log_user 											= $session_user;
+	$log_group 											= go_get_groupid($session_user, $astDB); 
+	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
+	$goUser												= $astDB->escape($_REQUEST['goUser']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);	
+	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
 	
 	### POST or GET Variables
-    $requestDataPhone 					= $astDB->escape($_REQUEST['requestDataPhone']);
-	$start_filterdate 					= $astDB->escape($_REQUEST['start_filterdate']);
-	$end_filterdate 					= $astDB->escape($_REQUEST['end_filterdate']);
-	$agent_filter 						= $astDB->escape($_REQUEST['agent_filter']);
+    $requestDataPhone 									= $astDB->escape($_REQUEST['requestDataPhone']);
+	$start_filterdate 									= $astDB->escape($_REQUEST['start_filterdate']);
+	$end_filterdate 									= $astDB->escape($_REQUEST['end_filterdate']);
+	$agent_filter 										= $astDB->escape($_REQUEST['agent_filter']);
 	
-	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
-			"result" 						=> "Error: Session User Not Defined."
+	// ERROR CHECKING 
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
 		);
-	} elseif (isset($_REQUEST['limit'])) {
-		$limit 							= $astDB->escape($_REQUEST['limit']);
-	} else {	
-		if (checkIfTenant($log_group, $goDB)) {
-			$ul							= "AND vl.user_group = '$log_group'";
-		} else {
-			if($log_group !== "ADMIN"){
-				$stringv 				= go_getall_allowed_users($log_group);
-				$ul 					= "AND rl.user IN ($stringv)";
-			} else {
-				$ul 					= "";
-			}
-		} 	
-			
-		if (!empty($requestDataPhone)) {
-			$sqlPhone 					= "AND vl.phone_number LIKE '$requestDataPhone%'";
-			$limit 						= "500";
-		} else{
-			$sqlPhone 					= "";
-		}
-
-		if ($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
-			$limit 						= "1000";
-			$filterdate 				= "AND date_format(rl.end_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
-		} else {
-			$filterdate 				= "";
-		}
-
-		if (!empty($agent_filter)) {
-			$limit 						= "1000";
-			$filteragent 				= "AND rl.user = '$agent_filter'";
-		} else {
-			$filteragent 				= "";
-		}
-
-
-		$query = "SELECT 
-				CONCAT(vl.first_name,' ',vl.last_name) AS full_name, 
-				rl.vicidial_id, 
-				vl.last_local_call_time, 
-				vl.phone_number, 
-				rl.length_in_sec, 
-				rl.filename, 
-				rl.location, 
-				rl.lead_id, 
-				rl.user, 
-				rl.start_time, 
-				rl.end_time, 
-				rl.recording_id, 
-				rl.b64encoded 
-			FROM recording_log rl, vicidial_list vl 
-			WHERE rl.lead_id = vl.lead_id
-			$sqlPhone 
-			$filterdate 
-			$filteragent 
-			$ul 
-			ORDER BY rl.start_time DESC
-			LIMIT $limit;";
-
-		$rsltv 								= $astDB->rawQuery($query);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
+		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
 		
-		if ($astDB->count > 0) {
-			foreach ($rsltv as $fresults) {
-				$location 						= $fresults['location'];
-				
-				if (strlen($location) > 2) {
-					$URLserver_ip 				= $location;
-					$URLserver_ip 				= preg_replace('/http:\/\//i', '', $URLserver_ip);
-					$URLserver_ip 				= preg_replace('/https:\/\//i', '', $URLserver_ip);
-					$URLserver_ip 				= preg_replace('/\/.*/i', '', $URLserver_ip);
-					//$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
-					$astDB->where('server_ip', $URLserver_ip);
-					$astDB->get('servers');
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+			// every time we need to filter out requests
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			
+			if ($tenant) {
+				$ul										= "AND vl.user_group = '$log_group'";
+			} else {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel > 8) {
+						$ul								= "AND vl.user_group = '$log_group'";
+					} else {
+						$stringv 						= go_getall_allowed_users($log_group);
+						$ul 							= "AND rl.user IN ($stringv)";					
+					}
+				} else {
+					$ul 								= "";
+				}				
+			}		
+			
+			if (!empty($requestDataPhone)) {
+				$sqlPhone 								= "AND vl.phone_number LIKE '$requestDataPhone%'";
+			} else{
+				$sqlPhone 								= "";
+			}
+
+			if ($start_filterdate != "" && $end_filterdate != "" && $start_filterdate != $end_filterdate){
+				$filterdate 							= "AND date_format(rl.end_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_filterdate' AND '$end_filterdate'";
+			} else {
+				$filterdate 							= "";
+			}
+
+			if (!empty($agent_filter)) {
+				$filteragent 							= "AND rl.user = '$agent_filter'";
+			} else {
+				$filteragent 							= "";
+			}
+
+
+			$query 										= "SELECT 
+					CONCAT(vl.first_name,' ',vl.last_name) AS full_name, 
+					rl.vicidial_id, 
+					vl.last_local_call_time, 
+					vl.phone_number, 
+					rl.length_in_sec, 
+					rl.filename, 
+					rl.location, 
+					rl.lead_id, 
+					rl.user, 
+					rl.start_time, 
+					rl.end_time, 
+					rl.recording_id, 
+					rl.b64encoded 
+				FROM recording_log rl, vicidial_list vl 
+				WHERE rl.lead_id = vl.lead_id
+				$sqlPhone 
+				$filterdate 
+				$filteragent 
+				$ul 
+				ORDER BY rl.start_time DESC
+				LIMIT $limit;";
+
+			$rsltv 										= $astDB->rawQuery($query);
+			
+			if ($astDB->count > 0) {
+				foreach ($rsltv as $fresults) {
+					$location 							= $fresults['location'];
 					
-					if ($astDB->count > 0) {
-						$cols 					= array(
-							"recording_web_link",
-							"alt_server_ip",
-							"external_server_ip"
-						);
-						
+					if (strlen($location) > 2) {
+						$URLserver_ip 					= $location;
+						$URLserver_ip 					= preg_replace('/http:\/\//i', '', $URLserver_ip);
+						$URLserver_ip 					= preg_replace('/https:\/\//i', '', $URLserver_ip);
+						$URLserver_ip 					= preg_replace('/\/.*/i', '', $URLserver_ip);
+						//$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
 						$astDB->where('server_ip', $URLserver_ip);
-						$rsltx 					= $astDB->get('servers', NULL, $cols);
+						$astDB->get('servers');
 						
-						if (preg_match("/ALT_IP/i", $rsltx['recording_web_link'])) {
-							$location 			= preg_replace("/$URLserver_ip/i", "{$rowx['alt_server_ip']}", $location);
-						}
-						if (preg_match("/EXTERNAL_IP/i", $rowx['recording_web_link'])) {
-							$location 			= preg_replace("/$URLserver_ip/i", "{$rowx['external_server_ip']}", $location);
+						if ($astDB->count > 0) {
+							$cols 						= array(
+								"recording_web_link",
+								"alt_server_ip",
+								"external_server_ip"
+							);
+							
+							$astDB->where('server_ip', $URLserver_ip);
+							$rsltx 					= $astDB->getOne('servers', NULL, $cols);
+							
+							if (preg_match("/ALT_IP/i", $rsltx['recording_web_link'])) {
+								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['alt_server_ip']}", $location);
+							}
+							if (preg_match("/EXTERNAL_IP/i", $rsltx['recording_web_link'])) {
+								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['external_server_ip']}", $location);
+							}
 						}
 					}
+					
+					$dataLeadId[] 					= $fresults['lead_id'];
+					$dataUniqueid[] 				= $fresults['vicidial_id'];
+					$dataStatus[] 					= $fresults['status'];
+					$dataUser[] 					= $fresults['user'];
+					$dataPhoneNumber[] 				= $fresults['phone_number'];
+					$dataFullName[] 				= $fresults['full_name'];
+					$dataLastLocalCallTime[] 		= $fresults['last_local_call_time'];
+					$dataStartLastLocalCallTime[] 	= $fresults['start_time'];
+					$dataEndLastLocalCallTime[] 	= $fresults['end_time'];
+					$dataLocation[] 				= $location;
+					$dataRecordingID[] 				= $fresults['recording_id'];
+					$dataB64encoded[]				= $fresults['b64encoded'];
+					
 				}
-				
-				$dataLeadId[] 					= $fresults['lead_id'];
-				$dataUniqueid[] 				= $fresults['vicidial_id'];
-				$dataStatus[] 					= $fresults['status'];
-				$dataUser[] 					= $fresults['user'];
-				$dataPhoneNumber[] 				= $fresults['phone_number'];
-				$dataFullName[] 				= $fresults['full_name'];
-				$dataLastLocalCallTime[] 		= $fresults['last_local_call_time'];
-				$dataStartLastLocalCallTime[] 	= $fresults['start_time'];
-				$dataEndLastLocalCallTime[] 	= $fresults['end_time'];
-				$dataLocation[] 				= $location;
-				$dataRecordingID[] 				= $fresults['recording_id'];
-				$dataB64encoded[]				= $fresults['b64encoded'];
-				
+
+				//$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
+				$astDB->where('lead_id', $fresults['lead_id']);
+				$astDB->get('recording_log');
+				$dataCount	 						= $astDB->getRowCount();
+
+				$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
+
+				$apiresults 						= array(
+					"result" 							=> "success",
+					"query" 							=> $query,
+					"cnt" 								=> $dataCount,
+					"lead_id" 							=> $dataLeadId,
+					"uniqueid" 							=> $dataUniqueid,
+					"status" 							=> $dataStatus,
+					"users" 							=> $dataUser,
+					"phone_number"	 					=> $dataPhoneNumber,
+					"full_name" 						=> $dataFullName,
+					"last_local_call_time" 				=> $dataLastLocalCallTime,
+					"start_last_local_call_time" 		=> $dataStartLastLocalCallTime,
+					"end_last_local_call_time" 			=> $dataEndLastLocalCallTime,
+					"location" 							=> $dataLocation,
+					"recording_id" 						=> $dataRecordingID,
+					"b64encoded" 						=> $dataB64encoded,
+					"query" 							=> $query
+				);
+			} else {
+				$apiresults 						= array(
+					"result" 							=> "success"
+				);
 			}
-
-			//$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
-			$astDB->where('lead_id', $fresults['lead_id']);
-			$astDB->get('recording_log');
-			$dataCount	 						= $astDB->getRowCount();
-
-			$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
-
-			$apiresults 						= array(
-				"result" 							=> "success",
-				"query" 							=> $query,
-				"cnt" 								=> $dataCount,
-				"lead_id" 							=> $dataLeadId,
-				"uniqueid" 							=> $dataUniqueid,
-				"status" 							=> $dataStatus,
-				"users" 							=> $dataUser,
-				"phone_number"	 					=> $dataPhoneNumber,
-				"full_name" 						=> $dataFullName,
-				"last_local_call_time" 				=> $dataLastLocalCallTime,
-				"start_last_local_call_time" 		=> $dataStartLastLocalCallTime,
-				"end_last_local_call_time" 			=> $dataEndLastLocalCallTime,
-				"location" 							=> $dataLocation,
-				"recording_id" 						=> $dataRecordingID,
-				"b64encoded" 						=> $dataB64encoded,
-				"query" 							=> $query
-			);
 		} else {
-			$apiresults 						= array(
-				"result" 							=> "success"
-			);
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= array(
+				"code" 										=> "10001", 
+				"result" 									=> $err_msg
+			);		
 		}
 	}
 
