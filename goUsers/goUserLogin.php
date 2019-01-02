@@ -72,7 +72,7 @@
 
 	$cols												= array("user_id", "user", "email", "pass", "full_name", "user_level", "user_group", "active", "pass_hash", "phone_login", "phone_pass");
 	$rsltv 												= $astDB->get("vicidial_users", 1, $cols);
-	var_dump($rsltv);
+	var_dump($astDB->getLastQuery());
 	if	($rsltv > 0) {
 		foreach ($rsltv as $fresults){
 			$dataUser 									= $fresults['user'];
