@@ -362,6 +362,8 @@
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery());
 					
 					$kamDB->where("username", $phone_login);
+                    if (!empty($realm))
+                        $kamDB->where("domain", $realm);
 					$kamDB->update("subscriber", $subscriber_array);
 
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $kamDB->getLastQuery());

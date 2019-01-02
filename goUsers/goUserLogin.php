@@ -131,6 +131,12 @@
 			$goDB->where('setting', 'GO_agent_use_wss');
 			$rsltw 										= $goDB->getOne('settings', 'value');
 			$use_webrtc 								= (!is_null($rsltw['value']) || $rsltw['value'] !== '') ? $rsltw['value'] : 0;
+            
+            ### Get ha1 pass
+            $kamDB->where('username', $dataPhone_login);
+            $kamDB->where('domain', $realm);
+            $rsltk                                      = $kamDB->getOne('subscriber', 'ha1');
+            $ha1_pass                                   = $rsltk['ha1'];
 			
 			$apiresults 								= array(
 				"result" 									=> "success",
@@ -149,7 +155,8 @@
 				"phone_pass" 								=> $dataPhone_pass,
 				"avatar" 									=> $dataAvatar,
 				"realm" 									=> $realm,
-				"use_webrtc" 								=> $use_webrtc
+				"use_webrtc" 								=> $use_webrtc,
+                "ha1"                                       => $ha1_pass
 			);
 		}
 	} else {
