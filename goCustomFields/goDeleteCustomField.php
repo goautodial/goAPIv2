@@ -29,8 +29,13 @@
     $countResult = $astDB->getRowCount();
     
     if($countResult > 0){
-        $selectColumns = "SHOW COLUMNS FROM `custom_$list_id` LIKE '$field_label';";
-        $queryResult1 = $astDB->rawQuery($selectColumns);
+        //$selectColumns = "SHOW COLUMNS FROM `custom_$list_id` LIKE '$field_label';";
+        //$queryResult1 = $astDB->rawQuery($selectColumns);
+        //$countResult1 = $astDB->getRowCount();
+        $astDB->where('field_label', $field_label);
+        $astDB->where('field_id', $field_id);
+        $astDB->where('list_id', $list_id);
+        $queryResult1 = $astDB->getOne('vicidial_lists_fields');
         $countResult1 = $astDB->getRowCount();
         
         if($countResult1 > 0 && $field_label != "lead_id"){
