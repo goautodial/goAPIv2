@@ -77,7 +77,8 @@
             }
            
             if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
-                $field_options_array = explode("\n",$field_options);
+                $A_field_options = str_replace('\r\n', '\n', $field_options);
+                $field_options_array = explode("\n",$A_field_options);
                 $field_options_count = count($field_options_array);
                 $te=0;
                 while ($te < $field_options_count)
@@ -99,7 +100,8 @@
              
             
             if ( ($field_type=='MULTI') or ($field_type=='CHECKBOX') ){
-                $field_options_array = explode("\n",$field_options);
+                $A_field_options = str_replace('\r\n', '\n', $field_options);
+                $field_options_array = explode("\n",$A_field_options);
                 $field_options_count = count($field_options_array);
                 $te=0;
                 while ($te < $field_options_count)
@@ -182,7 +184,7 @@
             if($astDB->getInsertId()){
                 $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
                
-                $apiresults = array("result" => "success");
+                $apiresults = array("result" => "success", "testQuery" => $stmtCUSTOM);
             }else{
                 $apiresults = array("result" => "Error: Failed to add custom field.", "query" => $insertQuery);
             }
