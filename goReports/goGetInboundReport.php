@@ -32,14 +32,18 @@
     $fromDate = $astDB->escape($_REQUEST['fromDate']);
     $toDate = $astDB->escape($_REQUEST['toDate']);
     $campaignID = $astDB->escape($_REQUEST['campaignID']);
-
+    $dispo_stats = $astDB->escape($_REQUEST['statuses']);
+   POSDUWIAndwjaN 
+    die("HOY");
+    
     if (empty($fromDate)) {
         $fromDate = date("Y-m-d")." 00:00:00";
     }
     if (empty($toDate)) {
         $toDate = date("Y-m-d")." 23:59:59";
     }
-	if (empty($log_user) || is_null($log_user)) {
+
+    if (empty($log_user) || is_null($log_user)) {
         $apiresults = array(
             "result" => "Error: Session User Not Defined."
         );
@@ -67,11 +71,6 @@
                 }
             }
 	    }
-
-		$dispo_stats = $astDB->escape($_REQUEST['statuses']);
-		$fromDate = $astDB->escape($_REQUEST['fromDate']);
-		$toDate = $astDB->escape($_REQUEST['toDate']);
-		$campaignID = $astDB->escape($_REQUEST['campaignID']);
 
 		if ($dispo_stats != NULL) {
 			$ul = " AND status = '$dispo_stats' ";
@@ -111,9 +110,9 @@
 		}
 
 		$apiresults = array(
-		    "TOPsorted_output" => $TOPsorted_output,
+		    "TOPsorted_output" => "POGI AKO"
 		);
 
-		return $apiresults;
+		//return $apiresults;
 	}
 ?>
