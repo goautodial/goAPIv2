@@ -138,11 +138,11 @@
 					if (!empty($options[2])) {
 						$insertData 				= array(
 							"menu_id" 					=> $menu_id,
-							"option_value" 				=> $option[0],
-							"option_description" 		=> $option[1],
-							"option_route" 				=> $option[2],
-							"option_route_value" 		=> $option[3],
-							"option_route_value_context"=> $option[4]
+							"option_value" 				=> $options[0],
+							"option_description" 		=> $options[1],
+							"option_route" 				=> $options[2],
+							"option_route_value" 		=> $options[3],
+							"option_route_value_context"=> $options[4]
 						);
 						
 						$astDB->insert("vicidial_call_menu_options", $insertData);
