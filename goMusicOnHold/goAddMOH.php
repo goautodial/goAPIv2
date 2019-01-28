@@ -35,6 +35,8 @@
 	$active 											= strtoupper($astDB->escape($_REQUEST['active']));
 	$random 											= strtoupper($astDB->escape($_REQUEST['random']));
 	$values 											= $astDB->escape($_REQUEST['item']);
+        $filename                                                                             = $astDB->escape($_REQUEST['filename']);
+
 	
     ### Default values 
     $defActive 											= array("Y","N");
@@ -111,7 +113,8 @@
 					);
 				} else {
 					$insertData 						= array(
-						'filename' 							=> 'conf',
+						//'filename' 							=> 'conf',
+                                                'filename'                                                      => $filename,
 						'rank' 								=> '1',
 						'moh_id' 							=> $moh_id
 					);

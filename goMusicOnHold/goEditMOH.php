@@ -119,11 +119,12 @@
 				if ($filename != null) {
 					$insertData 						= array(
 						'filename' 							=> $filename,
-						'rank' 								=> $rank,
+						//'rank' 								=> $rank,
+                                                'rank'                                                          => '1',
 						'moh_id' 							=> $moh_id
 					);
-					
-					$astDB->insert('vicidial_music_on_hold_files', $insertData);
+					$astDB->where('moh_id', $moh_id);
+					$astDB->update('vicidial_music_on_hold_files', $insertData);
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
 				}
 				
