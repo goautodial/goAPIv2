@@ -86,15 +86,28 @@
 					$dataRandom[] 						= $fresults['random'];
 					$dataUserGroup[] 					= $fresults['user_group'];
 					
-					$apiresults 						= array(
-						"result" 							=> "success", 
-						"moh_id" 							=> $dataModId, 
-						"moh_name" 							=> $dataMohName, 
-						"active" 							=> $dataActive, 
-						"random" 							=> $dataRandom, 
-						"user_group" 						=> $dataUserGroup
-					);
+        				$astDB->where('moh_id', $fresults['moh_id']);
+				        $rsltvfiles = $astDB->get('vicidial_music_on_hold_files');
+				        $countResultFiles = $astDB->getRowCount();
+
+				        if($countResultFiles > 0){
+				                foreach($rsltvfiles as $fresultsfiles){
+				                        $dataFileName[] = $fresultsfiles['filename'];
+				                        $dataRank[] = $fresultsfiles['rank'];
+				                }
+				        }
+
 				}
+			        $apiresults = array(
+			                "result" => "success",
+			                "moh_id" => $dataModId,
+			                "moh_name" => $dataMohName,
+			                "active" => $dataActive,
+			                "random" => $dataRandom,
+			                "user_group" => $dataUserGroup,
+			                "filename" => $dataFileName,
+			                "rank" => $dataRank
+			        );
 				
 				//$log_id 								= log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed info of Music On-Hold: $moh_id", $log_group);
 			} else {
