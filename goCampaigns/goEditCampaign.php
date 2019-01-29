@@ -293,7 +293,6 @@
 							'use_campaign_dnc' 					=> (!empty($use_campaign_dnc)) ? $use_campaign_dnc : $resultGet['use_campaign_dnc'],
 							'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
 							//'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : "",
-							'manual_dial_list_id' 				=> (!empty($manual_dial_list_id)) ? $manual_dial_list_id : $resultGet['manual_dial_list_id'], 
 							'hopper_level' 						=> (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
 							'alt_number_dialing' 				=> (!empty($alt_number_dialing)) ? $alt_number_dialing : $resultGet['alt_number_dialing']
 						);
@@ -317,6 +316,7 @@
 						'dial_timeout' 							=> (!empty($dial_timeout)) ? $dial_timeout : $resultGet['dial_timeout'], 
 						//'manual_dial_prefix' 					=> (!empty($manual_dial_prefix)) ? $manual_dial_prefix : $resultGet['manual_dial_prefix'],
 						'manual_dial_prefix' 					=> $manual_dial_prefix,
+						'manual_dial_list_id' 				    => (!empty($manual_dial_list_id)) ? $manual_dial_list_id : $resultGet['manual_dial_list_id'], 
 						'get_call_launch' 						=> (!empty($get_call_launch)) ? $get_call_launch : $resultGet['get_call_launch'], 
 						'next_agent_call' 						=> (!empty($next_agent_call)) ? $next_agent_call : $resultGet['next_agent_call'], 
 						'xferconf_a_number' 					=> (!empty($xferconf_a_number)) ? $xferconf_a_number : $resultGet['xferconf_a_number'], 
