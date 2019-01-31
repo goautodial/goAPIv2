@@ -77,7 +77,9 @@
             }
            
             if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
-                $field_options_array = explode("\n",$A_field_options);
+                //$field_options_array = explode("\n",$A_field_options);
+                $A_field_options = str_replace('\r\n', '\n', $A_field_options);
+                $field_options_array = explode('\n', $A_field_options);
                 $field_options_count = count($field_options_array);
                 $te=0;
                 while ($te < $field_options_count)
