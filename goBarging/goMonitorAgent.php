@@ -43,7 +43,6 @@ $NOW_TIME = date("Y-m-d H:i:s");
 $startMS = microtime();
 $action = $stage;
 
-var_dump($is_logged_in);
 if ($is_logged_in) {
 	if(strlen($source) < 2) {
 		$result = 'ERROR';
@@ -226,6 +225,7 @@ if ($is_logged_in) {
             }
         }
 	}
+    var_dump($APIResult);
 } else {
     $APIResult = array( "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." );
 }
