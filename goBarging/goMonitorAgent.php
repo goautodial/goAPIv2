@@ -47,7 +47,7 @@ if ($is_logged_in) {
 	if(strlen($source) < 2) {
 		$result = 'ERROR';
 		$result_reason = "Invalid Source";
-        $APIResult = array( "result" => "error", "message" => "$result_reason - $source" );
+        $apiresults = array( "result" => "error", "message" => "$result_reason - $source" );
 	} else {
         $hasError = 0;
         
@@ -57,7 +57,7 @@ if ($is_logged_in) {
 		$user_group = $rslt['user_group'];
         
 		if ( (!preg_match("/ $function /", $rslt['api_allowed_functions'])) && (!preg_match("/ALL_FUNCTIONS/", $rslt['api_allowed_functions'])) ) {
-			$APIResult = array( "result" => "error", "message" => "User does NOT have permission to use this function" );
+			$apiresults = array( "result" => "error", "message" => "User does NOT have permission to use this function" );
 			$hasError = 1;
 		}
         
@@ -70,7 +70,7 @@ if ($is_logged_in) {
             $rslt = $astDB->get('vicidial_users');
             $allowed_user = $astDB->getRowCount();
             if ( ($allowed_user < 1) && ($source != 'queuemetrics') ) {
-                $APIResult = array( "result" => "error", "message" => "User does NOT have permission to use blind monitoring" );
+                $apiresults = array( "result" => "error", "message" => "User does NOT have permission to use blind monitoring" );
                 $hasError = 1;
             } else {
                 //$stmt="SELECT count(*) from vicidial_conferences where conf_exten='$session_id' and server_ip='$server_ip';";
@@ -80,7 +80,7 @@ if ($is_logged_in) {
                 $session_exists = $astDB->getRowCount();
     
                 if ($session_exists < 1) {
-                    $APIResult = array( "result" => "error", "message" => "Invalid Session ID", "session_id" => $session_id, "server_ip" => $server_ip, "user" => $goUser );
+                    $apiresults = array( "result" => "error", "message" => "Invalid Session ID", "session_id" => $session_id, "server_ip" => $server_ip, "user" => $goUser );
                     $hasError = 1;
                 } else {
                     //$stmt="SELECT count(*) from phones where login='$phone_login';";
@@ -89,7 +89,7 @@ if ($is_logged_in) {
                     $phone_exists = $astDB->getRowCount();
     
                     if ( ($phone_exists < 1) && ($source != 'queuemetrics') ) {
-                        $APIResult = array( "result" => "error", "message" => "Invalid Phone Login", "phone_login" => $phone_login, "user" => $goUser );
+                        $apiresults = array( "result" => "error", "message" => "Invalid Phone Login", "phone_login" => $phone_login, "user" => $goUser );
                         $hasError = 1;
                     } else {
                         if ($source == 'queuemetrics') {
@@ -221,11 +221,11 @@ if ($is_logged_in) {
             if ($hasError < 1) {
 				$log_id = log_action($goDB, $action, $goUser, $ip_address, "{$goUser} barged in to {$agent}'s call", $user_group);
 				
-                $APIResult = array( "result" => "success", "message" => $message, "data" => $data );
+                $apiresults = array( "result" => "success", "message" => $message, "data" => $data );
             }
         }
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." );
+    $apiresults = array( "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." );
 }
 ?>
