@@ -223,7 +223,6 @@ if ($is_logged_in) {
 				
                 $APIResult = array( "result" => "success", "message" => $message, "data" => $data );
             }
-            var_dump($hasError);
         }
 	}
 } else {
