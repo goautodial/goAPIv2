@@ -223,9 +223,9 @@ if ($is_logged_in) {
 				
                 $APIResult = array( "result" => "success", "message" => $message, "data" => $data );
             }
+            var_dump($hasError);
         }
 	}
-    var_dump($APIResult);
 } else {
     $APIResult = array( "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." );
 }
