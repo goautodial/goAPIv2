@@ -221,8 +221,10 @@
 				if (empty($reset_list))
 					$reset_list 						= $data_reset_list;
 				
-				$astDB->where('list_id', $list_id);
-				$astDB->update('vicidial_list', array('called_since_last_reset' => $reset_list));
+                if ($reset_list === 'Y') {
+                    $astDB->where('list_id', $list_id);
+                    $astDB->update('vicidial_list', array('called_since_last_reset' => 'N'));
+                }
 			
 				$updateData 							= array(
 					'list_name' 							=> $list_name,
