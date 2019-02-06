@@ -253,14 +253,7 @@
 				$log_id 								= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Carrier: $carrier_id", $log_group, $astDB->getLastQuery());
 				
 				if ($q_insert) {
-					$data 								= array (
-						"rebuild_conf_files" 				=> "Y"
-					);
-					
-					$astDB->where("generate_vicidial_conf", "Y");
-					$astDB->where("active_asterisk_server", "Y");
-					$astDB->where("server_ip", $server_ip);
-					$astDB->update("servers", $data);
+					rebuildconfQuery($astDB, $server_ip);
 
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Reloaded sip.conf for: $carrier_id", $log_group, $astDB->getLastQuery());
 					$apiresults 						= array(

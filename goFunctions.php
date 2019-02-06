@@ -1846,12 +1846,15 @@
         return $result;
     }
 
-    function rebuildconfQuery($dbase, $server_ip){
+    function rebuildconfQuery($dbase, $server_ip = NULL){
         //"UPDATE servers SET rebuild_conf_files='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y' and server_ip='$server_ip';";
         $data = Array("rebuild_conf_files" => "Y");
         $dbase->where('generate_vicidial_conf', "Y");
         $dbase->where('active_asterisk_server', "Y");
+        
+        if(!empty($server_ip))
         $dbase->where('server_ip', $server_ip);
+
         $result = $dbase->update("servers", $data);
         
         if ($result) {
