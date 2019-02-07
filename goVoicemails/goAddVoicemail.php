@@ -94,6 +94,8 @@
 			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added new voicemail. ID: $voicemail_id", $log_group, $astDB->getLastQuery());
 			
 			if($q_insert){
+				rebuildconfQuery($astDB);
+				
 				$apiresults 			= array(
 					"result" 				=> "success",
 					"data" 					=> $q_insert
