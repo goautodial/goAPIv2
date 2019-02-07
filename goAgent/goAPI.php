@@ -26,7 +26,7 @@
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
 $version = file_get_contents("{$webRoot}/version.txt");
 $goCharset = "UTF-8";
-$goVersion = "1.0";
+$goVersion = "4.0";
 
 include_once('./includes/MySQLiDB.php');
 @include_once('../goDBasterisk.php');
