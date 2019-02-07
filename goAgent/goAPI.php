@@ -84,6 +84,15 @@ if (isset($_GET['bcrypt'])) { $bcrypt = $astDB->escape($_GET['bcrypt']); }
 if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
     else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }
 
+// Getting the right Timezone
+$goDB->where('setting', 'timezone');
+$rslt = $goDB->getOne('settings', 'value');
+$tz = $rslt['value'];
+if (!empty($tz)) {
+    ini_set('date.timezone', $tz);
+    date_default_timezone_set($tz);
+}
+
 $auth = 0;
 $US = '_';
 $CL = ':';

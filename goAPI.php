@@ -63,6 +63,15 @@
     $goCharset = "UTF-8";
     $goVersion = "4.0";
     
+	##### getting timezone ######
+    $goDB->where('setting', 'timezone');
+    $rslt = $goDB->getOne('settings', 'value');
+    $tz = $rslt['value'];
+	if (!empty($tz)) {
+        ini_set('date.timezone', $tz);
+        date_default_timezone_set($tz);
+	}
+    
     /* check credentials */
 	$pass_hash = '';
 	$cwd = $_SERVER['DOCUMENT_ROOT'];
