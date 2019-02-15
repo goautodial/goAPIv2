@@ -1,10 +1,10 @@
 <?php
 /**
- * @file        goGetDispoStats.php
- * @brief       API reports for disposition statuses
+ * @file        goGetInboundReport.php
+ * @brief       API reports for inbound report
  * @copyright   Copyright (c) 2018 GOautodial Inc.
  * @author      Alexander Jim Abenoja
- *
+ *		John Ezra Gois
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
  *  it under the terms of the GNU Affero General Public License as published by
@@ -33,8 +33,6 @@
     $toDate = $astDB->escape($_REQUEST['toDate']);
     $campaignID = $astDB->escape($_REQUEST['campaignID']);
     $dispo_stats = $astDB->escape($_REQUEST['statuses']);
-   POSDUWIAndwjaN 
-    die("HOY");
     
     if (empty($fromDate)) {
         $fromDate = date("Y-m-d")." 00:00:00";
@@ -84,7 +82,7 @@
 		    AND date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
 		";
 
-		$query = $astDB->rawQuery($query);
+		$query = $astDB->rawQuery($inbound_report_query);
 		$TOPsorted_output = "";
 		$number = 1;
 
@@ -110,9 +108,12 @@
 		}
 
 		$apiresults = array(
-		    "TOPsorted_output" => "POGI AKO"
+		    "result" => "success",
+		    "inbound_query" => $inbound_report_query,
+		    "query" => $query,
+		    "TOPsorted_output" => $TOPsorted_output
 		);
 
-		//return $apiresults;
+		return $apiresults;
 	}
 ?>
