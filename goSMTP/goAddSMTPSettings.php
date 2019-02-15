@@ -57,7 +57,7 @@
 		if($goDB->getInsertId() > 0){
 			$apiresults = array("result" => "success", "query" => $goDB->getLastQuery());
 		}else{
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => $insert_query);
+			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => $insertData);
 		}
 	}
 ?>
