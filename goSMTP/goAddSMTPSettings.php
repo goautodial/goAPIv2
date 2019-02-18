@@ -39,6 +39,8 @@
 		$username = $astDB->escape($_REQUEST['username']); 	//Username to use for SMTP authentication - use full email address for gmail
 		$password = $astDB->escape($_REQUEST['password']); 	//Password to use for SMTP authentication
 		
+		$password = encrypt_decrypt('encrypt', $password);
+
 		//$insert_query = "INSERT INTO smtp_settings(debug, timezone, ipv6_support, host, port, smtp_security, smtp_auth, username, password)
 		//VALUES('$debug','$timezone','$ipv6_support','$host','$port','$smtp_security','$smpt_auth','$username','$password');";
 		$insertData = array(
@@ -48,16 +50,39 @@
 			'host' => $host,
 			'port' => $port,
 			'smtp_security' => $smtp_security,
-			'smtp_auth' => $smtm_auth,
+			'smtp_auth' => $smtp_auth,
 			'username' => $username,
 			'password' => $password
 		);
 		$execute_insert = $goDB->insert('smtp_settings', $insertData);
 		
-		if($goDB->getInsertId() > 0){
+	//	if($goDB->getInsertId() > 0){
+		if($execute_insert){
 			$apiresults = array("result" => "success", "query" => $goDB->getLastQuery());
 		}else{
 			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => $insertData);
 		}
 	}
+	function encrypt_decrypt($action, $string) {
+        $output = false;
+
+        $encrypt_method = "AES-256-CBC";
+        $secret_key = 'This is my secret key';
+        $secret_iv = 'This is my secret iv';
+
+        // hash
+        $key = hash('sha256', $secret_key);
+
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        if( $action == 'encrypt' ) {
+            $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
+            $output = base64_encode($output);
+        }
+        else if( $action == 'decrypt' ){
+            $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+        }
+        return $output;
+        }
 ?>
