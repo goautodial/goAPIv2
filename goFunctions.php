@@ -61,22 +61,31 @@
 		$allowed_users = "";
 		
         if ($groupId=='ADMIN' || $groupId=='admin') {
-                   $query = "select user as userg from vicidial_users";
-                   $rsltv = mysqli_query($link,$query); 
+                   /*$query = "select user as userg from vicidial_users";
+                   $rsltv = mysqli_query($link,$query);*/
+
+                   $result = $astDB->getOne('vicidial_users', 'user AS userg');
         } else {
-                   $query = "select user as userg from vicidial_users where user_group='$groupId'";
-                   $rsltv = mysqli_query($link,$query); 
+                   /*$query = "select user as userg from vicidial_users where user_group='$groupId'";
+                   $rsltv = mysqli_query($link,$query);*/
+	
+		   $astDB->where('user_group', $groupId) ;
+		   $result = $astDB->getOne('vicidial_users', 'user AS userg');
         }
         
-        while($info = mysqli_fetch_array( $rsltv )) {
+        /*while($info = mysqli_fetch_array( $rsltv )) {
             $users[] = $info['userg'];
-        }
+        }*/
+        if($astDB->count > 0){
+                foreach($result as $fresults){
+                        $users[] = $fresults;
+                }
 		
 		if(!empty($users)){
 			$imploded = implode("','", $users);
 			$allowed_users = "'".$imploded."'";
 		}
-		
+	}
         return $allowed_users;
     }
     
