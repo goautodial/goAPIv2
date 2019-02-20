@@ -59,6 +59,7 @@
 	$am_message_chooser 								= $astDB->escape($_REQUEST['am_message_chooser']);
 	$agent_pause_codes_active 							= $astDB->escape($_REQUEST['agent_pause_codes_active']);
 	$manual_dial_filter 								= $astDB->escape($_REQUEST['manual_dial_filter']);
+	$manual_dial_search_filter							= $astDB->escape($_REQUEST['manual_dial_search_filter']);
 	$use_internal_dnc 									= $astDB->escape($_REQUEST['use_internal_dnc']);
 	$use_campaign_dnc 									= $astDB->escape($_REQUEST['use_campaign_dnc']);
 	$manual_dial_list_id 								= $astDB->escape($_REQUEST['manual_dial_list_id']);
@@ -280,6 +281,7 @@
 							'am_message_exten' 					=> $amMessageExten, 
 							'agent_pause_codes_active' 			=> (!empty($agent_pause_codes_active)) ? $agent_pause_codes_active : $resultGet['agent_pause_codes_active'], 
 							'manual_dial_filter' 				=> (!empty($manual_dial_filter)) ? $manual_dial_filter : $resultGet['manual_dial_filter'], 
+							'manual_dial_search_filter' 		=> (!empty($manual_dial_search_filter)) ? $manual_dial_search_filter : $resultGet['manual_dial_search_filter'],
 							'customer_3way_hangup_logging' 		=> (!empty($customer_3way_hangup_logging)) ? $customer_3way_hangup_logging : $resultGet['customer_3way_hangup_logging'], 
 							'customer_3way_hangup_seconds' 		=> (!empty($customer_3way_hangup_seconds)) ? $customer_3way_hangup_seconds : $resultGet['customer_3way_hangup_seconds'], 
 							'customer_3way_hangup_action' 		=> (!empty($customer_3way_hangup_action)) ? $customer_3way_hangup_action : $resultGet['customer_3way_hangup_action'],
