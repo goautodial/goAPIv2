@@ -23,31 +23,31 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);	
-	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
+	$log_user = $session_user;
+	$log_group = go_get_groupid($session_user, $astDB); 
+	$log_ip = $astDB->escape($_REQUEST['log_ip']);
+	$goUser	= $astDB->escape($_REQUEST['goUser']);
+	$goPass	= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);	
+	$limit 	= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
 	
-	### POST or GET Variables
-    $requestDataPhone 									= $astDB->escape($_REQUEST['requestDataPhone']);
-	$start_filterdate 									= $astDB->escape($_REQUEST['start_filterdate']);
-	$end_filterdate 									= $astDB->escape($_REQUEST['end_filterdate']);
-	$agent_filter 										= $astDB->escape($_REQUEST['agent_filter']);
+	// POST or GET Variables
+	$requestDataPhone = $astDB->escape($_REQUEST['requestDataPhone']);
+	$start_filterdate = $astDB->escape($_REQUEST['start_filterdate']);
+	$end_filterdate = $astDB->escape($_REQUEST['end_filterdate']);
+	$agent_filter = $astDB->escape($_REQUEST['agent_filter']);
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI User Not Defined."
+		$apiresults = array(
+			"result" => "Error: goAPI User Not Defined."
 		);
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI Password Not Defined."
+		$apiresults = array(
+			"result" => "Error: goAPI Password Not Defined."
 		);
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: Session User Not Defined."
+		$apiresults = array(
+			"result" => "Error: Session User Not Defined."
 		);
 	} else {
 		// check if goUser and goPass are valid
@@ -72,7 +72,7 @@
 						$ul								= "AND vl.user_group = '$log_group'";
 					} else {
 						$stringv 						= go_getall_allowed_users($log_group);
-						$ul 							= "AND rl.user IN ($stringv)";					
+						$ul 							= "AND rl.user IN ($stringv)";
 					}
 				} else {
 					$ul 								= "";
@@ -197,7 +197,8 @@
 				);
 			} else {
 				$apiresults 						= array(
-					"result" 							=> "success"
+					"result" 							=> "success",
+					"query" => $query
 				);
 			}
 		} else {
