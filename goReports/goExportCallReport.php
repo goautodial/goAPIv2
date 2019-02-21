@@ -274,14 +274,12 @@
     }
 	$result = $astDB->rawQuery($query);
 
-//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
+	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 	// CONVERT RETURN OF rawQuery to Arrays
 	$result = json_decode(json_encode($result), true);
 
 	//OUTPUT DATA HEADER//
-	//while ($fieldinfo=mysqli_ftch_field($result))
-	//while ($fieldinfo = $astDB->getFieldNames()) { // <------ ERROR!!!!
 	$csv_header = array_keys($result[0]);
 
 	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $csv_header);
@@ -330,26 +328,24 @@
 	
 	//OUTPUT DATA ROW//
 	foreach ($result as $row) {
-		$lead_id = $row[34];
-		$uniqueid = $row[35];
-		$list_id_spec = $row[8];
-
+		$lead_id = $row["lead_id"];
+		$uniqueid = $row["uniqueid"];
+		$list_id_spec = $row["list_id"];
+		
 		if ($per_call_notes == "Y") {
 			$astDB->WHERE("lead_id", $lead_id);
-			$fetch_callnotes 						= $astDB->getValue("vicidial_call_notes", "call_notes");
+			$fetch_callnotes = $astDB->getOne("vicidial_call_notes", "call_notes");
 			//$query_callnotes = "SELECT call_notes FROM vicidial_call_notes WHERE lead_id='$lead_id' LIMIT 1;");
-			$notes_ct 								= $astDB->count;
+			$notes_ct = $astDB->count;
 			
 			if ($notes_ct > 0) {
-				$notes_data 						= $fetch_callnotes;
-				$notes_data 						= rawurldecode($notes_data);
+				$notes_data = $fetch_callnotes["call_notes"];
+				$notes_data = rawurldecode($notes_data);
 			} else {
-				$notes_data 						= "";
+				$notes_data = "";
 			}
-			
-			array_push($row,$notes_data);
+			$row["call_notes"] = $notes_data;
 		}
-
 		if ($rec_location == "Y") {
 			//$recording_array = Array($lead_id);
 			if (isset($uniqueid2) && !empty($uniqueid2)) {
@@ -361,48 +357,51 @@
 				$astDB->WHERE("vicidial_id", $uniqueid);
 			}
 			$astDB->WHERE("lead_id", $lead_id);
-			$fetch_recording 						= $astDB->getValue("recording_log", "location");	
+			$fetch_recording = $astDB->getOne("recording_log", "location");	
 			//$query_recordings = "SELECT location FROM recording_log WHERE lead_id='$lead_id' $condition_SQL LIMIT 1;");
-			$rec_ct 								= $astDB->rawQuery($query_recordings);
+			$rec_ct = $astDB->count;
 			if ($rec_ct > 0) {
-				$rec_data 							= $fetch_recording["location"];
-				//$rec_data = rawurldecode($rec_data);
+				$rec_data = $fetch_recording["location"];
+				$rec_data = rawurldecode($rec_data);
 			} else {
-				$rec_data 							= "";
+				$rec_data = "";
 			}
-			
-			array_push($row,$rec_data);
+			//$apiresults = array ( "QUERY" => $fetch_recording, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $rec_data);
+			$row["rec_location"] = $rec_data;
 		}
+		//$apiresults = array ( $row );
 
 		// Replace special characters [,] with -
-        	if (!empty($row[28])) {
-            		$row[28] = preg_replace('/[,]+/', '-', trim($row[28]));
+        	if (!empty($row["address1"])) {
+            		$row["address1"] = preg_replace('/[,]+/', '-', trim($row["address1"]));
         	}
         	
-        	if (!empty($row[15])) {
-            		$row[15] = preg_replace('/[,]+/', '-', trim($row[15]));
+        	if (!empty($row["address2"])) {
+            		$row["address2"] = preg_replace('/[,]+/', '-', trim($row["address2"]));
         	}
        		
-		if (!empty($row[16])) {
-            		$row[16] = preg_replace('/[,]+/', '-', trim($row[16]));
+		if (!empty($row["address3"])) {
+            		$row["address3"] = preg_replace('/[,]+/', '-', trim($row["address3"]));
         	}
-        	if (!empty($row[17])) {
-            		$row[17] = preg_replace('/[,]+/', '-', trim($row[17]));
+        	if (!empty($row["comments"])) {
+            		$row["comments"] = preg_replace('/[,]+/', '-', trim($row["comments"]));
         	}
 
 		if ($custom_fields == "Y")	{
 			$keys = array_keys($active_list_fields); // list of active custom lists
-			
+				
 			for ($i = 0 ; $i < count($keys); $i++) {
 			    $list_id = $keys[$i];
 			    $fields = implode(",", $active_list_fields[$list_id]);
-				
+					
 				if ("custom_".$list_id_spec === $list_id) {
 					$astDB->WHERE("lead_id", $lead_id);
-					$fetch_CF = $astDB->getValue($list_id, $fields);
+					$fetch_CF = $astDB->getOne($list_id, $fields);
+	//				$test[] = $fetch_CF;
+					
 					//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
 
-					if ($fetch_CF !== NULL) {
+					if ($fetch_CF) {
 						for ($x = 0;$x < count($header_CF);$x++) {
 							if (!empty($fetch_CF[$header_CF[$x]])) {
 								$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
@@ -415,10 +414,10 @@
 				
 
 				for ($a=0;$a < count($fetch_row);$a++) {
-					array_push($row, $fetch_row[$a]);
+					$row[$header_CF[$a]] = $fetch_row[$a];
 				}
 				
-				$queries[] 							= $row;
+				//$queries[] 							= $row;
 				unset($fetch_row);
 				unset($fetch_CF);
 		    }
@@ -426,20 +425,19 @@
 		
 		$csv_row[] = $row;
 	}
+	//$apiresults = array ( $csv_row);
 
 	// new
 	// ----
-	$campFilter 									= (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
-	$inbFilter  									= (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
-	$listFilter 									= (strlen($lists) > 0) ? "List(s): $lists" : "";
-	$log_id 										= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
+	$campFilter = (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
+	$inbFilter = (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
+	$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
+	$log_id	= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 	
 	$apiresults 										= array(
 		"result" => "success", 
 		"header" 										=> $csv_header, 
 		"rows" 											=> $csv_row
 	);
-
-	
 ?>
 
