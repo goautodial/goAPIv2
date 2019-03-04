@@ -1052,6 +1052,10 @@
 					$campinfo['cb_sendemail'] 			= $rslt['cb_sendemail'];
 				}
 				
+				$goDB->where('setting', 'timezone');
+				$creamy = $goDB->getOne('settings', 'value');
+				$default_settings['timezone'] = $creamy['value'];
+				
 				$default_group_alias_cid 				= '';
 				$default_group_alias 					= $campinfo['default_group_alias'];
 				
