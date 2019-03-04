@@ -32,6 +32,15 @@
 		else
 			$ul = "";
     }
+    
+	##### getting timezone ######
+    $goDB->where('setting', 'timezone');
+    $rslt = $goDB->getOne('settings', 'value');
+    $tz = $rslt['value'];
+	if (!empty($tz)) {
+        ini_set('date.timezone', $tz);
+        date_default_timezone_set($tz);
+	}
 
     $query_date =  date('Y-m-d');
 
