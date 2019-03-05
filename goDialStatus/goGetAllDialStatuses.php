@@ -70,11 +70,12 @@
 					);
 					
 					if (!preg_match("/ALL/", $campaign_id)) {
+
 						$astDB->where("campaign_id", $campaign_id);
 					}
 					
 					$astDB->orderBy("status", "desc");			
-					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
+					$rsltv 								= $astDB->get("vicidial_statuses", NULL, $cols);			
 							
 					if ($astDB->count > 0) {
 						foreach ($rsltv as $fresults){
@@ -90,7 +91,7 @@
 				);
 				
 				$astDB->orderBy("status", "desc");			
-				$rsltv 									= $astDB->get("vicidial_statuses", NULL, $cols);
+				$rsltv 									= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
 				
 				if ($astDB->count > 0) {
 					foreach ($rsltv as $fresults){
