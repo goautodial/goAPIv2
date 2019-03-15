@@ -181,6 +181,7 @@
 				} else {
 					$apiresults 						= array(
 						"result" 							=> "success", 
+                        "query"                             => $SQLquery,
 						"data" 								=> 0
 					);		
 				}
