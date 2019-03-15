@@ -31,8 +31,9 @@
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
-	$hotkeys_only 										= $astDB->escape($_REQUEST['hotkeys_only']);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
+	$hotkeys_only 											= $astDB->escape($_REQUEST['hotkeys_only']);
+	$add_hotkey											= $astDB->escape($_REQUEST['add_hotkey']);
+	$campaign_id 											= $astDB->escape($_REQUEST['campaign_id']);
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -69,13 +70,12 @@
 						"status_name"
 					);
 					
-					if (!preg_match("/ALL/", $campaign_id)) {
-
+					if (!preg_match("/ALL/", $campaign_id) && $add_hotkey != "1") {
 						$astDB->where("campaign_id", $campaign_id);
 					}
 					
 					$astDB->orderBy("status", "desc");			
-					$rsltv 								= $astDB->get("vicidial_statuses", NULL, $cols);			
+					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
 							
 					if ($astDB->count > 0) {
 						foreach ($rsltv as $fresults){
@@ -90,21 +90,23 @@
 					"status_name"
 				);
 				
+				$astDB->where("selectable", "Y");
 				$astDB->orderBy("status", "desc");			
-				$rsltv 									= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
+				$rsltv 									= $astDB->get("vicidial_statuses", NULL, $cols);
 				
 				if ($astDB->count > 0) {
 					foreach ($rsltv as $fresults){
 						$dataStatus[] 					= $fresults['status'];
 						$dataStatusName[] 				= $fresults['status_name'];
-					}
-					
-					$apiresults 						= array(
-						"result" 							=> "success",
-						"status" 							=> $dataStatus,
-						"status_name" 						=> $dataStatusName
-					);		
+					}					
 				}
+
+				$apiresults                                             = array(
+                                                "result"                                                => "success",
+                                                "status"                                                => $dataStatus,
+                                                "status_name"                                           => $dataStatusName,
+                                )
+;
 			} else {
 				$err_msg 								= error_handle("10108", "status. No campaigns available");
 				$apiresults								= array(
