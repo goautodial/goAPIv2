@@ -173,7 +173,7 @@
 					$apiresults 						= array(
 						"result" 							=> "success", 
 						//"query" 							=> $astDB->getLastQuery(),
-                        "query"                             => $SQLquery,
+                        //"query"                             => $SQLquery,
 						"data" 								=> $onlineAgents, 
 						"dataGo" 							=> $dataGo,
 						"parked" 							=> $dataPCs
@@ -181,7 +181,6 @@
 				} else {
 					$apiresults 						= array(
 						"result" 							=> "success", 
-                        "query"                             => $SQLquery,
 						"data" 								=> 0
 					);		
 				}
