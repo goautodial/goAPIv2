@@ -59,7 +59,23 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {			
+			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {		
+                                $cols                                                                   = array(
+                                        "status",
+                                        "status_name"
+                                );
+
+                                $astDB->where("selectable", "Y");
+                                $astDB->orderBy("status", "desc");
+                                $rsltv                                                                  = $astDB->get("vicidial_statuses", NULL, $cols);
+
+                                if ($astDB->count > 0) {
+                                        foreach ($rsltv as $fresults){
+                                                $dataStatus[]                                   = $fresults['status'];
+                                                $dataStatusName[]                               = $fresults['status_name'];
+                                        }
+                                }
+	
 				if ($hotkeys_only === "1") {
 					$astDB->where("selectable", "Y");
 				}
@@ -70,7 +86,7 @@
 						"status_name"
 					);
 					
-					if (!preg_match("/ALL/", $campaign_id) && $add_hotkey != "1") {
+					if (!preg_match("/ALL/", $campaign_id)) {
 						$astDB->where("campaign_id", $campaign_id);
 					}
 					
@@ -85,22 +101,6 @@
 					}			
 				}
 				
-				$cols 									= array(
-					"status", 
-					"status_name"
-				);
-				
-				$astDB->where("selectable", "Y");
-				$astDB->orderBy("status", "desc");			
-				$rsltv 									= $astDB->get("vicidial_statuses", NULL, $cols);
-				
-				if ($astDB->count > 0) {
-					foreach ($rsltv as $fresults){
-						$dataStatus[] 					= $fresults['status'];
-						$dataStatusName[] 				= $fresults['status_name'];
-					}					
-				}
-
 				$apiresults                                             = array(
                                                 "result"                                                => "success",
                                                 "status"                                                => $dataStatus,
