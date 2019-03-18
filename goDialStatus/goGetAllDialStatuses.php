@@ -86,7 +86,7 @@
 						"status_name"
 					);
 					
-					if (!preg_match("/ALL/", $campaign_id) && $add_hotkey != "1") {
+					if (!preg_match("/ALL/", $campaign_id)) {
 						$astDB->where("campaign_id", $campaign_id);
 					}
 					
