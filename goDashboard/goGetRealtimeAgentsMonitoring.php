@@ -155,7 +155,7 @@
                         vc.campaign_name as 'vla_campaign_name', ol.conference as 'ol_conference', ol.name as 'ol_callerid'
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, online as ol, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
-                    WHERE (ol.name = vla.callerid OR ol.conference = vla.conf_exten) AND vla.campaign_id IN ('$allowedCampaigns')
+                    WHERE (ol.name = vla.callerid OR ol.conference = vla.conf_exten) AND (vla.campaign_id IN ('$allowedCampaigns') AND vla.campaign_id = vc.campaign_id)
                         AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
                     GROUP BY ol.conference
                     ORDER BY last_call_time";
