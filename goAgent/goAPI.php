@@ -107,6 +107,11 @@ $loginDATE = date("Ymd");
 $CIDdate = date("mdHis");
 $ENTRYdate = date("YmdHis");
 
+if ($_REQUEST['debugX']) {
+    var_dump($NOW_TIME);
+    die();
+}
+
 while (strlen($CIDdate) > 9) {$CIDdate = substr("$CIDdate", 1);}
 $check_time = ($StarTtimE - 86400);
 
