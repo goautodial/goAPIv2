@@ -108,7 +108,7 @@ $CIDdate = date("mdHis");
 $ENTRYdate = date("YmdHis");
 
 if ($_REQUEST['debugX']) {
-    var_dump($NOW_TIME);
+    var_dump($NOW_TIME, $tz);
     die();
 }
 
