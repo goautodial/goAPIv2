@@ -1012,23 +1012,21 @@
 				$C_scheduled_callbacks 							= $campinfo['scheduled_callbacks'];
 				unset($campinfo['scheduled_callbacks']);
 				
-				$cbRslt 										= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'enable_callback_alert'");
-				
+				$addedCB_Columns						= '';
+				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'enable_callback_alert'");
 				if ($cbRslt) {
-					$addedCB_Columns 							= ",enable_callback_alert,cb_noexpire,cb_sendemail";
+					$addedCB_Columns 				   .= ",enable_callback_alert,cb_noexpire,cb_sendemail";
 				}
 				
-				$cols									= "
-					custom_fields_launch,
-					custom_fields_list_id,
-					url_tab_first_title,
-					url_tab_first_url,
-					url_tab_second_title,
-					url_tab_second_url		
-				";
+				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'manual_dial_min_digits'");
+				if ($cbRslt) {
+					$addedCB_Columns 				   .= ",manual_dial_min_digits";
+				}
+				
+				$cols									= "custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url";
 				
 				$goDB->where('campaign_id', $campinfo['campaign_id']);
-				$rslt 									= $goDB->getOne('go_campaigns', $cols);
+				$rslt 									= $goDB->getOne('go_campaigns', "{$cols}{$addedCB_Columns}");
 				
 				$campinfo['custom_fields_launch'] 		= 'ONCALL';
 				$campinfo['custom_fields_list_id'] 		= '';
@@ -1039,6 +1037,7 @@
 				$campinfo['enable_callback_alert'] 		= 0;
 				$campinfo['cb_noexpire'] 				= 0;
 				$campinfo['cb_sendemail'] 				= 0;
+				$campinfo['manual_dial_min_digits'] 	= 6;
 				
 				if ($goDB->count > 0) {
 					$campinfo['custom_fields_launch'] 	= $rslt['custom_fields_launch'];
@@ -1050,6 +1049,7 @@
 					$campinfo['enable_callback_alert'] 	= $rslt['enable_callback_alert'];
 					$campinfo['cb_noexpire'] 			= $rslt['cb_noexpire'];
 					$campinfo['cb_sendemail'] 			= $rslt['cb_sendemail'];
+					$campinfo['manual_dial_min_digits'] = $rslt['manual_dial_min_digits'];
 				}
 				
 				$goDB->where('setting', 'timezone');
