@@ -227,6 +227,13 @@ if ($sipIsLoggedIn) {
         if ($vs_vc_ct > 0) {
             $script_recording_delay = $vs_vc_ct;
         }
+        
+        $mdmdRslt = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'manual_dial_min_digits'");
+        if ($goDB->getRowCount() > 0) {
+            $goDB->where('campaign_id', $campaign);
+            $rslt = $goDB->getOne('go_campaigns', 'manual_dial_min_digits');
+            $manual_dial_min_digits = $rslt['manual_dial_min_digits'];
+        }
     
         ### check if this is a callback, if it is, skip the grabbing of a new lead and mark the callback as INACTIVE
         if ( (strlen($callback_id)>0) and (strlen($lead_id)>0) ) {
@@ -241,10 +248,10 @@ if ($sipIsLoggedIn) {
             $affected_rows = 1;
             $CBleadIDset = 1;
         
-            if (strlen($phone_number) > 5)
+            if (strlen($phone_number) >= $manual_dial_min_digits)
                 {$override_dial_number = $phone_number;}
         } else {
-            if (strlen($phone_number)>3) {
+            if (strlen($phone_number)>=3) {
                 if (preg_match("/ENABLED/", $manual_dial_call_time_check)) {
                     $secX = date("U");
                     $hour = date("H");
@@ -434,7 +441,7 @@ if ($sipIsLoggedIn) {
                         $astDB->orderBy('modify_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_list', 'lead_id');
                         $man_leadID_ct = $astDB->getRowCount();
-                        if ( (count($man_leadID_ct) > 0) and (strlen($phone_number) > 5) )
+                        if ( (count($man_leadID_ct) > 0) and (strlen($phone_number) >= $manual_dial_min_digits) )
                             {$override_phone++;}
                     } else {
                         // Added a script to fetch the tenant id and it's allowed campaigns -- Chris Lomuntad <chris@goautodial.com>
@@ -1045,7 +1052,7 @@ if ($sipIsLoggedIn) {
 
             $called_count++;
 
-            if ( (strlen($agent_dialed_type) < 3) or (strlen($agent_dialed_number) < 6) ) {
+            if ( (strlen($agent_dialed_type) < 3) or (strlen($agent_dialed_number) < $manual_dial_min_digits) ) {
                 $agent_dialed_number = $phone_number;
                 if (strlen($agent_dialed_type) < 3)
                     {$agent_dialed_type = 'MAIN';}
