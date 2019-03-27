@@ -78,6 +78,7 @@
 	$closer_campaigns									= $astDB->escape($_REQUEST['closer_campaigns']);
 	$xfer_groups										= $astDB->escape($_REQUEST['xfer_groups']);
 	$custom_fields_launch								= $astDB->escape($_REQUEST['custom_fields_launch']);
+    $manual_dial_min_digits                             = $astDB->escape($_REQUEST['manual_dial_min_digits']);
 	$campaign_type										= $astDB->escape($_REQUEST['campaign_type']);
 	$custom_fields_list_id								= $astDB->escape($_REQUEST['custom_fields_list_id']);
 	$per_call_notes 									= $astDB->escape($_REQUEST['per_call_notes']);
@@ -386,7 +387,8 @@
 							'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
 							'enable_callback_alert' 			=> (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
 							'cb_noexpire' 						=> (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
-							'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail']					
+							'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail'],
+                            'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits']
 						);
 						
 						$goDB->where( 'campaign_id', $campaign_id );
@@ -407,7 +409,8 @@
 							'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
 							'enable_callback_alert' 			=> ( gettype($enable_callback_alert) != 'NULL' ) ? $enable_callback_alert : $resultGet['enable_callback_alert'],
 							'cb_noexpire' 						=> ( gettype($cb_noexpire) != 'NULL' ) ? $cb_noexpire : $resultGet['cb_noexpire'],
-							'cb_sendemail' 						=> ( gettype($cb_sendemail) != 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail']	
+							'cb_sendemail' 						=> ( gettype($cb_sendemail) != 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail'],
+                            'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) != 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits']
 						);
 
 						$goDB->insert('go_campaigns', $data_insert_go);
