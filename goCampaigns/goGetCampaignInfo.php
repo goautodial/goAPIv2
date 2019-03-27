@@ -42,6 +42,7 @@
 	$url_tab_second_url 								= '';
 	$location_id 										= '';
 	$dynamic_cid 										= '';
+	$manual_dial_min_digits								= '';
 
     // Check campaign_id if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
@@ -122,6 +123,7 @@
 						$enable_callback_alert			= $fresults['enable_callback_alert'];
 						$cb_noexpire 					= $fresults['cb_noexpire'];
 						$cb_sendemail					= $fresults['cb_sendemail'];
+						$manual_dial_min_digits			= $fresults['manual_dial_min_digits'];
 						
 						if ($location_id_COL !== '') {
 							$location_id 				= $fresults['location_id'];
@@ -154,6 +156,7 @@
 					$cb_sendemail 						= (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : '';				
 					$location_id 						= (gettype($location_id) != 'NULL') ? $location_id : '';
 					$dynamic_cid 						= (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
+					$manual_dial_min_digits				= (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : '';
 					
 					$apiresults 						= array(
 						"result" 							=> "success",
@@ -170,7 +173,8 @@
 						'cb_sendemail'						=> $cb_sendemail,
 						'number_of_lines' 					=> $numberoflines,
 						'location_id' 						=> $location_id,
-						'dynamic_cid' 						=> $dynamic_cid
+						'dynamic_cid' 						=> $dynamic_cid,
+						'manual_dial_min_digits'			=> $manual_dial_min_digits
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
