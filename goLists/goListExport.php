@@ -76,8 +76,8 @@
 				$header_columns 						= "";
 				
 				foreach ($cllist as $clrow) {
-					if ($clrow != 'lead_id') {
-						$header_columns 				.= ",".$clrow[0];
+					if ($clrow['Field'] != 'lead_id') {
+						$header_columns 				.= ",".$clrow['Field'];
 					}
 				}
 				
