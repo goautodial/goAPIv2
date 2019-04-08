@@ -214,9 +214,9 @@
                 $tableExist = $astDB->getRowCount();
                 
                 if ($tableExist < 1) {
-                    $field_sql .= "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";      
+                    $field_sql = "CREATE TABLE custom_$list_to (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";      
                 }else{
-                    $field_sql .= "ALTER TABLE custom_$list_to ADD $field_label ";
+                    $field_sql = "ALTER TABLE custom_$list_to ADD $field_label ";
                 }
 
                
