@@ -305,6 +305,7 @@
                 // $output[] = mysqli_error($link);
 
                 $data_insert = array(
+                    'list_id'           => $list_to,
                     'field_label'       => $field_label,
                     'field_name'        => $field_name,
                     'field_description' => $field_description,
