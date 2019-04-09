@@ -1167,6 +1167,8 @@
 				//$testVal 							= $astDB->getLastQuery();
 			}
 			
+			ksort($statuses); // Sorting of disposition statuses
+			
 			$VARCBstatusesLIST 						.= " ";
 			
 			$default_settings['quick_transfer_button_enabled'] 			= $quick_transfer_button_enabled;
