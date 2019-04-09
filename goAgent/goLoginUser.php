@@ -457,9 +457,9 @@ if ($sipIsLoggedIn || $use_webrtc) {
         if ($scheduled_callback == 'Y')
             {$VARCBstatusesLIST .= " {$status}";}
     }
-    //ksort($statuses);
-    //ksort($statuses_priority);
-    //ksort($statuses_colors);
+    ksort($statuses);
+    ksort($statuses_priority);
+    ksort($statuses_colors);
     $statuses_ct = ($statuses_ct + $statuses_camp_ct);
     $VARCBstatusesLIST .= " ";
     
