@@ -31,9 +31,9 @@
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
-	$hotkeys_only 											= $astDB->escape($_REQUEST['hotkeys_only']);
+	$is_selectable 										= $astDB->escape($_REQUEST['is_selectable']);
 	$add_hotkey											= $astDB->escape($_REQUEST['add_hotkey']);
-	$campaign_id 											= $astDB->escape($_REQUEST['campaign_id']);
+	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -60,32 +60,35 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {		
-                                $cols                                                                   = array(
-                                        "status",
-                                        "status_name"
-                                );
-
-                                $astDB->where("selectable", "Y");
-                                $astDB->orderBy("status", "desc");
-                                $rsltv                                                                  = $astDB->get("vicidial_statuses", NULL, $cols);
-
-                                if ($astDB->count > 0) {
-                                        foreach ($rsltv as $fresults){
-                                                $dataStatus[]                                   = $fresults['status'];
-                                                $dataStatusName[]                               = $fresults['status_name'];
-                                        }
-                                }
-	
-				if ($hotkeys_only === "1") {
-					$astDB->where("selectable", "Y");
-				}
+                $cols                                                                   = array(
+                    "status",
+                    "status_name"
+                );
+                
+				if ($is_selectable === "1") {
+                    $astDB->where("selectable", "Y");
+                }
+                $astDB->orderBy("status", "desc");
+                $rsltv                                  = $astDB->get("vicidial_statuses", NULL, $cols);
+                
+                if ($astDB->count > 0) {
+                    foreach ($rsltv as $fresults){
+                        $thisStatus                     = $fresults['status'];
+                        //$dataStatusName[]               = $fresults['status_name'];
+                        $statusTemp[$thisStatus]        = $fresults['status_name'];
+                    }
+                }
 				
-				if (strlen($hotkeys_only) > 0 && strlen($campaign_id) > 0) {
+				if (strlen($is_selectable) > 0 && strlen($campaign_id) > 0) {
 					$cols 								= array(
 						"status", 
 						"status_name"
 					);
 					
+                    if ($is_selectable === "1") {
+                        $astDB->where("selectable", "Y");
+                    }
+                    
 					if (!preg_match("/ALL/", $campaign_id)) {
 						$astDB->where("campaign_id", $campaign_id);
 					}
@@ -95,18 +98,25 @@
 							
 					if ($astDB->count > 0) {
 						foreach ($rsltv as $fresults){
-							$dataStatus[] 				= $fresults['status'];
-							$dataStatusName[] 			= $fresults['status_name'];
+                            $thisStatus                 = $fresults['status'];
+							//$dataStatusName[] 			= $fresults['status_name'];
+                            $statusTemp[$thisStatus]    = $fresults['status_name'];
 						}		
 					}			
 				}
+                
+                ksort($statusTemp);
+                
+                foreach ($statusTemp as $status => $status_name) {
+                    $dataStatus[]                       = $status;
+                    $dataStatusName[]                   = $status_name;
+                }
 				
-				$apiresults                                             = array(
-                                                "result"                                                => "success",
-                                                "status"                                                => $dataStatus,
-                                                "status_name"                                           => $dataStatusName,
-                                )
-;
+				$apiresults                             = array(
+                    "result"                                                => "success",
+                    "status"                                                => $dataStatus,
+                    "status_name"                                           => $dataStatusName,
+                );
 			} else {
 				$err_msg 								= error_handle("10108", "status. No campaigns available");
 				$apiresults								= array(
