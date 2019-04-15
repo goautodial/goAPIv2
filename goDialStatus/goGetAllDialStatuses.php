@@ -75,8 +75,14 @@
                     foreach ($rsltv as $fresults){
                         $thisStatus                     = $fresults['status'];
                         //$dataStatusName[]               = $fresults['status_name'];
-                        $statusTemp[$thisStatus]        = $fresults['status_name'];
+                        $systemStatuses[$thisStatus]    = $fresults['status_name'];
                     }
+                }
+                
+                ksort($systemStatuses);
+                foreach ($systemStatuses as $key => $status) {
+                    $dataStatus['system'][]             = $key;
+                    $dataStatusName['system'][]         = $status;
                 }
 				
 				if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
@@ -100,16 +106,15 @@
 						foreach ($rsltv as $fresults){
                             $thisStatus                 = $fresults['status'];
 							//$dataStatusName[] 			= $fresults['status_name'];
-                            $statusTemp[$thisStatus]    = $fresults['status_name'];
+                            $campStatuses[$thisStatus]  = $fresults['status_name'];
 						}		
 					}			
 				}
                 
-                ksort($statusTemp);
-                
-                foreach ($statusTemp as $status => $status_name) {
-                    $dataStatus[]                       = $status;
-                    $dataStatusName[]                   = $status_name;
+                ksort($campStatuses);
+                foreach ($campStatuses as $key => $status) {
+                    $dataStatus['campaign'][]           = $key;
+                    $dataStatusName['campaign'][]       = $status;
                 }
 				
 				$apiresults                             = array(
