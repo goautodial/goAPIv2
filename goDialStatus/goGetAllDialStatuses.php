@@ -60,7 +60,7 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {		
-                $cols                                                                   = array(
+                $cols                                   = array(
                     "status",
                     "status_name"
                 );
@@ -79,7 +79,7 @@
                     }
                 }
 				
-				if (strlen($is_selectable) > 0 && strlen($campaign_id) > 0) {
+				if (is_array($campaigns) && in_array($campaign_id, $campaigns)) {
 					$cols 								= array(
 						"status", 
 						"status_name"
