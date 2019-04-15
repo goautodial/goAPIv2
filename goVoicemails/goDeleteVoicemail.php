@@ -47,14 +47,14 @@
 		}
 		
 		// check voicemail ID if valid
-		$astDB->where('voicemail_id', $voicemail);
+		$astDB->where('voicemail_id', $voicemail_id);
 		$astDB->getOne('vicidial_voicemail');
 
 		if ($astDB->count > 0) {
-			$astDB->where('voicemail_id', $voicemail);
+			$astDB->where('voicemail_id', $voicemail_id);
 			$astDB->delete('vicidial_voicemail');			
 
-			$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Voicemail ID: $voicemail", $log_group, $astDB->getLastQuery());			
+			$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Voicemail ID: $voicemail_id", $log_group, $astDB->getLastQuery());			
 			$apiresults 				= array(
 				"result" 					=> "success"
 			);
