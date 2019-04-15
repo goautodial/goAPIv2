@@ -59,7 +59,7 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {		
+			//if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
                 $cols                                   = array(
                     "status",
                     "status_name"
@@ -79,7 +79,7 @@
                     }
                 }
 				
-				if (is_array($campaigns) && in_array($campaign_id, $campaigns)) {
+				if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
 					$cols 								= array(
 						"status", 
 						"status_name"
@@ -117,13 +117,13 @@
                     "status"                                                => $dataStatus,
                     "status_name"                                           => $dataStatusName,
                 );
-			} else {
-				$err_msg 								= error_handle("10108", "status. No campaigns available");
-				$apiresults								= array(
-					"code" 									=> "10108", 
-					"result" 								=> $err_msg
-				);
-			}
+			//} else {
+			//	$err_msg 								= error_handle("10108", "status. No campaigns available");
+			//	$apiresults								= array(
+			//		"code" 									=> "10108", 
+			//		"result" 								=> $err_msg
+			//	);
+			//}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
