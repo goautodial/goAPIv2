@@ -24,6 +24,9 @@
 
 	include_once ("goAPI.php");
 	
+	ini_set('display_errors', 1);
+	error_reporting(E_ALL);
+	
 	$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB); 
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);		
@@ -62,9 +65,9 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {    
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (!empty($status)) {
-				if (in_array($campaign_id, $campaigns) || $campaign_id == 'ALL') {			
+				if (in_array($campaign_id, $campaigns) || $campaign_id == 'ALL') {
 					$astDB->where('status', $status);
 					$astDB->get('vicidial_statuses', null, 'status');
 					
