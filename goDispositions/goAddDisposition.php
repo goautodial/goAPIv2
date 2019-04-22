@@ -195,8 +195,8 @@
                                         $log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
                                     }
                                 }
-							}					
-												
+							}
+							
 							$apiresults 				= array(
 								"result" 					=> "success"
 							);						
@@ -206,7 +206,7 @@
 								"code" 						=> "41004", 
 								"result" 					=> $err_msg
 							);
-						}						
+						}
 					} else {
 						$astDB->where("campaign_id", $campaign_id);
 						$astDB->where("status", $status);
