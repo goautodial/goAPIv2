@@ -73,22 +73,10 @@
 					
 					if ($astDB->count <= 0) {
 						if ($campaign_id == 'ALL') {
-							$astDB->where("campaign_id", $campaigns, 'IN');
-							$astDB->where("status", $status);
-							$astDB->get("vicidial_campaign_statuses", NULL, "status");
-							
-							if ($astDB->count < 1) {
-								$apiresults 		= array(
-									"result" 			=> "success"
-								);						
-							} else {
-								$err_msg 			= error_handle("41004", "status. Campaign Status already exists");
-								$apiresults			= array(
-									"code" 				=> "41004", 
-									"result" 			=> $err_msg
-								);
-							}	
-							
+								$astDB->where("campaign_id", $campaigns, 'IN');
+								$astDB->where("status", $status);
+								$astDB->get("vicidial_campaign_statuses", NULL, "status");
+								var_dump($astDB->getLastQuery());
 							//foreach ($campaigns as $campaignid) {
 							//	$astDB->where("campaign_id", $campaignid);
 							//	$astDB->where("status", $status);
