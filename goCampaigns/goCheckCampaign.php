@@ -35,7 +35,6 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
     $status 											= $astDB->escape($_REQUEST['status']);
-	var_dump($campaigns);
     
     // Check exisiting status
 	if (empty ($goUser) || is_null ($goUser)) {
@@ -74,7 +73,7 @@
 					
 					if ($astDB->count <= 0) {
 						if ($campaign_id == 'ALL') {
-							foreach ($campaigns["campaign_id"] as $key => $campaignid) {
+							foreach ($campaigns as $campaignid) {
 								$astDB->where("campaign_id", $campaignid);
 								$astDB->where("status", $status);
 								$astDB->get("vicidial_campaign_statuses", NULL, "status");
