@@ -24,8 +24,8 @@
 
 	include_once ("goAPI.php");
 	
-	ini_set('display_errors', 1);
-	error_reporting(E_ALL);
+	//ini_set('display_errors', 1);
+	//error_reporting(E_ALL);
 	
 	$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB); 
@@ -73,10 +73,22 @@
 					
 					if ($astDB->count <= 0) {
 						if ($campaign_id == 'ALL') {
-								$astDB->where("campaign_id", $campaigns, 'IN');
-								$astDB->where("status", $status);
-								$astDB->get("vicidial_campaign_statuses", NULL, "status");
-								var_dump($astDB->getLastQuery());
+							$astDB->where("campaign_id", $campaigns, 'IN');
+							$astDB->where("status", $status);
+							$astDB->get("vicidial_campaign_statuses", NULL, "status");
+							
+							if ($astDB->count < count($campaigns)) {
+								$apiresults 		= array(
+									"result" 			=> "success"
+								);						
+							} else {
+								$err_msg 			= error_handle("41004", "status. Campaign Status already exists");
+								$apiresults			= array(
+									"code" 				=> "41004", 
+									"result" 			=> $err_msg
+								);
+							}	
+							
 							//foreach ($campaigns as $campaignid) {
 							//	$astDB->where("campaign_id", $campaignid);
 							//	$astDB->where("status", $status);
