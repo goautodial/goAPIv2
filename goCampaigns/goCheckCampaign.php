@@ -35,6 +35,7 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
     $status 											= $astDB->escape($_REQUEST['status']);
+	var_dump($campaigns);
     
     // Check exisiting status
 	if (empty ($goUser) || is_null ($goUser)) {
