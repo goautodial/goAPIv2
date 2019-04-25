@@ -154,43 +154,49 @@
 						$astDB->where("status", $status);
 						$astDB->get("vicidial_campaign_statuses", NULL, "status");
 						
-						if($astDB->count <= 0) {
-							foreach ($campaigns["campaign_id"] as $key => $campaignid) {
-								$data					= array(
-									"status"				=> $status, 	
-									"status_name"			=> $status_name,
-									"selectable"			=> $selectable, 
-									"campaign_id"			=> $campaignid,
-									"human_answered"		=> $human_answered,
-									"category"				=> $category,
-									"sale"					=> $sale,
-									"dnc"					=> $dnc,
-									"customer_contact"		=> $customer_contact,
-									"not_interested"		=> $not_interested,
-									"unworkable"			=> $unworkable,
-									"scheduled_callback"	=> $scheduled_callback
-								);
-								
-								$astDB->insert("vicidial_campaign_statuses", $data);
-								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $astDB->getLastQuery());							
-								
-								$tableQuery 			= "SHOW tables LIKE 'go_statuses';";
-								$checkTable 			= $goDB->rawQuery($tableQuery);
-
-								if ($checkTable) {
-									$datago				= array(
-										"status"			=> $status, 	
-										"campaign_id"		=> $campaignid,
-										"priority"			=> $priority,
-										"color"				=> $color,
-										"type"				=> $type
-									);
-									
-									$qgo_insert			= $goDB->insert("go_statuses", $datago);
-									$log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
-								}
-							}					
-												
+						if($astDB->count < count($campaigns)) {
+							foreach ($campaigns as $campaignid) {
+                                $astDB->where("campaign_id", $campaignid);
+                                $astDB->where("status", $status);
+                                $astDB->get("vicidial_campaign_statuses", NULL, "status");
+                                
+                                if ($astDB->count < 1) {
+                                    $data					= array(
+                                        "status"				=> $status, 	
+                                        "status_name"			=> $status_name,
+                                        "selectable"			=> $selectable, 
+                                        "campaign_id"			=> $campaignid,
+                                        "human_answered"		=> $human_answered,
+                                        "category"				=> $category,
+                                        "sale"					=> $sale,
+                                        "dnc"					=> $dnc,
+                                        "customer_contact"		=> $customer_contact,
+                                        "not_interested"		=> $not_interested,
+                                        "unworkable"			=> $unworkable,
+                                        "scheduled_callback"	=> $scheduled_callback
+                                    );
+                                    
+                                    $astDB->insert("vicidial_campaign_statuses", $data);
+                                    $log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $astDB->getLastQuery());							
+                                    
+                                    $tableQuery 			= "SHOW tables LIKE 'go_statuses';";
+                                    $checkTable 			= $goDB->rawQuery($tableQuery);
+    
+                                    if ($checkTable) {
+                                        $datago				= array(
+                                            "status"			=> $status, 	
+                                            "campaign_id"		=> $campaignid,
+                                            "priority"			=> $priority,
+                                            "color"				=> $color,
+                                            "type"				=> $type
+                                        );
+                                        
+                                        $qgo_insert			= $goDB->insert("go_statuses", $datago);
+                                        $log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition $status on Campaign $campaignid", $log_group, $goDB->getLastQuery());							
+                                    }
+                                }
+							}
+							
 							$apiresults 				= array(
 								"result" 					=> "success"
 							);						
@@ -200,7 +206,7 @@
 								"code" 						=> "41004", 
 								"result" 					=> $err_msg
 							);
-						}						
+						}
 					} else {
 						$astDB->where("campaign_id", $campaign_id);
 						$astDB->where("status", $status);
