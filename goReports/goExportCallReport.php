@@ -26,6 +26,7 @@
 	$campaigns 		= $astDB->escape($_REQUEST['campaigns']);
 	$inbounds 		= $astDB->escape($_REQUEST['inbounds']);
 	$lists 			= $astDB->escape($_REQUEST['lists']);
+	$dispo_stats            = $astDB->escape($_REQUEST['statuses']);
 	$custom_fields 	= $astDB->escape($_REQUEST['custom_fields']);
 	$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
 	$rec_location 	= $astDB->escape($_REQUEST['rec_location']);
@@ -137,7 +138,7 @@
 	}
 	
 	if ($dispo_stats != "") {
-		$i										= 0;
+		$i= 0;
 		//$array_status 							= Array();
 
 		while ($i < $status_ct) {
@@ -147,7 +148,7 @@
 			$i++;
 		}
 		
-		if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ) {
+		if ( (in_array("ALL", $dispo_stats)) ) {
 			$status_SQL 						= "";
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
@@ -434,10 +435,12 @@
 	$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
 	$log_id	= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 	
-	$apiresults 										= array(
+	$apiresults = array(
 		"result" => "success", 
-		"header" 										=> $csv_header, 
-		"rows" 											=> $csv_row
+		"header" => $csv_header, 
+		"rows" 	=> $csv_row,
+		"query" => $query,
+		"data" => $dispo_stats
 	);
 ?>
 
