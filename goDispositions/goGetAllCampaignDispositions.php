@@ -67,31 +67,18 @@
 					"status_name", 
 					"campaign_id"
 				);
-			
-				$cols2 = array("status", "status_name");
 				
 				$astDB->where("campaign_id", $campaigns, "IN");
-				$astDB->groupBy("status");
-				$astDB->orderBy("status", "asc");			
+				$astDB->orderBy("campaign_id", "desc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
 				
-                                $astDB->orderBy("status", "asc");
-                                $result2                                                                 = $astDB->get("vicidial_statuses", NULL, $cols2);
-		
 				if ($astDB->count > 0) {
-					//GET CAMPAIGN STATUSES
 					foreach ($result as $fresults) {
 						$dataStat[] 					= $fresults["status"];			
 						$dataStatName[] 				= $fresults["status_name"];
 						$dataCampID[] 					= $fresults["campaign_id"];
 					}			
 					
-					//GET SYSTEM STATUSES
-					foreach ($result2 as $fresults) {
-                                                $dataStat[]                                     = $fresults["status"];
-                                                $dataStatName[]                                 = $fresults["status_name"];
-                                        }
-
 					$apiresults 						= array(
 						"result" 							=> "success", 
 						"campaign_id" 						=> $dataCampID, 
