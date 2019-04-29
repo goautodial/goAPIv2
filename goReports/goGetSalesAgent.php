@@ -94,7 +94,7 @@
 			}			
 		}
 			
-		if (!empty($sstatuses))
+		//if (!empty($sstatuses))
 			$sstatuses = implode("','",$sstatuses);
 			
 		$Qstatus2 = $astDB
@@ -115,9 +115,9 @@
 			}			
 		}
 			
-		if (!empty($cstatuses)) {
+		//if (!empty($cstatuses)) {
 			$cstatuses = implode("','",$cstatuses);
-		}
+		//}
 			
 		if (count($sstatuses) > 0 && count($cstatuses) > 0) {
 			$statuses = "{$sstatuses}','{$cstatuses}";
@@ -148,7 +148,8 @@
 			";
 			$outbound_sql = $astDB->rawQuery($outbound_query);
 			
-			if ($astDB->count > 0) {
+			$totagents = $astDB->count;	
+			if ($totagents > 0) {
 				$total_sales				= 0;
 				
 				foreach($outbound_sql as $row){	
@@ -215,7 +216,8 @@
 			"TOPsorted_output"	=> $TOPsorted_output, 
 			"BOTsorted_output"	=> $BOTsorted_output, 
 			"TOToutbound" 		=> $total_out_sales, 
-			"TOTinbound" 		=> $total_in_sales, 
+			"TOTinbound" 		=> $total_in_sales,
+			"TOTAgents"		=> $totagents
 		);
 			
 			return $apiresults;

@@ -230,7 +230,7 @@
 						$dead_sec						= $row['dead_sec'];
 						$customer						= $row['customer'];
 						$time							= ($wait + $talk + $dispo + $pause);
-						$time							= $time;
+						//$time							= $time;
 						
 						if ($wait > 65000) { $wait  	= 0; }
 						if ($talk > 65000) { $talk		= 0; }
@@ -262,20 +262,20 @@
 						array_push($TOTpause, $pause);
 						array_push($TOTdead, $dead_sec);
 						array_push($TOTcustomer, $customer);
-						array_push($TOTALtime, $talk);
+						array_push($TOTALtime, $time);
 						array_push($TOTcalls, $calls);
 					}
 					
-					$TOTwait 							= gmdate('H:i:s', array_sum($TOTwait));
-					$TOTtalk 							= gmdate('H:i:s', array_sum($TOTtalk));
-					$TOTdispo 							= gmdate('H:i:s', array_sum($TOTdispo));
-					$TOTpause 							= gmdate('H:i:s', array_sum($TOTpause));
-					$TOTdead 							= gmdate('H:i:s', array_sum($TOTdead));
+					$TOTwait 						= gmdate('H:i:s', array_sum($TOTwait));
+					$TOTtalk 						= gmdate('H:i:s', array_sum($TOTtalk));
+					$TOTdispo 						= gmdate('H:i:s', array_sum($TOTdispo));
+					$TOTpause 						= gmdate('H:i:s', array_sum($TOTpause));
+					$TOTdead 						= gmdate('H:i:s', array_sum($TOTdead));
 					$TOTcustomer 						= gmdate('H:i:s', array_sum($TOTcustomer));
-					$TOTALtime 							= gmdate('H:i:s', array_sum($TOTALtime));
-					$TOTtimeTC 							= gmdate('H:i:s', array_sum($TOTtimeTC));
+					$TOTALtime 						= gmdate('H:i:s', array_sum($TOTALtime));
+					$TOTtimeTC 						= gmdate('H:i:s', array_sum($TOTtimeTC));
 					$TOT_AGENTS 						= 'AGENTS: '.$usercount;
-					$TOTcalls							= array_sum($TOTcalls);
+					$TOTcalls						= array_sum($TOTcalls);
 				}
 						
 				// Check if the user had an AUTOLOGOUT timeclock event during the time period
