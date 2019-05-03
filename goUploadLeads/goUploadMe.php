@@ -387,10 +387,19 @@
 	function goCheckCustomFieldsName($link, $goCClistID, $gocustomFieldsCSV) {
 		// check fieldnames are correct
 		//$goSQLCheckFieldsCustom = "SELECT $gocustomFieldsCSV FROM custom_$goCClistID;";
+
+		$goCustomCheckQuery = "SELECT EXISTS(SELECT $gocustomFieldsCSV FROM custom_$goCClistID)";
+		$customCheck = $link->rawQuery($goCustomCheckQuery);
+		$countCustomCheck = $link->getRowCount();
+
+		if( $countCustomCheck == 0 ){
+			return "Error Field Name";
+		}
+
 		$rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
 		
 		if(!$rsltSQLCHECK){
-			$goRetMessage = "Error Field Name";
+			$goRetMessage = "Error Field Name $countCustomCheck ";
 		} else {
 			$goShowCustomFields = "DESC custom_$goCClistID;";
 			$rsltgoShowCustomFields = $link->rawQuery($goShowCustomFields);
