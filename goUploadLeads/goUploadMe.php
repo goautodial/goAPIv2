@@ -22,8 +22,9 @@
 */
 
 	ini_set('memory_limit','1024M');
-	ini_set('upload_max_filesize', '6000M');
-	ini_set('post_max_size', '6000M');
+	ini_set('upload_max_filesize', '600M');
+	ini_set('post_max_size', '600M');
+        ini_set('max_execution_time', 900);
 	
 	$thefile = $_FILES['goFileMe']['tmp_name'];
 	$theList = $astDB->escape($_REQUEST["goListId"]);
@@ -177,10 +178,6 @@
 								$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
 								$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
 								
-								$goCountInsertedLeads++;
-								$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
-
-
 								# start set query for custom fields
 								if($goCountTheHeader > 21) {
 									$goShowCustomFields = "DESC custom_$list_id;";
@@ -189,14 +186,14 @@
 									
 									if($countResultrsltgoShowCustomFields > 1) {
 										$totalExplode = count($goGetLastHeader2);
+										$goQueryCustomFields = "";
 										for($ax=0; $ax < $totalExplode; $ax++) {
 											$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
 											$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
-											
 											#$goQueryCustomFields .= "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPCAMP','".$goCustomValues."');";
 											#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 											
-											$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPCAMP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
+											$goQueryCustomFields .= "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPCAMP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues';";
 											$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 											
 											#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
@@ -205,7 +202,8 @@
 									} 
 								} 
 								# end set query for custom fields
-								
+								$goCountInsertedLeads++;
+                                                                $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 							}
 						}
 				}
@@ -260,9 +258,6 @@
 						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
 						
-						$goCountInsertedLeads++;
-						$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
-						
 						# start set query for custom fields
 						if($goCountTheHeader > 21) {
 							$goShowCustomFields = "DESC custom_$list_id;";
@@ -271,20 +266,22 @@
 							
 							if($countResultrsltgoShowCustomFields > 1) {
 								$totalExplode = count($goGetLastHeader2);
+								$goQueryCustomFields = "";
 								for($ax=0; $ax < $totalExplode; $ax++) {
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
 									$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
 										
 									#$goQueryCustomFields = "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPLIST','".$goCustomValues."');";
-									$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
-									$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+									$goQueryCustomFields .= "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues';";
+									#$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 									
 									#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 								}
-								
+								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
-							
-						} 
+						}
+						$goCountInsertedLeads++;
+                                                $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads"); 
 						# end set query for custom fields
 					}
 				}
@@ -329,9 +326,6 @@
 					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
 					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
 					
-					$goCountInsertedLeads++;
-					$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
-					
 					# start set query for custom fields
 					if($goCountTheHeader > 21) {
 						$goShowCustomFields = "DESC custom_$list_id;";
@@ -340,22 +334,25 @@
 						
 						if($countResultrsltgoShowCustomFields > 1) {
 							$totalExplode = count($goGetLastHeader2);
+							$goQueryCustomFields = "";
 							for($ax=0; $ax < $totalExplode; $ax++) {
 								$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
 								$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
 									
-								#$goQueryCustomFields .= "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDNODUP','".$goCustomValues."');";
-								
 								#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 								
-								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
-								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+								$goQueryCustomFields .= "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues';";
+								//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 								
 								#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 							}
-						} 
-						
+							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+						} 	
 					}
+
+                                        $goCountInsertedLeads++;
+                                        $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+
 				# end set query for custom fields
 				}
 			} #end No Duplicate check
