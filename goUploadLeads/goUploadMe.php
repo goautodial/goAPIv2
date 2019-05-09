@@ -84,6 +84,28 @@
 			if($goGetCheckcustomFieldNamesCorrect == "Error Field Name") {
 				$apiresults = array("result" => "Error" , "message" => "$goGetCheckcustomFieldNamesCorrect");
 			}
+		} else {
+			if($goCountTheHeader > 21) {
+				for($x=21; $x < count($getHeder); $x++) {
+					$goGetLastHeader .= $x.","; #get digits for specific data
+					$goGetLastCustomFiledsName .= $getHeder[$x].","; #get the digits for specific custom field
+				}
+			
+				$goGetLastHeader = preg_replace("/,$/",'',$goGetLastHeader);
+				$goGetLastHeader2 = explode(",",$goGetLastHeader);
+			
+				$goGetLastCustomFiledsName = preg_replace("/,$/",'',$goGetLastCustomFiledsName);
+				$goGetLastCustomFiledsName2 = explode(",",$goGetLastCustomFiledsName);
+			
+				# check custom field names are correct
+				$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;		
+				$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
+			
+				if($goGetCheckcustomFieldNamesCorrect == "Error Field Name") {
+					$apiresults = array("result" => "Error" , "message" => "$goGetCheckcustomFieldNamesCorrect");
+				}
+		
+			}
 		}
 		//end for custom fields start GLOBAL varaibles
 		
@@ -339,7 +361,7 @@
 										}
 
 										$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
-                                        	        		        $goCustomValues = implode(",", "'$goCustomValuesData'");
+                                        	        		        $goCustomValues = implode(",", $goCustomValuesData);
                         		        	                        $goCustomUpdate = implode(", ",  $goCustomUpdateData);
 			                                                        $goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 										$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
@@ -451,7 +473,7 @@
 
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
-                	                                        $goCustomValues = implode(",", "'$goCustomValuesData'");
+                	                                        $goCustomValues = implode(",", $goCustomValuesData);
         	                                                $goCustomUpdate = implode(", ",  $goCustomUpdateData);
 	                                                        $goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
@@ -548,13 +570,14 @@
 								//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
 								#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+
                                                                 array_push($goCustomValuesData, "'$goCustomValues'");
                                                                 array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 
 							}
 
 							$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
-							$goCustomValues = implode(",", "'$goCustomValuesData'");
+							$goCustomValues = implode(",", $goCustomValuesData);
 							$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
