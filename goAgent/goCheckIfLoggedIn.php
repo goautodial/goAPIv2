@@ -51,7 +51,7 @@ if (!isset($task) || (isset($task) && $task === '')) {
     $rslt = $astDB->getOne('web_client_sessions');
     $web_client_sessions = $astDB->getRowCount();
     
-    $last_call_is_not_null = 1;
+    $last_call_is_not_null = 0;
     $added_message = '';
     if ($check_last_call) {
         //$stmt = "SELECT * FROM vicidial_agent_log WHERE user='$goUser' AND (lead_id IS NOT NULL AND lead_id > '0') AND pause_sec >= '65535' AND status IS NULL AND sub_status IS NULL AND event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY event_time DESC LIMIT 1;";
@@ -64,7 +64,7 @@ if (!isset($task) || (isset($task) && $task === '')) {
     
     $is_logged_in = 0;
     $message = "You have been logged out from the dialer.{$added_message}";
-    if ($go_agent_sessions > 0 && $web_client_sessions > 0 && $last_call_is_not_null > 0) {
+    if ($go_agent_sessions > 0 && $web_client_sessions > 0 && $last_call_is_not_null < 1) {
         $is_logged_in = 1;
         $message = "You're currently logged in on the dialer.";
     }
