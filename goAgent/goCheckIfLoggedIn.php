@@ -64,9 +64,11 @@ if (!isset($task) || (isset($task) && $task === '')) {
     
     $is_logged_in = 0;
     $message = "You have been logged out from the dialer.{$added_message}";
-    if ($go_agent_sessions > 0 && $web_client_sessions > 0 && $last_call_is_not_null < 1) {
-        $is_logged_in = 1;
-        $message = "You're currently logged in on the dialer.";
+    if ($go_agent_sessions > 0 && $web_client_sessions > 0) {
+        if (($check_last_call > 0 && $last_call_is_not_null > 0) || ($check_last_call < 1 && $last_call_is_not_null < 1)) {
+            $is_logged_in = 1;
+            $message = "You're currently logged in on the dialer.";
+        }
     }
 
     $APIResult = array( "result" => "success", "logged_in" => $is_logged_in, "last_call_is_not_null" => $last_call_is_not_null, "message" => $message );
