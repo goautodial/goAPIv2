@@ -63,8 +63,8 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {    
 			if (is_array($campaigns)) {
 				//$astDB->where("vicidial_lists.campaign_id", $campaigns, "IN");
-				$campaign_ids							= implode(",", $campaigns);
-				$campaign_ids							= str_replace(",", "','", $campaign_ids);
+				$campaign_ids							= implode("','", $campaigns);
+				//$campaign_ids							= str_replace(",", "','", $campaign_ids);
 								
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
