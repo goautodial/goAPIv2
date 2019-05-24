@@ -84,6 +84,7 @@
 				
 				$query 									= "SELECT vicidial_lists.list_id, vicidial_lists.list_name, vicidial_lists.list_description, (SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally, (SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active, vicidial_lists.list_lastcalldate, vicidial_lists.campaign_id, vicidial_lists.reset_time, vicidial_campaigns.campaign_name FROM vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $ul ORDER by list_id;";			
 				$rsltv 									= $astDB->rawQuery($query);
+                $testSQL                                = $query;
 				
 				foreach ($rsltv as $fresults) {
 					$dataListId[] 						= $fresults['list_id'];
@@ -130,7 +131,8 @@
 					"cf_count"								=> $dataCFCount,
 					"campaign_id" 							=> $dataCampaignId, 
 					"next_listID" 							=> $next_list, 
-					"campaign_name" 						=> $dataCampaignName
+					"campaign_name" 						=> $dataCampaignName,
+                    "test_SQL"                              => $testSQL
 				);
 			} else {
 				$err_msg 								= error_handle("40001");
