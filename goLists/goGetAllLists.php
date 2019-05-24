@@ -69,6 +69,14 @@
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
 				$tenant									= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+                
+                $astDB->where('user_group', $log_group);
+                $allowed_camps                          = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                $allowed_campaigns                      = $allowed_camps['allowed_campaigns'];
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+					$campaign_ids                       = explode(" ", trim($allowed_campaigns));
+                    $campaign_ids						= implode("','", $campaign_ids);
+                }
 				
 				if ($tenant) {
 					$ul									= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
