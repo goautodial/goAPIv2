@@ -139,7 +139,7 @@
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere('user_group', "---ALL---");
 		} else {
-			if($log_group !== "ADMIN"){
+			if(strtoupper($log_group) !== "ADMIN"){
 				$astDB->where('user_group', $log_group);
 				$astDB->orWhere('user_group', "---ALL---");
 			}
@@ -154,7 +154,7 @@
 		
 		$astDB->orderBy('campaign_id', 'desc');
 		$result 								= $astDB->get('vicidial_campaigns', NULL, $cols);
-		$campaigns								= "";
+		$campaigns								= array();
 		
 		if ($astDB->count > 0) {
 			foreach($result as $fresults){
