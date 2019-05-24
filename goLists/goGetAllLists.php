@@ -76,9 +76,9 @@
 					$ul									= "";
 					
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel > 8) {
+						//if ($userlevel > 8) {
 							$ul							= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
-						}
+						//}
 					}					
 				}
 				
