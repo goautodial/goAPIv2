@@ -57,6 +57,9 @@
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 			
+			$astDB->where('user_group', $log_group);
+			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -65,6 +68,12 @@
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
+					} else {
+						$allowed_campaigns = $allowed_camps['allowed_campaigns'];
+						if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+							$allowed_campaigns = explode(" ", trim($allowed_campaigns));
+							$astDB->where('campaign_id', $allowed_campaigns, 'in');
+						}
 					}
 				}					
 			}

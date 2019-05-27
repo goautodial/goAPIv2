@@ -63,12 +63,20 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {    
 			if (is_array($campaigns)) {
 				//$astDB->where("vicidial_lists.campaign_id", $campaigns, "IN");
-				$campaign_ids							= implode(",", $campaigns);
-				$campaign_ids							= str_replace(",", "','", $campaign_ids);
+				$campaign_ids							= implode("','", $campaigns);
+				//$campaign_ids							= str_replace(",", "','", $campaign_ids);
 								
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
 				$tenant									= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+                
+                $astDB->where('user_group', $log_group);
+                $allowed_camps                          = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                $allowed_campaigns                      = $allowed_camps['allowed_campaigns'];
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+					$campaign_ids                       = explode(" ", trim($allowed_campaigns));
+                    $campaign_ids						= implode("','", $campaign_ids);
+                }
 				
 				if ($tenant) {
 					$ul									= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
@@ -76,14 +84,15 @@
 					$ul									= "";
 					
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel > 8) {
+						//if ($userlevel > 8) {
 							$ul							= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
-						}
+						//}
 					}					
 				}
 				
 				$query 									= "SELECT vicidial_lists.list_id, vicidial_lists.list_name, vicidial_lists.list_description, (SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally, (SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active, vicidial_lists.list_lastcalldate, vicidial_lists.campaign_id, vicidial_lists.reset_time, vicidial_campaigns.campaign_name FROM vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $ul ORDER by list_id;";			
 				$rsltv 									= $astDB->rawQuery($query);
+                //$testSQL                                = $query;
 				
 				foreach ($rsltv as $fresults) {
 					$dataListId[] 						= $fresults['list_id'];
@@ -130,7 +139,8 @@
 					"cf_count"								=> $dataCFCount,
 					"campaign_id" 							=> $dataCampaignId, 
 					"next_listID" 							=> $next_list, 
-					"campaign_name" 						=> $dataCampaignName
+					"campaign_name" 						=> $dataCampaignName,
+                    //"test_SQL"                              => $testSQL
 				);
 			} else {
 				$err_msg 								= error_handle("40001");
