@@ -75,28 +75,33 @@
 				$astDB->orderBy("status", "asc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);	
 				
-                                $astDB->orderBy("status", "asc");
-                                $result2                                                                 = $astDB->get("vicidial_statuses", NULL, $cols2);
+                $astDB->orderBy("status", "asc");
+                $result2                                = $astDB->get("vicidial_statuses", NULL, $cols2);
 		
 				if ($astDB->count > 0) {
 					//GET CAMPAIGN STATUSES
 					foreach ($result as $fresults) {
-						$dataStat[] 					= $fresults["status"];			
-						$dataStatName[] 				= $fresults["status_name"];
-						$dataCampID[] 					= $fresults["campaign_id"];
+                        $cCamp                          = $fresults["campaign_id"];
+                        $cStatus                        = $fresults["status"];
+                        $cStatusName                    = $fresults["status_name"];
+						$dataStat[] 					= $cStatus;			
+						$dataStatName[] 				= $cStatusName;
+						$dataCampID[] 					= $cCamp;
+                        $custom_dispo[$cCamp][$cStatus] = $cStatusName;
 					}			
 					
 					//GET SYSTEM STATUSES
 					foreach ($result2 as $fresults) {
-                                                $dataStat[]                                     = $fresults["status"];
-                                                $dataStatName[]                                 = $fresults["status_name"];
-                                        }
+                        $dataStat[]                     = $fresults["status"];
+                        $dataStatName[]                 = $fresults["status_name"];
+                    }
 
 					$apiresults 						= array(
-						"result" 							=> "success", 
-						"campaign_id" 						=> $dataCampID, 
-						"status_name" 						=> $dataStatName, 
-						"status" 							=> $dataStat
+						"result" 						=> "success", 
+						"campaign_id" 					=> $dataCampID, 
+						"status_name" 					=> $dataStatName, 
+						"status" 						=> $dataStat,
+                        "custom_dispo"                  => $custom_dispo
 					);			
 				}	 		
 			} else {
