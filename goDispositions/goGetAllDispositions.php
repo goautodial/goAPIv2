@@ -53,7 +53,7 @@
     } else {
         $astDB->where('user_group', $log_group);
         $allowed_camps                                  = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-		$allowed_campaigns                              = explode(" ", trim($allowed_camps['allowed_campaigns']));
+		$allowed_campaigns                              = $allowed_camps['allowed_campaigns'];
         
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -74,15 +74,17 @@
 			
 				$cols2 = array("status", "status_name");
                 
-				if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+				if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+                    $camps_allowed = explode(" ", trim($allowed_campaigns));
+                    $astDB->where("campaign_id", $camps_allowed, "IN");
                 }
 				$astDB->groupBy("status");
 				$astDB->orderBy("status", "asc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
                 
-				if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+				if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+                    $camps_allowed = explode(" ", trim($allowed_campaigns));
+                    $astDB->where("campaign_id", $camps_allowed, "IN");
                 }
 				$astDB->orderBy("status", "asc");			
 				$result2 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
