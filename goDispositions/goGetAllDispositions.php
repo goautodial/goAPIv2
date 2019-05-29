@@ -94,7 +94,7 @@
 						$dataStat[] 					= $cStatus;			
 						$dataStatName[] 				= $cStatusName;
 						$dataCampID[] 					= $cCamp;
-                        $custom_dispo[$cCamp][$cStatus] = $cStatusName;
+                        $custom_dispo[$cCamp][]         = $cStatus;
 					}			
 					
 					//GET SYSTEM STATUSES
