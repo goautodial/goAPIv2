@@ -54,6 +54,7 @@
         $astDB->where('user_group', $log_group);
         $allowed_camps                                  = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
         $allowed_campaigns                              = $allowed_camps['allowed_campaigns'];
+		$allowed_campaigns = explode(" ", trim($allowed_campaigns));
         
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -75,33 +76,41 @@
 				$cols2 = array("status", "status_name");
                 
 				if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-					$allowed_campaigns = explode(" ", trim($allowed_campaigns));
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
                 }
-				//$astDB->groupBy("status");
+				$astDB->groupBy("status");
 				$astDB->orderBy("status", "asc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
 				
                 $astDB->orderBy("status", "asc");
                 $result2                                = $astDB->get("vicidial_statuses", NULL, $cols2);
+                
+				if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                }
+				$astDB->orderBy("status", "asc");			
+				$result3 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
 		
 				if ($astDB->count > 0) {
 					//GET CAMPAIGN STATUSES
 					foreach ($result as $fresults) {
-                        $cCamp                          = $fresults["campaign_id"];
-                        $cStatus                        = $fresults["status"];
-                        $cStatusName                    = $fresults["status_name"];
-						$dataStat[] 					= $cStatus;			
-						$dataStatName[] 				= $cStatusName;
-						$dataCampID[] 					= $cCamp;
-                        $custom_dispo[$cStatus][]       = $cCamp;
-					}			
+						$dataStat[] 					= $fresults["campaign_id"];			
+						$dataStatName[] 				= $fresults["status"];
+						$dataCampID[] 					= $fresults["status_name"];
+					}
 					
 					//GET SYSTEM STATUSES
 					foreach ($result2 as $fresults) {
                         $dataStat[]                     = $fresults["status"];
                         $dataStatName[]                 = $fresults["status_name"];
                     }
+                    
+					foreach ($result3 as $fresults) {
+                        $cCamp                          = $fresults["campaign_id"];
+                        $cStatus                        = $fresults["status"];
+                        $cStatusName                    = $fresults["status_name"];
+                        $custom_dispo[$cStatus][]       = $cCamp;
+					}
 
 					$apiresults 						= array(
 						"result" 						=> "success", 
