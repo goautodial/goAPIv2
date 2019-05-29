@@ -103,7 +103,7 @@
 					foreach ($result2 as $fresults) {
                         $cCamp                          = $fresults["campaign_id"];
                         $cStatus                        = $fresults["status"];
-                        $custom_dispo[$cCamp][]       = $cStatus;
+                        $custom_dispo[$cCamp][]         = $cStatus;
 					}
 					
 					//GET SYSTEM STATUSES
