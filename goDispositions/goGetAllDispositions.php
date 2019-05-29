@@ -78,10 +78,9 @@
 					$allowed_campaigns = explode(" ", trim($allowed_campaigns));
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
                 }
-				$astDB->groupBy("status");
+				//$astDB->groupBy("status");
 				$astDB->orderBy("status", "asc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
-                $last_query = $astDB->getLastQuery();
 				
                 $astDB->orderBy("status", "asc");
                 $result2                                = $astDB->get("vicidial_statuses", NULL, $cols2);
@@ -109,8 +108,7 @@
 						"campaign_id" 					=> $dataCampID, 
 						"status_name" 					=> $dataStatName, 
 						"status" 						=> $dataStat,
-                        "custom_dispo"                  => $custom_dispo,
-                        "last_query"                    => $last_query
+                        "custom_dispo"                  => $custom_dispo
 					);			
 				}	 		
 			} else {
