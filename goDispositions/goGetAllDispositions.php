@@ -81,7 +81,7 @@
 				$astDB->groupBy("status");
 				$astDB->orderBy("status", "asc");			
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
-                $last_query = $astDB->last_query;
+                $last_query = $astDB->getLastQuery();
 				
                 $astDB->orderBy("status", "asc");
                 $result2                                = $astDB->get("vicidial_statuses", NULL, $cols2);
