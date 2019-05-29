@@ -86,6 +86,7 @@
                 }
 				$astDB->orderBy("status", "asc");			
 				$result2 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
+                $last_query = $astDB->getLastQuery();
 				
                 $astDB->orderBy("status", "asc");
                 $result3                                = $astDB->get("vicidial_statuses", NULL, $cols2);
@@ -115,7 +116,8 @@
 						"campaign_id" 					=> $dataCampID, 
 						"status_name" 					=> $dataStatName, 
 						"status" 						=> $dataStat,
-                        "custom_dispo"                  => $custom_dispo
+                        "custom_dispo"                  => $custom_dispo,
+                        "last_query" => $last_query
 					);			
 				}	 		
 			} else {
