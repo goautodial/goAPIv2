@@ -53,8 +53,7 @@
     } else {
         $astDB->where('user_group', $log_group);
         $allowed_camps                                  = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-        $allowed_campaigns                              = $allowed_camps['allowed_campaigns'];
-		$allowed_campaigns = explode(" ", trim($allowed_campaigns));
+		$allowed_campaigns                              = explode(" ", trim($allowed_camps['allowed_campaigns']));
         
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -91,7 +90,7 @@
 				$astDB->orderBy("status", "asc");			
 				$result3 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
 		
-				if ($astDB->count > 0) {
+				if ($allowed_campaigns > 0) {
 					//GET CAMPAIGN STATUSES
 					foreach ($result as $fresults) {
 						$dataStat[] 					= $fresults["campaign_id"];			
