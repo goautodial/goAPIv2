@@ -320,7 +320,8 @@
 									'email' => $email,
 									'security_phrase' => $security_phrase,
 									'comments' => $comments,
-									'entry_list_id' => $entry_list_id
+									'entry_list_id' => $entry_list_id,
+									'last_local_call_time' => '0000-00-00 00:00:00'
 								);
 								$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
 								$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
@@ -431,7 +432,8 @@
 							'email' => $email,
 							'security_phrase' => $security_phrase,
 							'comments' => $comments,
-							'entry_list_id' => $entry_list_id
+							'entry_list_id' => $entry_list_id,
+							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
 						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
@@ -504,7 +506,7 @@
 					$USarea = substr($phone_number, 0, 3);
 					$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
 			
-					$test_query = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id');";
+					$test_query = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id, last_local_call_time) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id', '0000-00-00 00:00:00');";
 					$insertData = array(
 						'lead_id' => '',
 						'entry_date' => $entry_date,
@@ -532,7 +534,8 @@
 						'email' => $email,
 						'security_phrase' => $security_phrase,
 						'comments' => $comments,
-						'entry_list_id' => $entry_list_id
+						'entry_list_id' => $entry_list_id,
+						'last_local_call_time' => '0000-00-00 00:00:00'
 					);
 					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
 					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
