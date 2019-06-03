@@ -66,7 +66,9 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					//}
-				}					
+				} else {
+					$astDB->where('script_id', '^script', 'REGEXP');
+				}
 			}
 		
 			// getting script count
