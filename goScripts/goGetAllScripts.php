@@ -79,7 +79,7 @@
 					$get_last_count 					= str_replace("script", "", $resultGetScript['script_id']);
 					$last_pl[] 							= intval($get_last_count);
 				} else {
-					$get_last_count 					= $resultGetScript['script_id'];
+					$get_last_count 					= str_replace("$log_group", "", $resultGetScript['script_id']);
 					$last_pl[] 							= intval($get_last_count);
 				}
 
@@ -95,14 +95,18 @@
 					}
 				}
 				
-				if ($log_group != "ADMIN") {
-					$script_num 						= $script_num;
+				if ($log_group !== "ADMIN") {
+					$script_num 						= "$log_group".$script_num;
 				}else{
 					$script_num 						= "script".$script_num;
 				}
 			} else {
 				// return data
-				$script_num 							= "script001";
+				if ($log_group !== "ADMIN") {
+					$script_num 						= "{$log_group}001";
+				}else{
+					$script_num 						= "script001";
+				}
 			}
 				
 			if ($tenant) {
@@ -110,10 +114,10 @@
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($userlevel > 8) {
+					//if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
-					}
+					//}
 				}					
 			}
 			
