@@ -53,7 +53,8 @@
 			);
 		} else {
 			//$query = "SELECT goFilename, goFileDate, goFilesize, goDirectory FROM sounds $ul";
-			$exec_query = $goDB->get('sounds');
+			//$exec_query = $goDB->get('sounds');
+			$exec_query = $goDB->rawQuery("SELECT * FROM `sounds` WHERE `uploaded_by` IN (SELECT `name` FROM `users` WHERE `user_group` = '$log_group')");
 			
 			if ($goDB->count > 0) {
 				foreach ($exec_query as $rslt) {
