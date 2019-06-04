@@ -79,13 +79,13 @@
                 }
 				
 				if ($tenant) {
-					$ul									= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
+					$ul									= "WHERE (vicidial_lists.campaign_id IN ('$campaign_ids') OR vicidial_lists.campaign_id IN (SELECT campaign_id FROM vicidial_campaigns WHERE user_group = '$log_group')";
 				} else {
 					$ul									= "";
 					
 					if (strtoupper($log_group) != 'ADMIN') {
 						//if ($userlevel > 8) {
-							$ul							= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
+							$ul							= "WHERE (vicidial_lists.campaign_id IN ('$campaign_ids') OR vicidial_lists.campaign_id IN (SELECT campaign_id FROM vicidial_campaigns WHERE user_group = '$log_group')";
 						//}
 					}					
 				}
