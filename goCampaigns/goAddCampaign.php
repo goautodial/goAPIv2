@@ -231,10 +231,10 @@
 					} else {
 						$tenant_id 							= '---ALL---';
 						
-						if (strtoupper($log_group) != 'ADMIN') {
-							if ($userlevel > 8) {
+						if (strtoupper($log_group) !== 'ADMIN') {
+							//if ($userlevel > 8) {
 								$tenant_id 					= "$log_group";
-							}
+							//}
 						}					
 					}
 
@@ -317,9 +317,13 @@
 					$NOW 									= date( "Y-m-d" );
 
 					if ( $tenant ) {
-						$tenant_id 							= '---ALL---';
-					} else {
 						$tenant_id 							= "$log_group";
+					} else {
+						$tenant_id 							= '---ALL---';
+						
+						if (strtoupper($log_group) !== 'ADMIN') {
+							$tenant_id 					    = "$log_group";
+						}
 					}
 
 					$local_call_time 						= "9am-9pm";
@@ -618,6 +622,10 @@
 								$tenant_id 					= "$log_group";								
 							} else {
 								$tenant_id 					= "---ALL---";
+                                
+                                if (strtoupper($log_group) !== 'ADMIN') {
+                                    $tenant_id 					    = "$log_group";
+                                }
 							}
 							
 							if ($campaign_id != 'undefined' && $campaign_id != '') {
@@ -987,6 +995,11 @@
 									$astDB->where( "user_group", $log_group );													
 								} else {
 									$tenant_id 					= "---ALL---";
+                                    
+                                    if (strtoupper($log_group) !== 'ADMIN') {
+                                        $tenant_id 				= "$log_group";
+                                        $astDB->where( "user_group", $log_group );	
+                                    }
 								}
 								
 								$astDB->where( 'campaign_id', $campaign_id );
