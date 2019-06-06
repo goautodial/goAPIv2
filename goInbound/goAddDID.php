@@ -256,6 +256,7 @@
 								"did_route" => $did_route,
 								"record_call" => $record_call,
 								"user_group" => $user_group,
+                                "group_id" => $group_id,
 								"user" => $user,
 								"menu_id" => $menu_id
 							);

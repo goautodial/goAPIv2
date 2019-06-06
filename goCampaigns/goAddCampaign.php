@@ -231,10 +231,10 @@
 					} else {
 						$tenant_id 							= '---ALL---';
 						
-						if (strtoupper($log_group) != 'ADMIN') {
-							if ($userlevel > 8) {
+						if (strtoupper($log_group) !== 'ADMIN') {
+							//if ($userlevel > 8) {
 								$tenant_id 					= "$log_group";
-							}
+							//}
 						}					
 					}
 
@@ -282,6 +282,23 @@
 						
 						$q_insertOutbound 					= $astDB->insert( 'vicidial_campaigns', $data_outbound );					
 						$log_id 							= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+                        
+                        $astDB->where('user_group', $log_group);
+                        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                        
+                        if (strlen($allowed_campaigns) < 1) { 
+                            $allowed_campaigns = " -"; 
+                        }
+                        
+                        if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                            $update_data = array(
+                                'allowed_campaigns' 					=>  " $campaign_id " . trim($allowed_campaigns)
+                            );
+                            
+                            $astDB->where('user_group', $log_group);
+                            $q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+                        }
 						
 						if ( $q_insertOutbound ) {
 							$datago_campaign 				= array(
@@ -317,9 +334,13 @@
 					$NOW 									= date( "Y-m-d" );
 
 					if ( $tenant ) {
-						$tenant_id 							= '---ALL---';
-					} else {
 						$tenant_id 							= "$log_group";
+					} else {
+						$tenant_id 							= '---ALL---';
+						
+						if (strtoupper($log_group) !== 'ADMIN') {
+							$tenant_id 					    = "$log_group";
+						}
 					}
 
 					$local_call_time 						= "9am-9pm";
@@ -378,6 +399,23 @@
 
 					$q_insertVCS 							= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 					$log_id 								= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+                    
+                    $astDB->where('user_group', $log_group);
+                    $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                    $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                    
+                    if (strlen($allowed_campaigns) < 1) { 
+                        $allowed_campaigns = " -"; 
+                    }
+                    
+                    if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                        $update_data = array(
+                            'allowed_campaigns' 					=>  " $campaign_id " . trim($allowed_campaigns)
+                        );
+                        
+                        $astDB->where('user_group', $log_group);
+                        $q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+                    }
 					
 					if ( $q_insertInbound ) {
 						if ( $callRoute != null ) {
@@ -618,6 +656,10 @@
 								$tenant_id 					= "$log_group";								
 							} else {
 								$tenant_id 					= "---ALL---";
+                                
+                                if (strtoupper($log_group) !== 'ADMIN') {
+                                    $tenant_id 					    = "$log_group";
+                                }
 							}
 							
 							if ($campaign_id != 'undefined' && $campaign_id != '') {
@@ -712,6 +754,23 @@
 
 								$q_insertVCS 				= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 								$log_id 					= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+                                
+                                $astDB->where('user_group', $log_group);
+                                $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                                $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                                
+                                if (strlen($allowed_campaigns) < 1) { 
+                                    $allowed_campaigns = " -"; 
+                                }
+                                
+                                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                                    $update_data = array(
+                                        'allowed_campaigns' 					=>  " $campaign_id " . trim($allowed_campaigns)
+                                    );
+                                    
+                                    $astDB->where('user_group', $log_group);
+                                    $q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+                                }
 								
 								if ( $q_insertBlended ) {
 									if ( $callRoute != null ) {
@@ -987,6 +1046,11 @@
 									$astDB->where( "user_group", $log_group );													
 								} else {
 									$tenant_id 					= "---ALL---";
+                                    
+                                    if (strtoupper($log_group) !== 'ADMIN') {
+                                        $tenant_id 				= "$log_group";
+                                        $astDB->where( "user_group", $log_group );	
+                                    }
 								}
 								
 								$astDB->where( 'campaign_id', $campaign_id );
@@ -1062,6 +1126,23 @@
 
 									$astDB->insert( "vicidial_campaign_stats", array( "campaign_id" => $campaign_id ) );
 									$log_id 						= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Survey Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+                                    
+                                    $astDB->where('user_group', $log_group);
+                                    $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                                    $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                                    
+                                    if (strlen($allowed_campaigns) < 1) { 
+                                        $allowed_campaigns = " -"; 
+                                    }
+                                    
+                                    if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                                        $update_data = array(
+                                            'allowed_campaigns' 					=>  " $campaign_id " . trim($allowed_campaigns)
+                                        );
+                                        
+                                        $astDB->where('user_group', $log_group);
+                                        $q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+                                    }
 
 									if ( $q_insertSurvey ) {
 										if ( preg_match("/\.(wav|mp3)$/i",$wavfile_orig) ) {
@@ -1456,19 +1537,23 @@
 						
 						$q_insertCopy = $astDB->insert('vicidial_campaigns', $data_copy);
 						$log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Campaign: $campaign_id (copied from: $copy_from_campaign)", $log_group, $astDB->getLastQuery());
-
-						/*$allowed_campaigns = go_getall_allowed_campaigns($log_group, $astDB);
-
-						if (strlen($allowed_campaigns) < 1) { 
-							$allowed_campaigns = " -"; 
-						}
-							
-						$update_data = array(
-							'allowed_campaigns' 					=>  ' {$campaign_id}$allowed_campaigns'
-						);
-						
-						$astDB->where('user_group', $tenant_id);
-						$q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);*/
+                        
+                        $astDB->where('user_group', $log_group);
+                        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+                        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                        
+                        if (strlen($allowed_campaigns) < 1) { 
+                            $allowed_campaigns = " -"; 
+                        }
+                        
+                        if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                            $update_data = array(
+                                'allowed_campaigns' 					=>  " $campaign_id " . trim($allowed_campaigns)
+                            );
+                            
+                            $astDB->where('user_group', $log_group);
+                            $q_updateAllowedCampaign = $astDB->update('vicidial_user_groups', $update_data);
+                        }
 
 						if($q_insertCopy){
 							foreach ($rsltGOCopy as $sourceCamp) {

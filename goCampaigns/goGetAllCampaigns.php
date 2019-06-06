@@ -64,15 +64,15 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper($log_group) !== 'ADMIN') {
+					$astDB->where("user_group", $log_group);
 					if ($userlevel > 8) {
-						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					} else {
 						$allowed_campaigns = $allowed_camps['allowed_campaigns'];
 						if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
 							$allowed_campaigns = explode(" ", trim($allowed_campaigns));
-							$astDB->where('campaign_id', $allowed_campaigns, 'in');
+							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
 						}
 					}
 				}					
