@@ -41,6 +41,7 @@
 		$lead_mapping = $astDB->escape($_REQUEST["lead_mapping"]);
 
 	$alex = array();
+	$goGetCheckcustomFieldNamesCorrect = ""; //constant
 	
 	// path where your CSV file is located
 	define('CSV_PATH','/tmp/');
@@ -63,8 +64,7 @@
         $field_regx = "/['\"`\\;]/";
         $field_regx = str_replace($delimiters, "", $field_regx);
 
-	/*$total = count(file($csv_file, FILE_SKIP_EMPTY_LINES));
-	$alex["total"] = $total;*/
+	$duplicates = 0;
 
 	//die($theList."<br>".$thefile."<br>".$csv_file);
 	if (($handle = fopen($csv_file, "r")) !== FALSE) {
@@ -83,19 +83,9 @@
 			
 			$goGetLastHeader = preg_replace("/,$/",'',$goGetLastHeader);
 			$goGetLastHeader2 = explode(",",$goGetLastHeader);
-		// pogi	
 			$goGetLastCustomFiledsName = preg_replace("/,$/",'',$goGetLastCustomFiledsName);
 			$goGetLastCustomFiledsName2 = explode(",",$goGetLastCustomFiledsName);
 				
-			// check custom field names are correct
-			/*$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;		
-			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
-			
-			$alex["goGetCheckcustomFieldNamesCorrect"] = $goGetCheckcustomFieldNamesCorrect;
-
-			if($goGetCheckcustomFieldNamesCorrect == "Error Field Name") {
-				$apiresults = array("result" => "Error" , "message" => "$goGetCheckcustomFieldNamesCorrect");
-			}*/
 		} elseif($goCountTheHeader > 21) {
 			for($x=21; $x < count($getHeder); $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
@@ -112,8 +102,6 @@
 			$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;
 			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
 			
-			$alex["goGetCheckcustomFieldNamesCorrect"] = $goGetCheckcustomFieldNamesCorrect;
-			
 			if($goGetCheckcustomFieldNamesCorrect === "error") {
 				fclose($handle);
 			}
@@ -121,14 +109,8 @@
 		//end for custom fields start GLOBAL varaibles
 		
 		
-		$counter = 0; // counter on what row execute
-		
 		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
 			$num = count($data);
-			/*if($counter >= 10){
-				$alex["counter"] = $counter;
-				fclose($handle);
-			}*/
 			for ($c=0; $c < $num; $c++) {
 				$col[$c] = $data[$c];
 			}
@@ -136,7 +118,6 @@
 			$field_regx = "/['\"`\\;]/";
 			
 			# SQL Query to insert data into DataBase
-			
 			$entry_date = date("Y-m-d H:i:s");
 			$status = "NEW";
 			$vendor_lead_code = preg_replace($field_regx, "", $col[1]);
@@ -171,7 +152,7 @@
 			$called_since_last_reset = "N";
 			
 			// LEAD MAPPING -- CUSTOMIZATION!!!!!
-			if(!empty(lead_mapping)){
+			if(!empty($lead_mapping)){
 				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
 				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
 				$standard_fields = array("Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments");
@@ -265,6 +246,7 @@
 			} // END OF LEAD MAPPING
 			
 			if($goDupcheck == "DUPCAMP") {
+				$alex["phone_num"] = $phone_number;
 				#Duplicate check all LIST in CAMPAIGN
 				if($goGetCheckcustomFieldNamesCorrect == "error" && empty($lead_mapping)) {
 					fclose($handle);
@@ -385,11 +367,15 @@
 								# end set query for custom fields
 								$goCountInsertedLeads++;
                                                                 $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+							}// end of IF
+							else{
+								$duplicates++;
 							}
 						}
 				}
 				
 			} elseif ($goDupcheck == "DUPLIST") {
+				$alex["phone_num"] = $phone_number;
 				#Duplicate check within the LIST
 				if($goGetCheckcustomFieldNamesCorrect === "error" && empty($lead_mapping)) {
 					fclose($handle);
@@ -399,7 +385,7 @@
 					$astDB->where('list_id', $list_id);
 					$rsltCheckDupPhone = $astDB->get('vicidial_list', null, 'phone_number');
 					$countResult = $astDB->getRowCount();
-
+					$alex["countresutl"] = $countResult;	
 					if($countResult < 1) {
 						$USarea = substr($phone_number, 0, 3);
 						$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
@@ -437,7 +423,7 @@
 						);
 						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
-						
+						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping)){ // LEAD MAPPING CUSTOMIZATION
                                                 	$goCustomKeyData = array();
@@ -496,6 +482,11 @@
 						$goCountInsertedLeads++;
                                                 $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads"); 
 						# end set query for custom fields
+					}//end if
+					else{
+						//fclose($handle);
+						$duplicates++;
+						//$apiresults = array("result" => "error" , "message" => "Error: Lead File Contains Duplicates in List");
 					}
 				}
 			} else {
@@ -562,10 +553,10 @@
 						$custom_keyValues = implode(",", $goCustomKeyData);
                                                 $goCustomValues = implode(",", $goCustomValuesData);
                                                 $goCustomUpdate = implode(", ",  $goCustomUpdateData);
-
+					
 						$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
                                                 $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-
+					
 					}elseif($goCountTheHeader > 21) {
 						$goShowCustomFields = "DESC custom_$list_id;";
 						$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
@@ -614,12 +605,16 @@
 	
 		fclose($handle);
 
-		if($goCountInsertedLeads > 0) {
-			$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads" , "alex_data" => $alex);
+		if($goCountInsertedLeads > 0 && $duplicates < 1) {
+			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
+		}elseif($goCountInsertedLeads > 0 && $duplicates > 0){
+			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    Duplicates:$duplicates");
 		} elseif($goGetCheckcustomFieldNamesCorrect === "error"){
-			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names");
+			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names. Check the File Headers");
+		}elseif($duplicates > 0){
+			$apiresults = array("result" => "error" , "message" => "Duplicates Found : $duplicates");
 		}else {
-			$apiresults = array("result" => "error", "message" => "$goCountInsertedLeads", "alex_data" => $alex);
+			$apiresults = array("result" => "error", "message" => "$goCountInsertedLeads", "duplicates" => $duplicates, "alex_data" => $alex);
 		}
 		
 		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
