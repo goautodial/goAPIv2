@@ -84,7 +84,7 @@
 				
 				$apiresults 							= array(
 					"result" 								=> "success", 
-					//"query"								=> $astDB->getLastQuery(),
+					"query"								=> $astDB->getLastQuery(),
 					"data" 									=> $data
 				);
 			} else {			
