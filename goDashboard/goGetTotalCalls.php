@@ -47,6 +47,11 @@
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
+        $astDB->where('user_group', $log_group);
+        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+        
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -57,8 +62,8 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
-			if (is_array($campaigns)) {				
-				$astDB->where("campaign_id", $campaigns, "IN");
+			if (is_array($allowed_campaigns)) {
+                $astDB->where("campaign_id", $allowed_campaigns, "IN");
 				
 				switch ($type) {
 					case "outbound":
