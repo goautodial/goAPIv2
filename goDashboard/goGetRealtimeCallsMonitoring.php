@@ -45,6 +45,11 @@
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
+        $astDB->where('user_group', $log_group);
+        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+        
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -64,8 +69,10 @@
 			);
 			
 			$table 										= "vicidial_auto_calls as vac, vicidial_campaigns as vc, vicidial_inbound_groups as vig ";
+            if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                $astDB->where("vac.campaign_id", $allowed_campaigns, "IN");
+            }
 			$rsltv										= $astDB
-				->where("vac.campaign_id", $campaigns, "IN")
 				->groupBy("status,call_type,phone_number")	
 				->get($table, 1000, $cols);
 			
