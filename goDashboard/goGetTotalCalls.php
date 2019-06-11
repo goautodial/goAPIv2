@@ -63,7 +63,9 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (is_array($allowed_campaigns)) {
-                $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                }
 				
 				switch ($type) {
 					case "outbound":
