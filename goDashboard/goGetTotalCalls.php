@@ -79,7 +79,7 @@
 					case "inbound":
 					
 					$data 								= $astDB
-						->where("call_date", array("$NOW 00:00:00", "'$NOW 23:59:59'"), "BETWEEN")
+						->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
 						->getValue("vicidial_closer_log", "count(call_date)");
 						
 					break;
@@ -95,8 +95,8 @@
 						
 				$apiresults 							= array(
 					"result" 								=> "success",
-					"query"								=> $astDB->getLastQuery(),
-					"data" 									=> $data			 
+					//"query"								=> $astDB->getLastQuery(),
+					"data" 									=> $data
 				); 	
 			}
 		} else {
