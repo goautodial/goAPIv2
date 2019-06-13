@@ -45,6 +45,11 @@
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
+        $astDB->where('user_group', $log_group);
+        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+        
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -55,9 +60,11 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
-			if (is_array($campaigns)) {
+			if (is_array($allowed_campaigns)) {
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                }
 				$data									= $astDB
-					->where("campaign_id", $campaigns, "IN")
 					->where("status", array("XFER"), "NOT IN")
 					->where("call_type", "IN", "=")		
 					->getValue("vicidial_auto_calls", "count(*)");
