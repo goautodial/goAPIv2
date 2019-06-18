@@ -144,7 +144,12 @@
                 
                 $allowedCampaigns = implode("','", $campaigns);
                 $defaultUsers = implode("','", DEFAULT_USERS);
-                $SQLquery = "SELECT vl.phone_number as 'vl_phone_number', vla.extension as 'vla_extension', vla.user as 'vla_user',
+		
+		$online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
+		$online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
+		$online_group = "GROUP BY ol.conference";
+
+                $SQLquery = "SELECT DISTINCT vl.phone_number as 'vl_phone_number', vla.extension as 'vla_extension', vla.user as 'vla_user',
                         vu.full_name as 'vu_full_name', vu.user_group as 'vu_user_group', vu.phone_login as 'vu_phone_login',
                         vla.conf_exten as 'vla_conf_exten', vla.status as 'vla_status', vla.comments as 'vla_comments',
                         vla.server_ip as 'vla_server_ip', vla.call_server_ip as 'vla_call_server_ip', UNIX_TIMESTAMP(last_call_time) as 'last_call_time',
@@ -152,15 +157,14 @@
                         vla.campaign_id as 'vla_campaign_id', UNIX_TIMESTAMP(last_state_change) as 'last_state_change',
                         vla.lead_id as 'vla_lead_id', vla.agent_log_id as 'vla_agent_log_id', vu.user_id as 'vu_user_id',
                         vu.user as 'vu_user', vla.callerid as 'vla_callerid', val.sub_status as 'vla_pausecode',
-                        vc.campaign_name as 'vla_campaign_name', ol.conference as 'ol_conference', ol.name as 'ol_callerid'
-                    FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, online as ol, vicidial_live_agents as vla
+                        vc.campaign_name as 'vla_campaign_name'
+                    FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
-                    WHERE (ol.name = vla.callerid OR ol.conference = vla.conf_exten) AND (vla.campaign_id IN ('$allowedCampaigns') AND vla.campaign_id = vc.campaign_id)
+                    WHERE (vla.campaign_id IN ('$allowedCampaigns') AND vla.campaign_id = vc.campaign_id) 
                         AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
-                    GROUP BY ol.conference
                     ORDER BY last_call_time";
                 $onlineAgents = $astDB->rawQuery($SQLquery);
-					
+				$queryoa = $SQLquery; //$astDB->getLastQuery();	
 				if ($astDB->count > 0) {
 					$dataPCs 							= array();
 					
@@ -181,7 +185,7 @@
 				} else {
 					$apiresults 						= array(
 						"result" 							=> "success", 
-						"data" 								=> 0
+						"data" 								=> $queryoa
 					);		
 				}
 					
@@ -193,7 +197,7 @@
 					->where("user_level != 4")
 					->where("user", DEFAULT_USERS, "NOT IN")
 					->getValue("vicidial_live_agents", "count(*)");		
-				
+					
 				$cols 									= array(
 					"channel as 'pc_channel'",
 					"server_ip as 'pc_server_ip'",
@@ -324,7 +328,7 @@
 				} else {
 					$apiresults 						= array(
 						"result" 							=> "success", 
-						"data" 								=> 0
+						"data" 								=> 0 
 					);		
 				}
 			}
