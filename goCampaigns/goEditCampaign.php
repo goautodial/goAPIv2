@@ -353,7 +353,9 @@
 						'disable_alter_custphone' 				=> (!empty($disable_alter_custphone)) ? $disable_alter_custphone : $resultGet['disable_alter_custphone'],
 						'my_callback_option' 					=> (!empty($my_callback_option)) ? $my_callback_option : $resultGet['my_callback_option'],
 						'lead_order' 							=> (!empty($lead_order)) ? $lead_order : $resultGet['lead_order'],
-						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary']
+						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary'],
+                                                'campaign_recording'                            => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
+                                                'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename']
 					);
 					
 					if ( $campaign_type == 'SURVEY' ) {
