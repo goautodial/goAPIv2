@@ -28,7 +28,12 @@
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
 	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	$filter 											= "default";
+
+	if(isset($_REQUEST['filter'])){
+		$filter 											= $astDB->escape($_REQUEST['filter']);
+	} else { 
+		$filter                                                                                         = "default";
+	}
 	
 	if (empty ($goUser) || is_null ($goUser)) {
 		$apiresults 									= array(
