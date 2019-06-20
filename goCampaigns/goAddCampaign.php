@@ -1028,7 +1028,7 @@
 							// Create New Survey Campaign
 							if ( $campaign_id!='undefined' && $campaign_id!='' || $campaign_id != null ){
 								//if($VARSERVTYPE == "cloud"){
-								$astDB->where("LOWER(server_description)", "meetme", "RLIKE");
+								//$astDB->where("LOWER(server_description)", "meetme", "RLIKE");
 								$fresults						= $astDB->getOne( "servers", "server_ip" );
 								
 								if ( $astDB->count >0 ) {
