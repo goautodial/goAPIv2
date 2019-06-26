@@ -45,6 +45,11 @@
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
+        $astDB->where('user_group', $log_group);
+        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+        
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -64,11 +69,15 @@
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
+					$astDB->where("user_group", $log_group);
 					if ($userlevel > 8) {
-						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
+					} else {
+						if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
+						}
 					}
-				}					
+				}
 			}
 				
 			$rsltvGo									= $goDB->get("users", NULL, "userid,avatar");		
@@ -142,7 +151,7 @@
 				//	->orderBy("last_call_time")		
 				//	->get($table, NULL, $cols);
                 
-                $allowedCampaigns = implode("','", $campaigns);
+                $allowedCampaigns = implode("','", $allowed_campaigns);
                 $defaultUsers = implode("','", DEFAULT_USERS);
 		
 		$online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
@@ -191,8 +200,10 @@
 					
 			} else {	
 				// online agents
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                }
 				$query_OnlineAgents						= $astDB
-					->where("campaign_id", $campaigns, "IN")
 					->where("user_level < 8")
 					->where("user_level != 4")
 					->where("user", DEFAULT_USERS, "NOT IN")
@@ -214,9 +225,10 @@
 					"phone_number as 'vac_phone_number'"
 				);
 				
-				$rsltvCallerIDsFromVAC					= $astDB
-					->where("campaign_id", $campaigns, "IN")
-					->get("vicidial_auto_calls", NULL, $cols);
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                }
+				$rsltvCallerIDsFromVAC					= $astDB->get("vicidial_auto_calls", NULL, $cols);
 					
 				// waiting for calls
 				$cols 									= array(
@@ -244,9 +256,11 @@
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
 				);
 				
-				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";				
+				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
+                }
 				$rsltvNoCalls 							= $astDB
-					->where("vicidial_campaigns.campaign_id", $campaigns, "IN")
 					->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
 					->where("vicidial_live_agents.user = vicidial_users.user")
 					->where("vicidial_live_agents.lead_id = 0")
@@ -283,9 +297,11 @@
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
 				);
 				
-				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";				
+				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
+                }
 				$rsltvInCalls 							= $astDB
-					->where("vicidial_campaigns.campaign_id", $campaigns, "IN")
 					->where("vicidial_live_agents.campaign_id = vicidial_campaigns.campaign_id")
 					->where("vicidial_live_agents.user = vicidial_users.user")
 					->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
