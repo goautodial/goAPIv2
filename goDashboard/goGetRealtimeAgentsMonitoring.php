@@ -151,7 +151,10 @@
 				//	->orderBy("last_call_time")		
 				//	->get($table, NULL, $cols);
                 
-                $allowedCampaigns = implode("','", $allowed_campaigns);
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                    $allowedCampaigns = implode("','", $allowed_campaigns);
+                    $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
+                }
                 $defaultUsers = implode("','", DEFAULT_USERS);
 		
 		$online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
@@ -169,7 +172,7 @@
                         vc.campaign_name as 'vla_campaign_name'
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
-                    WHERE (vla.campaign_id IN ('$allowedCampaigns') AND vla.campaign_id = vc.campaign_id) 
+                    WHERE ($campaignFilters vla.campaign_id = vc.campaign_id) 
                         AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
                     ORDER BY last_call_time";
                 $onlineAgents = $astDB->rawQuery($SQLquery);
