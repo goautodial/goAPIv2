@@ -65,7 +65,7 @@
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) !== 'ADMIN') {
-					$astDB->where("user_group", $log_group);
+					//$astDB->where("user_group", $log_group);
 					if ($userlevel > 8) {
 						$astDB->orWhere("user_group", "---ALL---");
 					} else {
