@@ -151,6 +151,7 @@
 				//	->orderBy("last_call_time")		
 				//	->get($table, NULL, $cols);
                 
+                $campaignFilters = '';
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $allowedCampaigns = implode("','", $allowed_campaigns);
                     $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
