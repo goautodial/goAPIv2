@@ -159,7 +159,7 @@
 				$no_agent_action_value 				= $no_agents_voicemail;
 			}
 			
-			if (!is_null($no_agents_ingroup) && $no_agent_action == "IN_GROUP") {
+			if (!is_null($no_agents_ingroup) && $no_agent_action == "INGROUP") {
 				$no_agent_action_value				= $no_agents_ingroup;
 			}
 			
