@@ -312,8 +312,9 @@
 
 					if ($pass_hash_enabled > 0) {
 						$phones_array 					= array(
-							"conf_secret" 					=> "", 
-							"pass" 							=> ""
+							"conf_secret" 					=> "",
+							"pass" 							=> "",
+                            "user_group"                    => $user_group
 						);
 						
 						$update_array 					= array_merge($update_array, array(
@@ -338,8 +339,9 @@
 						);
 					} else {
 						$phones_array 					= array(
-							"conf_secret" 					=> $pass, 
-							"pass" 							=> $pass
+							"conf_secret" 					=> $pass,
+							"pass" 							=> $pass,
+                            "user_group"                    => $user_group
 						);
 						
 						$update_array 					= array_merge($update_array, array(
