@@ -375,6 +375,13 @@
 					$update_array 						= array_merge($update_array, array(
 						"phone_login" 						=> $phone_login
 					));
+                    
+                    $phones_array 					= array(
+                        "user_group"                    => $user_group
+                    );
+                    
+					$astDB->where("extension", $phone_login);
+					$astDB->update("phones", $phones_array);
 				}
 
 				$astDB->where("user", $user);
