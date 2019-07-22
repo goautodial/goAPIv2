@@ -313,8 +313,7 @@
 					if ($pass_hash_enabled > 0) {
 						$phones_array 					= array(
 							"conf_secret" 					=> "",
-							"pass" 							=> "",
-                            "user_group"                    => $user_group
+							"pass" 							=> ""
 						);
 						
 						$update_array 					= array_merge($update_array, array(
@@ -340,8 +339,7 @@
 					} else {
 						$phones_array 					= array(
 							"conf_secret" 					=> $pass,
-							"pass" 							=> $pass,
-                            "user_group"                    => $user_group
+							"pass" 							=> $pass
 						);
 						
 						$update_array 					= array_merge($update_array, array(
@@ -382,6 +380,8 @@
                     
 					$astDB->where("extension", $phone_login);
 					$astDB->update("phones", $phones_array);
+                    
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery());
 				}
 
 				$astDB->where("user", $user);
