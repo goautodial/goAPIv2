@@ -69,9 +69,22 @@
 			$i++;
 		}
 		
-		$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
-		$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
-		$RUNcampaign = $i;
+		if (in_array("ALL", $campaigns)) {
+                        $campaign_SQL = "";
+                        $i = 0;
+                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                        foreach($SELECTQuery as $camp_val){
+				$array_camp[] = $camp_val["campaign_id"];
+			}
+			$imp_camp = implode("','", $array_camp);
+			$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
+			//die("ALEX");	
+                }else{
+			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
+			$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
+		}
+
+		$RUNcampaign = 1;
 		
 	} else {
 		$RUNcampaign = 0;
@@ -444,7 +457,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $dispo_stats
+		"data" => $campaign_SQL
 	);
 ?>
 
