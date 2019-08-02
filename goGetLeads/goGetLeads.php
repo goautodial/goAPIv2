@@ -24,12 +24,14 @@
 */
 
     include_once ("goAPI.php");
+    include_once ("../goStandardVariables.php");
  
-	$log_user 											= $session_user;
+	/*$log_user 											= $session_user;
 	$log_group 											= go_get_groupid($session_user, $astDB); 
 	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
 	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
+	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);*/
+
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	$search 											= $astDB->escape($_REQUEST['search']);
 	$disposition_filter 								= $astDB->escape($_REQUEST['disposition_filter']);
@@ -39,7 +41,9 @@
 	$state_filter 										= $astDB->escape($_REQUEST['state_filter']);
 	$search_customers 									= $astDB->escape($_REQUEST['search_customers']);
 	$goVarLimit 										= $astDB->escape($_REQUEST["goVarLimit"]);
-	$limit 												= 1000;
+	$start_date										= $astDB->escape($_REQUEST["start_date"]);
+	$end_date                                                                           	= $astDB->escape($_REQUEST["end_date"]);
+	$limit 												= 1000;	
 	$list_ids											= array();
 
 	// ERROR CHECKING 
@@ -117,6 +121,13 @@
 				$astDB->where("state", "%$state_filter%", "LIKE");
 			}
 
+			if (!empty($start_date) && !empty($end_date)) {
+				$start_date = date("Y-m-d G:i:s", strtotime($start_date));
+				$end_date = date("Y-m-d G:i:s", strtotime($end_date));
+
+				$astDB->where("last_local_call_time", array( date($start_date), date($end_date)), "BETWEEN");
+			}
+
 			if ($goVarLimit > 0) {
 				$limit 									= $goVarLimit;
 			}
@@ -125,7 +136,7 @@
 			$fresultsv 									= $astDB->get("vicidial_list", $limit, "*");
 			
 			// GET CUSTOMER LIST
-			$fresultsvgo 								= $goDB->get("go_customers", NULL, "lead_id");
+			$fresultsvgo 								= $goDB->get("go_customers", null, "lead_id");
 			$lead_ids_go								= array();
 			
 			foreach ($fresultsvgo as $fresultsgo) {
