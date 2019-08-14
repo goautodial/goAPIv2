@@ -153,12 +153,16 @@
 					$total_calls						= $astDB->getRowCount();
 					
 					// Total Number of Leads
-					$qtotalleads 						= $astDB
+					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
 						
-					$total_leads						= $astDB->getRowCount();
+					$total_leads						= $astDB->getRowCount();*/
+
+					$astDB->rawQuery("SELECT vl.list_id FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE vlo.campaign_id = '$campaign_id'");
+
+					$total_leads                                            = $astDB->getRowCount();
 					
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
@@ -231,6 +235,7 @@
 					$stringv 							= go_getall_closer_campaigns($campaign_id, $astDB);
 					$closerCampaigns 					= " AND campaign_id IN ('$stringv') ";
 					$vcloserCampaigns 					= " AND vclog.campaign_id IN ('$stringv') ";
+					$call_time                                                      = go_get_calltimes($campaign_id, $astDB);
 
 					if (strlen($stringv) > 0 && $stringv != '') {
 						$MunionSQL 						= "UNION select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_closer_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns group by weekno";
@@ -265,17 +270,22 @@
 						"Day6" 								=> $day6
 					);
 					
-					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
+					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaign_id' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
 					
 					$total_calls						= $astDB->getRowCount();
 					
 					// Total Number of Leads
-					$qtotalleads 						= $astDB
+					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
 						
-					$total_leads						= $astDB->getRowCount();
+					$total_leads						= $astDB->getRowCount();*/
+
+					$astDB->rawQuery("SELECT vl.list_id FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE
+ vlo.campaign_id = '$campaign_id'");
+
+                                        $total_leads                                            = $astDB->getRowCount();
 					
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
@@ -308,7 +318,7 @@
 					);
 					
 					// Disposition of Calls
-					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
+					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul and campaign_id = '$campaign_id' group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
 					if (count($qtotalstatus) > 0) {
@@ -345,6 +355,7 @@
 					$stringv 							= go_getall_closer_campaigns($campaign_id, $astDB);
 					$closerCampaigns 					= " AND campaign_id IN ('$stringv') ";
 					$vcloserCampaigns 					= " AND vclog.campaign_id IN ('$stringv') ";
+					$call_time                                                      = go_get_calltimes($campaign_id, $astDB);
 
 					if (strlen($stringv) > 0 && $stringv != '') {
 						$MunionSQL 						= "UNION select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_closer_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by monthname";							
@@ -389,17 +400,22 @@
 						"Month12" 							=> $month11
 					);
 					
-					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
+					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaign_id' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
 					
 					$total_calls						= $astDB->getRowCount();
 					
 					// Total Number of Leads
-					$qtotalleads 						= $astDB
+					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
 						
-					$total_leads						= $astDB->getRowCount();
+					$total_leads						= $astDB->getRowCount();*/
+
+					$astDB->rawQuery("SELECT vl.list_id FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE
+ vlo.campaign_id = '$campaign_id'");
+
+                                        $total_leads                                            = $astDB->getRowCount();
 					
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
@@ -432,7 +448,7 @@
 					);					
 					
 					// Disposition of Calls					
-					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
+					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaign_id' group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
 					if (count($qtotalstatus) > 0) {
