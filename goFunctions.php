@@ -193,24 +193,48 @@
     }
 
 	function go_getall_closer_campaigns($campaign_id, $astDB){
-		/*$query_date =  date('Y-m-d');
-		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaign_id' order by campaign_id";
-		$query = mysqli_query($link, $query_text);
-		$resultsu = mysqli_fetch_array($query);*/
+		if(strtoupper($campaign_id) === "ALL"){
+			//ALL CAMPAIGNS
+                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+
+                        foreach($SELECTQuery as $camp_val){
+                                $array_camp[] = $camp_val["campaign_id"];
+                        }
+                        $imploded_camp = "'".implode("','", $array_camp)."'";
+
+			// Inbound Sales //
+                        $inbound_query = "
+                                SELECT closer_campaigns FROM vicidial_campaigns
+                                WHERE campaign_id IN ($imploded_camp)
+                                ORDER BY campaign_id
+                        ";
+                        $row1 = $astDB->rawQuery($inbound_query);
+
+                        foreach($row1 as $data){
+                                if(!empty($data['closer_campaigns'])){
+                                $trimmed_cc = rtrim($data['closer_campaigns'], " - ");
+                                $closer_camp[] = $trimmed_cc;
+                                }//not null
+                        }
+
+                        //iterate thru array closer_camp to separate merged closer campaignsi
+                        $imploded = implode(" ", $closer_camp);
+                        $exploded = explode(" ", $imploded);
+			$allCloserCampaigns = "'".implode("','",$exploded)."'";
+		}else{
+			$resultsu = $astDB
+				->where("campaign_id", $campaign_id)
+				->orderBy("campaign_id")
+				->getValue("vicidial_campaigns", "trim(closer_campaigns)");
 		
-		$resultsu = $astDB
-			->where("campaign_id", $campaign_id)
-			->orderBy("campaign_id")
-			->getValue("vicidial_campaigns", "trim(closer_campaigns)");
-		
-		if (count($resultsu) > 0) {
+			if (count($resultsu) > 0) {
 			//$fresults = $resultsu['qresult'];
-			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
-			$allCloserCampaigns = implode("','",$closerCampaigns);
-		} else {
-			$allCloserCampaigns = '';
-		}
-		  
+				$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
+				$allCloserCampaigns = "'".implode("','",$closerCampaigns)."'";
+			} else {
+				$allCloserCampaigns = '';
+			}
+		}// if campaign_id is equal to ALL
 		return $allCloserCampaigns;
 	}
     
