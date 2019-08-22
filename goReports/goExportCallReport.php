@@ -73,11 +73,14 @@
                         $campaign_SQL = "";
                         $i = 0;
                         $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        foreach($SELECTQuery as $camp_val){
+                        $campaign_ct = $astDB->count;
+			foreach($SELECTQuery as $camp_val){
 				$array_camp[] = $camp_val["campaign_id"];
 			}
 			$imp_camp = implode("','", $array_camp);
-			$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
+			if (strtoupper($log_group) !== 'ADMIN') {
+				$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
+			}
 			//die("ALEX");	
                 }else{
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
