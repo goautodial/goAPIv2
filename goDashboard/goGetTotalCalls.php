@@ -71,6 +71,7 @@
 					case "outbound":
 					
 					$data 								= $astDB
+						//->where("length_in_sec", array('>' => 0))
 						->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
 						->getValue("vicidial_log", "count(call_date)");
 						
