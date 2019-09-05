@@ -134,6 +134,17 @@
 			$total_in_sales                                 = "";
 			$total_out_sales                                = "";
 	
+	    //ALL CAMPAIGNS
+            if ("ALL" === strtoupper($campaignID)) {
+                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                        foreach($SELECTQuery as $camp_val){
+                                $array_camp[] = $camp_val["campaign_id"];
+                        }
+            }else{
+                        $array_camp[] = $campaignID;
+            }
+            $imploded_camp = "'".implode("','", $array_camp)."'";
+	
 			if (strtolower($request) === 'outbound') {
 				$outbound_query 				= "
 					SELECT distinct(vl.phone_number) as phone_number, 
@@ -153,7 +164,7 @@
 					WHERE us.user = vlo.user AND vl.phone_number = vlo.phone_number 
 					AND vl.lead_id = vlo.lead_id AND vlo.length_in_sec > '0'
 					AND vlo.status in ('$statuses') AND date_format(vlo.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
-					AND vlo.campaign_id = '$campaignID' $ul 
+					AND vlo.campaign_id IN ($imploded_camp) $ul 
 					order by vlo.call_date ASC 
 					limit 2000
 				";
@@ -183,23 +194,24 @@
 			}
 		
 			if (strtolower($request) === 'inbound') {
-				$astDB->where("campaign_id", $campaignID);
-				$astDB->orderBy("campaign_id");
-				$closer_camps = $astDB->getOne("vicidial_campaigns");
-				$closer_camp_array 	= explode(" ",$closer_camps['closer_campaigns']);
-				$num 			= count($closer_camp_array);				
-				$x								= 0;
-	
-				while ($x<$num) {
-					if ($closer_camp_array[$x]!="-") {
-						$closer_campaigns[$x]	= $closer_camp_array[$x];
-					}
-					
-					$x++;
-				}
+				$inbound_query = "
+                	                SELECT closer_campaigns FROM vicidial_campaigns
+                        	        WHERE campaign_id IN ($imploded_camp)
+                                	ORDER BY campaign_id
+        	                ";
+	                        $closer_query = $astDB->rawQuery($inbound_query);
 				
-				$campaign_inb_query = "vlo.campaign_id IN ('".implode("','",$closer_campaigns)."')";
-			
+				foreach($closer_query as $data){
+                	                if(!empty($data['closer_campaigns'])){
+        	                        $trimmed_cc = rtrim($data['closer_campaigns'], " - ");
+	                                $closer_camp[] = $trimmed_cc;
+                                	}//not null
+                        	}
+				//iterate thru array closer_camp to separate merged closer campaignsi
+	                        $imploded = implode(" ", $closer_camp);
+        	                $exploded = explode(" ", $imploded);
+				$campaign_inb_query = "vlo.campaign_id IN ('".implode("','",$exploded)."')";
+				
 				$inbound_query 	= "
 					SELECT distinct(vl.phone_number) as phone_number, 
 						vl.lead_id as lead_id, 

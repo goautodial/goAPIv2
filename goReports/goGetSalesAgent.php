@@ -96,10 +96,22 @@
 			
 		//if (!empty($sstatuses))
 			$sstatuses = implode("','",$sstatuses);
-			
+		
+		//ALL CAMPAIGNS
+                        if ("ALL" === strtoupper($campaignID)) {
+                                $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+
+                                foreach($SELECTQuery as $camp_val){
+                                        $array_camp[] = $camp_val["campaign_id"];
+                                }
+                        }else{
+                                $array_camp[] = $campaignID;
+                        }
+                        $imploded_camp = "'".implode("','", $array_camp)."'";		
+	
 		$Qstatus2 = $astDB
 			->where("sale", "Y")
-			->where("campaign_id", $campaignID)
+			->where("campaign_id", $array_camp, "IN")
 			->get("vicidial_campaign_statuses", NULL, "status");
 			
 		$cstatusRX = "";
@@ -143,7 +155,7 @@
 				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
 				AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0' 
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '".$fromDate."' AND '".$toDate."' 
-				AND vlog.campaign_id = '".$campaignID."' $ul 
+				AND vlog.campaign_id IN ($imploded_camp) $ul 
 				GROUP BY us.full_name;
 			";
 			$outbound_sql = $astDB->rawQuery($outbound_query);
@@ -164,27 +176,10 @@
 			}
 		}
 		if (strtolower($request) == "inbound") {
-			// Inbound Sales //
-			$inbound_query = "
-				SELECT closer_campaigns FROM vicidial_campaigns 
-				WHERE campaign_id='".$campaignID."' 
-				ORDER BY campaign_id
-			";
-				
-			$row1 			= $astDB->rawQuery($inbound_query);
-			$closer_camp_array	= explode(" ",$row1['closer_campaigns']);
-			$num 			= count($closer_camp_array);				
-			$x			= 0;
-				
-			while ($x<$num) {
-				if ($closer_camp_array[$x]!="-") {
-					$closer_campaigns[$x] 	= $closer_camp_array[$x];
-				}
-					
-				$x++;
-			}
-				
-			$campaign_inb_query = "vlog.campaign_id IN ('".implode("','",$closer_campaigns)."')";
+			//GET ALL CLOSER CAMAPIGNS
+			$closer_camps = go_getall_closer_campaigns("ALL", $astDB);
+	
+			$campaign_inb_query = "vlog.campaign_id IN ($closer_camps)";
 				
 			$query = "
 				SELECT us.full_name AS full_name, us.user AS user, 
@@ -218,7 +213,7 @@
 			"TOToutbound" 		=> $total_out_sales, 
 			"TOTinbound" 		=> $total_in_sales,
 			"TOTAgents"		=> $totagents
-		);
+	);
 			
 			return $apiresults;
 	}
