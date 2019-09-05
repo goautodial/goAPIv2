@@ -70,9 +70,22 @@
 		}
 			
 		//Dial Statuses Summary
-		$list_ids[0] 						= "ALL";
-		$total_all							= ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
+		$list_ids[0] = "ALL";
+		$total_all = ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
 		
+			//ALL CAMPAIGNS
+			if ("ALL" === strtoupper($campaignID)) {
+                        	$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			
+                                foreach($SELECTQuery as $camp_val){
+                                        $array_camp[] = $camp_val["campaign_id"];
+                                }
+                        }else{
+                                $array_camp[] = $campaignID;
+                        }
+                        //$imploded_camp = "'".implode("','", $array_camp)."'";
+
+
 		//if (isset($list_ids) && $list_ids[0] == "ALL") {
 			/*$query 							= "
 				SELECT list_id FROM vicidial_lists 
@@ -81,7 +94,7 @@
 			";*/
 
 			$qlistid = $astDB
-				->where("campaign_id", $campaignID)
+				->where("campaign_id", $array_camp, "IN")
 				->orderBy("list_id")
 				->get("vicidial_lists", NULL, "list_id");
 				
@@ -104,7 +117,7 @@
 		}
 		
 		$qcstatuses = $astDB
-			->where("campaign_id", $campaignID)
+			->where("campaign_id", $array_camp, "IN")
 			->get("vicidial_campaign_statuses", NULL, array("status", "status_name"));
 		
 		if ($astDB->count > 0) {
@@ -216,33 +229,33 @@
 					<td nowrap> ".$statuses_list[$Pstatus]." </td>
 				";
 
-			$first 							= $all_called_first;
+			$firsti = $all_called_first;
 			
 			while ($first <= $all_called_last) {							
-				$called_printed				= 0;
-				$o							= 0;
+				$called_printed	= 0;
+				$o = 0;
 				
 				while ($statuses_called_to_print > $o) {
 					if ( ($count_statuses[$o] == "$Pstatus") AND ($count_called[$o] == "$first") ) {
 						$called_printed++;
-						$TOPsorted_output 	.= "<td nowrap> ".$count_count[$o]." </td>";
+						$TOPsorted_output .= "<td nowrap> ".$count_count[$o]." </td>";
 					}
 
 					$o++;
 				}
 				
 				if (!$called_printed) {
-					$TOPsorted_output 		.= "<td nowrap> 0 </td>";
+					$TOPsorted_output .= "<td nowrap> 0 </td>";
 				}
 				
 				$first++;
 			}
 			
-			$TOPsorted_output 				.= "<td nowrap> ".$leads_in_sts[$sts]." </td></tr>\n\n";
+			$TOPsorted_output .= "<td nowrap> ".$leads_in_sts[$sts]." </td></tr>\n\n";
 			$sts++;
 		}
 
-		$TOPsorted_output 					.= "
+		$TOPsorted_output .= "
 			</tbody>
 				<tfoot><tr class='warning'>
 				<th nowrap colspan='2'> Total For <i>".$total_all."</i> </th>
@@ -264,8 +277,8 @@
 			$first++;
 		}
 		
-		$TOPsorted_output 					.= "<th>$leads_in_list</th></tr>\n";				
-		$TOPsorted_output 					.= "</tfoot></table>";
+		$TOPsorted_output .= "<th>$leads_in_list</th></tr>\n";				
+		$TOPsorted_output .= "</tfoot></table>";
 	
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 			
