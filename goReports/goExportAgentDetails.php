@@ -360,14 +360,14 @@
 					}					
 				}
 
-				if ("ALL" === strtoupper($campaign_id)) {
+				if ("ALL" === strtoupper($campaignID)) {
 					$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
 					foreach($SELECTQuery as $camp_val){
 						$array_camp[] = $camp_val["campaign_id"];
 					}
 				}else{
-						$array_camp[] = $campaign_id;
+						$array_camp[] = $campaignID;
 				}
 				
 				/*
@@ -396,6 +396,7 @@
 					"sum(dispo_sec) as dispo_sec",
 					"sum(pause_sec) as pause_sec",
 					"count(lead_id) as calls",
+					"lead_id",
 					"status",
 					"sum(dead_sec) as dead_sec",
 					"(sum(talk_sec) - sum(dead_sec)) as customer"
@@ -421,12 +422,12 @@
 						$customer 						= $row['customer'];
 						$calls							= $row['calls'];
 						
-						if ($wait > 65000) { $wait  	= 0; }
+						/*if ($wait > 65000) { $wait  	= 0; }
 						if ($talk > 65000) { $talk		= 0; }
 						if ($dispo > 65000) { $dispo	= 0; }
 						if ($pause > 65000) { $pause	= 0; }
 						if ($dead > 65000) { $dead		= 0; }
-						if ($customer < 1) { $customer	= 0; }
+						if ($customer < 1) { $customer	= 0; }*/
 						
 						$TOTwait 						= ($TOTwait + $wait);
 						$TOTtalk 						= ($TOTtalk + $talk);
@@ -459,16 +460,17 @@
 								$Sdead[$m] 				= ($Sdead[$m] + $dead);
 								$Scustomer[$m] 			= ($Scustomer[$m] + $customer);
 								
-								if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
-									$Scalls[$m]++;
-								}
+								//if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
+								//	$Scalls[$m]++;
+									$Scalls[$m]			= ($Scalls[$m] + $calls);
+								//}
 							}
 							
 							$m++;
 						}
 						
 						if ($user_found < 1) {
-							$Scalls[$uc] 				= 0;
+							//$Scalls[$uc] 				= 0;
 							$Suser[$uc] 				= $user;
 							$Swait[$uc] 				= $wait;
 							$Stalk[$uc] 				= $talk;
@@ -477,9 +479,10 @@
 							$Sdead[$uc] 				= $dead;
 							$Scustomer[$uc] 			= $customer;
 							
-							if ($lead > 0) {
-								$Scalls[$uc]++;
-							}
+							//if ($lead > 0) {
+								//$Scalls[$uc]++;
+								$Scalls[$uc]                     = $calls;
+							//}
 							
 							$uc++;
 						}						
@@ -641,14 +644,14 @@
 					}
 
 					// END loop through each status //					
-					if (is_null($Scalls[$m])) {
-						$Scalls[$m] 					= 0;
-					}
+					//if (is_null($Scalls[$m])) {
+					//	$Scalls[$m] 					= 0;
+					//}
 
 					$Toutput 						= array(
 						"name" 							=> $Sname[$m], 
 						"user" 							=> $Suser[$m], 
-						"number_of_calls" 					=> $calls[$m], 
+						"number_of_calls" 					=> $Scalls[$m], 
 						"agent_time" 						=> $Stime[$m], 
 						"wait_time" 						=> $Swait[$m], 
 						"talk_time" 						=> $Stalk[$m], 
@@ -790,7 +793,8 @@
 					"TOTtimeTC" 							=> $TOTtimeTC, 
 					"TOT_AGENTS" 							=> $TOT_AGENTS, 
 					"TOTcalls" 								=> $TOTcalls, 
-					"FileExport" 							=> $TOPsorted_outputFILE
+					"FileExport" 							=> $TOPsorted_outputFILE,
+					"query" => $astDB->getLastQuery()
 				);
 				
 				return $apiresults;				
