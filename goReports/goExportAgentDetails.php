@@ -419,6 +419,7 @@
 						$status 						= $row['status'];
 						$dead 							= $row['dead_sec'];
 						$customer 						= $row['customer'];
+						$calls							= $row['calls'];
 						
 						if ($wait > 65000) { $wait  	= 0; }
 						if ($talk > 65000) { $talk		= 0; }
@@ -647,14 +648,14 @@
 					$Toutput 						= array(
 						"name" 							=> $Sname[$m], 
 						"user" 							=> $Suser[$m], 
-						"number_of_calls" 					=> $Scalls[$m], 
-						"agent_time" 						=> convert($Stime[$m]), 
-						"wait_time" 						=> convert($Swait[$m]), 
-						"talk_time" 						=> convert($Stalk[$m]), 
-						"dispo_time" 						=> convert($Sdispo[$m]), 
-						"pause_time" 						=> convert($Spause[$m]), 
-						"wrap_up" 						=> convert($Sdead[$m]), 
-						"customer_time" 					=> convert($Scustomer[$m])
+						"number_of_calls" 					=> $calls[$m], 
+						"agent_time" 						=> $Stime[$m], 
+						"wait_time" 						=> $Swait[$m], 
+						"talk_time" 						=> $Stalk[$m], 
+						"dispo_time" 						=> $Sdispo[$m], 
+						"pause_time" 						=> $Spause[$m], 
+						"wrap_up" 						=> $Sdead[$m], 
+						"customer_time" 					=> $Scustomer[$m]
 					);
 			
 					$Sstatuses[$m] 						= rtrim( $Sstatuses[$m], ",");
