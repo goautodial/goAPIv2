@@ -360,6 +360,7 @@
 					}					
 				}
 				
+				/*
 				$cols									= array(
 					"user",
 					"wait_sec",
@@ -375,7 +376,28 @@
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $campaignID)
 					->get("vicidial_agent_log", 1000, $cols);
-					
+				*/
+				
+				$cols = array(
+					"vu.full_name",
+					"val.user",
+					"sum(wait_sec) as wait_sec",
+					"sum(talk_sec) as talk_sec",
+					"sum(dispo_sec) as dispo_sec",
+					"sum(pause_sec) as pause_sec",
+					"count(lead_id) as calls",
+					"status",
+					"sum(dead_sec) as dead_sec",
+					"(sum(talk_sec) - sum(dead_sec)) as customer"
+				);
+				
+				$agent_time_ct = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
+					->groupBy("val.user")
+					->get("vicidial_agent_log val", $limit, $cols);
+
 				if ($astDB->count >0) {
 					foreach ($agent_time_ct as $row) {
 						$user 							= $row['user'];
@@ -386,7 +408,7 @@
 						$lead 							= $row['lead_id'];
 						$status 						= $row['status'];
 						$dead 							= $row['dead_sec'];
-						$customer 						= ($talk - $dead);
+						$customer 						= $row['customer'];
 						
 						if ($wait > 65000) { $wait  	= 0; }
 						if ($talk > 65000) { $talk		= 0; }
@@ -486,13 +508,13 @@
 					$RAWcalls 							= $Scalls[$m];
 					$RAWtimeSEC 						= $Stime[$m];
 			
-					$Swait[$m] 						= gmdate('H:i:s', $Swait[$m]); 
-					$Stalk[$m] 						= gmdate('H:i:s', $Stalk[$m]); 
-					$Sdispo[$m] 					= gmdate('H:i:s', $Sdispo[$m]); 
-					$Spause[$m] 					= gmdate('H:i:s', $Spause[$m]); 
-					$Sdead[$m] 						= gmdate('H:i:s', $Sdead[$m]); 
-					$Scustomer[$m] 					= gmdate('H:i:s', $Scustomer[$m]); 
-					$Stime[$m] 						= gmdate('H:i:s', $Stime[$m]); 
+					$Swait[$m] 						= convert($Swait[$m]); 
+					$Stalk[$m] 						= convert($Stalk[$m]); 
+					$Sdispo[$m] 					= convert($Sdispo[$m]); 
+					$Spause[$m] 					= convert($Spause[$m]); 
+					$Sdead[$m] 						= convert($Sdead[$m]); 
+					$Scustomer[$m] 					= convert($Scustomer[$m]); 
+					$Stime[$m] 						= convert($Stime[$m]); 
 			
 					$RAWtime 						= $Stime[$m];
 					$RAWwait 						= $Swait[$m];
@@ -528,7 +550,7 @@
 							$punches_found++;
 							$RAWtimeTCsec					= $TCtime[$n];
 							$TOTtimeTC 					= ($TOTtimeTC + $TCtime[$n]);
-							$StimeTC[$m] 					= gmdate('H:i:s', $TCtime[$n]); 
+							$StimeTC[$m] 					= convert($TCtime[$n]); 
 							$RAWtimeTC 					= $StimeTC[$m];
 							$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
 						}
@@ -577,7 +599,7 @@
 						
 						while ( ($i < $pause_sec_ct) AND ($status_found < 1) ) {
 							if ( ($Suser[$m] == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
-								$USERcodePAUSE_MS 		= gmdate('H:i:s', $PCpause_sec[$i]);
+								$USERcodePAUSE_MS 		= convert($PCpause_sec[$i]);
 								
 								if (strlen($USERcodePAUSE_MS)<1) {
 									$USERcodePAUSE_MS	= '0';
@@ -616,13 +638,13 @@
 						"name" 							=> $Sname[$m], 
 						"user" 							=> $Suser[$m], 
 						"number_of_calls" 					=> $Scalls[$m], 
-						"agent_time" 						=> $Stime[$m], 
-						"wait_time" 						=> $Swait[$m], 
-						"talk_time" 						=> $Stalk[$m], 
-						"dispo_time" 						=> $Sdispo[$m], 
-						"pause_time" 						=> $Spause[$m], 
-						"wrap_up" 						=> $Sdead[$m], 
-						"customer_time" 					=> $Scustomer[$m]
+						"agent_time" 						=> convert($Stime[$m]), 
+						"wait_time" 						=> convert($Swait[$m]), 
+						"talk_time" 						=> convert($Stalk[$m]), 
+						"dispo_time" 						=> convert($Sdispo[$m]), 
+						"pause_time" 						=> convert($Spause[$m]), 
+						"wrap_up" 						=> convert($Sdead[$m]), 
+						"customer_time" 					=> convert($Scustomer[$m])
 					);
 			
 					$Sstatuses[$m] 						= rtrim( $Sstatuses[$m], ",");
@@ -731,14 +753,6 @@
 				// END loop through each status //
 		
 				// call function to calculate AND print dialable leads
-				/*$TOTwait 								= gmdate('H:i:s', $TOTwait);
-				$TOTtalk 								= gmdate('H:i:s', $TOTtalk);
-				$TOTdispo 								= gmdate('H:i:s', $TOTdispo);
-				$TOTpause 								= gmdate('H:i:s', $TOTpause);
-				$TOTdead 								= gmdate('H:i:s', $TOTdead);
-				$TOTcustomer 								= gmdate('H:i:s', $TOTcustomer);
-				$TOTALtime 								= gmdate('H:i:s', $TOTALtime);
-				$TOTtimeTC 								= gmdate('H:i:s', $TOTtimeTC);*/
 
 				$TOTwait                                                                = convert($TOTwait);
 				$TOTtalk                                                                = convert($TOTtalk);
