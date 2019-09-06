@@ -359,6 +359,16 @@
 						}
 					}					
 				}
+
+				if ("ALL" === strtoupper($campaign_id)) {
+					$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+
+					foreach($SELECTQuery as $camp_val){
+						$array_camp[] = $camp_val["campaign_id"];
+					}
+				}else{
+						$array_camp[] = $campaign_id;
+				}
 				
 				/*
 				$cols									= array(
