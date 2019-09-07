@@ -2,9 +2,10 @@
 /**
  * @file 		goGetAllCampaigns.php
  * @brief 		API to get all campaigns
- * @copyright 	Copyright (C) GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra  <jeremiah@goautodial.com>
- * @author     	Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright 	Copyright (c) 2019 GOautodial Inc.
+ * @author     	Jeremiah Sebastian Samatra
+ * @author     	Alexander Jim Abenoja
+ * @author		Demian Lizandro A. Biscocho  
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -22,13 +23,7 @@
 */
 
 	include_once ("goAPI.php");
-	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));		
-        
+	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(

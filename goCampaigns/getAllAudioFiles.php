@@ -23,9 +23,6 @@
 */
 
 	include_once ( "goAPI.php" );
-	
-	$log_user 										= $session_user;
-	//$log_group 										= go_get_groupid($session_user, $astDB); 
     
     // Check exisiting status
 	if ( !isset($log_user) || is_null($log_user) ) {

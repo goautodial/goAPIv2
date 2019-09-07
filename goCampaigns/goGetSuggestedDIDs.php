@@ -2,7 +2,7 @@
 /**
  * @file        goGetSuggestedDIDs.php
  * @brief       API to get suggested DIDs
- * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho 
  * @author      Noel Umandap
  * @author      Alexander Jim Abenoja
@@ -24,11 +24,6 @@
 
     include_once ("goAPI.php");
 
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
     $keyword 											= $astDB->escape($_REQUEST['keyword']);
     
     // Check campaign_id if its null or empty

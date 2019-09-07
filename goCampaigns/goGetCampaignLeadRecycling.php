@@ -2,7 +2,7 @@
  /**
  * @file 		goGetCampaignLeadRecycling.php
  * @brief 		API for getting lead recycling for specific campaigns
- * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
@@ -22,10 +22,6 @@
 
     include_once ("goAPI.php");
 
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
 	$campaigns											= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);
 		
