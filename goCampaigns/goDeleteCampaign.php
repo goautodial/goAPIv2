@@ -2,7 +2,7 @@
 /**
  * @file 		goDeleteCampaign.php
  * @brief 		API to delete campaign
- * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author     	Alexander Jim H. Abenoja
  * @author		Jerico James Milo
@@ -24,11 +24,6 @@
 
     include_once( "goAPI.php" );
 
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid( $session_user, $astDB ); 
-	$log_ip 											= $astDB->escape( $_REQUEST['log_ip'] );
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
     $allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_ids 										= $_REQUEST["campaign_id"];
 	$action 											= $astDB->escape( $_REQUEST["action"] );

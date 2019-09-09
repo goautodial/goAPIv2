@@ -24,6 +24,35 @@
 	if (isset($_GET["session_user"])) { $session_user = $_GET["session_user"];
     } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }
 	//else $apiresults = array("result" => "Error: Session User Not Defined");
+
+    // CONVERT SECONDS TO DAY, HOUR:MINUTE,SEC //
+    function convert($n) {
+        /*$days=floor($secs/86400);
+        $hours=floor($secs/3600);
+        $minutes=floor($secs/60);
+        if($secs>=86400){$secs=$secs%86400;$r=$days.'d ';}
+        if($secs>=3600){$secs=$secs%3600;$r.=sprintf('%02d', $hours).':';}if($hours <= 0)$r.='00:';
+        if($secs>=60){$secs=$secs%60;$r.=sprintf('%02d', $minutes).':';}if($minutes <= 0)$r.='00:';
+        $r.=sprintf('%02d', $secs);
+        return $r;*/
+	$day = floor($n / (24 * 3600)); 
+  
+    	$n = ($n % (24 * 3600)); 
+    	$hour = $n / 3600; 
+  
+    	$n %= 3600; 
+    	$minutes = $n / 60 ; 
+  
+    	$n %= 60; 
+    	$seconds = $n;
+
+	$r = '';
+	if($day > 0 )$r .= $day.'d ';
+	if($hour > 0)$r .= sprintf('%02d', $hour).':';else $r.= '00:';
+	if($minutes > 0)$r .= sprintf('%02d', $minutes).':';else $r.='00:';
+	if($seconds > 0)$r .= sprintf('%02d', $seconds);else $r.='00';
+	return $r;
+    }
 	
     ##### get usergroup #########
     function go_get_groupid($goUser, $dbase){

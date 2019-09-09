@@ -2,9 +2,9 @@
 /**
  * @file        goGetDIDSettings.php
  * @brief       API to get DID Settings for a DID
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (c) 2019 GOautodial Inc.
+ * @author      Noel Umandap
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,6 @@
 
     include_once ("goAPI.php");
 
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
     $did 												= $astDB->escape($_REQUEST['did']);
     
     // Check campaign_id if its null or empty

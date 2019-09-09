@@ -2,7 +2,7 @@
  /**
  * @file 		goEditCampaign.php
  * @brief 		API for Modifying Campaigns
- * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author		Jericho James Milo
  * @author		Noel Umandap
@@ -25,11 +25,6 @@
 
     include_once ( "goAPI.php" );
 
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));	
 	$allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	$campaign_name 										= $astDB->escape($_REQUEST['campaign_name']);

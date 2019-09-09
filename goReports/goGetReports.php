@@ -35,7 +35,7 @@
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
     $request 										= $astDB->escape($_REQUEST['request']);
-	$dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    $dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
 	
     if (empty($fromDate)) {
     	$fromDate 									= date("Y-m-d")." 00:00:00";
@@ -86,13 +86,13 @@
 		$campaigns 									= $astDB->escape($_REQUEST['campaigns']);
 		$inbounds 									= $astDB->escape($_REQUEST['inbounds']);
 		$lists 										= $astDB->escape($_REQUEST['lists']);
-		$custom_fields 								= $astDB->escape($_REQUEST['custom_fields']);
-		$per_call_notes 							= $astDB->escape($_REQUEST['per_call_notes']);
-		$rec_location 								= $astDB->escape($_REQUEST['rec_location']);
+		$custom_fields 									= $astDB->escape($_REQUEST['custom_fields']);
+		$per_call_notes 								= $astDB->escape($_REQUEST['per_call_notes']);
+		$rec_location 									= $astDB->escape($_REQUEST['rec_location']);
 		
 		$goReportsReturn 							= go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $log_group, $astDB);		
 		$apiresults 								= array(
-			"result" 									=> "success", 
+			"result" 								=> "success", 
 			"getReports" 								=> $goReportsReturn
 		);
 	} else {
@@ -102,29 +102,30 @@
 			"getReports" 								=> $goReportsReturn
 		);
 	}
-   
+	return $apiresults;	
+ 
 	function go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location,$log_group, $astDB) {		
 		if (!empty($campaigns))
-			$campaigns 								= explode(",",$campaigns);
+			$campaigns 							= explode(",",$campaigns);
 		if (!empty($inbounds))
 		    $inbounds 								= explode(",",$inbounds);
 		if (!empty($lists))	
-		    $lists 									= explode(",",$lists);
+		    $lists 								= explode(",",$lists);
 		if (!empty($dispo_stats))	
 		    $dispo_stats 							= explode(",",$dispo_stats);
 		
 		$campaign_SQL 								= "";
-		$group_SQL 									= "";
-		$list_SQL 									= "";
+		$group_SQL 								= "";
+		$list_SQL 								= "";
 		$status_SQL 								= "";
 		
 		$campaign_ct 								= count($campaigns);
-		$group_ct 									= count($inbounds);
-		$list_ct 									= count($lists);
-		$status_ct 									= count($dispo_stats);
+		$group_ct 								= count($inbounds);
+		$list_ct 								= count($lists);
+		$status_ct 								= count($dispo_stats);
 
 		if ($campaigns != "") {
-			$i										= 0;
+			$i								= 0;
 			$array_campaign 						= Array();
 
 			while ($i < $campaign_ct) {
@@ -143,7 +144,7 @@
 		}
 		
 		if ($inbounds != "") {
-			$i										= 0;
+			$i								= 0;
 			$array_inbound 							= Array();
 
 			while ($i < $group_ct) {
@@ -168,8 +169,8 @@
 		if ($lists != "") {
 			$list_SQL 								= "";
 			
-			$i										= 0;
-			$array_list 							= Array();
+			$i									= 0;
+			$array_list 								= Array();
 			while ($i < $list_ct) {
 				//$list_SQL .= "'$lists[$i]',";
 				$list_SQL 							.= "'?',";
@@ -178,14 +179,14 @@
 			}
 			if (in_array("ALL", $lists)) {
 				$list_SQL 							= "";
-				$i									= 0;
+				$i								= 0;
 				while ($i < $campaign_ct) {
 					$camp_id 						= $campaigns[$i];
 					$astDB->WHERE("campaign_id", $camp_id);
 					$SELECTQuery = $astDB->getValue("vicidial_lists", "list_id");
 					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
 					foreach($SELECTQuery as $fetch_list) {
-						$array_list[] 				= $fetch_list["list_id"];
+						$array_list[] 					= $fetch_list["list_id"];
 					}
 					
 					$i++;
@@ -198,19 +199,19 @@
 				$i									= 0;
 				
 				while ($i < $list_ct) {
-					$array_list[] 					= $lists[$i];
+					$array_list[] 						= $lists[$i];
 					$i++;
 				}
 			}
 		}
 		
 		if ($dispo_stats != "") {
-			$i										= 0;
-			$array_status 							= Array();
+			$i									= 0;
+			$array_status 								= Array();
 
 			while ($i < $status_ct) {
 				//$status_SQL .= "'$dispo_stats[$i]',";
-				$status_SQL 						.= "'?',";
+				$status_SQL 							.= "'?',";
 				array_push($array_status, $dispo_stats[$i]);
 				$i++;
 			}
@@ -539,7 +540,7 @@
 		$campFilter 									= (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
 		$inbFilter  									= (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
 		$listFilter 									= (strlen($lists) > 0) ? "List(s): $lists" : "";
-		$log_id 										= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
+		$log_id 									= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 		
 		$return 										= array(
 			"query" 										=> $query, 
@@ -548,7 +549,8 @@
 			"return_this" 									=> $query
 		);
 		
-		return $return;
+		return $return; 
+		}
 	}
 	
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group, $astDB, $dispo_stats, $goDB) {		
@@ -557,9 +559,9 @@
 			$date2 										= new DateTime($toDate);
 			$interval 									= date_diff($date1,$date2);
 			$date_diff 									= $interval->format('%d');
-            $date_array 								= implode("','",go_get_dates($fromDate, $toDate));
+            		$date_array 								= implode("','",go_get_dates($fromDate, $toDate));
 			$file_download 								= 1;            
-            $tenant 									= 0;
+            		$tenant 									= 0;
             
             // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
             // every time we need to filter out requests
@@ -567,15 +569,15 @@
 				$tenant									= 1;
 			}
 			
-            if ($tenant) {
+            		if ($tenant) {
 				$astDB->where("user_group", $log_group);
-            } else {
+            		} else {
 				if (strtoupper($log_group) != 'ADMIN') {
 					if ($user_level > 8) {
 						$astDB->where("user_group", $log_group);
 					}
 				}
-            }
+            		}	
             
             //Initialise Values                        
 			if ($pageTitle != 'inbound_report') {
@@ -619,7 +621,7 @@
 				//foreach ($query as $Qstatus) {
 				$goTempStatVal 							= $Qstatus['status'];
 				$sstatuses[$a] 							= $Qstatus['status'];
-				$sstatusRX								.= "{$goTempStatVal}|";
+				$sstatusRX							.= "{$goTempStatVal}|";
 					//$a++;
 				//}			
 			}
@@ -634,13 +636,13 @@
 			
 			$cstatusRX 									= "";
 			$cstatuses 									= array();			
-			$b 											= 0;
+			$b 										= 0;
 			
 			if ($Qstatus) {
 				//foreach ($query as $Qstatus) {
 				$goTempStatVal 							= $Qstatus['status'];
 				$cstatuses[$b] 							= $Qstatus['status'];
-				$cstatusRX								.= "{$goTempStatVal}|";
+				$cstatusRX							.= "{$goTempStatVal}|";
 					//$b++;
 				//}			
 			}
@@ -1166,14 +1168,14 @@
 				$sub_statusesTOP 						= array();
 				$sub_statusesARY 						= $MT;
 				
-				$PCusers 								= '-';
+				$PCusers 							= '-';
 				$PCusersARY 							= $MT;
 				$PCuser_namesARY 						= $MT;
 
-				$i										= 0;
-				$a										= 1;
+				$i								= 0;
+				$a								= 1;
 				$sub_status_count						= 0;
-				$user_count								= 0;
+				$user_count							= 0;
 				
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
@@ -1273,7 +1275,7 @@
 						$TOTdispo 						= ($TOTdispo + $dispo);
 						$TOTpause 						= ($TOTpause + $pause);
 						$TOTdead 						= ($TOTdead + $dead);
-						$TOTcustomer 					= ($TOTcustomer + $customer);
+						$TOTcustomer 						= ($TOTcustomer + $customer);
 						$TOTALtime 						= ($TOTALtime + $pause + $dispo + $talk + $wait);
 						
 						if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
@@ -1294,10 +1296,10 @@
 								$user_found++;
 								$Swait[$m] 				= ($Swait[$m] + $wait);
 								$Stalk[$m] 				= ($Stalk[$m] + $talk);
-								$Sdispo[$m] 			= ($Sdispo[$m] + $dispo);
-								$Spause[$m] 			= ($Spause[$m] + $pause);
+								$Sdispo[$m] 				= ($Sdispo[$m] + $dispo);
+								$Spause[$m] 				= ($Spause[$m] + $pause);
 								$Sdead[$m] 				= ($Sdead[$m] + $dead);
-								$Scustomer[$m] 			= ($Scustomer[$m] + $customer);
+								$Scustomer[$m] 				= ($Scustomer[$m] + $customer);
 								
 								if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
 									$Scalls[$m]++;
@@ -1427,34 +1429,34 @@
 			
 				//# BEGIN loop through each user formatting data for output
 				$AUTOLOGOUTflag							= 0;
-				$m										= 0;
-				$rowId									= 1;
+				$m								= 0;
+				$rowId								= 1;
 				
 				while ( ($m < $uc) AND ($m < 50000) ) {
 					$SstatusesHTML						= "";
 					$SstatusesFILE						= "";
-					$Stime[$m] 							= ($Swait[$m] + $Stalk[$m] + $Sdispo[$m] + $Spause[$m]);
-					$RAWuser 							= $Suser[$m];
-					$RAWcalls 							= $Scalls[$m];
+					$Stime[$m] 						= ($Swait[$m] + $Stalk[$m] + $Sdispo[$m] + $Spause[$m]);
+					$RAWuser 						= $Suser[$m];
+					$RAWcalls 						= $Scalls[$m];
 					$RAWtimeSEC 						= $Stime[$m];
 			
-					$Swait[$m] 							= gmdate('H:i:s', $Swait[$m]); 
-					$Stalk[$m] 							= gmdate('H:i:s', $Stalk[$m]); 
+					$Swait[$m] 						= gmdate('H:i:s', $Swait[$m]); 
+					$Stalk[$m] 						= gmdate('H:i:s', $Stalk[$m]); 
 					$Sdispo[$m] 						= gmdate('H:i:s', $Sdispo[$m]); 
 					$Spause[$m] 						= gmdate('H:i:s', $Spause[$m]); 
-					$Sdead[$m] 							= gmdate('H:i:s', $Sdead[$m]); 
+					$Sdead[$m] 						= gmdate('H:i:s', $Sdead[$m]); 
 					$Scustomer[$m] 						= gmdate('H:i:s', $Scustomer[$m]); 
-					$Stime[$m] 							= gmdate('H:i:s', $Stime[$m]); 
+					$Stime[$m] 						= gmdate('H:i:s', $Stime[$m]); 
 			
-					$RAWtime 							= $Stime[$m];
-					$RAWwait 							= $Swait[$m];
-					$RAWtalk 							= $Stalk[$m];
-					$RAWdispo 							= $Sdispo[$m];
-					$RAWpause 							= $Spause[$m];
-					$RAWdead 							= $Sdead[$m];
+					$RAWtime 						= $Stime[$m];
+					$RAWwait 						= $Swait[$m];
+					$RAWtalk 						= $Stalk[$m];
+					$RAWdispo						= $Sdispo[$m];
+					$RAWpause						= $Spause[$m];
+					$RAWdead 						= $Sdead[$m];
 					$RAWcustomer 						= $Scustomer[$m];
 			
-					$n									= 0;
+					$n							= 0;
 					$user_name_found					= 0;
 					
 					while ($n < $user_ct) {
@@ -1472,17 +1474,17 @@
 						$Sname[$m] 						= $RAWname;
 					}
 			
-					$n 									= 0;
+					$n 							= 0;
 					$punches_found						= 0;
 					
 					while ($n < $punches_to_print) {
 						if ($Suser[$m] == $TCuser[$n]) {
 							$punches_found++;
-							$RAWtimeTCsec				= $TCtime[$n];
+							$RAWtimeTCsec					= $TCtime[$n];
 							$TOTtimeTC 					= ($TOTtimeTC + $TCtime[$n]);
-							$StimeTC[$m] 				= gmdate('H:i:s', $TCtime[$n]); 
+							$StimeTC[$m] 					= gmdate('H:i:s', $TCtime[$n]); 
 							$RAWtimeTC 					= $StimeTC[$m];
-							$StimeTC[$m] 				= sprintf("%10s", $StimeTC[$m]);
+							$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
 						}
 						
 						$n++;
@@ -1491,7 +1493,7 @@
 					if ($punches_found < 1) {
 						$RAWtimeTCsec 					= "0";
 						$StimeTC[$m] 					= "0:00"; 
-						$RAWtimeTC 						= $StimeTC[$m];
+						$RAWtimeTC 					= $StimeTC[$m];
 						$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
 					}
 			
@@ -1517,14 +1519,14 @@
 					}
 			
 					// BEGIN loop through each status //
-					$n									= 0;
+					$n							= 0;
 					
 					while ($n < $sub_status_count) {
 						$Sstatus						= $sub_statusesARY[$n];
 						$SstatusTXT						= "";
 						
 						// BEGIN loop through each stat line //
-						$i								= 0;
+						$i						= 0;
 						$status_found					= 0;
 						
 						while ( ($i < $pause_sec_ct) AND ($status_found < 1) ) {
@@ -1535,7 +1537,7 @@
 									$USERcodePAUSE_MS	= '0';
 								}
 								
-								$pfUSERcodePAUSE_MS 	= sprintf("%10s", $USERcodePAUSE_MS);
+								$pfUSERcodePAUSE_MS 		= sprintf("%10s", $USERcodePAUSE_MS);
 	
 								$SstatusesFILE 			.= ",$USERcodePAUSE_MS";
 								//$sub_statusesTOP[$m]
@@ -1564,29 +1566,29 @@
 						$Scalls[$m] 					= 0;
 					}
 
-					$Toutput 							= array(
-						"name" 								=> $Sname[$m], 
-						"user" 								=> $Suser[$m], 
+					$Toutput 						= array(
+						"name" 							=> $Sname[$m], 
+						"user" 							=> $Suser[$m], 
 						"number_of_calls" 					=> $Scalls[$m], 
 						"agent_time" 						=> $Stime[$m], 
 						"wait_time" 						=> $Swait[$m], 
 						"talk_time" 						=> $Stalk[$m], 
 						"dispo_time" 						=> $Sdispo[$m], 
 						"pause_time" 						=> $Spause[$m], 
-						"wrap_up" 							=> $Sdead[$m], 
+						"wrap_up" 						=> $Sdead[$m], 
 						"customer_time" 					=> $Scustomer[$m]
 					);
 			
 					$Sstatuses[$m] 						= rtrim( $Sstatuses[$m], ",");
 					
-					$Boutput 							= array(
-						"rowID" 							=> $rowId, 
-						"name" 								=> $Sname[$m], 
-						"statuses" 							=> $Sstatuses[$m]
+					$Boutput 						= array(
+						"rowID" 						=> $rowId, 
+						"name" 							=> $Sname[$m], 
+						"statuses" 						=> $Sstatuses[$m]
 					);
 					
 					$BoutputFile 						= array(
-						"statuses" 							=> $Sstatuses[$m]
+						"statuses" 						=> $Sstatuses[$m]
 					);
 
 					$TOPsorted_output[$m] 				= $Toutput;
@@ -1623,7 +1625,7 @@
 						rsort($TOPsort, SORT_STRING);
 					}
 			
-					$m									= 0;
+					$m							= 0;
 					
 					while ($m < $k) {
 						$sort_split 					= explode("-----",$TOPsort[$m]);
@@ -1649,15 +1651,15 @@
 				$SUMstatusesHTML						= "";
 				//$SUMstatusesFILE						= "";
 				$TOTtotPAUSE 							= 0;
-				$n										= 0;
+				$n								= 0;
 				
 				while ($n < $sub_status_count) {
 					$Scalls								= 0;
 					$Sstatus=$sub_statusesARY[$n];
-					$SUMstatusTXT						= "";
+					$SUMstatusTXT							= "";
 					// BEGIN loop through each stat line //
-					$i									= 0; 
-					$status_found						= 0;
+					$i								= 0; 
+					$status_found							= 0;
 					
 					while ($i < $pause_sec_ct) {
 						if ($Sstatus == "$sub_status[$i]") {
@@ -1673,7 +1675,8 @@
 					} else {
 						$TOTtotPAUSE 					= ($TOTtotPAUSE + $Scalls);
 			
-						$USERsumstatPAUSE_MS 			= gmdate('H:i:s', $Scalls); 
+						//$USERsumstatPAUSE_MS 			= gmdate('H:i:s', $Scalls);
+						$USERsumstatPAUSE_MS			= convert($Scalls); 
 						$pfUSERsumstatPAUSE_MS 			= sprintf("%11s", $USERsumstatPAUSE_MS);
 	
 						//$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
@@ -1685,31 +1688,40 @@
 				// END loop through each status //
 			
 				// call function to calculate AND print dialable leads
-				$TOTwait 								= gmdate('H:i:s', $TOTwait);
+				/*$TOTwait 								= gmdate('H:i:s', $TOTwait);
 				$TOTtalk 								= gmdate('H:i:s', $TOTtalk);
 				$TOTdispo 								= gmdate('H:i:s', $TOTdispo);
 				$TOTpause 								= gmdate('H:i:s', $TOTpause);
 				$TOTdead 								= gmdate('H:i:s', $TOTdead);
-				$TOTcustomer 							= gmdate('H:i:s', $TOTcustomer);
+				$TOTcustomer 								= gmdate('H:i:s', $TOTcustomer);
 				$TOTALtime 								= gmdate('H:i:s', $TOTALtime);
-				$TOTtimeTC 								= gmdate('H:i:s', $TOTtimeTC);
+				$TOTtimeTC 								= gmdate('H:i:s', $TOTtimeTC);*/
+
+				$TOTwait                                                                = convert($TOTwait);
+                                $TOTtalk                                                                = convert($TOTtalk);
+                                $TOTdispo                                                               = convert($TOTdispo);
+                                $TOTpause                                                               = convert($TOTpause);
+                                $TOTdead                                                                = convert($TOTdead);
+                                $TOTcustomer                                                    	= convert($TOTcustomer);
+                                $TOTALtime                                                              = convert($TOTALtime);
+                                $TOTtimeTC                                                              = convert($TOTtimeTC);
 				
 				$apiresults 							= array(
-					"result" 								=> "success", 
+					"result" 							=> "success", 
 					"TOPsorted_output" 						=> $TOPsorted_output, 
 					"sub_statusesTOP" 						=> $sub_statusesTOP, 
 					"BOTsorted_output" 						=> $BOTsorted_output, 
 					"SUMstatuses" 							=> $SUMstatuses, 
-					"TOTwait" 								=> $TOTwait, 
-					"TOTtalk" 								=> $TOTtalk, 
-					"TOTdispo" 								=> $TOTdispo, 
-					"TOTpause" 								=> $TOTpause, 
-					"TOTdead" 								=> $TOTdead, 
+					"TOTwait" 							=> $TOTwait, 
+					"TOTtalk" 							=> $TOTtalk, 
+					"TOTdispo" 							=> $TOTdispo, 
+					"TOTpause" 							=> $TOTpause, 
+					"TOTdead" 							=> $TOTdead, 
 					"TOTcustomer" 							=> $TOTcustomer, 
 					"TOTALtime" 							=> $TOTALtime, 
 					"TOTtimeTC" 							=> $TOTtimeTC, 
 					"TOT_AGENTS" 							=> $TOT_AGENTS, 
-					"TOTcalls" 								=> $TOTcalls, 
+					"TOTcalls" 							=> $TOTcalls, 
 					"FileExport" 							=> $TOPsorted_outputFILE
 				);
 				
@@ -2388,7 +2400,7 @@
 					/*while ($row = $astDB->rawQuery($query, MYSQLI_ASSOC)) {
 						$list_ids[$i]				= $row['list_id'];
 						$i++;
-					}*?
+					}*/
 				}
 				
 				$list 								= "'".implode("','",$list_ids)."'";

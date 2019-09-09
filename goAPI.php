@@ -2,9 +2,10 @@
 /**
  * @file    	goAPI.php
  * @brief     	API to handle every API
- * @copyright   Copyright (C) GOautodial Inc.
+ * @copyright   Copyright (C) 2019 GOautodial Inc.
  * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
  * @author      Alexander Jim H. Abenoja <alex@goautodial.com>
+ * @author		Demian Lizandro A. Biscocho <demian@goautodial.com>
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -57,6 +58,13 @@
     
 	if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
 		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }    
+		
+	/* Standard goAPI variables */
+    $log_user     = $session_user;
+    $log_group    = go_get_groupid($session_user, $astDB);     
+    $log_ip       = $astDB->escape($_REQUEST['log_ip']);
+    $goUser       = $astDB->escape($_REQUEST['goUser']);
+    $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));		
 		
     define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI'));
 
@@ -125,7 +133,7 @@
 			echo $apiresults;
 			exit();
 		} else if ($userResponseType == "xml") {
-			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $action .' "</action>\n" )';
+			echo '<?xml version="1.0" encoding="' . $goCharset . '"?>\n<goautodialapi version="'.$goVersion.'">(\n<action>"'. $goAction .' "</action>\n" )';
                 apiXMLOutput( $apiresults );
                 echo "</goautodialapi>";
 		} else {
