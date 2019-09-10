@@ -23,8 +23,6 @@
 
 	include_once("goAPI.php");
 	
-	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
 	$limit 											= 50; 
 	
 	if (isset($_REQUEST['limit'])) {

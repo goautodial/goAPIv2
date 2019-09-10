@@ -24,10 +24,6 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST['log_ip']);	
-
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST['voicemail_id']);
 	$pass 								= $astDB->escape($_REQUEST['pass']);
@@ -91,7 +87,7 @@
 			);
 			
 			$q_insert					= $astDB->insert('vicidial_voicemail', $data);			
-			$log_id 					= log_action($goDB, 'ADD', $log_user, $ip_address, "Added new voicemail. ID: $voicemail_id", $log_group, $astDB->getLastQuery());
+			$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added new voicemail. ID: $voicemail_id", $log_group, $astDB->getLastQuery());
 			
 			if($q_insert){
 				rebuildconfQuery($astDB);
