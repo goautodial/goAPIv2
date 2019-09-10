@@ -22,11 +22,6 @@
 **/
 	include_once ("goAPI.php");
 	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB); 
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
 	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
 	$call_time_name 									= $astDB->escape($_REQUEST['call_time_name']);
 	$call_time_comments 								= $astDB->escape($_REQUEST['call_time_comments']);
@@ -78,15 +73,15 @@
 		$apiresults 									= array(
 			"result" 										=> "Error: Set a value for Call Time ID not less than 3 characters."
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_name) || $call_time_name == null) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_name) || $call_time_name == null) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time name and must not be empty"
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�]/',$call_time_id)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�]/',$call_time_id)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time ID"
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_comments)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_comments)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time comments"
 		);
