@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
 	$list_id = $astDB->escape($_REQUEST['list_id']);
@@ -39,12 +40,6 @@
 	$web_form_address = $astDB->escape($_REQUEST['web_form_address']);
 	$reset_list = $astDB->escape(strtoupper($_REQUEST['reset_list']));
 	// $values = $_REQUEST['items'];
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
    
     ### Default values 
     $defActive = array("Y","N");
@@ -183,7 +178,7 @@
 																			$resultQuery = $astDB->update('vicidial_lists', $updateData);
 																			$logQuery = $astDB->getLastQuery();
 																			
-																			$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified List ID: $list_id", $log_group, $logQuery);
+																			$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified List ID: $list_id", $log_group, $logQuery);
 
 																			if($resultQuery == false) {
 																				$apiresults = array("result" => "Error: Update failed, check your details.");

@@ -20,14 +20,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
     $list_id = $astDB->escape($_REQUEST['list_id']);
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
-    $goUser = $astDB->escape($_REQUEST['goUser']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
     
 	if($list_id == null) { 
 		$apiresults = array("result" => "Error: Set a value for List ID."); 
@@ -58,7 +54,7 @@
 				$deleteQueryStmt = "DELETE FROM vicidial_lists_fields WHERE list_id='$dataListID' LIMIT 1;"; 
    				$deleteResultStmt = $astDB->rawQuery($deleteQueryStmt);
 				
-				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
+				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: List doesn't exist.");
