@@ -19,6 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
@@ -31,9 +32,6 @@
 	$theList = $_REQUEST["goListId"];
 	$goDupcheck = $_REQUEST["goDupcheck"];
 	$default_delimiter = ",";
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
 	
 	// path where your CSV file is located
 	define('CSV_PATH','/tmp/');

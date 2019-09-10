@@ -20,16 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');
 	
 	$goDupcheck = $astDB->escape($_REQUEST["goDupcheck"]);
 	$jsonDataRequest = json_decode($_REQUEST['jsonData'], true);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
 	$jsonDataPost = (array) json_decode(file_get_contents('php://input'), TRUE);
 
 	if(!empty($jsonDataRequest)){
@@ -171,9 +169,9 @@
 	// print_r($resultOfInserts);die;
 	if(in_array("error", $resultOfInserts)){
 		$apiresults = array("result" => "error", "message" => "Uploading Leads interrupted due too some errors. Please contact administrator.", "LeadNotSaved" => $leadsNotSaved);
-		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Error in uploading leads on List ID $list_id", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Error in uploading leads on List ID $list_id", $log_group);
 	}else{
 		$apiresults = array("result" => "success", "message" => "Uploading Leads success!");
-		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Successfully uploaded leads on List ID $list_id", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Successfully uploaded leads on List ID $list_id", $log_group);
 	}
 ?>

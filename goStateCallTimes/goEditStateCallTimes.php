@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
 	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
@@ -43,12 +44,6 @@
 	$sct_saturday_start = $astDB->escape($_REQUEST['sct_saturday_start']);
 	$sct_saturday_stop = $astDB->escape($_REQUEST['sct_saturday_stop']);
 	$user_group = $astDB->escape($_REQUEST['user_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
 
     ### ERROR CHECKING ...
 	if($state_call_time_id == null || strlen($state_call_time_id) < 3) {
@@ -212,7 +207,7 @@
 																									$apiresults = array("result" => "Error: Try updating State Call Times Again");
 																								} else {
 																									$apiresults = array("result" => "success");
-																									$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
+																									$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
 																								}
 																							} else {
 																								$apiresults = array("result" => "Error: State Call Times doesn't exist");
