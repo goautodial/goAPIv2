@@ -73,15 +73,15 @@
 		$apiresults 									= array(
 			"result" 										=> "Error: Set a value for Call Time ID not less than 3 characters."
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_name) || $call_time_name == null) {
+	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_name) || $call_time_name == null) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time name and must not be empty"
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�]/',$call_time_id)) {
+	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â]/',$call_time_id)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time ID"
 		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+�-]/',$call_time_comments)) {
+	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_comments)) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Special characters found in call time comments"
 		);
