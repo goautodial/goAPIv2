@@ -24,12 +24,6 @@
 	include_once("goAPI.php");
 	include_once("../licensed-conf.php");
 	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB);
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	
 	// POST or GET Variables
     $orig_extension 									= $astDB->escape($_REQUEST['extension']);
     $server_ip 											= $astDB->escape($_REQUEST['server_ip']);
