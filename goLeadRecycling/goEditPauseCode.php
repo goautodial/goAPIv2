@@ -20,18 +20,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['campaign_id']);
 	$status = $astDB->escape($_REQUEST['status']);
 	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
 	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
 	$active = strtoupper($astDB->escape($_REQUEST['active']));
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	
+		
     ### Default values 
     $defActive = array('N','Y');
 
@@ -45,7 +42,7 @@
 			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $attempt_delay)){
                 $apiresults = array("result" => "Error: Special characters found in pause code name and must not be empty");
 			} else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬/', $attempt_maximum)){
+				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $attempt_maximum)){
 					$apiresults = array("result" => "Error: Special characters found in pause code name and must not be empty");
 				} else {
 					if(!in_array($active,$defActive) && $active != null) {
@@ -96,7 +93,7 @@
 								} else {
 									$apiresults = array("result" => "success");
 									
-									$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Pause Code: $status", $log_group, $queryVM);
+									$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Pause Code: $status", $log_group, $queryVM);
 								}
 							} else {
 								$apiresults = array("result" => "Error: Pause code doesn't exist");

@@ -20,17 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['leadRecCampID']);
 	$status = $astDB->escape($_REQUEST['status']);
 	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
 	$active = strtoupper($astDB->escape($_REQUEST['active']));
 	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-
     ### Default values
     $defActive = array('N','Y');
 
@@ -91,7 +88,7 @@
                             } else {
                                 $apiresults = array("result" => "success");
 								
-                                $log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());
+                                $log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());
 							}
                         } else {
                             $apiresults = array("result" => "Error: Pause code doesn't exist");
