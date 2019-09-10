@@ -20,14 +20,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
     $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
-    $goUser = $astDB->escape($_REQUEST['goUser']);
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
     
     ### Check tenant_id if its null or empty
 	if($tenant_id == null) { 
@@ -149,7 +145,7 @@
 				$query30 = "DELETE FROM user_access_group WHERE user_group='$dataTenantID'";
 				$query30Result = $goDB->rawQuery($query30);
 
-				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Multi-Tenant: $dataTenantID", $log_group, $logQuery);
+				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Multi-Tenant: $dataTenantID", $log_group, $logQuery);
 
 				$apiresults = array("result" => "success");
 			} else {

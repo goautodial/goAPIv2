@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
     $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
@@ -30,8 +31,6 @@
     //$access_phones = $_REQUEST['access_phones'];
     //$access_voicemails = $_REQUEST['access_voicemails'];
    // $values = $_REQUEST['item'];
-    $goUser = $astDB->escape($_REQUEST['goUser']);
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
     $active = strtoupper($astDB->escape($_REQUEST['active']));
    //tenant_id, tenant_name, admin, active
     ### Default values 
@@ -39,11 +38,8 @@
     $defaccess_call_times = array("Y","N");
     $defaccess_carriers = array("Y","N");
     $defaccess_phones = array("Y","N");
-    $defaccess_voicemails = array("Y","N");
+	$defaccess_voicemails = array("Y","N");
 	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
 ###########################
 //Error Checking
     if($tenant_id == null) {
@@ -112,7 +108,7 @@
 											$result = $goDB->update('go_multi_tenant', $insertData);
 											$logQuery = $goDB->getLastQuery();
 											
-											$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Multi-Tenant: $tenant_id", $log_group, $logQuery);
+											$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Multi-Tenant: $tenant_id", $log_group, $logQuery);
 											$apiresults = array("result" => "success");
 										} else {
 											$apiresults = array("result" => "Error: Tenant doesn't exist");

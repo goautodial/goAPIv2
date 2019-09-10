@@ -24,12 +24,6 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB);
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	
     ### POST or GET Variables
 	$moh_id 											= $astDB->escape($_REQUEST['moh_id']);
 	$moh_name 											= $astDB->escape($_REQUEST['moh_name']);

@@ -24,18 +24,13 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB);
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);
 	$moh_id 											= $astDB->escape($_REQUEST['moh_id']);
 	$moh_name 											= $astDB->escape($_REQUEST['moh_name']);
 	$user_group 										= $astDB->escape($_REQUEST['user_group']);
 	$active 											= strtoupper($astDB->escape($_REQUEST['active']));
 	$random 											= strtoupper($astDB->escape($_REQUEST['random']));
 	$values 											= $astDB->escape($_REQUEST['item']);
-        $filename                                                                             = $astDB->escape($_REQUEST['filename']);
+    $filename                                           = $astDB->escape($_REQUEST['filename']);
 
 	
     ### Default values 
