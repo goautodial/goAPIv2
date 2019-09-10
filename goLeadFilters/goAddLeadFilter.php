@@ -28,11 +28,6 @@
 	$lead_filter_sql = $astDB->escape($_REQUEST['lead_filter_sql']);
 	$user_group = $astDB->escape($_REQUEST['user_group']);
 
-
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
     ### ERROR CHECKING 
 	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
 		$apiresults = array("result" => "Error: Special characters found in lead_filter_id, must not be empty and not less than 3 characters");
@@ -80,7 +75,7 @@
 									'user_group' => $user_group
 								);
 								$rsltv = $astDB->insert('vicidial_lead_filters');
-								$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Lead Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
+								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
 
 								if(!$rsltv){
 									$apiresults = array("result" => "Error: Add failed, check your details");
