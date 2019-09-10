@@ -19,15 +19,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     // POST or GET Variables
     $location = $goDB->escape($_REQUEST['location']);
-	
-	$log_user = $goDB->escape($_REQUEST['log_user']);
-	$log_group = $goDB->escape($_REQUEST['log_group']);
-	$ip_address = $goDB->escape($_REQUEST['hostname']);
-    
-    
+	    
 	if($location == null) {
 		$err_msg = error_handle("40001");
 		$APIResult = array("code" => "40001", "result" => $err_msg);
@@ -71,7 +67,7 @@
 			$APIResult = array("code" => "41004", "result" => $err_msg);
 		} else {
 			$APIResult = array("result" => "success");
-			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
+			$log_id = log_action($goDB, 'DELETE', $log_user, log_ip, "Deleted User Group: $dataUserGroup", $log_group, $deleteQuery);
 		}
 	}//end
 ?>

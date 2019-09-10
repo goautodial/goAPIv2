@@ -19,17 +19,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
-    $ip_address = $goDB->escape($_REQUEST['hostname']);
     $location = $goDB->escape($_REQUEST['location']);
     $description = $goDB->escape($_REQUEST['description']);
     $user_group = $goDB->escape($_REQUEST['user_group']);
     $active = $goDB->escape($_REQUEST['active']);
-	
-	$log_user = $goDB->escape($_REQUEST['log_user']);
-	$log_group = $goDB->escape($_REQUEST['log_group']);
-	
+		
 ########################
 	if($location == null) {
 		$APIResult = array("result" => "Error: Set a value for Location.");
@@ -60,7 +57,7 @@
 						if($goDB->getRowCount() < 1){
 							$APIResult = array("result" => "Error: Failed Update, Check your details");
 						} else {
-							$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Location: $location", $log_group, $goDB->getLastQuery());
+							$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Location: $location", $log_group, $goDB->getLastQuery());
 		
 							$APIResult = array("result" => "success");
 						}
