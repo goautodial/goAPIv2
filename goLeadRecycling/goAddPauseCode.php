@@ -20,7 +20,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['pauseCampID']);
 	$pause_code = $astDB->escape($_REQUEST['pause_code']);
