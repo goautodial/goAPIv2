@@ -26,11 +26,12 @@
  
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
-	$pass 								= $astDB->escape($_REQUEST["pass"]);
-	$fullname 							= $astDB->escape($_REQUEST["fullname"]);
-	$email 								= $astDB->escape($_REQUEST["email"]);
-	$active 							= $astDB->escape(strtoupper($_REQUEST["active"]));
-	$delete_vm_after_email 				= $astDB->escape($_REQUEST["delete_vm_after_email"]);
+	$pass 							= $astDB->escape($_REQUEST["pass"]);
+	$fullname 						= $astDB->escape($_REQUEST["fullname"]);
+	$email 							= $astDB->escape($_REQUEST["email"]);
+	$active 						= $astDB->escape(strtoupper($_REQUEST["active"]));
+	$delete_vm_after_email 					= $astDB->escape($_REQUEST["delete_vm_after_email"]);
+	$voicemail_greeting					= $astDB->escape($_REQUEST["voicemail_greeting"]); 
 
 	### Default values
     $defActive 							= array(
@@ -79,12 +80,13 @@
 		
 		if ($astDB->count > 0) {				
 			foreach ($query as $fresults) {
-				$dataVM_id			 	= $fresults["voicemail_id"];
+				$dataVM_id			= $fresults["voicemail_id"];
 				$dataVM_pass 			= $fresults["pass"];
 				$dataactive 			= $fresults["active"];
 				$datafullname 			= $fresults["fullname"];
-				$dataemail 				= $fresults["email"];
+				$dataemail 			= $fresults["email"];
 				$datadeleteVMemail 		= $fresults["delete_vm_after_email"];
+				$dataVM_greeting		= $fresults["voicemail_greeting"];
 			}
 			
 			if ($pass == null) { 
@@ -102,13 +104,17 @@
 			if ($delete_vm_after_email == null) {
 				$delete_vm_after_email 	= $datadeleteVMemail;
 			}
-			
+			if ($voicemail_greeting == null) {
+                                $voicemail_greeting                     = $dataVM_greeting;
+                        }
+
 			$data 						= array(
 				"pass" 						=> $pass,
 				"fullname" 					=> $fullname,
 				"email" 					=> $email,
 				"active" 					=> $active,
-				"delete_vm_after_email" 	=> $delete_vm_after_email
+				"delete_vm_after_email" 			=> $delete_vm_after_email,
+				"voicemail_greeting"				=> $voicemail_greeting
 			);
 			
 			$astDB->where("voicemail_id", $voicemail_id);
