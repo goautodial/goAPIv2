@@ -1,9 +1,9 @@
 <?php
  /**
- * @file        goEditFilter.php
- * @brief       API for Editing Specific Filter
+ * @file        goDeleteFilter.php
+ * @brief       API for Deleting Specific Filters
  * @copyright   Copyright (c) 2018 GOautodial Inc.
- * @author      Christopher P. Lomuntad
+ * @author		Christopher P. Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -22,14 +22,8 @@
 
 	include_once ("goAPI.php");	 
  
-	$lead_filter_id 									= $astDB->escape($_REQUEST["lead_filter_id"]); 	
-    $lead_filter_name 									= $astDB->escape($_REQUEST["lead_filter_name"]); 
-    $lead_filter_comments 								= $astDB->escape($_REQUEST['lead_filter_comments']);
-    //$lead_filter_sql 									= $astDB->escape($_REQUEST['lead_filter_sql']);
-    $lead_filter_sql 									= $_REQUEST['lead_filter_sql'];
-    //$lead_filter_sql 									= str_replace('\n','',$lead_filter_sql);
-    $user_group 										= $astDB->escape($_REQUEST['user_group']);
-    
+	$filter_id 											= $astDB->escape($_REQUEST["filter_id"]); 
+	
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -43,15 +37,11 @@
 		$apiresults 									= array(
 			"result" 										=> "Error: Session User Not Defined."
 		);
-	} elseif (empty($lead_filter_id) || is_null($lead_filter_id)) {
+	} elseif (empty($filter_id) || is_null($filter_id) ) {
 		$apiresults 									= array(
 			"result" 										=> "Error: Set a value for Filter ID."
 		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',$lead_filter_name) && $lead_filter_name != null) {
-		$apiresults 									= array(
-			"result" 										=> "Error: Special characters found in filter name"
-		);
-	} else {
+    } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -61,52 +51,52 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
+						$astDB->orWhere("user_group", "---ALL---");
 					}
 				}					
 			}
-
-			$astDB->where('lead_filter_id' , $lead_filter_id);
-			$filter								 		= $astDB->get('vicidial_lead_filters');
-
-			if ($filter) {
-				foreach ($filter as $fresults) {
-					$datafilter_id 						= $fresults['lead_filter_id'];
-					$datafilter_name 					= $fresults['lead_filter_name'];
-					$datafilter_comments 				= $fresults['lead_filter_comments'];
-					$datafilter_sql 					= $fresults['lead_filter_sql'];
-					$datauser_group 					= $fresults['user_group'];
-				}
-				
-				$data_update 							= array(
-					'lead_filter_name' 						=> ($lead_filter_name == null) ? $datafilter_name : $lead_filter_name,
-					'lead_filter_comments' 					=> ($lead_filter_comments == null) ? $datafilter_comments : $lead_filter_comments,
-					'lead_filter_sql' 						=> ($lead_filter_sql == null) ? ($datafilter_sql): $lead_filter_sql,
-					'user_group' 							=> ($user_group == null) ? $datauser_group : $user_group
-				);
-				
-				$astDB->where('lead_filter_id', $lead_filter_id);
-				$update 								= $astDB->update('vicidial_lead_filters', $data_update);
 			
-				if ($update) {
-					$apiresults 						= array(
-						"result" 							=> "success"
-					);
+			// check if script ID exists
+			$astDB->where("lead_filter_id", $filter_id);        
+			$astDB->getOne("vicidial_lead_filters", "lead_filter_id");
+			
+			if ($astDB->count > 0) {        
+				$astDB->where("lead_filter_id", $filter_id);
+				$getFilters 							= $astDB->getOne("vicidial_lead_filters", "lead_filter_id");
 
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Filter ID: $lead_filter_id", $log_group, $astDB->getLastQuery());
+				if($getFilters) {
+					$astDB->where("lead_filter_id", $filter_id);
+					$astDB->delete("vicidial_lead_filters");
+
+					$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Filter ID: $filter_id", $log_group, $astDB->getLastQuery());
+					
+					$data_update 						= array(
+						"lead_filter_id" 					=> ""
+					);
+					
+					$astDB->where("lead_filter_id", $filter_id);
+					$astDB->update("vicidial_campaigns", $data_update);
+
+					$log_id 							= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Filter ID: $filter_id", $log_group, $astDB->getLastQuery());
+
+					$apiresults 						= array(
+						"result" 						=> "success"
+					);
 				} else {
 					$apiresults 						= array(
-						"result" 							=> "Error: Try updating Filter Again"
+						"result" 							=> "Error: Filter doesn't exist."
 					);
 				}
 			} else {
@@ -115,7 +105,7 @@
 					"code" 									=> "10001", 
 					"result" 								=> $err_msg
 				);			
-			}				
+			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
@@ -124,5 +114,4 @@
 			);		
 		}
 	}
-	
 ?>
