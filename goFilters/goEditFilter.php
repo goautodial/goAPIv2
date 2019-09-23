@@ -25,7 +25,8 @@
 	$lead_filter_id 									= $astDB->escape($_REQUEST["lead_filter_id"]); 	
     $lead_filter_name 									= $astDB->escape($_REQUEST["lead_filter_name"]); 
     $lead_filter_comments 								= $astDB->escape($_REQUEST['lead_filter_comments']);
-    $lead_filter_sql 									= $astDB->escape($_REQUEST['lead_filter_sql']);
+    //$lead_filter_sql 									= $astDB->escape($_REQUEST['lead_filter_sql']);
+    $lead_filter_sql 									= $_REQUEST['lead_filter_sql'];
     //$lead_filter_sql 									= str_replace('\n','',$lead_filter_sql);
     $user_group 										= $astDB->escape($_REQUEST['user_group']);
     
