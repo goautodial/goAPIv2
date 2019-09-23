@@ -76,7 +76,7 @@
 				}					
 			}
 
-			$astDB->where('lead_filter_name' , $lead_filter_name);
+			$astDB->where('lead_filter_id' , $lead_filter_id);
 			$filter								 		= $astDB->get('vicidial_lead_filters');
 
 			if ($filter) {
