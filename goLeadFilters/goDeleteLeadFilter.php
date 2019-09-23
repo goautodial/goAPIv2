@@ -20,12 +20,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
     
     ### Check lead filter ID if its null or empty
 	if($lead_filter_id == null) { 
@@ -53,7 +51,7 @@
 				$astDB->where('lead_filter_id', $dataLeadFilterID);
    				$deleteResult = $astDB->delete('vicidial_lead_filters');
 				
-				$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Lead Filter ID: $dataLeadFilterID", $log_group, $astDB->getLastQuery());
+				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Filter ID: $dataLeadFilterID", $log_group, $astDB->getLastQuery());
 				$apiresults = array("result" => "success");
 			} else {
 				$apiresults = array("result" => "Error: Lead Filter doesn't exist.");

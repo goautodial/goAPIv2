@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
 	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
@@ -43,12 +44,6 @@
 	$sct_saturday_start = $astDB->escape($_REQUEST['sct_saturday_start']);
 	$sct_saturday_stop = $astDB->escape($_REQUEST['sct_saturday_stop']);
 	$user_group = $astDB->escape($_REQUEST['user_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
 
     ### Default values 
 
@@ -168,7 +163,7 @@
 																									);
 																									$rsltv = $astDB->insert('vicidial_state_call_times', $insertData);
 																									
-																									$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New State Call Time: $state_call_time_id", $log_group, $newQuery);
+																									$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New State Call Time: $state_call_time_id", $log_group, $newQuery);
 																									
 																									if($rsltv == false){
 																										$apiresults = array("result" => "Error: Add failed, check your details");

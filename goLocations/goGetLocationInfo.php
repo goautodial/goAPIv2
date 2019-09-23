@@ -19,13 +19,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
     $location = $astDB->escape($_REQUEST['location']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $ostDB->escape($_REQUEST['log_group']);
-	$ip_address = $ostDB->escape($_REQUEST['log_ip']);
     
 	if($location == null) { 
 		$APIResult = array("code" => "41004", "result" => "Error: Set a value for Location."); 
@@ -43,7 +40,7 @@
 		$countResult = $goDB->getRowCount();
 		$data = $rsltv;
 		
-		$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the info of Location: $location", $log_group);
+		$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of Location: $location", $log_group);
 
         $APIResult = array("result" => "success", "data" => $data);
 	}

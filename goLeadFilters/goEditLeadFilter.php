@@ -20,18 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
 	$lead_filter_name = $astDB->escape($_REQUEST['lead_filter_name']);
 	$lead_filter_comments = $astDB->escape($_REQUEST['lead_filter_comments']);
 	$lead_filter_sql = $astDB->escape($_REQUEST['lead_filter_sql']);
 	$user_group = $astDB->escape($_REQUEST['user_group']);
-	
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-
 
     ### ERROR CHECKING ...
     if($lead_filter_id == null) { 
@@ -88,7 +84,7 @@
 						$apiresults = array("result" => "Error: Try updating Lead Filter Again");
 					} else {
 						$apiresults = array("result" => "success");
-						$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified Lead Filter ID: $lead_filter_id", $log_group, $astDB->getLastQuery());
+						$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Filter ID: $lead_filter_id", $log_group, $astDB->getLastQuery());
 					}
 				} else {
 					$apiresults = array("result" => "Error: Lead Filter doesn't exist", "count" => $countLF);

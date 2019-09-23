@@ -20,15 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
  // POST or GET Variables
 	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
 	$status = $astDB->escape($_REQUEST['status']);
 	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
 	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
 	$active = $astDB->escape(strtoupper($_REQUEST['active']));
-
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 
  // Default values
  $defActive = array('N','Y');
@@ -75,7 +74,7 @@ if(empty($campaign_id) || empty($session_user) || empty($status)) {
 			if($rsltv1) {
 				$apiresults = array("result" => "success");
 
-				$log_id = log_action($goDB, 'MODIFY', $session, $ip_address, "Modified Lead Recycling: $status", $groupId, $queryVM);
+				$log_id = log_action($goDB, 'MODIFY', $session, $log_ip, "Modified Lead Recycling: $status", $groupId, $queryVM);
    }
   } else {
 			$apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");

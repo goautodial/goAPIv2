@@ -20,15 +20,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     // POST or GET Variables
 	$location = $goDB->escape($_REQUEST['location']);
 	$description = $goDB->escape($_REQUEST['description']);
 	$user_group = explode(",", $goDB->escape($_REQUEST['user_group']));
-	
-	$ip_address = $goDB->escape($_REQUEST['hostname']);
-	$log_user = $goDB->escape($_REQUEST['log_user']);
-	$log_group = $goDB->escape($_REQUEST['log_group']);
 
     // Error checking
 	if($location == null || $location == "") {
@@ -78,7 +75,7 @@
 						$goDB->insert('locations', $insertData);
 						$countCheck = $goDB->getInsertId();
 						
-						$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New Location $location under $user_group User Group(s)", $log_group, $goDB->getLastQuery());
+						$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Location $location under $user_group User Group(s)", $log_group, $goDB->getLastQuery());
 						
 						//$get_location_id = mysqli_query($linkgo, "SELECT id FROM locations WHERE name = '$location';");
 						$goDB->where('name', $location);

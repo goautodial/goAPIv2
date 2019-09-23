@@ -20,17 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['pauseCampID']);
 	$pause_code = $astDB->escape($_REQUEST['pause_code']);
 	$pause_code_name = $astDB->escape($_REQUEST['pause_code_name']);
 	$billable = strtoupper($astDB->escape($_REQUEST['billable']));
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	
+		
     ### Default values 
     $defBill = array('NO','YES','HALF');
 
@@ -70,7 +67,7 @@
 							$newQuery = "INSERT INTO vicidial_pause_codes (pause_code,pause_code_name,campaign_id,billable) VALUES ('$pause_code', '$pause_code_name', '$camp', '$billable');";
 							$rsltv = $astDB->rawQuery($newQuery);
 							
-							$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Pause Code $pause_code under Campaign ID $camp", $log_group, $newQuery);
+							$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Pause Code $pause_code under Campaign ID $camp", $log_group, $newQuery);
 
 							if(!$rsltv) {
 								$apiresults = array("result" => "Error: Add failed, check your details");

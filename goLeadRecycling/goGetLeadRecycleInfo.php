@@ -20,7 +20,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+    include_once ("goAPI.php");
+    
     $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
     $status = $astDB->escape($_REQUEST['status']);
 

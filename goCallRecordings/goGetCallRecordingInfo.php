@@ -20,11 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
-	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	//$log_ip 							= $astDB->escape($_REQUEST['log_ip']);	
+	include_once ("goAPI.php");	
 
 	### POST or GET Variables
     $recording_id 						= $astDB->escape($_REQUEST['recording_id']);

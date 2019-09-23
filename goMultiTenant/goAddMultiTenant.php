@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
 	### POST or GET Variables
 	$tenant_id = $astDB->escape($_REQUEST['tenant_id']);
@@ -30,14 +31,9 @@
 	$access_call_times = $astDB->escape($_REQUEST['access_call_times']);
 	$access_carriers = $astDB->escape($_REQUEST['access_carriers']);
 	$access_phones = $astDB->escape($_REQUEST['access_phones']);
-	$access_voicemails = $astDB->escape($_REQUEST['access_voicemails']);
-	$goUser = $astDB->escape($_REQUEST['goUser']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
+	$access_voicemails = $astDB->escape($_REQUEST['access_voicemails']);	
 	// $values = $_REQUEST['items'];
 	// $list_changedate = $_REQUEST['list_changedate'];
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
 
 	//tenant_id, tenant_name, admin, pass, active
     ### Default values 
@@ -157,7 +153,7 @@
 												$countResultOne = $astDB->getRowCount();
 												
 												if($countResult > 0 && $countResultOne > 0 ) {
-													$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added New Multi-Tenant Group: $tenant_id", $log_group, $queryTenant);
+													$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Multi-Tenant Group: $tenant_id", $log_group, $queryTenant);
 													$apiresults = array("result" => "success");
 												} else {
 													$apiresults = array("result" => "Error: Failed to add Tenant.");

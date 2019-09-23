@@ -20,6 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '600M');
@@ -32,9 +33,6 @@
 	$goCountInsertedLeads = 0;
 	$default_delimiter = ",";
 	$phone_code_override = $astDB->escape($_REQUEST["phone_code_override"]);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
 	
 	$lead_mapping = NULL;
 	if(!empty($_REQUEST["lead_mapping"]))	
@@ -721,7 +719,7 @@
 			$apiresults = array("result" => "error", "message" => "$goCountInsertedLeads", "duplicates" => $duplicates, "alex_data" => $alex);
 		}
 		
-		$log_id = log_action($goDB, 'UPLOAD', $log_user, $ip_address, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
 		
 	} // END IF handle
 	

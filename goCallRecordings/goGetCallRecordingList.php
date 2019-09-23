@@ -23,11 +23,6 @@
 
 	include_once ("goAPI.php");
 	
-	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user, $astDB); 
-	$log_ip = $astDB->escape($_REQUEST['log_ip']);
-	$goUser	= $astDB->escape($_REQUEST['goUser']);
-	$goPass	= (isset($_REQUEST['log_pass'])) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']);	
 	$limit 	= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
 	
 	// POST or GET Variables

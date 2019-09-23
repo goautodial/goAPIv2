@@ -22,11 +22,7 @@
 */
 
     include_once("goAPI.php");
-	$log_user 	= $session_user;
-	$log_group 	= go_get_groupid($session_user, $astDB); 
-	$log_ip 	= $astDB->escape($_REQUEST['log_ip']);
-	$goUser		= $astDB->escape($_REQUEST['goUser']);
-	$goPass		= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+
 	$fromDate 	= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 	= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
 	$campaign_id 	= $astDB->escape($_REQUEST['campaignID']);

@@ -24,12 +24,6 @@
 
     include_once ("goAPI.php");
  
-	$log_user 											= $session_user;
-	$log_group 											= go_get_groupid($session_user, $astDB);
-	$log_ip 											= $astDB->escape($_REQUEST['log_ip']);
-	$goUser												= $astDB->escape($_REQUEST['goUser']);
-	$goPass												= (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
-	
 	### POST or GET Variables
 	$campaign_id		 								= $astDB->escape($_REQUEST['pauseCampID']);
 	$pause_code 										= $astDB->escape($_REQUEST['pause_code']);

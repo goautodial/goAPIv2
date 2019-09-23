@@ -20,13 +20,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	include_once ("goAPI.php");
 
     ### POST or GET Variables
 	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
-	$ip_address = $astDB->escape($_REQUEST['hostname']);
-	
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
     
     ### Check Voicemail ID if its null or empty
 	if($state_call_time_id == null) { 
@@ -53,7 +50,7 @@
 			$astDB->where('state_call_time_id', $state_call_time_id);
 			$astDB->delete('vicidial_state_call_times');
 			
-			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
+			$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
 			$apiresults = array("result" => "success");
 		} else {
 			$apiresults = array("result" => "Error: State Call Menu doesn't exist.");

@@ -23,11 +23,7 @@
 */
 
 	include_once ("goAPI.php");
-	
-	$log_user 							= $session_user;
-	$log_group 							= go_get_groupid($session_user, $astDB); 
-	$ip_address 						= $astDB->escape($_REQUEST["log_ip"]);	
-	
+		
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
 	$active								= $astDB->escape($_REQUEST['active']);
@@ -59,7 +55,7 @@
 		$astDB->where("voicemail_id", $voicemail_id);
 		$astDB->orderBy("voicemail_id", "desc");
 		$rsltv 							= $astDB->getOne("vicidial_voicemail");
-		//$log_id 						= log_action($goDB, "VIEW", $log_user, $ip_address, "Viewed voicemail ID: $carrier_id", $astDB->getLastQuery());
+		//$log_id 						= log_action($goDB, "VIEW", $log_user, $log_ip, "Viewed voicemail ID: $carrier_id", $astDB->getLastQuery());
 		
 		if ($astDB->count > 0) {						
 			$apiresults 				= array(

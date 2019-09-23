@@ -23,10 +23,6 @@
 
     include_once("goAPI.php");
 	
-	$log_user 									= $session_user;
-	$log_group 									= go_get_groupid($log_user, $astDB); 
-	$log_ip 									= $astDB->escape($_REQUEST['log_ip']);	
-	
 	// POST or GET Variables
 	/*$audiofiles = $_REQUEST['files']*/;
 	$stage 										= $astDB->escape($_REQUEST['stage']);

@@ -32,9 +32,6 @@
 	}else{
 		$sortBy = "status";
 	}
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
 	
 	if($camp == null) {
 		$err_msg = error_handle("40001");
@@ -116,7 +113,7 @@
 			
 			$apiresults = array("result" => "success", "campaign_id" => $camp, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback, "priority" => $dataPriority, "color" => $dataColor);
 			
-			$log_id = log_action($goDB, 'VIEW', $log_user, $ip_address, "Viewed the dispositions of campaign $camp", $log_group);
+			$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the dispositions of campaign $camp", $log_group);
 			
 		} else {
 			$err_msg = error_handle("41004", "campaign_id. Campaign Disposition does not exist!");

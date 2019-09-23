@@ -20,18 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+	include_once ("goAPI.php");
+	
     ### POST or GET Variables
 	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
 	$lead_filter_name = $astDB->escape($_REQUEST['lead_filter_name']);
 	$lead_filter_comments = $astDB->escape($_REQUEST['lead_filter_comments']);
 	$lead_filter_sql = $astDB->escape($_REQUEST['lead_filter_sql']);
 	$user_group = $astDB->escape($_REQUEST['user_group']);
-
-
-	$ip_address = $astDB->escape($_REQUEST['log_ip']);
-	$log_user = $astDB->escape($_REQUEST['log_user']);
-	$log_group = $astDB->escape($_REQUEST['log_group']);
 
     ### ERROR CHECKING 
 	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
@@ -80,7 +76,7 @@
 									'user_group' => $user_group
 								);
 								$rsltv = $astDB->insert('vicidial_lead_filters');
-								$log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Lead Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
+								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
 
 								if(!$rsltv){
 									$apiresults = array("result" => "Error: Add failed, check your details");
