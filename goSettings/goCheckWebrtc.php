@@ -1,0 +1,32 @@
+<?php
+ /**
+ * @file                goCheckWebrtc.php
+ * @brief               API to retrieve Webrtc Setting On (1) or Off (0)
+ * @copyright   Copyright (C) GOautodial Inc.
+ * @author              Alexander Abenoja  <alex@goautodial.com>
+ *
+ * @par <b>License</b>:
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+        $goDB->where('setting', 'GO_agent_use_wss');
+        $rslt = $goDB->getOne('settings', 'value');
+
+        if($rslt){
+                $apiresults = array("result" => $rslt['value']);
+        } else {
+                $apiresults = array("result" => "Faile to get Result.");
+        }
+?>
+

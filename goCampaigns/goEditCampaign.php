@@ -350,7 +350,8 @@
 						'lead_order' 							=> (!empty($lead_order)) ? $lead_order : $resultGet['lead_order'],
 						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary'],
                                                 'campaign_recording'                            => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
-                                                'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename']
+                                                'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
+						'hopper_level'                                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level']
 					);
 					
 					if ( $campaign_type == 'SURVEY' ) {

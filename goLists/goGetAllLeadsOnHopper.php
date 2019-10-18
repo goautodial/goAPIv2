@@ -26,7 +26,7 @@
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
+//	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -80,7 +80,7 @@
 						vicidial_hopper.campaign_id = '$campaign_id'
 					ORDER BY 
 						vicidial_hopper.hopper_id
-					LIMIT $limit;
+					#LIMIT $limit;
 				";
 				
 				$rsltv 									= $astDB->rawQuery($query);
