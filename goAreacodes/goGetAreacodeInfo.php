@@ -2,9 +2,8 @@
 /**
  * @file        goGetAreacodeInfo.php
  * @brief       API to get the information of an areacode
- * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
- * @author      Alexander Jim Abenoja  <alex@goautodial.com>
+ * @copyright   Copyright (C) 2019 GOautodial Inc.
+ * @author      Thom Bernarth Patacsil
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
