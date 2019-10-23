@@ -113,6 +113,7 @@
 	$amd_send_to_vmx 									= $astDB->escape($_REQUEST['amd_send_to_vmx']);
 	$waitforsilence_options 							= $astDB->escape($_REQUEST['waitforsilence_options']);
 	$location 											= $astDB->escape($_REQUEST['location_id']);
+	$use_custom_cid 								= $astDB->escape($_REQUEST['use_custom_cid']);
 
     // Default values 
     $defActive 											= array( "Y", "N" );	
@@ -351,7 +352,8 @@
 						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary'],
                                                 'campaign_recording'                            => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
                                                 'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
-						'hopper_level'                                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level']
+						'hopper_level'                                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
+						'use_custom_cid'					=> (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid']
 					);
 					
 					if ( $campaign_type == 'SURVEY' ) {
