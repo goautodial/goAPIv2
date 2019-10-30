@@ -98,7 +98,7 @@ error_reporting(E_ERROR | E_PARSE);
                                         $filters = "AND pause_sec < 65000 AND wait_sec<65000 AND talk_sec<65000 AND dispo_sec<65000 ";
                                 }
 
-                                $perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
+                                $perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
                                 $rows_to_print = $astDB->rawQuery($perfdetails_sql);
                                 $i = 0;
 				foreach($rows_to_print as $row){
@@ -463,11 +463,10 @@ error_reporting(E_ERROR | E_PARSE);
                                 $k = 0;
 				$pause_condition = "AND pause_sec < 65000";
 
-                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(pause_sec) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user ORDER BY full_name,user,sub_status desc limit 1000";
+                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(pause_sec) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,sub_status ORDER BY full_name,user,sub_status desc limit 1000";
                                 $subs_to_print = $astDB->rawQuery($pause_sql);
-
 				$i = 0;
-				foreach($subs_to_print as $Brow){
+				foreach($subs_to_print as $i => $Brow){
                                         $PCfull_name[$i] = $Brow['full_name'];
                                         $PCuser[$i] = $Brow['user'];
                                         $PCpause_sec[$i] = $Brow['pause_sec'];
@@ -478,8 +477,10 @@ error_reporting(E_ERROR | E_PARSE);
                                                 $sub_statuses .= "$sub_status[$i]-";
                                                 $sub_statusesFILE .= ",$sub_status[$i]";
                                                 $sub_statusesARY[$j] = $sub_status[$i];
-                                                $SstatusesBOT .= "<th> $sub_status[$i] </th>";
-                                                $j++;
+						if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){
+                                                	$SstatusesBOT .= "<th> $sub_status[$i] </th>";
+							$j++;
+						}
                                         }
                                         if (!preg_match("/-".$PCuser[$i]."-/", $PCusers)) {
                                                 $PCusers .= $PCuser[$i]."-";
@@ -499,7 +500,6 @@ error_reporting(E_ERROR | E_PARSE);
                                 $Suser_ct = count($usersARY);
                                 $TOTtotNONPAUSE = 0;
                                 $TOTtotTOTAL = 0;
-                               	$alex["k"] = $k; 
 				while ($m < $k) {
                                         $d = 0;
                                         while ($d < $Suser_ct) {
@@ -529,17 +529,20 @@ error_reporting(E_ERROR | E_PARSE);
                                                 $status_found = 0;
 
                                                 foreach($subs_to_print as $i => $val) {
-                                                        if ( ($Suser == "$PCuser[$i]") AND ($Sstatus == "$sub_status[$i]") ) {
-                                                                $Spause_sec = ($Spause_sec + $PCpause_sec[$i]);
-                                                                $Snon_pause_sec = ($Snon_pause_sec + $PCnon_pause_sec[$i]);
-                                                                $Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
+                                                        if ( ($Suser == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
+								if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){ 
+                        	                                        $Spause_sec = ($Spause_sec + $PCpause_sec[$i]);
+                	                                                $Snon_pause_sec = ($Snon_pause_sec + $PCnon_pause_sec[$i]);
+        	                                                        $Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
+	
+	                                                                $USERcodePAUSE_MS = /*go_sec_convert($PCpause_sec[$i], 'H');*/convert($PCpause_sec[$i]);
+                	                                                $pfUSERcodePAUSE_MS = sprintf("%6s", $USERcodePAUSE_MS);
 
-                                                                $USERcodePAUSE_MS = convert($PCpause_sec[$i]);
-                                                                $pfUSERcodePAUSE_MS = sprintf("%6s", $USERcodePAUSE_MS);
-
-                                                                $Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
-                                                                $SstatusesBOTR[$m] .= "<td> $USERcodePAUSE_MS </td>";
-                                                                $status_found++;
+        	                                                        $Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
+	
+	                                                                $SstatusesBOTR[$m] .= "<td> $USERcodePAUSE_MS </td>";
+                                                                	$status_found++;
+								}
                                                         }
 
                                                         $i++;
@@ -547,7 +550,7 @@ error_reporting(E_ERROR | E_PARSE);
 
                                                 if ($status_found < 1) {
                                                         $Ssub_statusesFILE .= ",0";
-                                                        $SstatusesBOTR[$m] .= "<td> 0:00 </td>";
+                                                        $SstatusesBOTR[$m] .= "<td>".convert(0)."</td>";
                                                 }
                                                 // END loop through each stat line //
                                                 $n++;
