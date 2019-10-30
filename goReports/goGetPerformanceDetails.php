@@ -463,7 +463,7 @@ error_reporting(E_ERROR | E_PARSE);
                                 $k = 0;
 				$pause_condition = "AND pause_sec < 65000";
 
-                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(pause_sec) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,sub_status ORDER BY full_name,user,sub_status desc limit 1000";
+                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(pause_sec) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,sub_status ORDER BY full_name,user,sub_status desc limit 1000";
                                 $subs_to_print = $astDB->rawQuery($pause_sql);
 				$i = 0;
 				foreach($subs_to_print as $i => $Brow){
