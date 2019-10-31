@@ -211,8 +211,6 @@
 					$drop_inbound_group_override 		= $data_drop_inbound_group_override;
 				if (empty($campaign_cid_override))
 					$campaign_cid_override 				= $data_campaign_cid_override;
-				if (empty($web_form_address))
-					$web_form_address 					= $data_web_form_address;
 				if (empty($reset_list))
 					$reset_list 						= $data_reset_list;
 				
