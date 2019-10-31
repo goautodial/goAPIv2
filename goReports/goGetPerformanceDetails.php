@@ -477,10 +477,10 @@ error_reporting(E_ERROR | E_PARSE);
                                                 $sub_statuses .= "$sub_status[$i]-";
                                                 $sub_statusesFILE .= ",$sub_status[$i]";
                                                 $sub_statusesARY[$j] = $sub_status[$i];
-						if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){
+						//if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){
                                                 	$SstatusesBOT .= "<th> $sub_status[$i] </th>";
 							$j++;
-						}
+						//}
                                         }
                                         if (!preg_match("/-".$PCuser[$i]."-/", $PCusers)) {
                                                 $PCusers .= $PCuser[$i]."-";
@@ -530,7 +530,7 @@ error_reporting(E_ERROR | E_PARSE);
 
                                                 foreach($subs_to_print as $i => $val) {
                                                         if ( ($Suser == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
-								if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){ 
+								//if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){ 
                         	                                        $Spause_sec = ($Spause_sec + $PCpause_sec[$i]);
                 	                                                $Snon_pause_sec = ($Snon_pause_sec + $PCnon_pause_sec[$i]);
         	                                                        $Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
@@ -542,7 +542,7 @@ error_reporting(E_ERROR | E_PARSE);
 	
 	                                                                $SstatusesBOTR[$m] .= "<td> $USERcodePAUSE_MS </td>";
                                                                 	$status_found++;
-								}
+								//}
                                                         }
 
                                                         $i++;
