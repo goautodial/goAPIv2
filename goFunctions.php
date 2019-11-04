@@ -25,6 +25,47 @@
     } elseif (isset($_POST["session_user"])) { $session_user = $_POST["session_user"]; }
 	//else $apiresults = array("result" => "Error: Session User Not Defined");
 
+    // Conversion with precision from GAD v3 app
+    function go_sec_convert($sec,$precision){
+		$sec = round($sec,0);
+	
+		if ($sec < 1){
+			return "0:00";
+		}else{
+			if ($sec < 3600) {$precision='M';}
+	
+			if ($precision == 'H'){
+				$Fhours_H =	($sec / 3600);
+				$Fhours_H_int = floor($Fhours_H);
+				$Fhours_H_int = intval("$Fhours_H_int");
+				$Fhours_M = ($Fhours_H - $Fhours_H_int);
+				$Fhours_M = ($Fhours_M * 60);
+				$Fhours_M_int = floor($Fhours_M);
+				$Fhours_M_int = intval("$Fhours_M_int");
+				$Fhours_S = ($Fhours_M - $Fhours_M_int);
+				$Fhours_S = ($Fhours_S * 60);
+				$Fhours_S = round($Fhours_S, 0);
+				if ($Fhours_S < 10) {$Fhours_S = "0$Fhours_S";}
+				if ($Fhours_M_int < 10) {$Fhours_M_int = "0$Fhours_M_int";}
+				$Ftime = "$Fhours_H_int:$Fhours_M_int:$Fhours_S";
+			}
+			if ($precision == 'M'){
+				$Fminutes_M = ($sec / 60);
+				$Fminutes_M_int = floor($Fminutes_M);
+				$Fminutes_M_int = intval("$Fminutes_M_int");
+				$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
+				$Fminutes_S = ($Fminutes_S * 60);
+				$Fminutes_S = round($Fminutes_S, 0);
+				if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
+				$Ftime = "$Fminutes_M_int:$Fminutes_S";
+			}
+			if ($precision == 'S'){
+				$Ftime = $sec;
+			}
+			return "$Ftime";
+		}
+	}
+
     // CONVERT SECONDS TO DAY, HOUR:MINUTE,SEC //
     function convert($n) {
         /*$days=floor($secs/86400);

@@ -1,11 +1,9 @@
 <?php
 /**
- * @file 		goGetAllCampaigns.php
- * @brief 		API to get all campaigns
+ * @file 		goGetAllAreacodes.php
+ * @brief 		API to get all areacodes
  * @copyright 	Copyright (c) 2019 GOautodial Inc.
- * @author     	Jeremiah Sebastian Samatra
- * @author     	Alexander Jim Abenoja
- * @author		Demian Lizandro A. Biscocho  
+ * @author		Thom Bernarth Patacsil 
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -74,38 +72,47 @@
 			}
 			
 			$dataCampID									= "";
-			$dataCampName								= "";
-			$dataDialMethod								= "";
+			$dataCampName									= "";
+			$dataAreacode									= "";
+			$dataOutboundCID								= "";
 			$dataActive									= "";
-			$dataUseCID									= "";	
+			$dataDescription								= "";	
+			$dataCallCountToday								= "";
 			$cols 										= array(
-				"campaign_id",
-				"campaign_name",
-				"dial_method",
-				"active",
-				"use_custom_cid"
+				"vcid.campaign_id",
+				"vc.campaign_name",
+				"vcid.areacode",
+				"vcid.outbound_cid",
+				"vcid.active",
+				"vcid.cid_description",
+				"vcid.call_count_today"
 			);
 			
 			$astDB->orderBy('campaign_id', 'desc');
-			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);		
+			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
+			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', NULL, $cols);		
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
 					$dataCampID[] 						= $fresults['campaign_id'];
-					$dataCampName[] 					= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
-					$dataDialMethod[] 					= $fresults['dial_method'];
+					$dataCampName[]						= $fresults['campaign_name'];
+					$dataAreacode[] 					= $fresults['areacode'];
+					$dataOutboundCID[] 					= $fresults['outbound_cid'];
 					$dataActive[] 						= $fresults['active'];
-					$dataUseCID[]						= $fresults['use_custom_cid'];
+					$dataDescription[]					= $fresults['cid_description'];
+					$dataCallCountToday					= $fresults['call_count_today'];
 				}				
 			}
 			
 			$apiresults 								= array(
-				"result" 									=> "success", 
+				"result" 								=> "success", 
 				"campaign_id" 								=> $dataCampID,
-				"campaign_name" 							=> $dataCampName, 
-				"dial_method" 								=> $dataDialMethod, 
-				"active" 									=> $dataActive,
-				"use_custom_cid"							=> $dataUseCID
+				"campaign_name"								=> $dataCampName,
+				"areacode" 								=> $dataAreacode, 
+				"outbound_cid" 								=> $dataOutboundCID, 
+				"active" 								=> $dataActive,
+				"description"								=> $dataDescription,
+				"call_count_today"							=> $dataCallCountToday
 			);			
 		} else {
 			$err_msg 									= error_handle("10001");
