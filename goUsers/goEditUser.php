@@ -59,7 +59,7 @@
                 $_REQUEST['enable_webrtc']
             )
         );
-    }
+    } else {
 	
     // Default Values
     $defActive 											= array( "Y", "N" );	
@@ -457,5 +457,6 @@
 			);		
 		}
 	}
+    }
 
 ?>
