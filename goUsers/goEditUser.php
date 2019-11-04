@@ -306,23 +306,16 @@
 					$pass_cost 							= $fetch_passhash["pass_cost"];
 					$pass_hash 							= encrypt_passwd($pass, $pass_cost, $pass_key);
 
-					if ($pass_hash_enabled > 0) {
-                        $plain_pass = "";
-                        $plain_phone_pass = "";
-                        if (!empty($enable_webrtc) && $enable_webrtc == 0) {
-                            $plain_pass = $pass;
-                            $plain_phone_pass = $phone_pass;
-                        }
-                        
+					if ($pass_hash_enabled > 0 && $enable_webrtc !== 0) {
 						$phones_array 					= array(
-							"conf_secret" 					=> $plain_pass,
-							"pass" 							=> $plain_pass
+							"conf_secret" 					=> "",
+							"pass" 							=> ""
 						);
 						
 						$update_array 					= array_merge($update_array, array(
 							"pass_hash" 					=> $pass_hash, 
-							"pass" 							=> $plain_pass, 
-							"phone_pass" 					=> $plain_phone_pass
+							"pass" 							=> "", 
+							"phone_pass" 					=> ""
 							)
 						);
 
@@ -335,7 +328,7 @@
 						$ha1b 							= md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
 
 						$subscriber_array 				= array(
-							"password" 						=> $plain_pass, 
+							"password" 						=> "", 
 							"ha1" 							=> $ha1,
 							"ha1b" 							=> $ha1b
 						);
