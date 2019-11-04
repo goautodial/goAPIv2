@@ -324,8 +324,8 @@
 						
 						$value 							= $fetch_value["value"];						
 						$realm 							= (!is_null ($value) || $value !== '') ? $value : 'goautodial.com';						
-						$ha1 							= md5 ("{$phone_login}:{$realm}:{$phone_pass}");
-						$ha1b 							= md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
+						$ha1 							= md5 ("{$phone_login}:{$realm}:{$pass}");
+						$ha1b 							= md5 ("{$phone_login}@{$realm}:{$realm}:{$pass}");
 
 						$subscriber_array 				= array(
 							"password" 						=> "", 
