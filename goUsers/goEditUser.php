@@ -328,7 +328,7 @@
 						$ha1b 							= md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
 
 						$subscriber_array 				= array(
-							"password" 						=> ((int)$enable_webrtc == 0) ? $pass : "", 
+							"password" 						=> "", 
 							"ha1" 							=> $ha1,
 							"ha1b" 							=> $ha1b
 						);
