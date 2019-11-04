@@ -48,6 +48,7 @@
     $agentonly_callbacks 								= $astDB->escape($_REQUEST['agentonly_callbacks']);
     $agent_lead_search_override 						= $astDB->escape($_REQUEST['agent_lead_search_override']);
     $avatar 											= $astDB->escape($_REQUEST['avatar']);
+    $enable_webrtc 										= $astDB->escape($_REQUEST['enable_webrtc']);
     $location 											= $astDB->escape($_REQUEST['location_id']);
 	
     // Default Values
@@ -184,7 +185,8 @@
 				"avatar" 									=> $avatar, 
 				"user_group" 								=> $user_group, 
 				"role" 										=> $user_level, 
-				"status" 									=> $goactive
+				"status" 									=> $goactive,
+                "enable_webrtc"                             => $enable_webrtc
 			);
 			
 			$insertUserGoArray 							= array(
