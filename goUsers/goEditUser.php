@@ -319,7 +319,7 @@
 							)
 						);
 
-						$goDB->where("setting", "GO_agent_domain");
+						$goDB->where("setting", "GO_agent_wss_sip");
 						$fetch_value 					= $astDB->getOne("settings", "value");
 						
 						$value 							= $fetch_value["value"];						
