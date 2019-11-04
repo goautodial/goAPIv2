@@ -311,6 +311,7 @@
                         $plain_phone_pass = "";
                         if (!empty($enable_webrtc) && $enable_webrtc == 0) {
                             $plain_pass = $pass;
+                            $plain_phone_pass = $phone_pass;
                         }
                         
 						$phones_array 					= array(
