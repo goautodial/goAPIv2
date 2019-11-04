@@ -308,14 +308,14 @@
 
 					if ($pass_hash_enabled > 0) {
 						$phones_array 					= array(
-							"conf_secret" 					=> ((int)$enable_webrtc !== 0) ? $pass : "",
-							"pass" 							=> ((int)$enable_webrtc !== 0) ? $pass : ""
+							"conf_secret" 					=> ((int)$enable_webrtc == 0) ? $pass : "",
+							"pass" 							=> ((int)$enable_webrtc == 0) ? $pass : ""
 						);
 						
 						$update_array 					= array_merge($update_array, array(
 							"pass_hash" 					=> $pass_hash, 
-							"pass" 							=> ((int)$enable_webrtc !== 0) ? $pass : "", 
-							"phone_pass" 					=> ((int)$enable_webrtc !== 0) ? $phone_pass : ""
+							"pass" 							=> ((int)$enable_webrtc == 0) ? $pass : "", 
+							"phone_pass" 					=> ((int)$enable_webrtc == 0) ? $phone_pass : ""
 							)
 						);
 
@@ -328,7 +328,7 @@
 						$ha1b 							= md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
 
 						$subscriber_array 				= array(
-							"password" 						=> ((int)$enable_webrtc !== 0) ? $pass : "", 
+							"password" 						=> ((int)$enable_webrtc == 0) ? $pass : "", 
 							"ha1" 							=> $ha1,
 							"ha1b" 							=> $ha1b
 						);
