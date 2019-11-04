@@ -50,6 +50,7 @@
     $avatar 											= $astDB->escape($_REQUEST['avatar']);
     $enable_webrtc 										= $astDB->escape($_REQUEST['enable_webrtc']);
     $location 											= $astDB->escape($_REQUEST['location_id']);
+    var_dump($enable_webrtc);die();
 	
     // Default Values
     $defActive 											= array( "Y", "N" );	
@@ -186,7 +187,7 @@
 				"user_group" 								=> $user_group, 
 				"role" 										=> $user_level, 
 				"status" 									=> $goactive,
-                "enable_webrtc"                             => (int) $enable_webrtc
+                "enable_webrtc"                             => $enable_webrtc
 			);
 			
 			$insertUserGoArray 							= array(
