@@ -378,6 +378,10 @@
 					$astDB->update("phones", $phones_array);
                     
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery());
+                    
+                    if ($protocol != "EXTERNAL") { 
+                        $rebuild 							= rebuildconfQuery($astDB); 
+                    }
 				}
 
 				$astDB->where("user", $user);
