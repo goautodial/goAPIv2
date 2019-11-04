@@ -27,10 +27,12 @@
 
         if($rslt){
                 $webrtc = $rslt['value'];
-                if ($webrtc < 1 && (!empty($user_id) && !is_null($user_id))) {
+                if ($webrtc > 0 && (!empty($user_id) && !is_null($user_id))) {
                         $goDB->where('userid', $user_id);
                         $rsltu = $goDB->getOne('users', 'enable_webrtc');
-                        $webrtc = $rsltu['enable_webrtc'];
+                        if ($rsltu['enable_webrtc'] > -1) {
+                                $webrtc = $rsltu['enable_webrtc'];
+                        }
                 }
                 
                 $apiresults = array("result" => $webrtc);
