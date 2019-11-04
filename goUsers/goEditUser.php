@@ -308,8 +308,8 @@
 
 					if ($pass_hash_enabled > 0) {
 						$phones_array 					= array(
-							"conf_secret" 					=> ((int)$enable_webrtc == 0) ? $pass : "",
-							"pass" 							=> ((int)$enable_webrtc == 0) ? $pass : ""
+							"conf_secret" 					=> "",
+							"pass" 							=> ""
 						);
 						
 						$update_array 					= array_merge($update_array, array(
