@@ -355,14 +355,14 @@
 					$astDB->where("extension", $phone_login);
 					$astDB->update("phones", $phones_array);
 
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $astDB->getLastQuery());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, "{$phone_login}:{$realm}:{$pass}");
 					
 					$kamDB->where("username", $phone_login);
                     if (!empty($realm))
                         $kamDB->where("domain", $realm);
 					$kamDB->update("subscriber", $subscriber_array);
 
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, $kamDB->getLastQuery());
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Phone: $phone_login", $log_group, "{$phone_login}@{$realm}:{$realm}:{$pass}");
 				}
 					
 				if ($phone_login != null) {
