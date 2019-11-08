@@ -71,7 +71,7 @@
     }
 
     ##### reformat seconds into HH:MM:SS or MM:SS #####
-    function go_sec_convert($sec,$precision){
+    /*function go_sec_convert($sec,$precision){
 		$sec = round($sec,0);
 		if ($sec < 1){
 			return "0:00";
@@ -121,7 +121,7 @@
         } else {
             return false;
         }
-    }
+    }*/
     
 	/*function go_getall_closer_campaigns($campaignID, $link){
 		$query_date =  date('Y-m-d');
