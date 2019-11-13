@@ -353,7 +353,8 @@
                                                 'campaign_recording'                            => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
                                                 'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
 						'hopper_level'                                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
-						'use_custom_cid'					=> (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid']
+						'use_custom_cid'					=> (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid'],
+						'am_message_exten'					=> $amMessageExten
 					);
 					
 					if ( $campaign_type == 'SURVEY' ) {
