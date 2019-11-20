@@ -66,8 +66,8 @@
 		}
 			
 		//Dial Statuses Summary
-		$list_ids[0] = "ALL";
-		$total_all = ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
+		//$list_ids[0] = "ALL";
+		//$total_all = ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
 		
 			//ALL CAMPAIGNS
 			if ("ALL" === strtoupper($campaignID)) {
@@ -79,8 +79,10 @@
                         }else{
                                 $array_camp[] = $campaignID;
                         }
-                        //$imploded_camp = "'".implode("','", $array_camp)."'";
 
+		//$imploded_camp = "'".implode("','", $array_camp)."'";
+
+		$total_all = ($campaignID == "ALL") ? "ALL List IDs under ALL Campaigns" : "ALL List IDs under $campaignID";
 
 		//if (isset($list_ids) && $list_ids[0] == "ALL") {
 			/*$query 							= "
@@ -183,7 +185,7 @@
 				if ($status_called_last[$sts] > $all_called_last) {
 					$all_called_last 		= $status_called_last[$sts];
 				}
-			$o++;			
+				$o++;			
 			}
 		}
 		//var_dump($queryx);
@@ -216,7 +218,8 @@
 
 		$sts						= 0;
 		$statuses_called_to_print 			= count($status);
-		
+		$statuses_count_called_to_print			= count($count_count);
+
 		while ($statuses_called_to_print > $sts) {
 			$Pstatus = $status[$sts];					
 			$TOPsorted_output .= "
@@ -225,13 +228,13 @@
 					<td nowrap> ".$statuses_list[$Pstatus]." </td>
 				";
 
-			$firsti = $all_called_first;
+			$first = $all_called_first;
 			
 			while ($first <= $all_called_last) {							
 				$called_printed	= 0;
 				$o = 0;
 				
-				while ($statuses_called_to_print > $o) {
+				while ($statuses_count_called_to_print > $o) {
 					if ( ($count_statuses[$o] == "$Pstatus") AND ($count_called[$o] == "$first") ) {
 						$called_printed++;
 						$TOPsorted_output .= "<td nowrap> ".$count_count[$o]." </td>";
@@ -260,15 +263,16 @@
 		$first = $all_called_first;
 		
 		while ($first <= $all_called_last) {
-			if ($all_called_count[$first]) {
+			//if ($all_called_count[$first] == $first) {
+				$all_called_count_data = $all_called_count[$first];
 				$TOPsorted_output 			.= "
-					<th> $all_called_count[$first] </th>
+					<th> $all_called_count_data </th>
 				";
-			} else {
-				$TOPsorted_output 			.= "
-					<td> 0 </td>
-				";
-			}
+			//} else {
+			//	$TOPsorted_output 			.= "
+			//		<th> 0 </th>
+			//	";
+			//}
 			
 			$first++;
 		}
@@ -335,7 +339,7 @@
 			"result" 							=> "success", 
 			"SUMstatuses" 						=> $sts, 
 			"TOPsorted_output" 					=> $TOPsorted_output, 
-			"BOTsorted_output" 					=> $BOTsorted_output 
+			"BOTsorted_output" 					=> $BOTsorted_output
 		);
 		return $apiresults;
 	}
