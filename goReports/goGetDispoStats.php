@@ -305,7 +305,9 @@
 				$CALLEDsql 					= "
 					SELECT count(gmt_offset_now) as Clead_count FROM vicidial_list 
 					WHERE list_id IN (".$list.") 
-					AND status != 'NEW' AND gmt_offset_now = '".$timezone_now."'
+					AND status != 'NEW' 
+					AND status NOT IN ('DC','DNCC','XDROP')
+					AND gmt_offset_now = '".$timezone_now."'
 				";
 				// something in this loop doesn't work, comment mo one by one	
 				$queryCALLED 				= $astDB->rawQuery($CALLEDsql);
@@ -314,7 +316,9 @@
 				
 				$NOTCALLEDsql 				= "
 					SELECT count(gmt_offset_now) as NClead_count FROM vicidial_list 
-					WHERE list_id IN (".$list.") AND status = 'NEW'
+					WHERE list_id IN (".$list.") 
+					AND status = 'NEW'
+					AND status NOT IN ('DC','DNCC','XDROP')
 					AND gmt_offset_now = '$timezone_now'
 				";
 				
@@ -339,7 +343,8 @@
 			"result" 							=> "success", 
 			"SUMstatuses" 						=> $sts, 
 			"TOPsorted_output" 					=> $TOPsorted_output, 
-			"BOTsorted_output" 					=> $BOTsorted_output
+			"BOTsorted_output" 					=> $BOTsorted_output,
+			"query"							=> $NOTCALLEDsql
 		);
 		return $apiresults;
 	}
