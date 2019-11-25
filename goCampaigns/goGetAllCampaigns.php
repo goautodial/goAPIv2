@@ -97,16 +97,21 @@
 					$dataActive[] 						= $fresults['active'];
 					$dataUseCID[]						= $fresults['use_custom_cid'];
 				}				
+			
+				$apiresults 								= array(
+					"result" 									=> "success", 
+					"campaign_id" 								=> $dataCampID,
+					"campaign_name" 							=> $dataCampName, 
+					"dial_method" 								=> $dataDialMethod, 
+					"active" 									=> $dataActive,
+					"use_custom_cid"							=> $dataUseCID
+				);
+			} else {
+				$apiresults								= array(
+					"result"								=> "No Available Data"
+				);
 			}
 			
-			$apiresults 								= array(
-				"result" 									=> "success", 
-				"campaign_id" 								=> $dataCampID,
-				"campaign_name" 							=> $dataCampName, 
-				"dial_method" 								=> $dataDialMethod, 
-				"active" 									=> $dataActive,
-				"use_custom_cid"							=> $dataUseCID
-			);			
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
