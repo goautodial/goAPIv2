@@ -102,18 +102,22 @@
 					$dataDescription[]					= $fresults['cid_description'];
 					$dataCallCountToday					= $fresults['call_count_today'];
 				}				
-			}
 			
-			$apiresults 								= array(
-				"result" 								=> "success", 
-				"campaign_id" 								=> $dataCampID,
-				"campaign_name"								=> $dataCampName,
-				"areacode" 								=> $dataAreacode, 
-				"outbound_cid" 								=> $dataOutboundCID, 
-				"active" 								=> $dataActive,
-				"description"								=> $dataDescription,
-				"call_count_today"							=> $dataCallCountToday
-			);			
+				$apiresults 								= array(
+					"result" 								=> "success", 
+					"campaign_id" 								=> $dataCampID,
+					"campaign_name"								=> $dataCampName,
+					"areacode" 								=> $dataAreacode, 
+					"outbound_cid" 								=> $dataOutboundCID, 
+					"active" 								=> $dataActive,
+					"description"								=> $dataDescription,
+					"call_count_today"							=> $dataCallCountToday
+				);
+			} else {
+				$apiresults                                                             = array(
+					"result"								=> "No data available in table"
+				);
+			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
