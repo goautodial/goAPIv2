@@ -59,6 +59,8 @@
 						a.phone_number as phone_number, 
 						'' as campaign_id
 						FROM vicidial_dnc a
+						WHERE phone_number LIKE '%$search%'
+						LIMIT 10000
 				) UNION (
 					SELECT 
 						b.phone_number as phone_number,
@@ -66,7 +68,7 @@
 						FROM vicidial_campaign_dnc b
 						WHERE phone_number LIKE '%$search%'
 						AND campaign_id IN ('$campaign_ids')
-						LIMIT 100
+						LIMIT 10000
 				)";
 
 				$rsltv 									= $astDB->rawQuery($query);
