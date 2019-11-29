@@ -1063,9 +1063,11 @@
 									$wavfile_size 				= $_FILES['uploaded_wav']['size'];
 									$WeBServeRRooT				= '/var/lib/asterisk';
 									$sounds_web_directory 		= 'sounds';								
-									$wavfile_name 				= substr( $wavfile_name, 0, -4 );
-									$wavfile_name				= preg_replace( "/ /",'', "go_".$wavfile_name );
-									$wavfile_name				= preg_replace( "/@/",'', $wavfile_name );
+									if ( !empty($wavfile_name) ) {
+										$wavfile_name                           = substr( $wavfile_name, 0, -4 );
+										$wavfile_name				= preg_replace( "/ /",'', "go_".$wavfile_name );
+										$wavfile_name				= preg_replace( "/@/",'', $wavfile_name );
+									}
 
 									if ( empty($wavfile_name) ) {
 										$wavfile_name 			= "US_pol_survey_hello";
