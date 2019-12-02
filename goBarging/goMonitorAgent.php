@@ -127,12 +127,23 @@ if ($is_logged_in) {
                         $BMquery = "BM$StarTtimE$PADuser";
                         
                         $rslt = $astDB->getOne('system_settings', 'agent_whisper_enabled');
+                        $agent_whisper_enabled = $rslt['agent_whisper_enabled'];
     
-                        if ( (preg_match('/MONITOR/', $stage)) || (strlen($stage) < 1) ) {$stage = '0';}
-                        if (preg_match('/BARGE/', $stage)) {$stage = '';}
-                        if (preg_match('/HIJACK/', $stage)) {$stage = '';}
+                        if ( (preg_match('/MONITOR/', $stage)) || (strlen($stage) < 1) ) {
+                            $stage = '0';
+                            $wAction = 'listened';
+                        }
+                        if (preg_match('/BARGE/', $stage)) {
+                            $stage = '';
+                            $wAction = 'barged';
+                        }
+                        if (preg_match('/HIJACK/', $stage)) {
+                            $stage = '';
+                            $wAction = 'hijacking';
+                        }
                         if (preg_match('/WHISPER/', $stage)) {
-                            if ($rslt['agent_whisper_enabled'] == '1') {
+                            $wAction = 'whispered';
+                            if ($agent_whisper_enabled == '1') {
                                 $stage = '47378218';
                             } else {
                                 # WHISPER not enabled
@@ -219,7 +230,7 @@ if ($is_logged_in) {
             }
             
             if ($hasError < 1) {
-				$log_id = log_action($goDB, $action, $goUser, $ip_address, "{$goUser} barged in to {$agent}'s call", $user_group);
+				$log_id = log_action($goDB, $action, $goUser, $ip_address, "{$goUser} {$wAction} in to {$agent}'s call", $user_group);
 				
                 $apiresults = array( "result" => "success", "message" => $message, "data" => $data );
             }
