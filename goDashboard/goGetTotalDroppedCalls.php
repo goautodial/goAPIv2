@@ -67,13 +67,13 @@
 				$data_out = $astDB
 					->where("campaign_id", $campaigns, "IN")
 					->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
-					->where("status", "DROP")
+					->where("status", array("DROP", "IVRXFR"), "IN")
 					->getValue("vicidial_log", "count(lead_id)");
 
 				$data_in = $astDB
-					->where("campaign_id", $campaigns, "IN")
+					// ->where("campaign_id", $campaigns, "IN")
 					->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
-					->where("status", "DROP")
+					->where("status", array("XDROP", "TIMEOT", "NANQUE", "PDROP", "MAXCAL", "INBND"), "IN")
 					->getValue("vicidial_closer_log", "count(lead_id)");
 
 				$data = intval($data_out) + intval($data_in);
