@@ -58,12 +58,26 @@
 				$data = $astDB
 					->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
                                         ->getValue("vicidial_campaign_stats", "sum(drops_today)");
-				*/	
+					
 				$data 									= $astDB
 					->where("campaign_id", $campaigns, "IN")
 					->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
-					->getValue("vicidial_campaign_stats", "sum(drops_today)");
-						
+					->getValue("vicidial_campaign_stats", "sum(drops_today)");*/
+
+				$data_out = $astDB
+					->where("campaign_id", $campaigns, "IN")
+					->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+					->where("status", array("DROP", "IVRXFR"), "IN")
+					->getValue("vicidial_log", "count(lead_id)");
+
+				$data_in = $astDB
+					// ->where("campaign_id", $campaigns, "IN")
+					->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+					->where("status", array("XDROP", "TIMEOT", "NANQUE", "PDROP", "MAXCAL", "INBND"), "IN")
+					->getValue("vicidial_closer_log", "count(lead_id)");
+
+				$data = intval($data_out) + intval($data_in);
+		
 				$apiresults 							= array(
 					"result" 								=> "success", 
 					//"query"								=> $astDB->getLastQuery(),

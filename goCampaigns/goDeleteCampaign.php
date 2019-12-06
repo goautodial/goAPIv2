@@ -75,7 +75,11 @@
 					$astDB->where( "campaign_id", $campaign_ids, "IN" );
 					$goDB->delete( "vicidial_lead_recycle" );					
 					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );					
-				
+					
+					$astDB->where( "campaign_id", $campaign_ids, "IN" );
+					$astDB->delete( "vicidial_campaign_cid_areacodes" );
+					$log_id								= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Areacodes with Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );	
+			
 					$apiresults 						= array(
 						"result" 							=> "success"
 					);

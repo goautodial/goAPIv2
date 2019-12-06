@@ -1063,8 +1063,12 @@
 									$wavfile_size 				= $_FILES['uploaded_wav']['size'];
 									$WeBServeRRooT				= '/var/lib/asterisk';
 									$sounds_web_directory 		= 'sounds';								
-									$wavfile_name 				= substr( $wavfile_name, 0, -4 );
-									
+									if ( !empty($wavfile_name) ) {
+										$wavfile_name                           = substr( $wavfile_name, 0, -4 );
+										$wavfile_name				= preg_replace( "/ /",'', "go_".$wavfile_name );
+										$wavfile_name				= preg_replace( "/@/",'', $wavfile_name );
+									}
+
 									if ( empty($wavfile_name) ) {
 										$wavfile_name 			= "US_pol_survey_hello";
 									}								
@@ -1144,6 +1148,7 @@
 
 									if ( $q_insertSurvey ) {
 										if ( preg_match("/\.(wav|mp3)$/i",$wavfile_orig) ) {
+											$wavfile_name			= $_FILES['uploaded_wav']['name'];
 											$wavfile_dir 			= preg_replace( "/ /",'\ ', $wavfile_dir );
 											$wavfile_dir 			= preg_replace( "/@/",'\@', $wavfile_dir );
 											$wavfile_name 			= preg_replace( "/ /",'', "go_".$wavfile_name );
@@ -1154,7 +1159,7 @@
 											$goDB->where( 'goDirectory', $path_sounds );
 											$goDB->get( 'sounds' ); 
 											
-											if ( $goDB->count > 0 ) {
+											if ( $goDB->count == 0 ) {
 												copy( $wavfile_dir, "$path_sounds/$wavfile_name" );
 												chmod( "$path_sounds/$wavfile_name", 0766 );
 
@@ -1592,7 +1597,8 @@
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= array(
 				"code" 										=> "10001", 
-				"result" 									=> $err_msg
+				"result" 									=> $err_msg,
+				"campaign id" => $campaign_id
 			);		
 		}
 	}
