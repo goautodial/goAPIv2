@@ -31,21 +31,46 @@
 			"result" 						=> "Error: Session User Not Defined."
 		);
 	} else {
-		$data 						= array(
-			"allow_voicemail_greeting"				=> $allow_voicemail_greeting
-		);
-			
-		$update					= $astDB->update("system_settings", $data);
 		
-		if ($update) {
-			$apiresults 			= array(
-				"result" 				=> "success",
-				"data" 					=> $data
+		$resultGet = $astDB->getOne("system_settings", "allow_voicemail_greeting");
+
+		if ( $resultGet["allow_voicemail_greeting"] !== $allow_voicemail_greeting ){
+			$result = $resultGet["allow_voicemail_greeting"];
+			$data 						= array(
+				"allow_voicemail_greeting"				=> $allow_voicemail_greeting
 			);
-		} else {
-			$apiresults				= array(
-				"result" 				=> "Error: Allow voicemail greeting update failed, check your details"
-			);
-		} 
+			
+			$update					= $astDB->update("system_settings", $data);
+		
+			if ($update) {
+				$apiresults 			= array(
+					"result" 				=> "success",
+					"data" 					=> $data
+				);
+
+				if ( $allow_voicemail_greeting ) { 
+					$act = "Enabled"; 
+				} else { 
+					$act = "Disabled";
+				}
+
+				$log_message = "$act Voicemail Greeting";
+
+			} else {
+				$apiresults				= array(
+					"result" 				=> "Error: Allow voicemail greeting update failed, check your details"
+				);
+
+				$log_message = "Failed to Update System Settings: Voicemail Setting";
+
+			}
+
+			$log_id = log_action( $goDB, 'MODIFY', $log_user, $log_ip, $log_message, $log_group, $astDB->getLastQuery() );
+		}
+
+		$apiresults = array(
+			"result"                                => "success",
+			"message"				=> "Allow Voicemail Geeting Unchanged"
+                ); 
 	}
 ?>
