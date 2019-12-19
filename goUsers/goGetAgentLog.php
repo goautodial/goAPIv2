@@ -74,7 +74,7 @@
 				}					
 			}
 		
-			$limit 										= "200";
+			$limit 										= "5000";
 			$date 										= date ("Y-m-d");
 			
 			if (!empty($start_date)) {
