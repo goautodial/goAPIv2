@@ -195,10 +195,18 @@
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
+					->where("status != 'NULL'")
 					->groupBy("val.user")
 					->get("vicidial_agent_log val", $limit, $cols);
 					
 				$usercount = $astDB->getRowCount();
+
+				$agenttotalcalls = $astDB
+					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
+					->where("vu.user = vl.user")
+					->groupBy("vl.user")
+					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
 					
 				if ($astDB->count >0) {	
 					$TOTwait 	= array();
@@ -225,11 +233,18 @@
 					foreach ($agenttd as $row) {
 						$name		= $row['full_name'];
 						$user		= $row['user'];
+
+						foreach ($agenttotalcalls as $call){
+							if($call['user'] == $user){
+									$calls = $call['calls'];
+							}
+						}
+
 						$wait		= convert($row['wait_sec']);
 						$talk		= convert($row['talk_sec']);
 						$dispo		= convert($row['dispo_sec']);
 						$pause		= convert($row['pause_sec']);
-						$calls	 	= $row['calls'];
+						//$calls	 	= $row['calls'];
 						$status 	= $row['status'];
 						$dead_sec	= convert($row['dead_sec']);
 						$customer	= convert($row['customer']);
@@ -450,7 +465,7 @@
 					"TOTtimeTC" 		=> $TOTtimeTC, 
 					"TOT_AGENTS" 		=> $TOT_AGENTS, 
 					"TOTcalls" 		=> $TOTcalls,
-					"campaigns"		=> $array_camp,
+					"campaigns"		=> $array_camp
 					//"SstatusesBSUM"         => $SstatusesBSUM,
 					//"MIDsorted_output"	=> $MIDsorted_output,
 					//"legend"		=> $legend

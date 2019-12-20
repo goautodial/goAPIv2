@@ -403,12 +403,27 @@
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
+					->where("status != 'NULL'")
 					->groupBy("val.user")
 					->get("vicidial_agent_log val", $limit, $cols);
+
+				$agenttotalcalls = $astDB
+					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
+					->where("vu.user = vl.user")
+					->groupBy("vl.user")
+					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
 
 				if ($astDB->count >0) {
 					foreach ($agent_time_ct as $row) {
 						$user 							= $row['user'];
+
+						foreach ($agenttotalcalls as $call){
+							if($call['user'] == $user){
+									$calls = $call['calls'];
+							}
+						}
+
 						$wait 							= $row['wait_sec'];
 						$talk 							= $row['talk_sec'];
 						$dispo 							= $row['dispo_sec'];
@@ -417,7 +432,7 @@
 						$status 						= $row['status'];
 						$dead 							= $row['dead_sec'];
 						$customer 						= $row['customer'];
-						$calls							= $row['calls'];
+						//$calls							= $row['calls'];
 						
 						/*if ($wait > 65000) { $wait  	= 0; }
 						if ($talk > 65000) { $talk		= 0; }
