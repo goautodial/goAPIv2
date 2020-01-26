@@ -94,7 +94,8 @@
 				);
 			} else {
 				$apiresults 							= array(
-					"result" 								=> "Error: Empty."
+					"result" 							=> "success",
+					"message"							=> "Empty"
 				);
 			}
 		} else {
