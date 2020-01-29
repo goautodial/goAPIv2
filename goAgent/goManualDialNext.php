@@ -1053,9 +1053,17 @@ if ($sipIsLoggedIn) {
             $called_count++;
 
             if ( (strlen($agent_dialed_type) < 3) or (strlen($agent_dialed_number) < $manual_dial_min_digits) ) {
-                $agent_dialed_number = $phone_number;
                 if (strlen($agent_dialed_type) < 3)
                     {$agent_dialed_type = 'MAIN';}
+                    
+                if ($campaign_settings->alt_number_dialing == 'Y')
+                    {$agent_dialed_type = 'ALT';}
+                    
+                if ($phone_number !== '' && strlen($phone_number) > 3) {
+                    $agent_dialed_number = $phone_number;
+                } else if ($agent_dialed_type == 'ALT' && ((strlen($phone_number) <= 3) or (strlen($phone_number) < $manual_dial_min_digits))) {
+                    $agent_dialed_number = ($alt_phone !== '' ? $alt_phone : $address3);
+                }
             }
             if ( (strlen($callback_id) > 0) and (strlen($lead_id) > 0) ) {
                 if ($agent_dialed_type == 'ALT')

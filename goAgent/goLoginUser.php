@@ -547,6 +547,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $VARxferGroupsNames = rtrim($VARxferGroupsNames, ",");
     }
     
+    $DefaultALTDial = 0;
     if ($campaign_settings->alt_number_dialing == 'Y') {
         $alt_phone_dialing = 1;
     } else {

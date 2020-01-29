@@ -40,6 +40,8 @@ if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgen
     else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $astDB->escape($_POST['goAgentLogID']); }
 if (isset($_GET['goDialSeconds'])) { $Dial_Seconds = $astDB->escape($_GET['goDialSeconds']); }
     else if (isset($_POST['goDialSeconds'])) { $Dial_Seconds = $astDB->escape($_POST['goDialSeconds']); }
+if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
+    else if (isset($_POST['goStage'])) { $stage = $astDB->escape($_POST['goStage']); }
 
 $user = $agent->user;
 
