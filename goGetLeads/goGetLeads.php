@@ -85,6 +85,7 @@
 				$astDB->where("phone_number", "%$search%", "LIKE");
 				$astDB->orWhere("first_name", "$search%", "LIKE");
 				$astDB->orWhere("last_name", "$search%", "LIKE");
+				$astDB->orWhere("CONCAT_WS(' ',first_name,last_name)", "$search%", "LIKE");
 				$astDB->orWhere("lead_id", "$search%", "LIKE");
 			}
 
