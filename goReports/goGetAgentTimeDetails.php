@@ -138,8 +138,9 @@
 				$pcs_data = $astDB
 					->join("vicidial_users as vu", "val.user = vu.user", "LEFT")
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
-					->where("pause_sec", 0, ">")
-					->where("pause_sec", 65000, "<")
+					//->where("pause_sec", 0, ">")
+					//->where("pause_sec", 65000, "<")
+                    ->where("pause_sec", array(0, 65000), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("sub_status", array("LAGGED", "LOGIN"), "NOT IN")
 					->groupBy("vu.user,sub_status")
