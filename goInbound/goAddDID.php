@@ -25,12 +25,12 @@
         $did_pattern = $_REQUEST['did_pattern'];
         $did_description = $_REQUEST['did_description'];
         $active = strtoupper($_REQUEST['did_active']);
-        $did_route = strtoupper($_REQUEST['did_route']);
+        //$did_route = strtoupper($_REQUEST['did_route']);
         $user_group = $_REQUEST['user_group'];
         $goUser = $_REQUEST['goUser'];
         $ip_address = $_REQUEST['hostname'];
         $record_call = "N"; //$_REQUEST['record_call'];
-
+/*
 	// Agent
 		$user = $_REQUEST['user'];
         $user_unavailable_action = strtoupper($_REQUEST['user_unavailable_action']);
@@ -51,10 +51,10 @@
 	// Custon Extension
 		$extension = $_REQUEST['extension'];
 		$exten_context = $_REQUEST['exten_context'];
-
+*/
     // Default values 
-    $defUUA = array('IN_GROUP','EXTEN','VOICEMAIL','PHONE','VMAIL_NO_INST');
-    $defRoute = array('EXTEN','VOICEMAIL','AGENT','PHONE','IN_GROUP','CALLMENU','VMAIL_NO_INST');
+//    $defUUA = array('IN_GROUP','EXTEN','VOICEMAIL','PHONE','VMAIL_NO_INST');
+//    $defRoute = array('EXTEN','VOICEMAIL','AGENT','PHONE','IN_GROUP','CALLMENU','VMAIL_NO_INST');
     $defRecordCall = array('Y','N','Y_QUEUESTOP');
     $defActive = array("Y","N");
 
@@ -66,18 +66,18 @@
 		$apiresults = array("result" => "Error: Special characters found in did_pattern");
 	}else if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $did_description)){
 		$apiresults = array("result" => "Error: Special characters found in did_description");
-	}else if(!in_array($user_unavailable_action,$defUUA) && $user_unavailable_action != null) {
-		$apiresults = array("result" => "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'.");
+/*     }else if(!in_array($user_unavailable_action,$defUUA) && $user_unavailable_action != null) {
+		$apiresults = array("result" => "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'.");*/
 	}else if(!in_array($active,$defActive) && $active != null) {
 		$apiresults = array("result" => "Error: Default value for active is Y or N only.");
-	}else if(!in_array($did_route,$defRoute) && $did_route != null) {
-		$apiresults = array("result" => "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only.");
+/*	}else if(!in_array($did_route,$defRoute) && $did_route != null) {
+		$apiresults = array("result" => "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only.");*/
 	}else{
 		
 		$groupId = go_get_groupid($session_user, $astDB);
 		$log_user = $session_user;
 		$log_group = $groupId;
-
+	/*
 		// if DID ROUTE == AGENT
 		if($did_route === "AGENT" && empty($user)){
 			$apiresults = array("result" => "Error: Set Value for user"); 
@@ -125,7 +125,7 @@
 		}else if(!empty($exten_context) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $exten_context)){
             $apiresults = array("result" => "Error: Special characters found in exten_context");
 		}
-			
+	*/		
 		if(!empty($group_id) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)){
             $apiresults = array("result" => "Error: Special characters found in group_id");
 		}
@@ -152,6 +152,15 @@
 			if ($rowdf > 0) {
 				$apiresults = array("result" => "DID NOT ADDED - DID already exist.\n");
 			} else {
+				$col = Array(
+                                              "did_pattern" => $did_pattern,
+                                              "did_description" => $did_description,
+                                              "record_call" => $record_call,
+                                              "user_group" => $user_group
+                                        );
+                                $query = $astDB->insert("vicidial_inbound_dids", $col);
+				$log_query = $astDB->getLastQuery();
+				/*
 				if($did_route == "AGENT"){
 					$col = Array(
 								"did_pattern" => $did_pattern,
@@ -165,11 +174,11 @@
 							);
 					$queryAgent = $astDB->insert("vicidial_inbound_dids", $col);
 
-					$queryAgent = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$user', '$user_unavailable_action', '$user_route_settings_ingroup');";
+					//$queryAgent = "INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, ) values('$did_pattern', '$did_description', '$did_route', '$record_call', '$user_group', '$user', '$user_unavailable_action', '$user_route_settings_ingroup');";
 					//$queryAgentResult = mysqli_query($link, $queryAgent);
 				
 				//INSERT INTO vicidial_inbound_dids (did_pattern, did_description, did_route, record_call, user_group, user, user_unavailable_action, user_route_settings_ingroup) values('0000', 'Test', 'AGENT', 'N', 'ADMIN', '', 'VOICEMAIL', 'AGENTDIRECT');
-					$log_query = $queryAgent;
+					$log_query = $astDB->getLastQuery();
 				}
 				
 				if($did_route == "PHONE"){
@@ -268,7 +277,7 @@
 				
 					$log_query = $queryIG;
 				}
-				
+				*/
 				$astDB->where("did_pattern", $did_pattern);
 				$astDB->getOne("vicidial_inbound_dids");
 				//$queryCheck = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
