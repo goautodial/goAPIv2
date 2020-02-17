@@ -281,8 +281,7 @@
 						
 						$apiresults 					= array(
 							"result" 						=> "success", 
-							"data" 							=> $data,
-                            "vu_user_id"                    => $user_id
+							"data" 							=> $data
 						);            
 					}            
 				} else { // No, you're not powerful enough!
