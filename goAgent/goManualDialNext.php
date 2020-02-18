@@ -67,8 +67,8 @@ if ($sipIsLoggedIn) {
         else if (isset($_POST['goAccount'])) { $account = $astDB->escape($_POST['goAccount']); }
     if (isset($_GET['goQMExtension'])) { $qm_extension = $astDB->escape($_GET['goQMExtension']); }
         else if (isset($_POST['goQMExtension'])) { $qm_extension = $astDB->escape($_POST['goQMExtension']); }
-    if (isset($_GET['goSIPserver'])) { $qm_extension = $astDB->escape($_GET['goSIPserver']); }
-        else if (isset($_POST['goSIPserver'])) { $qm_extension = $astDB->escape($_POST['goSIPserver']); }
+    if (isset($_GET['goSIPserver'])) { $SIPserver = $astDB->escape($_GET['goSIPserver']); }
+        else if (isset($_POST['goSIPserver'])) { $SIPserver = $astDB->escape($_POST['goSIPserver']); }
     if (isset($_GET['goConfExten'])) { $conf_exten = $astDB->escape($_GET['goConfExten']); }
         else if (isset($_POST['goConfExten'])) { $conf_exten = $astDB->escape($_POST['goConfExten']); }
     if (isset($_GET['goExtContext'])) { $ext_context = $astDB->escape($_GET['goExtContext']); }
