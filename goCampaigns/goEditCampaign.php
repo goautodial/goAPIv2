@@ -113,7 +113,9 @@
 	$amd_send_to_vmx 									= $astDB->escape($_REQUEST['amd_send_to_vmx']);
 	$waitforsilence_options 							= $astDB->escape($_REQUEST['waitforsilence_options']);
 	$location 											= $astDB->escape($_REQUEST['location_id']);
-	$use_custom_cid 								= $astDB->escape($_REQUEST['use_custom_cid']);
+	$use_custom_cid 								    = $astDB->escape($_REQUEST['use_custom_cid']);
+	$survey_wait_sec 								    = $astDB->escape($_REQUEST['survey_wait_sec']);
+	$survey_no_response_action 							= $astDB->escape($_REQUEST['survey_no_response_action']);
 
     // Default values 
     $defActive 											= array( "Y", "N" );	
@@ -350,11 +352,13 @@
 						'my_callback_option' 					=> (!empty($my_callback_option)) ? $my_callback_option : $resultGet['my_callback_option'],
 						'lead_order' 							=> (!empty($lead_order)) ? $lead_order : $resultGet['lead_order'],
 						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary'],
-                                                'campaign_recording'                            => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
-                                                'campaign_rec_filename'                         => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
-						'hopper_level'                                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
-						'use_custom_cid'					=> (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid'],
-						'am_message_exten'					=> $amMessageExten
+                        'campaign_recording'                    => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
+                        'campaign_rec_filename'                 => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
+						'hopper_level'                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
+						'use_custom_cid'					    => (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid'],
+						'survey_wait_sec'					    => (!empty($survey_wait_sec)) ? $survey_wait_sec : $resultGet['survey_wait_sec'],
+						'survey_no_response_action'				=> (!empty($survey_no_response_action)) ? $survey_no_response_action : $resultGet['survey_no_response_action'],
+						'am_message_exten'					    => $amMessageExten
 					);
 					
 					if ( $campaign_type == 'SURVEY' ) {
