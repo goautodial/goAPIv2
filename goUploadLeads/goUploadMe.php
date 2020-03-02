@@ -20,6 +20,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+	ini_set('display_errors', 1);
+	error_reporting(E_ALL);
+	
 	include_once ("goAPI.php");
 
 	ini_set('memory_limit','1024M');
@@ -525,7 +528,7 @@
 						);
 						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
-						$alex["insertquery"] = $astDB->getLastQuery();
+						//$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping)){ // LEAD MAPPING CUSTOMIZATION
                                                 	$goCustomKeyData = array();
@@ -633,8 +636,8 @@
 					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
 					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
 
-					$alex["query_insert"] = $astDB->getLastQuery();
-					$alex["error_insert"] = $astDB->getLastError();
+					//$alex["query_insert"] = $astDB->getLastQuery();
+					//$alex["error_insert"] = $astDB->getLastError();
 	
 					# start set query for custom fields
 					if(!empty($lead_mapping)){ //LEAD MAPPING CUSTOMIZATION
