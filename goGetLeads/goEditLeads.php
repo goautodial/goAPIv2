@@ -67,25 +67,25 @@
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg 
 		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $first_name) && !empty($first_name)) {
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $first_name) && !empty($first_name)) {
 		$err_msg 										= error_handle("41004", "first_name");
 		$apiresults 									= array(
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
 		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $middle_initial) && !empty($middle_initial)) {
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $middle_initial) && !empty($middle_initial)) {
 		$err_msg 										= error_handle("41004", "middle_initial");
 		$apiresults 									= array(
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
 		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $last_name) && !empty($last_name)) {
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $last_name) && !empty($last_name)) {
 		$err_msg 										= error_handle("41004", "last_name");
 		$apiresults 									= array(
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
 		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $phone_number) && !empty($phone_number)) {
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $phone_number) && !empty($phone_number)) {
 		$err_msg 										= error_handle("41004", "phone_number");
 		$apiresults 									= array(
 			"code" 											=> "41004", 
@@ -97,7 +97,7 @@
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
 		);
-	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $web_form_address)) {
+	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $web_form_address)) {
 		$err_msg 										= error_handle("41004", "web_form_address");
 		$apiresults 									= array(
 			"code" 											=> "41004", 
