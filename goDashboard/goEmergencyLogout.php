@@ -48,14 +48,14 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (!empty($user_name)) {
 				$NOW_TIME 								= date("Y-m-d H:i:s");
 				$thedate 								= date('U');
 				$inactive_epoch 						= ($thedate - 60);
 
 				$astDB->where('user', $user_name);
-				$Vliveagent 							= $astDB->get('vicidial_live_agents', null, 'user,campaign_id,UNIX_TIMESTAMP(last_update_time) AS last_update_time');
+				$Vliveagent 							= $astDB->get('vicidial_live_agents', null, 'user,campaign_id,UNIX_TIMESTAMP(last_update_time) AS last_update_time,extension');
 				//$Vliveagent =  mysqli_fetch_array($Vliveagent, MYSQLI_ASSOC);
 
 				if (!empty($Vliveagent)) {
@@ -140,6 +140,15 @@
 					
 					$rslt7  							= $astDB->insert('vicidial_user_log', $insertData);					
 					$log_id 							= log_action($goDB, 'LOGOUT', $log_user, $log_ip, "User $log_user used emergency log out on $user_name", $log_group);
+					
+					$astDB->where('extension', $extension);
+					$astDB->orderBy('start_time', 'desc');
+					$wcrslt = $astDB->getOne('web_client_sessions', 'session_name');
+					
+					$astDB->where('user', $agents['user']);
+					$urslt = $astDB->getOne('vicidial_users', 'pass,pass_hash');
+					
+					logoutUser($agents['user'], $urslt['pass_hash'], $agents['server_ip'], $wcrslt['session_name'], $agents['agent_log_id']);
 							
 					$apiresults 						= array(
 						"result" 							=> "success"
@@ -190,6 +199,39 @@
 				"result" 									=> $err_msg
 			);		
 		}
+	}
+	
+	function logoutUser($uName, $uPass, $server_ip, $session_name, $agent_log_id) {
+		include_once('../../php/goCRMAPISettings.php');
+		
+		$postfields = array(
+            "goAction": 'goLogoutUser',
+            "goUser": $uName,
+            "goPass": $uPass,
+            "goSIPserver": 'kamailio',
+            "goNoDeleteSession": 1,
+            "goLogoutKickAll": 1,
+            "goServerIP": $server_ip,
+            "goSessionName": $session_name,
+            "goExtContext": 'default',
+            "goAgentLogID": $agent_log_id,
+            "responsetype": 'json',
+            "goUseWebRTC": 1
+		);
+		
+		
+		$ch = curl_init();
+		
+		curl_setopt($ch, CURLOPT_URL, gourl . "/goAgent/goAPI.php");
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postfields));
+		
+		// Receive server response ...
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		
+		$server_output = curl_exec($ch);
+		
+		curl_close ($ch);
 	}
 	
 ?>
