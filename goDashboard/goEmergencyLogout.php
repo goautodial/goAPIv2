@@ -233,7 +233,7 @@
 		
 		curl_close ($ch);
 		
-		return true;
+		//return true;
 	}
 	
 ?>
