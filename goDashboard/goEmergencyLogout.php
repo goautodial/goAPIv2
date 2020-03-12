@@ -148,7 +148,7 @@
 					$astDB->where('user', $agents['user']);
 					$urslt = $astDB->getOne('vicidial_users', 'pass,pass_hash');
 					
-					logoutUser($agents['user'], $urslt['pass_hash'], $agents['server_ip'], $wcrslt['session_name'], $agents['agent_log_id']);
+					//logoutUser($agents['user'], $urslt['pass_hash'], $agents['server_ip'], $wcrslt['session_name'], $agents['agent_log_id']);
 							
 					$apiresults 						= array(
 						"result" 							=> "success"
