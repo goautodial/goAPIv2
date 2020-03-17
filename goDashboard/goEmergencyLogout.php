@@ -24,6 +24,7 @@
 	include_once ("goAPI.php");
 	    
 	$user_name 											= $astDB->escape($_REQUEST['goUserAgent']);
+	$LogoutKickAll										= $astDB->escape($_REQUEST['LogoutKickAll']);
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -48,14 +49,14 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (!empty($user_name)) {
 				$NOW_TIME 								= date("Y-m-d H:i:s");
 				$thedate 								= date('U');
 				$inactive_epoch 						= ($thedate - 60);
 
 				$astDB->where('user', $user_name);
-				$Vliveagent 							= $astDB->get('vicidial_live_agents', null, 'user,campaign_id,UNIX_TIMESTAMP(last_update_time) AS last_update_time');
+				$Vliveagent 							= $astDB->get('vicidial_live_agents', null, 'user,campaign_id,UNIX_TIMESTAMP(last_update_time) AS last_update_time,extension');
 				//$Vliveagent =  mysqli_fetch_array($Vliveagent, MYSQLI_ASSOC);
 
 				if (!empty($Vliveagent)) {
@@ -113,6 +114,41 @@
 						$astDB->where('agent_log_id', $agents['agent_log_id']);
 						$rslt4  						= $astDB->update('vicidial_agent_log', $updatefields, 1);
 					}
+					
+					##### Hangup existing channels
+					$StarTtimE = date("U");
+					$NOW_TIME = date("Y-m-d H:i:s");
+					$extension = $Vliveagent['extension'];
+					$astDB->where('server_ip', $agents['server_ip']);
+					$astDB->where('channel', "$extension%", 'like');
+					$astDB->orderBy('channel');
+					$query = $astDB->getOne('live_sip_channels', 'channel');
+					$agent_channel = '';
+					if ($astDB->getRowCount() > 0) {
+						$agent_channel = $query['channel'];
+						$insertData = array(
+							'man_id' => '',
+							'uniqueid' => '',
+							'entry_date' => $NOW_TIME,
+							'status' => 'NEW',
+							'response' => 'N',
+							'server_ip' => $agents['server_ip'],
+							'channel' => '',
+							'action' => 'Hangup',
+							'callerid' => "ULGH3459$StarTtimE",
+							'cmd_line_b' => "Channel: $agent_channel",
+							'cmd_line_c' => '',
+							'cmd_line_d' => '',
+							'cmd_line_e' => '',
+							'cmd_line_f' => '',
+							'cmd_line_g' => '',
+							'cmd_line_h' => '',
+							'cmd_line_i' => '',
+							'cmd_line_j' => '',
+							'cmd_line_k' => ''
+						);
+						$rslt = $astDB->insert('vicidial_manager', $insertData);
+					}
 
 					//$sql_getsessID = "SELECT agent_session_id FROM go_agent_sessions WHERE sess_agent_user='$user_name';";
 					$astDB->where('sess_agent_user', $user_name);
@@ -125,7 +161,7 @@
 					//$query6 = "DELETE FROM go_agent_sessions WHERE sess_agent_user='".$agents['user']."' LIMIT 1;";
 					$astDB->where('sess_agent_user', $agents['user']);
 					$rslt6  							= $astDB->delete('go_agent_sessions', 1);
-
+					
 					//insert to user_log
 					//$query7 = "INSERT INTO vicidial_user_log(user, event, campaign_id, event_date, user_group, server_ip, session_id) VALUE('".$agents['user']."', 'FORCE-LOGOUT', '".$agents['campaign_id']."', '".$NOW_TIME."', '".$agents['user_group']."', '".$log_ip."', '".$fetch_sessID['agent_session_id']."');";
 					$insertData 						= array(
