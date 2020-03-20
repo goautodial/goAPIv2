@@ -124,6 +124,7 @@
 		$userResponseType = "xml";
 	}
     
+    var_dump($userResponseType);
     /* API OUTPUT */
     ob_start();
     
