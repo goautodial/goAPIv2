@@ -73,7 +73,7 @@
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = count($getHeder);
 		
-		$apiresults = array("result" => "success", "message" => "$goCountTheHeader");
+		$apiresults = array("result" => "success", "message" => "$goCountTheHeader", "duplicates" => "$lead_mapping");
 		$apiresults = json_encode( $apiresults );
 		echo $apiresults;
 		exit();
