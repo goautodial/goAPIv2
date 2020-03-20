@@ -490,6 +490,10 @@
 					//$astDB->where('phone_number', $phone_number);
 					//$resultCheckPhone = $astDB->getOne('vicidial_dnc', 'phone_number');
 					//$countResult2 = $astDB->getRowCount();
+		$apiresults = array("result" => "success", "message" => "$countResult", "duplicates" => "$lead_mapping");
+		$apiresults = json_encode( $apiresults );
+		echo $apiresults;
+		exit();
 						
 					if($countResult < 1) {
 						$USarea = substr($phone_number, 0, 3);
