@@ -73,8 +73,10 @@
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = count($getHeder);
 		
-		$apiresults = array("result" => "test", "message" => "$goCountTheHeader");
-		break;
+		$apiresults = array("result" => "success", "message" => "$goCountTheHeader");
+		$apiresults = json_encode( $apiresults );
+		echo $apiresults;
+		exit();
 		
 		if($goCountTheHeader > 21 && !empty($lead_mapping)) {
 			for($x=21; $x < count($getHeder); $x++) {
