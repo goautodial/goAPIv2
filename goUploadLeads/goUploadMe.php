@@ -73,6 +73,9 @@
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = count($getHeder);
 		
+		$apiresults = array("result" => "test", "message" => "$goCountTheHeader");
+		break;
+		
 		if($goCountTheHeader > 21 && !empty($lead_mapping)) {
 			for($x=21; $x < count($getHeder); $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
