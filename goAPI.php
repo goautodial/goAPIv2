@@ -57,8 +57,7 @@
 		else if (isset($_POST["goURL"])) { $goURL = $astDB->escape($_POST["goURL"]); }
     
 	if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
-		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }
-    var_dump($goAction . ".php");
+		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }    
 		
 	/* Standard goAPI variables */
     $log_user     = $session_user;
