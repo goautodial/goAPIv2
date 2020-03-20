@@ -106,11 +106,6 @@
 		}
 		//end for custom fields start GLOBAL varaibles
 		
-		$apiresults = array("result" => "success", "message" => "$goGetLastHeader", "duplicates" => "$goGetLastCustomFiledsName");
-		$apiresults = json_encode( $apiresults );
-		echo $apiresults;
-		exit();
-		
 		
 		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
 			$num = count($data);
