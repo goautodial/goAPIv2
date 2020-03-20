@@ -73,11 +73,6 @@
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = count($getHeder);
 		
-		$apiresults = array("result" => "success", "message" => "$goCountTheHeader", "duplicates" => "$lead_mapping");
-		$apiresults = json_encode( $apiresults );
-		echo $apiresults;
-		exit();
-		
 		if($goCountTheHeader > 21 && !empty($lead_mapping)) {
 			for($x=21; $x < count($getHeder); $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
@@ -110,6 +105,11 @@
 			}
 		}
 		//end for custom fields start GLOBAL varaibles
+		
+		$apiresults = array("result" => "success", "message" => "$goGetLastHeader", "duplicates" => "$goGetLastCustomFiledsName");
+		$apiresults = json_encode( $apiresults );
+		echo $apiresults;
+		exit();
 		
 		
 		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
