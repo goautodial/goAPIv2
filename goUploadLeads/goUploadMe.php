@@ -21,14 +21,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	include_once ("goAPI.php");
-	
-	ini_set('display_errors', 1);
-	error_reporting(E_ALL);
 
 	ini_set('memory_limit','2048M');
 	ini_set('upload_max_filesize', '600M');
 	ini_set('post_max_size', '600M');
     ini_set('max_execution_time', 0);
+	
+	ini_set('display_errors', 1);
+	error_reporting(E_ALL);
 	
 	$thefile = $_FILES['goFileMe']['tmp_name'];
 	$theList = $astDB->escape($_REQUEST["goListId"]);
@@ -111,7 +111,6 @@
 		
 		
 		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
-			var_dump('start');
 			$num = count($data);
 			for ($c=0; $c < $num; $c++) {
 				$col[$c] = $data[$c];
@@ -295,9 +294,8 @@
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
-						//$insertQuery = $astDB->insert('vicidial_list', $insertData);
-						//$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
-						var_dump('insertData: ' . $goDupcheck, $insertData);
+						$insertQuery = $astDB->insert('vicidial_list', $insertData);
+						$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
 						
 						# start set query for custom fields
 						if(!empty($lead_mapping) and !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
@@ -411,9 +409,8 @@
 								'entry_list_id' => $entry_list_id,
 								'last_local_call_time' => '0000-00-00 00:00:00'
 							);
-							//$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
-							//$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
-							var_dump('insertData: ' . $goDupcheck, $insertData);
+							$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
+							$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
 							
 							# start set query for custom fields
 							if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
@@ -496,7 +493,6 @@
 					//$astDB->where('phone_number', $phone_number);
 					//$resultCheckPhone = $astDB->getOne('vicidial_dnc', 'phone_number');
 					//$countResult2 = $astDB->getRowCount();
-					var_dump('countResult', $countResult);
 						
 					if($countResult < 1) {
 						$USarea = substr($phone_number, 0, 3);
@@ -533,13 +529,11 @@
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
-						//$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
-						//$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
-						//$alex["insertquery"] = $astDB->getLastQuery();
-						var_dump('insertData: ' . $goDupcheck, $insertData);
+						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
+						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
+						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
-							var_dump('lead_mapping', $lead_mapping, 'custom_array', $custom_array);
 							$goCustomKeyData = array();
 							$goCustomValuesData = array();
 							$goCustomUpdateData = array();
@@ -561,7 +555,6 @@
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 						}elseif($goCountTheHeader > 21) {
-							var_dump('goCountTheHeader', $goCountTheHeader);
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
@@ -590,8 +583,7 @@
 								$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
-								//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-								var_dump($goQueryCustomFields);
+								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
 						}
 						$goCountInsertedLeads++;
@@ -643,9 +635,8 @@
 						'entry_list_id' => $entry_list_id,
 						'last_local_call_time' => '0000-00-00 00:00:00'
 					);
-					//$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
-					//$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
-					var_dump('insertData: ' . $goDupcheck, $insertData);
+					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
+					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
 
 					$alex["query_insert"] = $astDB->getLastQuery();
 					$alex["error_insert"] = $astDB->getLastError();
@@ -733,7 +724,7 @@
 			$apiresults = array("result" => "error", "message" => "$goCountInsertedLeads", "duplicates" => $duplicates, "alex_data" => $alex);
 		}
 		
-		//$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
+		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
 		
 	} // END IF handle
 	
