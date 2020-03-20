@@ -576,15 +576,15 @@
 
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
-                	                                        $goCustomValues = implode(",", $goCustomValuesData);
-        	                                                $goCustomUpdate = implode(", ",  $goCustomUpdateData);
-	                                                        $goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
+								$goCustomValues = implode(",", $goCustomValuesData);
+								$goCustomUpdate = implode(", ",  $goCustomUpdateData);
+								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
 								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
 						}
 						$goCountInsertedLeads++;
-                                                $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads"); 
+                        $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads"); 
 						# end set query for custom fields
 					}//end if
 					else{
