@@ -117,6 +117,7 @@
 			}
 			# REGEX to prevent weird characters from ending up in the fields
 			$field_regx = "/['\"`\\;]/";
+			var_dump($num);
 			
 			# SQL Query to insert data into DataBase
 			$entry_date = date("Y-m-d H:i:s");
@@ -298,7 +299,7 @@
 						$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
 						
 						# start set query for custom fields
-						if(!empty($lead_mapping) and !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
+						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
 							$goCustomKeyData = array();
 							$goCustomValuesData = array();
 							$goCustomUpdateData = array();
