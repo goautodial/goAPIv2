@@ -119,41 +119,41 @@
 			$field_regx = "/['\"`\\;]/";
 			var_dump($num);
 			
-//			# SQL Query to insert data into DataBase
-//			$entry_date = date("Y-m-d H:i:s");
-//			$status = "NEW";
-//			$vendor_lead_code = preg_replace($field_regx, "", $col[1]);
-//			$list_id = $theList;
-//			$gmt_offset = "0";
-//			// PHONE CODE OVERRIDE
-//			if(!empty($phone_code_override))
-//				$phone_code = preg_replace($field_regx, "", $phone_code_override);
-//			else
-//				$phone_code = preg_replace($field_regx, "", $col[2]);
-//			$phone_number = preg_replace($field_regx, "", $col[0]);
-//			$title = preg_replace($field_regx, "", $col[3]);
-//			$first_name = preg_replace($field_regx, "", $col[4]);
-//			$middle_initial = preg_replace($field_regx, "", $col[5]);
-//			$last_name = preg_replace($field_regx, "", $col[6]);
-//			$address1 = preg_replace($field_regx, "", $col[7]);
-//			$address2 = preg_replace($field_regx, "", $col[8]);
-//			$address3 = preg_replace($field_regx, "", $col[9]);
-//			$city = preg_replace($field_regx, "", $col[10]);
-//			$state = preg_replace($field_regx, "", $col[11]);
-//			$province = preg_replace($field_regx, "", $col[12]);
-//			$postal_code = preg_replace($field_regx, "", $col[13]);
-//			$country_code = preg_replace($field_regx, "", $col[14]);
-//			$gender = preg_replace($field_regx, "", $col[15]);
-//			$date_of_birth = preg_replace($field_regx, "", $col[16]);
-//			$date_of_birth = date("Y-m-d", strtotime($date_of_birth));
-//			$alt_phone = preg_replace($field_regx, "", $col[17]);
-//			$email = preg_replace($field_regx, "", $col[18]);
-//			$security_phrase = preg_replace($field_regx, "", $col[19]);
-//			$comments = preg_replace($field_regx, "", $col[20]);
-//			$entry_list_id = 0;
-//			$called_since_last_reset = "N";
-//			
-//			// LEAD MAPPING -- CUSTOMIZATION!!!!!
+			# SQL Query to insert data into DataBase
+			$entry_date = date("Y-m-d H:i:s");
+			$status = "NEW";
+			$vendor_lead_code = preg_replace($field_regx, "", $col[1]);
+			$list_id = $theList;
+			$gmt_offset = "0";
+			// PHONE CODE OVERRIDE
+			if(!empty($phone_code_override))
+				$phone_code = preg_replace($field_regx, "", $phone_code_override);
+			else
+				$phone_code = preg_replace($field_regx, "", $col[2]);
+			$phone_number = preg_replace($field_regx, "", $col[0]);
+			$title = preg_replace($field_regx, "", $col[3]);
+			$first_name = preg_replace($field_regx, "", $col[4]);
+			$middle_initial = preg_replace($field_regx, "", $col[5]);
+			$last_name = preg_replace($field_regx, "", $col[6]);
+			$address1 = preg_replace($field_regx, "", $col[7]);
+			$address2 = preg_replace($field_regx, "", $col[8]);
+			$address3 = preg_replace($field_regx, "", $col[9]);
+			$city = preg_replace($field_regx, "", $col[10]);
+			$state = preg_replace($field_regx, "", $col[11]);
+			$province = preg_replace($field_regx, "", $col[12]);
+			$postal_code = preg_replace($field_regx, "", $col[13]);
+			$country_code = preg_replace($field_regx, "", $col[14]);
+			$gender = preg_replace($field_regx, "", $col[15]);
+			$date_of_birth = preg_replace($field_regx, "", $col[16]);
+			$date_of_birth = date("Y-m-d", strtotime($date_of_birth));
+			$alt_phone = preg_replace($field_regx, "", $col[17]);
+			$email = preg_replace($field_regx, "", $col[18]);
+			$security_phrase = preg_replace($field_regx, "", $col[19]);
+			$comments = preg_replace($field_regx, "", $col[20]);
+			$entry_list_id = 0;
+			$called_since_last_reset = "N";
+			
+			// LEAD MAPPING -- CUSTOMIZATION!!!!!
 //			if(!empty($lead_mapping)){
 //				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
 //				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
