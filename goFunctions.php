@@ -684,8 +684,6 @@
             if ($USACAN_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
-		
-		return array($gmt_offset, $PC_processed);
 
         if ( (!$AC_processed) and ($dst_range == 'FSA-LSO') ) {
             #**********************************************************************
