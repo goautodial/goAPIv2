@@ -531,8 +531,12 @@
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
-						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
-						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
+						try {
+							$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
+							$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
+						} catch (Exception $e) {
+							echo $e->getMessage();
+						}
 						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
