@@ -295,8 +295,8 @@
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
-						$insertQuery = $astDB->insert('vicidial_list', $insertData);
-						$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
+						////$insertQuery = $astDB->insert('vicidial_list', $insertData);
+						////$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
 						
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
@@ -318,7 +318,7 @@
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) 
 								VALUES('$goLastInsertedLeadIDDUPSYS', $goCustomValues) 
 								ON DUPLICATE KEY UPDATE $goCustomUpdate";
-							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+							////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
 						}elseif($goCountTheHeader > 21) {
 							$goShowCustomFields = "DESC custom_$list_id;";
@@ -343,7 +343,7 @@
 								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) 
 									VALUES('$goLastInsertedLeadIDDUPSYS', $goCustomValues) 
 									ON DUPLICATE KEY UPDATE $goCustomUpdate";
-								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+								////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
 						}// end set query for custom fields
 						$goCountInsertedLeads++;						
@@ -410,8 +410,8 @@
 								'entry_list_id' => $entry_list_id,
 								'last_local_call_time' => '0000-00-00 00:00:00'
 							);
-							$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
-							$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
+							////$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
+							////$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
 							
 							# start set query for custom fields
 							if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
@@ -434,7 +434,7 @@
 								$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 
 								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDDUPCAMP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
-								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+								////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
 							}elseif($goCountTheHeader > 21) {
 								$goShowCustomFields = "DESC custom_$list_id;";
@@ -465,7 +465,7 @@
 																$goCustomValues = implode(",", $goCustomValuesData);
 																$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 																$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPCAMP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
-									$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+									////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
 								} 
 							} 
@@ -530,8 +530,8 @@
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
 						);
-						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
-						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
+						////$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
+						////$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
 						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
@@ -554,7 +554,7 @@
 							$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
-							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+							////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 						}elseif($goCountTheHeader > 21) {
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
@@ -584,7 +584,7 @@
 								$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 								$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
-								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+								////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
 						}
 						$goCountInsertedLeads++;
@@ -636,8 +636,8 @@
 						'entry_list_id' => $entry_list_id,
 						'last_local_call_time' => '0000-00-00 00:00:00'
 					);
-					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
-					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
+					////$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
+					////$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
 
 					$alex["query_insert"] = $astDB->getLastQuery();
 					$alex["error_insert"] = $astDB->getLastError();
@@ -663,7 +663,7 @@
 						$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 					
 						$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
-                        $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+                        ////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 					
 					}elseif($goCountTheHeader > 21) {
 						$goShowCustomFields = "DESC custom_$list_id;";
@@ -697,7 +697,7 @@
 							$goCustomUpdate = implode(", ",  $goCustomUpdateData);
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 
-							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
+							////$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 						} 	
 					}
 					
