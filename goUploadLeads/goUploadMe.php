@@ -154,98 +154,98 @@
 			$called_since_last_reset = "N";
 			
 			// LEAD MAPPING -- CUSTOMIZATION!!!!!
-//			if(!empty($lead_mapping)){
-//				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
-//				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
-//				$standard_fields = array("Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments");
-//				// MAKE MAP FIELDS AN INDEX OF MAP DATA & SEPARATE STANDARD FROM CUSTOM ARRAYS
-//
-//				for($l=0; $l < count($lead_mapping_fields);$l++){
-//					if(in_array($lead_mapping_fields[$l], $standard_fields))
-//						$standard_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
-//					else
-//						$custom_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
-//				}
-//				//set default values to none
-//				$phone_number = "";
-//                $vendor_lead_code = "";
-//				if(!empty($phone_code_override))
-//					$phone_code = $phone_code_override;
-//				else
-//                    $phone_code = 1;
-//				$log = $phone_code_override;
-//				$title = "";
-//				$first_name = "";
-//				$middle_initial = "";
-//				$last_name = "";
-//				$address1 = "";
-//				$address2 = "";
-//				$address3 = "";
-//				$city = "";
-//				$state = "";
-//				$province = "";
-//				$postal_code = "";
-//				$country_code = "";
-//				$gender = "";
-//				$date_of_birth = "";
-//				$alt_phone = "";
-//				$email = "";
-//				$security_phrase = "";
-//				$comments = "";				
-//				
-//				//get arrayed lead mapping requests
-//				foreach($standard_array as $l => $map_data){
-//					//$logthis[] = $map_data;
-//					if($map_data !== "" || $map_data !== "."){
-//						// one by one sort through columns to overwrite lead mapping data
-//						if($l == "Phone")
-//							$phone_number = $col[$map_data];
-//						if($l == "VendorLeadCode")
-//							$vendor_lead_code = $col[$map_data];
-//						if($l == "PhoneCode"){
-//							if(!empty($phone_code_override))
-//								$phone_code = $phone_code_override;
-//							else
-//								$phone_code = $col[$map_data];
-//						}if($l == "Title")
-//							$title = $col[$map_data];
-//						if($l == "FirstName")
-//							$first_name = $col[$map_data];
-//						if($l == "MiddleInitial")
-//							$middle_initial = $col[$map_data];
-//						if($l == "LastName")
-//							$last_name = $col[$map_data];
-//						if($l == "Address1")
-//							$address1 = $col[$map_data];
-//						if($l == "Address2")
-//							$address2 = $col[$map_data];
-//						if($l == "Address3")
-//							$address3 = $col[$map_data];
-//						if($l == "City")
-//							$city = $col[$map_data];
-//						if($l == "State")
-//							$state = $col[$map_data];
-//						if($l == "Province")
-//							$province = $col[$map_data];
-//						if($l == "PostalCode")
-//							$postal_code = $col[$map_data];
-//						if($l == "CountryCode")
-//							$country_code = $col[$map_data];
-//						if($l == "Gender")
-//							$gender = $col[$map_data];
-//						if($l == "DateOfBirth")
-//							$date_of_birth = $col[$map_data];
-//						if($l == "AltPhone")
-//							$alt_phone = $col[$map_data];
-//						if($l == "Email")
-//							$email = $col[$map_data];
-//						if($l == "SecurityPhrase")
-//							$security_phrase = $col[$map_data];
-//						if($l == "Comments")
-//							$comments = $col[$map_data];
-//					}// end if
-//				}// end loop
-//			} // END OF LEAD MAPPING
+			if(!empty($lead_mapping)){
+				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
+				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
+				$standard_fields = array("Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments");
+				// MAKE MAP FIELDS AN INDEX OF MAP DATA & SEPARATE STANDARD FROM CUSTOM ARRAYS
+
+				for($l=0; $l < count($lead_mapping_fields);$l++){
+					if(in_array($lead_mapping_fields[$l], $standard_fields))
+						$standard_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
+					else
+						$custom_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
+				}
+				//set default values to none
+				$phone_number = "";
+                $vendor_lead_code = "";
+				if(!empty($phone_code_override))
+					$phone_code = $phone_code_override;
+				else
+                    $phone_code = 1;
+				$log = $phone_code_override;
+				$title = "";
+				$first_name = "";
+				$middle_initial = "";
+				$last_name = "";
+				$address1 = "";
+				$address2 = "";
+				$address3 = "";
+				$city = "";
+				$state = "";
+				$province = "";
+				$postal_code = "";
+				$country_code = "";
+				$gender = "";
+				$date_of_birth = "";
+				$alt_phone = "";
+				$email = "";
+				$security_phrase = "";
+				$comments = "";				
+				
+				//get arrayed lead mapping requests
+				foreach($standard_array as $l => $map_data){
+					//$logthis[] = $map_data;
+					if($map_data !== "" || $map_data !== "."){
+						// one by one sort through columns to overwrite lead mapping data
+						if($l == "Phone")
+							$phone_number = $col[$map_data];
+						if($l == "VendorLeadCode")
+							$vendor_lead_code = $col[$map_data];
+						if($l == "PhoneCode"){
+							if(!empty($phone_code_override))
+								$phone_code = $phone_code_override;
+							else
+								$phone_code = $col[$map_data];
+						}if($l == "Title")
+							$title = $col[$map_data];
+						if($l == "FirstName")
+							$first_name = $col[$map_data];
+						if($l == "MiddleInitial")
+							$middle_initial = $col[$map_data];
+						if($l == "LastName")
+							$last_name = $col[$map_data];
+						if($l == "Address1")
+							$address1 = $col[$map_data];
+						if($l == "Address2")
+							$address2 = $col[$map_data];
+						if($l == "Address3")
+							$address3 = $col[$map_data];
+						if($l == "City")
+							$city = $col[$map_data];
+						if($l == "State")
+							$state = $col[$map_data];
+						if($l == "Province")
+							$province = $col[$map_data];
+						if($l == "PostalCode")
+							$postal_code = $col[$map_data];
+						if($l == "CountryCode")
+							$country_code = $col[$map_data];
+						if($l == "Gender")
+							$gender = $col[$map_data];
+						if($l == "DateOfBirth")
+							$date_of_birth = $col[$map_data];
+						if($l == "AltPhone")
+							$alt_phone = $col[$map_data];
+						if($l == "Email")
+							$email = $col[$map_data];
+						if($l == "SecurityPhrase")
+							$security_phrase = $col[$map_data];
+						if($l == "Comments")
+							$comments = $col[$map_data];
+					}// end if
+				}// end loop
+			} // END OF LEAD MAPPING
 //			
 //
 //			if($goDupcheck === "DUPSYS"){ // Duplicate check all phone numbers in entire system
