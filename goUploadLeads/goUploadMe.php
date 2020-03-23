@@ -711,7 +711,6 @@
 		} #end while
 	
 		fclose($handle);
-		var_dump($goCountInsertedLeads, $duplicates);
 
 		if($goCountInsertedLeads > 0 && $duplicates < 1) {
 			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
