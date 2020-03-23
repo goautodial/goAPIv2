@@ -497,7 +497,7 @@
 						
 					if($countResult < 1) {
 						$USarea = substr($phone_number, 0, 3);
-						var_dump("=========================================",$phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+						var_dump("===================={$goCountInsertedLeads}=====================",$phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
 						//$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
 						
 						//$goQueryInsDupList = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id');";
