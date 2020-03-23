@@ -535,6 +535,7 @@
 						////$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
 						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
+						var_dump(!empty($lead_mapping), !empty($custom_array));
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
 							$goCustomKeyData = array();
 							$goCustomValuesData = array();
