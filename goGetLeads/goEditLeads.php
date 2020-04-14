@@ -24,6 +24,7 @@
 
     include_once ("goAPI.php");
 
+	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
 	$lead_id 											= $astDB->escape($_REQUEST["lead_id"]);
 	$first_name 										= $astDB->escape($_REQUEST["first_name"]);
 	$middle_initial 									= $astDB->escape($_REQUEST["middle_initial"]);
@@ -47,6 +48,7 @@
 	$user 												= $astDB->escape($_REQUEST["user"]);
 	$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
 	$defGender 											= array("M", "F", "U");
+    $custom_fields                                      = $_REQUEST["custom_fields"];
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -196,6 +198,15 @@
 
 				$astDB->where("lead_id", $lead_id);
 				$astDB->update("vicidial_list", $data);
+                
+                if (!empty($custom_fields)) {
+                    foreach ($custom_fields as $field => $value) {
+                        $cf_data[$field] = $astDB->escape($value);
+                    }
+                    
+                    $astDB->where("lead_id", $lead_id);
+                    $astDB->update("custom_{$list_id}", $cf_data);
+                }
 				
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
 				

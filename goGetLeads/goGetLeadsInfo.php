@@ -220,16 +220,28 @@
 					"user" 									=> $rlog_user
 				);
 				
-				$list_id 								= "custom_".$list_id;			
-				$cfl_query 								= $astDB->rawQuery("DESC $list_id;");
+				//$list_id 								= "custom_".$list_id;
+				//$cfl_query 								= $astDB->rawQuery("DESC $list_id;");
+				//
+				//if ($cfl_query) {
+				//	foreach ($cfl_query as $field_list) {
+				//		$exec_query_CF_list 			= $field_list["Field"];
+				//
+				//		if ($exec_query_CF_list != "lead_id") {
+				//			$list_fields[] 				= $exec_query_CF_list;
+				//		}
+				//	}
+				//}
 				
-				if ($cfl_query) {
-					foreach ($cfl_query as $field_list) {
-						$exec_query_CF_list 			= $field_list["Field"];
-
-						if ($exec_query_CF_list != "lead_id") {
-							$list_fields[] 				= $exec_query_CF_list;
-						}
+				$list_fields = array();
+				$custom_fields = array();
+				$astDB->where('list_id', $list_id);
+				$astDB->orderBy('field_rank,field_order', 'DESC');
+				$cfl_query								= $astDB->get('vicidial_lists_fields');
+				if ($astDB->count > 0) {
+					foreach ($cfl_query as $idx => $row) {
+						$custom_fields[] = $row;
+						$list_fields[] = $row['field_label'];
 					}
 				}
 				
@@ -237,14 +249,12 @@
 				
 				$cf_query								= $astDB
 					->where("lead_id", $lead_id)
-					->get($list_id, $limit, $fields);
+					->getOne("custom_$list_id", $fields);
 							
 				if ($astDB->count > 0) {
-					$CF_fetch 							= $cf_query;
-
-					for ($x=0;$x < count($list_fields);$x++) {
+					foreach ($cf_query as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
-						$CF_data[$list_fields[$x]] 		=  str_replace(",", " | ", $CF_fetch[$x]);
+						$custom_fields_values[$field] 		=  str_replace(",", " | ", $value);
 					}
 				}
 
@@ -256,7 +266,8 @@
 					"closerlog" 							=> $vclog_data, 
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
-					"custom_fields" 						=> $CF_data
+					"custom_fields" 						=> $custom_fields,
+					"custom_fields_values"					=> $custom_fields_values
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
