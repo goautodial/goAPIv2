@@ -249,7 +249,7 @@
 				
 				$cf_query								= $astDB
 					->where("lead_id", $lead_id)
-					->getOne($list_id, $fields);
+					->getOne("custom_$list_id", $fields);
 							
 				if ($astDB->count > 0) {
 					foreach ($cf_query as $field => $value) {
