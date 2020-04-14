@@ -242,9 +242,9 @@
 				if ($astDB->count > 0) {
 					$CF_fetch 							= $cf_query;
 
-					foreach ($list_fields as $field) {
+					foreach ($CF_fetch as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
-						$CF_data[$field] 		=  str_replace(",", " | ", $CF_fetch[$field]);
+						$CF_data[$field] 		=  str_replace(",", " | ", $value);
 					}
 				}
 
