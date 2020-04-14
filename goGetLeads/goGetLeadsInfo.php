@@ -267,7 +267,7 @@
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
 					"custom_fields" 						=> $custom_fields,
-					"custom_fields_values"					=> $CF_data
+					"custom_fields_values"					=> $cf_query
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
