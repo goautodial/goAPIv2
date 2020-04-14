@@ -220,16 +220,25 @@
 					"user" 									=> $rlog_user
 				);
 				
-				$list_id 								= "custom_".$list_id;			
-				$cfl_query 								= $astDB->rawQuery("DESC $list_id;");
+				//$list_id 								= "custom_".$list_id;
+				//$cfl_query 								= $astDB->rawQuery("DESC $list_id;");
+				//
+				//if ($cfl_query) {
+				//	foreach ($cfl_query as $field_list) {
+				//		$exec_query_CF_list 			= $field_list["Field"];
+				//
+				//		if ($exec_query_CF_list != "lead_id") {
+				//			$list_fields[] 				= $exec_query_CF_list;
+				//		}
+				//	}
+				//}
 				
-				if ($cfl_query) {
-					foreach ($cfl_query as $field_list) {
-						$exec_query_CF_list 			= $field_list["Field"];
-
-						if ($exec_query_CF_list != "lead_id") {
-							$list_fields[] 				= $exec_query_CF_list;
-						}
+				$list_fields = array();
+				$astDB->where('list_id', $list_id);
+				$cfl_query								= $astDB->get('vicidial_lists_fields');
+				if ($astDB->count > 0) {
+					foreach ($cfl_query as $row) {
+						$list_fields[] = $row->field_label;
 					}
 				}
 				
