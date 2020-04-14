@@ -249,12 +249,10 @@
 				
 				$cf_query								= $astDB
 					->where("lead_id", $lead_id)
-					->get($list_id, $limit, $fields);
+					->getOne($list_id, $fields);
 							
 				if ($astDB->count > 0) {
-					$CF_fetch 							= $cf_query[0];
-
-					foreach ($CF_fetch as $field => $value) {
+					foreach ($cf_query as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
 						$CF_data[$field] 		=  str_replace(",", " | ", $value);
 					}
@@ -269,7 +267,7 @@
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
 					"custom_fields" 						=> $custom_fields,
-					"custom_fields_values"					=> $fields
+					"custom_fields_values"					=> $CF_data
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
