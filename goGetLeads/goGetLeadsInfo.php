@@ -234,13 +234,14 @@
 				//}
 				
 				$list_fields = array();
+				$custom_fields = array();
 				$astDB->where('list_id', $list_id);
 				$astDB->orderBy('field_rank,field_order', 'DESC');
 				$cfl_query								= $astDB->get('vicidial_lists_fields');
 				if ($astDB->count > 0) {
 					foreach ($cfl_query as $idx => $row) {
+						$custom_fields[] = $row;
 						$list_fields[] = $row['field_label'];
-						$test_fields[] = $row;
 					}
 				}
 				
@@ -267,7 +268,8 @@
 					"closerlog" 							=> $vclog_data, 
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
-					"custom_fields" 						=> $list_fields
+					"custom_fields" 						=> $custom_fields,
+					"custom_fields_values"					=> $CF_data
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
