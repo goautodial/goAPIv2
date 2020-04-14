@@ -240,6 +240,7 @@
 				if ($astDB->count > 0) {
 					foreach ($cfl_query as $idx => $row) {
 						$list_fields[] = $row->field_label;
+						$test_fields[] = $row;
 					}
 				}
 				
@@ -266,7 +267,7 @@
 					"closerlog" 							=> $vclog_data, 
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
-					"custom_fields" 						=> $fields
+					"custom_fields" 						=> $test_fields
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
