@@ -254,7 +254,7 @@
 				if ($astDB->count > 0) {
 					foreach ($cf_query as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
-						$CF_data[$field] 		=  str_replace(",", " | ", $value);
+						$custom_fields_values[$field] 		=  str_replace(",", " | ", $value);
 					}
 				}
 
@@ -267,7 +267,7 @@
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
 					"custom_fields" 						=> $custom_fields,
-					"custom_fields_values"					=> $cf_query
+					"custom_fields_values"					=> $custom_fields_values
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
