@@ -240,7 +240,7 @@
 					->get($list_id, $limit, $fields);
 							
 				if ($astDB->count > 0) {
-					$CF_fetch 							= $cf_query;
+					$CF_fetch 							= $cf_query[0];
 
 					foreach ($CF_fetch as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
