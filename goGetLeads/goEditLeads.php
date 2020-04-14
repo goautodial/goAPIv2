@@ -47,7 +47,13 @@
 	$user 												= $astDB->escape($_REQUEST["user"]);
 	$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
 	$defGender 											= array("M", "F", "U");
+    $custom_fields                                      = $_REQUEST["custom_fields"];
 	
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined.",
+            "testing"                                       => $custom_fields
+		);
+        /*
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -261,6 +267,6 @@
 				"result" 									=> $err_msg
 			);		
 		}
-	}
+	}*/
 	
 ?>
