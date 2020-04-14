@@ -267,7 +267,7 @@
 					"closerlog" 							=> $vclog_data, 
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
-					"custom_fields" 						=> $test_fields
+					"custom_fields" 						=> $list_fields
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
