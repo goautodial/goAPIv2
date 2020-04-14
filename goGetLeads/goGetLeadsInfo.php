@@ -235,6 +235,7 @@
 				
 				$list_fields = array();
 				$astDB->where('list_id', $list_id);
+				$astDB->orderBy('field_rank,field_order', 'DESC');
 				$cfl_query								= $astDB->get('vicidial_lists_fields');
 				if ($astDB->count > 0) {
 					foreach ($cfl_query as $idx => $row) {
@@ -265,7 +266,7 @@
 					"closerlog" 							=> $vclog_data, 
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
-					"custom_fields" 						=> $cfl_query
+					"custom_fields" 						=> $fields
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
