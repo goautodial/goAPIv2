@@ -239,7 +239,7 @@
 				$cfl_query								= $astDB->get('vicidial_lists_fields');
 				if ($astDB->count > 0) {
 					foreach ($cfl_query as $idx => $row) {
-						$list_fields[] = $row->field_label;
+						$list_fields[] = $row['field_label'];
 						$test_fields[] = $row;
 					}
 				}
