@@ -328,7 +328,7 @@
 	//    for ($i = 0 ; $i < count($array_list); $i++) {
 	//		$list_id = $array_list[$i];
 		foreach ($array_list as $list) {
-			$custom_list_id = "custom_" . $list['list_id'];
+			$custom_list_id = "custom_" . (!empty($list['list_id']) ? $list['list_id'] : $list);
 			//$query_CF_list = "DESC custom_$list_id;");
 			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {
