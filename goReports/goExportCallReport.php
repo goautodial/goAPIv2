@@ -133,7 +133,7 @@
 			while ($i < $campaign_ct) {
 				$camp_id = $campaigns[$i];
 				$astDB->WHERE("campaign_id", $camp_id);
-				$SELECTQuery = $astDB->get("vicidial_lists", "list_id");
+				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 				//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
 				$array_list[] = $SELECTQuery;
 				
