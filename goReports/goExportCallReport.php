@@ -156,7 +156,7 @@
 		}
 	}
 	
-	if ($dispo_stats != "") {
+	if (!empty($dispo_stats)) {
 		$i= 0;
 		//$array_status 							= Array();
 
@@ -483,7 +483,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $campaigns
+		"data" => $array_list
 	);
 ?>
 
