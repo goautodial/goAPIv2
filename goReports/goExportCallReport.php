@@ -131,17 +131,22 @@
 		
 		if (in_array("ALL", $lists)) {
 			$list_SQL 							= "";
-			$i									= 0;
-			while ($i < $campaign_ct) {
-				$camp_id = $campaigns[$i];
-				$astDB->WHERE("campaign_id", $camp_id);
-				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
-				//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
-				$array_list = $SELECTQuery;
-				
-				$i++;
-			}
 			
+			if (in_array("ALL", $campaigns)) {
+				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
+				$array_list = $SELECTQuery;
+			} else {
+				$i									= 0;
+				while ($i < $campaign_ct) {
+					$camp_id = $campaigns[$i];
+					$astDB->WHERE("campaign_id", $camp_id);
+					$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
+					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
+					$array_list = $SELECTQuery;
+					
+					$i++;
+				}
+			}
 		}
 		else{
 			//$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
