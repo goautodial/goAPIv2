@@ -479,7 +479,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $campaign_SQL
+		"data" => $active_list_fields
 	);
 ?>
 
