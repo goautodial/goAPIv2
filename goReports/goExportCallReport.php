@@ -116,17 +116,19 @@
 		$RUNgroup								= 0;
 	}
 	
-	if ($lists != "") {
-		$list_SQL 								= "";
+	if (!empty($lists)) {
+		//$list_SQL 								= "";
+		$list_SQL								= implode("','", $lists);
 		
-		$i										= 0;
+		//$i										= 0;
 		//$array_list 							= Array();
-		while ($i < $list_ct) {
-			//$list_SQL .= "'$lists[$i]',";
-			$list_SQL 							.= "'$lists[$i]',";
-			//array_push($array_list, $lists[$i]);
-			$i++;
-		}
+		//while ($i < $list_ct) {
+		//	//$list_SQL .= "'$lists[$i]',";
+		//	$list_SQL 							.= "'$lists[$i]',";
+		//	//array_push($array_list, $lists[$i]);
+		//	$i++;
+		//}
+		
 		if (in_array("ALL", $lists)) {
 			$list_SQL 							= "";
 			$i									= 0;
@@ -142,14 +144,15 @@
 			
 		}
 		else{
-			$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
-			$list_SQL 							= "AND vi.list_id IN($list_SQL)";
-			$i									= 0;
-			
-			while ($i < $list_ct) {
-				$array_list[] 					= $lists[$i];
-				$i++;
-			}
+			//$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
+			$list_SQL 							= "AND vi.list_id IN('$list_SQL')";
+			$array_list							= $lists;
+			//$i									= 0;
+			//
+			//while ($i < $list_ct) {
+			//	$array_list[] 					= $lists[$i];
+			//	$i++;
+			//}
 		}
 	}
 	
