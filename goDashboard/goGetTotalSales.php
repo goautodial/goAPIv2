@@ -52,13 +52,21 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (is_array($campaigns)) {
-				//$status									= "SALE";
+				//$status									= array("SALE");
 				$default_status = array("SALE");
 				$camp_sql = $astDB->where("sale", "Y")
 					->where("campaign_id", $campaigns, "IN")
 					->get("vicidial_campaign_statuses",NULL, "status");
+				$query_camp = $astDB->getLastQuery();
+
 				foreach($camp_sql as $data){$camp_status[] = $data['status'];}
-				$status = array_merge($default_status, $camp_status);
+
+				if(!empty($camp_sql)){
+					$status = array_merge($default_status, $camp_status);
+				} else {
+					$status = $default_status;
+				}
+
 				$datetoday = date("Y-m-d");
 				$datehourly = date('Y-m-d H');
 				//$datestartday							= date("Y-m-d") . " 00:00:00";
@@ -130,6 +138,9 @@
 					//"query"	=> $astDB->getLastQuery(),
 					"data" => $data,
 					//"status" => $status,
+					//"camp_status" => $camp_status,
+					//"camp_sql" => $camp_sql,
+					//"query_camp" => $query_camp,
 					//"type" => $type,
 					//"alex" => $alex
 					//"camp" => "'".implode("','",$campaigns)."'"

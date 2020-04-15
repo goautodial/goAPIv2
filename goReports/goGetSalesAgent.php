@@ -149,13 +149,14 @@
 				SUM(if (vlog.status REGEXP '^(".$statusRX.")$', 1, 0)) AS sale 
 				FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl 
 				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
-				AND vl.lead_id = vlog.lead_id AND vlog.length_in_sec > '0' 
+				AND vl.lead_id = vlog.lead_id 
+				#AND vlog.length_in_sec > '0' 
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '".$fromDate."' AND '".$toDate."' 
 				AND vlog.campaign_id IN ($imploded_camp) $ul 
 				GROUP BY us.full_name;
 			";
 			$outbound_sql = $astDB->rawQuery($outbound_query);
-			
+
 			$totagents = $astDB->count;	
 			if ($totagents > 0) {
 				$total_sales				= 0;
@@ -182,7 +183,8 @@
 				SUM(if (vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale 
 				FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl 
 				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
-				AND vl.lead_id = vlog.lead_id #AND vlog.length_in_sec > '0'  
+				AND vl.lead_id = vlog.lead_id 
+				#AND vlog.length_in_sec > '0'  
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
 				AND $campaign_inb_query $ul 
 				GROUP BY us.full_name
