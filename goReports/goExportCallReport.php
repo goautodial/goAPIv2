@@ -34,10 +34,10 @@
 	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
 	$toDate = $astDB->escape($_REQUEST['toDate']);
  
-        if (empty($fromDate))
-            $fromDate = date("Y-m-d")." 00:00:00";
-        if (empty($toDate)) 
-            $toDate = date("Y-m-d")." 23:59:59";
+	if (empty($fromDate))
+		$fromDate = date("Y-m-d")." 00:00:00";
+	if (empty($toDate)) 
+		$toDate = date("Y-m-d")." 23:59:59";
         
 	if (!empty($campaigns))
 	    $campaigns = explode(",",$campaigns);
@@ -58,7 +58,7 @@
 	$list_ct = count($lists);
 	$status_ct = count($dispo_stats);
 
-	if ($campaigns != "") {
+	if (!empty($campaigns)) {
 		$i = 0;
 		//$array_campaign = Array();
 
@@ -70,10 +70,10 @@
 		}
 		
 		if (in_array("ALL", $campaigns)) {
-                        $campaign_SQL = "";
-                        $i = 0;
-                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        $campaign_ct = $astDB->count;
+			$campaign_SQL = "";
+			$i = 0;
+			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			$campaign_ct = $astDB->count;
 			foreach($SELECTQuery as $camp_val){
 				$array_camp[] = $camp_val["campaign_id"];
 			}
@@ -93,7 +93,7 @@
 		$RUNcampaign = 0;
 	}
 	
-	if ($inbounds != "") {
+	if (!empty($inbounds)) {
 		$i = 0;
 		//$array_inbound 							= Array();
 
@@ -483,7 +483,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $array_list
+		"data" => $campaigns
 	);
 ?>
 
