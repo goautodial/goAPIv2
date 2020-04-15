@@ -324,9 +324,10 @@
 	if ($custom_fields == "Y")	{
 	//    for ($i = 0 ; $i < count($array_list); $i++) {
 	//		$list_id = $array_list[$i];
-		foreach ($array_list as $list_id) {
+		foreach ($array_list as $list) {
+			$custom_list_id = "custom_" . $list['list_id'];
 			//$query_CF_list = "DESC custom_$list_id;");
-			$query_CF_list = $astDB->rawQuery("DESC custom_{$list_id};");
+			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {
 				//$n = 0;
 				//while ($field_list=$astDB->rawQuery($query_CF_list)) {
@@ -334,7 +335,7 @@
 					$exec_query_CF_list = $field_list["Field"];
 
 					if ($exec_query_CF_list != "lead_id") {
-						$active_list_fields["custom_{$list_id}"][] = $exec_query_CF_list;
+						$active_list_fields["$custom_list_id"][] = $exec_query_CF_list;
 						//$n++;
 					}
 				}
@@ -479,7 +480,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $array_list
+		"data" => $active_list_fields
 	);
 ?>
 
