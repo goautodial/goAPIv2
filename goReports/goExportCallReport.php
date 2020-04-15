@@ -322,31 +322,34 @@
 		array_push($csv_header, "recording_location");
 	}
 	if ($custom_fields == "Y")	{
-	    for ($i = 0 ; $i < count($array_list); $i++) {
-			$list_id = $array_list[$i];
+	//    for ($i = 0 ; $i < count($array_list); $i++) {
+	//		$list_id = $array_list[$i];
+		foreach ($array_list as $list_id) {
 			//$query_CF_list = "DESC custom_$list_id;");
-			$query_CF_list = $astDB->rawQuery("DESC custom_$list_id;");
+			$query_CF_list = $astDB->rawQuery("DESC custom_{$list_id};");
 			if ($query_CF_list) {
-				$n = 0;
+				//$n = 0;
 				//while ($field_list=$astDB->rawQuery($query_CF_list)) {
 				foreach ($query_CF_list as $field_list) {
 					$exec_query_CF_list = $field_list["Field"];
 
 					if ($exec_query_CF_list != "lead_id") {
-						$active_list_fields["custom_$list_id"][$n] = $exec_query_CF_list;
-						$n++;
+						$active_list_fields["custom_{$list_id}"][] = $exec_query_CF_list;
+						//$n++;
 					}
 				}
 			}
 		}
 
 		$header_CF 									= array();
-		$keys 										= array_keys($active_list_fields);
+		//$keys 										= array_keys($active_list_fields);
 		
-		for ($i = 0; $i < count($keys); $i++) {
-			$list_id 								= $keys[$i];
-			for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
-				$field 								= $active_list_fields[$list_id][$x];
+		//for ($i = 0; $i < count($keys); $i++) {
+		foreach ($active_list_fields as $list_id => $fields) {
+			//$list_id 								= $keys[$i];
+			//for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
+			foreach ($fields as $field) {
+				//$field 								= $active_list_fields[$list_id][$x];
 				if (!in_array($field,$header_CF)) {
 					$header_CF[] 					= $field;
 				}
@@ -419,11 +422,13 @@
         	}
 
 		if ($custom_fields == "Y")	{
-			$keys = array_keys($active_list_fields); // list of active custom lists
+			//$keys = array_keys($active_list_fields); // list of active custom lists
 				
-			for ($i = 0 ; $i < count($keys); $i++) {
-			    $list_id = $keys[$i];
-			    $fields = implode(",", $active_list_fields[$list_id]);
+			//for ($i = 0 ; $i < count($keys); $i++) {
+			foreach ($active_list_fields as $list_id => $fields) {
+			    //$list_id = $keys[$i];
+			    //$fields = implode(",", $active_list_fields[$list_id]);
+				$fields = implode(",", $fields);
 					
 				if ("custom_".$list_id_spec === $list_id) {
 					$astDB->WHERE("lead_id", $lead_id);
@@ -433,23 +438,27 @@
 					//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
 
 					if ($fetch_CF) {
-						for ($x = 0;$x < count($header_CF);$x++) {
-							if (!empty($fetch_CF[$header_CF[$x]])) {
-								$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+						//for ($x = 0;$x < count($header_CF);$x++) {
+						foreach ($header_CF as $header) {
+							//if (!empty($fetch_CF[$header_CF[$x]])) {
+							if (!empty($fetch_CF[$header])) {
+								//$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+								$row[$header] 		= str_replace(",", " | ", $fetch_CF[$header]);
 							} else {
-								$fetch_row[] 		=  "";
+								//$fetch_row[] 		=  "";
+								$row[$header]		= "";
 							}
 						}
 					}
 				}
 				
 
-				for ($a=0;$a < count($fetch_row);$a++) {
-					$row[$header_CF[$a]] = $fetch_row[$a];
-				}
+				//for ($a=0;$a < count($fetch_row);$a++) {
+				//	$row[$header_CF[$a]] = $fetch_row[$a];
+				//}
 				
 				//$queries[] 							= $row;
-				unset($fetch_row);
+				//unset($fetch_row);
 				unset($fetch_CF);
 		    }
 		}
