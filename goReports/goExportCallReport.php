@@ -483,7 +483,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $active_list_fields
+		"data" => $lists
 	);
 ?>
 
