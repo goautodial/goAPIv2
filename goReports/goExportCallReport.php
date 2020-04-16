@@ -34,10 +34,10 @@
 	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
 	$toDate = $astDB->escape($_REQUEST['toDate']);
  
-        if (empty($fromDate))
-            $fromDate = date("Y-m-d")." 00:00:00";
-        if (empty($toDate)) 
-            $toDate = date("Y-m-d")." 23:59:59";
+	if (empty($fromDate))
+		$fromDate = date("Y-m-d")." 00:00:00";
+	if (empty($toDate)) 
+		$toDate = date("Y-m-d")." 23:59:59";
         
 	if (!empty($campaigns))
 	    $campaigns = explode(",",$campaigns);
@@ -58,7 +58,7 @@
 	$list_ct = count($lists);
 	$status_ct = count($dispo_stats);
 
-	if ($campaigns != "") {
+	if (!empty($campaigns)) {
 		$i = 0;
 		//$array_campaign = Array();
 
@@ -70,10 +70,10 @@
 		}
 		
 		if (in_array("ALL", $campaigns)) {
-                        $campaign_SQL = "";
-                        $i = 0;
-                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        $campaign_ct = $astDB->count;
+			$campaign_SQL = "";
+			$i = 0;
+			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			$campaign_ct = $astDB->count;
 			foreach($SELECTQuery as $camp_val){
 				$array_camp[] = $camp_val["campaign_id"];
 			}
@@ -93,7 +93,7 @@
 		$RUNcampaign = 0;
 	}
 	
-	if ($inbounds != "") {
+	if (!empty($inbounds)) {
 		$i = 0;
 		//$array_inbound 							= Array();
 
@@ -116,44 +116,52 @@
 		$RUNgroup								= 0;
 	}
 	
-	if ($lists != "") {
-		$list_SQL 								= "";
+	if (!empty($lists)) {
+		//$list_SQL 								= "";
+		$list_SQL								= implode("','", $lists);
 		
-		$i										= 0;
+		//$i										= 0;
 		//$array_list 							= Array();
-		while ($i < $list_ct) {
-			//$list_SQL .= "'$lists[$i]',";
-			$list_SQL 							.= "'$lists[$i]',";
-			//array_push($array_list, $lists[$i]);
-			$i++;
-		}
+		//while ($i < $list_ct) {
+		//	//$list_SQL .= "'$lists[$i]',";
+		//	$list_SQL 							.= "'$lists[$i]',";
+		//	//array_push($array_list, $lists[$i]);
+		//	$i++;
+		//}
+		
 		if (in_array("ALL", $lists)) {
 			$list_SQL 							= "";
-			$i									= 0;
-			while ($i < $campaign_ct) {
-				$camp_id = $campaigns[$i];
-				$astDB->WHERE("campaign_id", $camp_id);
-				$SELECTQuery = $astDB->getValue("vicidial_lists", "list_id");
-				//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
-				$array_list[] = $SELECTQuery;
-				
-				$i++;
-			}
 			
+			if (in_array("ALL", $campaigns)) {
+				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
+				$array_list = $SELECTQuery;
+			} else {
+				$i									= 0;
+				while ($i < $campaign_ct) {
+					$camp_id = $campaigns[$i];
+					$astDB->WHERE("campaign_id", $camp_id);
+					$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
+					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
+					$array_list = $SELECTQuery;
+					
+					$i++;
+				}
+			}
 		}
 		else{
-			$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
-			$list_SQL 							= "AND vi.list_id IN($list_SQL)";
-			$i									= 0;
-			
-			while ($i < $list_ct) {
-				$array_list[] 					= $lists[$i];
-				$i++;
-			}
+			//$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
+			$list_SQL 							= "AND vi.list_id IN('$list_SQL')";
+			$array_list							= $lists;
+			//$i									= 0;
+			//
+			//while ($i < $list_ct) {
+			//	$array_list[] 					= $lists[$i];
+			//	$i++;
+			//}
 		}
 	}
 	
-	if ($dispo_stats != "") {
+	if (!empty($dispo_stats)) {
 		$i= 0;
 		//$array_status 							= Array();
 
@@ -322,31 +330,35 @@
 		array_push($csv_header, "recording_location");
 	}
 	if ($custom_fields == "Y")	{
-	    for ($i = 0 ; $i < count($array_list); $i++) {
-			$list_id = $array_list[$i];
+	//    for ($i = 0 ; $i < count($array_list); $i++) {
+	//		$list_id = $array_list[$i];
+		foreach ($array_list as $list) {
+			$custom_list_id = "custom_" . (!empty($list['list_id']) ? $list['list_id'] : $list);
 			//$query_CF_list = "DESC custom_$list_id;");
-			$query_CF_list = $astDB->rawQuery("DESC custom_$list_id;");
+			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {
-				$n = 0;
+				//$n = 0;
 				//while ($field_list=$astDB->rawQuery($query_CF_list)) {
 				foreach ($query_CF_list as $field_list) {
 					$exec_query_CF_list = $field_list["Field"];
 
 					if ($exec_query_CF_list != "lead_id") {
-						$active_list_fields["custom_$list_id"][$n] = $exec_query_CF_list;
-						$n++;
+						$active_list_fields["$custom_list_id"][] = $exec_query_CF_list;
+						//$n++;
 					}
 				}
 			}
 		}
 
 		$header_CF 									= array();
-		$keys 										= array_keys($active_list_fields);
+		//$keys 										= array_keys($active_list_fields);
 		
-		for ($i = 0; $i < count($keys); $i++) {
-			$list_id 								= $keys[$i];
-			for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
-				$field 								= $active_list_fields[$list_id][$x];
+		//for ($i = 0; $i < count($keys); $i++) {
+		foreach ($active_list_fields as $list_id => $fields) {
+			//$list_id 								= $keys[$i];
+			//for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
+			foreach ($fields as $field) {
+				//$field 								= $active_list_fields[$list_id][$x];
 				if (!in_array($field,$header_CF)) {
 					$header_CF[] 					= $field;
 				}
@@ -419,11 +431,13 @@
         	}
 
 		if ($custom_fields == "Y")	{
-			$keys = array_keys($active_list_fields); // list of active custom lists
+			//$keys = array_keys($active_list_fields); // list of active custom lists
 				
-			for ($i = 0 ; $i < count($keys); $i++) {
-			    $list_id = $keys[$i];
-			    $fields = implode(",", $active_list_fields[$list_id]);
+			//for ($i = 0 ; $i < count($keys); $i++) {
+			foreach ($active_list_fields as $list_id => $fields) {
+			    //$list_id = $keys[$i];
+			    //$fields = implode(",", $active_list_fields[$list_id]);
+				$fields = implode(",", $fields);
 					
 				if ("custom_".$list_id_spec === $list_id) {
 					$astDB->WHERE("lead_id", $lead_id);
@@ -433,23 +447,27 @@
 					//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
 
 					if ($fetch_CF) {
-						for ($x = 0;$x < count($header_CF);$x++) {
-							if (!empty($fetch_CF[$header_CF[$x]])) {
-								$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+						//for ($x = 0;$x < count($header_CF);$x++) {
+						foreach ($header_CF as $header) {
+							//if (!empty($fetch_CF[$header_CF[$x]])) {
+							if (!empty($fetch_CF[$header])) {
+								//$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+								$row[$header] 		= str_replace(",", " | ", $fetch_CF[$header]);
 							} else {
-								$fetch_row[] 		=  "";
+								//$fetch_row[] 		=  "";
+								$row[$header]		= "";
 							}
 						}
 					}
 				}
 				
 
-				for ($a=0;$a < count($fetch_row);$a++) {
-					$row[$header_CF[$a]] = $fetch_row[$a];
-				}
+				//for ($a=0;$a < count($fetch_row);$a++) {
+				//	$row[$header_CF[$a]] = $fetch_row[$a];
+				//}
 				
 				//$queries[] 							= $row;
-				unset($fetch_row);
+				//unset($fetch_row);
 				unset($fetch_CF);
 		    }
 		}
@@ -470,7 +488,7 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
-		"data" => $campaign_SQL
+		"data" => $array_list
 	);
 ?>
 
