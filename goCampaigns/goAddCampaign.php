@@ -1584,6 +1584,138 @@
 								"result" 								=> $err_msg
 							);
 						}
+						/*
+						// Dispositions Copy
+						$astDB->where("campaign_id", $copy_from_campaign);	
+						$result = $astDB->get("vicidial_campaign_statuses", NULL);	
+						
+						if ($astDB->count > 0) {
+							foreach ($result as $fresults) {
+								$dataStat[] 					= $fresults["status"];			
+								$dataStatName[] 				= $fresults["status_name"];
+								$dataCampID[] 					= $fresults["campaign_id"];
+								$dataSelectable[]				= $fresults["selectable"];
+								$dataHumanAns[] 				= $fresults["human_answered"];
+								$dataCategory[] 				= $fresults["category"];
+								$dataSale[] 					= $fresults["sale"];
+								$dataDNC[]						= $fresults["dnc"];
+								$dataCustContact[]				= $fresults["customer_contact"];
+								$dataNI[]						= $fresults["not_interested"];
+								$dataUnworkable[] 				= $fresults["unworkable"];
+								$dataScheduled[] 				= $fresults["scheduled_callback"];
+							}
+
+							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
+							$checkTable 				= $goDB->rawQuery($tableQuery);
+
+							$i = 0
+							foreach($dataStat as $stat){
+								$data						= array(
+									"status"					=> $dataStat[$i], 	
+									"status_name"				=> $dataStatName[$i],
+									"selectable"				=> $dataSelectable[$i], 
+									"campaign_id"				=> $campaign_id,
+									"human_answered"			=> $dataHumanAns[$i],
+									"category"					=> $dataCategory[$i],
+									"sale"						=> $dataSale[$i],
+									"dnc"						=> $dataDNC[$i],
+									"customer_contact"			=> $dataCustContact[$i],
+									"not_interested"			=> $dataNI[$i],
+									"unworkable"				=> $dataUnworkable[$i],
+									"scheduled_callback"		=> $dataScheduled[$i]
+								);
+								
+								$astDB->insert("vicidial_campaign_statuses", $data);
+								$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition " . $dataStat[$i] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $astDB->getLastQuery());
+
+								if ($checkTable) {
+									$goDB->where("campaign_id", $copy_from_campaign)
+									->where("status", $dataStat[$i]);
+
+									$result = $goDB->getOne("go_statuses", NULL);
+
+									if($result){
+										$datago					= array(
+											"status"				=> $result["status"], 	
+											"campaign_id"			=> $campaign_id,
+											"priority"				=> $result["priority"],
+											"color"					=> $result["color"],
+											"type"					=> $result["type"]
+										);
+									
+										$qgo_insert				= $goDB->insert("go_statuses", $datago);
+										$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition " . $result['status'] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $goDB->getLastQuery());							
+									}
+								}
+								$i++;
+							}
+						}
+
+						// Hotkeys Copy
+						$hotkeys = $astDB
+							->where("campaign_id", $copy_from_campaign)
+							->orderBy("hotkey")
+							->get("vicidial_campaign_hotkeys", null);
+			
+						if ($hotkeys) {
+							foreach($hotkeys as $fresults) {
+								$dataStatus[] 					= $fresults["status"];
+								$dataHotkey[] 					= $fresults["hotkey"];
+								$dataStatusName[] 				= $fresults["status_name"];
+								$dataSelectableHotkey[] 		= $fresults["selectable"];
+							}
+
+							$i = 0
+							foreach($dataStatus[] as $fstatus){
+								$data_insert 							= array(
+									'status'        						=> $dataStatus[$i],
+									'hotkey'        						=> $dataHotkey[$i],
+									'status_name'   						=> $dataStatusName[$i],
+									'selectable'    						=> $dataSelectableHotkey[$i],
+									'campaign_id'   						=> $campaign_id
+								);
+								
+								$insertHotkey 							= $astDB->insert('vicidial_campaign_hotkeys', $data_insert);
+								
+								if ($insertHotkey) {
+									$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Hotkey " . $dataHotkey[$i] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $astDB->getLastQuery());
+									
+								} 
+								$i++;
+							}
+						}
+
+						// Pause Code Copy
+						$astDB->where('campaign_id', $campaign_id);
+						$astDB->orderBy('pause_code');
+						$pauseCodes 								= $astDB->get('vicidial_pause_codes', NULL);
+
+						if ($astDB->count > 0) {
+							foreach($pauseCodes as $fresults){
+								$dataPC[]       					= $fresults['pause_code'];
+								$dataPCN[]      					= $fresults['pause_code_name'];
+								$dataBill[]     					= $fresults['billable'];
+							}
+
+							$i = 0;
+							foreach($dataPC as $fpausecode){
+								$data_insert 						= array(
+									'pause_code'      					=> $dataPC[$i],
+									'pause_code_name' 					=> $dataPCN[$i],
+									'campaign_id'     					=> $campaign_id,
+									'billable'        					=> $dataBill[$i]
+								);
+								
+								$q_insertpc 							= $astDB->insert('vicidial_pause_codes', $data_insert);
+								
+								if ($q_insertpc) {
+									$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Pause Code " . $dataPC[$i] . " under Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $astDB->getLastQuery());
+								} 
+
+								$i++;
+							}
+						}
+						*/						
 					} else {
 						$err_msg 									= error_handle("10010");
 						$apiresults 								= array(
