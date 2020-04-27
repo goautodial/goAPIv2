@@ -1584,7 +1584,7 @@
 								"result" 								=> $err_msg
 							);
 						}
-						/*
+						
 						// Dispositions Copy
 						$astDB->where("campaign_id", $copy_from_campaign);	
 						$result = $astDB->get("vicidial_campaign_statuses", NULL);	
@@ -1644,7 +1644,19 @@
 										);
 									
 										$qgo_insert				= $goDB->insert("go_statuses", $datago);
-										$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition " . $result['status'] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $goDB->getLastQuery());							
+										if($qgo_insert){
+											$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Disposition " . $result['status'] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $goDB->getLastQuery());
+											
+											$apiresults 							= array(
+												"result" 								=> "success"
+											);
+										} else {
+											$err_msg 								= error_handle("10010");
+											$apiresults 							= array(
+												"code" 									=> "10010", 
+												"result" 								=> $err_msg
+											);
+										}			
 									}
 								}
 								$i++;
@@ -1665,8 +1677,8 @@
 								$dataSelectableHotkey[] 		= $fresults["selectable"];
 							}
 
-							$i = 0
-							foreach($dataStatus[] as $fstatus){
+							$i = 0;
+							foreach($dataStatus as $fstatus){
 								$data_insert 							= array(
 									'status'        						=> $dataStatus[$i],
 									'hotkey'        						=> $dataHotkey[$i],
@@ -1679,8 +1691,17 @@
 								
 								if ($insertHotkey) {
 									$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Hotkey " . $dataHotkey[$i] . " on Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $astDB->getLastQuery());
-									
-								} 
+
+									$apiresults 							= array(
+										"result" 								=> "success"
+									);
+								} else {
+									$err_msg 								= error_handle("10010");
+									$apiresults 							= array(
+										"code" 									=> "10010", 
+										"result" 								=> $err_msg
+									);
+								}
 								$i++;
 							}
 						}
@@ -1710,12 +1731,21 @@
 								
 								if ($q_insertpc) {
 									$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Pause Code " . $dataPC[$i] . " under Campaign $campaign_id, Copied From: $copy_from_campaign", $log_group, $astDB->getLastQuery());
-								} 
+
+									$apiresults 							= array(
+										"result" 								=> "success"
+									);
+								} else {
+									$err_msg 								= error_handle("10010");
+									$apiresults 							= array(
+										"code" 									=> "10010", 
+										"result" 								=> $err_msg
+									);
+								}
 
 								$i++;
 							}
-						}
-						*/						
+						}					
 					} else {
 						$err_msg 									= error_handle("10010");
 						$apiresults 								= array(
