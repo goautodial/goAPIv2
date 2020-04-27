@@ -1608,7 +1608,7 @@
 							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
 							$checkTable 				= $goDB->rawQuery($tableQuery);
 
-							$i = 0
+							$i = 0;
 							foreach($dataStat as $stat){
 								$data						= array(
 									"status"					=> $dataStat[$i], 	
