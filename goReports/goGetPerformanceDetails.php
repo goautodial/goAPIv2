@@ -98,8 +98,35 @@ error_reporting(E_ERROR | E_PARSE);
                                         $filters = "AND pause_sec < 65000 AND wait_sec<65000 AND talk_sec<65000 AND dispo_sec<65000 ";
                                 }
 
-                                $perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
-                                $rows_to_print = $astDB->rawQuery($perfdetails_sql);
+                                //$perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
+                                //$rows_to_print = $astDB->rawQuery($perfdetails_sql);
+
+				$cols = array(
+					"COUNT(lead_id) as calls",
+                                        "full_name",
+					"vu.user as user",
+					"sum(wait_sec) as wait_sec",
+					"sum(talk_sec) as talk",
+					"sum(dispo_sec) as dispo_sec",
+					"sum(IF(pause_sec > 65000, 0, pause_sec)) as pause_sec",
+					"status",
+					"sum(dead_sec) as dead_sec",
+					"(sum(talk_sec) - sum(dead_sec)) as customer"
+                                );
+
+                                $rows_to_print = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+					->where("date_format(val.event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                        ->where("campaign_id", $array_camp, "IN")
+                                        ->where("vu.user_level != '4'")
+					->where("status", array('NULL', 'LAGGED'), "NOT IN")
+                                        ->groupBy("val.user, full_name, status")
+                                        ->orderBy("full_name, val.user, status", "DESC")
+                                        ->get("vicidial_agent_log val", "500000", $cols);
+                                        
+				$perfdetails_sql = $astDB->getLastQuery();	
+				$usercount = $astDB->getRowCount();
+
                                 $i = 0;
 				foreach($rows_to_print as $row){
                                         $calls[$i] = $row['calls'];
@@ -133,7 +160,6 @@ error_reporting(E_ERROR | E_PARSE);
                                                 if ($default_status) {
                                                         $fetch_statusname = $default_status;
                                                 }
-
 
                                                 if (!isset($fetch_statusname) || $fetch_statusname == NULL) {
                                                         # in custom statuses
@@ -216,6 +242,16 @@ error_reporting(E_ERROR | E_PARSE);
                                         // END loop through each status //
                                         
 					$Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
+
+                                        $d_fromDate = strtotime($fromDate);
+                                        $d_toDate = strtotime($toDate);
+                                        $difference = $d_toDate - $d_fromDate;
+
+                                        if($Stime >= $difference){
+                                                $Spause_sec = ($difference - $Swait_sec - $Stalk_sec - $Sdispo_sec);
+						$Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
+                                        }
+
                                         $TOTcalls = ($TOTcalls + $Scalls);
                                         $TOTtime = ($TOTtime + $Stime);
                                         $TOTtotTALK = ($TOTtotTALK + $Stalk_sec);
@@ -463,7 +499,7 @@ error_reporting(E_ERROR | E_PARSE);
                                 $k = 0;
 				$pause_condition = "AND pause_sec < 65000";
 
-                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(pause_sec) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,sub_status ORDER BY full_name,user,sub_status desc limit 1000";
+                                $pause_sql = "SELECT full_name,vicidial_users.user as user, sum(IF(pause_sec>65000, 0, pause_sec)) as pause_sec,sub_status, sum(wait_sec + talk_sec + dispo_sec) as non_pause_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'  AND vicidial_users.user = vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,sub_status ORDER BY full_name,user,sub_status desc limit 1000";
                                 $subs_to_print = $astDB->rawQuery($pause_sql);
 				$i = 0;
 				foreach($subs_to_print as $i => $Brow){
@@ -500,6 +536,12 @@ error_reporting(E_ERROR | E_PARSE);
                                 $Suser_ct = count($usersARY);
                                 $TOTtotNONPAUSE = 0;
                                 $TOTtotTOTAL = 0;
+
+				// Time Difference Filter
+				$d_fromDate = strtotime($fromDate);
+                                $d_toDate = strtotime($toDate);
+                                $difference = $d_toDate - $d_fromDate;
+
 				while ($m < $k) {
                                         $d = 0;
                                         while ($d < $Suser_ct) {
@@ -531,10 +573,14 @@ error_reporting(E_ERROR | E_PARSE);
                                                 foreach($subs_to_print as $i => $val) {
                                                         if ( ($Suser == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
 								//if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){ 
+									if($PCpause_sec[$i] >= $difference){
+                                                                                $PCpause_sec[$i] = ($difference - $Snon_pause_sec);
+                                                                        }
+
                         	                                        $Spause_sec = ($Spause_sec + $PCpause_sec[$i]);
                 	                                                $Snon_pause_sec = ($Snon_pause_sec + $PCnon_pause_sec[$i]);
-        	                                                        $Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
-	
+									$Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
+
 	                                                                $USERcodePAUSE_MS = /*go_sec_convert($PCpause_sec[$i], 'H');*/convert($PCpause_sec[$i]);
                 	                                                $pfUSERcodePAUSE_MS = sprintf("%6s", $USERcodePAUSE_MS);
 
@@ -556,6 +602,11 @@ error_reporting(E_ERROR | E_PARSE);
                                                 $n++;
                                         }
                                         // END loop through each status //
+                                        if($Stotal_sec >= $difference){
+                                                $Spause_sec = ($difference - $Snon_pause_sec);
+                                                $Stotal_sec = ($Spause_sec + $Snon_pause_sec);
+                                        }
+
                                         $TOTtotPAUSE = ($TOTtotPAUSE + $Spause_sec);
                                         $TOTtotNONPAUSE = ($TOTtotNONPAUSE + $Snon_pause_sec);
                                         $TOTtotTOTAL = ($TOTtotTOTAL + $Stotal_sec);
@@ -645,6 +696,9 @@ error_reporting(E_ERROR | E_PARSE);
                                         $n++;
                                 }
                                 // END loop through each status //
+				if($TOTtotPAUSE >= $difference){
+                                        $TOTtotPAUSE = ($TOTtotTOTAL - $TOTtotNONPAUSE);
+                                }
                                 $TOT_AGENTS = '<th nowrap>AGENTS: '.$m.'</th>';
                                 $TOTtotPAUSEB_MS = '<th nowrap>'.convert($TOTtotPAUSE).'</th>';
                                 $TOTtotNONPAUSE_MS = '<th nowrap>'.convert($TOTtotNONPAUSE).'</th>';
@@ -656,6 +710,7 @@ error_reporting(E_ERROR | E_PARSE);
 
                                 $apiresults = array(
                                         "result"                => "success",
+					"query"			=> $perfdetails_sql,
                                         "TOPsorted_output"      => $TOPsorted_output,
                                         "BOTsorted_output"      => $BOTsorted_output,
                                         "TOPsorted_outputFILE"  => $TOPsorted_outputFILE,
