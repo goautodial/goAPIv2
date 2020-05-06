@@ -59,6 +59,14 @@
 	$status_ct = count($dispo_stats);
 
 	if (!empty($campaigns)) {
+		$fresults = $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess = $astDB->getRowCount();
+		$userlevel = $fresults["user_level"];
+
 		$i = 0;
 		//$array_campaign = Array();
 
@@ -79,7 +87,9 @@
 			}
 			$imp_camp = implode("','", $array_camp);
 			if (strtoupper($log_group) !== 'ADMIN') {
-				$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
+				if ($log_group !== 'SUPERVISOR') {
+					$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
+				}
 			}
 			//die("ALEX");	
                 }else{
@@ -181,8 +191,12 @@
 	}
 	
 	if ($log_group !== "ADMIN") {
-		$stringv 								= go_getall_allowed_users($log_group);
-		$user_group_SQL 						= "AND vl.user IN ($stringv)";
+		if ($log_group !== 'SUPERVISOR') {
+			$stringv 								= go_getall_allowed_users($log_group);
+			$user_group_SQL 						= "AND vl.user IN ($stringv)";
+		} else {
+			$user_group_SQL                                                 = "";
+		}
 	}  else{
 		$user_group_SQL 						= "";
 	}
@@ -488,6 +502,8 @@
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query,
+		"userlevel" => $userlevel,
+		"log_group" => $log_group,
 		"data" => $array_list
 	);
 ?>

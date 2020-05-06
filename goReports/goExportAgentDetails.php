@@ -385,7 +385,7 @@
 					->get("vicidial_agent_log", 1000, $cols);
 				*/
 				
-				$cols = array(
+				/*$cols = array(
 					"vu.full_name",
 					"val.user",
 					"sum(wait_sec) as wait_sec",
@@ -405,7 +405,26 @@
 					->where("campaign_id", $array_camp, "IN")
 					->where("status != 'NULL'")
 					->groupBy("val.user")
-					->get("vicidial_agent_log val", $limit, $cols);
+					->get("vicidial_agent_log val", $limit, $cols);*/
+
+				$cols = array(
+					"vu.full_name",
+					"val.user",
+					"wait_sec",
+					"talk_sec",
+					"dispo_sec",
+					"pause_sec",
+					"status",
+					"dead_sec",
+				);
+
+				$agent_time_ct = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
+					->where("status != 'NULL'")
+					->orderBy("user", "DESC")
+					->get("vicidial_agent_log val", 10000000, $cols);
 
 				$agenttotalcalls = $astDB
 					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
@@ -415,7 +434,7 @@
 					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
 
 				if ($astDB->count >0) {
-					foreach ($agent_time_ct as $row) {
+					/*foreach ($agent_time_ct as $row) {
 						$user 							= $row['user'];
 
 						foreach ($agenttotalcalls as $call){
@@ -434,12 +453,12 @@
 						$customer 						= $row['customer'];
 						//$calls							= $row['calls'];
 						
-						/*if ($wait > 65000) { $wait  	= 0; }
-						if ($talk > 65000) { $talk		= 0; }
-						if ($dispo > 65000) { $dispo	= 0; }
-						if ($pause > 65000) { $pause	= 0; }
-						if ($dead > 65000) { $dead		= 0; }
-						if ($customer < 1) { $customer	= 0; }*/
+						//if ($wait > 65000) { $wait  	= 0; }
+						//if ($talk > 65000) { $talk		= 0; }
+						//if ($dispo > 65000) { $dispo	= 0; }
+						//if ($pause > 65000) { $pause	= 0; }
+						//if ($dead > 65000) { $dead		= 0; }
+						//if ($customer < 1) { $customer	= 0; }
 						
 						$TOTwait 						= ($TOTwait + $wait);
 						$TOTtalk 						= ($TOTtalk + $talk);
@@ -498,6 +517,64 @@
 							
 							$uc++;
 						}						
+					}*/
+
+					$Suser    	= array();
+					$Swait       	= array();
+					$Stalk        	= array();
+					$Sdispo       	= array();
+					$Spause       	= array();
+					$Sdead        	= array();
+					$Scustomer      = array();
+					$agent_timeARY  = array();
+					$Scalls   	= array();
+
+					$i=0;
+
+					foreach ($agent_time_ct as $row) {
+						$user           = $row['user'];
+						$name           = $row['full_name'];
+
+						if(!in_array($user, $Suser)){
+							array_push($Suser, $user);
+							// array_push($nameARY, $name);
+							foreach ($agenttotalcalls as $call){
+							   if($call['user'] == $user){
+								array_push($Scalls, $call['calls']);
+							   }
+							}
+						}
+
+						$wait = $row['wait_sec'];
+						$talk = $row['talk_sec'];
+						$dispo = $row['dispo_sec'];
+						$pause = $row['pause_sec'];
+						$dead = $row['dead_sec'];
+						$customer = $row['talk_sec'] - $row['dead_sec'];
+
+						if ($wait > 65000) {$wait=0;}
+						if ($talk > 65000) {$talk=0;}
+						if ($dispo > 65000) {$dispo=0;}
+						if ($pause > 65000) {$pause=0;}
+						if ($dead > 65000) {$dead=0;}
+						if ($customer < 1) {$customer=0;}
+
+						$m=0;
+						foreach($Suser as $users){
+							if ($user == $Suser[$m]){
+								$user_found++;
+
+								$Swait[$m] =    ($Swait[$m] + $wait);
+								$Stalk[$m] =    ($Stalk[$m] + $talk);
+								$Sdispo[$m] =   ($Sdispo[$m] + $dispo);
+								$Spause[$m] =   ($Spause[$m] + $pause);
+								$Sdead[$m] =    ($Sdead[$m] + $dead);
+								$Scustomer[$m] =    ($Scustomer[$m] + $customer);
+							}
+							$m++;
+						}
+
+						$i++;
 					}
 				}
 				//# END Gather all agent time records AND parse through them in PHP to save on DB load
@@ -525,11 +602,22 @@
 				$AUTOLOGOUTflag					= 0;
 				$m								= 0;
 				$rowId							= 1;
-				
-				while ( ($m < $uc) AND ($m < 50000) ) {
+				foreach($Suser as $users){
+				//while ( ($m < $uc) AND ($m < 50000) ) {
 					$SstatusesHTML						= "";
 					$SstatusesFILE						= "";
 					$Stime[$m] 							= ($Swait[$m] + $Stalk[$m] + $Sdispo[$m] + $Spause[$m]);
+
+					$d_fromDate = strtotime($fromDate);
+                                        $d_toDate = strtotime($toDate);
+                                        $difference = $d_toDate - $d_fromDate;
+                                        //$no_days = $difference->days;
+
+                                        if($Stime[$m] >= $difference){
+                                                $Spause[$m] = ($difference - $Swait[$m] - $Stalk[$m] - $Sdispo[$m]);
+                                                $Stime[$m] = ($Spause[$m] + $Swait[$m] + $Stalk[$m] + $Sdispo[$m]);
+                                        }
+
 					$RAWuser 							= $Suser[$m];
 					$RAWcalls 							= $Scalls[$m];
 					$RAWtimeSEC 						= $Stime[$m];
