@@ -437,13 +437,15 @@
             		$row["address2"] = preg_replace('/[,]+/', '-', trim($row["address2"]));
         	}
        		
-		if (!empty($row["address3"])) {
+			if (!empty($row["address3"])) {
             		$row["address3"] = preg_replace('/[,]+/', '-', trim($row["address3"]));
         	}
-        	if (!empty($row["comments"])) {
-            		$row["comments"] = preg_replace('/[,]+/', '-', trim($row["comments"]));
-        	}
-
+        	if (!empty($row["city"])) {
+				$row["city"] = preg_replace('/[,]+/', ' ', trim($row["city"]));
+			}
+			if (!empty($row["comments"])) {
+				$row["comments"] = preg_replace('/[,]+/', '-', trim($row["comments"]));
+			}
 		if ($custom_fields == "Y")	{
 			//$keys = array_keys($active_list_fields); // list of active custom lists
 				
