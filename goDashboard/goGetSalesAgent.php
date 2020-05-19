@@ -1,10 +1,9 @@
 <?php
 /**
- * @file        goGetStatisticalReports.php
- * @brief       API for Campaign Statistics
- * @copyright   Copyright (c) 2018 GOautodial Inc.
- * @author		Demian Lizandro A. Biscocho
- * @author      Alexander Jim Abenoja 
+ * @file        goGetSalesAgent.php
+ * @brief       API for Sales Agent Report on Dashboard for Statewide
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
+ * @author		Thom Bernarth D. Patacsil
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
@@ -94,36 +93,29 @@
 			$sstatuses = implode("','",$sstatuses);
 		
 		//ALL CAMPAIGNS
-                        if ("ALL" === strtoupper($campaignID)) {
-                                $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			if ("ALL" === strtoupper($campaignID)) {
+				$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
-                                foreach($SELECTQuery as $camp_val){
-                                        $array_camp[] = $camp_val["campaign_id"];
-                                }
+				foreach($SELECTQuery as $camp_val){
+					$array_camp[] = $camp_val["campaign_id"];
+				}
 
-				// Statewide Customization 
 				$SELECTQueryList = $astDB->get("vicidial_lists", null, "list_id");
 				$array_list = $SELECTQueryList;
-				// ./Statewide Customization 
 
-                        }else{
-                                $array_camp[] = $campaignID;
-		
-				// Statewide Customization 
+			}else{
+				$array_camp[] = $campaignID;
+
 				$i = 0;
 				foreach($array_camp as $camp) {
 					$camp_id = $array_camp[$i];
 					$astDB->WHERE("campaign_id", $camp_id);
 					$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
-					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
 					$array_list = $SELECTQuery;
 					$i++;
 				}
-				// ./Statewide Customization
+			}
 
-                        }
-
-		// Statewide Customization 
 		foreach($array_list as $list){
 			$custom_list_id = "custom_" . (!empty($list['list_id']) ? $list['list_id'] : $list);
 			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
@@ -137,9 +129,8 @@
 				}
 			}
 		}
-		// ./Statewide Customization
 
-                $imploded_camp = "'".implode("','", $array_camp)."'";		
+		$imploded_camp = "'".implode("','", $array_camp)."'";		
 	
 		$Qstatus2 = $astDB
 			->where("sale", "Y")
@@ -179,196 +170,105 @@
 		$total_out_sales                                = "";
 		$total_out_sales_amount				= 0;
 
-		if (strtolower($request) == "outbound") {
-			// Outbound Sales //
-			$outbound_query = "
+		$closer_camps = go_getall_closer_campaigns("ALL", $astDB);
+		$campaign_inb_query = "vlog.campaign_id IN ($closer_camps)";
+
+		$query = "
+			SELECT t.full_name AS full_name, t.user AS user, SUM(t.sale) AS sale FROM (
 				SELECT us.full_name AS full_name, us.user AS user, 
 				SUM(if (vlog.status REGEXP '^(".$statusRX.")$', 1, 0)) AS sale 
 				FROM vicidial_users as us, vicidial_log as vlog, vicidial_list as vl 
 				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
 				AND vl.lead_id = vlog.lead_id 
-				#AND vlog.length_in_sec > '0' 
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '".$fromDate."' AND '".$toDate."' 
 				AND vlog.campaign_id IN ($imploded_camp) $ul 
-				GROUP BY us.full_name;
-			";
-			$outbound_sql = $astDB->rawQuery($outbound_query);
-
-			// Statewide Customization 
-			$outbound_select_query_sales = "";
-			$i = 0;
-			foreach($array_list_amount as $list_amount){
-				if($i > 0) {
-					$outbound_select_query_sales .= " UNION ";
-				} 
-	
-				$outbound_select_query_sales .= "
-					SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS Amount 
-					FROM vicidial_log vlog 
-					LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id 
-					WHERE vlog.lead_id=cf.lead_id 
-					AND vlog.status IN ('$statuses') 
-					AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
-					AND vlog.campaign_id IN ($imploded_camp) $ul
-					GROUP BY vlog.user
-					";	
-				$i++;
-			}
-			
-			if($outbound_select_query_sales != ''){
-				$col_exists = 1;
-			} else {
-				$col_exists = 0;
-			}
-
-			if($col_exists){
-			$outbound_query_sales = "SELECT t.user, t.status, sum(IFNULL(t.amount, 0)) AS amount 
-				FROM ( $outbound_select_query_sales ) t 
-				GROUP BY t.user";
-
-			$outbound_sql_sales = $astDB->rawQuery($outbound_query_sales);
-			}
-			// ./Statewide Customization 
-
-			$totagents = $astDB->count;	
-			if ($totagents > 0) {
-				$total_sales				= 0;
-				
-				foreach($outbound_sql as $row){	
-				//while ($row = $astDB->rawQuery($outbound_query)) {
-					$amount_row = 0;
-					// Statewide Customization
-					if($col_exists){
-					    foreach($outbound_sql_sales as $row_sales){
-						if($row_sales['user'] == $row['user']){
-							$amount_row = $row_sales['amount'];
-						}
-					    }
-
-					    if(empty($amount_row)){
-						$amount_row = 0;
-					    }
-
-					    $display_amount = "<td nowrap>".$amount_row."</td>";
-					    $total_out_sales_amount          = $total_out_sales_amount + $amount_row;
-					} else {
-					    $total_out_sales_amount = 0;
-					    $display_amount = "";
-					}
-					// ./Statewide Customization
-
-					$TOPsorted_output	 	.= "<tr>";
-					$TOPsorted_output 		.= "<td nowrap>".$row['full_name']."</td>";
-					$TOPsorted_output 		.= "<td nowrap>".$row['user']."</td>";
-					$TOPsorted_output		.= "<td nowrap>".$row['sale']."</td>";
-					$TOPsorted_output               .= $display_amount;
-					$TOPsorted_output 		.= "</tr>";
-					$total_out_sales		 = $total_out_sales+$row['sale'];
-				}
-			}
-		}
-		if (strtolower($request) == "inbound") {
-			//GET ALL CLOSER CAMAPIGNS
-			$closer_camps = go_getall_closer_campaigns("ALL", $astDB);
-	
-			$campaign_inb_query = "vlog.campaign_id IN ($closer_camps)";
-				
-			$query = "
+				GROUP BY us.full_name
+				UNION
 				SELECT us.full_name AS full_name, us.user AS user, 
 				SUM(if (vlog.status REGEXP '^($statusRX)$', 1, 0)) AS sale 
 				FROM vicidial_users as us, vicidial_closer_log as vlog, vicidial_list as vl 
 				WHERE us.user = vlog.user AND vl.phone_number = vlog.phone_number 
-				AND vl.lead_id = vlog.lead_id 
-				#AND vlog.length_in_sec > '0'  
+				AND vl.lead_id = vlog.lead_id  
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
 				AND $campaign_inb_query $ul 
-				GROUP BY us.full_name
-				";
+				GROUP BY us.full_name 
+			) t GROUP BY us.full_name;
+		";
+		$sql = $astDB->rawQuery($query);
 
-			// Statewide Customization
-                        $inbound_select_query_sales = "";
-                        $i = 0;
-                        foreach($array_list_amount as $list_amount){
-                                if($i > 0) {
-                                        $inbound_select_query_sales .= " UNION ";
-                                }
+		$outbound_select_query_sales = "";
+		$i = 0;
+		
+		foreach($array_list_amount as $list_amount){
+			if($i > 0) {
+				$outbound_select_query_sales .= " UNION ";
+			} 
 
-                                $inbound_select_query_sales .= "
-                                        SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS amount
-                                        FROM vicidial_closer_log vlog
-                                        LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id
-                                        WHERE vlog.lead_id=cf.lead_id
-                                        AND vlog.status IN ('$statuses')
-                                        AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
-					AND $campaign_inb_query $ul
-					GROUP BY vlog.user
-                                        ";
-                                $i++;
-                        }
+			$outbound_select_query_sales .= "
+				SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS Amount 
+				FROM vicidial_log vlog 
+				LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id 
+				WHERE vlog.lead_id=cf.lead_id 
+				AND vlog.status IN ('$statuses') 
+				AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
+				AND vlog.campaign_id IN ($imploded_camp) $ul
+				GROUP BY vlog.user
+				";	
+			$i++;
+		}
 
-			if($inbound_select_query_sales != ''){
-				$col_exists = 1;
-			} else {
-				$col_exists = 0;
-			}
+		$inbound_select_query_sales = "";
+		$i = 0;
 
-			if($col_exists){
-                        $inbound_query_sales = "SELECT t.user, t.status, sum(IFNULL(t.amount, 0)) AS amount
-                                FROM ( $inbound_select_query_sales ) t
-				GROUP BY t.user";
-
-                        $inbound_sql_sales = $astDB->rawQuery($inbound_query_sales);
-			}
-                        // ./Statewide Customization
-				
-			if ($query) {
-				$total_sales				= 0;
-					
-				foreach($astDB->rawQuery($query) as $row) {
-				//while ($row = $astDB->rawQuery($inbound_query)) {
-
-					// Statewide Customization
-					if($col_exists){
-                                            foreach($inbound_sql_sales as $row_sales){
-                                                if($row_sales['user'] == $row['user']){
-                                                        $amount_row = $row_sales['amount'];
-                                                }
-                                            }
-
-                                            if(empty($amount_row)){
-                                                $amount_row = 0;
-                                            }
-                                            $total_in_sales_amount          = $total_in_sales_amount + $amount_row;
-					    $display_amount = "<td nowrap> ".$amount_row." </td>";
-					} else {
-						$total_in_sales_amount = 0;
-						$display_amount = "";
-					}
-                                        // ./Statewide Customization
-
-					$BOTsorted_output 		.= "<tr>";
-					$BOTsorted_output 		.= "<td nowrap> ".$row['full_name']." </td>";
-					$BOTsorted_output 		.= "<td nowrap> ".$row['user']." </td>";
-					$BOTsorted_output 		.= "<td nowrap> ".$row['sale']." </td>";
-					$BOTsorted_output               .= $display_amount;
-					$BOTsorted_output 		.= "</tr>";
-					$total_in_sales 		= $total_in_sales + $row['sale'];
+		foreach($array_list_amount as $list_amount){
+			if($i == 0) {
+				if($outbound_select_query_sales != ''){
+					$inbound_select_query_sales .= " UNION ";
 				}
 			}
+
+			if($i > 0) {
+				$inbound_select_query_sales .= " UNION ";
+			}
+
+			$inbound_select_query_sales .= "
+				SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS amount
+				FROM vicidial_closer_log vlog
+				LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id
+				WHERE vlog.lead_id=cf.lead_id
+				AND vlog.status IN ('$statuses')
+				AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
+				AND $campaign_inb_query $ul
+				GROUP BY vlog.user
+				";
+			$i++;
 		}
+
+		if($outbound_select_query_sales != '' || $inbound_select_query_sales != '' ){
+			$col_exists = 1;
+		} else {
+			$col_exists = 0;
+		}
+
+		if($col_exists){
+			$query_sales = "SELECT t.user, t.status, sum(IFNULL(t.amount, 0)) AS amount 
+				FROM ( $outbound_select_query_sales $inbound_select_query_sales ) t 
+				GROUP BY t.user";
+
+			$sql_sales = $astDB->rawQuery($query_sales);
+		}
+
+		$totagents = $astDB->count;	
+
 		$apiresults = array(
-			"result"		=> "success",
-			"TOPsorted_output"	=> $TOPsorted_output, 
-			"BOTsorted_output"	=> $BOTsorted_output, 
-			"TOToutbound" 		=> $total_out_sales, 
-			"TOTinbound" 		=> $total_in_sales,
-			"TOTAgents"		=> $totagents,
-			"TOTOUTamount"		=> $total_out_sales_amount,
-			"TOTINamount"		=> $total_in_sales_amount,
+			"result"			=> "success",
+			"sales"				=> $sql, 
+			"amount"			=> $sql_sales,
+			"TOTagents"			=> $totagents,
 			"col_exists"		=> $col_exists
-	);
+		);
 			
-			return $apiresults;
+		return $apiresults;
 	}
 
 ?>
