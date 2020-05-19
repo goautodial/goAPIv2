@@ -302,7 +302,7 @@
                 $stmtCUSTOM="$field_sql";
                 $output1[] = $field_sql;
                 
-$fp = fopen('testfile', 'a');
+$fp = fopen('testfile.txt', 'a');
 fwrite($fp, $field_sql);
                 
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
