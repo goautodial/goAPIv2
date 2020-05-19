@@ -301,6 +301,10 @@
                 }
                 $stmtCUSTOM="$field_sql";
                 $output1[] = $field_sql;
+                
+$fp = fopen('testfile', 'a');
+fwrite($fp, $field_sql);
+                
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
                 // $output[] = mysqli_error($link);
 
