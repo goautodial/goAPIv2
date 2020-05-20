@@ -127,11 +127,11 @@
                 }
                 
                 if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
-                    if($fieldcatch == "") {
+                    //if($fieldcatch == "") {
                         $field_sql .= "default '$field_default'";
-                    } else {
-                        $field_sql .= "default $fieldcatch";
-                    }
+                    //} else {
+                    //    $field_sql .= "default $fieldcatch";
+                    //}
                 }
                 
                 if ( empty($field_default) ) {
@@ -147,12 +147,12 @@
                     'field_name'        => $field_name,
                     'field_description' => $field_description,
                     'field_rank'        => $field_rank,
-                    'field_help'        => $field_help,
+                    'field_help'        => (!empty($field_help) ? $field_help : ''),
                     'field_type'        => $field_type,
-                    'field_options'     => $field_options,
+                    'field_options'     => (!empty($field_options) ? $field_options : ''),
                     'field_size'        => $field_size,
                     'field_max'         => $field_max,
-                    'field_default'     => $field_default,
+                    'field_default'     => (!empty($field_default) ? $field_default : ''),
                     'field_required'    => $field_required,
                     'field_cost'        => $field_cost,
                     'multi_position'    => $multi_position,
@@ -283,11 +283,11 @@
                 }
                 
                 if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
-                    if($fieldcatch == "") {
+                    //if($fieldcatch == "") {
                         $field_sql .= "default '$field_default'";
-                    } else {
-                        $field_sql .= "default $fieldcatch";
-                    }
+                    //} else {
+                    //    $field_sql .= "default $fieldcatch";
+                    //}
                 }
                 
                 if ( empty($field_default) ) {
@@ -301,6 +301,10 @@
                 }
                 $stmtCUSTOM="$field_sql";
                 $output1[] = $field_sql;
+                
+//$fp = fopen('testfile.txt', 'a');
+//fwrite($fp, $field_sql);
+                
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
                 // $output[] = mysqli_error($link);
 
@@ -310,14 +314,14 @@
                     'field_name'        => $field_name,
                     'field_description' => $field_description,
                     'field_rank'        => $field_rank,
-                    'field_help'        => (!empty($field_help)) ? $field_help:"NULL",
+                    'field_help'        => (!empty($field_help)) ? $field_help:"",
                     'field_type'        => $field_type,
-                    'field_options'     => (!empty($field_options)) ? $field_options:"NULL",
+                    'field_options'     => (!empty($field_options)) ? $field_options:"",
                     'field_size'        => $field_size,
                     'field_max'         => $field_max,
-                    'field_default'     => (!empty($field_default)) ? $field_default:"NULL",
+                    'field_default'     => (!empty($field_default)) ? $field_default:"",
                     'field_required'    => (!empty($field_required)) ? $field_required:"N",
-                    'field_cost'        => (!empty($field_cost)) ? $field_cost:"NULL",
+                    'field_cost'        => (!empty($field_cost)) ? $field_cost:"0",
                     'multi_position'    => (!empty($multi_position)) ? $multi_position:"HORIZONTAL",
                     'name_position'     => (!empty($name_position)) ? $name_position:"LEFT",
                     'field_order'       => $field_order
@@ -454,11 +458,11 @@
                         }
                         
                         if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
-                            if($fieldcatch == "") {
+                            //if($fieldcatch == "") {
                                 $field_sql .= "default '$field_default'";
-                            } else {
-                                $field_sql .= "default $fieldcatch";
-                            }
+                            //} else {
+                            //    $field_sql .= "default $fieldcatch";
+                            //}
                         }
                         
                         if ( empty($field_default) ) {
