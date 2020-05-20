@@ -22,12 +22,9 @@
 
     include_once("goAPI.php");
 
-    // need function go_sec_convert();
-    $fromDate 				= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 				= $astDB->escape($_REQUEST['toDate']);
-    $campaignID				= $astDB->escape($_REQUEST['campaignID']);
-    $request 				= $astDB->escape($_REQUEST['request']);
-    //dispo_stats 			= $astDB->escape($_REQUEST['statuses']);
+    $fromDate = "";
+    $toDate = "";
+    $campaignID				= 'ALL';
 	
     if (empty($fromDate)) {
     	$fromDate			= date("Y-m-d")." 00:00:00";
@@ -192,7 +189,7 @@
 				AND vlog.status in ('$statuses') AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
 				AND $campaign_inb_query $ul 
 				GROUP BY us.full_name 
-			) t GROUP BY us.full_name;
+			) t GROUP BY t.full_name;
 		";
 		$sql = $astDB->rawQuery($query);
 
