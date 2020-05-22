@@ -39,7 +39,7 @@
 	if (empty($toDate)) 
 		$toDate = date("Y-m-d")." 23:59:59";
         
-	if (!empty($campaigns))
+	if (!empty($campaigns) && $campaigns != NULL)
 	    $campaigns = explode(",",$campaigns);
 	if (!empty($inbounds))
 	    $inbounds = explode(",",$inbounds);
@@ -52,7 +52,7 @@
 	$group_SQL = "";
 	$list_SQL = "";
 	$status_SQL = "";
-	
+
 	$campaign_ct = count($campaigns);
 	$group_ct = count($inbounds);
 	$list_ct = count($lists);
@@ -104,19 +104,25 @@
 	}
 	
 	if (!empty($inbounds)) {
-		$i = 0;
-		//$array_inbound 							= Array();
+		$i=0;
+		if (in_array("ALL", $inbounds)) {
+			$group_SQL = go_getall_closer_campaigns("ALL", $astDB);
+			$i=1;
+		} else {
+			$i = 0;
+			//$array_inbound 							= Array();
 
-		while ($i < $group_ct) {
-			if (strlen($inbounds[$i]) > 0) {
-			  //$group_SQL .= "'$inbounds[$i]',";
-				$group_SQL .= "'$inbounds[$i]',";
-				//array_push($array_inbound, $inbounds[$i]);
+			while ($i < $group_ct) {
+				if (strlen($inbounds[$i]) > 0) {
+				  //$group_SQL .= "'$inbounds[$i]',";
+					$group_SQL .= "'$inbounds[$i]',";
+					//array_push($array_inbound, $inbounds[$i]);
+				}
+				$i++;
 			}
-			$i++;
-		}
 		
-		$group_SQL 								= preg_replace("/,$/i",'',$group_SQL);
+			$group_SQL 								= preg_replace("/,$/i",'',$group_SQL);
+		}
 		if ($group_ct > 0) {
 			$group_SQL 							= "AND vcl.campaign_id IN($group_SQL)";
 		}
@@ -217,7 +223,7 @@
 	}
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
-		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id 
+		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id 
 			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi 
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id 
@@ -437,13 +443,15 @@
             		$row["address2"] = preg_replace('/[,]+/', '-', trim($row["address2"]));
         	}
        		
-		if (!empty($row["address3"])) {
+			if (!empty($row["address3"])) {
             		$row["address3"] = preg_replace('/[,]+/', '-', trim($row["address3"]));
         	}
-        	if (!empty($row["comments"])) {
-            		$row["comments"] = preg_replace('/[,]+/', '-', trim($row["comments"]));
-        	}
-
+        	if (!empty($row["city"])) {
+				$row["city"] = preg_replace('/[,]+/', ' ', trim($row["city"]));
+			}
+			if (!empty($row["comments"])) {
+				$row["comments"] = preg_replace('/[,]+/', '-', trim($row["comments"]));
+			}
 		if ($custom_fields == "Y")	{
 			//$keys = array_keys($active_list_fields); // list of active custom lists
 				
@@ -501,10 +509,7 @@
 		"result" => "success", 
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
-		"query" => $query,
-		"userlevel" => $userlevel,
-		"log_group" => $log_group,
-		"data" => $array_list
+		"query" => $query
 	);
 ?>
 
