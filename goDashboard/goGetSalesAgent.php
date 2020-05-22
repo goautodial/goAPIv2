@@ -24,7 +24,9 @@
 
     $fromDate = "";
     $toDate = "";
-    $campaignID				= 'ALL';
+    $user_id				= $astDB->escape($_REQUEST['user_id']);
+    $campaignID				= $astDB->escape($_REQUEST['campaign_id']);
+    $campaignID				= (!empty($campaignID) ? $campaignID : 'ALL');
 	
     if (empty($fromDate)) {
     	$fromDate			= date("Y-m-d")." 00:00:00";
