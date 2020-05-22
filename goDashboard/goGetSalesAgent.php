@@ -66,7 +66,7 @@
 		// SALES PER AGENT
 		if ($log_group !== "ADMIN") {
 			$ul = "AND vlog.user_group = '$log_group'";
-            if ($log_group === "AGENT") {
+            if ($log_group === "AGENTS") {
                 $ul .= " AND vlog.user = '$log_user'";
             }
 		} else {
