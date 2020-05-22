@@ -24,7 +24,6 @@
 
     $fromDate = "";
     $toDate = "";
-    $user_id				= $astDB->escape($_REQUEST['user_id']);
     $campaignID				= $astDB->escape($_REQUEST['campaign_id']);
     $campaignID				= (!empty($campaignID) ? $campaignID : 'ALL');
 	
@@ -66,7 +65,10 @@
 			
 		// SALES PER AGENT
 		if ($log_group !== "ADMIN") {
-			$ul = "AND us.user_group = '$log_group'";
+			$ul = "AND vlog.user_group = '$log_group'";
+            if ($log_group === "AGENT") {
+                $ul .= " AND vlog.user = '$log_user'";
+            }
 		} else {
 			$ul = "";
 		}
