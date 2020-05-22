@@ -266,7 +266,8 @@
 			"sales"				=> $sql, 
 			"amount"			=> $sql_sales,
 			"TOTagents"			=> $totagents,
-			"col_exists"		=> $col_exists
+			"col_exists"		=> $col_exists,
+            "test_sql"          => $query_sales
 		);
 			
 		return $apiresults;
