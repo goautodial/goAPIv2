@@ -33,7 +33,10 @@
 	$log_group 		= go_get_groupid($session_user, $astDB);
 	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
 	$toDate = $astDB->escape($_REQUEST['toDate']);
- 
+	
+	$limit = $astDB->escape($_REQUEST['limit']);
+	$offset = $astDB->escape($_REQUEST['offset']);
+
 	if (empty($fromDate))
 		$fromDate = date("Y-m-d")." 00:00:00";
 	if (empty($toDate)) 
@@ -48,6 +51,12 @@
 	if (!empty($dispo_stats))	
 	    $dispo_stats = explode(",",$dispo_stats);
 	
+	if($limit != NULL && $offset != NULL){
+		$limit_SQL = "LIMIT $offset, $limit";
+	} else {
+		$limit_SQL = "";
+	}
+
 	$campaign_SQL = "";
 	$group_SQL = "";
 	$list_SQL = "";
@@ -192,7 +201,9 @@
 			$status_SQL 						= "";
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
-			$status_SQL 						= "AND vl.status IN ($status_SQL)";
+			$status_SQL_vl 						= "AND vl.status IN ($status_SQL)";
+			$status_SQL_vcl						= "AND vcl.status IN ($status_SQL)";
+
 		}
 	}
 	
@@ -218,8 +229,9 @@
 			AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
 			# AND vl.length_in_sec > 0 
 			$list_SQL $campaign_SQL 
-			$user_group_SQL $status_SQL 
-			order by vl.call_date";
+			$user_group_SQL $status_SQL_vl 
+			order by vl.call_date
+			$limit_SQL";
 	}
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
@@ -230,8 +242,9 @@
 			AND vi.lead_id = vcl.lead_id 
 			#AND vcl.length_in_sec > 0
 			$list_SQL $group_SQL 
-			$user_group_SQL $status_SQL 
-			order by vcl.call_date";
+			$user_group_SQL $status_SQL_vcl
+			order by vcl.call_date
+			$limit_SQL";
 	}
 	if ($RUNcampaign > 0 && $RUNgroup > 0) {
 		$query = "(SELECT vl.call_date,
@@ -279,7 +292,7 @@
 			$list_SQL 
 			$campaign_SQL 
 			$user_group_SQL 
-			$status_SQL 
+			$status_SQL_vl 
 			order by vl.call_date
 		) UNION (
 			SELECT vcl.call_date,
@@ -327,8 +340,9 @@
 			$list_SQL 
 			$group_SQL 
 			$user_group_SQL 
-			$status_SQL 
-			order by vcl.call_date);";
+			$status_SQL_vcl
+			order by vcl.call_date) 
+			$limit_SQL;";
     }
 	$result = $astDB->rawQuery($query);
 
