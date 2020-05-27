@@ -96,7 +96,8 @@ if ($is_logged_in) {
         $rslt = $astDB->get('vicidial_live_agents', null, 'calls_today');
         $vla_cc_ct = $astDB->getRowCount();
         if ($vla_cc_ct > 0) {
-            $calls_today = $vla_cc_ct;
+            $row = $rslt[0];
+            $calls_today = $row['calls_today'];
         } else {
             $calls_today = 0;
         }
@@ -129,7 +130,7 @@ if ($is_logged_in) {
 
         //$stmt = "UPDATE vicidial_campaign_agents set calls_today='$calls_today' where user='$user' and campaign_id='$campaign';";
         $astDB->where('user', $user);
-        $astDB->where('campain_id', $campaign);
+        $astDB->where('campaign_id', $campaign);
         $rslt = $astDB->update('vicidial_campaign_agents', array( 'calls_today' => $calls_today ));
 
         ##### grab the data from vicidial_list for the lead_id
