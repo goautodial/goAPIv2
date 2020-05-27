@@ -181,7 +181,7 @@ if ($is_logged_in) {
 	
 			//$stmt = "UPDATE vicidial_live_inbound_agents set last_call_finish=NOW() where group_id='$stage' and user='$user' limit 1;";
 			$updateData = array(
-				'last_call_finish' => 'NOW()'
+				'last_call_finish' => $NOW_TIME
 			);
 			$astDB->where('group_id', $stage);
 			$astDB->where('user', $user);

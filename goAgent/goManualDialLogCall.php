@@ -294,7 +294,7 @@ if ($is_logged_in) {
                 //$stmt = "UPDATE vicidial_closer_log set end_epoch='$StarTtimE', length_in_sec='$length_in_sec' $vcl_statusSQL where lead_id='$lead_id' and user='$user' and call_date > \"$four_hours_ago\" order by call_date desc limit 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->where('user', $user);
-                $astDB->where('call_date', $four_hours_ago);
+                $astDB->where('call_date', $four_hours_ago, '>');
                 $astDB->orderBy('call_date', 'desc');
                 $rslt = $astDB->update('vicidial_closer_log', $updateData, 1);
                 $affected_rows = $astDB->getRowCount();
@@ -1254,7 +1254,7 @@ if ($is_logged_in) {
                         $rslt = $astDB->get('recording_log', null, 'recording_id,start_epoch,vicidial_id,lead_id');
                         $fn_count = $astDB->getRowCount();
                         if ($fn_count) {
-                            $row = $rslt;
+                            $row = $rslt[0];
                             $recording_id = $row['recording_id'];
                             $start_time =	$row['start_epoch'];
                             $vicidial_id =	$row['vicidial_id'];
