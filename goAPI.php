@@ -126,6 +126,7 @@
     
     /* API OUTPUT */
     ob_start();
+    header("Access-Control-Allow-Origin: *");
     
 	if (count($apiresults)) {
 		if ($userResponseType == "json") {
