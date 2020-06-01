@@ -28,6 +28,7 @@ $filter_date = (empty($filter_date) ? $NOW_DATE : $filter_date);
 if ($goDB->has('go_sales_count')) {
     $goDB->where('user', $goUser);
     $goDB->where('campaign_id', $campaign);
+    $goDB->where('entry_date', $filter_date);
     $goDB->groupBy('user');
     $result = $goDB->getOne('go_sales_count', 'SUM(sales) AS sales, SUM(amount) AS amount');
     $s_cnt = $goDB->getRowCount();
