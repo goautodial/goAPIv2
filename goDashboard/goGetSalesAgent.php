@@ -49,12 +49,13 @@
 		$cols = array(
 			"user",
 			"full_name",
-			"sales as sale",
-			"amount"
+			"sum(sales) as sale",
+			"sum(amount) as amount"
 		);
 
 		$sql_sales = $goDB->where('entry_date', array($fromDate, $toDate), 'BETWEEN')
 				->where('amount', 0, '>')
+				->groupBy('user')
 				->get('go_sales_count', null, $cols);
 
 		$apiresults = array(
