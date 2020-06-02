@@ -26,8 +26,12 @@ if (isset($_GET['filter_date'])) { $filter_date = $astDB->escape($_GET['filter_d
 $filter_date = (empty($filter_date) ? $NOW_DATE : $filter_date);
 
 if ($goDB->has('go_sales_count')) {
+    $closer_campaigns = go_getall_closer_campaigns($campaign, $astDB);
+    $filter_campaigns = explode("','",trim($closer_campaigns, "'"));
+    array_push($filter_campaigns, $campaign);
+    
     $goDB->where('user', $goUser);
-    $goDB->where('campaign_id', $campaign);
+    $goDB->where('campaign_id', $filter_campaigns, 'IN');
     $goDB->where('entry_date', $filter_date);
     $goDB->groupBy('user');
     $result = $goDB->getOne('go_sales_count', 'SUM(sales) AS sales, SUM(amount) AS amount');
