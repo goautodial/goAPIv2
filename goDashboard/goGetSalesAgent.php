@@ -54,7 +54,7 @@
 		);
 
 		$sql_sales = $goDB->where('entry_date', array($fromDate, $toDate), 'BETWEEN')
-				->where('amount', 0, '>')
+				//->where('amount', 0, '>')
 				->groupBy('user')
 				->get('go_sales_count', null, $cols);
 
