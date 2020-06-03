@@ -251,7 +251,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
         
                                 //$stmt="UPDATE vicidial_live_agents set last_state_change='$deadNOW_TIME' where agent_log_id='$Aagent_log_id';";
                                 $astDB->where('agent_log_id', $Aagent_log_id);
-                                $rslt = $astDB->update('vicidial_live_agents', array('last_state_change'=>$NEWdead_epoch));
+                                $rslt = $astDB->update('vicidial_live_agents', array('last_state_change'=>$deadNOW_TIME));
                             }
                         }
                         ##### END DEAD logging section #####
