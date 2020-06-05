@@ -31,7 +31,7 @@ if ($goDB->has('go_sales_count')) {
     array_push($filter_campaigns, $campaign);
     
     $goDB->where('user', $goUser);
-    $goDB->where('campaign_id', $filter_campaigns, 'IN');
+    //$goDB->where('campaign_id', $filter_campaigns, 'IN');
     $goDB->where('entry_date', $filter_date);
     $goDB->groupBy('user');
     $result = $goDB->getOne('go_sales_count', 'SUM(sales) AS sales, SUM(amount) AS amount');
