@@ -23,42 +23,42 @@
 
     include_once("goAPI.php");
 	
-	$pageTitle 	= strtolower($astDB->escape($_REQUEST['pageTitle']));
-	$fromDate 	= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
-	$toDate 	= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-	$campaign_id 	= $astDB->escape($_REQUEST['campaignID']);
-	$request 	= $astDB->escape($_REQUEST['request']);
-	$limit		= 1000;
-	$defPage 	= "agent_detail";
+	$pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
+	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
+	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
+	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
+	$request 										= $astDB->escape($_REQUEST['request']);
+	$limit											= 1000;
+	$defPage 										= "agent_detail";
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults = array(
-			"result" => "Error: goAPI User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: goAPI User Not Defined."
 		);
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults = array(
-			"result" => "Error: goAPI Password Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: goAPI Password Not Defined."
 		);
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults = array(
-			"result" => "Error: Session User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
-		$err_msg = error_handle("40001");
-        $apiresults = array(
-			"code" => "40001",
-			"result" => $err_msg
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
 		);
 	} else {            
 		// check if goUser and goPass are valid
-		$fresults = $astDB
+		$fresults 									= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
 		
-		$goapiaccess = $astDB->getRowCount();
-		$userlevel = $fresults["user_level"];
+		$goapiaccess 								= $astDB->getRowCount();
+		$userlevel 									= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {				
 			// Agent Time Detail
@@ -78,11 +78,11 @@
 				}
 				
 				// check if MariaDB slave server available
-				$rslt											= $goDB
+				$rslt								= $goDB
 					->where('setting', 'slave_db_ip')
 					->where('context', 'creamy')
 					->getOne('settings', 'value');
-				$slaveDBip 										= $rslt['value'];
+				$slaveDBip 							= $rslt['value'];
 				
 				if (!empty($slaveDBip)) {
 					$astDB = new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
@@ -105,25 +105,25 @@
 				
 				if ($astDB->count > 0) {
 					foreach ($timeclock_ct as $row) {
-						$TCuser 						= $row['user'];
-						$TCtime 						= $row['login_sec'];
+						$TCuser 					= $row['user'];
+						$TCtime 					= $row['login_sec'];
 						
 						array_push($TOTtimeTC, $TCtime);
 					}
 				}
 				
-				$sub_statuses 		= '-';
-				$sub_statusesTXT 	= '';
-				$sub_statusesHEAD 	= '';
-				$sub_statusesHTML 	= '';
-				$sub_statusesFILE 	= '';
-				$sub_statusesTOP 	= array();
-				$sub_statusesARY 	= array();
+				$sub_statuses 						= '-';
+				$sub_statusesTXT 					= '';
+				$sub_statusesHEAD 					= '';
+				$sub_statusesHTML 					= '';
+				$sub_statusesFILE 					= '';
+				$sub_statusesTOP 					= array();
+				$sub_statusesARY 					= array();
 				
-				$PCusers 		= '-';
-				$PCuser_namesARY	= array();
-				$PCusersARY 		= array();
-				$PCpause_secsARY	= array();
+				$PCusers 							= '-';
+				$PCuser_namesARY					= array();
+				$PCusersARY 						= array();
+				$PCpause_secsARY					= array();
 				
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
@@ -142,7 +142,7 @@
                                 		$array_camp[] = $camp_val["campaign_id"];
                         		}
                 		}else{
-                        		$array_camp[] = $campaign_id;
+                        		$array_camp[] 		= $campaign_id;
                 		}
 				//$imploded_camp = "'".implode("','", $array_camp)."'";
 	
