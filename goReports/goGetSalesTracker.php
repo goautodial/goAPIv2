@@ -67,6 +67,24 @@
 			}
 		}
 			
+		// check if MariaDB slave server available
+		$rslt										= $goDB
+			->where('setting', 'slave_db_ip')
+			->where('context', 'creamy')
+			->getOne('settings', 'value');
+		$slaveDBip 									= $rslt['value'];
+		
+		if (!empty($slaveDBip)) {
+			$astDB 									= new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
+
+			if (!$astDB) {
+				echo "Error: Unable to connect to MariaDB slave server." . PHP_EOL;
+				echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
+				exit;
+				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
+			}			
+		}
+		
 		// SALES TRACKER
 		if ($log_group !== "ADMIN") {
 			$ul = "AND us.user_group = '$log_group'";

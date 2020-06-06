@@ -2,8 +2,9 @@
 /**
  * @file        goGetDispoStats.php
  * @brief       API reports for disposition statuses
- * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author      Alexander Jim Abenoja 
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
@@ -65,24 +66,38 @@
 			}
 		}
 			
-		//Dial Statuses Summary
-		//$list_ids[0] = "ALL";
-		//$total_all = ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
+		// check if MariaDB slave server available
+		$rslt										= $goDB
+			->where('setting', 'slave_db_ip')
+			->where('context', 'creamy')
+			->getOne('settings', 'value');
+		$slaveDBip 									= $rslt['value'];
 		
-			//ALL CAMPAIGNS
-			if ("ALL" === strtoupper($campaignID)) {
-                        	$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-			
-                                foreach($SELECTQuery as $camp_val){
-                                        $array_camp[] = $camp_val["campaign_id"];
-                                }
-                        }else{
-                                $array_camp[] = $campaignID;
-                        }
+		if (!empty($slaveDBip)) {
+			$astDB 									= new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
+
+			if (!$astDB) {
+				echo "Error: Unable to connect to MariaDB slave server." . PHP_EOL;
+				echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
+				exit;
+				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
+			}			
+		}
+		
+		//ALL CAMPAIGNS
+		if ("ALL" === strtoupper($campaignID)) {
+			$SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+
+			foreach($SELECTQuery as $camp_val){
+				$array_camp[] 						= $camp_val["campaign_id"];
+			}
+		} else {
+			$array_camp[] 							= $campaignID;
+		}
 
 		//$imploded_camp = "'".implode("','", $array_camp)."'";
 
-		$total_all = ($campaignID == "ALL") ? "ALL List IDs under ALL Campaigns" : "ALL List IDs under $campaignID";
+		$total_all 									= ($campaignID == "ALL") ? "ALL List IDs under ALL Campaigns" : "ALL List IDs under $campaignID";
 
 		//if (isset($list_ids) && $list_ids[0] == "ALL") {
 			/*$query 							= "
@@ -91,26 +106,26 @@
 				ORDER BY list_id
 			";*/
 
-			$qlistid = $astDB
-				->where("campaign_id", $array_camp, "IN")
-				->orderBy("list_id")
-				->get("vicidial_lists", NULL, "list_id");
-				
-			if ($astDB->count > 0) {
-				foreach ($qlistid as $row) {
-					$list_ids[]	= $row['list_id'];
-				}
+		$qlistid 									= $astDB
+			->where("campaign_id", $array_camp, "IN")
+			->orderBy("list_id")
+			->get("vicidial_lists", NULL, "list_id");
+			
+		if ($astDB->count > 0) {
+			foreach ($qlistid as $row) {
+				$list_ids[]							= $row['list_id'];
 			}
+		}
 		//}
 		$list = "'".implode("','",$list_ids)."'";
 		
-		$qsstatuses = $astDB
+		$qsstatuses 								= $astDB
 			->orderBy("status")
 			->get("vicidial_statuses", NULL, array("status", "status_name"));
 		
 		if ($astDB->count > 0) {
 			foreach ($qsstatuses as $row) {
-				$statuses_list[$row['status']] 	= $row['status_name'];
+				$statuses_list[$row['status']] 		= $row['status_name'];
 			}
 		}
 		
@@ -120,13 +135,13 @@
 		
 		if ($astDB->count > 0) {
 			foreach ($qcstatuses as $row) {
-				$statuses_list[$row['status']] 	= $row['status_name'];
+				$statuses_list[$row['status']] 		= $row['status_name'];
 			}
 		}
 		
-		$leads_in_list 						= 0;
-		$leads_in_list_N 					= 0;
-		$leads_in_list_Y 					= 0;
+		$leads_in_list 								= 0;
+		$leads_in_list_N 							= 0;
+		$leads_in_list_Y 							= 0;
 		
 		/*	
 		$cols = array(

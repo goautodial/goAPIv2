@@ -2,7 +2,7 @@
 /**
  * @file        goGetAgentTimeDetails.php
  * @brief       API for Agent Time Details Reports
- * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author      Alexander Jim Abenoja 
  *
@@ -73,16 +73,35 @@
 				}					
 			}
 			
+			// check if MariaDB slave server available
+			$rslt											= $goDB
+				->where('setting', 'slave_db_ip')
+				->where('context', 'creamy')
+				->getOne('settings', 'value');
+			$slaveDBip 										= $rslt['value'];
+			
+			if (!empty($slaveDBip)) {
+				$astDB = new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
+
+				if (!$astDB) {
+					echo "Error: Unable to connect to MariaDB slave server." . PHP_EOL;
+					echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
+					exit;
+					//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
+				}			
+			}			
+			
 			if ("ALL" === strtoupper($campaign_id)) {
 				$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
-                                foreach($SELECTQuery as $camp_val){
-                                        $array_camp[] = $camp_val["campaign_id"];
-                                }
-                        }else{
-                             $array_camp[] = $campaign_id;
-                        }
-                        $imploded_camp = "'".implode("','", $array_camp)."'";
+				foreach($SELECTQuery as $camp_val){
+					$array_camp[] = $camp_val["campaign_id"];
+				}
+			} else {
+				$array_camp[] = $campaign_id;
+			}
+			
+			$imploded_camp = "'".implode("','", $array_camp)."'";
 			/*	
 			$TOTtimeTC = array();
 				

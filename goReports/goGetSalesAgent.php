@@ -2,7 +2,7 @@
 /**
  * @file        goGetStatisticalReports.php
  * @brief       API for Campaign Statistics
- * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author      Alexander Jim Abenoja 
  *
@@ -24,38 +24,38 @@
     include_once("goAPI.php");
 
     // need function go_sec_convert();
-    $fromDate 				= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 				= $astDB->escape($_REQUEST['toDate']);
-    $campaignID				= $astDB->escape($_REQUEST['campaignID']);
-    $request 				= $astDB->escape($_REQUEST['request']);
-    $statewide_sales_report		= $astDB->escape($_REQUEST['statewide_sales_report']);
-    //dispo_stats 			= $astDB->escape($_REQUEST['statuses']);
+    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
+    $toDate 										= $astDB->escape($_REQUEST['toDate']);
+    $campaignID										= $astDB->escape($_REQUEST['campaignID']);
+    $request 										= $astDB->escape($_REQUEST['request']);
+    $statewide_sales_report							= $astDB->escape($_REQUEST['statewide_sales_report']);
+    //dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
 	
     if (empty($fromDate)) {
-    	$fromDate			= date("Y-m-d")." 00:00:00";
+    	$fromDate									= date("Y-m-d")." 00:00:00";
     }
     
     if (empty($toDate)) {
-    	$toDate 			= date("Y-m-d")." 23:59:59";
+    	$toDate 									= date("Y-m-d")." 23:59:59";
     }
 		
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults = array(
-			"result" => "Error: Session User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
 	} elseif ( empty($campaignID) || is_null($campaignID) ) {
-		$err_msg = error_handle("40001");
-        	$apiresults = array(
-			"code" => "40001",
-			"result" => $err_msg
+		$err_msg 									= error_handle("40001");
+        	$apiresults 							= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
 		);
 	} elseif (empty($fromDate) && empty($toDate)) {
-		$fromDate = date("Y-m-d") . " 00:00:00";
-		$toDate = date("Y-m-d") . " 23:59:59";
+		$fromDate 									= date("Y-m-d") . " 00:00:00";
+		$toDate 									= date("Y-m-d") . " 23:59:59";
 	} else {            
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
-		$tenant	= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+		$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 		
 		if ($tenant) {
 			$astDB->where("user_group", $log_group);
@@ -66,63 +66,81 @@
 				}
 			}
 		}
-			
+
+		// check if MariaDB slave server available
+		$rslt										= $goDB
+			->where('setting', 'slave_db_ip')
+			->where('context', 'creamy')
+			->getOne('settings', 'value');
+		$slaveDBip 									= $rslt['value'];
+		
+		if (!empty($slaveDBip)) {
+			$astDB 									= new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
+
+			if (!$astDB) {
+				echo "Error: Unable to connect to MariaDB slave server." . PHP_EOL;
+				echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
+				exit;
+				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
+			}			
+		}
+		
 		// SALES PER AGENT
 		if ($log_group !== "ADMIN") {
-			$ul = "AND us.user_group = '$log_group'";
+			$ul 									= "AND us.user_group = '$log_group'";
 		} else {
-			$ul = "";
+			$ul 									= "";
 		}
 		
 		$Qstatus = $astDB
 			->where("sale", "Y")
 			->get("vicidial_statuses", NULL, "status");
 				
-		$sstatusRX = "";
-		$sstatuses = array();			
-		$a = 0;
+		$sstatusRX 									= "";
+		$sstatuses 									= array();			
+		$a 											= 0;
 			
 		if ($astDB->count > 0) {
 			foreach ($Qstatus as $rowQS) {
-				$goTempStatVal = $rowQS['status'];
-				$sstatuses[$a] = $rowQS['status'];
-				$sstatusRX .= "{$goTempStatVal}|";
+				$goTempStatVal 						= $rowQS['status'];
+				$sstatuses[$a] 						= $rowQS['status'];
+				$sstatusRX 							.= "{$goTempStatVal}|";
 				$a++;
 			}			
 		}
 			
 		//if (!empty($sstatuses))
-			$sstatuses = implode("','",$sstatuses);
+		$sstatuses 									= implode("','",$sstatuses);
 		
 		//ALL CAMPAIGNS
-                        if ("ALL" === strtoupper($campaignID)) {
-                                $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+		if ("ALL" === strtoupper($campaignID)) {
+			$SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
-                                foreach($SELECTQuery as $camp_val){
-                                        $array_camp[] = $camp_val["campaign_id"];
-                                }
+			foreach($SELECTQuery as $camp_val){
+				$array_camp[] 						= $camp_val["campaign_id"];
+			}
 
-				// Statewide Customization 
-				$SELECTQueryList = $astDB->get("vicidial_lists", null, "list_id");
-				$array_list = $SELECTQueryList;
-				// ./Statewide Customization 
+		// Statewide Customization 
+		$SELECTQueryList 							= $astDB->get("vicidial_lists", null, "list_id");
+		$array_list 								= $SELECTQueryList;
+		// ./Statewide Customization 
 
-                        }else{
-                                $array_camp[] = $campaignID;
-		
-				// Statewide Customization 
-				$i = 0;
-				foreach($array_camp as $camp) {
-					$camp_id = $array_camp[$i];
-					$astDB->WHERE("campaign_id", $camp_id);
-					$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
-					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
-					$array_list = $SELECTQuery;
-					$i++;
-				}
-				// ./Statewide Customization
+		} else {
+			$array_camp[] 							= $campaignID;
 
-                        }
+			// Statewide Customization 
+			$i = 0;
+			foreach($array_camp as $camp) {
+				$camp_id 							= $array_camp[$i];
+				$astDB->WHERE("campaign_id", $camp_id);
+				$SELECTQuery 						= $astDB->get("vicidial_lists", null, "list_id");
+				//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
+				$array_list 						= $SELECTQuery;
+				$i++;
+			}
+			// ./Statewide Customization
+
+		}
 
 		// Statewide Customization 
 		foreach($array_list as $list){

@@ -2,7 +2,7 @@
 /**
  * @file        goGetAgentTimeDetails.php
  * @brief       API for Agent Time Details Reports
- * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author      Alexander Jim Abenoja 
  *
@@ -20,42 +20,42 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-error_reporting(E_ERROR | E_PARSE);
+	error_reporting(E_ERROR | E_PARSE);
     include_once("goAPI.php");
 
-	$fromDate 	= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
-	$toDate 	= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-	$campaign_id 	= $astDB->escape($_REQUEST['campaignID']);
-	$request 	= $astDB->escape($_REQUEST['request']);
-	$limit		= 100;
+	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
+	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
+	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
+	$request 										= $astDB->escape($_REQUEST['request']);
+	$limit											= 100;
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults = array(
-			"result" => "Error: goAPI User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: goAPI User Not Defined."
 		);
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults = array(
-			"result" => "Error: goAPI Password Not Defined."
+		$apiresults 								= array(
+			"result"						 			=> "Error: goAPI Password Not Defined."
 		);
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults = array(
-			"result" => "Error: Session User Not Defined."
+		$apiresults 								= array(
+			"result" 									=> "Error: Session User Not Defined."
 		);
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
-		$err_msg = error_handle("40001");
-        $apiresults = array(
-			"code" => "40001",
-			"result" => $err_msg
+		$err_msg 									= error_handle("40001");
+        $apiresults 								= array(
+			"code" 										=> "40001",
+			"result" 									=> $err_msg
 		);
 	} else {            
 		// check if goUser and goPass are valid
-		$fresults = $astDB
+		$fresults 									= $astDB
 			->where("user", $goUser)
 			->getOne("vicidial_users", "user,user_level");
 		
-		$goapiaccess = $astDB->getRowCount();
-		$userlevel = $fresults["user_level"];
+		$goapiaccess 								= $astDB->getRowCount();
+		$userlevel 									= $fresults["user_level"];
 		//$apiresults = array("data" => $alex);	
 
 		if ($goapiaccess > 0 && $userlevel > 7) {
@@ -71,6 +71,24 @@ error_reporting(E_ERROR | E_PARSE);
 						$astDB->where("user_group", $log_group);
 					}
 				}					
+			}
+
+			// check if MariaDB slave server available
+			$rslt									= $goDB
+				->where('setting', 'slave_db_ip')
+				->where('context', 'creamy')
+				->getOne('settings', 'value');
+			$slaveDBip 								= $rslt['value'];
+			
+			if (!empty($slaveDBip)) {
+				$astDB 								= new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
+
+				if (!$astDB) {
+					echo "Error: Unable to connect to MariaDB slave server." . PHP_EOL;
+					echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
+					exit;
+					//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
+				}			
 			}
 			
 			if ("ALL" === strtoupper($campaign_id)) {
