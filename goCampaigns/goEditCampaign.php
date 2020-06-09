@@ -307,7 +307,7 @@
 						'auto_dial_level' 						=> $autoDialLevel, 
 						'dial_prefix' 							=> $dialprefix,
 						'web_form_address' 						=> (!empty($webform)) ? $webform : $resultGet['web_form_address'], 
-						'campaign_script' 						=> (!empty($campaign_script)) ? $campaign_script : $resultGet['campaign_script'], 
+						'campaign_script' 						=> $campaign_script, 
 						'campaign_cid' 							=> (!empty($campaign_cid)) ? $campaign_cid : $resultGet['campaign_cid'], 
 						'campaign_vdad_exten' 					=> (!empty($campaign_vdad_exten)) ? $campaign_vdad_exten : $resultGet['campaign_vdad_exten'], 
 						'local_call_time' 						=> (!empty($local_call_time)) ? $local_call_time : $resultGet['local_call_time'],  
