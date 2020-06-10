@@ -4,6 +4,7 @@
  * @brief       API for Sales Agent Report on Dashboard for Statewide
  * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Thom Bernarth D. Patacsil
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
@@ -22,48 +23,58 @@
 
     include_once("goAPI.php");
 
-    $fromDate = "";
-    $toDate = "";
-    $campaignID				= $astDB->escape($_REQUEST['campaign_id']);
-    $campaignID				= (!empty($campaignID) ? $campaignID : 'ALL');
-	
-    if (empty($fromDate)) {
-    	$fromDate			= date("Y-m-d");
-    }
+    $fromDate 											= (empty($fromDate) ? date("Y-m-d") : "");
+    $toDate 											= (empty($toDate) ? date("Y-m-d") : "");
+    $campaignID											= (!empty($campaignID) ? $astDB->escape($_REQUEST['campaign_id']) : 'ALL');
     
-    if (empty($toDate)) {
-    	$toDate 			= date("Y-m-d");
-    }
-		
-	if (empty($log_user) || is_null($log_user)) {
-		$apiresults = array(
-			"result" => "Error: Session User Not Defined."
+	if (empty($goUser) || is_null($goUser)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI User Not Defined."
+		);
+	} elseif (empty($goPass) || is_null($goPass)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: goAPI Password Not Defined."
+		);
+	} elseif (empty($log_user) || is_null($log_user)) {
+		$apiresults 									= array(
+			"result" 										=> "Error: Session User Not Defined."
 		);
 	} elseif ( empty($campaignID) || is_null($campaignID) ) {
-		$err_msg = error_handle("40001");
-        	$apiresults = array(
-			"code" => "40001",
-			"result" => $err_msg
+		$err_msg 										= error_handle("40001");
+        	$apiresults 								= array(
+			"code" 											=> "40001",
+			"result" 										=> $err_msg
 		);
-	} else {            
-		$cols = array(
-			"user",
-			"full_name",
-			"sum(sales) as sale",
-			"sum(amount) as amount"
-		);
+	} else {
+		// check if goUser and goPass are valid
+		$fresults											= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+		
+		if ($goapiaccess > 0 && $userlevel > 7) {	
+			$cols 										= array(
+				"user",
+				"full_name",
+				"sum(sales) as sale",
+				"sum(amount) as amount"
+			);
 
-		$sql_sales = $goDB->where('entry_date', array($fromDate, $toDate), 'BETWEEN')
-				//->where('amount', 0, '>')
-				->groupBy('user')
-				->get('go_sales_count', null, $cols);
+			$sql_sales = $goDB->where('entry_date', array($fromDate, $toDate), 'BETWEEN')
+					//->where('amount', 0, '>')
+					->groupBy('user')
+					->get('go_sales_count', null, $cols);
 
-		$apiresults = array(
-			"result"			=> "success",
-			"amount"			=> $sql_sales,
-		);
-			
-		return $apiresults;
+			$apiresults 								= array(
+				"result"									=> "success",
+				"amount"									=> $sql_sales,
+			);
+				
+			return $apiresults;
+		}
 	}
 
 ?>
