@@ -205,7 +205,15 @@
                     }
                     
                     $astDB->where("lead_id", $lead_id);
-                    $astDB->update("custom_{$list_id}", $cf_data);
+                    $rslt = $astDB->get("custom_{$list_id}");
+                    
+                    if ($astDB->count > 0) {
+                        $astDB->where("lead_id", $lead_id);
+                        $astDB->update("custom_{$list_id}", $cf_data);
+                    } else {
+                        $cf_data["lead_id"] = $lead_id;
+                        $astDB->insert("custom_{$list_id}", $cf_data);
+                    }
                 }
 				
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
