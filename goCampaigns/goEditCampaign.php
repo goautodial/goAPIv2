@@ -393,7 +393,8 @@
 							'enable_callback_alert' 			=> (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
 							'cb_noexpire' 						=> (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
 							'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail'],
-                            'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits']
+                            				'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
+							'auto_dial_level'				=> $auto_dial_level
 						);
 						
 						$goDB->where( 'campaign_id', $campaign_id );
@@ -415,7 +416,8 @@
 							'enable_callback_alert' 			=> ( gettype($enable_callback_alert) != 'NULL' ) ? $enable_callback_alert : $resultGet['enable_callback_alert'],
 							'cb_noexpire' 						=> ( gettype($cb_noexpire) != 'NULL' ) ? $cb_noexpire : $resultGet['cb_noexpire'],
 							'cb_sendemail' 						=> ( gettype($cb_sendemail) != 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail'],
-                            'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) != 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits']
+                            				'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) != 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
+							'auto_dial_level'				=> $auto_dial_level
 						);
 
 						$goDB->insert('go_campaigns', $data_insert_go);

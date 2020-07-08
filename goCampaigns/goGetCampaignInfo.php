@@ -38,6 +38,7 @@
 	$location_id 										= '';
 	$dynamic_cid 										= '';
 	$manual_dial_min_digits								= '';
+	$auto_dial_level								= '';
 
     // Check campaign_id if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
@@ -119,6 +120,7 @@
 						$cb_noexpire 					= $fresults['cb_noexpire'];
 						$cb_sendemail					= $fresults['cb_sendemail'];
 						$manual_dial_min_digits			= $fresults['manual_dial_min_digits'];
+						$auto_dial_level			= $fresults['auto_dial_level'];
 						
 						if ($location_id_COL !== '') {
 							$location_id 				= $fresults['location_id'];
@@ -152,6 +154,7 @@
 					$location_id 						= (gettype($location_id) != 'NULL') ? $location_id : '';
 					$dynamic_cid 						= (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
 					$manual_dial_min_digits				= (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : '';
+					$auto_dial_level				= (gettype($auto_dial_level) != 'NULL') ? $auto_dial_level : '';
 					
 					$apiresults 						= array(
 						"result" 							=> "success",
@@ -169,7 +172,8 @@
 						'number_of_lines' 					=> $numberoflines,
 						'location_id' 						=> $location_id,
 						'dynamic_cid' 						=> $dynamic_cid,
-						'manual_dial_min_digits'			=> $manual_dial_min_digits
+						'manual_dial_min_digits'			=> $manual_dial_min_digits,
+						'auto_dial_level'				=> $auto_dial_level
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
