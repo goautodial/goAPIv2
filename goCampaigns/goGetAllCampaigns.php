@@ -72,12 +72,7 @@
 					}
 				}					
 			}
-			
-			$dataCampID									= "";
-			$dataCampName								= "";
-			$dataDialMethod								= "";
-			$dataActive									= "";
-			$dataUseCID									= "";	
+				
 			$cols 										= array(
 				"campaign_id",
 				"campaign_name",
