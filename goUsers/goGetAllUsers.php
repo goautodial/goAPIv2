@@ -105,8 +105,8 @@
 					
 					if ($goDB->count > 0) {
 						foreach ($querygo as $fresultsgo) {
-							$dataUserIDgo[] 			= $fresultsgo['userid'];
-							$dataAvatar[] 				= $fresultsgo['avatar'];		
+							$dataUserIDgo	 			= $fresultsgo['userid'];
+							$dataAvatar 				= $fresultsgo['avatar'];		
 						}
 					}												
 					

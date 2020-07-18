@@ -2,9 +2,10 @@
  /**
  * @file 		goAPI.php
  * @brief 		API for Getting Packages
- * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @copyright 	Copyright (c) 2020 GOautodial Inc.
  * @author		Alexander Abenoja
  * @author     	Chris Lomuntad
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -44,6 +45,8 @@
 		
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
+		$VARBRINGOWNVOIP								= $VARBRINGOWNVOIP ?? '';
+		$VARPACKAGETYPE									= $VARPACKAGETYPE ?? '';		
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			$apiresults 								= array("result" => "success", "show_carrier_settings" => $VARBRINGOWNVOIP, "packagetype" => $VARPACKAGETYPE);
