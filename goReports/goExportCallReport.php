@@ -67,6 +67,8 @@
 	$list_ct = count($lists);
 	$status_ct = count($dispo_stats);
 
+	$csv_row = "";
+
 	if (!empty($campaigns)) {
 		$fresults = $astDB
 			->where("user", $goUser)
@@ -507,8 +509,9 @@
 				unset($fetch_CF);
 		    }
 		}
-		
-		$csv_row[] = $row;
+
+		$data_row = implode(',', $row);
+		$csv_row .= $data_row . "\n";
 	}
 	//$apiresults = array ( $csv_row);
 
