@@ -1,10 +1,11 @@
 <?php
 /**
  * @file        goExportCallReport.php
- * @brief       API for Agent Time Details Reports
- * @copyright   Copyright (c) 2018 GOautodial Inc.
+ * @brief       API for Exporting Call Reports
+ * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author      Alexander Jim Abenoja 
+ * @author      Thom Bernarth Patacsil
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
