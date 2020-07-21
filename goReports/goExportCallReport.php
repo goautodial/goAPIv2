@@ -159,7 +159,7 @@
 		if (in_array("ALL", $lists)) {
 			$list_SQL 							= "";
 			
-			if (in_array("ALL", $campaigns)) {
+			if (in_array("ALL", $campaigns) || in_array('ALL', $inbounds)) {
 				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 				$array_list = $SELECTQuery;
 			} else {
