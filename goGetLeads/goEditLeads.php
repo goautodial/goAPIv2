@@ -37,12 +37,14 @@
 	$address2 											= $astDB->escape($_REQUEST["address2"]);
 	$address3 											= $astDB->escape($_REQUEST["address3"]);
 	$city 												= $astDB->escape($_REQUEST["city"]);
+	$state 												= $astDB->escape($_REQUEST["state"]);
 	$province 											= $astDB->escape($_REQUEST["province"]);
 	$postal_code 										= $astDB->escape($_REQUEST["postal_code"]);
 	$country_code 										= $astDB->escape($_REQUEST["country_code"]);
 	$date_of_birth 										= $astDB->escape($_REQUEST["date_of_birth"]);
 	$title 												= $astDB->escape($_REQUEST["title"]);
 	$status 											= $astDB->escape($_REQUEST["status"]);
+	$comments											= $astDB->escape($_REQUEST["comments"]);
 	$is_customer 										= $astDB->escape($_REQUEST["is_customer"]);
 	$user_id 											= $astDB->escape($_REQUEST["user_id"]);
 	$user 												= $astDB->escape($_REQUEST["user"]);
@@ -133,6 +135,7 @@
 					$data_address2 						= $fresults["address2"];
 					$data_address3 						= $fresults["address3"];
 					$data_city 							= $fresults["city"];
+					$data_state							= $fresults["state"];
 					$data_province						= $fresults["province"];
 					$data_postal_code 					= $fresults["postal_code"];
 					$data_country_code 					= $fresults["country_code"];
@@ -163,6 +166,8 @@
 					$address3							= $data_address3;
 				if (empty($city))
 					$city								= $data_city;
+				if (empty($state))
+					$state								= $data_state;
 				if (empty($province))
 					$province							= $data_province;
 				if (empty($postal_code))
@@ -188,12 +193,14 @@
 					"address2"								=> $address2,
 					"address3"								=> $address3,
 					"city"									=> $city,
+					"state"									=> $state,
 					"province"								=> $province,
 					"postal_code"							=> $postal_code,
 					"country_code"							=> $country_code,
 					"date_of_birth"							=> $date_of_birth,
 					"title"									=> $title,
-					"status"								=> $status
+					"status"								=> $status,
+					"comments"									=> $comments,
 				);
 
 				$astDB->where("lead_id", $lead_id);
