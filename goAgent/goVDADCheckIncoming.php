@@ -848,7 +848,7 @@ if ($is_logged_in) {
             $rslt = $astDB->get('vicidial_users', null, 'full_name');
             $VDU_cid_ct = $astDB->getRowCount();
             if ($VDU_cid_ct > 0) {
-                $ros = $rslt[0];
+                $row = $rslt[0];
                 $fronter_full_name		= $row['full_name'];
                 //echo $fronter_full_name . '|' . $tsr . "\n";
                 $dataOutput4 = array(
