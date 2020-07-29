@@ -85,7 +85,7 @@
 			}
 			
 			if ($added_custom_SQL3 != "") {
-				$stmt 									= "SELECT vl.lead_id AS vl.lead_id,vl.entry_date,vl.modify_date,vl.status,vl.user,vl.vendor_lead_code,vl.source_id,vl.list_id,vl.gmt_offset_now,vl.called_since_last_reset,vl.phone_code,vl.phone_number,vl.title,vl.first_name,vl.middle_initial,vl.last_name,vl.address1,vl.address2,vl.address3,vl.city,vl.state,vl.province,vl.postal_code,vl.country_code,vl.gender,vl.date_of_birth,vl.alt_phone,vl.email,vl.security_phrase,vl.comments,vl.called_count,vl.last_local_call_time,vl.rank,vl.owner $header_columns FROM vicidial_list vl LEFT OUTER JOIN $added_custom_SQL3 ON $added_custom_SQL4 WHERE vl.list_id='$list_id';";
+				$stmt 									= "SELECT vl.lead_id AS lead_id,vl.entry_date,vl.modify_date,vl.status,vl.user,vl.vendor_lead_code,vl.source_id,vl.list_id,vl.gmt_offset_now,vl.called_since_last_reset,vl.phone_code,vl.phone_number,vl.title,vl.first_name,vl.middle_initial,vl.last_name,vl.address1,vl.address2,vl.address3,vl.city,vl.state,vl.province,vl.postal_code,vl.country_code,vl.gender,vl.date_of_birth,vl.alt_phone,vl.email,vl.security_phrase,vl.comments,vl.called_count,vl.last_local_call_time,vl.rank,vl.owner $header_columns FROM vicidial_list vl LEFT OUTER JOIN $added_custom_SQL3 ON $added_custom_SQL4 WHERE vl.list_id='$list_id';";
 			} else {
 				$stmt 									= "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list WHERE list_id='$list_id'; ";
 			}
