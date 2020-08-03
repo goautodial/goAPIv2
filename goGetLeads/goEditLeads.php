@@ -200,7 +200,7 @@
 					"date_of_birth"							=> $date_of_birth,
 					"title"									=> $title,
 					"status"								=> $status,
-					"comments"									=> $comments,
+					"comments"								=> $comments,
 				);
 
 				$astDB->where("lead_id", $lead_id);
@@ -224,55 +224,37 @@
                 }
 				
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
-				
-				if ($is_customer > 0) {			
-					// check if existing customer
-					$goDB->where("lead_id", $lead_id);
-					$goDB->getOne("go_customers", "lead_id");
-									
-					if ($goDB->count < 1) {					
-						$goDB->where("user_group", $log_group);
-						$fresults 						= $goDB->getOne("user_access_group", "group_list_id");
-						$group_list_id 					= $fresults["group_list_id"];
+					
+				// check if existing customer
+				$goDB->where("lead_id", $lead_id);
+				$goDB->getOne("go_customers", "lead_id");
+								
+				if ($goDB->count < 1) {
+					if ($is_customer > 0) {
+						$datago                                         = array(
+							"lead_id"                                       => $lead_id,
+							"group_list_id"                         		=> $log_group,
+							"avatar"                                        => $avatar
+						);
 
-						if ($goDB->count < 1) {
-							$datago 					= array(
-								"cust_id"					=> NULL,
-								"lead_id"					=> $lead_id,
-								"group_list_id"				=> $log_group,
-								"avatar"					=> $avatar						
-							);
-							
-							$exec_go					= $goDB
-								->insert("go_customers", $datago);
-							
-							$log_id 					= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
-							
-						} else {
-							$datago 					= array(
-								"cust_id"					=> NULL,
-								"lead_id"					=> $lead_id,
-								"group_list_id"				=> $group_list_id,
-								"avatar"					=> $avatar						
-							);
-							
-							$exec_go					= $goDB
-								->where("group_list_id", $group_list_id)
-								->where("lead_id", $lead_id)
-								->update("go_customers", $datago);
-							
-							$log_id 					= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
-						}					
+						$exec_go                                        = $goDB
+							->insert("go_customers", $datago);
+
+						$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
 					}
-									
-					$apiresults 						= array(
-						"result" 							=> "success"
-					);
 				} else {
-					$apiresults 						= array(
-						"result" 							=> "success"
-					);
+					if($is_customer == 0){
+						$exec_go                                        = $goDB
+							->where("lead_id", $lead_id)
+							->delete("go_customers");
+						$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
+					}
 				}
+
+			$apiresults                                             = array(
+				"result"                                                        => "success",
+			);
+
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id. Doesn't exist");
 				$apiresults 							= array(
