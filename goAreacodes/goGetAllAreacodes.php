@@ -71,13 +71,13 @@
 				}					
 			}
 			
-			$dataCampID									= "";
-			$dataCampName									= "";
-			$dataAreacode									= "";
-			$dataOutboundCID								= "";
+			/*$dataCampID								= "";
+			$dataCampName								= "";
+			$dataAreacode								= "";
+			$dataOutboundCID							= "";
 			$dataActive									= "";
-			$dataDescription								= "";	
-			$dataCallCountToday								= "";
+			$dataDescription							= "";	
+			$dataCallCountToday							= "";*/
 			$cols 										= array(
 				"vcid.campaign_id",
 				"vc.campaign_name",
@@ -103,18 +103,18 @@
 					$dataCallCountToday					= $fresults['call_count_today'];
 				}				
 			
-				$apiresults 								= array(
+				$apiresults 							= array(
 					"result" 								=> "success", 
-					"campaign_id" 								=> $dataCampID,
-					"campaign_name"								=> $dataCampName,
+					"campaign_id" 							=> $dataCampID,
+					"campaign_name"							=> $dataCampName,
 					"areacode" 								=> $dataAreacode, 
-					"outbound_cid" 								=> $dataOutboundCID, 
+					"outbound_cid" 							=> $dataOutboundCID, 
 					"active" 								=> $dataActive,
-					"description"								=> $dataDescription,
-					"call_count_today"							=> $dataCallCountToday
+					"description"							=> $dataDescription,
+					"call_count_today"						=> $dataCallCountToday
 				);
 			} else {
-				$apiresults                                                             = array(
+				$apiresults                             = array(
 					"result"								=> "No data available in table"
 				);
 			}
