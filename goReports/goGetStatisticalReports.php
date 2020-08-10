@@ -95,7 +95,8 @@
 			// Agent Statistics
 			if ($pageTitle == 'stats') {			
 				if ($log_group !== "ADMIN") {
-					$ul = "AND user_group = '$log_group'";
+					if($log_group !== "GOADMIN")
+						$ul = "AND user_group = '$log_group'";
 				} else {
 					$ul = "";
 				}
