@@ -139,6 +139,7 @@
 						
 						if (!empty($google_COL)) {
 							$google_sheet_ids			= $fresults['google_sheet_ids'];
+							$google_sheet_list_id			= $fresults['google_sheet_list_id'];
 						}
 					}
 					
@@ -181,6 +182,7 @@
 					$auto_dial_level				= (gettype($auto_dial_level) != 'NULL') ? $auto_dial_level : '';
 					$google_sheet_ids				= (gettype($google_sheet_ids) != 'NULL') ? $google_sheet_ids : '';
 					$campaign_list_ids				= (gettype($campaign_list_ids) != 'NULL') ? $campaign_list_ids : '';
+					$google_sheet_list_id				= (gettype($google_sheet_list_id) != 'NULL') ? $google_sheet_list_id : '';
 					
 					$apiresults 						= array(
 						"result" 							=> "success",
@@ -201,7 +203,8 @@
 						'manual_dial_min_digits'			=> $manual_dial_min_digits,
 						'auto_dial_level'				=> $auto_dial_level,
 						'google_sheet_ids'				=> $google_sheet_ids,
-						'campaign_list_ids'				=> $campaign_list_ids
+						'campaign_list_ids'				=> $campaign_list_ids,
+						'google_sheet_list_id'				=> $google_sheet_list_id
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
