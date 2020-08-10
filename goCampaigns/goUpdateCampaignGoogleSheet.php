@@ -10,12 +10,12 @@
    ####################################################
     
    include_once ("goAPI.php");
-   $goUser 						= $astDB->escape($_REQUEST['goUser']);
-   $ip_address 					= $astDB->escape($_REQUEST['hostname']);
-   $campaign_id 					= $astDB->escape($_REQUEST['campaign_id']);
-   $google_sheet_ids 			= $astDB->escape($_REQUEST['google_sheet_ids']);
-   $log_user                 = $astDB->escape($_REQUEST['log_user']);
-   $log_group                = $astDB->escape($_REQUEST['log_group']);
+   $goUser                    = $astDB->escape($_REQUEST['goUser']);
+   $ip_address                = $astDB->escape($_REQUEST['hostname']);
+   $campaign_id               = $astDB->escape($_REQUEST['campaign_id']);
+   $google_sheet_ids          = $astDB->escape($_REQUEST['google_sheet_ids']);
+   $log_user                  = $astDB->escape($_REQUEST['log_user']);
+   $log_group                 = $astDB->escape($_REQUEST['log_group']);
    
    if($campaign_id != null) {
        $updateQuery = "UPDATE go_campaigns SET google_sheet_ids = '$google_sheet_ids' WHERE campaign_id='$campaign_id' LIMIT 1;";
