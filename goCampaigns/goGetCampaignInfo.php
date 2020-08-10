@@ -104,6 +104,13 @@
 					$dynamic_cid_COL 					= ", dynamic_cid";
 				}
 				
+				$google_COL 							= '';
+				$checkColumn 							= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'google_sheet_ids'");
+
+				if ($goDB->count > 0) {
+					$google_COL 						= ", google_sheet_ids";
+				}
+				
 				$goDB->where('campaign_id', $campaign_id);
 				$fresultsv 								= $goDB->get('go_campaigns');
 
@@ -128,6 +135,10 @@
 						
 						if ($dynamic_cid_COL !== '') {
 							$dynamic_cid 				= $fresults['dynamic_cid'];
+						}
+						
+						if (!empty($google_COL)) {
+							$google_sheet_ids			= $fresults['google_sheet_ids'];
 						}
 					}
 					
@@ -155,6 +166,7 @@
 					$dynamic_cid 						= (gettype($dynamic_cid) != 'NULL') ? $dynamic_cid : '';
 					$manual_dial_min_digits				= (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : '';
 					$auto_dial_level				= (gettype($auto_dial_level) != 'NULL') ? $auto_dial_level : '';
+					$google_sheet_ids				= (gettype($google_sheet_ids) != 'NULL') ? $google_sheet_ids : '';
 					
 					$apiresults 						= array(
 						"result" 							=> "success",
@@ -173,7 +185,8 @@
 						'location_id' 						=> $location_id,
 						'dynamic_cid' 						=> $dynamic_cid,
 						'manual_dial_min_digits'			=> $manual_dial_min_digits,
-						'auto_dial_level'				=> $auto_dial_level
+						'auto_dial_level'				=> $auto_dial_level,
+						'google_sheet_ids'				=> $google_sheet_ids
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
