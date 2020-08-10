@@ -18,14 +18,19 @@
    $log_group                 = $astDB->escape($_REQUEST['log_group']);
    
    if($campaign_id != null) {
-       $updateQuery = "UPDATE go_campaigns SET google_sheet_ids = '$google_sheet_ids' WHERE campaign_id='$campaign_id' LIMIT 1;";
-       //echo $updateQuery;
-       $updateResult = $goDB->query($updateQuery);
-       
-       $log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Updated Google Sheets for Campaign ID: $campaign_id", $log_group, $updateQuery);
-       
-       $apiresults = array("result" => "success");
+      //$updateQuery = "UPDATE go_campaigns SET google_sheet_ids = '$google_sheet_ids' WHERE campaign_id='$campaign_id' LIMIT 1;";
+      //echo $updateQuery;
+      $updateData = array(
+         'google_sheet_ids' => $google_sheet_ids
+      );
+      $goDB->where('campaign_id', $campaign_id);
+      $updateResult = $goDB->update('go_campaigns', $updateData, 1);
+      $updateQuery = $goDB->getLastQuery();
+      
+      $log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Updated Google Sheets for Campaign ID: $campaign_id", $log_group, $updateQuery);
+      
+      $apiresults = array("result" => "success");
    }else{
-       $apiresults = array("result" => "Error: Campaign doens't exist.");
+      $apiresults = array("result" => "Error: Campaign doens't exist.");
    }
 ?>
