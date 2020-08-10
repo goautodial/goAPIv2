@@ -152,6 +152,19 @@
 							}					
 						}
 					}
+				
+					if ($google_COL !== '') {
+						$queryList = "SELECT list_id,list_name FROM vicidial_lists WHERE campaign_id='$campaign_id'";
+						$rsltList = mysqli_query($link, $queryList);
+						$astDB->where('campaign_id', $campaign_id);
+						$rsltList = $astDB->get('vicidial_lists');
+						if ($astDB->count > 0) {
+							foreach ($rsltList as $listResult) {
+								$list_id = $listResult['list_id'];
+								$campaign_list_ids[$list_id] = $listResult['list_name'];
+							}
+						}
+					}
 					
 					$custom_fields_launch 				= (gettype($custom_fields_launch) != 'NULL') ? $custom_fields_launch : 'ONCALL';
 					$custom_fields_list_id 				= (gettype($custom_fields_list_id) != 'NULL') ? $custom_fields_list_id : '';
@@ -167,6 +180,7 @@
 					$manual_dial_min_digits				= (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : '';
 					$auto_dial_level				= (gettype($auto_dial_level) != 'NULL') ? $auto_dial_level : '';
 					$google_sheet_ids				= (gettype($google_sheet_ids) != 'NULL') ? $google_sheet_ids : '';
+					$campaign_list_ids				= (gettype($campaign_list_ids) != 'NULL') ? $campaign_list_ids : '';
 					
 					$apiresults 						= array(
 						"result" 							=> "success",
@@ -186,7 +200,8 @@
 						'dynamic_cid' 						=> $dynamic_cid,
 						'manual_dial_min_digits'			=> $manual_dial_min_digits,
 						'auto_dial_level'				=> $auto_dial_level,
-						'google_sheet_ids'				=> $google_sheet_ids
+						'google_sheet_ids'				=> $google_sheet_ids,
+						'campaign_list_ids'				=> $campaign_list_ids
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
