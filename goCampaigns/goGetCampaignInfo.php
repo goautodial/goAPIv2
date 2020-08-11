@@ -115,7 +115,7 @@
 				$checkColumn 							= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'country_code'");
 
 				if ($goDB->count > 0) {
-					$country_code_COL 					= ", country_code";
+					$country_code_COL 					= ", default_country_code";
 				}
 				
 				
@@ -137,7 +137,7 @@
 				}	
 				
 				$goDB->where('campaign_id', $campaign_id);
-				$fresultsv 								= $goDB->get('go_campaigns');
+				$fresultsv 							= $goDB->get('go_campaigns');
 
 				if ($goDB->count > 0) {
 					foreach ((array)$fresultsv as $fresults) {
@@ -168,7 +168,7 @@
 						}
 						
 						if (!empty($country_code_COL)) {
-							$country_code				= $fresults['country_code'];
+							$default_country_code			= $fresults['default_country_code'];
 						}
 					}
 					
@@ -211,7 +211,7 @@
 					$google_sheet_ids					= (gettype($google_sheet_ids) != 'NULL') ? $google_sheet_ids : '';
 					$campaign_list_ids					= (gettype($campaign_list_ids) != 'NULL') ? $campaign_list_ids : '';
 					$google_sheet_list_id					= (gettype($google_sheet_list_id) != 'NULL') ? $google_sheet_list_id : '';
-					$country_code						= (gettype($country_code) != 'NULL') ? $country_code : '';
+					$default_country_code					= (gettype($default_country_code) != 'NULL') ? $default_country_code : '';
 					
 					$apiresults 						= array(
 						"result" 					=> "success",
@@ -235,7 +235,7 @@
 						'campaign_list_ids'				=> $campaign_list_ids,
 						'google_sheet_list_id'				=> $google_sheet_list_id,
 						'country_codes'					=> $country_codes,
-						'country_code'					=> $country_code
+						'default_country_code'				=> $default_country_code
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
