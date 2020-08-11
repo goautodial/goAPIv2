@@ -126,13 +126,13 @@
 					->groupBy('country_code,country')
 					->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
 
-				$country_code 							= array();
+				$country_codes 							= array();
 				if ($astDB->count > 0) {
 					foreach ($rslt as $country) {
 						$country_id 					= "{$country['country']}_{$country['country_code']}";
-						$country_code[$country_id]['code'] 		= htmlentities(addslashes($country['country_code']));
-						$country_code[$country_id]['tld'] 		= htmlentities(addslashes($country['tld']));
-						$country_code[$country_id]['name'] 		= htmlentities(addslashes($country['country_name']));
+						$country_codes[$country_id]['code'] 		= htmlentities(addslashes($country['country_code']));
+						$country_codes[$country_id]['tld'] 		= htmlentities(addslashes($country['tld']));
+						$country_codes[$country_id]['name'] 		= htmlentities(addslashes($country['country_name']));
 					}			
 				}	
 				
