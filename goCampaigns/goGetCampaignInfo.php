@@ -111,6 +111,24 @@
 					$google_COL 						= ", google_sheet_ids";
 				}
 				
+				
+
+				$rslt 								= $astDB
+					->where('tld', '', '!=')
+					->join('vicidial_country_iso_tld', 'country=iso3', 'left')
+					->groupBy('country_code,country')
+					->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
+
+				$country_code 							= array();
+				if ($astDB->count > 0) {
+					foreach ($rslt as $country) {
+						$country_id 					= "{$country['country']}_{$country['country_code']}";
+						$country_code[$country_id]['code'] 		= htmlentities(addslashes($country['country_code']));
+						$country_code[$country_id]['tld'] 		= htmlentities(addslashes($country['tld']));
+						$country_code[$country_id]['name'] 		= htmlentities(addslashes($country['country_name']));
+					}			
+				}	
+				
 				$goDB->where('campaign_id', $campaign_id);
 				$fresultsv 								= $goDB->get('go_campaigns');
 
@@ -185,9 +203,9 @@
 					$google_sheet_list_id				= (gettype($google_sheet_list_id) != 'NULL') ? $google_sheet_list_id : '';
 					
 					$apiresults 						= array(
-						"result" 							=> "success",
-						"data" 								=> array_shift($result),
-						"campaign_type" 					=> $campaign_type,
+						"result" 					=> "success",
+						"data" 						=> array_shift($result),
+						"campaign_type" 				=> $campaign_type,
 						"custom_fields_launch" 				=> $custom_fields_launch,
 						'custom_fields_list_id' 			=> $custom_fields_list_id,
 						'url_tab_first_title' 				=> $url_tab_first_title,
@@ -195,16 +213,17 @@
 						'url_tab_second_title' 				=> $url_tab_second_title,
 						'url_tab_second_url' 				=> $url_tab_second_url,
 						'enable_callback_alert'				=> $enable_callback_alert,
-						'cb_noexpire'						=> $cb_noexpire,
-						'cb_sendemail'						=> $cb_sendemail,
-						'number_of_lines' 					=> $numberoflines,
-						'location_id' 						=> $location_id,
-						'dynamic_cid' 						=> $dynamic_cid,
+						'cb_noexpire'					=> $cb_noexpire,
+						'cb_sendemail'					=> $cb_sendemail,
+						'number_of_lines' 				=> $numberoflines,
+						'location_id' 					=> $location_id,
+						'dynamic_cid' 					=> $dynamic_cid,
 						'manual_dial_min_digits'			=> $manual_dial_min_digits,
 						'auto_dial_level'				=> $auto_dial_level,
 						'google_sheet_ids'				=> $google_sheet_ids,
 						'campaign_list_ids'				=> $campaign_list_ids,
-						'google_sheet_list_id'				=> $google_sheet_list_id
+						'google_sheet_list_id'				=> $google_sheet_list_id,
+						'country_codes'					=> $country_code
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
