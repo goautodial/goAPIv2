@@ -1023,6 +1023,11 @@
 					$addedCB_Columns 				   .= ",manual_dial_min_digits";
 				}
 				
+				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'default_country_code'");
+				if ($cbRslt) {
+					$addedCB_Columns 				   .= ",default_country_code";
+				}
+				
 				$cols									= "custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url";
 				
 				$goDB->where('campaign_id', $campinfo['campaign_id']);
@@ -1038,6 +1043,7 @@
 				$campinfo['cb_noexpire'] 				= 0;
 				$campinfo['cb_sendemail'] 				= 0;
 				$campinfo['manual_dial_min_digits'] 	= 6;
+				$campinfo['default_country_code']	= '';
 				
 				if ($goDB->count > 0) {
 					$campinfo['custom_fields_launch'] 	= $rslt['custom_fields_launch'];
@@ -1050,6 +1056,7 @@
 					$campinfo['cb_noexpire'] 			= $rslt['cb_noexpire'];
 					$campinfo['cb_sendemail'] 			= $rslt['cb_sendemail'];
 					$campinfo['manual_dial_min_digits'] = $rslt['manual_dial_min_digits'];
+					$campinfo['default_country_code'] = $rslt['default_country_code'];
 				}
 				
 				$goDB->where('setting', 'timezone');
