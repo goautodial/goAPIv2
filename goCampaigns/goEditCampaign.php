@@ -117,6 +117,7 @@
 	$survey_wait_sec 								    = $astDB->escape($_REQUEST['survey_wait_sec']);
 	$survey_no_response_action 							= $astDB->escape($_REQUEST['survey_no_response_action']);
 	$google_sheet_list_id								= $astDB->escape($_REQUEST["google_sheet_list_id"]);
+	$default_country_code								= $astDB->escape($_REQUEST["default_country_code"]);
 
     // Default values 
     $defActive 											= array( "Y", "N" );	
@@ -396,7 +397,8 @@
 							'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail'],
                             				'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
 							'auto_dial_level'				=> $auto_dial_level,
-							'google_sheet_list_id'				=> $google_sheet_list_id
+							'google_sheet_list_id'				=> $google_sheet_list_id,
+							'default_country_code'				=> $default_country_code
 						);
 						
 						$goDB->where( 'campaign_id', $campaign_id );
@@ -420,7 +422,8 @@
 							'cb_sendemail' 						=> ( gettype($cb_sendemail) != 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail'],
                             				'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) != 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
 							'auto_dial_level'				=> $auto_dial_level,
-							'google_sheet_list_id'				=> $google_sheet_list_id
+							'google_sheet_list_id'				=> $google_sheet_list_id,
+							'default_country_code'				=> $default_country_code
 						);
 
 						$goDB->insert('go_campaigns', $data_insert_go);
