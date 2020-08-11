@@ -112,7 +112,7 @@
 				}
 				
 				$country_code_COL 						= '';
-				$checkColumn 							= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'country_code'");
+				$checkColumn 							= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'default_country_code'");
 
 				if ($goDB->count > 0) {
 					$country_code_COL 					= ", default_country_code";
