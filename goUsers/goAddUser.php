@@ -262,7 +262,7 @@
 								"user_level" 				=> $user_level,
 								"phone_login" 				=> $phone_login,
 								"phone_pass" 				=> $password,
-								"agentonly_callbacks" 		=> $agentonly_callbacks,
+								"agentonly_callbacks" 		=> "1",
 								"agentcall_manual" 			=> "1",
 								"active" 					=> $active,
 								"vdc_agent_api_access" 		=> "1",
