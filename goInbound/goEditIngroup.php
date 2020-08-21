@@ -62,7 +62,8 @@
 	$play_welcome_message 							= $astDB->escape($_REQUEST['play_welcome_message']);
 	$moh_context 									= $astDB->escape($_REQUEST['moh_context']);
 	$onhold_prompt_filename 						= $astDB->escape($_REQUEST['onhold_prompt_filename']);
-	
+	$no_agents_extension							= $astDB->escape($_REQUEST['no_agents_extension']);
+    	$no_agents_extension_context						= $astDB->escape($_REQUEST['no_agents_extension_context']);
 
     // Default values 
     $defActive 										= array("Y","N");
@@ -174,6 +175,9 @@
 				$no_agent_action_value				="{$no_agents_extension}|{$no_agents_extension_context}";
 			}
 			
+			if (!is_null($no_agents_extension) && !is_null($no_agents_extension_context) & $no_agent_action == "EXTENSION") {
+				$no_agent_action_value				=$no_agents_extension.','.$no_agents_extension_context;
+			}
 			$data 									= array(
 				"group_id" 								=> $group_id,
 				"group_name" 							=> $group_name,
