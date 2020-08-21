@@ -222,7 +222,7 @@
 				} 
 	
 				$outbound_select_query_sales .= "
-					SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS Amount 
+					SELECT vlog.list_id, vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS Amount 
 					FROM vicidial_log vlog 
 					LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id 
 					WHERE vlog.lead_id=cf.lead_id 
@@ -307,25 +307,25 @@
 				";
 
 			// Statewide Customization
-                        $inbound_select_query_sales = "";
-                        $i = 0;
-                        foreach($array_list_amount as $list_amount){
-                                if($i > 0) {
-                                        $inbound_select_query_sales .= " UNION ";
-                                }
+			$inbound_select_query_sales = "";
+			$i = 0;
+			foreach($array_list_amount as $list_amount){
+					if($i > 0) {
+							$inbound_select_query_sales .= " UNION ";
+					}
 
-                                $inbound_select_query_sales .= "
-                                        SELECT vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS amount
-                                        FROM vicidial_closer_log vlog
-                                        LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id
-                                        WHERE vlog.lead_id=cf.lead_id
-                                        AND vlog.status IN ('$statuses')
-                                        AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
-					AND $campaign_inb_query $ul
-					GROUP BY vlog.user
-                                        ";
-                                $i++;
-                        }
+					$inbound_select_query_sales .= "
+							SELECT vlog.list_id, vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS amount
+							FROM vicidial_closer_log vlog
+							LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id
+							WHERE vlog.lead_id=cf.lead_id
+							AND vlog.status IN ('$statuses')
+							AND date_format(vlog.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
+							AND $campaign_inb_query $ul
+							GROUP BY vlog.user
+							";
+					$i++;
+			}
 
 			if($inbound_select_query_sales != ''){
 				$col_exists = 1;
