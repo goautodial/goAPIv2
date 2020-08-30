@@ -62,3 +62,10 @@ curl 'https://DOMAINNAME/goAPIv2/goCampaigns/goAPI.php?goAction=goAddCampaign&go
 
 The encrypted password can be derived from the pass_hash column in the vicidial_users table under the asterisk database. Or use /var/www/html/bin/pass_hasher.php to generate the encrypted password.
 
+## OpenAPI Spec
+
+There is also a work-in-progress openapi spec composed by @God-Zalo which can be used for
+code-generating 
+[client sdks in different languages](https://github.com/OpenAPITools/openapi-generator):
+
+- https://app.swaggerhub.com/apis/godzalo/goautodial-users/0.1.3
