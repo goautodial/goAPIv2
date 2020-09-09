@@ -67,7 +67,8 @@ if ($is_logged_in) {
 			$channel = $row['channel'];
 			$call_output = array(
                 'uniqueid' => $uniqueid,
-                'channel' => $channel
+                'channel' => $channel,
+                'MDalert' => ''
             );
 			$call_good++;
 		} else {
