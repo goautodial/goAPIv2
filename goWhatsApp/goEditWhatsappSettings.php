@@ -20,37 +20,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	//$query = "SELECT * FROM smtp_settings LIMIT 1;";
-	$rsltv = $goDB->getOne('settings')
-		->where('settings', 'GO_whatsapp_user');
-	$exist = $goDB->getRowCount();
-	
-	if($exist <= 1){
-		$user = $astDB->escape($_REQUEST['GO_whatsapp_user']); 
-		$token = $astDB->escape($_REQUEST['GO_whatsapp_token']); 
-		$host = $astDB->escape($_REQUEST['GO_whatsapp_host']); 
-		$instance = $astDB->escape($_REQUEST['GO_whatsapp_instance']); 	
-		$callback_url = $astDB->escape($_REQUEST['GO_whatsapp_callback_url']); 
+	$user = $astDB->escape($_REQUEST['GO_whatsapp_user']); 
+	$token = $astDB->escape($_REQUEST['GO_whatsapp_token']); 
+	$host = $astDB->escape($_REQUEST['GO_whatsapp_host']); 
+	$instance = $astDB->escape($_REQUEST['GO_whatsapp_instance']); 	
+	$callback_url = $astDB->escape($_REQUEST['GO_whatsapp_callback_url']); 
 
-		$settings = array(
-			'GO_whatsapp_user' => $user, 
-			'GO_whatsapp_token' => $token, 
-			'GO_whatsapp_host' => $host, 
-			'GO_whatsapp_instance' => $instance, 
-			'GO_whatsapp_callback_url' => $callback_url
-		);
-		
-		foreach($settings as $setting => $key){
+	$settings = array(
+		'GO_whatsapp_user' => $user, 
+		'GO_whatsapp_token' => $token, 
+		'GO_whatsapp_host' => $host, 
+		'GO_whatsapp_instance' => $instance, 
+		'GO_whatsapp_callback_url' => $callback_url
+	);
+	
+	foreach($settings as $setting => $key){
+		$check_setting = $goDB->where('setting', $setting)
+			->getOne('settings');
+		$exist_setting = $goDB->getRowCount();
+
+		if($exist_setting){
 			$data = array(
 				'value' => $key
 			);
-			$execute_update = $goDB->update('settings', $data)->where('setting', $setting);
-		}
+			$execute_update = $goDB->update('settings', $data)
+				->where('setting', $setting);
+		} else {
+			$insertData = array(
+				'setting' => $setting,
+				'context' => "module_GOautodialWhatsApp",
+				'value' => $key
+			);
 
-		if($execute_update){
-			$apiresults = array("result" => "success");
-		}else{
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.");
+			$execute_insert = $goDB->insert('settings', $insertData);
 		}
-	} 
+	}
+
+	if($execute_update){
+		$apiresults = array("result" => "success");
+	}else{
+		$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.");
+	}
 ?>
