@@ -207,11 +207,14 @@ if ($is_logged_in) {
 					$astDB->where('lead_id', $lead_id);
 					$astDB->update($custom_listid, $fields);
 					
+                    $custom_last_SQL = $astDB->getLastQuery();
 					$update_success = $astDB->getRowCount();
 				} else {
 					$fields['lead_id'] = $lead_id;
 					
 					$astDB->insert($custom_listid, $fields);
+                    
+                    $custom_last_SQL = $astDB->getLastQuery();
 					$lastError = $astDB->getLastError();
 					$insert_success = $astDB->getRowCount();
 				}
@@ -233,7 +236,7 @@ if ($is_logged_in) {
 			$retry_count++;
 		}
         
-        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError );
+        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError, "last_query" => $custom_last_SQL );
     }
 } else {
     $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
