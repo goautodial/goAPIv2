@@ -170,7 +170,7 @@
 			}
 			
 			if (!is_null($no_agents_extension) && !is_null($no_agents_extension_context) && $no_agent_action == "EXTENSION") {
-				$no_agent_action_value				="{$no_agents_extension}|{$no_agents_extension_context}";
+				$no_agent_action_value				="{$no_agents_extension},{$no_agents_extension_context}";
 			}
 			$data 									= array(
 				"group_id" 								=> $group_id,
