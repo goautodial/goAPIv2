@@ -68,12 +68,12 @@ if (count($list_ids) > 0 ) {
     $astDB->where('vl.list_id', $list_ids, 'in');
     $astDB->where('vl.status', array('DNC', 'DNCL'), 'not in');
     if (strlen($search_string) >= 3) {
-        $astDB->where('first_name', $search_string, 'like');
-        $astDB->orWhere('last_name', $search_string, 'like');
-        $astDB->orWhere('phone_number', $search_string, 'like');
-        $astDB->orWhere('lead_id', $search_string, 'like');
-        $astDB->orWhere('campaign_id', $search_string, 'like');
-        $astDB->orWhere('comments', $search_string, 'like');
+        $astDB->where('first_name', "%$search_string%", 'like');
+        $astDB->orWhere('last_name', "%$search_string%", 'like');
+        $astDB->orWhere('phone_number', "%$search_string%", 'like');
+        $astDB->orWhere('lead_id', "%$search_string%", 'like');
+        $astDB->orWhere('campaign_id', "%$search_string%", 'like');
+        $astDB->orWhere('comments', "%$search_string%", 'like');
     }
     $astDB->join('vicidial_lists vls', 'vls.list_id=vl.list_id', 'left');
     $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,campaign_id,status,comments,phone_code');
