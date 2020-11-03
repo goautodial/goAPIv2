@@ -31,6 +31,9 @@ if (isset($_GET['goLeadSearchMethod'])) { $agent_lead_search_method = $astDB->es
 if (isset($_GET['goIsLoggedIn'])) { $is_logged_in = $astDB->escape($_GET['goIsLoggedIn']); }
     else if (isset($_POST['goIsLoggedIn'])) { $is_logged_in = $astDB->escape($_POST['goIsLoggedIn']); }
 
+if (isset($_GET['goSearchString'])) { $search_string = $astDB->escape($_GET['goSearchString']); }
+    else if (isset($_POST['goSearchString'])) { $search_string = $astDB->escape($_POST['goSearchString']); }
+
 if (!isset($limit) || !is_numeric($limit)) {
     $limit = 10000;
 }
@@ -64,6 +67,14 @@ foreach ($rslt as $val) {
 if (count($list_ids) > 0 ) {
     $astDB->where('vl.list_id', $list_ids, 'in');
     $astDB->where('vl.status', array('DNC', 'DNCL'), 'not in');
+    if (strlen($search_string) >= 3) {
+        $astDB->where('first_name', $search_string, 'like');
+        $astDB->orWhere('last_name', $search_string, 'like');
+        $astDB->orWhere('phone_number', $search_string, 'like');
+        $astDB->orWhere('lead_id', $search_string, 'like');
+        $astDB->orWhere('campaign_id', $search_string, 'like');
+        $astDB->orWhere('comments', $search_string, 'like');
+    }
     $astDB->join('vicidial_lists vls', 'vls.list_id=vl.list_id', 'left');
     $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,campaign_id,status,comments,phone_code');
     $lastQuery = $astDB->getLastQuery();
