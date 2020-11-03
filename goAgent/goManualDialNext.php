@@ -1013,6 +1013,7 @@ if ($sipIsLoggedIn) {
                 $phone_code		= trim("{$row['phone_code']}");
                 if ($override_phone < 1)
                     {$phone_number	= trim("{$row['phone_number']}");}
+                $orig_phone     = trim("{$row['phone_number']}");
                 $title			= trim("{$row['title']}");
                 $first_name		= trim("{$row['first_name']}");
                 $middle_initial	= trim("{$row['middle_initial']}");
@@ -1070,6 +1071,10 @@ if ($sipIsLoggedIn) {
                     {$agent_dialed_number = $alt_phone;}
                 if ($agent_dialed_type == 'ADDR3')
                     {$agent_dialed_number = $address3;}
+                
+                if (strlen($agent_dialed_number) <= 3 or (strlen($agent_dialed_number) < $manual_dial_min_digits)) {
+                    $agent_dialed_number = $orig_phone;
+                }
             }
 
             ##### BEGIN check for postal_code and phone time zones if alert enabled
