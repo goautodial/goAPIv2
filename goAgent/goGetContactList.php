@@ -68,8 +68,7 @@ if (count($list_ids) > 0 ) {
     $astDB->where('vl.list_id', $list_ids, 'in');
     $astDB->where('vl.status', array('DNC', 'DNCL'), 'not in');
     if (strlen($search_string) >= 3) {
-        $astDB->where('first_name', "%$search_string%", 'like');
-        $astDB->orWhere('last_name', "%$search_string%", 'like');
+        $astDB->where("CONCAT(first_name,' ',last_name)", "%$search_string%", 'like');
         $astDB->orWhere('phone_number', "%$search_string%", 'like');
         $astDB->orWhere('lead_id', "%$search_string%", 'like');
         $astDB->orWhere('campaign_id', "%$search_string%", 'like');
