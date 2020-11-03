@@ -78,6 +78,7 @@ if (count($list_ids) > 0 ) {
     $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,campaign_id,status,comments,phone_code');
     $lastQuery = $astDB->getLastQuery();
 
+    $leads = array();
     foreach ($rslt as $lead) {
         $leads[] = $lead;
     }
