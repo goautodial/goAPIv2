@@ -173,7 +173,8 @@
 
                                                 # in default statuses
 						$astDB->where("status", $var_status);
-						$default_status = $astDB->getOne("vicidial_statuses", "status_name");
+                                                $default_status = $astDB->getOne("vicidial_statuses", "status_name");
+                                                $fetch_statusname = NULL;
 
                                                 if ($default_status) {
                                                         $fetch_statusname = $default_status;
