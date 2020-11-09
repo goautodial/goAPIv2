@@ -47,6 +47,8 @@
 	$lead_order 										= $astDB->escape($_REQUEST['lead_order']);
 	$lead_order_secondary 								= $astDB->escape($_REQUEST['lead_order_secondary']);
 	$lead_filter 										= $astDB->escape($_REQUEST['lead_filter']);
+	$call_count_limit 									= $astDB->escape($_REQUEST['call_count_limit']);
+	$call_count_target 									= $astDB->escape($_REQUEST['call_count_target']);
 	$dial_timeout 										= $astDB->escape($_REQUEST['dial_timeout']);
 	$manual_dial_prefix 								= $astDB->escape($_REQUEST['manual_dial_prefix']);
 	$get_call_launch 									= $astDB->escape($_REQUEST['get_call_launch']);
@@ -316,6 +318,8 @@
 						'dial_status_a' 						=> (!empty($dial_status)) ? $dial_status : $resultGet['dial_status'], 
 						//'lead_filter_id' 						=> (!empty($lead_filter)) ? $lead_filter : $resultGet['lead_filter_id'],
 						'lead_filter_id' 						=> (!empty($lead_filter)) ? $lead_filter : '',
+						'call_count_limit' 						=> (!empty($call_count_limit)) ? $call_count_limit : '0',
+						'call_count_target' 					=> (!empty($call_count_target)) ? $call_count_target : '3',
 						'dial_timeout' 							=> (!empty($dial_timeout)) ? $dial_timeout : $resultGet['dial_timeout'], 
 						//'manual_dial_prefix' 					=> (!empty($manual_dial_prefix)) ? $manual_dial_prefix : $resultGet['manual_dial_prefix'],
 						'manual_dial_prefix' 					=> $manual_dial_prefix,
