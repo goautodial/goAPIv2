@@ -119,14 +119,15 @@
 			->where("campaign_id", $array_camp, "IN")
 			->orderBy("list_id")
 			->get("vicidial_lists", NULL, "list_id");
-			
+		
+        $list_ids = array();
 		if ($astDB->count > 0) {
 			foreach ($qlistid as $row) {
 				$list_ids[]							= $row['list_id'];
 			}
 		}
 		//}
-		$list = "'".implode("','",$list_ids)."'";
+		$list = (count($list_ids) > 0) ? "'".implode("','",$list_ids)."'" : "'-1'";;
 		
 		$qsstatuses 								= $astDB
 			->orderBy("status")
