@@ -114,11 +114,13 @@
     ##### checkiftenant ######
     function checkIfTenant($groupId, $dbase){
         //$query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
-		$dbase->where('tenant_id', $groupId);
-        $rslt_tenant = $dbase->get('go_multi_tenant');
+		//$dbase->where('tenant_id', $groupId);
+        //$rslt_tenant = $dbase->get('go_multi_tenant');
+		$dbase->where('user_group', $groupId);
+		$rslt_tenant = $dbase->get('vicidial_user_groups');
 		$check_result_tenant = $dbase->getRowCount();
 		
-        if ($check_result_tenant > 0) {
+        if ($check_result_tenant > 0 && $groupId !== "ADMIN") {
             return true;
         } else {
             return false;
@@ -204,7 +206,7 @@
 		return $allAllowedCampaigns;
     }
 
-    function allowed_campaigns($log_group, $goDB, $astDB, $type=null) {
+    function allowed_campaigns($log_group, $goDB, $astDB, $type=null, $user_level=null) {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere('user_group', "---ALL---");
