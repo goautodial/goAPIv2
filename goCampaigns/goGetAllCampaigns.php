@@ -50,14 +50,15 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
 			
 			$astDB->where('user_group', $log_group);
 			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
-				$astDB->orWhere("user_group", "---ALL---");
+				//$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
