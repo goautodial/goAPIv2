@@ -127,7 +127,11 @@
 			}
 		}
 		//}
-		$list = (count($list_ids) > 0) ? "'".implode("','",$list_ids)."'" : "'-1'";;
+        if ($tenant) {
+            $list = (count($list_ids) > 0) ? "'".implode("','",$list_ids)."'" : "'-1'";
+        } else {
+            $list = "'".implode("','",$list_ids)."'";
+        }
 		
 		$qsstatuses 								= $astDB
 			->orderBy("status")
