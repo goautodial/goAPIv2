@@ -52,10 +52,18 @@
 		$toDate 									= date("Y-m-d") . " 23:59:59";
 		//die($fromDate." - ".$toDate);									=> $err_msg
 	} else {
+		$fresults 									= $astDB
+			->where("user", $goUser)
+			->getOne("vicidial_users", "user,user_level,user_group");
+		
+		$goapiaccess 								= $astDB->getRowCount();
+		$userlevel 									= $fresults["user_level"];
+		$usergroup 									= $fresults["user_group"];
+        
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
 		//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-        $tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
+        $tenant                                     = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
 			
 		// check if MariaDB slave server available
 		$rslt										= $goDB
@@ -76,11 +84,11 @@
 		}
 		
 		if ($tenant) {
-			$astDB->where("user_group", $log_group);
+			$astDB->where("user_group", $usergroup);
 		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
+			if (strtoupper($usergroup) != 'ADMIN') {
 				if ($user_level > 8) {
-					$astDB->where("user_group", $log_group);
+					$astDB->where("user_group", $usergroup);
 				}
 			}
 		}
