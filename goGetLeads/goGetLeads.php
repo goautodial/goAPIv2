@@ -68,11 +68,28 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		$usergroup										= $fresults["user_group"];
+        
+        $tenant                                         = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
-			if (is_array($campaigns)) {
+            if ($tenant) {
+                $astDB->where("user_group", $usergroup);
+            } else {
+                if (strtoupper($usergroup) != 'ADMIN') {
+                    if ($user_level > 8) {
+                        $astDB->where("user_group", $usergroup);
+                    }
+                }
+            }
+            $SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+            $array_camp = array();
+            foreach($SELECTQuery as $camp_val){
+                $array_camp[] 						= $camp_val["campaign_id"];
+            }
+            
+			if (is_array($array_camp)) {
 				$listids								= $astDB
-				->where("campaign_id", $campaigns, "IN")
+				->where("campaign_id", $array_camp, "IN")
 				->get("vicidial_lists", NULL, "list_id");
 			}
 	
