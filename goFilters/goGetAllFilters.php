@@ -101,7 +101,7 @@
 				
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
-				$astDB->orWhere("user_group", "---ALL---");
+				$astDB->orWhere("lead_filter_id", "FILTEMP");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
 					if ($userlevel > 8) {
