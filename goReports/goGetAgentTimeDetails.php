@@ -62,20 +62,11 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {				
 			// Agent Time Detail
-			if ($pageTitle == "agent_detail") {			
+			if ($pageTitle == "agent_detail") {
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
-				$tenant	= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-				
-				if ($tenant) {
-					$astDB->where("user_group", $log_group);
-				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel > 8) {
-							$astDB->where("user_group", $log_group);
-						}
-					}					
-				}
+				//$tenant	= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+                $tenant     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
 				
 				// check if MariaDB slave server available
 				$rslt								= $goDB
@@ -93,6 +84,16 @@
 						exit;
 						//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
 					}			
+				}
+				
+				if ($tenant) {
+					$astDB->where("user_group", $log_group);
+				} else {
+					if (strtoupper($log_group) != 'ADMIN') {
+						if ($userlevel > 8) {
+							$astDB->where("user_group", $log_group);
+						}
+					}					
 				}
 				
 				$TOTtimeTC = array();
@@ -136,14 +137,14 @@
 				}
 				
 				if ("ALL" === strtoupper($campaign_id)) {
-                        		$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        		
+                    $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                    
 					foreach($SELECTQuery as $camp_val){
-                                		$array_camp[] = $camp_val["campaign_id"];
-                        		}
-                		}else{
-                        		$array_camp[] 		= $campaign_id;
-                		}
+                        $array_camp[] = $camp_val["campaign_id"];
+                    }
+                }else{
+                    $array_camp[] 		= $campaign_id;
+                }
 				//$imploded_camp = "'".implode("','", $array_camp)."'";
 	
 				$cols = array(

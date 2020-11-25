@@ -77,9 +77,14 @@
 				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
 			}			
 		}
+        
+		$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
 		
 		//ALL CAMPAIGNS
 		if ("ALL" === strtoupper($campaign_id)) {
+            if ($tenant) {
+                $astDB->where("user_group", $log_group);
+            }
 			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
 			foreach($SELECTQuery as $camp_val){

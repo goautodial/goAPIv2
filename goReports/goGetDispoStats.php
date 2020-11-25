@@ -54,17 +54,8 @@
 	} else {
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
-		$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-		
-		if ($tenant) {
-			$astDB->where("user_group", $log_group);
-		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
-				if ($user_level > 8) {
-					$astDB->where("user_group", $log_group);
-				}
-			}
-		}
+		//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+        $tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
 			
 		// check if MariaDB slave server available
 		$rslt										= $goDB
@@ -82,6 +73,16 @@
 				exit;
 				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
 			}			
+		}
+		
+		if ($tenant) {
+			$astDB->where("user_group", $log_group);
+		} else {
+			if (strtoupper($log_group) != 'ADMIN') {
+				if ($user_level > 8) {
+					$astDB->where("user_group", $log_group);
+				}
+			}
 		}
 		
 		//ALL CAMPAIGNS
