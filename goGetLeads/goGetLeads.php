@@ -63,12 +63,13 @@
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level");
+			->getOne("vicidial_users", "user,user_level,user_group");
 		
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
+		$usergroup										= $fresults["user_group"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {    
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (is_array($campaigns)) {
 				$listids								= $astDB
 				->where("campaign_id", $campaigns, "IN")
@@ -126,7 +127,11 @@
 				$limit 									= $goVarLimit;
 			}
 			
-			$astDB->where("list_id", $list_ids, "IN");
+            if (count($list_ids) < 1) {
+                $list_ids = array("-1");
+            }
+            
+            $astDB->where("list_id", $list_ids, "IN");
 			$fresultsv 									= $astDB->get("vicidial_list", $limit, "*");
 			
 			// GET CUSTOMER LIST
