@@ -54,7 +54,7 @@ if ($sipIsLoggedIn) {
 		### set the lead back to previous status and called_count
 		//$stmt = "UPDATE vicidial_list set status='$stage', called_count='$called_count',user='$user' where lead_id='$lead_id';";
 		$updateData = array(
-			'status' => $status,
+			'status' => $stage,
 			'called_count' => $called_count,
 			'user' => $user
 		);
