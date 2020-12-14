@@ -103,7 +103,7 @@
 			$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;
 			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
 			
-			if($goGetCheckcustomFieldNamesCorrect === "error") {
+			if($goGetCheckcustomFieldNamesCorrect !== "success") {
 				fclose($handle);
 			}
 		}
@@ -716,8 +716,8 @@
 			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
 		}elseif($goCountInsertedLeads > 0 && $duplicates > 0){
 			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    Duplicates:$duplicates");
-		} elseif($goGetCheckcustomFieldNamesCorrect === "error"){
-			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names. Check the File Headers");
+		} elseif($goGetCheckcustomFieldNamesCorrect != "success"){
+			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names. Check the File Headers $goGetCheckcustomFieldNamesCorrect");
 		}elseif($duplicates > 0){
 			$apiresults = array("result" => "error" , "message" => "Duplicates Found : $duplicates");
 		}else {
@@ -750,12 +750,16 @@
 
 		if( $countCustomCheck === 0 ){
 			return "error";
+		} else {
+			return "success";
 		}
 
-		$rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
+		/*$rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
+		$query = $link->getLastQuery();
 		
 		if(!$rsltSQLCHECK){
 			$goRetMessage = "error";
+			$goRetMessage = "$query";
 		} else {
 			/*$goShowCustomFields = "DESC custom_$goCClistID;";
 			$rsltgoShowCustomFields = $link->rawQuery($goShowCustomFields);
@@ -767,11 +771,11 @@
 				}
 				
 				$goRetMessage = preg_replace("/,$/",'',$goCustomFields);
-			}*/
+			}
 			$goRetMessage = "success";
 		}
 				
-		return $goRetMessage;
+		return $goRetMessage;*/
 	}
 	
 	// check 1st if fields are not less than 21
