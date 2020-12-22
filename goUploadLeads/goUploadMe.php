@@ -334,7 +334,7 @@
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
 									$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
 									array_push($goCustomValuesData, "'$goCustomValues'");
-									array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+									array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
 								$goCustomValues = implode(",", $goCustomValuesData);
@@ -456,7 +456,7 @@
 										
 										#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 										array_push($goCustomValuesData, "'$goCustomValues'");
-										array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+										array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 
 									}
 
@@ -575,7 +575,7 @@
 									
 									#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 									array_push($goCustomValuesData, "'$goCustomValues'");
-                                                                        array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+                                                                        array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
