@@ -87,7 +87,7 @@
 			$astDB->where("user_group", $usergroup);
 		} else {
 			if (strtoupper($usergroup) != 'ADMIN') {
-				if ($user_level > 8) {
+				if ($user_level < 9) {
 					$astDB->where("user_group", $usergroup);
 				}
 			}

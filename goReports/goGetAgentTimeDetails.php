@@ -90,7 +90,7 @@
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel > 8) {
+						if ($userlevel < 9) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
@@ -130,7 +130,7 @@
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($user_level > 8) {
+						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
@@ -192,7 +192,7 @@
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($user_level > 8) {
+						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
