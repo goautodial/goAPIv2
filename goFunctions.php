@@ -207,11 +207,11 @@
     function allowed_campaigns($log_group, $goDB, $astDB, $type=null) {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
-			$astDB->orWhere('user_group', "---ALL---");
+			//$astDB->orWhere('user_group', "---ALL---");
 		} else {
 			if(strtoupper($log_group) !== "ADMIN"){
 				$astDB->where('user_group', $log_group);
-				$astDB->orWhere('user_group', "---ALL---");
+				//$astDB->orWhere('user_group', "---ALL---");
 			}
 		}    
 
