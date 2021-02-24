@@ -37,7 +37,7 @@
                 
                 $apiresults = array("result" => $webrtc);
         } else {
-                $apiresults = array("result" => "Faile to get Result.");
+                $apiresults = array("result" => "Failed to get Result.");
         }
 ?>
 
