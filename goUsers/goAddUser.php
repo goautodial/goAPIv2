@@ -32,8 +32,9 @@
 	$phone_pass 										= $pass;
 	$user_group 										= $astDB->escape($_REQUEST['user_group']);
 	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));		
-	$avatar 											= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);	
+	$avatar 											= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);
 	$seats 												= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
+	$server_ip 											= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
 	$defActive 											= array("Y", "N");
 
     // Error Checking
@@ -203,8 +204,10 @@
 						$astDB->getOne("vicidial_users", "user") ;
 						
 						if ($astDB->count <= 0) {
-							$rServerIP 					= $astDB->getOne("servers", "server_ip");
-							$server_ip 					= $rServerIP['server_ip'];
+                            if (!isset($server_ip)) {
+                                $rServerIP 					= $astDB->getOne("servers", "server_ip");
+                                $server_ip 					= $rServerIP['server_ip'];
+                            }
 							
 							// check group_level
 							$group_level 				= $goDB
