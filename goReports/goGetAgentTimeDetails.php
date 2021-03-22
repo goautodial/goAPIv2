@@ -60,7 +60,7 @@
 		$goapiaccess 								= $astDB->getRowCount();
 		$userlevel 									= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {				
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// Agent Time Detail
 			if ($pageTitle == "agent_detail") {
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
