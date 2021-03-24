@@ -101,51 +101,6 @@
 			$checkTable 								= $astDB->rawQuery($tableQuery);
 			
 			if ($checkTable) {
-				$cols 									= array(
-					"vl.phone_number as 'vl_phone_number'",
-					"vla.extension as 'vla_extension'",
-					"vla.user as 'vla_user'",
-					"vu.full_name as 'vu_full_name'",
-					"vu.user_group as 'vu_user_group'",
-					"vu.phone_login as 'vu_phone_login'",
-					"vla.conf_exten as 'vla_conf_exten'",
-					"vla.status as 'vla_status'",
-					"vla.comments as 'vla_comments'",
-					"vla.server_ip as 'vla_server_ip'",
-					"vla.call_server_ip as 'vla_call_server_ip'",
-					"UNIX_TIMESTAMP(last_call_time) as 'last_call_time'",
-					"UNIX_TIMESTAMP(last_update_time) as 'last_update_time'",
-					"UNIX_TIMESTAMP(last_call_finish) as 'last_call_finish'",
-					"vla.campaign_id as 'vla_campaign_id'",
-					"UNIX_TIMESTAMP(last_state_change) as 'last_state_change'",
-					"vla.lead_id as 'vla_lead_id'",
-					"vla.agent_log_id as 'vla_agent_log_id'",
-					"vu.user_id as 'vu_user_id'",
-					"vu.user as 'vu_user'",
-					"vla.callerid as 'vla_callerid'",
-					"val.sub_status as 'vla_pausecode'",
-					"vc.campaign_name as 'vla_campaign_name'",
-					"ol.conference as 'ol_conference'",
-					"ol.name as 'ol_callerid'"
-				);
-				
-				$table									= "vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, online as ol, vicidial_live_agents as vla";				
-				//$onlineAgents 							= $astDB
-				//	->join("vicidial_list as vl", "vla.lead_id = vl.lead_id", "LEFT")
-				//	//->join("online as ol", "ol.name = vla.callerid", "LEFT")
-				//	//->joinOrWhere("online as ol", "ol.conference", "vla.conf_exten")			
-				//	->where("ol.name = vla.callerid")
-				//	->orWhere("ol.conference = vla.conf_exten")
-				//	->where("vla.campaign_id", $campaigns, "IN")
-				//	->where("vla.campaign_id = vc.campaign_id")
-				//	->where("vla.user = vu.user")
-				//	->where("vla.user_level != 4")
-				//	->where("vla.user", DEFAULT_USERS, "NOT IN")
-				//	->where("vla.agent_log_id = val.agent_log_id")
-				//	->groupBy("ol.conference")
-				//	->orderBy("last_call_time")		
-				//	->get($table, NULL, $cols);
-                
                 $campaignFilters = '';
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $allowedCampaigns = implode("','", $allowed_campaigns);
@@ -153,9 +108,9 @@
                 }
                 $defaultUsers = implode("','", DEFAULT_USERS);
 		
-		$online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
-		$online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
-		$online_group = "GROUP BY ol.conference";
+                $online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
+                $online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
+                $online_group = "GROUP BY ol.conference";
 
                 $SQLquery = "SELECT DISTINCT vl.phone_number as 'vl_phone_number', vla.extension as 'vla_extension', vla.user as 'vla_user',
                         vu.full_name as 'vu_full_name', vu.user_group as 'vu_user_group', vu.phone_login as 'vu_phone_login',
@@ -165,7 +120,7 @@
                         vla.campaign_id as 'vla_campaign_id', UNIX_TIMESTAMP(last_state_change) as 'last_state_change',
                         vla.lead_id as 'vla_lead_id', vla.agent_log_id as 'vla_agent_log_id', vu.user_id as 'vu_user_id',
                         vu.user as 'vu_user', vla.callerid as 'vla_callerid', val.sub_status as 'vla_pausecode',
-                        vc.campaign_name as 'vla_campaign_name'
+                        vc.campaign_name as 'vla_campaign_name', vla.closer_campaigns as 'vla_closer_campaigns'
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
                     WHERE ($campaignFilters vla.campaign_id = vc.campaign_id) 
@@ -186,6 +141,7 @@
 						"result" 							=> "success", 
 						//"query" 							=> $astDB->getLastQuery(),
                         //"query"                             => $SQLquery,
+                        "online_table"                      => "exist",
 						"data" 								=> $onlineAgents, 
 						"dataGo" 							=> $dataGo,
 						"parked" 							=> $dataPCs
