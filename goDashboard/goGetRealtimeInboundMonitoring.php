@@ -134,7 +134,18 @@
                     
                     foreach ($onlineAgents as $agent) {
                         $aUser = $agent['vu_user'];
-                        $calls_in_queue[$aUser] = 10;
+                        
+                        if (!empty($agent['vla_closer_campaigns'])) {
+                            $closer_campaigns           = trim(substr($agent['vla_closer_campaigns'], 0, -1));
+                            $closer_campaigns           = explode(" ", $closer_campaigns);
+                            $astDB->where("campaign_id", $closer_campaigns, "IN");
+                        }
+                        $cData							= $astDB
+                            ->where("status", array("XFER"), "NOT IN")
+                            ->where("call_type", "IN", "=")		
+                            ->get("vicidial_auto_calls");
+                        
+                        $calls_in_queue[$aUser]         = $astDB->getRowCount();
                     }
 					
 					if ($resultsPCs) {
