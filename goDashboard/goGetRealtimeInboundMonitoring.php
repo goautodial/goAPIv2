@@ -133,8 +133,7 @@
                     $calls_in_queue                     = array();
                     
                     foreach ($onlineAgents as $agent) {
-                        var_dump($agent);
-                        $aUser = $agent->vu_user_id;
+                        $aUser = $agent['vu_user'];
                         $calls_in_queue[$aUser] = 10;
                     }
 					
