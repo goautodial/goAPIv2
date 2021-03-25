@@ -124,7 +124,7 @@
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
                     WHERE ($campaignFilters vla.campaign_id = vc.campaign_id) 
-                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id AND vla.closer_campaigns <> ''
+                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
                     ORDER BY last_call_time";
                 $onlineAgents = $astDB->rawQuery($SQLquery);
 				$queryoa = $SQLquery; //$astDB->getLastQuery();	
