@@ -130,6 +130,12 @@
 				$queryoa = $SQLquery; //$astDB->getLastQuery();	
 				if ($astDB->count > 0) {
 					$dataPCs 							= array();
+                    $calls_in_queue                     = array();
+                    
+                    foreach ($onlineAgents as $agent) {
+                        $aUser = $agent->vu_user_id;
+                        $calls_in_queue[$aUser] = 10;
+                    }
 					
 					if ($resultsPCs) {
 						foreach ($resultsPCs as $resultsPC) {               
@@ -144,7 +150,8 @@
                         "online_table"                      => "exist",
 						"data" 								=> $onlineAgents, 
 						"dataGo" 							=> $dataGo,
-						"parked" 							=> $dataPCs
+						"parked" 							=> $dataPCs,
+                        "calls_in_queue"                    => $calls_in_queue
 					);			
 				} else {
 					$apiresults 						= array(
