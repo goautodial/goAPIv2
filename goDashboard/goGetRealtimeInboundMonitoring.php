@@ -141,7 +141,7 @@
                             $astDB->where("campaign_id", $closer_campaigns, "IN");
                         }
                         $cData							= $astDB
-                            ->where("status", array("XFER"), "NOT IN")
+                            ->where("status", array("XFER", "CLOSER"), "NOT IN")
                             ->where("call_type", "IN", "=")		
                             ->get("vicidial_auto_calls");
                         
