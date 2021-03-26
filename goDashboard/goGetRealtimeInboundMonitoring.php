@@ -25,6 +25,7 @@
     include_once ("goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$ingroup 										    = $astDB->escape( $_REQUEST['ingroup'] );
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
