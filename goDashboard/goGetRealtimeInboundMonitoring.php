@@ -131,15 +131,14 @@
 				if ($astDB->count > 0) {
 					$dataPCs 							= array();
                     $calls_in_queue                     = array();
-                    $inbound_groups                     = array();
                     
                     foreach ($onlineAgents as $agent) {
                         $aUser = $agent['vu_user'];
                         
                         if (!empty($agent['vla_closer_campaigns'])) {
                             $closer_campaigns           = trim(substr($agent['vla_closer_campaigns'], 0, -1));
-                            $inbound_groups             = explode(" ", $closer_campaigns);
-                            $astDB->where("campaign_id", $inbound_groups, "IN");
+                            $closer_campaigns           = explode(" ", $closer_campaigns);
+                            $astDB->where("campaign_id", $closer_campaigns, "IN");
                         }
                         $cData							= $astDB
                             ->where("status", array("XFER", "CLOSER"), "NOT IN")
@@ -153,7 +152,7 @@
 						foreach ($resultsPCs as $resultsPC) {               
 							array_push($dataPCs, $resultsPC);
 						}				
-					}
+					}                        
 					
 					$apiresults 						= array(
 						"result" 							=> "success", 
@@ -163,8 +162,7 @@
 						"data" 								=> $onlineAgents, 
 						"dataGo" 							=> $dataGo,
 						"parked" 							=> $dataPCs,
-                        "calls_in_queue"                    => $calls_in_queue,
-                        "inbound_groups"                    => $inbound_groups
+                        "calls_in_queue"                    => $calls_in_queue
 					);
 				} else {
 					$apiresults 						= array(
