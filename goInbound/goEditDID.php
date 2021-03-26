@@ -41,6 +41,7 @@
 	$voicemail_ext 									= $astDB->escape($_REQUEST['voicemail_ext']);
 	$extension 										= $astDB->escape($_REQUEST['extension']);
 	$exten_context 									= $astDB->escape($_REQUEST['exten_context']);	
+	$list_id     									= $astDB->escape($_REQUEST['list_id']);	
    
     // Default values 
     $defUUA 										= array(
@@ -158,6 +159,7 @@
 				$datavoicemail_ext	 				= $fresults['voicemail_ext'];
 				$dataextension	 					= $fresults['extension'];
 				$dataexten_context	 				= $fresults['exten_context'];
+                $datalist_id                        = $fresults['list_id'];
 			}
 
 			if (empty($did_pattern)) { 
@@ -219,6 +221,10 @@
 			if (empty($exten_context)) {
 				$exten_context 						= $dataexten_context;
 			}
+
+			if (empty($list_id)) { 
+				$list_id 						    = $datalist_id;
+			}
 			
             $astDB->where("did_pattern", $did_pattern);
             $astDB->where("did_id", $did_id, "!=");
@@ -240,7 +246,8 @@
 					'menu_id' 							=> $menu_id,
 					'voicemail_ext' 					=> $voicemail_ext,
 					'extension' 						=> $extension,
-					'exten_context' 					=> $exten_context					
+					'exten_context' 					=> $exten_context,
+                    'list_id'                           => $list_id
 				);
 				
 				$astDB->where("did_id", $did_id);
