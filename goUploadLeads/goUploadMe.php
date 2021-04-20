@@ -66,7 +66,8 @@
         $field_regx = str_replace($delimiters, "", $field_regx);
 
 	$duplicates = 0;
-
+	$getHeder = "";
+	$goCountTheHeader = "";
 	//die($theList."<br>".$thefile."<br>".$csv_file);
 	if (($handle = fopen($csv_file, "r")) !== FALSE) {
 		$getHeder = fgetcsv($handle);
@@ -102,8 +103,7 @@
 			# check custom field names are correct
 			$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;
 			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
-			
-			if($goGetCheckcustomFieldNamesCorrect !== "success") {
+			if($goGetCheckcustomFieldNamesCorrect != "success") { 
 				fclose($handle);
 			}
 		}
@@ -112,6 +112,7 @@
 		
 		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
 			$num = count($data);
+			
 			for ($c=0; $c < $num; $c++) {
 				$col[$c] = $data[$c];
 			}
@@ -716,7 +717,7 @@
 			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
 		}elseif($goCountInsertedLeads > 0 && $duplicates > 0){
 			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    Duplicates:$duplicates");
-		} elseif($goGetCheckcustomFieldNamesCorrect != "success"){
+		} elseif($goGetCheckcustomFieldNamesCorrect == "error"){
 			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names. Check the File Headers $goGetCheckcustomFieldNamesCorrect");
 		}elseif($duplicates > 0){
 			$apiresults = array("result" => "error" , "message" => "Duplicates Found : $duplicates");
@@ -747,7 +748,7 @@
 		$goCustomCheckQuery = "SELECT EXISTS(SELECT $gocustomFieldsCSV FROM custom_$goCClistID)";
 		$customCheck = $link->rawQuery($goCustomCheckQuery);
 		$countCustomCheck = $link->getRowCount();
-
+	
 		if( $countCustomCheck === 0 ){
 			return "error";
 		} else {
