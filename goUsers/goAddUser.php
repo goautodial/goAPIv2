@@ -332,7 +332,8 @@
 								"role" 				=> $user_level,
 								"status" 			=> $goactive,
 								"user_group" 			=> $user_group,
-								"phone" 			=> $phone_login
+								"phone" 			=> $phone_login,
+								"email"				=> $email
 								//"location_id" => $location
 							);
 							
