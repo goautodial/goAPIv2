@@ -454,7 +454,8 @@
 			}
 			$row["call_notes"] = $notes_data;
 		}
-		/*if ($rec_location == "Y") {
+		if ($rec_location == "Y" && ($row["user"] === "VDAD" || $row["user"] === "VDCL")) {
+			$row["recording_location"] = "";
 			//$recording_array = Array($lead_id);
 			/*if (isset($uniqueid2) && !empty($uniqueid2)) {
 				//$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
@@ -476,7 +477,8 @@
 			}
 			//$apiresults = array ( "QUERY" => $fetch_recording, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $rec_data);
 			$row["rec_location"] = $row["location"];
-		}*/
+			*/
+		}
 		//$apiresults = array ( $row );
 
 		// Replace special characters [,] with -
