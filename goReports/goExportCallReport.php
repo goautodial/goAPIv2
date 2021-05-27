@@ -241,10 +241,13 @@
 	
 	$export_fields_SQL 							= "";
 	
-	if($rec_location === "Y")
+	if($rec_location === "Y"){
 	$endepoch_sql = ",vl.end_epoch";
-	else
+	$endepoch_sql2 = ",vcl.end_epoch";
+	}else{
 	$endepoch_sql = "";	
+	$endepoch_sql2 = "";
+	}
 	$duration_sql = "vl.length_in_sec as call_duration, ";
         $duration_sql2 = "vcl.length_in_sec as call_duration, ";
 	$location_sql = "";
@@ -262,7 +265,7 @@
 	}
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
-		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id $location_sql
+		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id $location_sql $endepoch_sql2
 			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
@@ -311,6 +314,7 @@
 				vl.uniqueid, 
 				vi.entry_list_id 
 				$location_sql
+				$endepoch_sql
 				$export_fields_SQL 
 			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
@@ -360,6 +364,7 @@
 				vcl.closecallid, 
 				vi.entry_list_id 
 				$location_sql
+				$endepoch_sql2
 				$export_fields_SQL 
 			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
@@ -390,8 +395,8 @@
 
 	if ($rec_location == "Y") {
 		array_push($csv_header, "recording_location");
-		//$ee_key = array_search("end_epoch",$csv_header);
-		//array_splice($csv_header, $ee_key, 1);
+		$ee_key = array_search("end_epoch",$csv_header);
+		array_splice($csv_header, $ee_key, 1);
 	}
 	if ($custom_fields == "Y")	{
 	//    for ($i = 0 ; $i < count($array_list); $i++) {
@@ -497,7 +502,7 @@
 				}
 			}
 			//$apiresults = array ( "QUERY" => $fetch_recording, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $rec_data);
-			//unset($row["end_epoch"]);
+			unset($row["end_epoch"]);
 			$row["rec_location"] = $rec_data;
 			
 		}
