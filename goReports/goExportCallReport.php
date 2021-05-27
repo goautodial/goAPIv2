@@ -241,21 +241,19 @@
 	
 	$export_fields_SQL 							= "";
 	
-	if($rec_location === "Y"){
-		$duration_sql = "rl.length_in_sec as call_duration, ";
-		$duration_sql2 = "rl.length_in_sec as call_duration, ";
-		$location_sql = ", rl.location as recording_location";
-	}else{
-		$duration_sql = "rl.length_in_sec as call_duration, ";
-                $duration_sql2 = "rl.length_in_sec as call_duration, ";
-		$location_sql = "";
-	}
+	if($rec_location === "Y")
+	$endepoch_sql = ",vl.end_epoch";
+	else
+	$endepoch_sql = "";	
+	$duration_sql = "vl.length_in_sec as call_duration, ";
+        $duration_sql2 = "vcl.length_in_sec as call_duration, ";
+	$location_sql = "";
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
-		$query = "SELECT vl.call_date, $duration_sql vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $location_sql 
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi, recording_log rl 
+		$query = "SELECT vl.call_date, $duration_sql vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $location_sql $endepoch_sql 
+			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id AND rl.lead_id = vi.lead_id
+			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
 			# AND vl.length_in_sec > 0 
 			$list_SQL $campaign_SQL 
 			$user_group_SQL $status_SQL_vl 
@@ -265,10 +263,9 @@
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
 		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id $location_sql
-			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi, recording_log rl 
+			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id AND rl.lead_id = vi.lead_id
-			AND vi.lead_id = vcl.lead_id 
+			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
 			#AND vcl.length_in_sec > 0
 			$list_SQL $group_SQL 
 			$user_group_SQL $status_SQL_vcl
@@ -315,9 +312,9 @@
 				vi.entry_list_id 
 				$location_sql
 				$export_fields_SQL 
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi, recording_log rl
+			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id AND rl.lead_id = vi.lead_id
+			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
 			# AND vl.length_in_sec > 0
 			$list_SQL 
 			$campaign_SQL 
@@ -364,9 +361,9 @@
 				vi.entry_list_id 
 				$location_sql
 				$export_fields_SQL 
-			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi, recording_log rl
+			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id AND rl.lead_id = vi.lead_id
+			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
 			# AND vcl.length_in_sec > 0
 			$list_SQL 
 			$group_SQL 
@@ -391,9 +388,11 @@
 		array_push($csv_header, "call_notes");
 	}
 
-	/*if ($rec_location == "Y") {
+	if ($rec_location == "Y") {
 		array_push($csv_header, "recording_location");
-	}*/
+		//$ee_key = array_search("end_epoch",$csv_header);
+		//array_splice($csv_header, $ee_key, 1);
+	}
 	if ($custom_fields == "Y")	{
 	//    for ($i = 0 ; $i < count($array_list); $i++) {
 	//		$list_id = $array_list[$i];
@@ -439,7 +438,7 @@
 		$uniqueid = $row["uniqueid"];
 		$list_id_spec = $row["list_id"];
 		$row["call_duration"] = gmdate("H:i:s",$row["call_duration"]);		
-	
+
 		if ($per_call_notes == "Y") {
 			$astDB->WHERE("lead_id", $lead_id);
 			$fetch_callnotes = $astDB->getOne("vicidial_call_notes", "call_notes");
@@ -454,10 +453,10 @@
 			}
 			$row["call_notes"] = $notes_data;
 		}
-		if ($rec_location == "Y" && ($row["user"] === "VDAD" || $row["user"] === "VDCL")) {
-			$row["recording_location"] = "";
+		if ($rec_location == "Y") {
+			$end_epoch = $row["end_epoch"];
 			//$recording_array = Array($lead_id);
-			/*if (isset($uniqueid2) && !empty($uniqueid2)) {
+			if (isset($uniqueid2) && !empty($uniqueid2)) {
 				//$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
 				$astDB->WHERE("vicidial_id", $uniqueid);
 				$astDB->orWHERE("vicidial_id", $uniqueid2);
@@ -473,11 +472,34 @@
 				$rec_data = $fetch_recording["location"];
 				$rec_data = rawurldecode($rec_data);
 			} else {
-				$rec_data = "";
+				// TRY 2nd using end_epoch
+				$astDB->WHERE("end_epoch", $end_epoch);
+				$astDB->WHERE("lead_id", $lead_id);
+                        	$fetch_recording = $astDB->getOne("recording_log", "location");
+				$rec_ct = $astDB->count;
+
+                        	if ($rec_ct > 0) {
+                                	$rec_data = $fetch_recording["location"];
+                                	$rec_data = rawurldecode($rec_data);
+                        	} else {
+					// TRY 3rd if there's only 1 data with the lead_id
+	                                $astDB->WHERE("length_in_sec", 0, ">");
+        	                        $astDB->WHERE("lead_id", $lead_id);
+                	                $fetch_recording = $astDB->getOne("recording_log", "location");
+                        	        $rec_ct = $astDB->count;
+					
+					if ($rec_ct == 1) {
+	                                        $rec_data = $fetch_recording["location"];
+                                        	$rec_data = rawurldecode($rec_data);
+                                	} else {
+						$rec_data="";
+					}
+				}
 			}
 			//$apiresults = array ( "QUERY" => $fetch_recording, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $rec_data);
-			$row["rec_location"] = $row["location"];
-			*/
+			//unset($row["end_epoch"]);
+			$row["rec_location"] = $rec_data;
+			
 		}
 		//$apiresults = array ( $row );
 
