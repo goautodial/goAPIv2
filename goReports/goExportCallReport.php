@@ -460,6 +460,9 @@
 		}
 		if ($rec_location == "Y") {
 			$end_epoch = $row["end_epoch"];
+			if(in_array($row["user"], array("VDAD", "VDCL"))){
+				$rec_data = "";
+			}else{
 			//$recording_array = Array($lead_id);
 			if (isset($uniqueid2) && !empty($uniqueid2)) {
 				//$condition_SQL = "AND ((vicidial_id = '$uniqueid') OR (vicidial_id = '$uniqueid2')) ";
@@ -501,7 +504,7 @@
 					}
 				}
 			}
-			//$apiresults = array ( "QUERY" => $fetch_recording, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $rec_data);
+			}//.else/ automatically skip rec_location fetch if user is VDAD or VDCL 
 			unset($row["end_epoch"]);
 			$row["rec_location"] = $rec_data;
 			
