@@ -117,7 +117,7 @@
 
 			//$time = strtotime($row['call_date']);
 			//$time = $row['end_epoch'] + $row['start_epoch'];
-			$time = date("h:i:s", $date);
+			$time = date("h:i:s A", $date);
 			$TOPsorted_output .= '<td nowrap>'.$time.'</td>';
 			$TOPsorted_output .= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';
 			$TOPsorted_output .= '<td nowrap>'.$row['status'].'</td>';
