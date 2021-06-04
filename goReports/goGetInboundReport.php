@@ -30,7 +30,10 @@
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
-    $dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    
+    $dispo_stats = "";
+    if(isset($_REQUEST['statuses']))
+    $dispo_stats = $astDB->escape($_REQUEST['statuses']);
     
     if (empty($fromDate)) {
         $fromDate 									= date("Y-m-d")." 00:00:00";
@@ -67,7 +70,6 @@
                 }
             }
 	    }
-
 		// check if MariaDB slave server available
 		$rslt										= $goDB
 			->where('setting', 'slave_db_ip')
@@ -92,42 +94,42 @@
 			$ul 									= "";
 		}
 
-		$inbound_report_query 						= "
+		$inbound_report_query = "
 		    SELECT * FROM vicidial_closer_log
 		    WHERE campaign_id = '$campaignID' $ul
 		    AND date_format(call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
 		";
-
-		$query 										= $astDB->rawQuery($inbound_report_query);
-		$TOPsorted_output 							= "";
-		$number 									= 1;
+		$query = $astDB->rawQuery($inbound_report_query);
+		$TOPsorted_output = "";
+		$number = 1;
 
 		foreach ($query as $row) {
-			$TOPsorted_output[] 					.= '<tr>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.$number.'</td>';
+		
+			$TOPsorted_output .= '<tr>';
+			$TOPsorted_output .= '<td nowrap>'.$row['lead_id'].'</td>';
 
-		    $date 									= strtotime($row['call_date']);
-			$date 									= date("Y-m-d", $date);
-			$TOPsorted_output[] 					.= '<td nowrap>'.$date.'</td>';
+		    $date = strtotime($row['call_date']);
+			$date = date("Y-m-d", $date);
+			$TOPsorted_output .= '<td nowrap>'.$date.'</td>';
 
-		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['user'].'</td>';
-		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['phone_number'].'</td>';
+		    $TOPsorted_output .= '<td nowrap>'.$row['user'].'</td>';
+		    $TOPsorted_output .= '<td nowrap>'.$row['phone_number'].'</td>';
 
 			//$time = strtotime($row['call_date']);
-			$time 									= $row['end_epoch'] + $row['start_epoch'];
-			$time 									= date("h:i:s", $time);
-			$TOPsorted_output[] 					.= '<td nowrap>'.$time.'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.$row['status'].'</td>';
-			$TOPsorted_output[] 					.= '</tr>';
-			$number++;
+			$time = $row['end_epoch'] + $row['start_epoch'];
+			$time = date("h:i:s", $time);
+			$TOPsorted_output .= '<td nowrap>'.$time.'</td>';
+			$TOPsorted_output .= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';
+			$TOPsorted_output .= '<td nowrap>'.$row['status'].'</td>';
+			$TOPsorted_output .= '</tr>';
+			//$number++;
 		}
 
-		$apiresults 								= array(
-		    "result" 									=> "success",
-		    "inbound_query" 							=> $inbound_report_query,
-		    "query" 									=> $query,
-		    "TOPsorted_output" 							=> $TOPsorted_output
+		$apiresults = array(
+		    "result" 		=> "success",
+		    "inbound_query" 	=> $inbound_report_query,
+		    //"debug_value" 	=> $alex,
+		    "TOPsorted_output" 	=> $TOPsorted_output
 		);
 
 		return $apiresults;
