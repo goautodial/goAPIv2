@@ -109,15 +109,15 @@
 			$TOPsorted_output .= '<td nowrap>'.$row['lead_id'].'</td>';
 
 		    $date = strtotime($row['call_date']);
-			$date = date("Y-m-d", $date);
-			$TOPsorted_output .= '<td nowrap>'.$date.'</td>';
+			$call_date = date("Y-m-d", $date);
+			$TOPsorted_output .= '<td nowrap>'.$call_date.'</td>';
 
 		    $TOPsorted_output .= '<td nowrap>'.$row['user'].'</td>';
 		    $TOPsorted_output .= '<td nowrap>'.$row['phone_number'].'</td>';
 
 			//$time = strtotime($row['call_date']);
-			$time = $row['end_epoch'] + $row['start_epoch'];
-			$time = date("h:i:s", $time);
+			//$time = $row['end_epoch'] + $row['start_epoch'];
+			$time = date("h:i:s", $date);
 			$TOPsorted_output .= '<td nowrap>'.$time.'</td>';
 			$TOPsorted_output .= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';
 			$TOPsorted_output .= '<td nowrap>'.$row['status'].'</td>';
