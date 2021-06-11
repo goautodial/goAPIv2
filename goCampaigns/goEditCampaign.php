@@ -310,7 +310,7 @@
 						'dial_method' 							=> (gettype($dial_method) != NULL) ? $dial_method : $resultGet['dial_method'], 
 						'auto_dial_level' 						=> $autoDialLevel, 
 						'dial_prefix' 							=> $dialprefix,
-						'web_form_address' 						=> (!empty($webform)) ? $webform : $resultGet['web_form_address'], 
+						'web_form_address' 						=> (!empty($webform) OR empty($webform)) ? $webform : $resultGet['web_form_address'], 
 						'campaign_script' 						=> $campaign_script, 
 						'campaign_cid' 							=> (!empty($campaign_cid)) ? $campaign_cid : $resultGet['campaign_cid'], 
 						'campaign_vdad_exten' 					=> (!empty($campaign_vdad_exten)) ? $campaign_vdad_exten : $resultGet['campaign_vdad_exten'], 
@@ -330,8 +330,10 @@
 						'xferconf_b_number' 					=> (!empty($xferconf_b_number)) ? $xferconf_b_number : $resultGet['xferconf_b_number'], 
 						//'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'],
 						'three_way_dial_prefix' 				=> $three_way_dial_prefix,
-						'closer_campaigns' 						=> (!empty($closer_campaigns)) ? $closer_campaigns : $resultGet['closer_campaigns'],
-						'xfer_groups' 							=> (!empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
+															//nat: made changes to the line of code below
+						'closer_campaigns' 						=> (!empty($closer_campaigns) OR empty($closer_campaigns)) ? $closer_campaigns : $resultGet['closer_campaigns'],
+															//nat: made changes to the line of code below
+						'xfer_groups' 							=> (!empty($xfer_groups) OR empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
 						'survey_first_audio_file' 				=> (!empty($survey_first_audio_file)) ? $survey_first_audio_file : $resultGet['survey_first_audio_file'],
 						'survey_method' 						=> (!empty($survey_method)) ? $survey_method : $resultGet['survey_method'],
 						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $resultGet['survey_menu_id'],
