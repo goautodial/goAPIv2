@@ -137,14 +137,15 @@
 				}
 				
 				if ("ALL" === strtoupper($campaign_id)) {
-                    $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                    
+                    			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                    			
 					foreach($SELECTQuery as $camp_val){
-                        $array_camp[] = $camp_val["campaign_id"];
-                    }
-                }else{
-                    $array_camp[] 		= $campaign_id;
-                }
+                        			$array_camp[] = $camp_val["campaign_id"];
+                    			}
+					
+                		}else{
+                			$array_camp[] = $campaign_id;
+                		}
 				//$imploded_camp = "'".implode("','", $array_camp)."'";
 	
 				$cols = array(
@@ -226,32 +227,45 @@
 				$cols = array(
 				      "vu.full_name",
 			              "val.user",
-			              "wait_sec",
-			              "talk_sec",
-			              "dispo_sec",
-			              "pause_sec",
+			              "SUM(wait_sec) as wait_sec",
+			              "SUM(talk_sec) as talk_sec",
+			              "SUM(dispo_sec) as dispo_sec",
+			              "SUM(pause_sec) as pause_sec",
 			              "status",
-			              "dead_sec",
+			              "SUM(dead_sec) as dead_sec",
 				);
         
+				
 			        $agenttd = $astDB
 			            ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 			            ->where("campaign_id", $array_camp, "IN")
-			            ->where("status != 'NULL'")
+			            //->where("status != 'NULL'")
+				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
 			            ->get("vicidial_agent_log val", 10000000, $cols);
-            
+           			
+				//$agenttd = $astDB->rawQuery(""); 
 				$query_td = $astDB->getLastQuery();
 			        $usercount = $astDB->getRowCount();
-	
+				
+				/*
 				$agenttotalcalls = $astDB
 					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("vu.user = vl.user")
 					->groupBy("vl.user")
 					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
-					
+				*/
+				$agenttotalcalls = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                        ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                        ->where("campaign_id", $array_camp, "IN")
+					//->where("status != 'NULL'")
+                                        ->groupBy("user")
+                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.agent_log_id) as calls");
+				$query_ttc = $astDB->getLastQuery();
+	
 				if ($astDB->count >0) {	
 					/*$TOTwait 	= array();
 					$TOTtalk 	= array();
@@ -596,7 +610,8 @@
 					"TOTtimeTC" 		=> $TOTtimeTC, 
 					"TOT_AGENTS" 		=> $TOT_AGENTS, 
 					"TOTcalls" 		=> $TOTcalls,
-					"campaigns"		=> $array_camp
+					"campaigns"		=> $array_camp,
+					"query" => $query_td
 					//"SstatusesBSUM"         => $SstatusesBSUM,
 					//"MIDsorted_output"	=> $MIDsorted_output,
 					//"legend"		=> $legend
