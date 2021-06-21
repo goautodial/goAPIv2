@@ -240,7 +240,7 @@
 			            ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 			            ->where("campaign_id", $array_camp, "IN")
-			            //->where("status != 'NULL'")
+			            ->where("status != 'LAGGED'")
 				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
 			            ->get("vicidial_agent_log val", 10000000, $cols);
@@ -263,7 +263,7 @@
                                         ->where("campaign_id", $array_camp, "IN")
 					//->where("status != 'NULL'")
                                         ->groupBy("user")
-                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.agent_log_id) as calls");
+                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
 				$query_ttc = $astDB->getLastQuery();
 	
 				if ($astDB->count >0) {	
