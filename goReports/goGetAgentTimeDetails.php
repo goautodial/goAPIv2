@@ -160,7 +160,7 @@
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					//->where("pause_sec", 0, ">")
 					//->where("pause_sec", 65000, "<")
-                    ->where("pause_sec", array(0, 65000), "BETWEEN")
+                    //->where("pause_sec", array(0, 65000), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("sub_status", array("LAGGED", "LOGIN"), "NOT IN")
 					->groupBy("vu.user,sub_status")
@@ -240,7 +240,7 @@
 			            ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 			            ->where("campaign_id", $array_camp, "IN")
-			            ->where("status != 'LAGGED'")
+			            //->where("status != 'LAGGED'")
 				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
 			            ->get("vicidial_agent_log val", 10000000, $cols);
@@ -383,12 +383,13 @@
                                 $pause = $row['pause_sec'];
                                 $dead = $row['dead_sec'];
                                 $customer = $row['talk_sec'] - $row['dead_sec'];
-
+/*
                                 if ($wait > 65000) {$wait=0;}
                                 if ($talk > 65000) {$talk=0;}
                                 if ($dispo > 65000) {$dispo=0;}
                                 if ($pause > 65000) {$pause=0;}
                                 if ($dead > 65000) {$dead=0;}
+*/
                                 if ($customer < 1) {$customer=0;}
 
                                 $TOTwait =      ($TOTwait + $wait);
