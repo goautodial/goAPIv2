@@ -241,6 +241,7 @@
 			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 			            ->where("campaign_id", $array_camp, "IN")
 			            //->where("status != 'LAGGED'")
+				    ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
 				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
 			            ->get("vicidial_agent_log val", 10000000, $cols);
@@ -261,8 +262,9 @@
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
                                         ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
                                         ->where("campaign_id", $array_camp, "IN")
-					//->where("status != 'NULL'")
-                                        ->groupBy("user")
+					//->where("sub_status != 'LAGGED'")
+                                	->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+				        ->groupBy("user")
                                         ->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
 				$query_ttc = $astDB->getLastQuery();
 	
@@ -383,13 +385,18 @@
                                 $pause = $row['pause_sec'];
                                 $dead = $row['dead_sec'];
                                 $customer = $row['talk_sec'] - $row['dead_sec'];
-/*
-                                if ($wait > 65000) {$wait=0;}
-                                if ($talk > 65000) {$talk=0;}
-                                if ($dispo > 65000) {$dispo=0;}
-                                if ($pause > 65000) {$pause=0;}
-                                if ($dead > 65000) {$dead=0;}
-*/
+			
+                                //if ($wait > 65000) {$wait=0;}
+				if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
+                                //if ($talk > 65000) {$talk=0;}
+				if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
+                                //if ($dispo > 65000) {$dispo=0;}
+				if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
+                                //if ($pause > 65000) {$pause=0;}
+				if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
+                                //if ($dead > 65000) {$dead=0;}
+				if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}			
+	
                                 if ($customer < 1) {$customer=0;}
 
                                 $TOTwait =      ($TOTwait + $wait);
@@ -612,7 +619,8 @@
 					"TOT_AGENTS" 		=> $TOT_AGENTS, 
 					"TOTcalls" 		=> $TOTcalls,
 					"campaigns"		=> $array_camp,
-					"query" => $query_td
+					"query" => $query_td,
+					"QUERY2" => $query_ttc
 					//"SstatusesBSUM"         => $SstatusesBSUM,
 					//"MIDsorted_output"	=> $MIDsorted_output,
 					//"legend"		=> $legend
