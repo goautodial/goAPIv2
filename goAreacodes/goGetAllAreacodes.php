@@ -94,12 +94,13 @@
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
-					$dataCampID[] 						= $fresults['campaign_id'];
-					$dataCampName[]						= $fresults['campaign_name'];
-					$dataAreacode[] 					= $fresults['areacode'];
-					$dataOutboundCID[] 					= $fresults['outbound_cid'];
-					$dataActive[] 						= $fresults['active'];
-					$dataDescription[]					= $fresults['cid_description'];
+					$camp_id							= $fresults['campaign_id'];
+					$dataCampID[$camp_id] 				= $camp_id;
+					$dataCampName[$camp_id]				= $fresults['campaign_name'];
+					$dataAreacode[$camp_id] 			= $fresults['areacode'];
+					$dataOutboundCID[$camp_id] 			= $fresults['outbound_cid'];
+					$dataActive[$camp_id] 				= $fresults['active'];
+					$dataDescription[$camp_id]			= $fresults['cid_description'];
 					$dataCallCountToday					= $fresults['call_count_today'];
 				}				
 			
