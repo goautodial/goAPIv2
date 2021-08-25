@@ -101,7 +101,7 @@
 					$dataOutboundCID[$camp_id] 			= $fresults['outbound_cid'];
 					$dataActive[$camp_id] 				= $fresults['active'];
 					$dataDescription[$camp_id]			= $fresults['cid_description'];
-					$dataCallCountToday[$camp_id]		= $fresults['call_count_today'];
+					$dataCallCountToday					= $fresults['call_count_today'];
 				}				
 			
 				$apiresults 							= array(
