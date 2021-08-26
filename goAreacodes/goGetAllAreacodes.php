@@ -141,15 +141,15 @@
 				} else {
 					$apiresults								= array(
 						"draw"									=> $draw,
-						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
-						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
+						"recordsTotal"							=> $result->getUnlimitedRowCount(),
+						"recordsFiltered"						=> $result->getUnlimitedRowCount(),
 						"data"									=> $dataOutput
 					);
 				}
 			} else {
 				$apiresults                             = array(
 					"result"								=> "No data available in table",
-					"test"									=> $astDB->getLastError()
+					//"test"									=> $astDB->getLastError()
 				);
 			}
 		} else {
