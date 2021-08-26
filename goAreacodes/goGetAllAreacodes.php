@@ -98,10 +98,10 @@
 			$astDB->orderBy($order, $dir);
 			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
 			if (isset($search) && strlen($search) > 0) {
-				$astDB->where('campaign_id', $search)
-					  ->orWhere('campaign_name', $search)
-					  ->orWhere('areacode', $search)
-					  ->orWhere('outbound_cid', $search);
+				$astDB->where('vcid.campaign_id', $search)
+					  ->orWhere('vc.campaign_name', $search)
+					  ->orWhere('vcid.areacode', $search)
+					  ->orWhere('vcid.outbound_cid', $search);
 			}
 			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols, true);
 			
