@@ -21,6 +21,8 @@
 */
 
 	include_once ("goAPI.php");
+	$start  = (isset($_REQUEST['start']) ? $astDB->escape($_REQUEST['start']) : 0);
+	$length = (isset($_REQUEST['length']) ? $astDB->escape($_REQUEST['length']) : 10);
 	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -90,7 +92,7 @@
 			
 			$astDB->orderBy('campaign_id', 'desc');
 			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
-			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', NULL, $cols);		
+			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols);
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
