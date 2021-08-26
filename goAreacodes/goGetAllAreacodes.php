@@ -103,6 +103,7 @@
 					  ->orWhere('outbound_cid', $search);
 			}
 			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols);
+			$astDB->calculateUnlimitedRowCount();
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
@@ -141,8 +142,8 @@
 				} else {
 					$apiresults								= array(
 						"draw"									=> $draw,
-						"recordsTotal"							=> $result->getUnlimitedRowCount(),
-						"recordsFiltered"						=> $result->getUnlimitedRowCount(),
+						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
+						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
 						"data"									=> $dataOutput
 					);
 				}
