@@ -148,7 +148,8 @@
 				}
 			} else {
 				$apiresults                             = array(
-					"result"								=> "No data available in table"
+					"result"								=> "No data available in table",
+					"test"									=> $astDB->getLastError()
 				);
 			}
 		} else {
