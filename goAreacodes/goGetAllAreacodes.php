@@ -143,7 +143,7 @@
 						"draw"									=> $draw,
 						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
 						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
-						"data"									=> json_encode($dataOutput)
+						"data"									=> $dataOutput
 					);
 				}
 			} else {
