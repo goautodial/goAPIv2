@@ -27,6 +27,7 @@
 	$order  = (isset($_REQUEST['order']) ? $astDB->escape($_REQUEST['order']) : "campaign_id");
 	$dir    = (isset($_REQUEST['dir']) ? $astDB->escape($_REQUEST['dir']) : "desc");
 	$search = (isset($_REQUEST['search']) ? $astDB->escape($_REQUEST['search']) : "");
+	$can_update = (isset($_REQUEST['can_update']) ? $astDB->escape($_REQUEST['can_update']) : "N");
 	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -115,9 +116,22 @@
 						$dataDescription[]					= $fresults['cid_description'];
 						$dataCallCountToday					= $fresults['call_count_today'];
 					} else {
+						$avatar_link = "";
+						$campaign_link = "";
+						if ($can_update !== "N") {
+							$avatar_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
+							$campaign_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
+						}
+						$avatar_link .= '<avatar username="'.$fresults['campaign_name'].'" :size="32"></avatar>';
+						$campaign_link = $fresults['campaign_id'];
+						if ($can_update !== "N") {
+							$avatar_link .= '</a>';
+							$campaign_link .= '</a>';
+						}
+						
 						$dataOutput[]						= array(
-							"avatar"							=> "",
-							"campaign_id"						=> $fresults['campaign_id'],
+							"avatar"							=> $avatar_link,
+							"campaign_id"						=> $campaign_link,
 							"campaign_name"						=> $fresults['campaign_name'],
 							"areacode"							=> $fresults['areacode'],
 							"outbound_cid"						=> $fresults['outbound_cid'],
