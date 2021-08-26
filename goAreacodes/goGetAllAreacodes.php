@@ -123,7 +123,7 @@
 							$campaign_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
 						}
 						$avatar_link .= '<avatar username="'.$fresults['campaign_name'].'" :size="32"></avatar>';
-						$campaign_link = $fresults['campaign_id'];
+						$campaign_link .= $fresults['campaign_id'];
 						if ($can_update !== "N") {
 							$avatar_link .= '</a>';
 							$campaign_link .= '</a>';
