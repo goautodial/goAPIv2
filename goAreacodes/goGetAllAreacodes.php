@@ -21,8 +21,12 @@
 */
 
 	include_once ("goAPI.php");
+	$draw   = (isset($_REQUEST['draw']) ? $astDB->escape($_REQUEST['draw']) : 0);
 	$start  = (isset($_REQUEST['start']) ? $astDB->escape($_REQUEST['start']) : 0);
 	$length = (isset($_REQUEST['length']) ? $astDB->escape($_REQUEST['length']) : 10);
+	$order  = (isset($_REQUEST['order']) ? $astDB->escape($_REQUEST['order']) : "campaign_id");
+	$dir    = (isset($_REQUEST['dir']) ? $astDB->escape($_REQUEST['dir']) : "desc");
+	$search = (isset($_REQUEST['search']) ? $astDB->escape($_REQUEST['search']) : "");
 	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -90,31 +94,58 @@
 				"vcid.call_count_today"
 			);
 			
-			$astDB->orderBy('campaign_id', 'desc');
+			$astDB->orderBy($order, $dir);
 			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
+			if (isset($search) && strlen($search) > 0) {
+				$astDB->where('campaign_id', $search)
+					  ->orWhere('campaign_name', $search)
+					  ->orWhere('areacode', $search)
+					  ->orWhere('outbound_cid', $search);
+			}
 			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols);
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
-					$dataCampID[] 						= $fresults['campaign_id'];
-					$dataCampName[]						= $fresults['campaign_name'];
-					$dataAreacode[] 					= $fresults['areacode'];
-					$dataOutboundCID[] 					= $fresults['outbound_cid'];
-					$dataActive[] 						= $fresults['active'];
-					$dataDescription[]					= $fresults['cid_description'];
-					$dataCallCountToday					= $fresults['call_count_today'];
+					if (!$draw) {
+						$dataCampID[] 						= $fresults['campaign_id'];
+						$dataCampName[]						= $fresults['campaign_name'];
+						$dataAreacode[] 					= $fresults['areacode'];
+						$dataOutboundCID[] 					= $fresults['outbound_cid'];
+						$dataActive[] 						= $fresults['active'];
+						$dataDescription[]					= $fresults['cid_description'];
+						$dataCallCountToday					= $fresults['call_count_today'];
+					} else {
+						$dataOutput[]						= array(
+							"avatar"							=> "",
+							"campaign_id"						=> $fresults['campaign_id'],
+							"campaign_name"						=> $fresults['campaign_name'],
+							"areacode"							=> $fresults['areacode'],
+							"outbound_cid"						=> $fresults['outbound_cid'],
+							"active"							=> $fresults['active'],
+							"action"							=> "",
+						);
+					}
 				}				
 			
-				$apiresults 							= array(
-					"result" 								=> "success", 
-					"campaign_id" 							=> $dataCampID,
-					"campaign_name"							=> $dataCampName,
-					"areacode" 								=> $dataAreacode, 
-					"outbound_cid" 							=> $dataOutboundCID, 
-					"active" 								=> $dataActive,
-					"description"							=> $dataDescription,
-					"call_count_today"						=> $dataCallCountToday
-				);
+				if (!$draw) {
+					$apiresults 							= array(
+						"result" 								=> "success", 
+						"campaign_id" 							=> $dataCampID,
+						"campaign_name"							=> $dataCampName,
+						"areacode" 								=> $dataAreacode, 
+						"outbound_cid" 							=> $dataOutboundCID, 
+						"active" 								=> $dataActive,
+						"description"							=> $dataDescription,
+						"call_count_today"						=> $dataCallCountToday
+					);
+				} else {
+					$apiresults								= array(
+						"draw"									=> $draw,
+						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
+						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
+						"data"									=> json_encode($dataOutput)
+					);
+				}
 			} else {
 				$apiresults                             = array(
 					"result"								=> "No data available in table"
