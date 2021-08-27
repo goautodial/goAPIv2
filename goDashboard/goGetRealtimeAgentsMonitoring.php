@@ -146,6 +146,11 @@
 				//	->orderBy("last_call_time")		
 				//	->get($table, NULL, $cols);
                 
+                $SQLuser_group = "";
+				if (strtoupper($log_group) != 'ADMIN') {
+					$SQLuser_group = "AND vu.user_group = '$log_group'";
+				}
+                
                 $campaignFilters = '';
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $allowedCampaigns = implode("','", $allowed_campaigns);
@@ -153,9 +158,9 @@
                 }
                 $defaultUsers = implode("','", DEFAULT_USERS);
 		
-		$online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
-		$online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
-		$online_group = "GROUP BY ol.conference";
+                $online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
+                $online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
+                $online_group = "GROUP BY ol.conference";
 
                 $SQLquery = "SELECT DISTINCT vl.phone_number as 'vl_phone_number', vla.extension as 'vla_extension', vla.user as 'vla_user',
                         vu.full_name as 'vu_full_name', vu.user_group as 'vu_user_group', vu.phone_login as 'vu_phone_login',
@@ -169,7 +174,8 @@
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
                     WHERE ($campaignFilters vla.campaign_id = vc.campaign_id) 
-                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
+                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id 
+                        $SQLuser_group
                     ORDER BY last_call_time";
                 $onlineAgents = $astDB->rawQuery($SQLquery);
 				$queryoa = $SQLquery; //$astDB->getLastQuery();	
@@ -256,6 +262,11 @@
 				);
 				
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";
+                
+				if (strtoupper($log_group) != 'ADMIN') {
+					$astDB->where("vicidial_users.user_group", $log_group);
+				}
+                
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
@@ -297,6 +308,11 @@
 				);
 				
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";
+                
+				if (strtoupper($log_group) != 'ADMIN') {
+					$astDB->where("vicidial_users.user_group", $log_group);
+				}
+                
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
