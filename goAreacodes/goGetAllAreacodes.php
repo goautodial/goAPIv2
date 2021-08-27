@@ -4,6 +4,7 @@
  * @brief 		API to get all areacodes
  * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Thom Bernarth Patacsil 
+ * @author		Christopher Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
