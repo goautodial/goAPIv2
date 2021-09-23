@@ -106,13 +106,14 @@
     if($system_settings['pass_hash_enabled'] > 0 )
     	$astDB->where("pass_hash", $pass_hash);
     else
-	   $astDB->where("pass", $pass);
+        $astDB->where("pass", $pass);
     $astDB->getOne("vicidial_users");
     $check_result = $astDB->count;
 	
-    if ($check_result > 0) {       
-        if (file_exists($goAction . ".php" )) {
-            include $goAction . ".php";
+    if ($check_result > 0) {
+	$includeAction = basename(realpath($goAction . ".php"));
+        if (file_exists($includeAction)) {
+            include $includeAction;
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
     		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
