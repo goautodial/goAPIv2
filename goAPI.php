@@ -111,9 +111,9 @@
     $check_result = $astDB->count;
 	
     if ($check_result > 0) {
-	$includeAction = basename(realpath($goAction . ".php"));
-        if (file_exists($includeAction)) {
-            include $includeAction;
+        //$includeAction = basename(realpath($goAction . ".php"));
+        if (file_exists($goAction . ".php")) {
+            include $goAction . ".php";
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
     		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
