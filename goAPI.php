@@ -107,10 +107,11 @@
     	$astDB->where("pass_hash", $pass_hash);
     else
         $astDB->where("pass", $pass);
-    $astDB->getOne("vicidial_users");
-    $check_result = $astDB->count;
+    //$astDB->getOne("vicidial_users");
+    //$check_result = $astDB->count;
+    $check_result = $astDB->getOne("vicidial_users", "count(*) as sum");
 	
-    if ($check_result > 0) {
+    if ($check_result['sum'] > 0) {
         //$includeAction = basename(realpath($goAction . ".php"));
         if (file_exists($goAction . ".php")) {
             include $goAction . ".php";
