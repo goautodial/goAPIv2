@@ -158,7 +158,7 @@
 						"draw"									=> $draw,
 						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
 						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
-						"data"									=> $dataOutput
+						"data"									=> (!is_null($dataOutput) ? $dataOutput : [])
 					);
 				}
 			} else {
