@@ -107,8 +107,8 @@
     	$astDB->where("pass_hash", $pass_hash);
     else
         $astDB->where("pass", $pass);
-    //$astDB->getOne("vicidial_users");
-    $astDB->getOne("vicidial_users", "count(*) as sum");
+    $astDB->getOne("vicidial_users");
+    //$astDB->getOne("vicidial_users", "count(*) as sum");
     $check_result = $astDB->count;
 	
     if ($check_result > 0) {
