@@ -100,7 +100,8 @@
 			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
-        $bcrypt = 0;
+        if ($user === 'goAPI')
+            $bcrypt = 0;
 	}
 	
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
