@@ -107,10 +107,8 @@
     	$astDB->where("pass_hash", $pass_hash);
     else
         $astDB->where("pass", $pass);
-    //$astDB->getOne("vicidial_users");
-    //$check_result = $astDB->getRowCount();
-    $rslt = $astDB->getOne("vicidial_users", "count(*) as sum");
-    $check_result = $rslt['sum'];
+    $rslt = $astDB->get("vicidial_users");
+    $check_result = $astDB->getRowCount();
 	
     if ($check_result > 0) {
         //$includeAction = basename(realpath($goAction . ".php"));
