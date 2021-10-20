@@ -94,6 +94,8 @@
 
 	$passSQL = "pass='$pass'";
 	if ($system_settings['pass_hash_enabled'] > 0) {
+        if (strlen($pass) > 20) $bcrypt = 1;
+        
 		if ($bcrypt < 1) {
 			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
