@@ -108,8 +108,9 @@
     else
         $astDB->where("pass", $pass);
     $astDB->getOne("vicidial_users");
+    $check_result = $astDB->getRowCount();
     //$astDB->getOne("vicidial_users", "count(*) as sum");
-    $check_result = $astDB->count;
+    //$check_result = $astDB->count;
 	
     if ($check_result > 0) {
         //$includeAction = basename(realpath($goAction . ".php"));
