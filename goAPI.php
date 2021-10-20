@@ -102,34 +102,17 @@
 	
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
     //$rslt=mysqli_query($link, $query_user);
-    //$astDB->where("user", $goUser);
-    //if($system_settings['pass_hash_enabled'] > 0 )
-    //	$astDB->where("pass_hash", $pass_hash);
-    //else
-    //    $astDB->where("pass", $pass);
-    //$rslt = $astDB->get("vicidial_users");
+    $astDB->where("user", $goUser);
+    if($system_settings['pass_hash_enabled'] > 0 )
+    	$astDB->where("pass_hash", $pass_hash);
+    else
+        $astDB->where("pass", $pass);
+    //$astDB->getOne("vicidial_users");
     //$check_result = $astDB->getRowCount();
-    
-    $auth = 0;
-    $bcrypt = (strlen($pass) > 30) ? 1 : 0;
-    $err_message = "Login incorrect, please try again";
-    $auth_message = user_authorization($astDB, $user, $pass, '', 1, $bcrypt, 0);
-    if ($auth_message == 'GOOD')
-        {$auth = 1;}
-    if ($auth_message == 'LOCK')
-        {$err_message = "Too many login attempts, try again in 15 minutes";}
-    if ($auth_message == 'ERRNETWORK')
-        {$err_message = "Too many network errors, please contact your administrator";}
-    if ($auth_message == 'ERRSERVERS')
-        {$err_message = "No available servers, please contact your administrator";}
-    if ($auth_message == 'ERRPHONES')
-        {$err_message = "No available phones, please contact your administrator";}
-    if ($auth_message == 'ERRDUPLICATE')
-        {$err_message = "You are already logged in, please log out of your other session first";}
-    if ($auth_message == 'ERRAGENTS')
-        {$err_message = "Too many agents logged in, please contact your administrator";}
+    $astDB->getOne("vicidial_users", "count(*) as sum");
+    $check_result = $astDB->count;
 	
-    if ($auth > 0) {
+    if ($check_result > 0) {
         //$includeAction = basename(realpath($goAction . ".php"));
         if (strpos($goAction, '/') === false && file_exists($goAction . ".php")) {
             include $goAction . ".php";
