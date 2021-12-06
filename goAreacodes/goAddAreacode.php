@@ -61,7 +61,7 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {				
 		
 			// check if already existing in whole system
-			$astDB->where( "campaign_id", $campaign_id );
+			/* (nat) $astDB->where( "campaign_id", $campaign_id );
 			$astDB->where( "areacode", $areacode );
 			$astDB->getOne( "vicidial_campaign_cid_areacodes", "campaign_id, areacode" );
             $lastQuery = $astDB->getLastQuery();
@@ -71,7 +71,7 @@
 				$apiresults 								= array(
 					"result" 									=> $err_msg
 				);
-			} else {
+			} else { */
 
 					$data						= array(
 						'campaign_id' 						=> $campaign_id, 
@@ -94,7 +94,7 @@
                         "result"        => $lastQuery
 					);
 				}
-			}
+			// (nat) }
 		}
 	}
 	return $apiresults;

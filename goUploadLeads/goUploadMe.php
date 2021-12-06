@@ -57,7 +57,7 @@
 		
 	   $delimiters = explode(" ", $_REQUEST["custom_delimiter"]);
            $str = file_get_contents($csv_file);
-           $str1 = str_replace($delimiters, $default_delimiter, $str);
+           $str1 = str_replace($delimiters, $default_delimiter, $str); 
            file_put_contents($csv_file, $str1);
         }
 
@@ -305,7 +305,12 @@
 							$goCustomUpdateData = array();
 							
 							foreach($custom_array as $custom_key => $map_data){
-								$goCustomValues = $col[$map_data];
+								$goCustomValues = preg_replace($field_regx, "", $col[$map_data]);
+								//8626
+                                                                if(is_null($goCustomValues)  || $goCustomValues === "")
+                                                                     $goCustomValues = "";
+								else
+                                                                     $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 								array_push($goCustomKeyData, "$custom_key");
 								array_push($goCustomValuesData, "'$goCustomValues'");
 								array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
@@ -333,7 +338,12 @@
 								
 								for($ax=0; $ax < $totalExplode; $ax++) {
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
-									$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
+									$goCustomValues = preg_replace($field_regx, "",$col[$goGetLastHeader2[$ax]]); #get the values of the custom fielde"
+									//8626
+									if(is_null($goCustomValues)  || $goCustomValues === "")
+										$goCustomValues = "";
+									else
+										$goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 									array_push($goCustomValuesData, "'$goCustomValues'");
 									array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 								}
@@ -420,7 +430,12 @@
 								$goCustomUpdateData = array();
 
 								foreach($custom_array as $custom_key => $map_data){
-									$goCustomValues = $col[$map_data];
+									$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
+									//8626
+                                                                        if(is_null($goCustomValues) || $goCustomValues === "")
+                                                                                $goCustomValues = "";
+									else
+                                                                                $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 									array_push($goCustomKeyData, "$custom_key");
 									array_push($goCustomValuesData, "'$goCustomValues'");
 									array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
@@ -448,7 +463,12 @@
 
 									for($ax=0; $ax < $totalExplode; $ax++) {
 										$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
-										$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
+										$goCustomValues = preg_replace($field_regx, "",$col[$goGetLastHeader2[$ax]]); #get the values of the custom fields
+										//8626
+                                                                        	if(is_null($goCustomValues) || $goCustomValues === "")
+                                                                                	$goCustomValues = "";
+										else
+	                                                                                $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 										#$goQueryCustomFields .= "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPCAMP','".$goCustomValues."');";
 										#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 										
@@ -540,7 +560,12 @@
 							$goCustomUpdateData = array();
 
 							foreach($custom_array as $custom_key => $map_data){
-								$goCustomValues = $col[$map_data];
+								$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
+								//8626
+                                                                if(is_null($goCustomValues) || $goCustomValues === "")
+                                                                     $goCustomValues = "";
+								else
+                                                                     $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 								array_push($goCustomKeyData, "$custom_key");
 								array_push($goCustomValuesData, "'$goCustomValues'");
 								array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
@@ -568,8 +593,12 @@
 
 								for($ax=0; $ax < $totalExplode; $ax++) {
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
-									$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
-										
+									$goCustomValues = preg_replace($field_regx, "",$col[$goGetLastHeader2[$ax]]); #get the values of the custom fields
+									//8626
+                                                                        if(is_null($goCustomValues) || $goCustomValues === "")
+                                                                             $goCustomValues = "";	
+									else
+                                                                                $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 									#$goQueryCustomFields = "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPLIST','".$goCustomValues."');";
 									#$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 									#$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
@@ -649,7 +678,12 @@
                                                 $goCustomUpdateData = array();
 
 						foreach($custom_array as $custom_key => $map_data){
-							$goCustomValues = $col[$map_data];
+							$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
+							//8626
+                                                        if(is_null($goCustomValues) || $goCustomValues === "")
+                                                             $goCustomValues = "";
+							else
+                                                             $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 							array_push($goCustomKeyData, "$custom_key");
 							array_push($goCustomValuesData, "'$goCustomValues'");
                             array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
@@ -678,8 +712,12 @@
 
 							for($ax=0; $ax < $totalExplode; $ax++) {
 								$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
-								$goCustomValues = $col[$goGetLastHeader2[$ax]]; #get the values of the custom fields
-									
+								$goCustomValues = preg_replace($field_regx, "",$col[$goGetLastHeader2[$ax]]); #get the values of the custom fields
+								//8626
+                                                                if(is_null($goCustomValues) || $goCustomValues === "")
+                                                                     $goCustomValues = "";
+								else
+                                                                     $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);	
 								#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
 								
 //								$goQueryCustomFields .= "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues';";
@@ -716,9 +754,9 @@
 		if($goCountInsertedLeads > 0 && $duplicates < 1) {
 			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
 		}elseif($goCountInsertedLeads > 0 && $duplicates > 0){
-			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    Duplicates:$duplicates");
+			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    \nDuplicates:$duplicates");
 		} elseif($goGetCheckcustomFieldNamesCorrect == "error"){
-			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. Incompatible Field Names. Check the File Headers $goGetCheckcustomFieldNamesCorrect");
+			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. \nIncompatible File Headers \n\nPlease use \"Lead Mapping\" function instead");
 		}elseif($duplicates > 0){
 			$apiresults = array("result" => "error" , "message" => "Duplicates Found : $duplicates");
 		}else {

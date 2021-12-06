@@ -35,7 +35,6 @@
 	}else{
 		$jsonData = $jsonDataPost;
 	}
-
 	$list_id = $jsonData['list_id'];
 	$leads = $jsonData['leads'];
 	$baseFields = array("lead_id", "entry_date", "status", "vendor_lead_code", "list_id", "gmt_offset_now", "phone_code", "phone_number", "title", "first_name", "middle_initial", "last_name", "address1", "address2", "address3", "city", "state", "province", "postal_code", "country_code", "gender", "date_of_birth", "alt_phone", "email", "security_phrase", "comments", "entry_list_id");
@@ -50,7 +49,6 @@
 	foreach ($sqlCF as $fresults){
 		$customFields[] = $fresults['column_name'];
 	}
-
 	foreach($leads as $lead){
 		$leadsFields = $lead['fields'];
 		$insertFields = array();
@@ -64,17 +62,17 @@
 		$postal_code = '';
 		foreach($leadsFields as $fields){
 			if(in_array($fields['FieldName'], $baseFields) && $fields['FieldType'] != "custom"){
-				$insertFields[] = "`".$fields['FieldName']."`";
+				$insertFields[] = $fields['FieldName'];
 				if($fields['FieldName'] == "phone_code"){
 					if(!empty($fields['FieldValue'])){
-						$insertValues[] = '"'.$fields['FieldValue'].'"';
+						$insertValues[] = $fields['FieldValue'];
 						$phone_code = $fields['FieldValue'];
 					}else{
-						$insertValues[] = '"1"';
+						$insertValues[] = 1;
 						$phone_code = '';
 					}
 				}else{
-					$insertValues[] = '"'.$fields['FieldValue'].'"';
+					$insertValues[] = $fields['FieldValue'];
 				}
 
 				if($fields['FieldName'] == "state"){
@@ -102,8 +100,8 @@
 				}
 			}else{
 				if(in_array($fields['FieldName'], $customFields)){
-					$insertCustomFields[] = "`".$fields['FieldName']."`";
-					$insertCustomValues[] = '"'.$fields['FieldValue'].'"';
+					$insertCustomFields[] = $fields['FieldName'];
+					$insertCustomValues[] = $fields['FieldValue'];
 				}
 				
 			}
@@ -115,10 +113,12 @@
 		$USarea = substr($phone_number, 0, 3);
 		$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
 		if(strpos($insertFields, 'gmt_offset_now') !== false){
-			$insertFields[] = "`gmt_offset_now`";
-			$insertValues[] = '"'.$gmt_offset.'"';
+			$insertFields[] = "gmt_offset_now";
+			$insertValues[] = $gmt_offset;
 		}
 
+	// ARRAY TO STRING 
+	/*
 		// Base fields and values
 		$insertFields = implode(",", $insertFields);
     	$insertValues = implode(",", $insertValues);
@@ -135,9 +135,22 @@
     		$phone_code_field = ", `phone_code`";
     		$phone_code_value = ", '1'";
     	}
-    	
+    	*/	
+
+	/* RAWQUERY INSERT FAIL
     	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
-    	$resultInsertList = $astDB->rawQuery($insertListQuery);
+    	$resultInsertList = $astDB->rawQuery($insertListQuery) or die($astDB->getLastQuery());
+	*/
+	$fixData = array();
+	for($i = 0; $i < count($insertFields); $i++){
+		$fixData[$insertFields[$i]] = $insertValues[$i];
+	}
+	$defaultData = array(
+		"list_id" => $list_id,
+		"status" => "NEW",
+	);
+	$insertData = array_merge($defaultData, $fixData);
+	$resultInsertList = $astDB->insert("vicidial_list", $insertData);
     	if($resultInsertList){
     		//true
     		array_push($resultOfInserts, "ok");

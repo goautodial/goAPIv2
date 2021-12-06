@@ -445,12 +445,12 @@ if ($is_logged_in) {
     if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i", $script_text)) )
         {$scriptHtml .= "<div id=\"NewScriptContents\">";}
     if ($isPBP !== 'Y') {
-        $scriptHtml .= "<center><B>$script_name</B><BR>\n";
+        $scriptHtml .= "<center><B>$script_name</B></center><BR>\n";
     }
     $scriptHtml .= "$script_text\n";
-    if ($isPBP !== 'Y') {
+    /*if ($isPBP !== 'Y') {
         $scriptHtml .= "</center>";
-    }
+    }*/
     if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i", $script_text)) )
         {$scriptHtml .= "</div>";}
     $scriptHtml .= "</TD></TR></TABLE>\n";
