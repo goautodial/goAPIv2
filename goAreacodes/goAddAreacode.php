@@ -64,6 +64,7 @@
 			$astDB->where( "campaign_id", $campaign_id );
 			$astDB->where( "areacode", $areacode );
 			$astDB->getOne( "vicidial_campaign_cid_areacodes", "campaign_id, areacode" );
+            $lastQuery = $astDB->getLastQuery();
 		    
 			if ( $astDB->count > 0 ) {
 				$err_msg 									= "Areacode is Existing in the Campaign";
@@ -89,7 +90,8 @@
 					);
 				} else {
 					$apiresults = array (
-						"result"		=> $astDB->getLastError()
+						//"result"		=> $astDB->getLastError()
+                        "result"        => $lastQuery
 					);
 				}
 			}
