@@ -61,16 +61,16 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {				
 		
 			// check if already existing in whole system
-			/* (nat) $astDB->where( "campaign_id", $campaign_id );
+			$astDB->where( "campaign_id", $campaign_id );
 			$astDB->where( "areacode", $areacode );
-			$astDB->getOne( "vicidial_campaign_cid_areacodes", "campaign_id, areacode" );
+			$astDB->getOne( "vicidial_campaign_cid_areacodes" );
 		    
 			if ( $astDB->count > 0 ) {
 				$err_msg 									= "Areacode is Existing in the Campaign";
 				$apiresults 								= array(
 					"result" 									=> $err_msg
 				);
-			} else { */
+			} else { 
 
 					$data						= array(
 						'campaign_id' 						=> $campaign_id, 
@@ -92,7 +92,7 @@
 						"result"		=> $astDB->getLastError()
 					);
 				}
-			// (nat) }
+			}
 		}
 	}
 	return $apiresults;
