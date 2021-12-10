@@ -109,6 +109,7 @@
 	$survey_fourth_audio_file 							= $astDB->escape($_REQUEST['survey_fourth_audio_file']);
 	$survey_fourth_status 								= $astDB->escape($_REQUEST['survey_fourth_status']);
 	$survey_fourth_exten 								= $astDB->escape($_REQUEST['survey_fourth_exten']);
+	$survey_response_digit_map 							= $astDB->escape($_REQUEST['survey_response_digit_map']);
     $no_channels 										= $astDB->escape($_REQUEST['no_channels']);
     $disable_alter_custdata 							= $astDB->escape($_REQUEST['disable_alter_custdata']);
     $disable_alter_custphone 							= $astDB->escape($_REQUEST['disable_alter_custphone']);
@@ -328,6 +329,9 @@
 						'next_agent_call' 						=> (!empty($next_agent_call)) ? $next_agent_call : $resultGet['next_agent_call'], 
 						'xferconf_a_number' 					=> (!empty($xferconf_a_number)) ? $xferconf_a_number : $resultGet['xferconf_a_number'], 
 						'xferconf_b_number' 					=> (!empty($xferconf_b_number)) ? $xferconf_b_number : $resultGet['xferconf_b_number'], 
+															//nat: added the two following lines of code
+						'three_way_call_cid' 					=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
+						'survey_response_digit_map' 			=> (!empty($survey_response_digit_map)) ? $survey_response_digit_map : $resultGet['survey_response_digit_map'],
 						//'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'],
 						'three_way_dial_prefix' 				=> $three_way_dial_prefix,
 															//nat: made changes to the line of code below
