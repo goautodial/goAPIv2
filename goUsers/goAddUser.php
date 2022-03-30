@@ -25,17 +25,25 @@
 	include_once ("../licensed-conf.php");
 	
     // POST or GET Variables
-	$orig_user 											= (isset($_REQUEST['user']) ? $astDB->escape($_REQUEST['user']) : "agent001");
-	$pass 												= $astDB->escape($_REQUEST['pass']);
-	$orig_full_name 									= (isset($_REQUEST['full_name']) ? $astDB->escape($_REQUEST['full_name']) : "Agent 001");
-	$phone_login 										= $astDB->escape($_REQUEST['phone_login']);
-	$phone_pass 										= $pass;
-	$user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));		
-	$avatar 											= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);
-	$seats 												= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
-	$server_ip 											= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
-	$defActive 											= array("Y", "N");
+	$orig_user 	= (isset($_REQUEST['user']) ? $astDB->escape($_REQUEST['user']) : "agent001");
+	$pass 		= $astDB->escape($_REQUEST['pass']);
+	$orig_full_name = (isset($_REQUEST['full_name']) ? $astDB->escape($_REQUEST['full_name']) : "Agent 001");
+	$phone_login 	= $astDB->escape($_REQUEST['phone_login']);
+	$phone_pass 	= $pass;
+	$user_group 	= $astDB->escape($_REQUEST['user_group']);
+	$active 	= $astDB->escape(strtoupper($_REQUEST['active']));		
+	$email 		= $astDB->escape($_REQUEST['email']);
+	$avatar 	= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);
+	$seats 		= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
+	$server_ip 	= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
+	$defActive 	= array("Y", "N");
+							
+	// osticket
+	$ostuname = $orig_user;
+	$ostfullname = explode(' ', $orig_full_name);
+	$ostfname = $ostfullname[0];
+	$ostlname = $ostfullname[1];
+
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -257,19 +265,21 @@
 								$password				= $pass;
 							}
 							
-							$dataUser 					= array(
-								"user" 						=> $user,
-								"pass" 						=> $password,
-								"user_group" 				=> $user_group,
-								"full_name" 				=> $full_name,
-								"user_level" 				=> $user_level,
-								"phone_login" 				=> $phone_login,
-								"phone_pass" 				=> $password,
+							
+							$dataUser = array(
+								"user" 				=> $user,
+								"pass" 				=> $password,
+								"user_group" 			=> $user_group,
+								"full_name" 			=> $full_name,
+								"user_level" 			=> $user_level,
+								"email" 			=> $email,
+								"phone_login" 			=> $phone_login,
+								"phone_pass" 			=> $password,
 								"agentonly_callbacks" 		=> "1",
-								"agentcall_manual" 			=> "1",
-								"active" 					=> $active,
+								"agentcall_manual" 		=> "1",
+								"active" 			=> $active,
 								"vdc_agent_api_access" 		=> "1",
-								"pass_hash" 				=> $pass_hash,
+								"pass_hash" 			=> $pass_hash,
 								"agent_choose_ingroups" 	=> "1",
 								"vicidial_recording" 		=> "1",
 								"vicidial_transfers" 		=> "1",
@@ -278,148 +288,180 @@
 							);
 							
 							$q_insertUser 				= $astDB->insert('vicidial_users', $dataUser); // insert record in asterisk.vicidial_users
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
+							$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
 							
-							$dataPhones 				= array(
-								"extension" 				=> $phone_login,
-								"dialplan_number" 			=> "9999" . $phone_login,
-								"voicemail_id" 				=> $phone_login,
-								"phone_ip" 					=> "",
-								"computer_ip" 				=> "",
-								"server_ip" 				=> $server_ip,
-								"login" 					=> $phone_login,
-								"pass" 						=> $password,
-								"status" 					=> "ACTIVE",
-								"active" 					=> $active,
-								"phone_type" 				=> "",
-								"fullname" 					=> $full_name,
-								"company" 					=> $user_group,
-								"picture" 					=> "",
-								"protocol" 					=> "EXTERNAL",
-								"local_gmt" 				=> "-5",
-								"outbound_cid" 				=> "0000000000",
-								"template_id" 				=> "--NONE--",
+							$dataPhones = array(
+								"extension" 			=> $phone_login,
+								"dialplan_number" 		=> "9999" . $phone_login,
+								"voicemail_id" 			=> $phone_login,
+								"phone_ip" 			=> "",
+								"computer_ip" 			=> "",
+								"server_ip" 			=> $server_ip,
+								"login" 			=> $phone_login,
+								"pass" 				=> $password,
+								"status" 			=> "ACTIVE",
+								"active" 			=> $active,
+								"phone_type" 			=> "",
+								"fullname" 			=> $full_name,
+								"company" 			=> $user_group,
+								"picture" 			=> "",
+								"protocol" 			=> "EXTERNAL",
+								"local_gmt" 			=> "-5",
+								"outbound_cid" 			=> "0000000000",
+								"template_id" 			=> "--NONE--",
 								//"conf_override" => $conf_override,
-								"user_group" 				=> $user_group,
-								"conf_secret" 				=> $password,
-								"messages" 					=> "0",
-								"old_messages" 				=> "0"
+								"user_group" 			=> $user_group,
+								"conf_secret" 			=> $password,
+								"messages" 			=> "0",
+								"old_messages" 			=> "0"
 							);
 							
 							$astDB->insert('phones', $dataPhones); // insert record in goautodial.users
 							
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
+							$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
 							
 							$astDB->where("user", $user);
-							$query 						= $astDB->getOne("vicidial_users", "user_id");
+							$query = $astDB->getOne("vicidial_users", "user_id");
 
-							$userid 					= $query["user_id"];
+							$userid = $query["user_id"];
 											
 							if  ($active == "N") { 
-								$goactive 				= 0; 
+								$goactive = 0; 
 							} else { 
-								$goactive 				= 1; 
+								$goactive = 1; 
 							}
 							
-							$datago 					= array(
-								"userid" 					=> $userid,
-								"name" 						=> $user,
-								"fullname" 					=> $full_name,
-								"avatar" 					=> $avatar,
-								"role" 						=> $user_level,
-								"status" 					=> $goactive,
-								"user_group" 				=> $user_group,
-								"phone" 					=> $phone_login
+							$datago = array(
+								"userid" 			=> $userid,
+								"name" 				=> $user,
+								"fullname" 			=> $full_name,
+								"avatar" 			=> $avatar,
+								"role" 				=> $user_level,
+								"status" 			=> $goactive,
+								"user_group" 			=> $user_group,
+								"phone" 			=> $phone_login,
+								"email"				=> $email
 								//"location_id" => $location
 							);
 							
 							$goDB->insert('users', $datago); // insert record in goautodial.users
 							
 							// Admin logs
-							$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $goDB->getLastQuery());
+							$log_id	= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $goDB->getLastQuery());
 								
 							$astDB->where("user", $user);
 							$astDB->getOne("vicidial_users", "user");
 							
 							if ($astDB->count > 0) {
 								$goDB->where("setting", "GO_agent_wss_sip");
-								$querygo 				= $goDB->getOne("settings", "value");
-								$realm 					= $querygo['value'];
+								$querygo = $goDB->getOne("settings", "value");
+								$realm = $querygo['value'];
 								
 								if  ($pass_hash_enabled > 0) {
-									$ha1 				= md5 ("{$phone_login}:{$realm}:{$phone_pass}");
-									$ha1b 				= md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
-									$phone_pass 		= '';
+									$ha1 = md5 ("{$phone_login}:{$realm}:{$phone_pass}");
+									$ha1b = md5 ("{$phone_login}@{$realm}:{$realm}:{$phone_pass}");
+									$phone_pass = '';
 								}
 
 								$goDB->where("setting", "GO_agent_domain");
-								$rowd 					= $goDB->getOne("settings", "value");
+								$rowd = $goDB->getOne("settings", "value");
 
-								$domain 				= (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
+								$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 							
-								$datakam 				= array(
-									"username" 				=> $phone_login,
-									"domain" 				=> $domain,
-									"password" 				=> $phone_pass,
-									"ha1" 					=> $ha1,
-									"ha1b" 					=> $ha1b
+								$datakam = array(
+									"username" 		=> $phone_login,
+									"domain" 		=> $domain,
+									"password" 		=> $phone_pass,
+									"ha1" 			=> $ha1,
+									"ha1b" 			=> $ha1b
 								);							
 							
 								$kamDB->insert('subscriber', $datakam);
-								$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $kamDB->getLastQuery());
+								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $kamDB->getLastQuery());
 								
-								$return_user 			= $userid;
+								$return_user = $userid;
 								array_push ($arr_user, $return_user);							
 							} else {
-								$err_msg 				= error_handle("41004", "user");
-								$apiresults 			= array(
-									"code" 					=> "41004", 
-									"result" 				=> $err_msg
+								$err_msg = error_handle("41004", "user");
+								$apiresults = array(
+									"code" 			=> "41004", 
+									"result" 		=> $err_msg
 								);
-							}								
+							}			
+
+							// osticket
+							$dataOST = array(
+								'username'					=> $ostuname,
+								'dept_id'					=> 1,
+								'role_id'					=> 1,
+								'firstname'					=> $ostfname,
+								'lastname'					=> $ostlname,
+								'passwd'					=> ostHashPassword($pass),
+								'email'						=> $email,
+								'signature'					=> '',
+								'isactive'					=> 1,
+								'isadmin'					=> 0,
+								'isvisible'					=> 0,
+								'onvacation'				=> 0,
+								'assigned_only'				=> 0,
+								'show_assigned_tickets'		=> 0,
+								'change_passwd'				=> 0,
+								'max_page_size'				=> 0,
+								'auto_refresh_rate'			=> 0,
+								'default_signature_type'	=> 'none',
+								'default_paper_size'		=> 'Letter',
+								'extra'						=> '{"def_assn_role":true}',
+								'permissions'				=> '{"org.create":1,"faq.manage":1,"visibility.departments":1,"user.create":1,"user.edit":1,"user.dir":1}',
+								'created'					=> date('Y-m-d h:i:s'),
+								'updated'					=> date('Y-m-d h:i:s')
+							);
+
+							$osticketDB->insert('ost_staff', $dataOST);
+							// $log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Agent: $user $testvar", $log_group, $osticketDB->getLastQuery());
 						} else {				
-							$error_count 				= 1;
-							$i 							= $i - 1;
+							$error_count = 1;
+							$i = $i - 1;
 						}
 					}
 					
 					if ($error_count == 0) {
-						$apiresults 					= array(
-							"result" 						=> "success", 
-							"user created" 					=> $arr_user
+						$apiresults = array(
+							"result" => "success", 
+							"user created" => $arr_user,
+							"query_result" => ostHashPassword($pass)
 						);
 					} elseif ($error_count == 1) {
-						$err_msg 						= error_handle("10113");
-						$apiresults 					= array(
-							"code" 							=> "10113", 
-							"result" 						=> $err_msg
+						$err_msg = error_handle("10113");
+						$apiresults = array(
+							"code" 					=> "10113", 
+							"result" 				=> $err_msg
 						);
 					} elseif ($error_count == 2) {
-						$err_msg 						= error_handle("41004", "user_group");
-						$apiresults 					= array(
-							"code" 							=> "41004", 
-							"result" 						=> $err_msg
+						$err_msg = error_handle("41004", "user_group");
+						$apiresults = array(
+							"code" 					=> "41004", 
+							"result" 				=> $err_msg
 						);
 					}
 				} else {
-					$err_msg 							= error_handle("10004", "seats. Reached Maximum Licensed Seats!");
-					$apiresults 						= array(
-						"code" 								=> "10004", 
-						"result" 							=> $err_msg
+					$err_msg = error_handle("10004", "seats. Reached Maximum Licensed Seats!");
+					$apiresults = array(
+						"code" 						=> "10004", 
+						"result" 					=> $err_msg
 					);
 				}			
 			} else {
-				$err_msg 								= error_handle("41004", "user_group");
-				$apiresults 							= array(
-					"code" 									=> "41004", 
-					"result" 								=> $err_msg
+				$err_msg = error_handle("41004", "user_group");
+				$apiresults = array(
+					"code" 							=> "41004", 
+					"result" 						=> $err_msg
 				);
 			}
 		} else {
-			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
-				"result" 									=> $err_msg
+			$err_msg = error_handle("10001");
+			$apiresults = array(
+				"code" 								=> "10001", 
+				"result" 							=> $err_msg
 			);		
 		}
 	}

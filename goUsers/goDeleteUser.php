@@ -81,6 +81,14 @@
 					->getOne("vicidial_users");
 				
 				if ($astDB->count > 0) {
+
+					// osticket
+					$ostCols							= array('user', 'full_name');
+					$ostQuery							= $astDB
+						->where('user_id', $user_id)
+						->get('vicidial_users', null, $ostCols);
+					// ..osticket
+
 					$phone_login 						= $query['phone_login'];
 					
 					$astDB->where("user_id", $user_id) ;
@@ -99,6 +107,13 @@
 					$kamDB->delete("subscriber");				
 					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Subscriber: $phone_login", $log_group, $kamDB->getLastQuery());
 				
+					// osticket
+					foreach ($ostQuery as $ostResults) {
+						$ostUsername		= $ostResults['user'];
+					}
+
+					$osticketDB->where('username', $ostUsername);
+					$osticketDB->delete('ost_staff');
 				} else {
 					$error_count 						= 1;
 				}
