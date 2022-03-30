@@ -1,9 +1,9 @@
 <?php
 /**
- * @file        goDBkamailio.php
- * @brief       Configurations to connect to kamailio DB
+ * @file        goDBosticket.php
+ * @brief       Configurations to connect to asterisk DB
  * @copyright   Copyright (C) GOautodial Inc.
- * @author      Noel Umandap  <noelumandap@goautodial.com>
+ * @author      Jerico James Flores Milo  <jericojames@goautodial.com>
  * @author      Alexander Jim Abenoja  <alex@goautodial.com>
  *
  * @par <b>License</b>:
@@ -20,6 +20,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+include_once ("includes/MySQLiDB.php");
+
 if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf";
 } else {
@@ -36,9 +38,10 @@ if ( file_exists($conf_path) )
                 {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",$PATHlogs);}
         if (preg_match("/^PATHweb/", $DBCline))
                 {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
+         if (preg_match("/^PATHsounds/", $DBCline))
+                {$path_sounds = $DBCline;   $path_sounds = preg_replace("/.*=/","",$path_sounds);}
         if (preg_match("/^VARserver_ip/", $DBCline))
                 {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}
-                
         if (preg_match("/^VARDBost_server/", $DBCline))
                 {$VARDBost_server = $DBCline;   $VARDBost_server = preg_replace("/.*=/","",$VARDBost_server);}
         if (preg_match("/^VARDBost_database/", $DBCline))
@@ -52,12 +55,18 @@ if ( file_exists($conf_path) )
         }
     }
 
-$ostDB = new MySQLiDB($VARDBost_server, $VARDBost_user, $VARDBost_pass, $VARDBost_database);
+    $VARDBost_server   = "192.168.6.235";
+    $VARDBost_user     = "Uosticket";
+    $VARDBost_pass     = "DbOsH#ayOp#ka2O22";
+    $VARDBost_database = "osticket_db";
 
-if (!$ostDB)
+$osticketDB = new MySQLiDB($VARDBost_server, $VARDBost_user, $VARDBost_pass, $VARDBost_database);
+
+if (!$osticketDB)
     {
-    echo "Error: Unable to connect to MySQL goautodial." . PHP_EOL;
-    echo "Debugging Error: " . $ostDB->getLastError() . PHP_EOL;
+    echo "Error: Unable to connect to MySQL osticket_db." . PHP_EOL;
+    echo "Debugging Error: " . $osticketDB->getLastError() . PHP_EOL;
     exit;
+    //die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
     }
 ?>

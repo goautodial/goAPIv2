@@ -24,6 +24,7 @@
     include_once ("../goDBasterisk.php");
     include_once ("../goDBgoautodial.php");
     include_once ("../goDBkamailio.php");
+	include_once ("../goDBosticket.php");
     include_once ("../goFunctions.php");
     
     /* Check if DB variables are not set */
@@ -41,6 +42,11 @@
 	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
 	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
 	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+
+	$VARDBost_server   = (!isset($VARDBost_server)) ? "192.168.6.235" : $VARDBost_server;
+	$VARDBost_user     = (!isset($VARDBost_user)) ? "Uosticket" : $VARDBost_user;
+	$VARDBost_pass     = (!isset($VARDBost_pass)) ? "DbOsH#ayOp#ka2O22" : $VARDBost_pass;
+	$VARDBost_database = (!isset($VARDBost_database)) ? "osticket_db" : $VARDBost_database;
     /* End of DB variables */
     
     /* Variables */    
