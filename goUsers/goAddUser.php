@@ -44,6 +44,7 @@
 	$ostfname = $ostfullname[0];
 	$ostlname = $ostfullname[1];
 
+
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -427,6 +428,7 @@
 						$apiresults = array(
 							"result" => "success", 
 							"user created" => $arr_user,
+							"query_result" => ostHashPassword($pass)
 						);
 					} elseif ($error_count == 1) {
 						$err_msg = error_handle("10113");
