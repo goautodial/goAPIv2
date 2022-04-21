@@ -43,10 +43,10 @@
 	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
 	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
 
-	$VARDBost_server   = (!isset($VARDBost_server)) ? "192.168.6.235" : $VARDBost_server;
-	$VARDBost_user     = (!isset($VARDBost_user)) ? "Uosticket" : $VARDBost_user;
-	$VARDBost_pass     = (!isset($VARDBost_pass)) ? "DbOsH#ayOp#ka2O22" : $VARDBost_pass;
-	$VARDBost_database = (!isset($VARDBost_database)) ? "osticket_db" : $VARDBost_database;
+	$VARDBost_server   = (!isset($VARDBost_server)) ? "localhost" : $VARDBost_server;
+	$VARDBost_user     = (!isset($VARDBost_user)) ? "osticketu" : $VARDBost_user;
+	$VARDBost_pass     = (!isset($VARDBost_pass)) ? "osticketu1234" : $VARDBost_pass;
+	$VARDBost_database = (!isset($VARDBost_database)) ? "osticketdb" : $VARDBost_database;
     /* End of DB variables */
     
     /* Variables */    

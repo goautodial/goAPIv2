@@ -55,11 +55,6 @@ if ( file_exists($conf_path) )
         }
     }
 
-    $VARDBost_server   = "192.168.6.235";
-    $VARDBost_user     = "Uosticket";
-    $VARDBost_pass     = "DbOsH#ayOp#ka2O22";
-    $VARDBost_database = "osticket_db";
-
 $osticketDB = new MySQLiDB($VARDBost_server, $VARDBost_user, $VARDBost_pass, $VARDBost_database);
 
 if (!$osticketDB)
