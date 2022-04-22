@@ -62,13 +62,15 @@
                 }
 				
 				$data									= $astDB
-					->where("update_time", array("$NOW 09:00:00", "$NOW 21:00:00"), "BETWEEN")
+					//->where("update_time", array("$NOW 09:00:00", "$NOW 21:00:00"), "BETWEEN")
+					->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
 					->getValue("vicidial_campaign_stats", "sum(answers_today)");
-				
-				$apiresults 							= array(
-					"result" 								=> "success",
+				$err = $astDB->getLastQuery();	
+				$apiresults = array(
+					"result" => "success",
 					//"query"								=> $astDB->getLastQuery(),
-					"data" 									=> $data
+					"data" => $data,
+					"query" => $err
 				);		
 			}
 		} else {

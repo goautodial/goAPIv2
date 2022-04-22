@@ -137,14 +137,15 @@
 				}
 				
 				if ("ALL" === strtoupper($campaign_id)) {
-                    $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                    
+                    			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                    			
 					foreach($SELECTQuery as $camp_val){
-                        $array_camp[] = $camp_val["campaign_id"];
-                    }
-                }else{
-                    $array_camp[] 		= $campaign_id;
-                }
+                        			$array_camp[] = $camp_val["campaign_id"];
+                    			}
+					
+                		}else{
+                			$array_camp[] = $campaign_id;
+                		}
 				//$imploded_camp = "'".implode("','", $array_camp)."'";
 	
 				$cols = array(
@@ -159,7 +160,7 @@
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					//->where("pause_sec", 0, ">")
 					//->where("pause_sec", 65000, "<")
-                    ->where("pause_sec", array(0, 65000), "BETWEEN")
+                    //->where("pause_sec", array(0, 65000), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("sub_status", array("LAGGED", "LOGIN"), "NOT IN")
 					->groupBy("vu.user,sub_status")
@@ -226,32 +227,47 @@
 				$cols = array(
 				      "vu.full_name",
 			              "val.user",
-			              "wait_sec",
-			              "talk_sec",
-			              "dispo_sec",
-			              "pause_sec",
+			              "SUM(wait_sec) as wait_sec",
+			              "SUM(talk_sec) as talk_sec",
+			              "SUM(dispo_sec) as dispo_sec",
+			              "SUM(pause_sec) as pause_sec",
 			              "status",
-			              "dead_sec",
+			              "SUM(dead_sec) as dead_sec",
 				);
         
+				
 			        $agenttd = $astDB
 			            ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 			            ->where("campaign_id", $array_camp, "IN")
-			            ->where("status != 'NULL'")
+			            //->where("status != 'LAGGED'")
+				    ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
 			            ->get("vicidial_agent_log val", 10000000, $cols);
-            
+           			
+				//$agenttd = $astDB->rawQuery(""); 
 				$query_td = $astDB->getLastQuery();
 			        $usercount = $astDB->getRowCount();
-	
+				
+				/*
 				$agenttotalcalls = $astDB
 					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("vu.user = vl.user")
 					->groupBy("vl.user")
 					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
-					
+				*/
+				$agenttotalcalls = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                        ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                        ->where("campaign_id", $array_camp, "IN")
+					//->where("sub_status != 'LAGGED'")
+                                	->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+				        ->groupBy("user")
+                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
+				$query_ttc = $astDB->getLastQuery();
+	
 				if ($astDB->count >0) {	
 					/*$TOTwait 	= array();
 					$TOTtalk 	= array();
@@ -369,12 +385,18 @@
                                 $pause = $row['pause_sec'];
                                 $dead = $row['dead_sec'];
                                 $customer = $row['talk_sec'] - $row['dead_sec'];
-
-                                if ($wait > 65000) {$wait=0;}
-                                if ($talk > 65000) {$talk=0;}
-                                if ($dispo > 65000) {$dispo=0;}
-                                if ($pause > 65000) {$pause=0;}
-                                if ($dead > 65000) {$dead=0;}
+			
+                                //if ($wait > 65000) {$wait=0;}
+				if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
+                                //if ($talk > 65000) {$talk=0;}
+				if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
+                                //if ($dispo > 65000) {$dispo=0;}
+				if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
+                                //if ($pause > 65000) {$pause=0;}
+				if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
+                                //if ($dead > 65000) {$dead=0;}
+				if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}			
+	
                                 if ($customer < 1) {$customer=0;}
 
                                 $TOTwait =      ($TOTwait + $wait);
@@ -596,7 +618,9 @@
 					"TOTtimeTC" 		=> $TOTtimeTC, 
 					"TOT_AGENTS" 		=> $TOT_AGENTS, 
 					"TOTcalls" 		=> $TOTcalls,
-					"campaigns"		=> $array_camp
+					"campaigns"		=> $array_camp,
+					"query" => $query_td,
+					"QUERY2" => $query_ttc
 					//"SstatusesBSUM"         => $SstatusesBSUM,
 					//"MIDsorted_output"	=> $MIDsorted_output,
 					//"legend"		=> $legend

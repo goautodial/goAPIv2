@@ -50,7 +50,13 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
-			if (is_array($campaigns)) {	
+			if (is_array($campaigns)) {
+				if (strtoupper($log_group) != 'ADMIN') {
+					if ($userlevel < 9) {
+                        $astDB->where("user_group", $log_group);
+					}
+				}
+                
 				$data									= $astDB
 					->where("campaign_id", $campaigns, "IN")
 					->where("status", array($agentstatus), "IN")

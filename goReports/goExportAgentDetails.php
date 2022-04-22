@@ -406,7 +406,7 @@
 					->where("status != 'NULL'")
 					->groupBy("val.user")
 					->get("vicidial_agent_log val", $limit, $cols);*/
-
+				/*
 				$cols = array(
 					"vu.full_name",
 					"val.user",
@@ -422,17 +422,47 @@
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
-					->where("status != 'NULL'")
+					//->where("status != 'NULL'")
 					->orderBy("user", "DESC")
 					->get("vicidial_agent_log val", 10000000, $cols);
+				*/
+				$cols = array(
+                                      "vu.full_name",
+                                      "val.user",
+                                      "SUM(wait_sec) as wait_sec",
+                                      "SUM(talk_sec) as talk_sec",
+                                      "SUM(dispo_sec) as dispo_sec",
+                                      "SUM(pause_sec) as pause_sec",
+                                      "status",
+                                      "SUM(dead_sec) as dead_sec",
+                                );
 
+                                $agent_time_ct = $astDB
+                                    ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                    ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                    ->where("campaign_id", $array_camp, "IN")
+                                    //->where("status != 'LAGGED'")
+                                    ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+                                    ->groupBy("user")
+                                    ->orderBy("user", "DESC")
+                                    ->get("vicidial_agent_log val", 10000000, $cols);
+
+				$agenttotalcalls = $astDB
+                                        ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                        ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                        ->where("campaign_id", $array_camp, "IN")
+                                        //->where("sub_status != 'LAGGED'")
+                                        ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+                                        ->groupBy("user")
+                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
+				/*
 				$agenttotalcalls = $astDB
 					->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					->where("vu.user = vl.user")
 					->groupBy("vl.user")
 					->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
-
+				*/
 				if ($astDB->count >0) {
 					/*foreach ($agent_time_ct as $row) {
 						$user 							= $row['user'];
@@ -552,11 +582,16 @@
 						$dead = $row['dead_sec'];
 						$customer = $row['talk_sec'] - $row['dead_sec'];
 
-						if ($wait > 65000) {$wait=0;}
+						/*if ($wait > 65000) {$wait=0;}
 						if ($talk > 65000) {$talk=0;}
 						if ($dispo > 65000) {$dispo=0;}
 						if ($pause > 65000) {$pause=0;}
-						if ($dead > 65000) {$dead=0;}
+						if ($dead > 65000) {$dead=0;}*/
+                                		if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
+		                                if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
+                		                if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
+                                		if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
+		                                if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}
 						if ($customer < 1) {$customer=0;}
 
 						$m=0;

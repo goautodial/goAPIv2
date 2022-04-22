@@ -520,10 +520,10 @@ $script_text = stripslashes($script_text);
 $goAgentScripts .=  "<TABLE WIDTH=100%><TR><TD>\n";
 if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i",$script_text)) )
 	{$goAgentScripts .=   "<div id=\"NewScriptContents\">";}
-$goAgentScripts .=  "<center><B>$script_name</B><BR>\n";
+$goAgentScripts .=  "<center><B>$script_name</B></center><BR>\n";
 $goAgentScripts .=  "$script_text\n";
 if ( ( ($IFRAME < 1) and ($ScrollDIV > 0) ) or (preg_match("/IGNORENOSCROLL/i",$script_text)) )
-	{$goAgentScripts .=  "</center></div>";}
+	{$goAgentScripts .=  "</div>";}
 $goAgentScripts .=  "</TD></TR></TABLE>\n";
 
 //exit;

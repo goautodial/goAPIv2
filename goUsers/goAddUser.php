@@ -37,13 +37,12 @@
 	$seats 		= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
 	$server_ip 	= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
 	$defActive 	= array("Y", "N");
-							
+
 	// osticket
 	$ostuname = $orig_user;
 	$ostfullname = explode(' ', $orig_full_name);
 	$ostfname = $ostfullname[0];
-	$ostlname = $ostfullname[1];
-
+	$ostlname = $ostfullname[1]
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -426,7 +425,7 @@
 					
 					if ($error_count == 0) {
 						$apiresults = array(
-							"result" => "success", 
+							"result" => "success",
 							"user created" => $arr_user,
 							"query_result" => ostHashPassword($pass)
 						);

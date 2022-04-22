@@ -4,6 +4,7 @@
  * @brief 		API to get all areacodes
  * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author		Thom Bernarth Patacsil 
+ * @author		Christopher Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +22,13 @@
 */
 
 	include_once ("goAPI.php");
+	$draw   = (isset($_REQUEST['draw']) ? $astDB->escape($_REQUEST['draw']) : 0);
+	$start  = (isset($_REQUEST['start']) ? $astDB->escape($_REQUEST['start']) : 0);
+	$length = (isset($_REQUEST['length']) ? $astDB->escape($_REQUEST['length']) : 10);
+	$order  = (isset($_REQUEST['order']) ? $astDB->escape($_REQUEST['order']) : "campaign_id");
+	$dir    = (isset($_REQUEST['dir']) ? $astDB->escape($_REQUEST['dir']) : "desc");
+	$search = (isset($_REQUEST['search']) ? $astDB->escape($_REQUEST['search']) : "");
+	$can_update = (isset($_REQUEST['can_update']) ? $astDB->escape($_REQUEST['can_update']) : "N");
 	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -88,34 +96,75 @@
 				"vcid.call_count_today"
 			);
 			
-			$astDB->orderBy('campaign_id', 'desc');
+			$astDB->orderBy($order, $dir);
 			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
-			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', NULL, $cols);		
+			if (isset($search) && strlen($search) > 0) {
+				$astDB->where('vcid.campaign_id', $search)
+					  ->orWhere('vc.campaign_name', $search)
+					  ->orWhere('vcid.areacode', $search)
+					  ->orWhere('vcid.outbound_cid', $search);
+			}
+			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols, true);
 			
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
-					$dataCampID[] 						= $fresults['campaign_id'];
-					$dataCampName[]						= $fresults['campaign_name'];
-					$dataAreacode[] 					= $fresults['areacode'];
-					$dataOutboundCID[] 					= $fresults['outbound_cid'];
-					$dataActive[] 						= $fresults['active'];
-					$dataDescription[]					= $fresults['cid_description'];
-					$dataCallCountToday					= $fresults['call_count_today'];
+					if (!$draw) {
+						$dataCampID[] 						= $fresults['campaign_id'];
+						$dataCampName[]						= $fresults['campaign_name'];
+						$dataAreacode[] 					= $fresults['areacode'];
+						$dataOutboundCID[] 					= $fresults['outbound_cid'];
+						$dataActive[] 						= $fresults['active'];
+						$dataDescription[]					= $fresults['cid_description'];
+						$dataCallCountToday					= $fresults['call_count_today'];
+					} else {
+						$avatar_link = "";
+						$campaign_link = "";
+						if ($can_update !== "N") {
+							$avatar_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
+							$campaign_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
+						}
+						$avatar_link .= '<avatar username="'.$fresults['campaign_name'].'" :size="32"></avatar>';
+						$campaign_link .= '<strong>'.$fresults['campaign_id'].'</strong>';
+						if ($can_update !== "N") {
+							$avatar_link .= '</a>';
+							$campaign_link .= '</a>';
+						}
+						
+						$dataOutput[]						= array(
+							"avatar"							=> $avatar_link,
+							"campaign_id"						=> $campaign_link,
+							"campaign_name"						=> $fresults['campaign_name'],
+							"areacode"							=> $fresults['areacode'],
+							"outbound_cid"						=> $fresults['outbound_cid'],
+							"active"							=> $fresults['active'],
+							"action"							=> "",
+						);
+					}
 				}				
 			
-				$apiresults 							= array(
-					"result" 								=> "success", 
-					"campaign_id" 							=> $dataCampID,
-					"campaign_name"							=> $dataCampName,
-					"areacode" 								=> $dataAreacode, 
-					"outbound_cid" 							=> $dataOutboundCID, 
-					"active" 								=> $dataActive,
-					"description"							=> $dataDescription,
-					"call_count_today"						=> $dataCallCountToday
-				);
+				if (!$draw) {
+					$apiresults 							= array(
+						"result" 								=> "success", 
+						"campaign_id" 							=> $dataCampID,
+						"campaign_name"							=> $dataCampName,
+						"areacode" 								=> $dataAreacode, 
+						"outbound_cid" 							=> $dataOutboundCID, 
+						"active" 								=> $dataActive,
+						"description"							=> $dataDescription,
+						"call_count_today"						=> $dataCallCountToday
+					);
+				} else {
+					$apiresults								= array(
+						"draw"									=> $draw,
+						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
+						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
+						"data"									=> (!is_null($dataOutput) ? $dataOutput : [])
+					);
+				}
 			} else {
 				$apiresults                             = array(
-					"result"								=> "No data available in table"
+					"result"								=> "No data available in table",
+					//"test"									=> $astDB->getLastError()
 				);
 			}
 		} else {

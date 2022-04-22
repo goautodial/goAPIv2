@@ -25,6 +25,7 @@
     include_once ("goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$ingroup 										    = $astDB->escape( $_REQUEST['ingroup'] );
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -130,6 +131,23 @@
 				$queryoa = $SQLquery; //$astDB->getLastQuery();	
 				if ($astDB->count > 0) {
 					$dataPCs 							= array();
+                    $calls_in_queue                     = array();
+                    
+                    foreach ($onlineAgents as $agent) {
+                        $aUser = $agent['vu_user'];
+                        
+                        if (!empty($agent['vla_closer_campaigns'])) {
+                            $closer_campaigns           = trim(substr($agent['vla_closer_campaigns'], 0, -1));
+                            $closer_campaigns           = explode(" ", $closer_campaigns);
+                            $astDB->where("campaign_id", $closer_campaigns, "IN");
+                        }
+                        $cData							= $astDB
+                            ->where("status", array("XFER", "CLOSER"), "NOT IN")
+                            ->where("call_type", "IN", "=")		
+                            ->get("vicidial_auto_calls");
+                        
+                        $calls_in_queue[$aUser]         = $astDB->getRowCount();
+                    }
 					
 					if ($resultsPCs) {
 						foreach ($resultsPCs as $resultsPC) {               
@@ -144,8 +162,9 @@
                         "online_table"                      => "exist",
 						"data" 								=> $onlineAgents, 
 						"dataGo" 							=> $dataGo,
-						"parked" 							=> $dataPCs
-					);			
+						"parked" 							=> $dataPCs,
+                        "calls_in_queue"                    => $calls_in_queue
+					);
 				} else {
 					$apiresults 						= array(
 						"result" 							=> "success", 

@@ -40,7 +40,10 @@
 	$menu_id 										= $astDB->escape($_REQUEST['menu_id']);
 	$voicemail_ext 									= $astDB->escape($_REQUEST['voicemail_ext']);
 	$extension 										= $astDB->escape($_REQUEST['extension']);
-	$exten_context 									= $astDB->escape($_REQUEST['exten_context']);	
+	$exten_context 									= $astDB->escape($_REQUEST['exten_context']);
+	$list_id     									= $astDB->escape($_REQUEST['list_id']);
+	$call_handle_method 							= $astDB->escape($_REQUEST['call_handle_method']);
+	$agent_search_method     						= $astDB->escape($_REQUEST['agent_search_method']);
    
     // Default values 
     $defUUA 										= array(
@@ -158,6 +161,9 @@
 				$datavoicemail_ext	 				= $fresults['voicemail_ext'];
 				$dataextension	 					= $fresults['extension'];
 				$dataexten_context	 				= $fresults['exten_context'];
+                $datalist_id                        = $fresults['list_id'];
+				$datacall_handle_method	 			= $fresults['call_handle_method'];
+                $dataagent_search_method            = $fresults['agent_search_method'];
 			}
 
 			if (empty($did_pattern)) { 
@@ -219,6 +225,18 @@
 			if (empty($exten_context)) {
 				$exten_context 						= $dataexten_context;
 			}
+
+			if (empty($list_id)) { 
+				$list_id 						    = $datalist_id;
+			}
+			
+			if (empty($call_handle_method)) {
+				$call_handle_method 				= $datacall_handle_method;
+			}
+
+			if (empty($agent_search_method)) { 
+				$agent_search_method 				= $dataagent_search_method;
+			}
 			
             $astDB->where("did_pattern", $did_pattern);
             $astDB->where("did_id", $did_id, "!=");
@@ -240,7 +258,10 @@
 					'menu_id' 							=> $menu_id,
 					'voicemail_ext' 					=> $voicemail_ext,
 					'extension' 						=> $extension,
-					'exten_context' 					=> $exten_context					
+					'exten_context' 					=> $exten_context,
+                    'list_id'                           => $list_id,
+                    'call_handle_method'                => $call_handle_method,
+                    'agent_search_method'               => $agent_search_method
 				);
 				
 				$astDB->where("did_id", $did_id);
