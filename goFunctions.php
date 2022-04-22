@@ -1997,4 +1997,74 @@
     function _remove_empty_internal($value) {
 		return !empty($value) || $value === 0;
     }	
+
+    function ostHashPassword($password) {
+        $random = '';
+        $hash = '';
+
+        $random = get_random_bytes(16);
+
+        $hash = crypt($password, gensalt_blowfish($random));
+
+        return $hash;
+    }
+
+    function get_random_bytes($count)
+	{
+        $random_state = microtime();
+		$output = '';
+
+		if (strlen($output) < $count) {
+			$output = '';
+			for ($i = 0; $i < $count; $i += 16) {
+				$random_state = md5(microtime() . $random_state);
+				$output .= pack('H*', md5($random_state));
+			}
+			$output = substr($output, 0, $count);
+		}
+
+		return $output;
+	}
+
+    function gensalt_blowfish($input)
+	{
+		# This one needs to use a different order of characters and a
+		# different encoding scheme from the one in encode64() above.
+		# We care because the last character in our encoded string will
+		# only represent 2 bits.  While two known implementations of
+		# bcrypt will happily accept and correct a salt string which
+		# has the 4 unused bits set to non-zero, we do not want to take
+		# chances and we also do not want to waste an additional byte
+		# of entropy.
+		$itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $iteration_count_log2 = 8;
+
+		$output = '$2a$';
+		$output .= chr(ord('0') + $iteration_count_log2 / 10);
+		$output .= chr(ord('0') + $iteration_count_log2 % 10);
+		$output .= '$';
+
+		$i = 0;
+		do {
+			$c1 = ord($input[$i++]);
+			$output .= $itoa64[$c1 >> 2];
+			$c1 = ($c1 & 0x03) << 4;
+			if ($i >= 16) {
+				$output .= $itoa64[$c1];
+				break;
+			}
+
+			$c2 = ord($input[$i++]);
+			$c1 |= $c2 >> 4;
+			$output .= $itoa64[$c1];
+			$c1 = ($c2 & 0x0f) << 2;
+
+			$c2 = ord($input[$i++]);
+			$c1 |= $c2 >> 6;
+			$output .= $itoa64[$c1];
+			$output .= $itoa64[$c2 & 0x3f];
+		} while (1);
+
+		return $output;
+	}
 ?>
