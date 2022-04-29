@@ -25,7 +25,8 @@
     
     // POST or GET Variables
     $user_ids 											= $_REQUEST['user_id'];
-    $action 											= $astDB->escape($_REQUEST['action']);	
+    $action 											= $astDB->escape($_REQUEST['action']);
+	$osTicket       									= $astDB->escape($_REQUEST['osTicketEn']);
 	
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -83,10 +84,12 @@
 				if ($astDB->count > 0) {
 
 					// osticket
-					$ostCols							= array('user', 'full_name');
-					$ostQuery							= $astDB
-						->where('user_id', $user_id)
-						->get('vicidial_users', null, $ostCols);
+					if ($osTicket) {
+						$ostCols							= array('user', 'full_name');
+						$ostQuery							= $astDB
+							->where('user_id', $user_id)
+							->get('vicidial_users', null, $ostCols);
+					}
 					// ..osticket
 
 					$phone_login 						= $query['phone_login'];
@@ -108,12 +111,14 @@
 					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Subscriber: $phone_login", $log_group, $kamDB->getLastQuery());
 				
 					// osticket
-					foreach ($ostQuery as $ostResults) {
-						$ostUsername		= $ostResults['user'];
-					}
+					if ($osTicket) {
+						foreach ($ostQuery as $ostResults) {
+							$ostUsername		= $ostResults['user'];
+						}	
 
-					$osticketDB->where('username', $ostUsername);
-					$osticketDB->delete('ost_staff');
+						$osticketDB->where('username', $ostUsername);
+						$osticketDB->delete('ost_staff');
+					}
 				} else {
 					$error_count 						= 1;
 				}

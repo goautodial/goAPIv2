@@ -37,12 +37,15 @@
 	$seats 		= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
 	$server_ip 	= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
 	$defActive 	= array("Y", "N");
+	$osTicket       = $astDB->escape($_REQUEST['osTicketEn']);
 
 	// osticket
-	$ostuname = $orig_user;
-	$ostfullname = explode(' ', $orig_full_name);
-	$ostfname = $ostfullname[0];
-	$ostlname = $ostfullname[1];
+	if ($osTicket) {
+		$ostuname = $orig_user;
+		$ostfullname = explode(' ', $orig_full_name);
+		$ostfname = $ostfullname[0];
+		$ostlname = $ostfullname[1];
+	}
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -389,34 +392,36 @@
 							}			
 
 							// osticket
-							$dataOST = array(
-								'username'					=> $ostuname,
-								'dept_id'					=> 1,
-								'role_id'					=> 1,
-								'firstname'					=> $ostfname,
-								'lastname'					=> $ostlname,
-								'passwd'					=> ostHashPassword($pass),
-								'email'						=> $email,
-								'signature'					=> '',
-								'isactive'					=> 1,
-								'isadmin'					=> 0,
-								'isvisible'					=> 0,
-								'onvacation'				=> 0,
-								'assigned_only'				=> 0,
-								'show_assigned_tickets'		=> 0,
-								'change_passwd'				=> 0,
-								'max_page_size'				=> 0,
-								'auto_refresh_rate'			=> 0,
-								'default_signature_type'	=> 'none',
-								'default_paper_size'		=> 'Letter',
-								'extra'						=> '{"def_assn_role":true}',
-								'permissions'				=> '{"org.create":1,"faq.manage":1,"visibility.departments":1,"user.create":1,"user.edit":1,"user.dir":1}',
-								'created'					=> date('Y-m-d h:i:s'),
-								'updated'					=> date('Y-m-d h:i:s')
-							);
+							if ($osTicket) {
+								$dataOST = array(
+									'username'					=> $ostuname,
+									'dept_id'					=> 1,
+									'role_id'					=> 1,
+									'firstname'					=> $ostfname,
+									'lastname'					=> $ostlname,
+									'passwd'					=> ostHashPassword($pass),
+									'email'						=> $email,
+									'signature'					=> '',
+									'isactive'					=> 1,
+									'isadmin'					=> 0,
+									'isvisible'					=> 0,
+									'onvacation'				=> 0,
+									'assigned_only'				=> 0,
+									'show_assigned_tickets'		=> 0,
+									'change_passwd'				=> 0,
+									'max_page_size'				=> 0,
+									'auto_refresh_rate'			=> 0,
+									'default_signature_type'	=> 'none',
+									'default_paper_size'		=> 'Letter',
+									'extra'						=> '{"def_assn_role":true}',
+									'permissions'				=> '{"org.create":1,"faq.manage":1,"visibility.departments":1,"user.create":1,"user.edit":1,"user.dir":1}',
+									'created'					=> date('Y-m-d h:i:s'),
+									'updated'					=> date('Y-m-d h:i:s')
+								);
 
-							$osticketDB->insert('ost_staff', $dataOST);
-							// $log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Agent: $user $testvar", $log_group, $osticketDB->getLastQuery());
+								$osticketDB->insert('ost_staff', $dataOST);
+								// $log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New Agent: $user $testvar", $log_group, $osticketDB->getLastQuery());
+							}
 						} else {				
 							$error_count = 1;
 							$i = $i - 1;
