@@ -24,7 +24,7 @@
 
     include_once ("goAPI.php");
  
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	// $campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -50,12 +50,32 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
+			//get all allowed campaigns
+            $userGroupCamps                             = $astDB->where("user_group", $log_group)
+                ->get("vicidial_user_groups", null, array('allowed_campaigns'));
+
+            foreach ($userGroupCamps as $key) {
+                $camps = $key["allowed_campaigns"];
+            }
+
+            if (preg_match("/ALL-CAMPAIGNS/", $camps)) {
+                $campQuery                              = $astDB->where('active', 'Y')
+                    ->get('vicidial_campaigns', null, array('campaign_id'));
+
+                foreach ($campQuery as $key) {
+                    $campaigns[]    = $key["campaign_id"];
+                }   
+            } else {
+                $trimCamps  = trim($camps, " -");
+                $campaigns = explode(" ", $trimCamps);
+            }
+			
 			if (is_array($campaigns)) {
-				if (strtoupper($log_group) != 'ADMIN') {
-					if ($userlevel < 9) {
-                        $astDB->where("user_group", $log_group);
-					}
-				}
+				// if (strtoupper($log_group) != 'ADMIN') {
+				// 	if ($userlevel < 9) {
+                //         $astDB->where("user_group", $log_group);
+				// 	}
+				// }
                 
 				$ready									= array( "READY", "CLOSER" );
 				$data									= $astDB

@@ -24,7 +24,7 @@
 
     include_once ("goAPI.php");
  
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	// $campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -58,7 +58,7 @@
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -68,13 +68,13 @@
 					if ($userlevel > 8) {
 						$astDB->orWhere("user_group", "---ALL---");
 					} else {
-						if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+						if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
 							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
 						}
 					}
 				}
-			}
-				
+			}	
+			
 			$rsltvGo									= $goDB->get("users", NULL, "userid,avatar");		
 				
 			if ($goDB->count > 0) {
@@ -82,7 +82,7 @@
 				foreach ($rsltvGo as $fresultsGo){
 					array_push($dataGo, $fresultsGo);
 				}
-			} 	
+			} 
 			
 			$cols 										= array(
 				"channel as 'pc_channel'",
@@ -148,11 +148,13 @@
                 
                 $SQLuser_group = "";
 				if (strtoupper($log_group) != 'ADMIN') {
-					$SQLuser_group = "AND vu.user_group = '$log_group'";
+					if ($userlevel < 8) {
+						$SQLuser_group = "AND vu.user_group = '$log_group'";
+					}
 				}
                 
                 $campaignFilters = '';
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $allowedCampaigns = implode("','", $allowed_campaigns);
                     $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
                 }
@@ -205,7 +207,7 @@
 					
 			} else {	
 				// online agents
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
                 }
 				$query_OnlineAgents						= $astDB
@@ -230,7 +232,7 @@
 					"phone_number as 'vac_phone_number'"
 				);
 				
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
                 }
 				$rsltvCallerIDsFromVAC					= $astDB->get("vicidial_auto_calls", NULL, $cols);
@@ -264,10 +266,12 @@
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";
                 
 				if (strtoupper($log_group) != 'ADMIN') {
-					$astDB->where("vicidial_users.user_group", $log_group);
+					if ($userlevel < 8) {
+						$astDB->where("vicidial_users.user_group", $log_group);
+					}
 				}
                 
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
 				$rsltvNoCalls 							= $astDB
@@ -310,10 +314,12 @@
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";
                 
 				if (strtoupper($log_group) != 'ADMIN') {
-					$astDB->where("vicidial_users.user_group", $log_group);
+					if ($userlevel < 8) {
+						$astDB->where("vicidial_users.user_group", $log_group);
+					}
 				}
                 
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
 				$rsltvInCalls 							= $astDB
