@@ -122,7 +122,7 @@
 				}
 			}
 			//die("ALEX");	
-                }else{
+		}else{
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 			$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
 		}
@@ -193,8 +193,7 @@
 					$i++;
 				}
 			}
-		}
-		else{
+		} else {
 			//$list_SQL 							= preg_replace("/,$/i",'',$list_SQL);
 			$list_SQL 							= "AND vi.list_id IN('$list_SQL')";
 			$array_list							= $lists;
@@ -232,14 +231,17 @@
 		if ($log_group !== 'SUPERVISOR') {
 			$stringv 								= go_getall_allowed_users($log_group);
 			$user_group_SQL 						= "AND vl.user IN ($stringv)";
+			$user_group_SQL_2 						= "AND vu.user IN ($stringv)";
 		} else {
-			$user_group_SQL                                                 = "";
+			$user_group_SQL							= "";
+			$user_group_SQL_2						= "";
 		}
-	}  else{
-		$user_group_SQL 						= "";
+	} else {
+		$user_group_SQL 							= "";
+		$user_group_SQL_2 							= "";
 	}
 	
-	$export_fields_SQL 							= "";
+	$export_fields_SQL 								= "";
 	
 	if($rec_location === "Y"){
 	$endepoch_sql = ",vl.end_epoch";
@@ -249,7 +251,7 @@
 	$endepoch_sql2 = "";
 	}
 	$duration_sql = "vl.length_in_sec as call_duration, ";
-        $duration_sql2 = "vcl.length_in_sec as call_duration, ";
+    $duration_sql2 = "vcl.length_in_sec as call_duration, ";
 	$location_sql = "";
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
@@ -257,7 +259,6 @@
 			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
-			# AND vl.length_in_sec > 0 
 			$list_SQL $campaign_SQL 
 			$user_group_SQL $status_SQL_vl 
 			order by vl.call_date
@@ -269,9 +270,8 @@
 			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
-			#AND vcl.length_in_sec > 0
 			$list_SQL $group_SQL 
-			$user_group_SQL $status_SQL_vcl
+			$user_group_SQL_2 $status_SQL_vcl
 			order by vcl.call_date
 			$limit_SQL";
 	}
@@ -319,10 +319,9 @@
 			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
-			# AND vl.length_in_sec > 0
 			$list_SQL 
 			$campaign_SQL 
-			$user_group_SQL 
+			$user_group_SQL_2 
 			$status_SQL_vl 
 			order by vl.call_date
 		) UNION (
@@ -369,10 +368,9 @@
 			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
-			# AND vcl.length_in_sec > 0
 			$list_SQL 
 			$group_SQL 
-			$user_group_SQL 
+			$user_group_SQL_2 
 			$status_SQL_vcl
 			order by vcl.call_date) 
 			$limit_SQL;";

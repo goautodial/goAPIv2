@@ -83,21 +83,21 @@
 			}			
 		}
 		
-		if ($tenant) {
-			$astDB->where("user_group", $usergroup);
-		} else {
-			if (strtoupper($usergroup) != 'ADMIN') {
-				if ($user_level < 9) {
-					$astDB->where("user_group", $usergroup);
-				}
-			}
-		}
+		// if ($tenant) {
+		// 	$astDB->where("user_group", $usergroup);
+		// } else {
+		// 	if (strtoupper($usergroup) != 'ADMIN') {
+		// 		if ($userlevel < 8) {
+		// 			$astDB->where("user_group", $usergroup);
+		// 		}
+		// 	}
+		// }
 		
 		//ALL CAMPAIGNS
 		if ("ALL" === strtoupper($campaignID)) {
 			$SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
-			foreach($SELECTQuery as $camp_val){
+			foreach($SELECTQuery as $camp_val) {
 				$array_camp[] 						= $camp_val["campaign_id"];
 			}
 		} else {
@@ -119,7 +119,7 @@
 			->where("campaign_id", $array_camp, "IN")
 			->orderBy("list_id")
 			->get("vicidial_lists", NULL, "list_id");
-		
+		$test_query = $astDB->getLastQuery();
         $list_ids = array();
 		if ($astDB->count > 0) {
 			foreach ($qlistid as $row) {
@@ -373,7 +373,8 @@
 			"SUMstatuses" 						=> $sts, 
 			"TOPsorted_output" 					=> $TOPsorted_output, 
 			"BOTsorted_output" 					=> $BOTsorted_output,
-			"query"							=> $NOTCALLEDsql
+			"query"								=> $NOTCALLEDsql,
+			"test"								=> $userlevel
 		);
 		return $apiresults;
 	}

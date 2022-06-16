@@ -63,7 +63,7 @@
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			//$tenant	= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-            $tenant = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
+                        $tenant = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
 
 			// check if MariaDB slave server available
 			$rslt									= $goDB
@@ -82,16 +82,6 @@
 					//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
 				}			
 			}
-				
-			if ($tenant) {
-				$astDB->where("user_group", $usergroup);
-			} else {
-				if (strtoupper($usergroup) != 'ADMIN') {
-					if ($userlevel < 9) {
-						$astDB->where("user_group", $usergroup);
-					}
-				}					
-			}
 			
 			if ("ALL" === strtoupper($campaign_id)) {
 				$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
@@ -105,44 +95,54 @@
                         $imploded_camp = "'".implode("','", $array_camp)."'";
 			
 			// ------------ S T A R T -----------------------
-				$statusesFILE = "";
-                                $statuses = '-';
-                                $statusesARY[0] = "";
-                                $j = 0;
-                                $users = '-';
-                                $usersARY = array();
-                                $user_namesARY = array();
-                                $k = 0;
+                        $statusesFILE = "";
+                        $statuses = '-';
+                        $statusesARY[0] = "";
+                        $j = 0;
+                        $users = '-';
+                        $usersARY = array();
+                        $user_namesARY = array();
+                        $k = 0;
 
-                                if ($date_diff <= 0) {
-                                        $filters = "AND pause_sec < 65000 AND wait_sec<65000 AND talk_sec<65000 AND dispo_sec<65000 ";
-                                }
+                        if ($date_diff <= 0) {
+                                $filters = "AND pause_sec < 65000 AND wait_sec<65000 AND talk_sec<65000 AND dispo_sec<65000 ";
+                        }
 
-                                //$perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
-                                //$rows_to_print = $astDB->rawQuery($perfdetails_sql);
+                        //$perfdetails_sql = "SELECT count(*) as calls,sum(talk_sec) as talk,full_name,vicidial_users.user as user,sum(pause_sec) as pause_sec,sum(wait_sec) as wait_sec,sum(dispo_sec) as dispo_sec,status,sum(dead_sec) as dead_sec FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user AND vicidial_users.user_level!='4' $log_groupSQL AND campaign_id IN ($imploded_camp) GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
+                        //$rows_to_print = $astDB->rawQuery($perfdetails_sql);
 
-				$cols = array(
-					"COUNT(lead_id) as calls",
-                                        "full_name",
-					"vu.user as user",
-					"sum(wait_sec) as wait_sec",
-					"sum(talk_sec) as talk",
-					"sum(dispo_sec) as dispo_sec",
-					"sum(IF(pause_sec > 65000, 0, pause_sec)) as pause_sec",
-					"status",
-					"sum(dead_sec) as dead_sec",
-					"(sum(talk_sec) - sum(dead_sec)) as customer"
-                                );
+			if ($tenant) {
+				$astDB->where("user_group", $usergroup);
+			} else {
+				if (strtoupper($usergroup) != 'ADMIN') {
+					if ($userlevel < 9) {
+						$astDB->where("user_group", $usergroup);
+					}
+				}					
+			}
 
-                                $rows_to_print = $astDB
-					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-					->where("date_format(val.event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
-                                        ->where("campaign_id", $array_camp, "IN")
-                                        ->where("vu.user_level != '4'")
-					->where("status", array('NULL', 'LAGGED'), "NOT IN")
-                                        ->groupBy("val.user, full_name, status")
-                                        ->orderBy("full_name, val.user, status", "DESC")
-                                        ->get("vicidial_agent_log val", "500000", $cols);
+                        $cols = array(
+                                "COUNT(lead_id) as calls",
+                                "full_name",
+                                "vu.user as user",
+                                "sum(wait_sec) as wait_sec",
+                                "sum(talk_sec) as talk",
+                                "sum(dispo_sec) as dispo_sec",
+                                "sum(IF(pause_sec > 65000, 0, pause_sec)) as pause_sec",
+                                "status",
+                                "sum(dead_sec) as dead_sec",
+                                "(sum(talk_sec) - sum(dead_sec)) as customer"
+                        );
+
+                        $rows_to_print = $astDB
+                                ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                ->where("date_format(val.event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                ->where("campaign_id", $array_camp, "IN")
+                                ->where("vu.user_level != '4'")
+                                ->where("status", array('NULL', 'LAGGED'), "NOT IN")
+                                ->groupBy("val.user, full_name, status")
+                                ->orderBy("full_name, val.user, status", "DESC")
+                                ->get("vicidial_agent_log val", "500000", $cols);
                                         
 				$perfdetails_sql = $astDB->getLastQuery();	
 				$usercount = $astDB->getRowCount();
@@ -770,7 +770,7 @@
                                         "SstatusesBOTR"         => $SstatusesBOTR,
                                         "SstatusesBSUM"         => $SstatusesBSUM,
                                         "Legend"                => $legend,
-                                        "alex"                 => $alex
+                                        "test"                  => $usercount
                                 );
 
 		} else {

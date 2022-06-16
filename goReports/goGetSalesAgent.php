@@ -53,6 +53,15 @@
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
 	} else {            
+		// check if goUser and goPass are valid
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
 		$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
@@ -61,7 +70,7 @@
 			$astDB->where("user_group", $log_group);
 		} else {
 			if (strtoupper($log_group) != 'ADMIN') {
-				if ($user_level < 9) {
+				if ($userlevel < 8) {
 					$astDB->where("user_group", $log_group);
 				}
 			}
@@ -87,7 +96,9 @@
 		
 		// SALES PER AGENT
 		if ($log_group !== "ADMIN") {
-			$ul 									= "AND us.user_group = '$log_group'";
+			if ($userlevel < 9) {
+				$ul 									= "AND us.user_group = '$log_group'";
+			}
 		} else {
 			$ul 									= "";
 		}
@@ -158,7 +169,7 @@
 		}
 		// ./Statewide Customization
 
-                $imploded_camp = "'".implode("','", $array_camp)."'";		
+		$imploded_camp = "'".implode("','", $array_camp)."'";		
 	
 		$Qstatus2 = $astDB
 			->where("sale", "Y")
@@ -196,7 +207,9 @@
 		$BOTsorted_output                               = "";
 		$total_in_sales                                 = "";
 		$total_out_sales                                = "";
-		$total_out_sales_amount				= 0;
+		$total_out_sales_amount							= 0;
+		$totagents										= 0;
+		$total_in_sales_amount 							= 0;
 
 		if (strtolower($request) == "outbound") {
 			// Outbound Sales //
@@ -213,6 +226,8 @@
 			";
 			$outbound_sql = $astDB->rawQuery($outbound_query);
 
+			$totagents = $astDB->count;	
+
 			// Statewide Customization 
 			$outbound_select_query_sales = "";
 			$i = 0;
@@ -221,7 +236,7 @@
 					$outbound_select_query_sales .= " UNION ";
 				} 
 	
-				$outbound_select_query_sales .= "
+				$outbound_select_query_sales = "
 					SELECT vlog.list_id, vlog.user, vlog.status, sum(IFNULL(cf.Amount, 0)) AS Amount 
 					FROM vicidial_log vlog 
 					LEFT JOIN $list_amount cf on vlog.lead_id = cf.lead_id 
@@ -249,7 +264,6 @@
 			}
 			// ./Statewide Customization 
 
-			$totagents = $astDB->count;	
 			if ($totagents > 0) {
 				$total_sales				= 0;
 				
@@ -379,19 +393,21 @@
 				}
 			}
 		}
+
 		$apiresults = array(
-			"result"		=> "success",
+			"result"			=> "success",
 			"TOPsorted_output"	=> $TOPsorted_output, 
 			"BOTsorted_output"	=> $BOTsorted_output, 
 			"TOToutbound" 		=> $total_out_sales, 
 			"TOTinbound" 		=> $total_in_sales,
-			"TOTAgents"		=> $totagents,
+			"TOTAgents"			=> $totagents,
 			"TOTOUTamount"		=> $total_out_sales_amount,
 			"TOTINamount"		=> $total_in_sales_amount,
-			"col_exists"		=> $col_exists
-	);
+			"col_exists"		=> $col_exists,
+			"testVar"			=> " "
+		);
 			
-			return $apiresults;
+		return $apiresults;
 	}
 
 ?>

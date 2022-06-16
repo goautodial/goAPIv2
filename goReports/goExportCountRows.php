@@ -95,7 +95,7 @@
 				}
 			}
 			//die("ALEX");	
-                }else{
+		}else{
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 			$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
 		}
@@ -196,6 +196,7 @@
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
 			$status_SQL 						= "AND vl.status IN ($status_SQL)";
+			$status_SQL_2 						= "AND vu.status IN ($status_SQL)";
 		}
 	}
 	
@@ -254,7 +255,7 @@
 			$list_SQL 
 			$group_SQL 
 			$user_group_SQL 
-			$status_SQL 
+			$status_SQL_2 
 			order by vcl.call_date)) t";
     }
 	$results = $astDB->rawQuery($query);

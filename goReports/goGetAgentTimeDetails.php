@@ -66,7 +66,7 @@
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
 				//$tenant	= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-                $tenant     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
+                $tenant     = ($userlevel < 8 && $log_group !== "ADMIN") ? 1 : 0;
 				
 				// check if MariaDB slave server available
 				$rslt								= $goDB
@@ -90,7 +90,7 @@
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel < 9) {
+						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
@@ -126,28 +126,28 @@
 				$PCusersARY 						= array();
 				$PCpause_secsARY					= array();
 				
+				if ("ALL" === strtoupper($campaign_id)) {
+                    $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                    			
+					foreach($SELECTQuery as $camp_val){
+                        $array_camp[] = $camp_val["campaign_id"];
+                    }
+					
+            	}else{
+                	$array_camp[] = $campaign_id;
+                }
+				//$imploded_camp = "'".implode("','", $array_camp)."'";
+	
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($user_level < 9) {
+						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
 				}
-				
-				if ("ALL" === strtoupper($campaign_id)) {
-                    			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                    			
-					foreach($SELECTQuery as $camp_val){
-                        			$array_camp[] = $camp_val["campaign_id"];
-                    			}
-					
-                		}else{
-                			$array_camp[] = $campaign_id;
-                		}
-				//$imploded_camp = "'".implode("','", $array_camp)."'";
-	
+
 				$cols = array(
 					"vu.full_name",
 					"val.user",
@@ -193,7 +193,7 @@
 					$astDB->where("user_group", $log_group);
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
-						if ($user_level < 9) {
+						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
@@ -225,30 +225,30 @@
 				*/
 
 				$cols = array(
-				      "vu.full_name",
-			              "val.user",
-			              "SUM(wait_sec) as wait_sec",
-			              "SUM(talk_sec) as talk_sec",
-			              "SUM(dispo_sec) as dispo_sec",
-			              "SUM(pause_sec) as pause_sec",
-			              "status",
-			              "SUM(dead_sec) as dead_sec",
+					"vu.full_name",
+			    	"val.user",
+					"SUM(wait_sec) as wait_sec",
+					"SUM(talk_sec) as talk_sec",
+					"SUM(dispo_sec) as dispo_sec",
+					"SUM(pause_sec) as pause_sec",
+					"status",
+					"SUM(dead_sec) as dead_sec",
 				);
         
 				
-			        $agenttd = $astDB
-			            ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-			            ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
-			            ->where("campaign_id", $array_camp, "IN")
-			            //->where("status != 'LAGGED'")
+				$agenttd = $astDB
+					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
+					//->where("status != 'LAGGED'")
 				    ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
 				    ->groupBy("user")
 				    ->orderBy("user", "DESC")
-			            ->get("vicidial_agent_log val", 10000000, $cols);
+					->get("vicidial_agent_log val", 10000000, $cols);
            			
 				//$agenttd = $astDB->rawQuery(""); 
 				$query_td = $astDB->getLastQuery();
-			        $usercount = $astDB->getRowCount();
+				$usercount = $astDB->getRowCount();
 				
 				/*
 				$agenttotalcalls = $astDB
@@ -260,12 +260,12 @@
 				*/
 				$agenttotalcalls = $astDB
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-                                        ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
-                                        ->where("campaign_id", $array_camp, "IN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("campaign_id", $array_camp, "IN")
 					//->where("sub_status != 'LAGGED'")
-                                	->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
-				        ->groupBy("user")
-                                        ->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
+					->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
+					->groupBy("user")
+					->get("vicidial_agent_log val", $limit, "val.user, count(val.lead_id) as calls");
 				$query_ttc = $astDB->getLastQuery();
 	
 				if ($astDB->count >0) {	
@@ -293,13 +293,11 @@
 					foreach ($agenttd as $row) {
 						$name		= $row['full_name'];
 						$user		= $row['user'];
-
 						foreach ($agenttotalcalls as $call){
 							if($call['user'] == $user){
 									$calls = $call['calls'];
 							}
 						}
-
 						$wait		= convert($row['wait_sec']);
 						$talk		= convert($row['talk_sec']);
 						$dispo		= convert($row['dispo_sec']);
@@ -320,7 +318,6 @@
 						array_push($customerARY, $customer);
 						array_push($agent_timeARY, $time);
 						array_push($callsARY, $calls);
-
 						$totwait_sec           = $row['wait_sec'];
                                                 $tottalk_sec           = $row['talk_sec'];
                                                 $totdispo_sec          = $row['dispo_sec'];
@@ -337,7 +334,6 @@
                                                 array_push($TOTcustomer, $totcustomer_sec);
                                                 array_push($TOTALtime, $tottime_sec);
                                                 array_push($TOTcalls, $calls);
-
 					}
 					
 					$TOTwait 	= convert(array_sum($TOTwait));
@@ -352,81 +348,81 @@
 					$TOTcalls	= array_sum($TOTcalls);
 					*/
 
-			    $nameARY	= array();
-                            $userARY	= array();
-                            $wait_secARY	= array();
-                            $talk_secARY	= array();
-                            $dispo_secARY	= array();
-                            $pause_secARY	= array();
-                            $dead_secARY	= array();
-                            $customerARY	= array();
-                            $agent_timeARY	= array();
-                            $callsARY	= array();
+					$nameARY	= array();
+					$userARY	= array();
+					$wait_secARY	= array();
+					$talk_secARY	= array();
+					$dispo_secARY	= array();
+					$pause_secARY	= array();
+					$dead_secARY	= array();
+					$customerARY	= array();
+					$agent_timeARY	= array();
+					$callsARY	= array();
 
-                            $i=0;
+					$i=0;
 
-                            foreach ($agenttd as $row) {
-                                $user		= $row['user'];
-                                $name		= $row['full_name'];
+					foreach ($agenttd as $row) {
+						$user		= $row['user'];
+						$name		= $row['full_name'];
                        
-				if(!in_array($user, $userARY) && isset($name)){
-					array_push($userARY, $user);
-					array_push($nameARY, $name);
-					foreach ($agenttotalcalls as $call){
-                                           if($call['user'] == $user){
-                                           	array_push($callsARY, $call['calls']);
-                                           }
-                                    	}	
-				}
+						if(!in_array($user, $userARY) && isset($name)){
+							array_push($userARY, $user);
+							array_push($nameARY, $name);
+							foreach ($agenttotalcalls as $call){
+								if($call['user'] == $user){
+									array_push($callsARY, $call['calls']);
+								}
+							}	
+						}
  
-                                $wait = $row['wait_sec'];
-                                $talk = $row['talk_sec'];
-                                $dispo = $row['dispo_sec'];
-                                $pause = $row['pause_sec'];
-                                $dead = $row['dead_sec'];
-                                $customer = $row['talk_sec'] - $row['dead_sec'];
-			
-                                //if ($wait > 65000) {$wait=0;}
-				if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
-                                //if ($talk > 65000) {$talk=0;}
-				if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
-                                //if ($dispo > 65000) {$dispo=0;}
-				if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
-                                //if ($pause > 65000) {$pause=0;}
-				if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
-                                //if ($dead > 65000) {$dead=0;}
-				if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}			
-	
-                                if ($customer < 1) {$customer=0;}
+						$wait = $row['wait_sec'];
+						$talk = $row['talk_sec'];
+						$dispo = $row['dispo_sec'];
+						$pause = $row['pause_sec'];
+						$dead = $row['dead_sec'];
+						$customer = $row['talk_sec'] - $row['dead_sec'];
+				
+									//if ($wait > 65000) {$wait=0;}
+						if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
+										//if ($talk > 65000) {$talk=0;}
+						if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
+										//if ($dispo > 65000) {$dispo=0;}
+						if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
+										//if ($pause > 65000) {$pause=0;}
+						if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
+										//if ($dead > 65000) {$dead=0;}
+						if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}			
+		
+						if ($customer < 1) {$customer=0;}
 
-                                $TOTwait =      ($TOTwait + $wait);
-                                $TOTtalk =      ($TOTtalk + $talk);
-                                $TOTdispo =     ($TOTdispo + $dispo);
-                                $TOTpause =     ($TOTpause + $pause);
-                                $TOTdead =      ($TOTdead + $dead);
-                                $TOTcustomer =  ($TOTcustomer + $customer);
-                                $TOTALtime = ($TOTALtime + $pause + $dispo + $talk + $wait);
-                                
-                                $user_found=0;
+						$TOTwait =      ($TOTwait + $wait);
+						$TOTtalk =      ($TOTtalk + $talk);
+						$TOTdispo =     ($TOTdispo + $dispo);
+						$TOTpause =     ($TOTpause + $pause);
+						$TOTdead =      ($TOTdead + $dead);
+						$TOTcustomer =  ($TOTcustomer + $customer);
+						$TOTALtime = ($TOTALtime + $pause + $dispo + $talk + $wait);
+						
+						$user_found=0;
 
-                                $m=0;
-				foreach($userARY as $users){
-                                    if ($user == $userARY[$m]){
-                                        $user_found++;
+						$m=0;
+						foreach($userARY as $users){
+							if ($user == $userARY[$m]){
+								$user_found++;
 
-                                        $wait_secARY[$m] =    ($wait_secARY[$m] + $wait);
-                                        $talk_secARY[$m] =    ($talk_secARY[$m] + $talk);
-                                        $dispo_secARY[$m] =   ($dispo_secARY[$m] + $dispo);
-                                        $pause_secARY[$m] =   ($pause_secARY[$m] + $pause);
-                                        $dead_secARY[$m] =    ($dead_secARY[$m] + $dead);
-                                        $customerARY[$m] =    ($customerARY[$m] + $customer);
-					$agent_timeARY[$m] =  ($agent_timeARY[$m] + $wait + $talk + $dispo + $pause);
-                                    }
-                                    $m++;
-                                }
+								$wait_secARY[$m] =    ($wait_secARY[$m] + $wait);
+								$talk_secARY[$m] =    ($talk_secARY[$m] + $talk);
+								$dispo_secARY[$m] =   ($dispo_secARY[$m] + $dispo);
+								$pause_secARY[$m] =   ($pause_secARY[$m] + $pause);
+								$dead_secARY[$m] =    ($dead_secARY[$m] + $dead);
+								$customerARY[$m] =    ($customerARY[$m] + $customer);
+								$agent_timeARY[$m] =  ($agent_timeARY[$m] + $wait + $talk + $dispo + $pause);
+							}
+							$m++;
+						}
 
-                                $i++;
-                            } //end of while
+						$i++;
+					} //end of while
 					$d_fromDate = strtotime($fromDate);
 					$d_toDate = strtotime($toDate);
 					$difference = $d_toDate - $d_fromDate;
@@ -442,25 +438,25 @@
 					}
 
 					$TOTwait        = convert(array_sum($wait_secARY));
-                                        $TOTtalk        = convert(array_sum($talk_secARY));
-                                        $TOTdispo       = convert(array_sum($dispo_secARY));
-                                        $TOTpause       = convert(array_sum($pause_secARY));
-                                        $TOTdead        = convert(array_sum($dead_secARY));
-                                        $TOTcustomer    = convert(array_sum($customerARY));
-                                        $TOTALtime      = convert(array_sum($agent_timeARY));
-                                        $TOTtimeTC      = convert(array_sum($TOTtimeTC));
-                                        $TOT_AGENTS     = 'AGENTS: '.count($userARY);
-                                        $TOTcalls       = array_sum($callsARY);
+					$TOTtalk        = convert(array_sum($talk_secARY));
+					$TOTdispo       = convert(array_sum($dispo_secARY));
+					$TOTpause       = convert(array_sum($pause_secARY));
+					$TOTdead        = convert(array_sum($dead_secARY));
+					$TOTcustomer    = convert(array_sum($customerARY));
+					$TOTALtime      = convert(array_sum($agent_timeARY));
+					$TOTtimeTC      = convert(array_sum($TOTtimeTC));
+					$TOT_AGENTS     = 'AGENTS: '.count($userARY);
+					$TOTcalls       = array_sum($callsARY);
 
 					$j = 0;
 					foreach($userARY as $users){
 						$wait_secARY[$j] = convert($wait_secARY[$j]);
-                                                $talk_secARY[$j] = convert($talk_secARY[$j]);
-                                                $dispo_secARY[$j] = convert($dispo_secARY[$j]);
-                                                $pause_secARY[$j] = convert($pause_secARY[$j]);
-                                                $dead_secARY[$j] = convert($dead_secARY[$j]);
-                                                $customerARY[$j] = convert($customerARY[$j]);
-                                                $agent_timeARY[$j] = convert($agent_timeARY[$j]);
+						$talk_secARY[$j] = convert($talk_secARY[$j]);
+						$dispo_secARY[$j] = convert($dispo_secARY[$j]);
+						$pause_secARY[$j] = convert($pause_secARY[$j]);
+						$dead_secARY[$j] = convert($dead_secARY[$j]);
+						$customerARY[$j] = convert($customerARY[$j]);
+						$agent_timeARY[$j] = convert($agent_timeARY[$j]);
 						$j++;
 					}
 					
@@ -511,11 +507,9 @@
 				/*$usersARY[0] = "";
 				$statusesARY[0] = "";
 				$user_namesARY[0] = "";
-
 				if ($log_group !== "ADMIN") {
                                         $log_groupSQL = "AND vicidial_users.user_group='$log_group'";
                                 }
-
 				$perfdetails_sql = "SELECT count(*) as calls,full_name,vicidial_users.user as user,status FROM vicidial_users,vicidial_agent_log WHERE date_format(event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' AND vicidial_users.user=vicidial_agent_log.user $log_groupSQL AND campaign_id = '$campaign_id' GROUP BY user,full_name,status order by full_name,user,status desc limit 500000";
 				$rows_to_print = $astDB->rawQuery($perfdetails_sql);
 						
@@ -530,10 +524,8 @@
                                                 $statuses     .= "$status[$i]-";
                                                 $SUMstatuses  .= "$status[$i] ";
                                                 $statusesARY[$j] = $status[$i];
-
                                                 ## getting status name
                                                 $var_status = $status[$i];
-
                                                 # in default statuses
                                                 $query = "
                                                     SELECT status_name FROM vicidial_statuses
@@ -542,7 +534,6 @@
                                                 if ($query) {
                                                     $fetch_statusname = $astDB->rawQuery($query);
                                                 }
-
                                                 if (!isset($fetch_statusname) || $fetch_statusname == NULL) {
                                                     # in custom statuses
                                                     $query = "
@@ -551,14 +542,11 @@
                                                     ";
                                                     $fetch_statusname = $astDB->rawQuery($query);
                                                 }
-
                                                 $legend[] = $status[$i]." = ".$fetch_statusname['status_name'];
-
                                                 ## end of getting status name
                                                 $SstatusesTOP .= "<th> $status[$i] </th>";
                                                 $j++;
 					}
-
                                         if (!preg_match("/-$user[$i]-/", $users)) {
                                                 $users              .= "$user[$i]-";
                                                 $usersARY[$k]       = $user[$i];
@@ -575,7 +563,6 @@
                                         $Suser          = $usersARY[$m];
                                         $Sfull_name     = $user_namesARY[$m];
 					$Scalls         = 0;
-
                                         // BEGIN loop through each status //
                                         $n = 0;
                                         while ($n < $j) {
@@ -594,13 +581,11 @@
                                                 $n++;
                                         }
 					// END loop through each status //
-
 					$Moutput = "<tr>
                                                 <td> $Sfull_name </td>
                                                 $SstatusesMID[$m]
                                                 </tr>";
 					$MIDsorted_output[$m] = $Moutput;
-
 					$m++			
 				}*/
 
