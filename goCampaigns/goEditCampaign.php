@@ -340,7 +340,7 @@
 						'xfer_groups' 							=> (!empty($xfer_groups) OR empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
 						'survey_first_audio_file' 				=> (!empty($survey_first_audio_file)) ? $survey_first_audio_file : $resultGet['survey_first_audio_file'],
 						'survey_method' 						=> (!empty($survey_method)) ? $survey_method : $resultGet['survey_method'],
-						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $resultGet['survey_menu_id'],
+						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $survey_menu_id,
 						'survey_dtmf_digits' 					=> (!empty($survey_dtmf_digits)) ? $survey_dtmf_digits : $resultGet['survey_dtmf_digits'],
 						'survey_xfer_exten' 					=> (!empty($survey_xfer_exten)) ? $survey_xfer_exten : $resultGet['survey_xfer_exten'],
 						'survey_ni_digit' 						=> (!empty($survey_ni_digit)) ? $survey_ni_digit : $resultGet['survey_ni_digit'],
