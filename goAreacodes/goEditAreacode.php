@@ -25,6 +25,7 @@
   $areacode = $_REQUEST['areacode'];
 
   $outbound_cid = $astDB->escape($_REQUEST['outbound_cid']);
+  $outbound_cid_old = $astDB->escape($_REQUEST['outbound_cid_old']);
   $active = $_REQUEST['active'];
   $cid_description = $astDB->escape($_REQUEST['cid_description']);
 
@@ -52,6 +53,7 @@
 
 		$astDB->where('campaign_id', $campaign_id);
 		$astDB->where('areacode', $areacode);
+		$astDB->where('outbound_cid', $outbound_cid_old);
 
 		$cols = array(
 			'outbound_cid',
@@ -81,6 +83,7 @@
 
 		$astDB->where('campaign_id', $campaign_id);
 		$astDB->where('areacode', $areacode);
+		$astDB->where('outbound_cid', $outbound_cid_old);
 		$update = $astDB->update('vicidial_campaign_cid_areacodes', $data);
 
 		if($update) {
