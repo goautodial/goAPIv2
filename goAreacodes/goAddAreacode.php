@@ -64,6 +64,7 @@
 			$astDB->where( "campaign_id", $campaign_id );
 			$astDB->where( "areacode", $areacode );
 			$astDB->where( "outbound_cid", $outbound_cid );
+            
 			$astDB->getOne( "vicidial_campaign_cid_areacodes" );
 		    
 			if ( $astDB->count > 0 ) {
