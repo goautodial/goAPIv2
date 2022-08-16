@@ -83,16 +83,25 @@
 				}			
 			}
 			
-			if ("ALL" === strtoupper($campaign_id)) {
-				$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+            if ("ALL" === strtoupper($campaign_id)) {
+                $astDB->where('user_group', $log_group);
+                $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+        
+                $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                    $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                    $astDB->where('campaign_id', $allowed_campaigns, 'in');
+                }
+                
+                $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
-                                foreach($SELECTQuery as $camp_val){
-                                        $array_camp[] = $camp_val["campaign_id"];
-                                }
-                        }else{
-                             $array_camp[] = $campaign_id;
-                        }
-                        $imploded_camp = "'".implode("','", $array_camp)."'";
+                foreach($SELECTQuery as $camp_val) {
+                    $array_camp[] = $camp_val["campaign_id"];
+                }
+            } else {
+                $array_camp[] = $campaign_id;
+            }
+            $imploded_camp = "'".implode("','", $array_camp)."'";
 			
 			// ------------ S T A R T -----------------------
                         $statusesFILE = "";
@@ -112,11 +121,11 @@
                         //$rows_to_print = $astDB->rawQuery($perfdetails_sql);
 
 			if ($tenant) {
-				$astDB->where("user_group", $usergroup);
+				$astDB->where("vu.user_group", $usergroup);
 			} else {
 				if (strtoupper($usergroup) != 'ADMIN') {
 					if ($userlevel < 9) {
-						$astDB->where("user_group", $usergroup);
+						$astDB->where("vu.user_group", $usergroup);
 					}
 				}					
 			}

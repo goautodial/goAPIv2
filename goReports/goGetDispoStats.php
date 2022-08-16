@@ -95,6 +95,15 @@
 		
 		//ALL CAMPAIGNS
 		if ("ALL" === strtoupper($campaignID)) {
+            $astDB->where('user_group', $log_group);
+            $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+    
+            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                $astDB->where('campaign_id', $allowed_campaigns, 'in');
+            }
+            
 			$SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
 			foreach($SELECTQuery as $camp_val) {
