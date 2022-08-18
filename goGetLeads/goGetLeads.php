@@ -72,12 +72,25 @@
         $tenant                                         = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
+            $astDB->where('user_group', $log_group);
+            $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+
             if ($tenant) {
-                $astDB->where("user_group", $usergroup);
+                // $astDB->where("user_group", $usergroup);
+                $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                    $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                    $astDB->where('campaign_id', $allowed_campaigns, 'in');
+                }
             } else {
                 if (strtoupper($usergroup) != 'ADMIN') {
-                    if ($user_level > 8) {
-                        $astDB->where("user_group", $usergroup);
+                    if ($user_level < 9) {
+                        // $astDB->where("user_group", $usergroup);
+                        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+                        if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                            $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                            $astDB->where('campaign_id', $allowed_campaigns, 'in');
+                        }
                     }
                 }
             }
@@ -98,14 +111,42 @@
 					$list_ids[]							= $listid["list_id"];
 				}
 			}
+
+            if (!empty($start_date) && !empty($end_date)) {
+				$start_date = date("Y-m-d G:i:s", strtotime($start_date));
+				$end_date = date("Y-m-d G:i:s", strtotime($end_date));
+            }
 			
-			if (!empty($search)) {
-				$astDB->where("phone_number", "%$search%", "LIKE");
-				$astDB->orWhere("first_name", "$search%", "LIKE");
-				$astDB->orWhere("last_name", "$search%", "LIKE");
-				$astDB->orWhere("CONCAT_WS(' ',first_name,last_name)", "$search%", "LIKE");
-				$astDB->orWhere("lead_id", "$search%", "LIKE");
-			}
+            if ($tenant) {
+                $getleadid                               = $astDB->where("last_local_call_time", array( date($start_date), date($end_date)), "BETWEEN")
+                ->where("list_id", $list_ids, "IN")
+                ->get("vicidial_list", $limit, array("list_id", "lead_id"));
+            } else {
+                if (strtoupper($usergroup) != 'ADMIN') {
+                    if ($user_level < 9) {
+                        $getleadid                      = $astDB->where("last_local_call_time", array( date($start_date), date($end_date)), "BETWEEN")
+                        ->where("list_id", $list_ids, "IN")
+                        ->get("vicidial_list", $limit, array("list_id", "lead_id"));
+                    }
+                }
+            }
+
+            if (count($getleadid)) {
+                $array_lead                             = array();
+                foreach ($getleadid as $leadid) {
+                    $array_lead[]                       = $leadid["lead_id"];
+                }
+
+                $astDB->where("lead_id", $array_lead, "IN");
+            }
+            
+			// if (!empty($search)) {
+			// 	$astDB->orWhere("phone_number", "%$search%", "LIKE");
+			// 	$astDB->orWhere("first_name", "$search%", "LIKE");
+			// 	$astDB->orWhere("last_name", "$search%", "LIKE");
+			// 	$astDB->orWhere("CONCAT_WS(' ',first_name,last_name)", "$search%", "LIKE");
+			// 	$astDB->orWhere("lead_id", "$search%", "LIKE");
+			// }
 
 			if (!empty($disposition_filter)) {
 				//$filterDispo = "AND status = '$disposition_filter'";
@@ -150,6 +191,7 @@
             
             $astDB->where("list_id", $list_ids, "IN");
 			$fresultsv 									= $astDB->get("vicidial_list", $limit, "*");
+            $test_query = $astDB->getLastQuery();
 			
 			// GET CUSTOMER LIST
 			$fresultsvgo 								= $goDB->get("go_customers", null, "lead_id");
@@ -177,16 +219,31 @@
 					
 					array_push($datago, $fresults);
 				} else {
-					$dataLeadid2[] 						= $fresults['lead_id'];
-					$dataListid2[] 						= $fresults['list_id'];
-					$dataFirstName2[] 					= $fresults['first_name'];
-					$dataMiddleInitial2[] 				= $fresults['middle_initial'];
-					$dataLastName2[] 					= $fresults['last_name'];
-					$dataPhoneNumber2[] 				= $fresults['phone_number'];
-					$dataDispo2[] 						= $fresults['status'];
-					$dataLastCallTime2[] 				= $fresults['last_local_call_time'];
-				
-					array_push($data, $fresults);
+                    if (!empty($search)) {
+                        if (preg_match("/$search/", $fresults['phone_number']) || preg_match("/$search/", $fresults['first_name']) || preg_match("/$search/", $fresults['last_name'])) {
+                            $dataLeadid2[] 						= $fresults['lead_id'];
+                            $dataListid2[] 						= $fresults['list_id'];
+                            $dataFirstName2[] 					= $fresults['first_name'];
+                            $dataMiddleInitial2[] 				= $fresults['middle_initial'];
+                            $dataLastName2[] 					= $fresults['last_name'];
+                            $dataPhoneNumber2[] 				= $fresults['phone_number'];
+                            $dataDispo2[] 						= $fresults['status'];
+                            $dataLastCallTime2[] 				= $fresults['last_local_call_time'];
+                        
+                            array_push($data, $fresults);
+                        }
+                    } else {
+                        $dataLeadid2[] 						= $fresults['lead_id'];
+                        $dataListid2[] 						= $fresults['list_id'];
+                        $dataFirstName2[] 					= $fresults['first_name'];
+                        $dataMiddleInitial2[] 				= $fresults['middle_initial'];
+                        $dataLastName2[] 					= $fresults['last_name'];
+                        $dataPhoneNumber2[] 				= $fresults['phone_number'];
+                        $dataDispo2[] 						= $fresults['status'];
+                        $dataLastCallTime2[] 				= $fresults['last_local_call_time'];
+                    
+                        array_push($data, $fresults);
+                    }
 				}
 			}
 			
