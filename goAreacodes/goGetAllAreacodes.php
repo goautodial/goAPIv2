@@ -73,7 +73,7 @@
 						$allowed_campaigns = $allowed_camps['allowed_campaigns'];
 						if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
 							$allowed_campaigns = explode(" ", trim($allowed_campaigns));
-							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
+							$astDB->orWhere('vcid.campaign_id', $allowed_campaigns, 'in');
 						}
 					}
 				}					
