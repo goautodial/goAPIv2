@@ -62,7 +62,9 @@
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
-					}
+					} else {
+						$astDB->where("user_group", $log_group);
+                    }
 				}					
 			}
 
