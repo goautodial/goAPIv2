@@ -185,8 +185,8 @@
                 
                 $log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New IVR $menu_id", $log_group, $query . $query2 . $query3);
                 
-                $server_ip = $astDB->getOne('servers', 'server_ip');
-                rebuildconfQuery($astDB, $server_ip);
+                // $server_ip = $astDB->getOne('servers', 'server_ip');
+                rebuildconfQuery($astDB);
 
 				$apiresults 					= array(
 					"result" 						=> "success"

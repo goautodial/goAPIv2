@@ -149,7 +149,7 @@
 			
 			$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $qupdate . $qdelete . $qinsert);
 			//reload asterisk
-			rebuildconfQuery($astDB, $log_ip);
+			rebuildconfQuery($astDB);
 			
 			$apiresults 							= array(
 				"result" 								=> "success"
