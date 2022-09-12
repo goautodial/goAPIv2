@@ -75,7 +75,7 @@
 			}		
 			
 			if (!empty($requestDataPhone)) {
-				$sqlPhone 								= "AND vl.phone_number LIKE '$requestDataPhone%'";
+				$sqlPhone 								= "AND (vl.phone_number LIKE '$requestDataPhone%' OR vl.first_name LIKE '$requestDataPhone%' OR last_name LIKE '$requestDataPhone%')";
 			} else{
 				$sqlPhone 								= "";
 			}
