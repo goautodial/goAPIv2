@@ -111,6 +111,10 @@
 				foreach ($listids as $listid) {
 					$list_ids[]							= $listid["list_id"];
 				}
+
+                if (!in_array(998, $list_ids) || !in_array(999, $list_ids)) {
+                    array_push($list_ids, 998, 999);
+                }
 			}
             
             $search_filter = "";
