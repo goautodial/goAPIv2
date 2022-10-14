@@ -181,6 +181,7 @@
 							foreach ($fresultsvRA as $fresultsRA) {
 								$numberoflines			= $fresultsRA['number_of_lines'];
                                 $confExten              = $fresultsRA['conf_exten'];
+                                $vra_status             = $fresultsRA['status'];
 							}					
 						}
 					}
@@ -238,7 +239,8 @@
 						'google_sheet_list_id'				=> $google_sheet_list_id,
 						'country_codes'					=> $country_codes,
 						'default_country_code'				=> $default_country_code,
-                        'conf_exten'                        => $confExten
+                        'conf_exten'                        => $confExten,
+                        'vra_status'                        => $vra_status
 					);
 					
 					$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of campaign id: $campaign_id", $log_group);
