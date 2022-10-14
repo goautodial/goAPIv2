@@ -121,6 +121,7 @@
 	$survey_no_response_action 							= $astDB->escape($_REQUEST['survey_no_response_action']);
 	$google_sheet_list_id								= $astDB->escape($_REQUEST["google_sheet_list_id"]);
 	$default_country_code								= $astDB->escape($_REQUEST["default_country_code"]);
+    $conf_exten                                         = $astDB->escape($_REQUEST["conf_exten"]);
 
     // Default values 
     $defActive 											= array( "Y", "N" );	
@@ -451,13 +452,13 @@
 					if ( $campaign_type == "SURVEY" ) {
 						if ( $survey_method != "AGENT_XFER" && $active == 'Y' ) {
 							$astDB->where( 'campaign_id', $campaign_id );
-							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'ACTIVE'));
+							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'ACTIVE', 'conf_exten' => $conf_exten));
 							
 							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
 							
 						} else {
 							$astDB->where( 'campaign_id', $campaign_id );
-							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'INACTIVE'));
+							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'INACTIVE', 'conf_exten' => $conf_exten));
 							
 							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
 						}
