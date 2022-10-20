@@ -110,6 +110,9 @@
 		if (in_array("ALL", $campaigns)) {
 			$campaign_SQL = "";
 			$i = 0;
+            if (strtoupper($log_group) !== 'ADMIN') {
+                $astDB->where('user_group', $log_group);
+            }
 			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 			$campaign_ct = $astDB->count;
 			foreach($SELECTQuery as $camp_val){
