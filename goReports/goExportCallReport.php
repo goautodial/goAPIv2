@@ -230,19 +230,19 @@
 		}
 	}
 	
-	if ($log_group !== "ADMIN") {
-		if ($log_group !== 'SUPERVISOR') {
-			$stringv 								= go_getall_allowed_users($log_group);
-			$user_group_SQL 						= "AND vl.user IN ($stringv)";
-			$user_group_SQL_2 						= "AND vu.user IN ($stringv)";
-		} else {
-			$user_group_SQL							= "";
-			$user_group_SQL_2						= "";
-		}
-	} else {
+	// if ($log_group !== "ADMIN") {
+	// 	if ($log_group !== 'SUPERVISOR') {
+	// 		$stringv 								= go_getall_allowed_users($log_group);
+	// 		$user_group_SQL 						= "AND vl.user IN ($stringv)";
+	// 		$user_group_SQL_2 						= "AND vu.user IN ($stringv)";
+	// 	} else {
+	// 		$user_group_SQL							= "";
+	// 		$user_group_SQL_2						= "";
+	// 	}
+	// } else {
 		$user_group_SQL 							= "";
 		$user_group_SQL_2 							= "";
-	}
+	// }
 	
 	$export_fields_SQL 								= "";
 	

@@ -203,16 +203,16 @@
 		}
 	}
 	
-	if ($log_group !== "ADMIN") {
-		if ($log_group !== 'SUPERVISOR') {
-			$stringv 								= go_getall_allowed_users($log_group);
-			$user_group_SQL 						= "AND vl.user IN ($stringv)";
-		} else {
-			$user_group_SQL                                                 = "";
-		}
-	}  else{
+	// if ($log_group !== "ADMIN") {
+	// 	if ($log_group !== 'SUPERVISOR') {
+	// 		$stringv 								= go_getall_allowed_users($log_group);
+	// 		$user_group_SQL 						= "AND vl.user IN ($stringv)";
+	// 	} else {
+	// 		$user_group_SQL                                                 = "";
+	// 	}
+	// }  else{
 		$user_group_SQL 						= "";
-	}
+	// }
 	
 	$export_fields_SQL 							= "";
 	
