@@ -224,6 +224,11 @@
 			// check if carrier_id exists
 			$astDB->where('carrier_id', $carrier_id);
 			$astDB->getOne("vicidial_server_carriers");
+            
+            $set_user_group                             = "---ALL---";
+            if (strtoupper($log_group) != 'ADMIN') {
+                $set_user_group                         = $log_group;
+            }
 
 			if ($astDB->count > 0) {
 				$apiresults 							= array(
@@ -241,7 +246,8 @@
 					"dialplan_entry" 						=> $dialplan_entry, 
 					"server_ip" 							=> $server_ip, 
 					"globals_string" 						=> $globals_string, 
-					"active" 								=> $active
+					"active" 								=> $active,
+                    "user_group"                            => $set_user_group
 				);
 				
 				$q_insert 								= $astDB->insert("vicidial_server_carriers", $data);
