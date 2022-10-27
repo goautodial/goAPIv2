@@ -109,15 +109,28 @@
 		
 		if (in_array("ALL", $campaigns)) {
 			$campaign_SQL = "";
-			$i = 0;
+			// $i = 0;
             if (strtoupper($log_group) !== 'ADMIN') {
                 $astDB->where('user_group', $log_group);
             }
-			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-			$campaign_ct = $astDB->count;
-			foreach($SELECTQuery as $camp_val){
-				$array_camp[] = $camp_val["campaign_id"];
-			}
+            $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+    
+            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                $astDB->where('campaign_id', $allowed_campaigns, 'in');
+            }
+            
+            $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+                        
+            foreach($SELECTQuery as $camp_val){
+                $array_camp[] = $camp_val["campaign_id"];
+            }
+			// $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			// $campaign_ct = $astDB->count;
+			// foreach($SELECTQuery as $camp_val){
+			// 	$array_camp[] = $camp_val["campaign_id"];
+			// }
 			$imp_camp = implode("','", $array_camp);
 			if (strtoupper($log_group) !== 'ADMIN') {
 				if ($log_group !== 'SUPERVISOR') {
