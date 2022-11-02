@@ -1185,7 +1185,7 @@
 										}
 
 										do {
-											$agvar 					= mt_rand();
+											$agvar 					= mt_rand(1000000000, 9999999999);
 											$astDB->where( 'user', $agvar );
 											$user_exist 			= $astDB->get( 'vicidial_users', null, 'user' ); 
 										}
