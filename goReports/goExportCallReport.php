@@ -152,7 +152,38 @@
 	if (!empty($inbounds)) {
 		$i=0;
 		if (in_array("ALL", $inbounds)) {
-			$group_SQL = go_getall_closer_campaigns("ALL", $astDB);
+			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
+
+            if (strtoupper($log_group) !== 'ADMIN') {
+                $astDB->where('user_group', $log_group);
+            }
+            $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+    
+            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                $astDB->where('campaign_id', $allowed_campaigns, 'in');
+            }
+
+            $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+            foreach($SELECTQuery as $camp_val){
+                $array_camp[] = $camp_val["campaign_id"];
+            }
+
+            $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
+                ->orderBy("campaign_id")
+                ->get("vicidial_campaigns", NULL, "closer_campaigns");
+
+            $closer_camp;
+            foreach($closer_campaigns as $row){
+                if(!empty($row['closer_campaigns'])){
+                    $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
+                    $closer_camp .= " ".$trimmed_cc;
+                }
+            }
+            $explodedCloserCamps = explode(" ", ltrim($closer_camp));
+			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
+
 			$i=1;
 		} else {
 			$i = 0;
@@ -271,10 +302,13 @@
 	$location_sql = "";
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
-		$query = "SELECT vl.call_date, $duration_sql vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $location_sql $endepoch_sql 
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
+		$query = "SELECT vl.call_date, $duration_sql vl.phone_number, vl.status, vl.user, vu.full_name, vl.campaign_id, vi.vendor_lead_code, vi.source_id, vi.list_id, vi.gmt_offset_now, vi.phone_code, vi.title, vi.first_name, vi.middle_initial, vi.last_name, vi.address1, vi.address2, vi.address3, vi.city, vi.state, vi.province, vi.postal_code,vi.country_code, vi.gender, vi.date_of_birth, vi.alt_phone, vi.email, vi.security_phrase, vi.comments, vl.user_group, vl.alt_dial, vi.rank, vi.owner, vi.lead_id, vl.uniqueid, vi.entry_list_id $location_sql $endepoch_sql 
+			FROM vicidial_log vl
+            LEFT JOIN vicidial_list vi
+            ON vi.lead_id=vl.lead_id
+            LEFT JOIN vicidial_users vu
+            ON vu.user=vl.user
+			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
 			$list_SQL $campaign_SQL 
 			$user_group_SQL $status_SQL_vl 
 			order by vl.call_date
@@ -283,9 +317,12 @@
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
 		$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id $location_sql $endepoch_sql2
-			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi
+			FROM vicidial_closer_log vcl
+            LEFT JOIN vicidial_list vi
+            ON vi.lead_id=vcl.lead_id
+            LEFT JOIN vicidial_users vu
+            ON vu.user=vcl.user
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
 			$list_SQL $group_SQL 
 			$user_group_SQL_2 $status_SQL_vcl
 			order by vcl.call_date
@@ -332,9 +369,12 @@
 				$location_sql
 				$endepoch_sql
 				$export_fields_SQL 
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
+                FROM vicidial_log vl
+                LEFT JOIN vicidial_list vi
+                ON vi.lead_id=vl.lead_id
+                LEFT JOIN vicidial_users vu
+                ON vu.user=vl.user
 			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id
 			$list_SQL 
 			$campaign_SQL 
 			$user_group_SQL_2 
@@ -381,9 +421,12 @@
 				$location_sql
 				$endepoch_sql2
 				$export_fields_SQL 
-			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi
+                FROM vicidial_closer_log vcl
+                LEFT JOIN vicidial_list vi
+                ON vi.lead_id=vcl.lead_id
+                LEFT JOIN vicidial_users vu
+                ON vu.user=vcl.user
 			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id
 			$list_SQL 
 			$group_SQL 
 			$user_group_SQL_2 

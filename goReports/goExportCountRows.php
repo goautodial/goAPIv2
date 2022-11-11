@@ -99,18 +99,14 @@
             foreach($SELECTQuery as $camp_val){
                 $array_camp[] = $camp_val["campaign_id"];
             }
-			// $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-			// $campaign_ct = $astDB->count;
-			// foreach($SELECTQuery as $camp_val){
-			// 	$array_camp[] = $camp_val["campaign_id"];
-			// }
+            
 			$imp_camp = implode("','", $array_camp);
 			if (strtoupper($log_group) !== 'ADMIN') {
 				if ($log_group !== 'SUPERVISOR') {
 					$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
 				}
 			}
-			//die("ALEX");	
+				
 		}else{
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 			$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
@@ -125,12 +121,41 @@
 	if (!empty($inbounds)) {
 		$i=0;
 		if (in_array("ALL", $inbounds)) {
-			$group_SQL = go_getall_closer_campaigns("ALL", $astDB);
+			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
+
+            if (strtoupper($log_group) !== 'ADMIN') {
+                $astDB->where('user_group', $log_group);
+            }
+            $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+    
+            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
+            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+                $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+                $astDB->where('campaign_id', $allowed_campaigns, 'in');
+            }
+
+            $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+            foreach($SELECTQuery as $camp_val){
+                $array_camp[] = $camp_val["campaign_id"];
+            }
+
+            $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
+                ->orderBy("campaign_id")
+                ->get("vicidial_campaigns", NULL, "closer_campaigns");
+
+            $closer_camp;
+            foreach($closer_campaigns as $row){
+                if(!empty($row['closer_campaigns'])){
+                    $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
+                    $closer_camp .= " ".$trimmed_cc;
+                }
+            }
+            $explodedCloserCamps = explode(" ", ltrim($closer_camp));
+			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
+
 			$i=1;
 		} else {
 			$i = 0;
-			//$array_inbound 							= Array();
-
 			while ($i < $group_ct) {
 				if (strlen($inbounds[$i]) > 0) {
 				  //$group_SQL .= "'$inbounds[$i]',";
@@ -234,45 +259,54 @@
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
 		$query = "SELECT count(vl.user) as row_count
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi 
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
-			$list_SQL $campaign_SQL 
-			$user_group_SQL $status_SQL 
-			order by vl.call_date";
+            FROM vicidial_log vl 
+            LEFT JOIN vicidial_list vi 
+            ON vi.lead_id=vl.lead_id 
+            LEFT JOIN vicidial_users vu 
+            ON vu.user=vl.user 
+            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
+            $list_SQL $campaign_SQL 
+            $user_group_SQL $status_SQL 
+            order by vl.call_date";
 	}
 	
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
-		$query	= "SELECT count(vl.user) as row_count
-			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi 
-			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id 
-			AND vi.lead_id = vcl.lead_id 
-			$list_SQL $group_SQL 
-			$user_group_SQL $status_SQL 
-			order by vcl.call_date";
+		$query	= "SELECT count(vcl.user) as row_count
+            FROM vicidial_closer_log vcl 
+            LEFT JOIN vicidial_list vi
+            ON vcl.lead_id = vi.lead_id
+            LEFT JOIN vicidial_users vu 
+            ON vcl.user = vu.user
+            WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            AND vi.lead_id = vcl.lead_id 
+            $list_SQL $group_SQL 
+            $user_group_SQL $status_SQL 
+            order by vcl.call_date";
 	}
 	if ($RUNcampaign > 0 && $RUNgroup > 0) {
 		$query = "SELECT SUM(t.row_count) as row_count FROM
-			((SELECT count(vl.user) as row_count
-			FROM vicidial_users vu, vicidial_log vl,vicidial_list vi
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
-			$list_SQL 
-			$campaign_SQL 
-			$user_group_SQL 
-			$status_SQL 
-			order by vl.call_date
-		 	) UNION (
-			SELECT count(vcl.user) as row_count
-			FROM vicidial_users vu, vicidial_closer_log vcl,vicidial_list vi 
-			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vcl.user AND vi.lead_id=vcl.lead_id  
-			$list_SQL 
-			$group_SQL 
-			$user_group_SQL 
-			$status_SQL_2 
-			order by vcl.call_date)) t";
+            ((SELECT count(vl.user) as row_count
+            FROM vicidial_log vl 
+            LEFT JOIN vicidial_list vi 
+            ON vi.lead_id=vl.lead_id 
+            LEFT JOIN vicidial_users vu 
+            ON vu.user=vl.user 
+            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
+            $list_SQL $campaign_SQL 
+            $user_group_SQL $status_SQL 
+            order by vl.call_date
+            ) UNION (
+            SELECT count(vcl.user) as row_count
+            FROM vicidial_closer_log vcl 
+            LEFT JOIN vicidial_list vi
+            ON vcl.lead_id = vi.lead_id
+            LEFT JOIN vicidial_users vu 
+            ON vcl.user = vu.user
+            WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            AND vi.lead_id = vcl.lead_id 
+            $list_SQL $group_SQL 
+            $user_group_SQL $status_SQL 
+            order by vcl.call_date)) t";
     }
 	$results = $astDB->rawQuery($query);
 
