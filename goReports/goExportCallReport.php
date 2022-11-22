@@ -160,13 +160,13 @@
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
     
             $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-                $allowed_campaigns = explode(" ", trim($allowed_campaigns));
-                $astDB->where('campaign_id', $allowed_campaigns, 'in');
+            if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+                $allowed_campaigns_exploded = explode(" ", trim($allowed_campaigns));
+                $astDB->where('campaign_id', $allowed_campaigns_exploded, 'in');
             }
 
             $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-            foreach($SELECTQuery as $camp_val){
+            foreach($allowed_campaigns as $camp_val){
                 $array_camp[] = $camp_val["campaign_id"];
             }
 
@@ -181,6 +181,17 @@
                     $closer_camp .= " ".$trimmed_cc;
                 }
             }
+			
+			if (strtoupper($log_group) !== 'ADMIN') {
+				$astDB->where("user_group", $log_group);
+				$astDB->orWhere("user_group", "---ALL---");
+			}
+
+			$ingroups_query = $astDB->get("vicidial_inbound_groups", NULL, "group_id");
+			foreach ($ingroups_query as $row) {
+				$closer_camp .= " ".$row["group_id"];
+			}
+
             $explodedCloserCamps = explode(" ", ltrim($closer_camp));
 			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
 
