@@ -24,7 +24,7 @@
 
 	include_once ("goAPI.php");
 	
-	$limit												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
+	$limit												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
     
     ### Check Server ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
