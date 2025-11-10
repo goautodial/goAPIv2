@@ -38,12 +38,17 @@
 	$tracking_group 								= $_REQUEST['tracking_group'];
 	$user_group 									= $_REQUEST['user_group'];
 	$custom_dialplan_entry 							= $_REQUEST['custom_dialplan_entry'];	
-	$items 											= $_REQUEST['items'];
+	// $items 											= $_REQUEST['items'];
+	$route_option 									= $_REQUEST['route_option'];
+	$route_desc 									= $_REQUEST['route_desc'];
+	$route_menu 									= $_REQUEST['route_menu'];
+	$option_route_value                             = $_REQUEST['option_route_value'];
+	$option_route_context 							= $_REQUEST['option_route_context'];
 	
-	if (!empty($items)) {
-		$exploded_items 							= explode("|", $items);
-		$filtered_items 							= array_filter($exploded_items);
-	}
+	// if (!empty($items)) {
+	// 	$exploded_items 							= explode("|", $items);
+	// 	$filtered_items 							= array_filter($exploded_items);
+	// }
 
     // Default values 
     $defActive = array("Y","N");
@@ -118,7 +123,19 @@
 			$qupdate								= $astDB->getLastQuery();								
 			
 			//$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $astDB->getLastQuery());
-	        		
+
+	        $items                                                                  = "";
+
+            for ($i=0;$i < count($route_option);$i++) {
+                if($route_option[$i] == "A") $route_option[$i] = '#';
+                if($route_option[$i] == "B") $route_option[$i] = '*';
+                if($route_option[$i] == "C") $route_option[$i] = 'TIMECHECK';
+                if($route_option[$i] == "D") $route_option[$i] = 'TIMEOUT';
+                if($route_option[$i] == "E") $route_option[$i] = 'INVALID';
+
+                $items                                                          .= $route_option[$i]."+".$route_desc[$i]."+".$route_menu[$i]."+".$option_route_value[$i]."+".$option_route_context[$i];
+                $items                                                          .= "|";
+            }		
 			// query for call menu options
 			if (!empty($items)) {
 				$return_query 						= "";
@@ -127,7 +144,10 @@
 
 				$qdelete							= $astDB->getLastQuery();
 				//$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $astDB->getLastQuery());
-				
+            
+                $exploded_items 							= explode("|", $items);
+                $filtered_items 							= array_filter($exploded_items);
+                
 				for ($i=0; $i < count($filtered_items); $i++) {
 					$options 						= explode("+", $filtered_items[$i]);
 					
@@ -149,7 +169,7 @@
 			
 			$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $qupdate . $qdelete . $qinsert);
 			//reload asterisk
-			rebuildconfQuery($astDB, $log_ip);
+			rebuildconfQuery($astDB);
 			
 			$apiresults 							= array(
 				"result" 								=> "success"

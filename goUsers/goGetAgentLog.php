@@ -142,6 +142,7 @@
 					$closerlog_queue_seconds[] 			= $closerlog_fetch['queue_seconds'];
 					$closerlog_term_reason[] 			= $closerlog_fetch['term_reason'];
 					$closerlog_phone_number[] 			= $closerlog_fetch['phone_number'];
+					$closerlog_lead_id[]                = $closerlog_fetch['lead_id'];
 				}
 				
 				$closerlog_array 						= array(
@@ -153,7 +154,8 @@
 					"list_id" 								=> $closerlog_list_id, 
 					"queue_seconds" 						=> $closerlog_queue_seconds, 
 					"term_reason" 							=> $closerlog_term_reason,
-					"phone_number"							=> $closerlog_phone_number
+					"phone_number"							=> $closerlog_phone_number,
+                    "lead_id"                               => $closerlog_lead_id
 				);
 			}
 			
@@ -196,7 +198,7 @@
 			if ($agentlog == "outbound") {
 				$data									= $outbound_array;
 			} elseif ($agentlog == "inbound") {
-				$data									= $inbound_array;
+				$data									= $closerlog_array;
 			} elseif ($agentlog == "userlog") {
 				$data									= $userlog_array;
 			}

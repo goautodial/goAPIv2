@@ -25,6 +25,7 @@
 	### POST or GET Variables
 	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
     	$areacode 										= $astDB->escape($_REQUEST["areacode"]);
+    	$outbound_cid                                   = $astDB->escape($_REQUEST["outbound_cid"]);
     
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -61,16 +62,19 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			$cols 										= array(
 				"campaign_id", 
-				"areacode"
+				"areacode",
+                "outbound_cid"
 			);
 		
 			$astDB->where("campaign_id", $campaign_id);
 			$astDB->where("areacode", $areacode);
+			$astDB->where("outbound_cid", $outbound_cid);
 			$checkPC									= $astDB->get("vicidial_campaign_cid_areacodes", null, $cols);
 			
 			if ($checkPC) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->where("areacode", $areacode);
+                $astDB->where("outbound_cid", $outbound_cid);
 				$astDB->delete("vicidial_campaign_cid_areacodes");
 
 				$log_id 								= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted Areacode: $areacode from Campaign ID $campaign_id", $log_group, $astDB->getLastQuery());
