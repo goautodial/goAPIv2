@@ -22,9 +22,11 @@
 
   $campaign_id = $_REQUEST['campaign_id'];
   $areacode = $_REQUEST['areacode'];
+  $outbound_cid = $_REQUEST['outbound_cid'];
 
   $astDB->where('campaign_id', $campaign_id);
   $astDB->where('areacode', $areacode);
+  $astDB->where('outbound_cid', $outbound_cid);
 
   $cols = array(
 		'campaign_id',

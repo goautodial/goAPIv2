@@ -109,6 +109,7 @@
 	$survey_fourth_audio_file 							= $astDB->escape($_REQUEST['survey_fourth_audio_file']);
 	$survey_fourth_status 								= $astDB->escape($_REQUEST['survey_fourth_status']);
 	$survey_fourth_exten 								= $astDB->escape($_REQUEST['survey_fourth_exten']);
+	$survey_response_digit_map 							= $astDB->escape($_REQUEST['survey_response_digit_map']);
     $no_channels 										= $astDB->escape($_REQUEST['no_channels']);
     $disable_alter_custdata 							= $astDB->escape($_REQUEST['disable_alter_custdata']);
     $disable_alter_custphone 							= $astDB->escape($_REQUEST['disable_alter_custphone']);
@@ -120,6 +121,8 @@
 	$survey_no_response_action 							= $astDB->escape($_REQUEST['survey_no_response_action']);
 	$google_sheet_list_id								= $astDB->escape($_REQUEST["google_sheet_list_id"]);
 	$default_country_code								= $astDB->escape($_REQUEST["default_country_code"]);
+    $conf_exten                                         = $astDB->escape($_REQUEST["conf_exten"]);
+    $vra_status                                         = $astDB->escape($_REQUEST["vra_status"]);
 
     // Default values 
     $defActive 											= array( "Y", "N" );	
@@ -328,6 +331,9 @@
 						'next_agent_call' 						=> (!empty($next_agent_call)) ? $next_agent_call : $resultGet['next_agent_call'], 
 						'xferconf_a_number' 					=> (!empty($xferconf_a_number)) ? $xferconf_a_number : $resultGet['xferconf_a_number'], 
 						'xferconf_b_number' 					=> (!empty($xferconf_b_number)) ? $xferconf_b_number : $resultGet['xferconf_b_number'], 
+															//nat: added the two following lines of code
+						'three_way_call_cid' 					=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
+						'survey_response_digit_map' 			=> (!empty($survey_response_digit_map)) ? $survey_response_digit_map : $resultGet['survey_response_digit_map'],
 						//'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'],
 						'three_way_dial_prefix' 				=> $three_way_dial_prefix,
 															//nat: made changes to the line of code below
@@ -336,7 +342,7 @@
 						'xfer_groups' 							=> (!empty($xfer_groups) OR empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
 						'survey_first_audio_file' 				=> (!empty($survey_first_audio_file)) ? $survey_first_audio_file : $resultGet['survey_first_audio_file'],
 						'survey_method' 						=> (!empty($survey_method)) ? $survey_method : $resultGet['survey_method'],
-						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $resultGet['survey_menu_id'],
+						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $survey_menu_id,
 						'survey_dtmf_digits' 					=> (!empty($survey_dtmf_digits)) ? $survey_dtmf_digits : $resultGet['survey_dtmf_digits'],
 						'survey_xfer_exten' 					=> (!empty($survey_xfer_exten)) ? $survey_xfer_exten : $resultGet['survey_xfer_exten'],
 						'survey_ni_digit' 						=> (!empty($survey_ni_digit)) ? $survey_ni_digit : $resultGet['survey_ni_digit'],
@@ -445,18 +451,30 @@
 					}
 					
 					if ( $campaign_type == "SURVEY" ) {
-						if ( $survey_method != "AGENT_XFER" && $active == 'Y' ) {
-							$astDB->where( 'campaign_id', $campaign_id );
-							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'ACTIVE'));
+						// if ( $survey_method != "AGENT_XFER" && $active == 'Y' ) {
+						// 	$astDB->where( 'campaign_id', $campaign_id );
+						// 	$astDB->update( 'vicidial_remote_agents', array( 'status' => 'ACTIVE', 'conf_exten' => $conf_exten));
 							
-							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
+						// 	$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
 							
-						} else {
-							$astDB->where( 'campaign_id', $campaign_id );
-							$astDB->update( 'vicidial_remote_agents', array( 'status' => 'INACTIVE'));
+						// } else {
+						// 	$astDB->where( 'campaign_id', $campaign_id );
+						// 	$astDB->update( 'vicidial_remote_agents', array( 'status' => 'INACTIVE', 'conf_exten' => $conf_exten));
 							
-							$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
-						}
+						// 	$log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
+						// }
+
+                        if ($survey_method == "AGENT_XFER") {
+                            $astDB->where( 'campaign_id', $campaign_id );
+                            $astDB->update( 'vicidial_remote_agents', array( 'status' => $vra_status, 'conf_exten' => $conf_exten));
+
+                            $log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
+                        } elseif ($survey_method == "EXTENSION") {
+                            $astDB->where( 'campaign_id', $campaign_id );
+                            $astDB->update( 'vicidial_remote_agents', array( 'status' => $vra_status));
+
+                            $log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
+                        }
 						
 						if (!empty($no_channels)) {
 							$astDB->where( 'campaign_id', $campaign_id );

@@ -24,14 +24,29 @@
 	
 	$groupId = go_get_groupid($goUser, $astDB);
 	
-	if (!checkIfTenant($groupId, $goDB)) {
-		//$ul = "";
-	} else {
-		//$ul = "AND user_group='$groupId'";
-		//$addedSQL = "WHERE user_group='$groupId'";
-		$astDB->where('user_group', $groupId);
-	}
+	// if (!checkIfTenant($groupId, $goDB)) {
+	// 	//$ul = "";
+	// } else {
+	// 	//$ul = "AND user_group='$groupId'";
+	// 	//$addedSQL = "WHERE user_group='$groupId'";
+	// 	$astDB->where('user_group', $groupId);
+	// }
 
+    if (checkIfTenant($groupId, $goDB)) {
+        $astDB->where("user_group", $groupId);
+        $astDB->orWhere("lead_filter_id", "FILTEMP");
+    } else {
+        if (strtoupper($groupId) != 'ADMIN') {
+            if ($userlevel > 8) {
+                $astDB->where("user_group", $groupId);
+                $astDB->orWhere("lead_filter_id", "FILTEMP");
+            // $astDB->orWhere("user_group", "---ALL---");
+            } else {
+                $astDB->where("user_group", $groupId);
+                $astDB->orWhere("lead_filter_id", "FILTEMP");
+            }
+        }					
+    }
 
    	//$query = "SELECT lead_filter_id,lead_filter_name FROM vicidial_lead_filters $ul $addedSQL ORDER BY lead_filter_id;";
 	$astDB->orderBy('lead_filter_id', 'desc');
@@ -40,6 +55,6 @@
 	foreach ($rsltv as $fresults){
 		$dataLeadFilterID[] = $fresults['lead_filter_id'];
        	$dataLeadFilterName[] = $fresults['lead_filter_name'];
-   		$apiresults = array("result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName);
 	}
+    $apiresults = array("result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName);
 ?>

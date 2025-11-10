@@ -24,7 +24,7 @@
 
 	include_once ("goAPI.php");
 	
-	$limit												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
+	$limit												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
     
     ### Check Server ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
@@ -59,10 +59,12 @@
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($userlevel > 8) {
+					// if ($userlevel > 8) {
+					// 	$astDB->where("user_group", $log_group);
+					// 	$astDB->orWhere("user_group", "---ALL---");
+					// } else {
 						$astDB->where("user_group", $log_group);
-						$astDB->orWhere("user_group", "---ALL---");
-					}
+                    // }
 				}					
 			}
 

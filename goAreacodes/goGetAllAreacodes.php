@@ -73,7 +73,7 @@
 						$allowed_campaigns = $allowed_camps['allowed_campaigns'];
 						if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
 							$allowed_campaigns = explode(" ", trim($allowed_campaigns));
-							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
+							$astDB->orWhere('vcid.campaign_id', $allowed_campaigns, 'in');
 						}
 					}
 				}					
@@ -120,8 +120,8 @@
 						$avatar_link = "";
 						$campaign_link = "";
 						if ($can_update !== "N") {
-							$avatar_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
-							$campaign_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'">';
+							$avatar_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'" data-cid="'.$fresults['outbound_cid'].'">';
+							$campaign_link .= '<a class="view_areacode" data-toggle="modal" data-target="#modal_edit_areacode" data-camp="'.$fresults['campaign_id'].'" data-ac="'.$fresults['areacode'].'" data-cid="'.$fresults['outbound_cid'].'">';
 						}
 						$avatar_link .= '<avatar username="'.$fresults['campaign_name'].'" :size="32"></avatar>';
 						$campaign_link .= '<strong>'.$fresults['campaign_id'].'</strong>';

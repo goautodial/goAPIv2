@@ -1185,7 +1185,7 @@
 										}
 
 										do {
-											$agvar 					= mt_rand();
+											$agvar 					= mt_rand(1000000000, 9999999999);
 											$astDB->where( 'user', $agvar );
 											$user_exist 			= $astDB->get( 'vicidial_users', null, 'user' ); 
 										}
@@ -1195,11 +1195,12 @@
 										$pass 						= substr( str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10 );
 										$survey_method 				= "EXTENSION";
 										
-										if ( $survey_method != "AGENT_XFER" && $active == 'Y' ) {
-											$remote_agent_status 	= 'Y';
-										} else {
-											$remote_agent_status 	= 'N';
-										}
+										// if ( $survey_method != "AGENT_XFER" && $active == 'Y' ) {
+										// 	$remote_agent_status 	= 'Y';
+										// } else {
+										// 	$remote_agent_status 	= 'N';
+										// }
+                                        $remote_agent_status        = 'INACTIVE';
 										
 										$agent_user 				= $agvar;
 										$agent_name 				= "Survey Agent - ".$campaign_id;

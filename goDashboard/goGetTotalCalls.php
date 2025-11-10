@@ -58,12 +58,13 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (is_array($allowed_campaigns)) {
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
-                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
-                }
 				
 				switch ($type) {
 					case "outbound":
+                        
+                    if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
+                        $astDB->where("campaign_id", $allowed_campaigns, "IN");
+                    }
 					
 					$data 								= $astDB
 						//->where("length_in_sec", array('>' => 0))
@@ -73,6 +74,19 @@
 					break;
 					
 					case "inbound":
+
+                    //get inbound groups
+                    $getIngroups                            = $astDB->where('user_group', $log_group)
+                        ->get('vicidial_inbound_groups', NULL, array('group_id'));
+
+                    $ingroups                               = array();
+                    foreach ($getIngroups as $fresults) {
+                        $ingroups[]                         = $fresults['group_id'];
+                    }
+
+                    if ($log_group !== "ADMIN") {
+                        $astDB->where("campaign_id", $ingroups, "IN");
+                    }
 					
 					$data 								= $astDB
 						->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
