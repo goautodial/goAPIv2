@@ -94,10 +94,14 @@
 
 	$passSQL = "pass='$pass'";
 	if ($system_settings['pass_hash_enabled'] > 0) {
+        if (strlen($pass) > 20) $bcrypt = 1;
+        
 		if ($bcrypt < 1) {
 			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
 		} else {$pass_hash = $pass;}
 		$passSQL = "pass_hash='$pass_hash'";
+        if ($user === 'goAPI')
+            $bcrypt = 0;
 	}
 	
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
@@ -106,12 +110,13 @@
     if($system_settings['pass_hash_enabled'] > 0 )
     	$astDB->where("pass_hash", $pass_hash);
     else
-	   $astDB->where("pass", $pass);
-    $astDB->getOne("vicidial_users", "count(*) as sum");
+        $astDB->where("pass", $pass);
+    $rslt = $astDB->getOne("vicidial_users");
     $check_result = $astDB->count;
 	
-    if ($check_result > 0) {       
-        if (file_exists($goAction . ".php" )) {
+    if ($check_result > 0) {
+        //$includeAction = basename(realpath($goAction . ".php"));
+        if (strpos($goAction, '/') === false && file_exists($goAction . ".php")) {
             include $goAction . ".php";
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
