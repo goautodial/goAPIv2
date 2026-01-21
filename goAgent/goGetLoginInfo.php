@@ -175,7 +175,7 @@
 				'timer_action_message' 					=> '',
 				'timer_action_seconds' 					=> '',
 				'timer_action_destination' 				=> '',
-				'RedirectXFER' 							=> 0,
+				'RedirecTxFEr' 							=> 0,
 				'conf_dialed' 							=> 0,
 				'open_dispo_screen' 					=> 0,
 				'DialALTPhone' 							=> false,

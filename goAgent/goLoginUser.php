@@ -3,6 +3,7 @@
  * @file 		goLoginUser.php
  * @brief 		API for Agent UI
  * @copyright 	Copyright (C) GOautodial Inc.
+ * @author      Demian Biscocho <demian@goautodial.com>
  * @author     	Chris Lomuntad <chris@goautodial.com>
  *
  * @par <b>License</b>:
@@ -45,6 +46,13 @@ if (isset($_GET['goCloserBlended'])) { $closer_blended = $astDB->escape($_GET['g
     else if (isset($_POST['goCloserBlended'])) { $closer_blended = $astDB->escape($_POST['goCloserBlended']); }
 
 $closer_blended = (isset($closer_blended)) ? (int) $closer_blended : 0;
+
+//Confbridge
+//$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+$astDB->where('server_ip', $server_ip);
+$query = $astDB->getOne('servers','conf_engine');
+$conf_engine = $query['conf_engine'];
+$conf_table = "vicidial_conferences";
 
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, 'kamailio', $use_webrtc);
@@ -114,10 +122,15 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $campaign_leads_to_call = $query['cnt'];
     if ( ( ($campaign_settings->campaign_allow_inbound == 'Y') and ($campaign_settings->dial_method != 'MANUAL') ) || ($campaign_leads_to_call > 0) || (preg_match('/Y/',$campaign_settings->no_hopper_leads_logins)) ) {
         ##### check to see if the user has a conf extension already, this happens if they previously exited uncleanly
+        //Confbridge
+        if ($conf_engine == "CONFBRIDGE") {
+            $conf_table = "vicidial_confbridges";
+            $session_prepend = 2;
+        }
         //$query = $db->query("SELECT conf_exten FROM vicidial_conferences WHERE extension='$SIP_user' AND server_ip = '{$phone_settings->server_ip}' LIMIT 1;");
         $astDB->where('extension', $SIP_user);
         $astDB->where('server_ip', $phone_settings->server_ip);
-        $query = $astDB->getOne('vicidial_conferences', 'conf_exten');
+        $query = $astDB->getOne("$conf_table", 'conf_exten');
         $prev_login_ct = $astDB->getRowCount();
         
         $i=0;
@@ -133,14 +146,14 @@ if ($sipIsLoggedIn || $use_webrtc) {
             $astDB->where('server_ip', $phone_settings->server_ip);
             $astDB->where('extension', '');
             $astDB->orWhere('extension', null);
-            $query = $astDB->get('vicidial_conferences');
+            $query = $astDB->get("$conf_table");
             if ($astDB->getRowCount() > 0) {
-                $query = $astDB->rawQuery("UPDATE vicidial_conferences SET extension='$SIP_user', leave_3way='0' WHERE server_ip='{$phone_settings->server_ip}' AND ((extension='') OR (extension=null)) LIMIT 1");
+                $query = $astDB->rawQuery("UPDATE $conf_table SET extension='$SIP_user', leave_3way='0' WHERE server_ip='{$phone_settings->server_ip}' AND ((extension='') OR (extension=null)) LIMIT 1");
     
                 $astDB->where('server_ip', $phone_settings->server_ip);
                 $astDB->where('extension', $SIP_user);
                 $astDB->orWhere('extension', $user);
-                $query = $astDB->getOne('vicidial_conferences', 'conf_exten');
+                $query = $astDB->getOne("$conf_table", 'conf_exten');
                 $session_id = $query['conf_exten'];
             }
             
@@ -169,7 +182,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $TEMP_SIP_user_DiaL = $SIP_user_DiaL;
         if ($phone_settings->on_hook_agent == 'Y')
             {$TEMP_SIP_user_DiaL = 'Local/8300@default';}
-        $agent_login_data = "||$NOW_TIME|NEW|N|{$phone_settings->server_ip}||Originate|$SIqueryCID|Channel: $TEMP_SIP_user_DiaL|Context: {$phone_settings->ext_context}|Exten: $session_id|Priority: 1|Callerid: $SIqueryCID|||||";
+        $agent_login_data = "||$NOW_TIME|NEW|N|{$phone_settings->server_ip}||Originate|$SIqueryCID|Channel: $TEMP_SIP_user_DiaL|Context: {$phone_settings->ext_context}|Exten: $session_prepend$session_id|Priority: 1|Callerid: $SIqueryCID|||||";
         $insertData = array(
             'man_id' => '',
             'uniqueid' => '',
@@ -182,7 +195,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
             'callerid' => $SIqueryCID,
             'cmd_line_b' => "Channel: $TEMP_SIP_user_DiaL",
             'cmd_line_c' => "Context: {$phone_settings->ext_context}",
-            'cmd_line_d' => "Exten: $session_id",
+            'cmd_line_d' => "Exten: $session_prepend$session_id",
             'cmd_line_e' => 'Priority: 1',
             'cmd_line_f' => "Callerid: \"$SIqueryCID\" <{$campaign_settings->campaign_cid}>",
             'cmd_line_g' => '',

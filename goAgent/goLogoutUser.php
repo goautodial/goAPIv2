@@ -3,6 +3,7 @@
  * @file 		goLogoutUser.php
  * @brief 		API for Agent UI
  * @copyright 	Copyright (C) GOautodial Inc.
+ * @author      Demian Biscocho <demian@goautodial.com>
  * @author     	Chris Lomuntad <chris@goautodial.com>
  *
  * @par <b>License</b>:
@@ -42,6 +43,13 @@ if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgen
 if (isset($_GET['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_GET['goUseWebRTC']); }
     else if (isset($_POST['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_POST['goUseWebRTC']); }
 
+//Confbridge
+//$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+$astDB->where('server_ip', $server_ip);
+$query = $astDB->getOne('servers','conf_engine');
+$conf_engine = $query['conf_engine'];
+$conf_table = "vicidial_conferences";
+
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver, $use_webrtc);
 
@@ -74,10 +82,15 @@ if ($sipIsLoggedIn) {
     if ( (preg_match('/8300/', $phone_settings->dialplan_number)) and (strlen($phone_settings->dialplan_number)<5) and ($protocol == 'Local') ) {
         $SIP_user = "{$protocol}/{$extension}{$phone_login}";
     }
-    
+
+    //Confbridge
+    if ($conf_engine == "CONFBRIDGE") {
+        $conf_table = "vicidial_confbridges";
+    }
+
     $astDB->where('extension', $SIP_user);
     $astDB->where('server_ip', $server_ip);
-    $query = $astDB->getOne('vicidial_conferences', 'conf_exten');
+    $query = $astDB->getOne("$conf_table", 'conf_exten');
     $prev_login_ct = $astDB->getRowCount();
     
     $i=0;
@@ -97,7 +110,7 @@ if ($sipIsLoggedIn) {
 			//$stmt="UPDATE vicidial_conferences set extension='' where server_ip='$server_ip' and conf_exten='$conf_exten';";
             $astDB->where('server_ip', $server_ip);
             $astDB->where('conf_exten', $conf_exten);
-            $rslt = $astDB->update('vicidial_conferences', array( 'extension' => '' ));
+            $rslt = $astDB->update("$conf_table", array( 'extension' => '' ));
 			$vc_remove = $astDB->getRowCount();
         }
 

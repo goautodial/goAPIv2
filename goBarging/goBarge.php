@@ -34,13 +34,23 @@ if($goServerIP == "") {  array("result" => "Error: No Server IP"); }
 if($goPhone == "") {  array("result" => "Error: No Phone"); }
 if($type == "") {  array("result" => "Error: No Type"); }
 
-
 $StarTtime = date("U");
 $NOW_TIME = date("Y-m-d H:i:s");
+
+//Confbridge
+//$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+$astDB->where('server_ip', $server_ip);
+$query = $astDB->getOne('servers','conf_engine');
+$rslt = $query['conf_engine'];
+$conf_table = "vicidial_conferences";
+if ($rslt == "CONFBRIDGE") {
+	$conf_table = "vicidial_confbridges";
+}
+
 //$query = "SELECT count(*) AS cnt from vicidial_conferences where conf_exten='$goConfExten' and server_ip='$goServerIP'";
 $astDB->where('conf_exten', $goConfExten);
 $astDB->where('server_ip', $goServerIP);
-$rsltv = $astDB->get('vicidial_conferences');
+$rsltv = $astDB->get("$conf_table");
 $session_exist = $astDB->getRowCount();
 
 if ($session_exist > 0) {

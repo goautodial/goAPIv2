@@ -73,10 +73,19 @@ if ($is_logged_in) {
                 $apiresults = array( "result" => "error", "message" => "User does NOT have permission to use blind monitoring" );
                 $hasError = 1;
             } else {
+                //Confbridge
+                //$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+                $astDB->where('server_ip', $server_ip);
+                $query = $astDB->getOne('servers','conf_engine');
+                $rsltvc = $query['conf_engine'];
+                $conf_table = "vicidial_conferences";
+                if ($rsltvc == "CONFBRIDGE") {
+                    $conf_table = "vicidial_confbridges";
+                }
                 //$stmt="SELECT count(*) from vicidial_conferences where conf_exten='$session_id' and server_ip='$server_ip';";
                 $astDB->where('conf_exten', $session_id);
                 $astDB->where('server_ip', $server_ip);
-                $rslt = $astDB->get('vicidial_conferences');
+                $rslt = $astDB->get("$conf_table");
                 $session_exists = $astDB->getRowCount();
     
                 if ($session_exists < 1) {
@@ -131,10 +140,16 @@ if ($is_logged_in) {
     
                         if ( (preg_match('/MONITOR/', $stage)) || (strlen($stage) < 1) ) {
                             $stage = '0';
+                            if ($rsltvc == "CONFBRIDGE") {
+                                $stage = '4';
+                            }
                             $wAction = 'listened';
                         }
                         if (preg_match('/BARGE/', $stage)) {
                             $stage = '';
+                            if ($rsltvc == "CONFBRIDGE") {
+                                $stage = '6';
+                            }
                             $wAction = 'barged';
                         }
                         if (preg_match('/HIJACK/', $stage)) {

@@ -41,6 +41,7 @@
 	$recording_web_link 								= $astDB->escape($_REQUEST['recording_web_link']);
 	$alt_server_ip 										= $astDB->escape($_REQUEST['alt_server_ip']);
 	$external_server_ip 								= $astDB->escape($_REQUEST['external_server_ip']);
+	$conf_engine 										= $astDB->escape($_REQUEST['conf_engine']);
 	$defActive 											= array("Y","N");
 	
     ### Check Server ID if its null or empty
@@ -119,7 +120,8 @@
 					"rebuild_music_on_hold"					=> $rebuild_music_on_hold,
 					"recording_web_link"					=> $recording_web_link,
 					"alt_server_ip"							=> $alt_server_ip,
-					"external_server_ip"					=> $external_server_ip				
+					"external_server_ip"					=> $external_server_ip,
+					"conf_engine"							=> $conf_engine
 				);
 				
 				$astDB->where("server_id", $server_id);

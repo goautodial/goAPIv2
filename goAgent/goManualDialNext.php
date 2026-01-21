@@ -164,10 +164,20 @@ if ($sipIsLoggedIn) {
         $SIP_user = "{$protocol}/{$extension}{$phone_login}";
         $qm_extension = "{$extension}{$agent->phone_login}";
     }
+
+    //Confbridge
+    //$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+    $astDB->where('server_ip', $server_ip);
+    $query = $astDB->getOne('servers','conf_engine');
+    $rslt = $query['conf_engine'];
+    $conf_table = "vicidial_conferences";
+    if ($rslt == "CONFBRIDGE") {
+        $conf_table = "vicidial_confbridges";
+    }
     
     $astDB->where('extension', $SIP_user);
     $astDB->where('server_ip', $server_ip);
-    $query = $astDB->getOne('vicidial_conferences', 'conf_exten');
+    $query = $astDB->getOne("$conf_table", 'conf_exten');
     $conf_exten = $query['conf_exten'];
     
     $astDB->where('extension', $extension);

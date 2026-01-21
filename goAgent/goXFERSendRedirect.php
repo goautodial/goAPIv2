@@ -82,6 +82,14 @@ if (isset($_GET['goCallCID'])) { $CallCID = $astDB->escape($_GET['goCallCID']); 
 $NOWnum = date("YmdHis");
 
 if ($is_logged_in) {
+    //Confbridge
+    //$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
+    $astDB->where('server_ip', $server_ip);
+    $query = $astDB->getOne('servers','conf_engine');
+    $conf_engine = $query['conf_engine'];
+    $conf_table = "vicidial_conferences";
+    $threeway_context = $ext_context;
+
     if ($ACTION == "RedirectVD") {
         if ( (strlen($channel) < 3) or (strlen($queryCID) < 15) or (strlen($exten) < 1) or (strlen($campaign) < 1) or (strlen($ext_context) < 1) or (strlen($ext_priority) < 1) or (strlen($uniqueid) < 2) or (strlen($lead_id) < 1) ) {
             $channel_live = 0;
@@ -662,19 +670,23 @@ if ($is_logged_in) {
             $message = '';
             $result = 'error';
             if (preg_match("/NEXTAVAILABLE/", $exten)) {
+                //Confbridge
+                if ($conf_engine == "CONFBRIDGE") {
+                    $conf_table = "vicidial_confbridges";
+                }
                 //$stmtA="SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                $rslt = $astDB->rawQuery("SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
+                $rslt = $astDB->rawQuery("SELECT * FROM $conf_table where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
                 $row_ct = $astDB->getRowCount();
                 $lastSQL = $astDB->getLastQuery();
                 if ($row_ct > 1) {
                     //$stmtB="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                    $rslt = $astDB->rawQuery("UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
+                    $rslt = $astDB->rawQuery("UPDATE $conf_table set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
     
                     //$stmtC="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('extension', "$protocol/$extension$NOWnum");
                     $astDB->where('conf_exten', $session_id, '!=');
-                    $rslt = $astDB->get('vicidial_conferences', null, 'conf_exten');
+                    $rslt = $astDB->get("$conf_table", null, 'conf_exten');
                     $row = $rslt[0];
                     $exten = $row['conf_exten'];
     
@@ -685,12 +697,12 @@ if ($is_logged_in) {
                     //$stmtD="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('conf_exten', $exten);
-                    $rslt = $astDB->update('vicidial_conferences', array('extension' => "$protocol/$extension"), 1);
+                    $rslt = $astDB->update("$conf_table", array('extension' => "$protocol/$extension"), 1);
     
                     //$stmtE="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('conf_exten', $session_id);
-                    $rslt = $astDB->update('vicidial_conferences', array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
+                    $rslt = $astDB->update("$conf_table", array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
     
                     $queryCID = "CXAR24$NOWnum";
                     //$stmtF="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
@@ -923,31 +935,35 @@ if ($is_logged_in) {
                 $message = '';
                 $result = 'error';
                 if (preg_match("/NEXTAVAILABLE/", $exten)) {
+                    //Confbridge
+                    if ($conf_engine == "CONFBRIDGE") {
+                        $conf_table = "vicidial_confbridges";
+                    }
                     //$stmt = "SELECT count(*) FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';";
-                    $rslt = $astDB->rawQuery("SELECT * FROM vicidial_conferences where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
+                    $rslt = $astDB->rawQuery("SELECT * FROM $conf_table where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id';");
                     $row_ct = $astDB->getRowCount();
                     $lastSQL = $astDB->getLastQuery();
                     if ($row_ct > 1) {
                         //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
-                        $rslt = $astDB->rawQuery("UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
+                        $rslt = $astDB->rawQuery("UPDATE $conf_table set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
     
                         //$stmt="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('extension', "$protocol/$extension$NOWnum");
                         $astDB->where('conf_exten', $session_id, '!=');
-                        $rslt = $astDB->get('vicidial_conferences', null, 'conf_exten');
+                        $rslt = $astDB->get("$conf_table", null, 'conf_exten');
                         $row = $rslt[0];
                         $exten = $row['conf_exten'];
     
                         //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('conf_exten', $exten);
-                        $rslt = $astDB->update('vicidial_conferences', array('extension' => "$protocol/$extension"), 1);
+                        $rslt = $astDB->update("$conf_table", array('extension' => "$protocol/$extension"), 1);
     
                         //$stmt="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('conf_exten', $session_id);
-                        $rslt = $astDB->update('vicidial_conferences', array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
+                        $rslt = $astDB->update("$conf_table", array('leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"));
     
                         $queryCID = "CXAR23$NOWnum";
                         //$stmtB="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
@@ -991,7 +1007,7 @@ if ($is_logged_in) {
                         $exitThis = 1;
                     } else {
                         $channel_liveX = 0;
-                        $message .= "Cannot find empty vicidial_conference on $server_ip, Redirect command not inserted\n|$lastSQL|";
+                        $message .= "Cannot find empty $conf_table on $server_ip, Redirect command not inserted\n|$lastSQL|";
                         //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                     }
                 }
