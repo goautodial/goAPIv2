@@ -7,7 +7,7 @@
 cd /var/www/html
 git clone https://github.com/goautodial/goAPIv2
 </pre>
-<p>Documentation (incomplete): https://drive.google.com/drive/folders/1ERrp_QdSVBsIpPKzoeU2hNQikCYSKJH0?usp=sharing.</p><br>
+<p>Documentation: https://goautodial.org/projects/goautodialapi/wiki </p><br>
 <p>Sample PHP code to create campaign:
   
   	$postfields = array(
