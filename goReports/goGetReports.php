@@ -547,7 +547,6 @@
 		);
 		
 		return $return; 
-		}
 	}
 	
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group, $astDB, $dispo_stats, $goDB) {		
@@ -3001,7 +3000,6 @@
 				return $apiresults;
 			}
 		}
-	}
 	}
 
 ?>
