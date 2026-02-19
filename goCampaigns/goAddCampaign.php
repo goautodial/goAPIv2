@@ -276,7 +276,8 @@
 							'campaign_script' 					=> $script
 						);
 						
-						$q_insertOutbound 					= $astDB->insert( 'vicidial_campaigns', $data_outbound );					
+						$q_insertOutbound 					= $astDB->insert( 'vicidial_campaigns', $data_outbound );
+						$q_insertVCS 						= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 						$log_id 							= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
                         
                         $astDB->where('user_group', $log_group);
@@ -392,10 +393,8 @@
 					);
 					
 					$q_insertInbound 						= $astDB->insert( 'vicidial_campaigns', $data_inbound );
-					$log_id 								= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
-
 					$q_insertVCS 							= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
-					$log_id 								= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Outbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+					$log_id 								= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
                     
                     $astDB->where('user_group', $log_group);
                     $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -747,12 +746,10 @@
 								);
 								
 								$q_insertBlended 			= $astDB->insert( 'vicidial_campaigns', $data_blended );
-								$log_id 					= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
-								//$insertQuery = $astDB->getLastQuery();
-
 								$q_insertVCS 				= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 								$log_id 					= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
-                                
+                                //$insertQuery = $astDB->getLastQuery();
+
                                 $astDB->where('user_group', $log_group);
                                 $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
                                 $allowed_campaigns = $allowed_camps['allowed_campaigns'];
@@ -1124,9 +1121,7 @@
 									);
 									
 									$q_insertSurvey 				= $astDB->insert( 'vicidial_campaigns', $data_survey );
-									$log_id 						= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Survey Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
-
-									$astDB->insert( "vicidial_campaign_stats", array( "campaign_id" => $campaign_id ) );
+									$q_insertVCS 					= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 									$log_id 						= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Survey Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
                                     
                                     $astDB->where('user_group', $log_group);

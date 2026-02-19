@@ -22,52 +22,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
- 
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-    $NOW 												= date("Y-m-d");
-    
-	// ERROR CHECKING 
-	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI User Not Defined."
-		);
-	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI Password Not Defined."
-		);
-	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: Session User Not Defined."
-		);
-	} else {
-		// check if goUser and goPass are valid
-		$fresults										= $astDB
-			->where("user", $goUser)
-			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level");
-		
-		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
-			$data 										= $astDB
-				->where("campaign_id", $campaigns, "IN")
-				->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
-				->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
-					
-			$apiresults 								= array(
-				"result" 									=> "success",
-				//"query"									=> $astDB->getLastQuery(),
-				"data" 										=> $data
+include_once ("goAPI.php");
+
+$allowed_campaigns 									= allowed_campaigns($log_group, $goDB, $astDB);
+$NOW 												= date("Y-m-d");
+
+// ERROR CHECKING
+if (empty($goUser) || is_null($goUser)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: goAPI User Not Defined."
+	);
+} elseif (empty($goPass) || is_null($goPass)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: goAPI Password Not Defined."
+	);
+} elseif (empty($log_user) || is_null($log_user)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: Session User Not Defined."
+	);
+} else {
+	// check if goUser and goPass are valid
+	$fresults										= $astDB
+		->where("user", $goUser)
+		->where("pass_hash", $goPass)
+		->getOne("vicidial_users", "user,user_level");
+
+	$goapiaccess									= $astDB->getRowCount();
+	$userlevel										= $fresults["user_level"];
+
+	if ($goapiaccess > 0 && $userlevel > 7) {
+		if (is_array($allowed_campaigns)) {
+			if ($log_group !== "ADMIN") {
+				$astDB->where("campaign_id", $allowed_campaigns, "IN");
+			}
+
+			//$astDB->where("campaign_id", $allowed_campaigns, "IN");
+			$astDB->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+			$data 									= $astDB->getValue("vicidial_campaign_stats", "concat(round((sum(drops_today)/sum(answers_today) * 100)),'')");
+
+			$apiresults 							= array(
+				"result" 								=> "success",
+				//"query"								=> $astDB->getLastQuery(),
+				"data" 									=> $data
 			);
-		} else {
-			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
-				"result" 									=> $err_msg
-			);		
 		}
+	} else {
+		$err_msg 									= error_handle("10001");
+		$apiresults 								= array(
+			"code" 										=> "10001",
+			"result" 									=> $err_msg
+		);
 	}
+}
     
 ?>

@@ -214,7 +214,7 @@ if ($is_logged_in) {
     
                                 if ( ($queuemetrics->queuemetrics_socket == 'CONNECT_COMPLETE') and (strlen($queuemetrics->queuemetrics_socket_url) > 10) ) {
                                     $socket_send_data_begin='?';
-                                    $socket_send_data = "time_id=$StarTtime&call_id=$CalLCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$secondS&data3=$CLqueue_position$data4SS";
+                                    $socket_send_data = "time_id=$StarTtime&call_id=$CallCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$secondS&data3=$CLqueue_position$data4SS";
                                     if (preg_match("/\?/",$queuemetrics->queuemetrics_socket_url))
                                         {$socket_send_data_begin='&';}
                                     ### send queue_log data to the queuemetrics_socket_url ###
