@@ -1534,7 +1534,8 @@
 							'ofcom_uk_drop_calc' 						=> $resultGetCopy['ofcom_uk_drop_calc']
 						);
 						
-						$q_insertCopy = $astDB->insert('vicidial_campaigns', $data_copy);
+						$q_insertCopy 								= $astDB->insert('vicidial_campaigns', $data_copy);
+						$q_insertVCS 								= $astDB->insert( 'vicidial_campaign_stats', array('campaign_id' => $campaign_id) );
 						$log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Campaign: $campaign_id (copied from: $copy_from_campaign)", $log_group, $astDB->getLastQuery());
                         
                         $astDB->where('user_group', $log_group);
