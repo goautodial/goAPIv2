@@ -42,10 +42,11 @@
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level");
-		
+			->getOne("vicidial_users", "user,user_level,user_group");
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
+		$log_group										= $fresults["user_group"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function

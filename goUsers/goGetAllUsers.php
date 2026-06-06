@@ -41,11 +41,12 @@
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level");
-		
+			->getOne("vicidial_users", "user,user_level,user_group");
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
+		$log_group										= $fresults["user_group"];
+
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
@@ -65,12 +66,12 @@
 			
 			// get users list
 			$cols 										= array(
-				"user_id", 
-				"user", 
-				"full_name", 
-				"user_level", 
-				"user_group", 
-				"phone_login", 
+				"user_id",
+				"user",
+				"full_name",
+				"user_level",
+				"user_group",
+				"phone_login",
 				"active"
 			);
 			
@@ -129,7 +130,7 @@
 					"avatar" 								=> $dataAvatar, 
 					"useridgo" 								=> $dataUserIDgo, 
 					"licensedSeats" 						=> $config["licensedSeats"], 
-					"last_count" 							=> $agent_num 
+					"last_count" 							=> $agent_num
 				);					
 			} else {
 				$err_msg 								= error_handle("10010");
