@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
- 
+
 //ini_set('display_errors', 'on');
 //error_reporting(E_ALL);
 
@@ -175,7 +175,9 @@ if (isset($goAction) && $goAction != "") {
             $rslt = $astDB->getOne('vicidial_users', 'vdc_agent_api_access');
             $allowedAPIAccess = $rslt['vdc_agent_api_access'];
             if ($allowedAPIAccess) {
-                if (!preg_match("/goGetCallbackCount|goCheckIfLoggedIn|goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect|goGetAgentsLoggedIn|goGetContactList|goGetCustomerInfo|goUpdateCustomer|goAgentStats/", $goAction) && (!isset($campaign) || $campaign == '')) {
+                if (isset($phone_login) && !is_valid_phone_extension($phone_login)) {
+                    $APIResult = array( "result" => "error", "message" => "Invalid phone extension" );
+                } else if (!preg_match("/goGetCallbackCount|goCheckIfLoggedIn|goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect|goGetAgentsLoggedIn|goGetContactList|goGetCustomerInfo|goUpdateCustomer|goAgentStats/", $goAction) && (!isset($campaign) || $campaign == '')) {
                     $APIResult = array( "result" => "error", "message" => "Please select a campaign" );
                 } else {
                     include("{$goAction}.php");
