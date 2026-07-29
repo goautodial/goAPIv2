@@ -28,12 +28,12 @@
     // Conversion with precision from GAD v3 app
     function go_sec_convert($sec,$precision){
 		$sec = round($sec,0);
-	
+
 		if ($sec < 1){
 			return "0:00";
 		}else{
 			if ($sec < 3600) {$precision='M';}
-	
+
 			if ($precision == 'H'){
 				$Fhours_H =	($sec / 3600);
 				$Fhours_H_int = floor($Fhours_H);
@@ -76,15 +76,15 @@
         if($secs>=60){$secs=$secs%60;$r.=sprintf('%02d', $minutes).':';}if($minutes <= 0)$r.='00:';
         $r.=sprintf('%02d', $secs);
         return $r;*/
-	$day = floor($n / (24 * 3600)); 
-  
-    	$n = ($n % (24 * 3600)); 
-    	$hour = $n / 3600; 
-  
-    	$n %= 3600; 
-    	$minutes = $n / 60 ; 
-  
-    	$n %= 60; 
+	$day = floor($n / (24 * 3600));
+
+    	$n = ($n % (24 * 3600));
+    	$hour = $n / 3600;
+
+    	$n %= 3600;
+    	$minutes = $n / 60 ;
+
+    	$n %= 60;
     	$seconds = $n;
 
 	$r = '';
@@ -94,7 +94,7 @@
 	if($seconds > 0)$r .= sprintf('%02d', $seconds);else $r.='00';
 	return $r;
     }
-	
+
     ##### get usergroup #########
     function go_get_groupid($goUser, $dbase){
         //$query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
@@ -108,28 +108,28 @@
         } else {
 			return false;
 		}
-        
+
     }
-    
+
     ##### checkiftenant ######
     function checkIfTenant($groupId, $dbase){
         //$query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
 		$dbase->where('tenant_id', $groupId);
         $rslt_tenant = $dbase->get('go_multi_tenant');
 		$check_result_tenant = $dbase->getRowCount();
-		
+
         if ($check_result_tenant > 0) {
             return true;
         } else {
             return false;
         }
     }
-    
-    
+
+
     function go_getall_allowed_users($groupId) {
         include("goDBasterisk.php");
 		$allowed_users = "";
-		
+
         if ($groupId=='ADMIN' || $groupId=='admin') {
                    $query = "select user as userg from vicidial_users";
                    //$rsltv = mysqli_query($link,$query);
@@ -138,10 +138,10 @@
         } else {
                    $query = "select user as userg from vicidial_users where user_group='$groupId'";
                    //$rsltv = mysqli_query($link,$query);
-	
+
 		   $result = $astDB->rawQuery($query);
         }
-        
+
         /*while($info = mysqli_fetch_array( $rsltv )) {
             $users[] = $info['userg'];
         }*/
@@ -150,7 +150,7 @@
                 foreach($result as $fresults){
                         $users[] = $fresults['userg'];
                 }
-		
+
 		if(!empty($users)){
 			$imploded = implode("','", $users);
 			$allowed_users = "'".$imploded."'";
@@ -158,28 +158,28 @@
 	}
         return $allowed_users;
     }
-    
-    
+
+
     function go_total_agents_callv($groupId) {
         include("goDBasterisk.php");
-        if (!checkIfTenant($groupId)) { 
+        if (!checkIfTenant($groupId)) {
            $query = "select count(*) as qresult from vicidial_users";
            $rsltv = mysqli_query($link,$query);
         } else {
            $query = "select count(*) as qresult from vicidial_users where user_group='$groupId'";
            $rsltv = mysqli_query($link,$query);
         }
-                
+
         $fresults = mysqli_fetch_assoc($rsltv);
         $fresults = $fresults['qresult'];
-                
+
         if ($fresults == NULL) {
             $fresults = 0;
         }
-        
+
         return $fresults;
     }
-	
+
     function go_getall_allowed_campaigns($groupId, $dbase)
     {
 		/*$groupId = $this->go_get_groupid();
@@ -190,17 +190,17 @@
 		//$query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
 		$dbase->where('user_group', $groupId);
 		$resultsu = $dbase->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS qresult');
-		
+
 		if($dbase->getRowCount() > 0){
 			$fresults = $resultsu['qresult'];
 			$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-			
+
 			$allAllowedCampaigns = implode("",$allowedCampaigns);
 			//$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
 		}else{
 			$allAllowedCampaigns = '';
 		}
-		
+
 		return $allAllowedCampaigns;
     }
 
@@ -213,7 +213,7 @@
 				$astDB->where('user_group', $log_group);
 				//$astDB->orWhere('user_group', "---ALL---");
 			}
-		}    
+		}
 
 		$cols 									= array(
 			"campaign_id",
@@ -221,11 +221,11 @@
 			"dial_method",
 			"active"
 		);
-		
+
 		$astDB->orderBy('campaign_id', 'desc');
 		$result 								= $astDB->get('vicidial_campaigns', NULL, $cols);
 		$campaigns								= array();
-		
+
 		if ($astDB->count > 0) {
 			foreach($result as $fresults){
 				$dataCampID[] 					= $fresults['campaign_id'];
@@ -233,32 +233,32 @@
 				$dataDialMethod[] 				= $fresults['dial_method'];
 				$dataActive[] 					= $fresults['active'];
 			}
-			
+
 		}
-		
+
         switch ($type) {
-            case "all":		
+            case "all":
 				$campaigns	 					= array(
-					"campaign_id" 					=> $dataCampID, 
-					"campaign_name" 				=> $dataCampName, 
-					"dial_method" 					=> $dataDialMethod, 
+					"campaign_id" 					=> $dataCampID,
+					"campaign_name" 				=> $dataCampName,
+					"dial_method" 					=> $dataDialMethod,
 					"active" 						=> $dataActive
 				);
-				
+
                 break;
-                
-            case "status":		
+
+            case "status":
 				$campaigns	 					= array(
-					"campaign_id" 					=> $dataCampID, 
+					"campaign_id" 					=> $dataCampID,
 					"active" 						=> $dataActive
 				);
-				
-                break;                
-            
-            default: 
+
+                break;
+
+            default:
 				$campaigns	 					= $dataCampID;
 		}
-		
+
 		return $campaigns;
     }
 
@@ -296,7 +296,7 @@
 				->where("campaign_id", $campaign_id)
 				->orderBy("campaign_id")
 				->getValue("vicidial_campaigns", "trim(closer_campaigns)");
-		
+
 			if (count($resultsu) > 0) {
 			//$fresults = $resultsu['qresult'];
 				$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
@@ -307,39 +307,39 @@
 		}// if campaign_id is equal to ALL
 		return $allCloserCampaigns;
 	}
-    
-	function go_get_calltimes($campaign_id, $astDB){		
+
+	function go_get_calltimes($campaign_id, $astDB){
 		/*$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$campaign_id'";
 		$query_result = mysqli_query($link, $query);
 		$fetch_result = mysqli_fetch_array($query_result);
 		$call_time = $fetch_result['call_time'];*/
-		
+
 		$call_time = $astDB
 			->where("campaign_id", $campaign_id)
-			->getValue("vicidial_campaigns", "local_call_time");		
+			->getValue("vicidial_campaigns", "local_call_time");
 
 		if (strlen($call_time) > 0){
 			/*$query = "SELECT ct_default_start, ct_default_stop FROM vicidial_call_times WHERE call_time_id='$call_time'";
 			$result_query = mysqli_query($link, $query);
 			$fetch_result = mysqli_fetch_array($result_query);
 			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];*/
-			
+
 			$fetch_result = $astDB
 				->where("call_time_id", $call_time)
 				->getOne("vicidial_call_times", "ct_default_start, ct_default_stop");
-				
+
 			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];
-				
+
 		}
 
 		return $result;
 	}
-	
+
     #### Jerico James Flores Milo ####
-    #### My APIxmlOuput           #### 
+    #### My APIxmlOuput           ####
     function apiXMLOutput($val, $lastk = "") {
     	foreach ($val as $k => $v) {
-    
+
     		if (is_array( $v )) {
     			if (is_numeric( $k )) {
     				echo "<{$lastk}>\n";
@@ -349,32 +349,32 @@
     					echo "<{$k}>\n";
     				}
     			}
-    
+
     			apiXMLOutput( $v, $k );
-    
+
     			if (is_numeric( $k )) {
     				echo "</{$lastk}>\n";
     				continue;
     			}
-    
-    
+
+
     			if (( !is_numeric( key( $v ) ) && count( $v ) )) {
     				echo "</{$k}>\n";
     				continue;
     			}
-    
+
     			continue;
     		}
-    
+
     		$v = html_entity_decode( $v );
-    
+
     		if (( strpos( $v, "<![CDATA[" ) === false && htmlspecialchars( $v ) != $v )) {
     			$v = ( "<![CDATA[" . $v . "]" ) . "]>";
     		}
-    
+
     		echo "<{$k}>{$v}</{$k}>\n";
     	}
-    
+
     }
 
     function get_settings($type=null, $dbase, $param1=null, $param2=null) {
@@ -384,19 +384,19 @@
                 $dbase->where('user', $param1);
                 $return = $dbase->getOne('vicidial_users' , 'user_id,user,pass,pass_hash,phone_login,phone_pass,full_name,user_level,hotkeys_active,agent_choose_ingroups,scheduled_callbacks,agentonly_callbacks,agentcall_manual,vicidial_recording,vicidial_transfers,closer_default_blended,user_group,vicidial_recording_override,alter_custphone_override,alert_enabled,agent_shift_enforcement_override,shift_override_flag,allow_alerts,closer_campaigns,agent_choose_territories,custom_one,custom_two,custom_three,custom_four,custom_five,agent_call_log_view_override,agent_choose_blended,agent_lead_search_override,preset_contact_search');
                 break;
-            
+
             case "campaign":
 				$nextdial_secondsSQL = '';
 				$nextResult = $dbase->rawQuery("SHOW COLUMNS FROM `vicidial_campaigns` LIKE 'nextdial_seconds'");
 				if ($dbase->getRowCount() > 0) {
 					$nextdial_secondsSQL = ",nextdial_seconds";
 				}
-				
+
                 //Campaign Settings
                 $dbase->where('campaign_id', $param1);
                 $return = $dbase->getOne('vicidial_campaigns', "campaign_id,campaign_name,park_ext,park_file_name,web_form_address,allow_closers,auto_dial_level,dial_timeout,dial_prefix,campaign_cid,campaign_vdad_exten,campaign_rec_exten,campaign_recording,campaign_rec_filename,campaign_script,get_call_launch,am_message_exten,xferconf_a_dtmf AS Call_XC_a_DTMF,xferconf_a_number AS Call_XC_a_Number,xferconf_b_dtmf AS Call_XC_b_DTMF,xferconf_b_number AS Call_XC_b_Number,alt_number_dialing,scheduled_callbacks,wrapup_seconds,wrapup_message,closer_campaigns,use_internal_dnc,allcalls_delay,omit_phone_code,agent_pause_codes_active,no_hopper_leads_logins,campaign_allow_inbound,manual_dial_list_id,default_xfer_group,xfer_groups,disable_alter_custphone,display_queue_count,manual_dial_filter,agent_clipboard_copy AS Copy_to_Clipboard,use_campaign_dnc,three_way_call_cid,dial_method,three_way_dial_prefix,web_form_target,vtiger_screen_login,agent_allow_group_alias,default_group_alias,quick_transfer_button,prepopulate_transfer_preset,view_calls_in_queue,view_calls_in_queue_launch,call_requeue_button,pause_after_each_call,no_hopper_dialing,agent_dial_owner_only,agent_display_dialable_leads,web_form_address_two,agent_select_territories,crm_popup_login,crm_login_address,timer_action,timer_action_message,timer_action_seconds,start_call_url,dispo_call_url,xferconf_c_number AS Call_XC_c_Number,xferconf_d_number AS Call_XC_d_Number,xferconf_e_number AS Call_XC_e_Number,use_custom_cid,scheduled_callbacks_alert,scheduled_callbacks_count,manual_dial_override,blind_monitor_warning,blind_monitor_message,blind_monitor_filename,timer_action_destination,enable_xfer_presets,hide_xfer_number_to_dial,manual_dial_prefix,customer_3way_hangup_logging,customer_3way_hangup_seconds,customer_3way_hangup_action,ivr_park_call,manual_preview_dial,api_manual_dial,manual_dial_call_time_check,my_callback_option,per_call_notes,agent_lead_search,agent_lead_search_method,queuemetrics_phone_environment,auto_pause_precall,auto_pause_precall_code,auto_resume_precall,manual_dial_cid,custom_3way_button_transfer,callback_days_limit,disable_dispo_screen,disable_dispo_status,screen_labels,status_display_fields,pllb_grouping,pllb_grouping_limit,in_group_dial,in_group_dial_select,pause_after_next_call,owner_populate{$nextdial_secondsSQL}");
                 break;
-            
+
             case "hotkeys":
                 //Campaign HotKeys
                 $dbase->where('selectable', 'Y');
@@ -405,7 +405,7 @@
                 $dbase->orderBy('hotkey', 'asc');
                 $return = $dbase->get('vicidial_campaign_hotkeys', 9, 'hotkey,status,status_name');
                 break;
-            
+
             case "phone":
                 //Phone Settings
                 //Removed columns: DBX_server,DBX_database,DBX_user,DBX_pass,DBX_port,DBY_server,DBY_database,DBY_user,DBY_pass,DBY_port,ASTmgrUSERNAME,ASTmgrSECRET,
@@ -414,32 +414,41 @@
                 $dbase->where('active', 'Y');
                 $return = $dbase->getOne('phones', 'extension,dialplan_number,voicemail_id,phone_ip,computer_ip,server_ip,login,pass,status,active,phone_type,fullname,company,picture,messages,old_messages,protocol,local_gmt,login_user,login_pass,login_campaign,park_on_extension,conf_on_extension,VICIDIAL_park_on_extension,VICIDIAL_park_on_filename,monitor_prefix,recording_exten,voicemail_exten,voicemail_dump_exten,ext_context,dtmf_send_extension,call_out_number_group,client_browser,install_directory,local_web_callerID_URL,VICIDIAL_web_URL,AGI_call_logging_enabled,user_switching_enabled,conferencing_enabled,admin_hangup_enabled,admin_hijack_enabled,admin_monitor_enabled,call_parking_enabled,updater_check_enabled,AFLogging_enabled,QUEUE_ACTION_enabled,CallerID_popup_enabled,voicemail_button_enabled,enable_fast_refresh,fast_refresh_rate,enable_persistant_mysql,auto_dial_next_number,VDstop_rec_after_each_call,outbound_cid,enable_sipsak_messages,email,template_id,conf_override,phone_context,conf_secret,is_webphone,use_external_server_ip,codecs_list,webphone_dialpad,phone_ring_timeout,on_hook_agent,webphone_auto_answer');
                 break;
-            
+
             case "usergroup":
                 //User Group Settings
                 $dbase->where('user_group', $param1);
                 $return = $dbase->getOne('vicidial_user_groups', 'forced_timeclock_login,shift_enforcement,group_shifts,agent_status_viewable_groups,agent_status_view_time,agent_call_log_view,agent_xfer_consultative,agent_xfer_dial_override,agent_xfer_vm_transfer,agent_xfer_blind_transfer,agent_xfer_dial_with_customer,agent_xfer_park_customer_dial,agent_fullscreen,webphone_url_override,webphone_dialpad_override,webphone_systemkey_override');
                 break;
-            
+
             case "labels":
                 //Field Labels
                 $return = $dbase->getOne('system_settings', 'label_title,label_first_name,label_middle_initial,label_last_name,label_address1,label_address2,label_address3,label_city,label_state,label_province,label_postal_code,label_vendor_lead_code,label_gender,label_phone_number,label_phone_code,label_alt_phone,label_security_phrase,label_email,label_comments');
                 break;
-            
+
             case "queuemetrics":
                 //Queue Metrics
                 $return = $dbase->getOne('system_settings', 'enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id,allow_sipsak_messages,queuemetrics_pe_phone_append,queuemetrics_socket,queuemetrics_socket_url');
                 break;
-            
+
             default:
                 //System Settings
                 $return = $dbase->getOne('system_settings', 'use_non_latin,vdc_header_date_format,vdc_customer_date_format,vdc_header_phone_format,webroot_writable,timeclock_end_of_day,vtiger_url,enable_vtiger_integration,outbound_autodial_active,enable_second_webform,user_territories_active,static_agent_url,custom_fields_enabled,pllb_grouping_limit,qc_features_active,allow_emails,default_language,vicidial_agent_disable,pass_hash_enabled,agentonly_callback_campaign_lock');
         }
-        
+
         return json_decode(json_encode($return), FALSE);
     }
-    
+
+    // Security issue reported by Santosh Kumar Puppala: https://github.com/Santoshkumarpuppala
+    function is_valid_phone_extension($exten) {
+        return (is_string($exten) && preg_match('/\A[A-Za-z0-9_.@-]{1,64}\z/', $exten));
+    }
+
     function check_sip_login($dbase, $exten, $type='kamailio', $webrtc=true) {
+        if (!is_valid_phone_extension($exten)) {
+            return false;
+        }
+
         if (!$webrtc) {
             if ($type == 'kamailio') {
                 //$cwd = getcwd();
@@ -457,30 +466,33 @@
 				$return = ($dbase->getRowCount() > 0) ? true : false;
                 return $return;
             } else {
-                $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/asterisk -rx \"sip show peer '.$exten.'\""', $asteriskVars);
-                if (strlen($asteriskVars[1]) < 1) {
-                    foreach ($asteriskVars as $vars) {
-                        $list = explode(':', $vars);
-                        if (trim($list[0]) == "Status" && preg_match('/^OK/', trim($list[1]))) {
-                            return true;
-                        }
-                    }
-                }
+                // Deprecated/Removed: '/usr/share/goautodial/goautodialc.pl' has not been present in installations since 2018 (v4+).
+                
+                // $asteriskCommand = 'sudo /usr/sbin/asterisk -rx "sip show peer '.$exten.'"';
+                // $lastLine = exec('/usr/share/goautodial/goautodialc.pl '.escapeshellarg($asteriskCommand), $asteriskVars);
+                // if (strlen($asteriskVars[1]) < 1) {
+                //     foreach ($asteriskVars as $vars) {
+                //         $list = explode(':', $vars);
+                //         if (trim($list[0]) == "Status" && preg_match('/^OK/', trim($list[1]))) {
+                //             return true;
+                //         }
+                //     }
+                // }
                 return false;
             }
         } else {
             return true;
         }
     }
-    
+
     function check_agent_login($aDB, $agent) {
         $user = get_settings('user', $aDB, $agent);
         $phone = get_settings('phone', $aDB, $user->phone_login, $user->phone_pass);
-        
+
         $aDB->where('user', $agent);
         $aDB->where('server_ip', $phone->server_ip);
         $aDB->getOne('vicidial_live_agents');
-        
+
         $return = ($aDB->getRowCount() > 0) ? 1 : 0;
         return $return;
     }
@@ -594,7 +606,7 @@
         if ( (!$AC_processed) and ($dst_range == 'SSM-FSN') ) {
             #**********************************************************************
             # SSM-FSN
-            #     This is returns 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is returns 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on Second Sunday March to First Sunday November at 2 am.
             #     INPUTS:
@@ -605,10 +617,10 @@
             #     OPTIONAL INPUT:
             #       timezone        INTEGER       hour difference UTC - local standard time
             #                                      (DEFAULT is blank)
-            #                                     make calculations based on UTC time, 
+            #                                     make calculations based on UTC time,
             #                                     which means shift at 10:00 UTC in April
             #                                     and 9:00 UTC in October
-            #     OUTPUT: 
+            #     OUTPUT:
             #                       INTEGER       1 = DST, 0 = not DST
             #
             # S  M  T  W  T  F  S
@@ -617,14 +629,14 @@
             #15 16 17 18 19 20 21
             #22 23 24 25 26 27 28
             #29 30 31
-            # 
+            #
             # S  M  T  W  T  F  S
             #    1  2  3  4  5  6
             # 7  8  9 10 11 12 13
             #14 15 16 17 18 19 20
             #21 22 23 24 25 26 27
             #28 29 30 31
-            # 
+            #
             #**********************************************************************
 
 			$USACAN_DST = 0;
@@ -634,53 +646,53 @@
 			$dow= $wday;
 
 			if ($mm < 3 || $mm > 11) {
-                $USACAN_DST = 0;   
+                $USACAN_DST = 0;
 			} else if ($mm >= 4 and $mm <= 10) {
-                $USACAN_DST = 1;   
+                $USACAN_DST = 1;
 			} else if ($mm == 3) {
                 if ($dd > 13) {
-                    $USACAN_DST = 1;   
+                    $USACAN_DST = 1;
                 } else if ($dd >= ($dow+8)) {
                     if ($timezone) {
                         if ($dow == 0 and $ns < (7200+$timezone*3600)) {
-                            $USACAN_DST = 0;   
+                            $USACAN_DST = 0;
                         } else {
-                            $USACAN_DST = 1;   
+                            $USACAN_DST = 1;
                         }
                     } else {
                         if ($dow == 0 and $ns < 7200) {
-                            $USACAN_DST = 0;   
+                            $USACAN_DST = 0;
                         } else {
-                            $USACAN_DST = 1;   
+                            $USACAN_DST = 1;
                         }
                     }
                 } else {
-                    $USACAN_DST = 0;   
+                    $USACAN_DST = 0;
                 }
 			} else if ($mm == 11) {
                 if ($dd > 7) {
-                    $USACAN_DST = 0;   
+                    $USACAN_DST = 0;
                 } else if ($dd < ($dow+1)) {
-                    $USACAN_DST = 1;   
+                    $USACAN_DST = 1;
                 } else if ($dow == 0) {
                     if ($timezone) { # UTC calculations
                         if ($ns < (7200+($timezone-1)*3600)) {
-                            $USACAN_DST = 1;   
+                            $USACAN_DST = 1;
                         } else {
-                            $USACAN_DST = 0;   
+                            $USACAN_DST = 0;
                         }
                     } else { # local time calculations
                         if ($ns < 7200) {
-                            $USACAN_DST = 1;   
+                            $USACAN_DST = 1;
                         } else {
-                            $USACAN_DST = 0;   
+                            $USACAN_DST = 0;
                         }
                     }
                 } else {
-                    $USACAN_DST = 0;   
+                    $USACAN_DST = 0;
                 }
 			} # end of month checks
-			
+
             if ($USACAN_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -688,11 +700,11 @@
         if ( (!$AC_processed) and ($dst_range == 'FSA-LSO') ) {
             #**********************************************************************
             # FSA-LSO
-            #     This is returns 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is returns 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on first Sunday in April and last Sunday in October at 2 am.
             #**********************************************************************
-			
+
 			$USA_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -753,11 +765,11 @@
 
         if ( (!$AC_processed) and ($dst_range == 'LSM-LSO') ) {
             #**********************************************************************
-            #     This is s 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is s 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on last Sunday in March and last Sunday in October at 1 am.
             #**********************************************************************
-			
+
 			$GBR_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -813,18 +825,18 @@
                     $GBR_DST = 0;
                 }
 			} # end of month checks
-			
+
             if ($GBR_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
 
         if ( (!$AC_processed) and ($dst_range == 'LSO-LSM') ) {
             #**********************************************************************
-            #     This is s 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is s 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on last Sunday in October and last Sunday in March at 1 am.
             #**********************************************************************
-			
+
 			$AUS_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -880,7 +892,7 @@
                     $AUS_DST = 1;
                 }
 			} # end of month checks
-			
+
             if ($AUS_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -888,11 +900,11 @@
         if ( (!$AC_processed) and ($dst_range == 'FSO-LSM') ) {
             #**********************************************************************
             #   TASMANIA ONLY
-            #     This is s 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is s 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on first Sunday in October and last Sunday in March at 1 am.
             #**********************************************************************
-			
+
 			$AUST_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -946,7 +958,7 @@
                     $AUST_DST = 0;
                 }
 			} # end of month checks
-			
+
             if ($AUST_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -955,74 +967,74 @@
             #**********************************************************************
             # FSO-FSA
             #   2008+ AUSTRALIA ONLY (country code 61)
-            #     This is returns 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is returns 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on first Sunday in October and first Sunday in April at 1 am.
             #**********************************************************************
-		
+
             $AUSE_DST = 0;
             $mm = $mon;
             $dd = $mday;
             $ns = $dsec;
             $dow= $wday;
-    
+
             if ($mm < 4 or $mm > 10) {
-                $AUSE_DST = 1;   
+                $AUSE_DST = 1;
             } else if ($mm >= 5 and $mm <= 9) {
-                $AUSE_DST = 0;   
+                $AUSE_DST = 0;
             } else if ($mm == 4) {
                 if ($dd > 7) {
-                    $AUSE_DST = 0;   
+                    $AUSE_DST = 0;
                 } else if ($dd >= ($dow+1)) {
                     if ($timezone) {
                         if ($dow == 0 and $ns < (3600+$timezone*3600)) {
-                            $AUSE_DST = 1;   
+                            $AUSE_DST = 1;
                         } else {
-                            $AUSE_DST = 0;   
+                            $AUSE_DST = 0;
                         }
                     } else {
                         if ($dow == 0 and $ns < 7200) {
-                            $AUSE_DST = 1;   
+                            $AUSE_DST = 1;
                         } else {
-                            $AUSE_DST = 0;   
+                            $AUSE_DST = 0;
                         }
                     }
                 } else {
-                    $AUSE_DST = 1;   
+                    $AUSE_DST = 1;
                 }
             } else if ($mm == 10) {
                 if ($dd >= 8) {
-                    $AUSE_DST = 1;   
+                    $AUSE_DST = 1;
                 } else if ($dd >= ($dow+1)) {
                     if ($timezone) {
                         if ($dow == 0 and $ns < (7200+$timezone*3600)) {
-                            $AUSE_DST = 0;   
+                            $AUSE_DST = 0;
                         } else {
-                            $AUSE_DST = 1;   
+                            $AUSE_DST = 1;
                         }
                     } else {
                         if ($dow == 0 and $ns < 3600) {
-                            $AUSE_DST = 0;   
+                            $AUSE_DST = 0;
                         } else {
-                            $AUSE_DST = 1;   
+                            $AUSE_DST = 1;
                         }
                     }
                 } else {
-                    $AUSE_DST = 0;   
+                    $AUSE_DST = 0;
                 }
             } # end of month checks
-            
+
             if ($AUSE_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
 
         if ( (!$AC_processed) and ($dst_range == 'FSO-TSM') ) {
             #**********************************************************************
-            #     This is s 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is s 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on first Sunday in October and third Sunday in March at 1 am.
             #**********************************************************************
-			
+
 			$NZL_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -1076,7 +1088,7 @@
                     $NZL_DST = 0;
                 }
 			} # end of month checks
-			
+
             if ($NZL_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -1085,65 +1097,65 @@
             #**********************************************************************
             # LSS-FSA
             #   2007+ NEW ZEALAND (country code 64)
-            #     This is returns 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is returns 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect.
             #     Based on last Sunday in September and first Sunday in April at 1 am.
             #**********************************************************************
-            
+
             $NZLN_DST = 0;
             $mm = $mon;
             $dd = $mday;
             $ns = $dsec;
             $dow= $wday;
-    
+
             if ($mm < 4 || $mm > 9) {
-                $NZLN_DST = 1;   
+                $NZLN_DST = 1;
             } else if ($mm >= 5 && $mm <= 9) {
-                $NZLN_DST = 0;   
+                $NZLN_DST = 0;
             } else if ($mm == 4) {
                 if ($dd > 7) {
-                    $NZLN_DST = 0;   
+                    $NZLN_DST = 0;
                 } else if ($dd >= ($dow+1)) {
                     if ($timezone) {
                         if ($dow == 0 && $ns < (3600+$timezone*3600)) {
-                            $NZLN_DST = 1;   
+                            $NZLN_DST = 1;
                         } else {
-                            $NZLN_DST = 0;   
+                            $NZLN_DST = 0;
                         }
                     } else {
                         if ($dow == 0 && $ns < 7200) {
-                            $NZLN_DST = 1;   
+                            $NZLN_DST = 1;
                         } else {
-                            $NZLN_DST = 0;   
+                            $NZLN_DST = 0;
                         }
                     }
                 } else {
-                    $NZLN_DST = 1;   
+                    $NZLN_DST = 1;
                 }
             } else if ($mm == 9) {
                 if ($dd < 25) {
-                    $NZLN_DST = 0;   
+                    $NZLN_DST = 0;
                 } else if ($dd < ($dow+25)) {
-                    $NZLN_DST = 0;   
+                    $NZLN_DST = 0;
                 } else if ($dow == 0) {
                     if ($timezone) { # UTC calculations
                         if ($ns < (3600+($timezone-1)*3600)) {
-                            $NZLN_DST = 0;   
+                            $NZLN_DST = 0;
                         } else {
-                            $NZLN_DST = 1;   
+                            $NZLN_DST = 1;
                         }
                     } else { # local time calculations
                         if ($ns < 3600) {
-                            $NZLN_DST = 0;   
+                            $NZLN_DST = 0;
                         } else {
-                            $NZLN_DST = 1;   
+                            $NZLN_DST = 1;
                         }
                     }
                 } else {
-                    $NZLN_DST = 1;   
+                    $NZLN_DST = 1;
                 }
             } # end of month checks
-            
+
             if ($NZLN_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -1151,11 +1163,11 @@
         if ( (!$AC_processed) and ($dst_range == 'TSO-LSF') ) {
             #**********************************************************************
             # TSO-LSF
-            #     This is returns 1 if Daylight Savings Time is in effect and 0 if 
+            #     This is returns 1 if Daylight Savings Time is in effect and 0 if
             #       Standard time is in effect. Brazil
             #     Based on Third Sunday October to Last Sunday February at 1 am.
             #**********************************************************************
-			
+
 			$BZL_DST = 0;
 			$mm = $mon;
 			$dd = $mday;
@@ -1163,55 +1175,55 @@
 			$dow= $wday;
 
 			if ($mm < 2 || $mm > 10) {
-                $BZL_DST = 1;   
+                $BZL_DST = 1;
 			} else if ($mm >= 3 and $mm <= 9) {
-                $BZL_DST = 0;   
+                $BZL_DST = 0;
 			} else if ($mm == 2) {
                 if ($dd < 22) {
-                    $BZL_DST = 1;   
+                    $BZL_DST = 1;
                 } else if ($dd < ($dow+22)) {
-                    $BZL_DST = 1;   
+                    $BZL_DST = 1;
                 } else if ($dow == 0) {
                     if ($timezone) { # UTC calculations
                         if ($ns < (3600+($timezone-1)*3600)) {
-                            $BZL_DST = 1;   
+                            $BZL_DST = 1;
                         } else {
-                            $BZL_DST = 0;   
+                            $BZL_DST = 0;
                         }
                     } else { # local time calculations
                         if ($ns < 3600) {
-                            $BZL_DST = 1;   
+                            $BZL_DST = 1;
                         } else {
-                            $BZL_DST = 0;   
+                            $BZL_DST = 0;
                         }
                     }
                 } else {
-                    $BZL_DST = 0;   
+                    $BZL_DST = 0;
                 }
 			} else if ($mm == 10) {
                 if ($dd < 22) {
-                    $BZL_DST = 0;   
+                    $BZL_DST = 0;
                 } else if ($dd < ($dow+22)) {
-                    $BZL_DST = 0;   
+                    $BZL_DST = 0;
                 } else if ($dow == 0) {
                     if ($timezone) { # UTC calculations
                         if ($ns < (3600+($timezone-1)*3600)) {
-                            $BZL_DST = 0;   
+                            $BZL_DST = 0;
                         } else {
-                            $BZL_DST = 1;   
+                            $BZL_DST = 1;
                         }
                     } else { # local time calculations
                         if ($ns < 3600) {
-                            $BZL_DST = 0;   
+                            $BZL_DST = 0;
                         } else {
-                            $BZL_DST = 1;   
+                            $BZL_DST = 1;
                         }
                     }
                 } else {
-                    $BZL_DST = 1;   
+                    $BZL_DST = 1;
                 }
 			} # end of month checks
-			
+
             if ($BZL_DST) {$gmt_offset++;}
             $AC_processed++;
 		}
@@ -1228,16 +1240,16 @@
     ##### DETERMINE IF LEAD IS DIALABLE #####
     function dialable_gmt($aDB, $local_call_time, $gmt_offset, $state) {
         $dialable=0;
-    
+
         $pzone = 3600 * $gmt_offset;
         $pmin = (gmdate("i", time() + $pzone));
         $phour = ( (gmdate("G", time() + $pzone)) * 100);
         $pday = gmdate("w", time() + $pzone);
-        $tz = sprintf("%.2f", $p);	
+        $tz = sprintf("%.2f", $p);
         $GMT_gmt = "$tz";
         $GMT_day = "$pday";
         $GMT_hour = ($phour + $pmin);
-    
+
         //$stmt="SELECT call_time_id,call_time_name,call_time_comments,ct_default_start,ct_default_stop,ct_sunday_start,ct_sunday_stop,ct_monday_start,ct_monday_stop,ct_tuesday_start,ct_tuesday_stop,ct_wednesday_start,ct_wednesday_stop,ct_thursday_start,ct_thursday_stop,ct_friday_start,ct_friday_stop,ct_saturday_start,ct_saturday_stop,ct_state_call_times FROM vicidial_call_times where call_time_id='$local_call_time';";
         $aDB->where('call_time_id', $local_call_time);
         $rowx = $aDB->get('vicidial_call_times', null, 'call_time_id,call_time_name,call_time_comments,ct_default_start,ct_default_stop,ct_sunday_start,ct_sunday_stop,ct_monday_start,ct_monday_stop,ct_tuesday_start,ct_tuesday_stop,ct_wednesday_start,ct_wednesday_stop,ct_thursday_start,ct_thursday_stop,ct_friday_start,ct_friday_stop,ct_saturday_start,ct_saturday_stop,ct_state_call_times');
@@ -1258,7 +1270,7 @@
         $Gct_saturday_start =	$rowx['ct_saturday_start'];
         $Gct_saturday_stop =	$rowx['ct_saturday_stop'];
         $Gct_state_call_times = $rowx['ct_state_call_times'];
-    
+
         if ($GMT_day == 0) {	#### Sunday local time{
             if (($Gct_sunday_start == 0) and ($Gct_sunday_stop == 0)) {
                 if ( ($GMT_hour >= $Gct_default_start) and ($GMT_hour < $Gct_default_stop) )
@@ -1322,7 +1334,7 @@
                     {$dialable = 1;}
             }
         }
-    
+
         return $dialable;
 	}
 
@@ -1358,7 +1370,7 @@
             }
         }
     }
-    
+
     function audit_comments_active($aDB, $list_id, $format, $user, $NOW_TIME, $server_ip, $session_name) {
         //$stmt="select count(audit_comments) from vicidial_lists_custom where list_id='$list_id' and audit_comments='1' limit 1;";
         $aDB->where('list_id', $list_id);
@@ -1370,7 +1382,7 @@
             return false;
         }
     }
-    
+
     function get_audited_comments($aDB, $lead_id, $format, $user, $NOW_TIME, $server_ip, $session_name) {
         global $ACcount;
         global $ACcomments;
@@ -1378,7 +1390,7 @@
         $aDB->where('lead_id', $lead_id);
         $rslt = $aDB->get('vicidial_comments', null, 'user_id,comment');
         $ACcount = $aDB->getRowCount();
-    
+
         if($ACcount > 0) {
             $x = 0;
             while ($ACcount > $x) {
@@ -1438,14 +1450,14 @@
 					'salt' => base64_encode($SSpass_key)
 				];
 				$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
-				$pass_hash = substr($pass_hash, 29, 31);				
+				$pass_hash = substr($pass_hash, 29, 31);
             } else {$pass_hash = $pass;}
             //$passSQL = "pass_hash='$pass_hash'";
             $aDB->where('pass_hash', $pass_hash);
         } else {
             $aDB->where('pass', $pass);
         }
-        
+
         if ($user_option == 'MGR') {
             $aDB->where('manager_shift_enforcement_override', '1');
         } else {
@@ -1556,7 +1568,7 @@
         return $auth_key;
     }
     ##### END validate user login credentials, check for failed lock out #####
-    
+
 	##### ACTION LOGS #####
 	function log_action($link, $action, $user, $ip, $details, $user_group, $db_query = '') {
 		$action = $link->escape(strtoupper($action));
@@ -1566,7 +1578,7 @@
 		$user_group = $link->escape($user_group);
 		$details = $link->escape($details);
 		$db_query = $link->escape($db_query);
-		
+
 		if ((!is_null($user) && strlen($user) > 0) && (!is_null($ip) && strlen($ip) > 0) && $link) {
 			//$logSQL = "INSERT INTO go_action_logs (user, ip_address, event_date, action, details, db_query, user_group) VALUES ('$user', '$ip', '$event_date', '$action', '$details', '$db_query', '$user_group');";
 			$insertData = array(
@@ -1580,7 +1592,7 @@
 			);
 			$result = $link->insert('go_action_logs', $insertData);
 		}
-		
+
 		if ($result) {
 			$log_id = $link->getInsertId();
 			return $log_id;
@@ -1589,13 +1601,13 @@
 		}
 	}
 	##### END ACTION LOGS #####
-    
+
     function hangup_cause_description($code) {
         global $hangup_cause_dictionary;
         if ( array_key_exists($code, $hangup_cause_dictionary)  ) { return $hangup_cause_dictionary[$code]; }
         else { return "Unidentified Hangup Cause Code."; }
 	}
-    
+
 
     ##### SIP Hangup Cause Description Map  #####
     function sip_hangup_cause_description($sip_code) {
@@ -1603,7 +1615,7 @@
         if ( array_key_exists($sip_code,$sip_hangup_cause_dictionary)  ) { return $sip_hangup_cause_dictionary[$sip_code]; }
         else { return "Unidentified SIP Hangup Cause Code."; }
     }
-    
+
     ##### Hangup Cause Dictionary #####
     $hangup_cause_dictionary = array(
         0 => "Unspecified. No other cause codes applicable.",
@@ -1656,7 +1668,7 @@
         111 => "Protocol error, unspecified.",
         127 => "Interworking, unspecified."
     );
-    
+
     ##### SIP Hangup Cause Dictionary #####
     $sip_hangup_cause_dictionary = array(
         400 => "Bad Request.",
@@ -1715,7 +1727,7 @@
         604 => "Does Not Exist Anywhere.",
         606 => "Not Acceptable."
     );
-	
+
 	#get file sizes
 	function formatSizeUnits($bytes){
         if ($bytes >= 1073741824)
@@ -1730,14 +1742,14 @@
             $bytes = $bytes . ' byte';
         else
             $bytes = '0 bytes';
-		
+
         return $bytes;
 	}
-	
+
 	// API Response Codes
 	function error_handle($code, $param = NULL){
 		$err_msg = "";
-			
+
 		switch($code){
 			case "10001";
 				$err_msg = "Error: You do not have permission to view this page ";
@@ -1838,8 +1850,8 @@
 				$err_msg = "Error: Invalid phone number ";
 				if(!empty($param))
 				$err_msg .= "in ".$param;
-			break;			
-			
+			break;
+
 			case "40001";
 				$err_msg = "Error: Missing required parameters ";
 				if(!empty($param))
@@ -1881,7 +1893,7 @@
 				$err_msg .= "in ".$param;
 			break;
 		}
-		
+
 		return $err_msg;
 	}
 
@@ -1927,7 +1939,7 @@
             return $result;
         }
     }
-    
+
     // check usergroup in-reference to campaign
     function go_check_usergroup_campaign($link, $usergroup = NULL, $campaign_id = NULL){
         $result = 0; // if result is returned 1, then the usergroup is matched with the campaign
@@ -1954,19 +1966,19 @@
         $data = Array("rebuild_conf_files" => "Y");
         $dbase->where('generate_vicidial_conf', "Y");
         $dbase->where('active_asterisk_server', "Y");
-        
+
         if(!empty($server_ip))
         $dbase->where('server_ip', $server_ip);
 
         $result = $dbase->update("servers", $data);
-        
+
         if ($result) {
             return "Success!";
         } else {
             return "Failed to rebuild conf. Mysql_Error: ".$dbase->getLastError();
         }
     }
-	
+
 	function encrypt_passwd($pass, $cost, $salt = null) {
 		$pass_options = [
 			'cost' => $cost,
@@ -1975,12 +1987,12 @@
 		$pass_hash = password_hash($pass, PASSWORD_BCRYPT, $pass_options);
 		return substr($pass_hash, 29, 31);
 	}
-	
+
 	function nl($string) {
 		if(isset($_SERVER['SHELL'])) return preg_replace('/\<br(\s*)?\/?\>/i', PHP_EOL, $string);
 		return nl2br($string);
 	}
-	
+
 	// escape existing special characters already in the database
 	function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
 		$escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c", "	");
@@ -1989,12 +2001,12 @@
 
 		return $result;
 	}
-	
+
     function remove_empty($array) {
     	return array_filter($array, '_remove_empty_internal');
     }
 
     function _remove_empty_internal($value) {
 		return !empty($value) || $value === 0;
-    }	
+    }
 ?>
