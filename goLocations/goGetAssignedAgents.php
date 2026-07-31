@@ -67,5 +67,5 @@ if (count($rsltv) > 0) {
 		$dataRole[] = $row['role'];
 	}
 }
-$APIResult = array("result" => "success", "user_id" => $dataUserID, "user" => $dataName, "full_name" => $dataFullName, "campaign" => $dataCampaign, "campaign_name" => $dataCampaignName, "campaign_agent" => $dataCampaignAgent, "role" => $dataRole);
+$APIResult = ["result" => "success", "user_id" => $dataUserID, "user" => $dataName, "full_name" => $dataFullName, "campaign" => $dataCampaign, "campaign_name" => $dataCampaignName, "campaign_agent" => $dataCampaignAgent, "role" => $dataRole];
 ?>

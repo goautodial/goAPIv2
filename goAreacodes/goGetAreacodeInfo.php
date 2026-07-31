@@ -28,14 +28,14 @@
   $astDB->where('areacode', $areacode);
   $astDB->where('outbound_cid', $outbound_cid);
 
-  $cols = array(
+  $cols = [
 		'campaign_id',
 		'areacode',
 		'outbound_cid',
 		'active',
 		'cid_description',
 		'call_count_today'
-	);
+	];
 
   $result = $astDB->getOne('vicidial_campaign_cid_areacodes', null, $cols);
   
@@ -46,7 +46,7 @@
 	  $dataDescription = $result['cid_description'];
 	  $dataCallCountToday = $result['call_count_today'];
   
-  $apiresults = array(
+  $apiresults = [
     "result"        => "success",
     "campaign_id"        => $dataCampID,
     "areacode"		=> $dataAreacode,
@@ -54,5 +54,5 @@
     "active"		=> $dataActive,
     "cid_description"	=> $dataDescription,
     "call_count_today"	=> $dataCallCountToday
-  );
+  ];
 ?>

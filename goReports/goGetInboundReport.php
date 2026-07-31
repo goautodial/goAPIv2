@@ -25,7 +25,7 @@
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL);
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
@@ -43,15 +43,15 @@
     }
 
     if (empty($log_user) || is_null($log_user)) {
-        $apiresults 								= array(
+        $apiresults 								= [
             "result" 									=> "Error: Session User Not Defined."
-        );
+        ];
     } elseif ( empty($campaignID) || is_null($campaignID) ) {
         $err_msg 									= error_handle("40001");
-        $apiresults 								= array(
+        $apiresults 								= [
                 "code" 									=> "40001",
                 "result" 								=> $err_msg
- 		);
+ 		];
     } elseif (empty($fromDate) && empty($toDate)) {
 	    $fromDate 									= date("Y-m-d") . " 00:00:00";
 	    $toDate 									= date("Y-m-d") . " 23:59:59";
@@ -59,12 +59,12 @@
     } else {
 	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 	    // every time we need to filter out requests
-	    $tenant 									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+	    $tenant 									=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 
 	    if ($tenant) {
 	            $astDB->where("user_group", $log_group);
 	    } else {
-            if (strtoupper($log_group) != 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 if ($user_level < 9) {
                     $astDB->where("user_group", $log_group);
                 }
@@ -104,7 +104,7 @@
 		$number = 1;
 
 		foreach ($query as $row) {
-		
+
 			$TOPsorted_output .= '<tr>';
 			$TOPsorted_output .= '<td nowrap>'.$row['lead_id'].'</td>';
 
@@ -125,13 +125,11 @@
 			//$number++;
 		}
 
-		$apiresults = array(
+		return [
 		    "result" 		=> "success",
 		    "inbound_query" 	=> $inbound_report_query,
 		    //"debug_value" 	=> $alex,
 		    "TOPsorted_output" 	=> $TOPsorted_output
-		);
-
-		return $apiresults;
+		];
 	}
 ?>

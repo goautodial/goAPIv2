@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
-	include_once ("../licensed-conf.php");
+    include_once (__DIR__ . "/goAPI.php");
+	include_once (__DIR__ . "/../licensed-conf.php");
 	
     // POST or GET Variables
 	$orig_user 	= (isset($_REQUEST['user']) ? $astDB->escape($_REQUEST['user']) : "agent001");
@@ -36,69 +36,69 @@
 	$avatar 	= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);
 	$seats 		= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
 	$server_ip 	= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
-	$defActive 	= array("Y", "N");
+	$defActive 	= ["Y", "N"];
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $orig_user)) {
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $orig_user)) {
 		$err_msg 										= error_handle("41004", "user");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass)) {
 		$err_msg 										= error_handle("41004", "pass");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', $orig_full_name)) {
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', (string) $orig_full_name)) {
 		$err_msg 										= error_handle("41004", "full_name");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 	} elseif (empty($orig_user)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
     } elseif (empty($pass)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
     } elseif (empty($orig_full_name)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
     } elseif (empty($user_group)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
     } elseif (!in_array($active,$defActive) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -147,11 +147,11 @@
 					$pass_hash_enabled 					= $rpasshash['pass_hash_enabled'];
 					$pass_cost 							= $rpasshash['pass_cost'];
 					$pass_key 							= $rpasshash['pass_key'];
-					$get_last 							= preg_replace("/[^0-9]/","", $orig_user);
+					$get_last 							= preg_replace("/[^0-9]/","", (string) $orig_user);
 					$last_num_user 						= intval($get_last);				
-					$get_last2 							= preg_replace("/[^0-9]/","", $orig_full_name);
+					$get_last2 							= preg_replace("/[^0-9]/","", (string) $orig_full_name);
 					$last_num_name 						= intval($get_last2);				
-					$arr_user 							= array();
+					$arr_user 							= [];
 					$add_num 							= 0;
 					
 					for ($i=0;$i < $seats;$i++) {
@@ -164,7 +164,7 @@
 							$user 						= $orig_user;
 							
 							if  ($last_num_user === 0 && $seats > 0) {
-								$orig_user 				= $orig_user."1";
+								$orig_user .= "1";
 								$last_num_user 			= 1;
 							}
 						}
@@ -175,13 +175,13 @@
 							$full_name 					= $orig_full_name;
 							
 							if ($last_num_name === 0 && $seats > 0) {
-								$orig_full_name 		= $orig_full_name."1";
+								$orig_full_name .= "1";
 								$last_num_name 			= 1;
 							}
 						}
 						
-						$phone_login 					= $phone_login + $add_num;				
-						$add_num 						= $add_num + 1;
+						$phone_login += $add_num;				
+						$add_num += 1;
 
 						if (!empty($location)) {
 							$result_location 			= go_check_location ($location, $user_group);
@@ -189,10 +189,10 @@
 							if ($result_location < 1) {
 								$err_msg 				= error_handle("41006", "location. User group does not exist in the location selected.");
 								
-								$apiresults 			= array(
+								$apiresults 			= [
 									"code" 					=> "41006", 
 									"result" 				=> $err_msg
-								);
+								];
 								
 								$location 				= "";
 							}
@@ -238,7 +238,7 @@
 							$x 							= 0;
 							$y 							= 0;
 							
-							while ($x == $y) {
+							while ($x === $y) {
 								$random_digit 			= mt_rand(1000000000, 9999999999);
 								$astDB->where("phone_login", $random_digit);
 								$astDB->getOne("vicidial_users", "phone_login");
@@ -259,7 +259,7 @@
 							}
 							
 							
-							$dataUser = array(
+							$dataUser = [
 								"user" 				=> $user,
 								"pass" 				=> $password,
 								"user_group" 			=> $user_group,
@@ -278,12 +278,12 @@
 								"vicidial_transfers" 		=> "1",
 								"closer_default_blended" 	=> "1",
 								"scheduled_callbacks" 		=> "1"
-							);
+							];
 							
 							$q_insertUser 				= $astDB->insert('vicidial_users', $dataUser); // insert record in asterisk.vicidial_users
 							$log_id 				= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $astDB->getLastQuery());
 							
-							$dataPhones = array(
+							$dataPhones = [
 								"extension" 			=> $phone_login,
 								"dialplan_number" 		=> "9999" . $phone_login,
 								"voicemail_id" 			=> $phone_login,
@@ -307,7 +307,7 @@
 								"conf_secret" 			=> $password,
 								"messages" 			=> "0",
 								"old_messages" 			=> "0"
-							);
+							];
 							
 							$astDB->insert('phones', $dataPhones); // insert record in goautodial.users
 							
@@ -324,7 +324,7 @@
 								$goactive = 1; 
 							}
 							
-							$datago = array(
+							$datago = [
 								"userid" 			=> $userid,
 								"name" 				=> $user,
 								"fullname" 			=> $full_name,
@@ -335,7 +335,7 @@
 								"phone" 			=> $phone_login,
 								"email"				=> $email
 								//"location_id" => $location
-							);
+							];
 							
 							$goDB->insert('users', $datago); // insert record in goautodial.users
 							
@@ -361,70 +361,70 @@
 
 								$domain = (!is_null($rowd['value']) || $rowd['value'] !== '') ? $rowd['value'] : 'goautodial.com';
 							
-								$datakam = array(
+								$datakam = [
 									"username" 		=> $phone_login,
 									"domain" 		=> $domain,
 									"password" 		=> $phone_pass,
 									"ha1" 			=> $ha1,
 									"ha1b" 			=> $ha1b
-								);							
+								];							
 							
 								$kamDB->insert('subscriber', $datakam);
 								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New User: $user", $log_group, $kamDB->getLastQuery());
 								
 								$return_user = $userid;
-								array_push ($arr_user, $return_user);							
+								$arr_user[] = $return_user;							
 							} else {
 								$err_msg = error_handle("41004", "user");
-								$apiresults = array(
+								$apiresults = [
 									"code" 			=> "41004", 
 									"result" 		=> $err_msg
-								);
+								];
 							}								
 						} else {				
 							$error_count = 1;
-							$i = $i - 1;
+							$i -= 1;
 						}
 					}
 					
-					if ($error_count == 0) {
-						$apiresults = array(
+					if ($error_count === 0) {
+						$apiresults = [
 							"result" => "success", 
 							"user created" => $arr_user
-						);
-					} elseif ($error_count == 1) {
+						];
+					} elseif ($error_count === 1) {
 						$err_msg = error_handle("10113");
-						$apiresults = array(
+						$apiresults = [
 							"code" 					=> "10113", 
 							"result" 				=> $err_msg
-						);
+						];
 					} elseif ($error_count == 2) {
 						$err_msg = error_handle("41004", "user_group");
-						$apiresults = array(
+						$apiresults = [
 							"code" 					=> "41004", 
 							"result" 				=> $err_msg
-						);
+						];
 					}
 				} else {
 					$err_msg = error_handle("10004", "seats. Reached Maximum Licensed Seats!");
-					$apiresults = array(
+					$apiresults = [
 						"code" 						=> "10004", 
 						"result" 					=> $err_msg
-					);
+					];
 				}			
 			} else {
 				$err_msg = error_handle("41004", "user_group");
-				$apiresults = array(
+				$apiresults = [
 					"code" 							=> "41004", 
 					"result" 						=> $err_msg
-				);
+				];
 			}
 		} else {
 			$err_msg = error_handle("10001");
-			$apiresults = array(
+			$apiresults = [
 				"code" 								=> "10001", 
 				"result" 							=> $err_msg
-			);		
+			];		
 		}
 	}
     

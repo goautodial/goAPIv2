@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 	
     // POST or GET Variables
     $group_id 										= $astDB->escape($_REQUEST['group_id']);
@@ -64,19 +64,19 @@
 	$onhold_prompt_filename 						= $astDB->escape($_REQUEST['onhold_prompt_filename']);
 
     // Default values 
-    $defActive 										= array("Y","N");
-    $deffronter_display 							= array("Y","N");
+    $defActive 										= ["Y","N"];
+    $deffronter_display 							= ["Y","N"];
     
-    $defget_call_launch 							= array(
+    $defget_call_launch 							= [
 		'NONE',
 		'SCRIPT',
 		'WEBFORM',
 		'WEBFORMTWO',
 		'FORM',
 		'EMAIL'
-	);
+	];
 	
-    $defnext_agent_call 							= array(
+    $defnext_agent_call 							= [
 		'fewest_calls_campaign',
 		'longest_wait_time',
 		'ring_all',
@@ -87,52 +87,52 @@
 		'inbound_group_rank',
 		'campaign_rank',
 		'fewest_calls'
-	);
+	];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($group_id) || is_null($group_id)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Set a value for Inbound ID."
-		);
-	} elseif ((strlen($group_name) < 2 && !is_null($group_name)) || (strlen($group_color) < 2 && !is_null($group_color))) {
-		$apiresults 								= array(
+		];
+	} elseif ((strlen((string) $group_name) < 2 && !is_null($group_name)) || (strlen((string) $group_color) < 2 && !is_null($group_color))) {
+		$apiresults 								= [
 			"result" 									=> "<br>GROUP NOT ADDED - Please go back and look at the data you entered\n <br>Group name and group color must be at least 2 characters in length\n"
-		);
+		];
 	} elseif ($queue_priority < -99 || $queue_priority > 99) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: queue_priority Value should be in between -99 and 99"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_id)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in group_id"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_name)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_name)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in group_name"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_color)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_color)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in group_color"
-		);
+		];
 	} elseif (!in_array($active,$defActive) && !is_null($active)) {
-	   $apiresults 									= array(
+	   $apiresults 									= [
 			"result" 									=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!in_array($fronter_display,$deffronter_display) && !is_null($fronter_display)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for fronter_display is Y or N only."
-		);
+		];
 	} elseif (!in_array($get_call_launch,$defget_call_launch) && !is_null($get_call_launch)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for get_call_launch is NONE, SCRIPT, WEBFORM, WEBFORMTWO, FORM or EMAIL only."
-		);
+		];
 	} elseif (!in_array($next_agent_call,$defnext_agent_call) && !is_null($next_agent_call)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for next_agent_call is fewest_calls_campaign, longest_wait_time, ring_all, random, oldest_call_start, oldest_call_finish, overall_user_level, inbound_group_rank, campaign_rank or fewest_calls only."
-		);
+		];
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
             $astDB->where("user_group", $log_group);
@@ -144,9 +144,9 @@
 		//$stmtCheck 								= "SELECT group_id from vicidial_inbound_groups where group_id='$group_id';";
 		
 		if ($row < 1) {
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "GROUP NOT MODIFIED - Inbound doesn't exist"
-			);
+			];
 		} else {
 			// filter for no_agent_action_value
 			if (!is_null($no_agents_exten) && $no_agent_action == "MESSAGE") {
@@ -172,7 +172,7 @@
 			if (!is_null($no_agents_extension) && !is_null($no_agents_extension_context) && $no_agent_action == "EXTENSION") {
 				$no_agent_action_value				="{$no_agents_extension},{$no_agents_extension_context}";
 			}
-			$data 									= array(
+			$data 									= [
 				"group_id" 								=> $group_id,
 				"group_name" 							=> $group_name,
 				"group_color" 							=> $group_color,
@@ -202,7 +202,7 @@
 				"onhold_prompt_filename" 				=> $onhold_prompt_filename,
 				"after_hours_message_filename" 			=> $after_hours_message_filename,
 				"call_time_id" 							=> $call_time_id
-			);
+			];
 			
 			$astDB->where("group_id", $group_id);
 			$astDB->update("vicidial_inbound_groups", $data);
@@ -210,8 +210,8 @@
 			$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Inbound Group $group_id", $log_group, $astDB->getLastQuery());
 		}
 		
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "success"
-		);		
+		];		
 	}
 ?>

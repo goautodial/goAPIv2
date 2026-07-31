@@ -22,28 +22,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$goItemRank											= $astDB->escape($_REQUEST['itemrank']);
 	$goIDgroup 											= $astDB->escape($_REQUEST['idgroup']);
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($goIDgroup) || is_null($goIDgroup)) {
-        $apiresults 									= array(
+        $apiresults 									= [
 			"result" 										=> "Error: Set a value for Group ID."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -55,10 +55,11 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {			
-			$itemsumitexplode 							= explode('&', $goItemRank);
+			$itemsumitexplode 							= explode('&', (string) $goItemRank);
 			$group_id 									= $goIDgroup;
+            $counter = count( $itemsumitexplode );
 
-			for( $i = 0; $i < count( $itemsumitexplode ); $i++ ) {
+			for( $i = 0; $i < $counter; $i++ ) {
 
 				$itemsumitsplit 						= explode('=', $itemsumitexplode[$i]);
 				$showval 								= htmlspecialchars(urldecode($itemsumitsplit[0]));
@@ -95,9 +96,9 @@
 						$NEWcloser_campaigns 			= "{$closer_campaigns} -";
 					}
 					
-					$datum 								= array(
+					$datum 								= [
 						"closer_campaigns" 					=> $NEWcloser_campaigns
-					);
+					];
 					
 					$astDB->where("user", $user);
 					$astDB->update("vicidial_users", $datum);
@@ -108,10 +109,10 @@
 					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
 					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
 					
-					$data 								= array(
+					$data 								= [
 						"group_rank" 						=> $datavals1, 
 						"group_weight" 						=> $datavals1
-					);
+					];
 					
 					$astDB->where("user", "{$itemsexplode[1]}"); //CHECK
 					$astDB->where("group_id", $group_id); //CHECK
@@ -127,9 +128,9 @@
 					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
 					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
 					
-					$datum 								= array(
+					$datum 								= [
 						"group_grade" 						=> $datavals1
-					);
+					];
 					
 					$astDB->where("user", "{$itemsexplode[1]}");
 					$astDB->where("group_id", $group_id);
@@ -138,16 +139,16 @@
 				
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Agent Rank(s) on Group $group_id", $log_group);
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

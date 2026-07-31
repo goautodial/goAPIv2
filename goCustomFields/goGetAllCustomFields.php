@@ -28,7 +28,7 @@
 		$rsltv = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
 		
 		foreach($rsltv as $fresults){
-			$data[] = array(
+			$data[] = [
 				'field_id'          => $fresults['field_id'],
 				'field_label'       => $fresults['field_label'],
 				'field_name'        => $fresults['field_name'],
@@ -45,12 +45,12 @@
 				'multi_position'    => $fresults['multi_position'],
 				'name_position'     => $fresults['name_position'],
 				'field_order'       => $fresults['field_order']
-			);
+			];
 		}
-		$apiresults = array("result" => "success", "data" => $data);
+		$apiresults = ["result" => "success", "data" => $data];
 	}else{
 		$err_msg = error_handle("10107");
-		$apiresults = array("error_code" => "10107","result" => $err_msg);
+		$apiresults = ["error_code" => "10107","result" => $err_msg];
 	}
     
 ?>

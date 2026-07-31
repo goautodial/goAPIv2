@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
 	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
@@ -46,73 +46,73 @@
 	$user_group = $astDB->escape($_REQUEST['user_group']);
 
     ### ERROR CHECKING ...
-	if($state_call_time_id == null || strlen($state_call_time_id) < 3) {
-		$apiresults = array("result" => "Error: Set a value for State Call Time ID not less than 3 characters.");
+	if($state_call_time_id == null || strlen((string) $state_call_time_id) < 3) {
+		$apiresults = ["result" => "Error: Set a value for State Call Time ID not less than 3 characters."];
 	} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $state_call_time_name) && $state_call_time_name != null){
-            $apiresults = array("result" => "Error: Special characters found in state call time name");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $state_call_time_name) && $state_call_time_name != null){
+            $apiresults = ["result" => "Error: Special characters found in state call time name"];
         } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $state_call_time_id) && $state_call_time_id != null){
-				$apiresults = array("result" => "Error: Special characters found in state call time ID");
+			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $state_call_time_id) && $state_call_time_id != null){
+				$apiresults = ["result" => "Error: Special characters found in state call time ID"];
 			} else {
-				if(strlen($state_call_time_state) != 2 && $state_call_time_state != null){
-					$apiresults = array("result" => "Error: State Call Time State only accept two characters");
+				if(strlen((string) $state_call_time_state) !== 2 && $state_call_time_state != null){
+					$apiresults = ["result" => "Error: State Call Time State only accept two characters"];
 				} else {
-					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $state_call_time_state) && $state_call_time_state != null){
-						$apiresults = array("result" => "Error: Special characters found in state call time state");
+					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $state_call_time_state) && $state_call_time_state != null){
+						$apiresults = ["result" => "Error: Special characters found in state call time state"];
 					} else {
 						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $state_call_time_comments) && $state_call_time_comments != null){
-							$apiresults = array("result" => "Error: Special characters found in state call time comments");
+							$apiresults = ["result" => "Error: Special characters found in state call time comments"];
 						} else {
 							if(!is_numeric($sct_default_start) && $sct_default_start != null){
-								$apiresults = array("result" => "Error: sct_default_start must be a number or combination of number");
+								$apiresults = ["result" => "Error: sct_default_start must be a number or combination of number"];
 							} else {
 								if(!is_numeric($sct_default_stop) && $sct_default_stop != null){
-									$apiresults = array("result" => "Error: sct_default_stop must be a number or combination of number");
+									$apiresults = ["result" => "Error: sct_default_stop must be a number or combination of number"];
 								} else {
 									if(!is_numeric($sct_sunday_start) && $sct_sunday_start != null){
-										$apiresults = array("result" => "Error: sct_sunday_start must be a number or combination of number");
+										$apiresults = ["result" => "Error: sct_sunday_start must be a number or combination of number"];
 									} else {
 										if(!is_numeric($sct_sunday_stop) && $sct_sunday_stop != null){
-											$apiresults = array("result" => "Error: sct_sunday_stop must be a number or combination of number");
+											$apiresults = ["result" => "Error: sct_sunday_stop must be a number or combination of number"];
 										} else {
 											if(!is_numeric($sct_monday_start) && $sct_monday_start != null){
-												$apiresults = array("result" => "Error: sct_monday_start must be a number or combination of number");
+												$apiresults = ["result" => "Error: sct_monday_start must be a number or combination of number"];
 											} else {
 												if(!is_numeric($sct_monday_stop) && $sct_monday_stop != null){
-													$apiresults = array("result" => "Error: sct_monday_stop must be a number or combination of number");
+													$apiresults = ["result" => "Error: sct_monday_stop must be a number or combination of number"];
 												} else {
 													if(!is_numeric($sct_tuesday_start) && $sct_tuesday_start != null){
-														$apiresults = array("result" => "Error: sct_tuesday_start must be a number or combination of number");
+														$apiresults = ["result" => "Error: sct_tuesday_start must be a number or combination of number"];
 													} else {
 														if(!is_numeric($sct_tuesday_stop) && $sct_tuesday_stop != null){
-															$apiresults = array("result" => "Error: sct_tuesday_stop must be a number or combination of number");
+															$apiresults = ["result" => "Error: sct_tuesday_stop must be a number or combination of number"];
 														} else {
 															if(!is_numeric($sct_wednesday_start) && $sct_wednesday_start != null){
-																$apiresults = array("result" => "Error: sct_wednesday_start must be a number or combination of number");
+																$apiresults = ["result" => "Error: sct_wednesday_start must be a number or combination of number"];
 															} else {
 																if(!is_numeric($sct_wednesday_stop) && $sct_wednesday_stop != null){
-																	$apiresults = array("result" => "Error: sct_wednesday_stop must be a number or combination of number");
+																	$apiresults = ["result" => "Error: sct_wednesday_stop must be a number or combination of number"];
 																} else {
 																	if(!is_numeric($sct_thursday_start) && $sct_thursday_start != null){
-																		$apiresults = array("result" => "Error: sct_thursday_start must be a number or combination of number");
+																		$apiresults = ["result" => "Error: sct_thursday_start must be a number or combination of number"];
 																	} else {
 																		if(!is_numeric($sct_thursday_stop) && $sct_thursday_stop != null){
-																			$apiresults = array("result" => "Error: sct_thursday_stop must be a number or combination of number");
+																			$apiresults = ["result" => "Error: sct_thursday_stop must be a number or combination of number"];
 																		} else {
 																			if(!is_numeric($sct_friday_start) && $sct_friday_start != null){
-																				$apiresults = array("result" => "Error: sct_friday_start must be a number or combination of number");
+																				$apiresults = ["result" => "Error: sct_friday_start must be a number or combination of number"];
 																			} else {
 																				if(!is_numeric($sct_friday_stop) && $sct_friday_stop != null){
-																					$apiresults = array("result" => "Error: sct_friday_stop must be a number or combination of number");
+																					$apiresults = ["result" => "Error: sct_friday_stop must be a number or combination of number"];
 																				} else {
 																					if(!is_numeric($sct_saturday_start) && $sct_saturday_start != null){
-																						$apiresults = array("result" => "Error: sct_saturday_start must be a number or combination of number");
+																						$apiresults = ["result" => "Error: sct_saturday_start must be a number or combination of number"];
 																					} else {
 																						if(!is_numeric($sct_saturday_stop) && $sct_saturday_stop != null){
-																							$apiresults = array("result" => "Error: sct_saturday_stop must be a number or combination of number");
+																							$apiresults = ["result" => "Error: sct_saturday_stop must be a number or combination of number"];
 																						} else {
-																							$groupId = go_get_groupid($goUser, $astDB);
+																							$groupId = go_get_groupid($goUser);
 																							
 																							if (!checkIfTenant($groupId, $goDB)) {
 																								//$ul = "";
@@ -179,7 +179,7 @@
 																								if($delete_vm_after_email == null) {$delete_vm_after_email = $datadeleteVMemail;}
 																								
 																								//$queryVM = "UPDATE vicidial_state_call_times SET state_call_time_state='".mysqli_escape_string($state_call_time_state)."',  state_call_time_name='".mysqli_escape_string($state_call_time_name)."',  state_call_time_comments='".mysqli_escape_string($state_call_time_comments)."',  user_group='".mysqli_escape_string($user_group)."',  sct_default_start='".mysqli_escape_string($sct_default_start)."',  sct_default_stop='".mysqli_escape_string($sct_default_stop)."',  sct_sunday_start='".mysqli_escape_string($sct_sunday_start)."',  sct_sunday_stop='".mysqli_escape_string($sct_sunday_stop)."',  sct_monday_start='".mysqli_escape_string($sct_monday_start)."',  sct_monday_stop='".mysqli_escape_string($sct_monday_stop)."',  sct_tuesday_start='".mysqli_escape_string($sct_tuesday_start)."',  sct_tuesday_stop='".mysqli_escape_string($sct_tuesday_stop)."',  sct_wednesday_start='".mysqli_escape_string($sct_wednesday_start)."',  sct_wednesday_stop='".mysqli_escape_string($sct_wednesday_stop)."',  sct_thursday_start='".mysqli_escape_string($sct_thursday_start)."',  sct_thursday_stop='".mysqli_escape_string($sct_thursday_stop)."',  sct_friday_start='".mysqli_escape_string($sct_friday_start)."',  sct_friday_stop='".mysqli_escape_string($sct_friday_stop)."',  sct_saturday_start='".mysqli_escape_string($sct_saturday_start)."',  sct_saturday_stop='".mysqli_escape_string($sct_saturday_stop)."' WHERE state_call_time_id='".mysqli_escape_string($state_call_time_id)."';";
-																								$updateData = array(
+																								$updateData = [
 																									'state_call_time_state' => $state_call_time_state,
 																									'state_call_time_name' => $state_call_time_name,
 																									'state_call_time_comments' => $state_call_time_comments,
@@ -200,17 +200,17 @@
 																									'sct_friday_stop' => $sct_friday_stop,
 																									'sct_saturday_start' => $sct_saturday_start,
 																									'sct_saturday_stop' => $sct_saturday_stop
-																								);
+																								];
 																								$astDB->where('state_call_time_id', $state_call_time_id);
 																								$rsltv1 = $astDB->update('vicidial_state_call_times', $updateData);
 																								if($astDB->getRowCount() < 1){
-																									$apiresults = array("result" => "Error: Try updating State Call Times Again");
+																									$apiresults = ["result" => "Error: Try updating State Call Times Again"];
 																								} else {
-																									$apiresults = array("result" => "success");
+																									$apiresults = ["result" => "success"];
 																									$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
 																								}
 																							} else {
-																								$apiresults = array("result" => "Error: State Call Times doesn't exist");
+																								$apiresults = ["result" => "Error: State Call Times doesn't exist"];
 																							}
 																						}
 																					}

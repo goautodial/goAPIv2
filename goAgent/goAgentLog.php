@@ -43,13 +43,13 @@ $astDB->orderBy('user_log_id', 'desc');
 $check_query = $astDB->getOne('vicidial_user_log', 'user_log_id,event');
 $eventDB = $check_query['event'];
 
-if( (strtoupper($event) === strtoupper($eventDB) /*&& strtoupper($eventDB) !== "MANUAL" */) || (strtoupper($event) === strtoupper("resume") && strtoupper($eventDB) === strtoupper("LOGIN") ) || (strtoupper($event) === strtoupper("resume") && strtoupper($eventDB) === strtoupper("MANUAL") ) ){
+if( (strtoupper((string) $event) === strtoupper((string) $eventDB) /*&& strtoupper($eventDB) !== "MANUAL" */) || (strtoupper((string) $event) === strtoupper("resume") && strtoupper((string) $eventDB) === strtoupper("LOGIN") ) || (strtoupper((string) $event) === strtoupper("resume") && strtoupper((string) $eventDB) === strtoupper("MANUAL") ) ){
 	//error DO NOT INSERT
-	$APIResult = array("result" => "error");
+	$APIResult = ["result" => "error"];
 }else{
-	$insertData = array(
+	$insertData = [
 		"user" => $goUser,
-		"event" => strtoupper($event),
+		"event" => strtoupper((string) $event),
 		"campaign_id" => $campaign,
 		"event_date" => $NOW,
 		"event_epoch" => $NOWepoch,
@@ -58,8 +58,8 @@ if( (strtoupper($event) === strtoupper($eventDB) /*&& strtoupper($eventDB) !== "
 		"server_ip" => $server_ip,
 		"extension" => $extension,
 		"computer_ip" => $computer_ip
-	);
+	];
 	$astDB->insert('vicidial_user_log', $insertData);
-	$APIResult = array("result" => "success");
+	$APIResult = ["result" => "success"];
 }
 ?>

@@ -20,14 +20,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     $lead_filter_id = $astDB->escape($_REQUEST["lead_filter_id"]);
 
 	if($lead_filter_id == null) {
-		$apiresults = array("result" => "Error: Set a value for Lead Filter ID.");
+		$apiresults = ["result" => "Error: Set a value for Lead Filter ID."];
 	} else {
-        $groupId = go_get_groupid($goUser, $astDB);
+        $groupId = go_get_groupid($goUser);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "";
@@ -47,10 +47,10 @@
 			foreach ($rsltv as $fresults){
 				$dataLeadFilterID[] = $fresults['lead_filter_id'];
 				$dataLeadFilterName[] = $fresults['lead_filter_name'];
-				$apiresults = array("result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName);
+				$apiresults = ["result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName];
 			}
 		} else {
-			$apiresults = array("result" => "Error: Lead Filter does not exist.");
+			$apiresults = ["result" => "Error: Lead Filter does not exist."];
 		}
 	}
 ?>

@@ -25,8 +25,8 @@ $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
 $user_group = $agent->user_group;
-$phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
-$phone_pass = (isset($phone_pass)) ? $phone_pass : $agent->phone_pass;
+$phone_login ??= $agent->phone_login;
+$phone_pass ??= $agent->phone_pass;
 
 if (isset($_GET['goNoDeleteSession'])) { $no_delete_sessions = $astDB->escape($_GET['goNoDeleteSession']); }
     else if (isset($_POST['goNoDeleteSession'])) { $no_delete_sessions = $astDB->escape($_POST['goNoDeleteSession']); }
@@ -51,7 +51,7 @@ $conf_engine = $query['conf_engine'];
 $conf_table = "vicidial_conferences";
 
 ### Check if the agent's phone_login is currently connected
-$sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver, $use_webrtc);
+$sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
 
 if ($sipIsLoggedIn) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
@@ -67,19 +67,19 @@ if ($sipIsLoggedIn) {
         $extension = "{$phone_settings->dialplan_number}@{$phone_settings->ext_context}";
     }
     
-    if (preg_match("/Zap/i", $protocol)) {
-        if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", $asterisk_version)) {
+    if (preg_match("/Zap/i", (string) $protocol)) {
+        if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", (string) $asterisk_version)) {
             $do_nothing = 1;
         } else {
             $protocol = 'DAHDI';
         }
     }
     
-    $server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
+    $server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
     
     ##### check to see if the user has a conf extension already, this happens if they previously exited uncleanly
     $SIP_user = "{$protocol}/{$extension}";
-    if ( (preg_match('/8300/', $phone_settings->dialplan_number)) and (strlen($phone_settings->dialplan_number)<5) and ($protocol == 'Local') ) {
+    if ( preg_match('/8300/', (string) $phone_settings->dialplan_number) && strlen((string) $phone_settings->dialplan_number) < 5 && $protocol == 'Local' ) {
         $SIP_user = "{$protocol}/{$extension}{$phone_login}";
     }
 
@@ -99,7 +99,7 @@ if ($sipIsLoggedIn) {
         $i++;
     }
     
-    if (strlen($conf_exten) > 0) {
+    if ((string) $conf_exten !== '') {
         $astDB->where('server_ip', $server_ip);
         $astDB->where('user', $user);
         $query = $astDB->getOne('vicidial_live_agents', 'campaign_id');
@@ -110,7 +110,7 @@ if ($sipIsLoggedIn) {
 			//$stmt="UPDATE vicidial_conferences set extension='' where server_ip='$server_ip' and conf_exten='$conf_exten';";
             $astDB->where('server_ip', $server_ip);
             $astDB->where('conf_exten', $conf_exten);
-            $rslt = $astDB->update("$conf_table", array( 'extension' => '' ));
+            $rslt = $astDB->update("$conf_table", [ 'extension' => '' ]);
 			$vc_remove = $astDB->getRowCount();
         }
 
@@ -134,7 +134,7 @@ if ($sipIsLoggedIn) {
         $agent_channel = '';
         if ($astDB->getRowCount() > 0) {
             $agent_channel = $query['channel'];
-            $insertData = array(
+            $insertData = [
                 'man_id' => '',
                 'uniqueid' => '',
                 'entry_date' => $NOW_TIME,
@@ -154,7 +154,7 @@ if ($sipIsLoggedIn) {
                 'cmd_line_i' => '',
                 'cmd_line_j' => '',
                 'cmd_line_k' => ''
-            );
+            ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
         }
         
@@ -165,7 +165,7 @@ if ($sipIsLoggedIn) {
 			$queryCID = "ULGH3458$StarTtimE";
 
 			//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$queryCID','Channel: $kick_local_channel','Context: $ext_context','Exten: 8300','Priority: 1','Callerid: $queryCID','','','','$channel','$exten');";
-            $insertData = array(
+            $insertData = [
                 'man_id' => '',
                 'uniqueid' => '',
                 'entry_date' => $NOW_TIME,
@@ -185,7 +185,7 @@ if ($sipIsLoggedIn) {
                 'cmd_line_i' => '',
                 'cmd_line_j' => $agent_channel,
                 'cmd_line_k' => $conf_exten
-            );
+            ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
 		}
         
@@ -196,7 +196,7 @@ if ($sipIsLoggedIn) {
         $query = $astDB->delete('vicidial_live_agents');
         $errmsg = $astDB->getLastError();
         $retry_count = 0;
-		while ( (strlen($errmsg) > 0) and ($retry_count < 9) ) {
+		while ( strlen((string) $errmsg) > 0 && $retry_count < 9 ) {
             $astDB->where('server_ip', $server_ip);
             $astDB->where('user', $user);
             $query = $astDB->delete('vicidial_live_agents');
@@ -222,15 +222,15 @@ if ($sipIsLoggedIn) {
         $astDB->orderBy('agent_log_id', 'desc');
         $rslt = $astDB->getOne('vicidial_agent_log', 'pause_epoch,pause_sec,wait_epoch,talk_epoch,dispo_epoch,agent_log_id');
 		$VDpr_ct = $astDB->getRowCount();
-		if ( ($VDpr_ct > 0) and (strlen($rslt['talk_epoch'] < 5)) and (strlen($rslt['dispo_epoch'] < 5)) ) {
+		if ( $VDpr_ct > 0 && strlen($rslt['talk_epoch'] < 5) && strlen($rslt['dispo_epoch'] < 5) ) {
 			$agent_log_id = $rslt['agent_log_id'];
 			$pause_sec = (($StarTtimE - $rslt['pause_epoch']) + $rslt['pause_sec']);
 
 			//$stmt="UPDATE vicidial_agent_log set pause_sec='$pause_sec',wait_epoch='$StarTtimE' where agent_log_id='$agent_log_id';";
-            $updateData = array(
+            $updateData = [
                 'pause_sec' => $pause_sec,
                 'wait_epoch' => $StarTtimE
-            );
+            ];
 			$astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->update('vicidial_agent_log', $updateData);
         }
@@ -239,14 +239,14 @@ if ($sipIsLoggedIn) {
         $NOW_USERLOG = date("Y-m-d H:i:s");
         $NOWepoch_USERLOG = date("U");
         //$stmt = "INSERT INTO vicidial_user_log (user,event,campaign_id,event_date,event_epoch,user_group) values('$user','LOGOUT','$campaign','$NOW_TIME','$StarTtimE','$user_group')";
-        $insertData = array(
+        $insertData = [
             'user' => $user,
             'event' => 'LOGOUT',
             'campaign_id' => $campaign,
             'event_date' => $NOW_USERLOG,
             'event_epoch' => $NOWepoch_USERLOG,
             'user_group' => $user_group
-        );
+        ];
         $query = $astDB->insert('vicidial_user_log', $insertData);
 
         $result = 'success';
@@ -256,12 +256,12 @@ if ($sipIsLoggedIn) {
         $message = "User {$user} is not logged in";
     }
     
-    $APIResult = array( "result" => $result, "message" => $message );
+    $APIResult = [ "result" => $result, "message" => $message ];
 } else {
     $message = "SIP exten '{$phone_login}' is NOT connected";
-    if (strlen($phone_login) < 1) {
+    if (strlen((string) $phone_login) < 1) {
         $message = "User '$user' does NOT have any phone extension assigned.";
     }
-    $APIResult = array( "result" => "error", "message" => $message );
+    $APIResult = [ "result" => "error", "message" => $message ];
 }
 ?>

@@ -20,19 +20,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
     $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
-    
+
     ### Check tenant_id if its null or empty
 	if($tenant_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Tenant ID."); 
+		$apiresults = ["result" => "Error: Set a value for Tenant ID."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
+    	$groupId = go_get_groupid($goUser);
 		// Get Allowed Campaigns
-		$allowed_campaigns = go_getall_allowed_campaigns($tenant_id, $astDB);
-    
+		$allowed_campaigns = go_getall_allowed_campaigns($tenant_id);
+
 		if (!checkIfTenant($groupId, $goDB)) {
         	//$ul = "WHERE tenant_id='$tenant_id'";
 			$goDB->where('tenant_id', $tenant_id);
@@ -53,7 +53,7 @@
 
 		foreach ($list_ids as $fresults1) {
             $listId = $fresults1['list_id'];
-            
+
 			//$query2 = "DELETE FROM vicidial_lists WHERE list_id IN ('$listIds')";
 			$astDB->where('list_id', $listId);
 			$list_ids = $astDB->delete('vicidial_lists');
@@ -112,30 +112,30 @@
 				$query22Result = $astDB->rawQuery($query22);
 				$query23 = "DELETE FROM vicidial_inbound_groups WHERE user_group='$dataTenantID'";
 				$query23Result = $astDB->rawQuery($query23);
-				
+
 				// Delete Admins & Users
 				$query24 = "DELETE FROM vicidial_users WHERE user_group='$dataTenantID'";
 				$query24Result = $astDB->rawQuery($query24);
-				
+
 				// Delete Widget
 				$query25 = "DELETE FROM go_widget_position WHERE html_id='$dataTenantID'";
 				$query25Result = $astDB->rawQuery($query25);
-				
+
 				// Delete Phones
 				$query26 = "DELETE FROM phones WHERE user_group='$dataTenantID'";
 				$query26Result = $astDB->rawQuery($query26);
-				
+
 				// Delete User Group
 				$query27 = "DELETE FROM vicidial_user_groups WHERE user_group='$dataTenantID'";
 				$query27Result = $astDB->rawQuery($query27);
-				
+
 				// Delete Kamailio Entry
 				/* ...
 				if ($this->config->item('VARKAMAILIO')=="Y") {
 					$query = $this->kamilioDB->query("DELETE FROM subscriber WHERE username RLIKE '9999$tenantid'");
 				}
 				*/
-				
+
 				// Delete Other Stuff
 				$query28 = "DELETE FROM go_login_type WHERE account_num='$dataTenantID'";
 				$query28Result = $goDB->rawQuery($query28);
@@ -147,12 +147,12 @@
 
 				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Multi-Tenant: $dataTenantID", $log_group, $logQuery);
 
-				$apiresults = array("result" => "success");
+				$apiresults = ["result" => "success"];
 			} else {
-				$apiresults = array("result" => "Error: Tenant doesn't exist.");
+				$apiresults = ["result" => "Error: Tenant doesn't exist."];
 			}
 		} else {
-			$apiresults = array("result" => "Error: Tenant doesn't exist.");
+			$apiresults = ["result" => "Error: Tenant doesn't exist."];
 		}
 	}//end
 ?>

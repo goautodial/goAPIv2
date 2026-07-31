@@ -34,11 +34,11 @@
     foreach ($rsltv as $fresults){
 		$dataStatus[] = $fresults['status'];
        	$dataStatusName[] = $fresults['status_name'];
-   		$apiresults = array(
+   		$apiresults = [
 			"result" => "success",
 			"status" => $dataStatus,
 			"status_name" => $dataStatusName,
 			"test" => $query
-		);
+		];
 	}
 ?>

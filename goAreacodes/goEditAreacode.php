@@ -30,36 +30,36 @@
   $cid_description = $astDB->escape($_REQUEST['cid_description']);
 
 	if (empty($goUser) || is_null($goUser)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: goAPI User Not Defined."
-                );
+                ];
         } elseif (empty($goPass) || is_null($goPass)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: goAPI Password Not Defined."
-                );
+                ];
         } elseif (empty($log_user) || is_null($log_user)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: Session User Not Defined."
-                );
+                ];
         } elseif (empty($campaign_id) || is_null($campaign_id)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: Campaign ID not Defined."
-                );
+                ];
         } elseif (empty($areacode) || is_null($areacode)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: Areacode not Defined."
-                );
+                ];
         } else {
 
 		$astDB->where('campaign_id', $campaign_id);
 		$astDB->where('areacode', $areacode);
 		$astDB->where('outbound_cid', $outbound_cid_old);
 
-		$cols = array(
+		$cols = [
 			'outbound_cid',
 			'active',
 			'cid_description',
-		);
+		];
 
 		$result = $astDB->getOne('vicidial_campaign_cid_areacodes', null, $cols);
   
@@ -75,11 +75,11 @@
 			$cid_description = $dataDescription;
 		}
   
-		$data = array(
+		$data = [
 			"outbound_cid"		=> $outbound_cid,
 			"active"		=> $active,
 			"cid_description"	=> $cid_description
-		);
+		];
 
 		$astDB->where('campaign_id', $campaign_id);
 		$astDB->where('areacode', $areacode);
@@ -89,14 +89,14 @@
 		if($update) {
    			$log_id = log_action( $goDB, 'MODIFY', $log_user, $log_ip, "Updated Areacode: $areacode for campaign: $campaign_id", $log_group, $astDB->getLastQuery());
 
-    			$apiresults = array(
+    			$apiresults = [
 				"result" => "success"
-			);
+			];
 		} else {
-			$apiresults = array(
+			$apiresults = [
 	                	"result" => "error",
 				"error" => $astDB->getLastError()
-		        );
+		        ];
 		}
 	}
 	return $apiresults;

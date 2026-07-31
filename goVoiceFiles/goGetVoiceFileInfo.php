@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 	
 	### POST or GET Variables
 	$audiofile 										= $astDB->escape($_REQUEST['audiofile']);
@@ -29,16 +29,16 @@
 
     // Error Checking
 	if ( empty($log_user) || is_null($log_user) ) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( $audiofile == null ) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Set a value for Audiofile"
-		);
+		];
 	} else {
 		//$stmt = "SELECT count(*) as countuser from vicidial_users where user='$user' and user_level > 6;";
-		if ( checkIfTenant($log_group, $astDB) ) {
+		if ( checkIfTenant($log_group, $goDB) ) {
 			$astDB->where( "user	_group", $log_group );
 		}
 		
@@ -50,19 +50,15 @@
 		if ( $astDB->count < 1 ) {
 			$result 								= 'ERROR';
 			$result_reason 							= "sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST";
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "Error".$result_reason
-			);
+			];
 		} else {
 			$server_name 							= getenv("SERVER_NAME");
 			//$server_port 							= getenv("SERVER_PORT");
 			$server_port 							= "443";
 			
-			if ( preg_match("443", $server_port) ) {
-				$HTTPprotocol 						= 'https://';
-			} else {
-				$HTTPprotocol 						= 'https://';
-			}
+			$HTTPprotocol 						= 'https://';
 			
 			$admDIR 								= "$HTTPprotocol$server_name:$server_port";
 			
@@ -84,9 +80,9 @@
 			if ( $sounds_central_control_active < 1 ) {
 				$result 							= 'ERROR';
 				$result_reason 						= "sounds_list CENTRAL SOUND CONTROL IS NOT ACTIVE";
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "Error: ".$result_reason
-				);
+				];
 			} else {
 				$i 									= 0;
 				$filename_sort 						= $MT;
@@ -97,8 +93,8 @@
 				// if ($DB>0) {echo "DEBUG: sounds_list variables - $dirpath|$stage|$format\n";}
 				while ( false !== ($file = readdir($dh)) ) {
 					# Do not list subdirectories
-					if ( (!is_dir("$dirpath/$file")) and (preg_match('/\.(wav|mp3)$/', $file)) ) {
-						if ( (!is_null($search) && strlen($search) > 0) ) {
+					if ( !is_dir("$dirpath/$file") && preg_match('/\.(wav|mp3)$/', $file) ) {
+						if ( (!is_null($search) && (string) $search !== '') ) {
 							if ( !preg_match("/$search/", $file) )
 								continue;
 						}
@@ -133,9 +129,9 @@
 				
 				closedir($dh);
 		
-				if ( preg_match('date', $stage) ) { rsort( $file_sort ); }
-				if ( preg_match('name', $stage) ) { sort( $file_sort ); }
-				if ( preg_match('size', $stage) ) { rsort( $file_sort ); }
+				if ( preg_match('date', (string) $stage) ) { rsort( $file_sort ); }
+				if ( preg_match('name', (string) $stage) ) { sort( $file_sort ); }
+				if ( preg_match('size', (string) $stage) ) { rsort( $file_sort ); }
 		
 				sleep(1);
 		
@@ -147,13 +143,13 @@
 					$m 								= $file_split[1];
 					$NOWsize 						= filesize( "$dirpath/$file_names[$m]" );
 					//if($file_names == $audiofile){
-					$apiresults 					= array(
+					$apiresults 					= [
 						"result" 						=> "success", 
 						"file_name" 					=> $file_names, 
 						"file_date" 					=> $file_dates, 
 						"file_size" 					=> $file_sizes, 
 						"file_poch" 					=> $file_epoch
-					);
+					];
 
 					$k++;
 				}

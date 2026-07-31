@@ -21,27 +21,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (!isset($campaign_id) || is_null($campaign_id)) {
-    	$apiresults 									= array(
+    	$apiresults 									= [
 			"result" 										=> "Error: Campaign ID no defined."
-		); 
+		]; 
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -55,13 +55,13 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -69,7 +69,7 @@
 				}					
 			}
 
-			$cols 										= array( "campaign_id", "pause_code", "pause_code_name", "billable" );
+			$cols 										= [ "campaign_id", "pause_code", "pause_code_name", "billable" ];
 			
 			$astDB->where('campaign_id', $campaign_id);
 			$astDB->orderBy('pause_code');
@@ -83,24 +83,24 @@
 					$dataBill[]     					= $fresults['billable'];
 				}
 
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"campaign_id" 							=> $dataCampID, 
 					"pause_code" 							=> $dataPC, 
 					"pause_code_name" 						=> $dataPCN, 
 					"billable" 								=> $dataBill
-				);   
+				];   
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success" // No Pause Codes available
-				);					
+				];					
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

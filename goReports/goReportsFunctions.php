@@ -29,8 +29,7 @@
         
         if ($check_resultv > 0) {
             $rowc=mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
-            $goUser_group = $rowc["user_group"];
-            return $goUser_group;
+            return $rowc["user_group"];
         }
        
     }
@@ -46,13 +45,13 @@
     
     function go_get_dates($d1, $d2)
     {
-            $diff = explode("|", go_get_date_diff($d1, $d2));
+            $diff = explode("|", (string) go_get_date_diff($d1, $d2));
             $days = $diff[2];
 
             for ($i=0;$i<=$days;$i++)
             {
                     $dateARY[$i] = $d1;
-                    $d1 = date("Y-m-d", strtotime(date("Y-m-d", strtotime($d1)) . " +1 day"));
+                    $d1 = date("Y-m-d", strtotime(date("Y-m-d", strtotime((string) $d1)) . " +1 day"));
             }
             return $dateARY;
     }
@@ -60,7 +59,7 @@
    
     function go_get_date_diff($d1, $d2)
     {
-            $diff = abs(strtotime($d2) - strtotime($d1));
+            $diff = abs(strtotime((string) $d2) - strtotime((string) $d1));
 
             $years = floor($diff / (365*60*60*24));
             $months = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
@@ -161,7 +160,7 @@
 	# grab names of global statuses and statuses in the selected campaign
 	
 		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_statuses order by status");
-		$statuses_to_print = mysqli_num_rows($query);
+		mysqli_num_rows($query);
 	
 		$ns = 0;
 		while($row = mysqli_fetch_array($query)){
@@ -181,7 +180,7 @@
 
 		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_campaign_statuses where campaign_id='$camp' and selectable='Y' and human_answered='Y' order by status");
 		
-		$Cstatuses_to_print = mysqli_num_rows($query);
+		mysqli_num_rows($query);
 	
 		$o = 0;
 		while($row = mysqli_fetch_array($query)) {
@@ -199,10 +198,8 @@
 			$statuses[$o]=$row['status'];
 			$o++;
 		}
-
-		$apiresults = array($statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code);
 	
-		return $apiresults;
+		return [$statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code];
 	}
 	
 	function get_inbound_groups($userID, $link, $groupId) {
@@ -215,9 +212,8 @@
 		$stmt ="select group_id,group_name from vicidial_inbound_groups $groupSQL;";
 		
 		$query = mysqli_query($link, $stmt);
-		$inboundgroups = mysqli_fetch_array($query);
 		
-		return $inboundgroups;
+		return mysqli_fetch_array($query);
 	}
 
  

@@ -30,8 +30,8 @@ $sqlCheck = $astDB->get('vicidial_voicemail');
 $countCheck = $astDB->getRowCount();
 
 if($countCheck <= 0) {
-    $apiresults = array("result" => "success");
+    $apiresults = ["result" => "success"];
 } else {
-    $apiresults = array("result" => "Error: Add failed, Voicemail already already exist!");
+    $apiresults = ["result" => "Error: Add failed, Voicemail already already exist!"];
 }
 ?>

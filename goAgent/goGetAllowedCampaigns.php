@@ -23,7 +23,7 @@
 $hasLocation = $astDB->escape($_REQUEST['has_location']);
 
 $agent = get_settings('user', $astDB, $goUser);
-$camp_list = array();
+$camp_list = [];
 
 $astDB->where('extension', $agent->phone_login);
 $astDB->where('active', 'Y');
@@ -44,7 +44,7 @@ if ($phoneExist > 0) {
     if ($hasLocation) {
         $astDB->where('user', $goUser);
         $query = $astDB->get('vicidial_campaign_agents', null, 'campaign_id');
-        $camps = array();
+        $camps = [];
         foreach ($query as $row) {
             $camps[] = $row['campaign_id'];
         }
@@ -62,11 +62,11 @@ if ($phoneExist > 0) {
     
     if (count($camp_list)) {
         ksort($camp_list);
-        $APIResult = array( "result" => "success", "data" => array("allowed_campaigns" => $camp_list) );
+        $APIResult = [ "result" => "success", "data" => ["allowed_campaigns" => $camp_list] ];
     } else {
-        $APIResult = array( "result" => "error", "message" => "No allowed campaigns" );
+        $APIResult = [ "result" => "error", "message" => "No allowed campaigns" ];
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "Phone login not configured" );
+    $APIResult = [ "result" => "error", "message" => "Phone login not configured" ];
 }
 ?>

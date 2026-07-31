@@ -22,30 +22,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 		
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
 	$active								= $astDB->escape($_REQUEST['active']);
    
 	### Default values
-    $defActive 							= array(
+    $defActive 							= [
 		"Y",
 		"N"
-	);  
+	];  
 
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
-	} elseif ($voicemail_id == null || strlen($voicemail_id) < 3) {
-		$apiresults 					= array(
+		];
+	} elseif ($voicemail_id == null || strlen((string) $voicemail_id) < 3) {
+		$apiresults 					= [
 			"result" 						=> "Error: Set a value for Voicemail ID."
-		);
+		];
 	} elseif (!in_array($active,$defActive) && $active != null) {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -58,14 +58,14 @@
 		//$log_id 						= log_action($goDB, "VIEW", $log_user, $log_ip, "Viewed voicemail ID: $carrier_id", $astDB->getLastQuery());
 		
 		if ($astDB->count > 0) {						
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "success",
 				"data"						=> $rsltv
-			);
+			];
 		} else {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "Error: Empty."
-			);
+			];
 		}
 	}
 ?>

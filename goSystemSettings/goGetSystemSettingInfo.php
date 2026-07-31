@@ -20,25 +20,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 		
 
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		$rsltv 							= $astDB->getOne("system_settings");
 		
 		if ($astDB->count > 0) {						
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "success",
 				"data"						=> $rsltv
-			);
+			];
 		} else {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "Error: Empty."
-			);
+			];
 		}
 	}
 ?>

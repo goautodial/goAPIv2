@@ -20,31 +20,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
 	$location = $goDB->escape($_REQUEST['location']);
 	$description = $goDB->escape($_REQUEST['description']);
-	$user_group = explode(",", $goDB->escape($_REQUEST['user_group']));
+	$user_group = explode(",", (string) $goDB->escape($_REQUEST['user_group']));
 
     // Error checking
 	if($location == null || $location == "") {
 		$err_msg = error_handle("40001");
-		$APIResult = array("code" => "40001","result" => $err_msg);
+		$APIResult = ["code" => "40001","result" => $err_msg];
 	} else {
-        if(strlen($location) < 2 ) {
+        if(strlen((string) $location) < 2 ) {
             $err_msg = error_handle("41006", "location");
-			$APIResult = array("code" => "41006","result" => $err_msg);
+			$APIResult = ["code" => "41006","result" => $err_msg];
         } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $location)) {
+			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', (string) $location)) {
 				$err_msg = error_handle("41004", "location");
-				$APIResult = array("code" => "41004","result" => $err_msg);
+				$APIResult = ["code" => "41004","result" => $err_msg];
 			} else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', $description) || $description == null){
+				if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', (string) $description) || $description == null){
 					$err_msg = error_handle("41004", "description");
-					$APIResult = array("code" => "41004","result" => $err_msg);
+					$APIResult = ["code" => "41004","result" => $err_msg];
 				} else {
-					$groupId = go_get_groupid($goUser, $astDB);
+					$groupId = go_get_groupid($goUser);
 		
 					$goDB->where('name', $location);
 					if (checkIfTenant($groupId, $goDB)) {
@@ -62,16 +62,16 @@
 					
 					if($countResult > 0) {
 						$err_msg = error_handle("41004", "location. Already exists");
-						$APIResult = array("code" => "41004","result" => $err_msg);
+						$APIResult = ["code" => "41004","result" => $err_msg];
 					} else {
 						$user_group = implode(",", $user_group);
-						$insertData = array(
+						$insertData = [
 							'name' => $location,
 							'description' => $description,
 							'user_group' => $user_group,
 							'active' => 1,
 							'date_add' => date("Y-m-d H:i:s")
-						);
+						];
 						$goDB->insert('locations', $insertData);
 						$countCheck = $goDB->getInsertId();
 						
@@ -83,10 +83,10 @@
 						$location_id = $fetch_id['id'];
 
 						if($countCheck > 0) {
-							$APIResult = array("result" => "success", "location_id" => $location_id , "location" => $location, "user_group" => $user_group);
+							$APIResult = ["result" => "success", "location_id" => $location_id , "location" => $location, "user_group" => $user_group];
 						} else {
 							$err_msg = error_handle("10010");
-							$APIResult = array("code" => "10010","result" => $err_msg);
+							$APIResult = ["code" => "10010","result" => $err_msg];
 						}
 					}
 				}

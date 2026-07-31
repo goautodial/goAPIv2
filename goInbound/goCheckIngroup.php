@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */  
-  include_once ("goAPI.php");
+  include_once (__DIR__ . "/goAPI.php");
   
   // POST or GET Variables
   $group_id = $astDB->escape($_REQUEST['group_id']);
@@ -29,9 +29,9 @@
   //$stmtCheck = "SELECT group_id from vicidial_inbound_groups where group_id='$group_id';";
   
   if ($row > 0) {
-    $apiresults = array("result" => "GROUP NOT ADDED - there is already a Inbound in the system with this ID\n");
+    $apiresults = ["result" => "GROUP NOT ADDED - there is already a Inbound in the system with this ID\n"];
   } else {
-    $apiresults = array("result" => "success");
+    $apiresults = ["result" => "success"];
   }
       
 ?>

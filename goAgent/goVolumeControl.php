@@ -40,16 +40,16 @@ if (isset($_GET['goStage'])) { $stage = $astDB->escape($_GET['goStage']); }
 if (isset($_GET['goQueryCID'])) { $queryCID = $astDB->escape($_GET['goQueryCID']); }
     else if (isset($_POST['goQueryCID'])) { $queryCID = $astDB->escape($_POST['goQueryCID']); }
 
-$server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
+$server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
-if ( (strlen($exten) < 1) || (strlen($channel) < 1) || (strlen($stage) < 1) || (strlen($queryCID) < 1) ) {
-    $APIResult = array( "result" => "error", "message" => "Either conference, stage or queryCID is not valid, Originate command not inserted." );
+if ( (strlen((string) $exten) < 1) || (strlen((string) $channel) < 1) || (strlen((string) $stage) < 1) || (strlen((string) $queryCID) < 1) ) {
+    $APIResult = [ "result" => "error", "message" => "Either conference, stage or queryCID is not valid, Originate command not inserted." ];
 } else {
 	$participant_number = 'XXYYXXYYXXYYXX';
-	if (preg_match('/UP/i',$stage)) {$vol_prefix = '4';}
-	if (preg_match('/DOWN/i',$stage)) {$vol_prefix = '3';}
-	if (preg_match('/UNMUTE/i',$stage)) {$vol_prefix = '2';}
-	if (preg_match('/MUTING/i',$stage)) {$vol_prefix = '1';}
+	if (preg_match('/UP/i',(string) $stage)) {$vol_prefix = '4';}
+	if (preg_match('/DOWN/i',(string) $stage)) {$vol_prefix = '3';}
+	if (preg_match('/UNMUTE/i',(string) $stage)) {$vol_prefix = '2';}
+	if (preg_match('/MUTING/i',(string) $stage)) {$vol_prefix = '1';}
 	
 	$local_DEF = 'Local/';
 	$local_AMP = '@';
@@ -57,7 +57,7 @@ if ( (strlen($exten) < 1) || (strlen($channel) < 1) || (strlen($stage) < 1) || (
 	$volume_local_channel = "$local_DEF$participant_number$vol_prefix$exten$local_AMP$ext_context";
 
 	//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$queryCID','Channel: $volume_local_channel','Context: $ext_context','Exten: 8300','Priority: 1','Callerid: $queryCID','','','','$channel','$exten');";
-	$insertData = array(
+	$insertData = [
 		'man_id' => '',
 		'uniqueid' => '',
 		'entry_date' => $NOW_TIME,
@@ -77,9 +77,9 @@ if ( (strlen($exten) < 1) || (strlen($channel) < 1) || (strlen($stage) < 1) || (
 		'cmd_line_i' => '',
 		'cmd_line_j' => $channel,
 		'cmd_line_k' => $exten
-	);
+	];
 	$astDB->insert('vicidial_manager', $insertData);
 	
-    $APIResult = array( "result" => "success", "message" => "Volume command sent for Conference $exten, Stage $stage Channel $channel on $server_ip." );
+    $APIResult = [ "result" => "success", "message" => "Volume command sent for Conference $exten, Stage $stage Channel $channel on $server_ip." ];
 }
 ?>

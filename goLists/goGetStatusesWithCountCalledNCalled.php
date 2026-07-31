@@ -22,29 +22,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     $list_id 											= $astDB->escape($_REQUEST['list_id']);
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($list_id) || is_null($list_id)) {
 		$err_msg 										= error_handle("10107");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "10107",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -78,21 +78,21 @@
 				$dataCountVLists[]						= $fresults['countvlists'];
 				$dataStatName[]							= $fresults['status_name'];
 
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result"								=> "success",
 					"stats"									=> $dataStats,
 					"is_called"								=> $dataIsCalled,
 					"not_called"							=> $dataNotCalled,
 					"countvlists"							=> $dataCountVLists,
 					"status_name"							=> $dataStatName
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}			
 ?>

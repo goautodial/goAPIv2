@@ -24,9 +24,9 @@
     $state_call_time_id = $astDB->escape($_REQUEST["state_call_time_id"]);
 
 	if($state_call_time_id == null) {
-		$apiresults = array("result" => "Error: Set a value for State Call Time ID.");
+		$apiresults = ["result" => "Error: Set a value for State Call Time ID."];
 	} else {
-		$groupId = go_get_groupid($goUser, $astDB);
+		$groupId = go_get_groupid($goUser);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "";
@@ -49,10 +49,10 @@
 				$dataDefStart[] = $fresults['sct_default_start'];
 				$dataDefStop[] = $fresults['sct_default_stop'];
 				$dataUserGroup[] = $fresults['user_group'];
-				$apiresults = array("result" => "success", "state_call_time_id" => $dataStateID, "state_call_time_state" => $dataStateState, "state_call_time_name" => $dataStateName, "sct_default_start" => $dataDefStart, "sct_default_stop" => $dataDefStop, "user_group" => $dataUserGroup);
+				$apiresults = ["result" => "success", "state_call_time_id" => $dataStateID, "state_call_time_state" => $dataStateState, "state_call_time_name" => $dataStateName, "sct_default_start" => $dataDefStart, "sct_default_stop" => $dataDefStop, "user_group" => $dataUserGroup];
 			}
 		} else {
-			$apiresults = array("result" => "Error: Lead Filter does not exist.");
+			$apiresults = ["result" => "Error: Lead Filter does not exist."];
 		}
 	}
 ?>

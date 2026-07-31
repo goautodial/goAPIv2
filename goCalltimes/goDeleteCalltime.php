@@ -21,23 +21,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
 
     // ERROR CHECKING 
 	if (empty ($goUser) || is_null ($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty ($goPass) || is_null ($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty ($log_user) || is_null ($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -57,7 +57,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -74,23 +74,23 @@
 				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID: $call_time_id", $log_group, $astDB->getLastQuery());
 
 				if ($deleteQuery) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				} else {
 					$astDB->getLastError();
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Calltime doesn't exist."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

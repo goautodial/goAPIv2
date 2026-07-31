@@ -20,16 +20,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
     $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
     
     ### Check tenant_id if its null or empty
 	if($tenant_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Tenant ID."); 
+		$apiresults = ["result" => "Error: Set a value for Tenant ID."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
+    	$groupId = go_get_groupid($goUser);
     
 		if (!checkIfTenant($groupId, $goDB)) {
         	//$ul = "WHERE tenant_id='$tenant_id'";
@@ -58,10 +58,10 @@
 				$rsltv1 = $astDB->get('vicidial_users');
 				$dataCount = $astDB->getRowCount();
 				
-				$apiresults = array("result" => "success", "cnt" => $dataCount, "tenant_id" => $dataTenantId, "tenant_name" => $dataTenantName, "active" => $dataActive);
+				$apiresults = ["result" => "success", "cnt" => $dataCount, "tenant_id" => $dataTenantId, "tenant_name" => $dataTenantName, "active" => $dataActive];
 			}
 		} else {
-			$apiresults = array("result" => "Error: Tenant doesn't exist.");
+			$apiresults = ["result" => "Error: Tenant doesn't exist."];
 		}
 	}
 ?>

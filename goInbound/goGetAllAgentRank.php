@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
     $limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
     $ingroup_id 										= $astDB->escape($_REQUEST['group_id']);
@@ -30,21 +30,21 @@
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($ingroup_id) || is_null($ingroup_id)) {
-        $apiresults 									= array(
+        $apiresults 									= [
 			"result" 										=> "Error: Set a value for Group ID."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -64,7 +64,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -77,12 +77,12 @@
 				//$findSQL = "AND user RLIKE '$find_user'";
 			}
 		
-			$cols 										= array(
+			$cols 										= [
 				"user", 
 				"full_name", 
 				"closer_campaigns", 
 				"user_group"
-			);
+			];
 			
 			$astDB->where("user", DEFAULT_USERS, "NOT IN");
 			$astDB->where("user_level", 4, "!=");
@@ -99,11 +99,11 @@
 						$isChecked 						= ' CHECKED';
 					}
 					
-					$cols2 								= array(
+					$cols2 								= [
 						"group_rank", 
 						"group_grade", 
 						"calls_today"
-					);
+					];
 					
 					$query_viga 						= $astDB
 						->where("group_id", $ingroup_id)
@@ -122,13 +122,13 @@
 							}
 						}
 					} else {
-						$insertData 					= array(
+						$insertData 					= [
 							"calls_today" 					=> 0,
 							"group_rank" 					=> 0,
 							"group_weight" 					=> 0,
 							"user" 							=> $username,
 							"group_id" 						=> $ingroup_id
-						);
+						];
 						
 						$astDB->insert("vicidial_inbound_group_agents", $insertData);
 						//$stmtD="INSERT INTO vicidial_inbound_group_agents set calls_today='0',group_rank='0',group_weight='0',user='{$fresults['user']}',group_id='$ingroup_id';";
@@ -156,7 +156,7 @@
 					//rank dropdown name or id,def value,values from db ::
 					//-> CI $users_output .= form_dropdown("$rank_field",$rankArray,$group_rank,"style='font-size:10px;'");
 					// <select name="$rank_field" id=rank_field"> <option value="$group_rank" selected>$group_rank</option> <option value="$rankArray">$rankArray</option>"
-					$rankArray 		  					= array(
+					$rankArray 		  					= [
 						'9'									=> '9',
 						'8'									=> '8',
 						'7'									=> '7',
@@ -176,7 +176,7 @@
 						'-7'								=> '-7',
 						'-8'								=> '-8',
 						'-9'								=> '-9'
-					);
+					];
 					
 					$dataRankFields[] 					= $rank_field;
 					$dataArigRank[]   					= $group_rank;
@@ -184,7 +184,7 @@
 					//grade dropdown name or id, def value, values from db :: 
 					//-> CI $users_output .= form_dropdown("$grade_field",$gradeArray,$group_grade,"style='font-size:10px;'");
 					// <select name="$grade_field" id="$grade_field"> <option value="$group_grade" selected>$group_grade</option> <option value="$gradeArray">$gradeArray</option>"
-					$gradeArray 						= array(
+					$gradeArray 						= [
 						'10'								=>'10',
 						'9'									=> '9',
 						'8'									=> '8',
@@ -196,7 +196,7 @@
 						'2'									=> '2',
 						'1'									=> '1',
 						'0'									=> '0'
-					);
+					];
 					
 					$dataGradeField[] 					= $grade_field;
 					$dataArigGrade[]  					= $group_grade;
@@ -204,7 +204,7 @@
 					$dataGradeArray[]  					= $gradeArray;				
 				}	
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"user" 									=> $dataUser, 
 					"full_name" 							=> $dataFullName, 
@@ -218,18 +218,18 @@
 					"values_grade" 							=> $dataArigGrade,
 					"dropdown_gradedefvalues" 				=> $dataGradeArray,
 					"call_today" 							=> $dataArigCalls
-				);			
+				];			
 			}  else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: No data to show."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
    

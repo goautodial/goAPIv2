@@ -62,18 +62,18 @@ if ($is_logged_in) {
     $user = $agent->user;
     $user_group = $agent->user_group;
     
-    $random = (rand(1000000, 9999999) + 10000000);
-    $updateData = array(
+    $random = (random_int(1000000, 9999999) + 10000000);
+    $updateData = [
         'uniqueid' => 0,
         'callerid' => '',
         'channel' => '',
         'random_id' => $random,
         'comments' => '',
         'last_state_change' => $NOW_TIME
-    );
-    if (preg_match('/INBOUND_MAN/', $campaign_settings->dial_method)) {
+    ];
+    if (preg_match('/INBOUND_MAN/', (string) $campaign_settings->dial_method)) {
         //$vla_autodialSQL = ",outbound_autodial='N'";
-        $updateData = array_merge( $updateData, array( 'outbound_autodial' => 'N' ) );
+        $updateData = array_merge( $updateData, [ 'outbound_autodial' => 'N' ] );
     }
     //$stmt="UPDATE vicidial_live_agents set uniqueid=0,callerid='',channel='', random_id='$random',comments='',last_state_change='$NOW_TIME' $vla_autodialSQL where user='$user' and server_ip='$server_ip';";
     $astDB->where('user', $user);
@@ -81,7 +81,7 @@ if ($is_logged_in) {
     $rslt = $astDB->update('vicidial_live_agents', $updateData);
     $errno = $astDB->getLastError();
     $retry_count = 0;
-    while ( (strlen($errno) > 0) and ($retry_count < 9) ) {
+    while ( strlen((string) $errno) > 0 && $retry_count < 9 ) {
         $astDB->where('user', $user);
         $astDB->where('server_ip', $server_ip);
         $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -91,16 +91,16 @@ if ($is_logged_in) {
     
     if ($comments != 'NO_STATUS_CHANGE') {
         //$vla_lead_wipeSQL='';
-        $updateData = array(
+        $updateData = [
             'status' => $stage
-        );
+        ];
         if ($ACTION == 'VDADready') {
             //$vla_lead_wipeSQL = ",lead_id=0";
-            $updateData = array_merge( $updateData, array( 'lead_id' => 0 ) );
+            $updateData = array_merge( $updateData, [ 'lead_id' => 0 ] );
         }
         if ($ACTION == 'VDADpause') {
             //$vla_ring_resetSQL = ",ring_callerid=''";
-            $updateData = array_merge( $updateData, array( 'ring_callerid' => '' ) );
+            $updateData = array_merge( $updateData, [ 'ring_callerid' => '' ] );
         }
         //$stmt="UPDATE vicidial_live_agents set status='$stage' $vla_lead_wipeSQL $vla_ring_resetSQL where user='$user' and server_ip='$server_ip';";
         $astDB->where('user', $user);
@@ -108,7 +108,7 @@ if ($is_logged_in) {
         $rslt = $astDB->update('vicidial_live_agents', $updateData);
         $errno = $astDB->getLastError();
         $retry_count = 0;
-        while ( (strlen($errno) > 0) and ($retry_count < 9) ) {
+        while ( strlen((string) $errno) > 0 && $retry_count < 9 ) {
             $astDB->where('user', $user);
             $astDB->where('server_ip', $server_ip);
             $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -125,8 +125,8 @@ if ($is_logged_in) {
         ##### END QUEUEMETRICS LOGGING LOOKUP #####
         ###########################################
         if ($queuemetrics->enable_queuemetrics_logging > 0) {
-            if ( (preg_match('/READY/', $stage)) or (preg_match('/CLOSER/', $stage)) ) {$QMstatus = 'UNPAUSEALL';}
-            if (preg_match('/PAUSE/', $stage)) {$QMstatus = 'PAUSEALL';}
+            if ( preg_match('/READY/', (string) $stage) || preg_match('/CLOSER/', (string) $stage) ) {$QMstatus = 'UNPAUSEALL';}
+            if (preg_match('/PAUSE/', (string) $stage)) {$QMstatus = 'PAUSEALL';}
             $qmDB = new MySQLiDB($queuemetrics->queuemetrics_server_ip, $queuemetrics->queuemetrics_login, $queuemetrics->queuemetrics_pass, $queuemetrics->queuemetrics_dbname);
     
             $data4SQL='';
@@ -136,7 +136,7 @@ if ($is_logged_in) {
             $rslt = $astDB->getOne('vicidial_campaigns', 'queuemetrics_phone_environment');
             $cqpe_ct = $astDB->getRowCount();
             
-            $insertData = array(
+            $insertData = [
                 'partition' => 'P01',
                 'time_id' => $StarTtimE,
                 'call_id' => 'NONE',
@@ -144,14 +144,14 @@ if ($is_logged_in) {
                 'agent' => "Agent/$user",
                 'verb' => $QMstatus,
                 'serverid' => $queuemetrics->queuemetrics_log_id
-            );
+            ];
             
             if ($cqpe_ct > 0) {
                 $pe_append = '';
-                if ( ($queuemetrics->queuemetrics_pe_phone_append > 0) and (strlen($rslt['queuemetrics_phone_environment'])>0) )
+                if ( $queuemetrics->queuemetrics_pe_phone_append > 0 && strlen($rslt['queuemetrics_phone_environment']) > 0 )
                     {$pe_append = "-$qm_extension";}
                 $data4SQL = ",data4='$row[0]$pe_append'";
-                $insertData = array_merge( $insertData, array( 'data4' => "{$rslt['queuemetrics_phone_environment']}{$pe_append}" ) );
+                $insertData = array_merge( $insertData, [ 'data4' => "{$rslt['queuemetrics_phone_environment']}{$pe_append}" ] );
             }
     
             //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='NONE',queue='NONE',agent='Agent/$user',verb='$QMstatus',serverid='$queuemetrics_log_id' $data4SQL;";
@@ -173,43 +173,43 @@ if ($is_logged_in) {
         if ($rslt['wait_epoch'] > 0) {
             $wait_sec = (($StarTtimE - $rslt['wait_epoch']) + $rslt['wait_sec']);
         }
-        if ( (preg_match("/NULL/i", $rslt['dispo_epoch'])) or ($rslt['dispo_epoch'] < 1000) )
+        if ( preg_match("/NULL/i", $rslt['dispo_epoch']) || $rslt['dispo_epoch'] < 1000 )
             {$pause_sec = (($StarTtimE - $rslt['pause_epoch']) + $rslt['pause_sec']);}
         else
             {$pause_sec = (($rslt['dispo_epoch'] - $rslt['pause_epoch']) + $rslt['pause_sec']);}
     }
     
     if ($ACTION == 'VDADready') {
-        if ( (preg_match("/NULL/i", $dispo_epoch)) or ($dispo_epoch < 1000) ) {
+        if ( preg_match("/NULL/i", (string) $dispo_epoch) || $dispo_epoch < 1000 ) {
             //$stmt="UPDATE vicidial_agent_log set pause_sec='$pause_sec',wait_epoch='$StarTtimE' where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
-            $rslt = $astDB->update('vicidial_agent_log', array( 'pause_sec' => $pause_sec, 'wait_epoch' => $StarTtimE ));
+            $rslt = $astDB->update('vicidial_agent_log', [ 'pause_sec' => $pause_sec, 'wait_epoch' => $StarTtimE ]);
         }
     }
     
     if ($ACTION == 'VDADpause') {
-        if ( (preg_match("/NULL/i", $dispo_epoch)) or ($dispo_epoch < 1000) ) {
+        if ( preg_match("/NULL/i", (string) $dispo_epoch) || $dispo_epoch < 1000 ) {
             //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec' where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
-            $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec ));
+            $rslt = $astDB->update('vicidial_agent_log', [ 'wait_sec' => $wait_sec ]);
         }
         
         $agent_log = 'NEW_ID';
     }
     
     if ($wrapup == 'WRAPUP') {
-        if ( (preg_match("/NULL/i",$dispo_epoch)) or ($dispo_epoch < 1000) ) {
+        if ( preg_match("/NULL/i",(string) $dispo_epoch) || $dispo_epoch < 1000 ) {
             //$stmt="UPDATE vicidial_agent_log set dispo_epoch='$StarTtimE', dispo_sec='0' where agent_log_id='$agent_log_id';";
-            $updateData = array(
+            $updateData = [
                 'dispo_epoch' => $StarTtimE,
                 'dispo_sec' => '0'
-            );
+            ];
         } else {
             $dispo_sec = ($StarTtimE - $dispo_epoch);
             //$stmt="UPDATE vicidial_agent_log set dispo_sec='$dispo_sec' where agent_log_id='$agent_log_id';";
-            $updateData = array(
+            $updateData = [
                 'dispo_sec' => $dispo_sec
-            );
+            ];
         }
         $astDB->where('agent_log_id', $agent_log_id);
         $rslt = $astDB->update('vicidial_agent_log', $updateData);
@@ -217,7 +217,7 @@ if ($is_logged_in) {
     
     if ($agent_log == 'NEW_ID') {
         //$stmt="INSERT INTO vicidial_agent_log (user,server_ip,event_time,campaign_id,pause_epoch,pause_sec,wait_epoch,user_group) values('$user','$server_ip','$NOW_TIME','$campaign','$StarTtimE','0','$StarTtimE','$user_group');";
-        $insertData = array(
+        $insertData = [
             'user' => $user,
             'server_ip' => $server_ip,
             'event_time' => $NOW_TIME,
@@ -226,27 +226,24 @@ if ($is_logged_in) {
             'pause_sec' => 0,
             'wait_epoch' => $StarTtimE,
             'user_group' => $user_group
-        );
+        ];
         $rslt = $astDB->insert('vicidial_agent_log', $insertData);
         $affected_rows = $astDB->getRowCount();
         $agent_log_id = $astDB->getInsertId();
     
         //$stmt="UPDATE vicidial_live_agents SET agent_log_id='$agent_log_id' where user='$user';";
         $astDB->where('user', $user);
-        $rslt = $astDB->update('vicidial_live_agents', array( 'agent_log_id' => $agent_log_id ));
+        $rslt = $astDB->update('vicidial_live_agents', [ 'agent_log_id' => $agent_log_id ]);
         $VLAaffected_rows_update = $astDB->getRowCount();
     }
     
-    if (strlen($sub_status) > 0) {
+    if ((string) $sub_status !== '') {
         ### if a pause code(sub_status) is sent with this pause request, continue on to that action without printing output
         $stage = 0;
         $status = $sub_status;
-    
-        if ($stage < 1) {
-            //$stmt="UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') )order by agent_log_id limit 2;";
-            $rslt = $astDB->rawQuery("UPDATE vicidial_agent_log set sub_status='$status' where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') ) order by agent_log_id limit 2;");
-            $affected_rows = $astDB->getRowCount();
-        }
+        //$stmt="UPDATE vicidial_agent_log set sub_status=\"$status\" where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') )order by agent_log_id limit 2;";
+        $rslt = $astDB->rawQuery("UPDATE vicidial_agent_log set sub_status='$status' where agent_log_id >= '$agent_log_id' and user='$user' and ( (sub_status is NULL) or (sub_status='') ) order by agent_log_id limit 2;");
+        $affected_rows = $astDB->getRowCount();
     
         ### if entry accepted, add a queue_log entry if QM integration is enabled
         if ($affected_rows > 0) {
@@ -255,18 +252,18 @@ if ($is_logged_in) {
             $queuemetrics = get_settings('queuemetrics', $astDB);
             ##### END QUEUEMETRICS LOGGING LOOKUP #####
             ###########################################
-            if ( ($enable_sipsak_messages > 0) and ($queuemetrics->allow_sipsak_messages > 0) and (preg_match("/SIP/i", $phone_settings->protocol)) ) {
+            if ( $enable_sipsak_messages > 0 && $queuemetrics->allow_sipsak_messages > 0 && preg_match("/SIP/i", (string) $phone_settings->protocol) ) {
                 $SIPSAK_prefix = 'BK-';
                 passthru("/usr/local/bin/sipsak -M -O desktop -B \"$SIPSAK_prefix$status\" -r 5060 -s sip:$extension@$phone_ip > /dev/null");
             }
             
             if ($queuemetrics->enable_queuemetrics_logging > 0) {
                 $pause_call_id = 'NONE';
-                if (strlen($campaign_settings->campaign_cid) > 12) {$pause_call_id = $campaign_cid;}
+                if (strlen((string) $campaign_settings->campaign_cid) > 12) {$pause_call_id = $campaign_cid;}
                 $qmDB = new MySQLiDB($queuemetrics->queuemetrics_server_ip, $queuemetrics->queuemetrics_login, $queuemetrics->queuemetrics_pass, $queuemetrics->queuemetrics_dbname);
     
                 //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtime',call_id='$pause_call_id',queue='NONE',agent='Agent/$user',verb='PAUSEREASON',serverid='$queuemetrics_log_id',data1='$status';";
-                $insertData = array(
+                $insertData = [
                     'partition' => 'P01',
                     'time_id' => $StarTtimE,
                     'call_id' => $pause_call_id,
@@ -275,7 +272,7 @@ if ($is_logged_in) {
                     'verb' => 'PAUSEREASON',
                     'serverid' => $queuemetrics_log_id,
                     'data1' => $status
-                );
+                ];
                 $rslt = $qmDB->insert('queue_log', $insertData);
                 $affected_rows = $qmDB->getRowCount();
     
@@ -283,12 +280,12 @@ if ($is_logged_in) {
             }
         }
         //echo ' Pause Code ' . $status . " has been recorded\nNext agent_log_id:\n" . $agent_log_id . "\n";
-        $APIResult = array( "result" => "success", "data" => array( 'pause_code' => $status, 'agent_log_id' => $agent_log_id, 'message' => "Pause Code $status has been recorded. Next agent_log_id is $agent_log_id" ) );
+        $APIResult = [ "result" => "success", "data" => [ 'pause_code' => $status, 'agent_log_id' => $agent_log_id, 'message' => "Pause Code $status has been recorded. Next agent_log_id is $agent_log_id" ] ];
     } else {
         //echo 'Agent ' . $user . ' is now in status ' . $stage . "\nNext agent_log_id:\n$agent_log_id\n";
-        $APIResult = array( "result" => "success", "data" => array( 'status' => $stage, 'agent_log_id' => $agent_log_id, 'message' => "Agent $user is now in status $stage. Next agent_log_id is $agent_log_id" ) );
+        $APIResult = [ "result" => "success", "data" => [ 'status' => $stage, 'agent_log_id' => $agent_log_id, 'message' => "Agent $user is now in status $stage. Next agent_log_id is $agent_log_id" ] ];
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

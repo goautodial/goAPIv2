@@ -34,24 +34,24 @@
                 $dataPhoneNumber[] = $fresults['phone_number'];
 		}
 	}
-		
+
 	$apiresults = array("result" => "success", "returnPnumbers" => $dataPhoneNumber);
 */
- 
+
 	if($countResult > 0) {
-        
-			$dataPhoneNumbers = array();
-            
+
+			$dataPhoneNumbers = [];
+
 			foreach ($rsltv as $fresults){
-                array_push($dataPhoneNumbers, $fresults);
+                $dataPhoneNumbers[] = $fresults;
 				//$dataPhoneNumbers[] = 	$fresults['phone_number'];
             }
-			 			
+
 			$data = array_merge($dataPhoneNumbers);
 			//echo count($data);
-            $apiresults = array("result" => "success", "data" => $data);
+            $apiresults = ["result" => "success", "data" => $data];
     }
-	
+
 
 /*
 	// path where your CSV file is located

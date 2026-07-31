@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("../goFunctions.php");
+    include_once (__DIR__ . "/../goFunctions.php");
 
 if (isset($_GET['action'])) { $action = $astDB->escape($_GET['action']); }
     else if (isset($_POST['action'])) { $action = $astDB->escape($_POST['action']); }
@@ -55,7 +55,7 @@ if ($user === 'sess_expired') {
         $sessRslt = $astDB->getOne('vicidial_user_log', 'campaign_id');
         $campaign = $sessRslt['campaign_id'];
         
-        $insertData = array(
+        $insertData = [
             "user" => $user,
             "event" => 'AUTO-LOGOUT',
             "campaign_id" => $campaign,
@@ -66,12 +66,12 @@ if ($user === 'sess_expired') {
             "server_ip" => '',
             "extension" => '',
             "computer_ip" => ''
-        );
+        ];
         $astDB->insert('vicidial_user_log', $insertData);
     }
 }
 
-$insertData = array(
+$insertData = [
     'user' => $user,
     'ip_address' => $ip_address,
     'event_date' => $NOW_TIME,
@@ -79,8 +79,8 @@ $insertData = array(
     'details' => "$details",
     'db_query' => "$db_query",
     'user_group' => $user_group
-);
+];
 $goDB->insert('go_action_logs', $insertData);
 
-$APIResult = array( "result" => "success", "message" => "Action made by a user successfully logged." );
+$APIResult = [ "result" => "success", "message" => "Action made by a user successfully logged." ];
 ?>

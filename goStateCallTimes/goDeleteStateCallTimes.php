@@ -20,18 +20,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
 	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
-    
+
     ### Check Voicemail ID if its null or empty
 	if($state_call_time_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for State Call Time ID."); 
+		$apiresults = ["result" => "Error: Set a value for State Call Time ID."]; 
 	} else {
 		$groupId = go_get_groupid($goUser);
 
-		if (!checkIfTenant($groupId)) {
+		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "";
 		} else {
 			//$ul = "AND user_group='$groupId'";
@@ -39,7 +39,7 @@
 			$astDB->where('user_group', $groupId);
 		}
 
-		
+
    		//$queryOne = "SELECT state_call_time_id FROM vicidial_state_call_times $ul where state_call_time_id='".mysqli_escape_string($state_call_time_id)."';";
 		$astDB->where('state_call_time_id', $state_call_time_id);
    		$rsltvOne = $astDB->get('vicidial_state_call_times');
@@ -49,11 +49,11 @@
 			//$deleteQuery = "DELETE FROM vicidial_state_call_times WHERE state_call_time_id= '$state_call_time_id';";
 			$astDB->where('state_call_time_id', $state_call_time_id);
 			$astDB->delete('vicidial_state_call_times');
-			
+
 			$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted State Call Time: $state_call_time_id", $log_group, $astDB->getLastQuery());
-			$apiresults = array("result" => "success");
+			$apiresults = ["result" => "success"];
 		} else {
-			$apiresults = array("result" => "Error: State Call Menu doesn't exist.");
+			$apiresults = ["result" => "Error: State Call Menu doesn't exist."];
 		}
 	}//end
 ?>

@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-	include_once("goAPI.php");
+	include_once(__DIR__ . "/goAPI.php");
 	
 	$campaigns 		= $astDB->escape($_REQUEST['campaigns']);
 	$inbounds 		= $astDB->escape($_REQUEST['inbounds']);
@@ -31,7 +31,7 @@
 	$custom_fields 	= $astDB->escape($_REQUEST['custom_fields']);
 	$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
 	$rec_location 	= $astDB->escape($_REQUEST['rec_location']);
-	$log_group 		= go_get_groupid($session_user, $astDB);
+	$log_group 		= go_get_groupid($session_user);
 	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
 	$toDate = $astDB->escape($_REQUEST['toDate']);
 	
@@ -110,19 +110,19 @@
 		if (in_array("ALL", $campaigns)) {
 			$campaign_SQL = "";
 			// $i = 0;
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-    
+
             $allowed_campaigns = $allowed_camps['allowed_campaigns'];
             if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
                 $allowed_campaigns = explode(" ", trim($allowed_campaigns));
                 $astDB->where('campaign_id', $allowed_campaigns, 'in');
             }
-            
+
             $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        
+
             foreach($SELECTQuery as $camp_val){
                 $array_camp[] = $camp_val["campaign_id"];
             }
@@ -132,7 +132,7 @@
 			// 	$array_camp[] = $camp_val["campaign_id"];
 			// }
 			$imp_camp = implode("','", $array_camp);
-			if (strtoupper($log_group) !== 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($log_group !== 'SUPERVISOR') {
 					$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
 				}
@@ -154,7 +154,7 @@
 		if (in_array("ALL", $inbounds)) {
 			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
 
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -173,8 +173,6 @@
             $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
                 ->orderBy("campaign_id")
                 ->get("vicidial_campaigns", NULL, "closer_campaigns");
-
-            $closer_camp;
             foreach($closer_campaigns as $row){
                 if(!empty($row['closer_campaigns'])){
                     $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
@@ -182,7 +180,7 @@
                 }
             }
 			
-			if (strtoupper($log_group) !== 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			}
@@ -192,7 +190,7 @@
 				$closer_camp .= " ".$row["group_id"];
 			}
 
-            $explodedCloserCamps = explode(" ", ltrim($closer_camp));
+            $explodedCloserCamps = explode(" ", ltrim((string) $closer_camp));
 			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
 
 			$i=1;
@@ -201,7 +199,7 @@
 			//$array_inbound 							= Array();
 
 			while ($i < $group_ct) {
-				if (strlen($inbounds[$i]) > 0) {
+				if ($inbounds[$i] !== '') {
 				  //$group_SQL .= "'$inbounds[$i]',";
 					$group_SQL .= "'$inbounds[$i]',";
 					//array_push($array_inbound, $inbounds[$i]);
@@ -458,11 +456,11 @@
 	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $csv_header);
 	
 	if ($per_call_notes == "Y") {
-		array_push($csv_header, "call_notes");
+		$csv_header[] = "call_notes";
 	}
 
 	if ($rec_location == "Y") {
-		array_push($csv_header, "recording_location");
+		$csv_header[] = "recording_location";
 		$ee_key = array_search("end_epoch",$csv_header);
 		array_splice($csv_header, $ee_key, 1);
 	}
@@ -470,7 +468,7 @@
 	//    for ($i = 0 ; $i < count($array_list); $i++) {
 	//		$list_id = $array_list[$i];
 		foreach ($array_list as $list) {
-			$custom_list_id = "custom_" . (!empty($list['list_id']) ? $list['list_id'] : $list);
+			$custom_list_id = "custom_" . (empty($list['list_id']) ? $list : $list['list_id']);
 			//$query_CF_list = "DESC custom_$list_id;");
 			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {
@@ -487,11 +485,11 @@
 			}
 		}
 
-		$header_CF 									= array();
+		$header_CF 									= [];
 		//$keys 										= array_keys($active_list_fields);
 		
 		//for ($i = 0; $i < count($keys); $i++) {
-		foreach ($active_list_fields as $list_id => $fields) {
+		foreach ($active_list_fields as $fields) {
 			//$list_id 								= $keys[$i];
 			//for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
 			foreach ($fields as $field) {
@@ -520,7 +518,7 @@
 			
 			if ($notes_ct > 0) {
 				$notes_data = $fetch_callnotes["call_notes"];
-				$notes_data = rawurldecode($notes_data);
+				$notes_data = rawurldecode((string) $notes_data);
 			} else {
 				$notes_data = "";
 			}
@@ -528,7 +526,7 @@
 		}
 		if ($rec_location == "Y") {
 			$end_epoch = $row["end_epoch"];
-			if(in_array($row["user"], array("VDAD", "VDCL"))){
+			if(in_array($row["user"], ["VDAD", "VDCL"])){
 				$rec_data = "";
 			}else{
 			//$recording_array = Array($lead_id);
@@ -546,7 +544,7 @@
 			$rec_ct = $astDB->count;
 			if ($rec_ct > 0) {
 				$rec_data = $fetch_recording["location"];
-				$rec_data = rawurldecode($rec_data);
+				$rec_data = rawurldecode((string) $rec_data);
 			} else {
 				// TRY 2nd using end_epoch
 				$astDB->WHERE("end_epoch", $end_epoch);
@@ -556,7 +554,7 @@
 
                         	if ($rec_ct > 0) {
                                 	$rec_data = $fetch_recording["location"];
-                                	$rec_data = rawurldecode($rec_data);
+                                	$rec_data = rawurldecode((string) $rec_data);
                         	} else {
 					// TRY 3rd if there's only 1 data with the lead_id
 	                                $astDB->WHERE("length_in_sec", 0, ">");
@@ -566,7 +564,7 @@
 					
 					if ($rec_ct == 1) {
 	                                        $rec_data = $fetch_recording["location"];
-                                        	$rec_data = rawurldecode($rec_data);
+                                        	$rec_data = rawurldecode((string) $rec_data);
                                 	} else {
 						$rec_data="";
 					}
@@ -646,16 +644,16 @@
 
 	// new
 	// ----
-	$campFilter = (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
-	$inbFilter = (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
-	$listFilter = (strlen($lists) > 0) ? "List(s): $lists" : "";
+	$campFilter = ((string) $campaigns !== '') ? "Campaign(s): $campaigns" : "";
+	$inbFilter = ((string) $inbounds !== '') ? "Inbound Groups(s): $inbounds" : "";
+	$listFilter = ((string) $lists !== '') ? "List(s): $lists" : "";
 	$log_id	= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 	
-	$apiresults = array(
+	$apiresults = [
 		"result" => "success", 
 		"header" => $csv_header, 
 		"rows" 	=> $csv_row,
 		"query" => $query
-	);
+	];
 ?>
 

@@ -22,25 +22,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-include_once ("goAPI.php");
+include_once (__DIR__ . "/goAPI.php");
 
 $allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
-$type												= (!isset($_REQUEST["type"])) ? "all" : $astDB->escape($_REQUEST['type']);
+$type												= (isset($_REQUEST["type"])) ? $astDB->escape($_REQUEST['type']) : "all";
 $NOW 												= date("Y-m-d");
 
 // ERROR CHECKING
 if (empty($goUser) || is_null($goUser)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: goAPI User Not Defined."
-	);
+	];
 } elseif (empty($goPass) || is_null($goPass)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: goAPI Password Not Defined."
-	);
+	];
 } elseif (empty($log_user) || is_null($log_user)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: Session User Not Defined."
-	);
+	];
 } else {
 	// check if goUser and goPass are valid
 	$fresults										= $astDB
@@ -60,7 +60,7 @@ if (empty($goUser) || is_null($goUser)) {
 					$astDB->where("campaign_id", $allowed_campaigns, "IN");
 				}
 				//->where("length_in_sec", array('>' => 0))
-				$astDB->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+				$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
 				$data 								= $astDB->getValue("vicidial_log", "count(call_date)");
 
 				break;
@@ -70,9 +70,9 @@ if (empty($goUser) || is_null($goUser)) {
 				//get inbound groups
 				$getIngroups                        = $astDB->where('user_group', $log_group)
 					->orWhere("user_group", "---ALL---")
-					->get('vicidial_inbound_groups', NULL, array('group_id'));
+					->get('vicidial_inbound_groups', NULL, ['group_id']);
 
-				$ingroups                           = array();
+				$ingroups                           = [];
 
 				foreach ($getIngroups as $fresults) {
 					$ingroups[]                     = $fresults['group_id'];
@@ -82,7 +82,7 @@ if (empty($goUser) || is_null($goUser)) {
 					$astDB->where("campaign_id", $ingroups, "IN");
 				}
 
-				$astDB->where("call_date", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN");
+				$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
 				$data 								= $astDB->getValue("vicidial_closer_log", "count(call_date)");
 
 				break;
@@ -90,24 +90,24 @@ if (empty($goUser) || is_null($goUser)) {
 				case "all":
 
 				$data 								= $astDB
-					->where("update_time", array("$NOW 00:00:00", "$NOW 23:59:59"), "BETWEEN")
+					->where("update_time", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN")
 					->getValue("vicidial_campaign_stats", "sum(calls_today)");
 
 				break;
 			}
 
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "success",
 				//"query"								=> $astDB->getLastQuery(),
 				"data" 									=> $data
-			);
+			];
 		}
 	} else {
 		$err_msg 									= error_handle("10001");
-		$apiresults 								= array(
+		$apiresults 								= [
 			"code" 										=> "10001",
 			"result" 									=> $err_msg
-		);
+		];
 	}
 }
 

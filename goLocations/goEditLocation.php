@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
     $location = $goDB->escape($_REQUEST['location']);
@@ -29,18 +29,18 @@
 		
 ########################
 	if($location == null) {
-		$APIResult = array("result" => "Error: Set a value for Location.");
+		$APIResult = ["result" => "Error: Set a value for Location."];
 	} else {
-		if(preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $location)){
-			$APIResult = array("result" => "Error: Special characters found in location");
+		if(preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', (string) $location)){
+			$APIResult = ["result" => "Error: Special characters found in location"];
 		} else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', $description)){
-				$APIResult = array("result" => "Error: Special characters found in description");
+			if(preg_match('/[\'^£$%&*()}{@#~?><>|=+¬]/', (string) $description)){
+				$APIResult = ["result" => "Error: Special characters found in description"];
 			} else {
 				if($active < 0 && $active != null || $active > 1 && $active != null) {
-					$APIResult = array("result" => "Error: Active Value should be in between 0 and 1");
+					$APIResult = ["result" => "Error: Active Value should be in between 0 and 1"];
 				} else {
-					$groupId = go_get_groupid($goUser, $astDB);
+					$groupId = go_get_groupid($goUser);
 		
 					$goDB->where('name', $location);
 					if (checkIfTenant($groupId, $goDB)) {
@@ -52,17 +52,17 @@
 					$countResult = $goDB->getRowCount();
 					if($countResult > 0) {
 						$goDB->where('name', $location);
-						$goDB->update('locations', array( 'description' => $description, 'user_group' => $user_group, 'active' => $active ));
+						$goDB->update('locations', [ 'description' => $description, 'user_group' => $user_group, 'active' => $active ]);
 	
 						if($goDB->getRowCount() < 1){
-							$APIResult = array("result" => "Error: Failed Update, Check your details");
+							$APIResult = ["result" => "Error: Failed Update, Check your details"];
 						} else {
 							$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Location: $location", $log_group, $goDB->getLastQuery());
 		
-							$APIResult = array("result" => "success");
+							$APIResult = ["result" => "success"];
 						}
 					} else {
-						$APIResult = array("result" => "Error: Location doesn't exist. ");
+						$APIResult = ["result" => "Error: Location doesn't exist. "];
 					}
 				}
 			}

@@ -21,7 +21,7 @@
 */
 
     $limit = $goDB->escape($_REQUEST['limit']);
-    if($limit < 1){ $limit = 100; } else { $limit = $limit; }
+    if($limit < 1){ $limit = 100; }
  
     //$groupId = go_get_groupid($session_user);
     $groupId = $goDB->escape($_REQUEST['user_group']);
@@ -40,6 +40,6 @@
 		$dataUserGroup[] = $row['user_group'];
 		$dataActive[] = $row['active'];
 	}
-	$APIResult = array("result" => "success", "location_id" => $dataLocationID, "location" => $dataLocation, "description" => $dataDescription, "user_group" => $dataUserGroup, "active" => $dataActive);
+	$APIResult = ["result" => "success", "location_id" => $dataLocationID, "location" => $dataLocation, "description" => $dataDescription, "user_group" => $dataUserGroup, "active" => $dataActive];
 
 ?>

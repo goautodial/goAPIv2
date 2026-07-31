@@ -29,8 +29,8 @@
 	if($exist > 0){
 		$data = $rsltv;
 		
-		$apiresults = array("result" => "success", "data" => $data);
+		$apiresults = ["result" => "success", "data" => $data];
 	} else {
-		$apiresults = array("result" => "SMTP Setting doesn't exist. Please configure a valid SMTP Setting to continue.");
+		$apiresults = ["result" => "SMTP Setting doesn't exist. Please configure a valid SMTP Setting to continue."];
 	}
 ?>

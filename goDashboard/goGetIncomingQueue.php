@@ -22,23 +22,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-include_once ("goAPI.php");
+include_once (__DIR__ . "/goAPI.php");
 
 $allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
 
 // ERROR CHECKING
 if (empty($goUser) || is_null($goUser)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: goAPI User Not Defined."
-	);
+	];
 } elseif (empty($goPass) || is_null($goPass)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: goAPI Password Not Defined."
-	);
+	];
 } elseif (empty($log_user) || is_null($log_user)) {
-	$apiresults 									= array(
+	$apiresults 									= [
 		"result" 										=> "Error: Session User Not Defined."
-	);
+	];
 } else {
 	// check if goUser and goPass are valid
 	$fresults										= $astDB
@@ -55,22 +55,22 @@ if (empty($goUser) || is_null($goUser)) {
 				$astDB->where("campaign_id", $allowed_campaigns, "IN");
 			}
 
-			$astDB->where("status", array("XFER"), "NOT IN");
+			$astDB->where("status", ["XFER"], "NOT IN");
 			$astDB->where("call_type", "IN", "=");
 			$data									= $astDB->getValue("vicidial_auto_calls", "count(*)");
 
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "success",
 				//"query"								=> $astDB->getLastQuery(),
 				"data" 									=> $data
-			);
+			];
 		}
 	} else {
 		$err_msg 									= error_handle("10001");
-		$apiresults 								= array(
+		$apiresults 								= [
 			"code" 										=> "10001",
 			"result" 									=> $err_msg
-		);
+		];
 	}
 }
 	

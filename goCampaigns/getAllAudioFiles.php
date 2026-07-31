@@ -1,5 +1,7 @@
 <?php
-/**
+declare(strict_types=1);
+
+    /**
  * @file    	getAllAudioFiles.php
  * @brief     	Get audio files from sound directory
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
@@ -22,27 +24,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ( "goAPI.php" );
+	include_once ( __DIR__ . "/goAPI.php" );
     
     // Check exisiting status
 	if ( !isset($log_user) || is_null($log_user) ) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} else { 		
 		$sounds_web_directory 						= '../../sounds';
 		$files 										= scandir($sounds_web_directory);
 		
-		if ( !empty($files) ) {
-			$apiresults 							= array (
+		if ( $files !== [] && $files !== false ) {
+			$apiresults 							=  [
 				"result" 								=> "success", 
 				"data" 									=> $files
-			);
+			];
 		} else {
-			$apiresults 							= array (
+			$apiresults 							=  [
 				"result" 								=> "error", 
 				"data" 									=> $files
-			);
+			];
 		}
 	}
 ?>

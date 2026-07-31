@@ -83,8 +83,8 @@ $DO_NOT_UPDATE = 0;
 $DO_NOT_UPDATE_text = '';
 
 if ($is_logged_in) {
-	if ( (strlen($phone_number) < 1) || (strlen($lead_id) < 1) ) {
-        $APIResult = array( "result" => "error", "message" => "Phone Number or Lead ID is NOT valid" );
+	if ( (strlen((string) $phone_number) < 1) || (strlen((string) $lead_id) < 1) ) {
+        $APIResult = [ "result" => "error", "message" => "Phone Number or Lead ID is NOT valid" ];
 	} else {
 		//$stmt = "SELECT disable_alter_custdata,disable_alter_custphone FROM vicidial_campaigns where campaign_id='$campaign'";
         $astDB->where('campaign_id', $campaign);
@@ -97,12 +97,12 @@ if ($is_logged_in) {
 			$disable_alter_custphone =	$row['disable_alter_custphone'];
 			$i++;
 		}
-		if ( (preg_match('/Y/', $disable_alter_custdata)) or (preg_match('/Y/', $disable_alter_custphone)) ) {
-			if (preg_match('/Y/',$disable_alter_custdata)) {
+		if ( preg_match('/Y/', (string) $disable_alter_custdata) || preg_match('/Y/', (string) $disable_alter_custphone) ) {
+			if (preg_match('/Y/',(string) $disable_alter_custdata)) {
 				$DO_NOT_UPDATE = 1;
 				$DO_NOT_UPDATE_text = ' NOT';
 			}
-			if (preg_match('/Y/',$disable_alter_custphone)) 				{
+			if (preg_match('/Y/',(string) $disable_alter_custphone)) 				{
 				$DO_NOT_UPDATEphone = 1;
 			}
 			//$stmt = "SELECT alter_custdata_override,alter_custphone_override FROM vicidial_users where user='$user'";
@@ -116,11 +116,11 @@ if ($is_logged_in) {
 				$alter_custphone_override = $row['alter_custphone_override'];
 				$i++;
 			}
-			if (preg_match('/ALLOW_ALTER/', $alter_custdata_override)) {
+			if (preg_match('/ALLOW_ALTER/', (string) $alter_custdata_override)) {
 				$DO_NOT_UPDATE = 0;
 				$DO_NOT_UPDATE_text = '';
 			}
-			if (preg_match('/ALLOW_ALTER/', $alter_custphone_override)) {
+			if (preg_match('/ALLOW_ALTER/', (string) $alter_custphone_override)) {
 				$DO_NOT_UPDATEphone = 0;
 			}
 		}
@@ -132,13 +132,13 @@ if ($is_logged_in) {
 			$comments = preg_replace("/--QUES--/i", '?', $comments);
 			$comments = preg_replace("/--POUND--/i", '#', $comments);
 			
-			$address1 = preg_replace("/\r/i", '', $address1);
+			$address1 = preg_replace("/\r/i", '', (string) $address1);
 			$address1 = preg_replace("/\n/i", '!N', $address1);
 			
-			$address2 = preg_replace("/\r/i", '', $address2);
+			$address2 = preg_replace("/\r/i", '', (string) $address2);
 			$address2 = preg_replace("/\n/i", '!N', $address2);
 
-			$updateData = array(
+			$updateData = [
                 'vendor_lead_code' => $vendor_lead_code,
                 'title' => $title,
                 'first_name' => $first_name,
@@ -158,11 +158,11 @@ if ($is_logged_in) {
                 'email' => $email,
                 'security_phrase' => $security_phrase,
                 'comments' => $comments
-            );
+            ];
 			if ($DO_NOT_UPDATEphone < 1) {
-                $phoneSQL = array(
+                $phoneSQL = [
                     'phone_number' => $phone_number
-                );
+                ];
                 $updateData = array_merge($updateData, $phoneSQL);
             }
 
@@ -171,9 +171,9 @@ if ($is_logged_in) {
             $rslt = $astDB->update('vicidial_list', $updateData);
 		}
 		
-		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && strlen($custom_fields) > 0)) {
+		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && (string) $custom_fields !== '')) {
 			$custom_fields = explode(',', $custom_fields);
-			$fields = array();
+			$fields = [];
 			$custom_fields_SQL = '';
 			foreach($custom_fields as $label) {
 				if (isset($_GET[$label])) { $fields[$label] = $astDB->escape($_GET[$label]); }
@@ -185,7 +185,7 @@ if ($is_logged_in) {
 				$fields[$label] = preg_replace("/--QUES--/i", '?', $fields[$label]);
 				$fields[$label] = preg_replace("/--POUND--/i", '#', $fields[$label]);
 				
-				if (strlen($fields[$label]) > 0) {
+				if ((string) $fields[$label] !== '') {
 					$custom_fields_SQL .= "$label,";
 				}
 			}
@@ -198,7 +198,7 @@ if ($is_logged_in) {
 			
 			$astDB->has($custom_listid);
 			$lastError = $astDB->getLastError();
-			if (strlen($lastError) < 1) {
+			if (strlen((string) $lastError) < 1) {
 				$astDB->where('lead_id', $lead_id);
 				$rslt = $astDB->getOne($custom_listid);
 				$lead_exist = $astDB->getRowCount();
@@ -221,24 +221,24 @@ if ($is_logged_in) {
 			}
 		}
 		
-		$random = (rand(1000000, 9999999) + 10000000);
+		$random = (random_int(1000000, 9999999) + 10000000);
 		//$stmt="UPDATE vicidial_live_agents set random_id='$random' where user='$user' and server_ip='$server_ip';";
         $astDB->where('user', $user);
         $astDB->where('server_ip', $server_ip);
-        $rslt = $astDB->update('vicidial_live_agents', array( 'random_id' => $random ));
-        $errno = strlen($astDB->getLastError());
+        $rslt = $astDB->update('vicidial_live_agents', [ 'random_id' => $random ]);
+        $errno = strlen((string) $astDB->getLastError());
 		$retry_count = 0;
-		while ( ($errno > 0) and ($retry_count < 9) ) {
+		while ( $errno > 0 && $retry_count < 9 ) {
             $astDB->where('user', $user);
             $astDB->where('server_ip', $server_ip);
-            $rslt = $astDB->update('vicidial_live_agents', array( 'random_id' => $random ));
-            $errno = strlen($astDB->getLastError());
+            $rslt = $astDB->update('vicidial_live_agents', [ 'random_id' => $random ]);
+            $errno = strlen((string) $astDB->getLastError());
 			$retry_count++;
 		}
         
-        $APIResult = array( "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError, "last_query" => $custom_last_SQL );
+        $APIResult = [ "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError, "last_query" => $custom_last_SQL ];
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

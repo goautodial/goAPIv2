@@ -21,30 +21,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
     $user_ids 											= $_REQUEST['user_id'];
     $action 											= $astDB->escape($_REQUEST['action']);	
 	
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($user_ids)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Set a value for User ID."); 
 	} elseif ($action == "delete_selected") {
 		// check if goUser and goPass are valid
@@ -64,7 +64,7 @@
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
@@ -103,27 +103,27 @@
 					$error_count 						= 1;
 				}
 				
-				if ($error_count == 0) { 
-					$apiresults 						= array(
+				if ($error_count === 0) { 
+					$apiresults 						= [
 						"result" 							=> "success"
-					); 
+					]; 
 				}
 				
-				if ($error_count == 1) {
+				if ($error_count === 1) {
 					$err_msg 							= error_handle("10010");
-					$apiresults 						= array(
+					$apiresults 						= [
 						"code" 								=> "10010", 
 						"result" 							=> $err_msg, 
 						"data" 								=> "$user_ids"
-					);
+					];
 				}
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

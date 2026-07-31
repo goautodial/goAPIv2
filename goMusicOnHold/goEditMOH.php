@@ -22,55 +22,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
 	$moh_id 											= $astDB->escape($_REQUEST['moh_id']);
 	$moh_name 											= $astDB->escape($_REQUEST['moh_name']);
 	$user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$active 											= strtoupper($astDB->escape($_REQUEST['active']));
-	$random 											= strtoupper($astDB->escape($_REQUEST['random']));
+	$active 											= strtoupper((string) $astDB->escape($_REQUEST['active']));
+	$random 											= strtoupper((string) $astDB->escape($_REQUEST['random']));
 	$values 											= $astDB->escape($_REQUEST['item']);
 	$filename 											= $astDB->escape($_REQUEST['filename']);
 	$ranks 												= $astDB->escape($_REQUEST['rank']);
 	
     ### Default values 
-    $defActive 											= array("Y","N");
-    $defRandom 											= array("N","Y");
+    $defActive 											= ["Y","N"];
+    $defRandom 											= ["N","Y"];
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif ($moh_id == null || strlen($moh_id) < 3) {
-		$apiresults 									= array(
+		];
+	} elseif ($moh_id == null || strlen((string) $moh_id) < 3) {
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for MOH ID not less than 3 characters."
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_name)) {
-		$apiresults 									= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $moh_name)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in moh_name and must not be empty"
-		);
-	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $moh_id)) {
-		$apiresults 									= array(
+		];
+	} elseif(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $moh_id)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in moh_id"
-		);
+		];
 	} elseif (!in_array($active,$defActive)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!in_array($random,$defRandom)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for random is Y or N only."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -84,13 +84,13 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -111,12 +111,12 @@
 				}			
 
 				if ($filename != null) {
-					$insertData 						= array(
+					$insertData 						= [
 						'filename' 							=> $filename,
 						//'rank' 								=> $rank,
                                                 'rank'                                                          => '1',
 						'moh_id' 							=> $moh_id
-					);
+					];
 					$astDB->where('moh_id', $moh_id);
 					$astDB->update('vicidial_music_on_hold_files', $insertData);
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
@@ -127,12 +127,12 @@
 				if ($user_group == null) {$user_group 	= $datauser_group;}
 				if ($random == null) {$random 			= $datarandom;}
 
-				$updateData 							= array(
+				$updateData 							= [
 					'moh_name' 								=> $moh_name,
 					'active' 								=> $active,
 					'user_group' 							=> $user_group,
 					'random' 								=> $random
-				);
+				];
 				
 				$astDB->where('moh_id', $moh_id);
 				$rsltv1 								= $astDB->update('vicidial_music_on_hold', $updateData);
@@ -153,48 +153,48 @@
 				);*/
 				
 				if (!$rsltv1) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Try updating Moh Again"
-					);
+					];
 				} else {
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 					
 					$affected_rows++;
 					
 					if ($affected_rows) {
 						//$newQuery2 = "UPDATE servers SET rebuild_conf_files='Y',rebuild_music_on_hold='Y',sounds_update='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
-						$updateData 					= array(
+						$updateData 					= [
 							'rebuild_conf_files' 			=> 'Y',
 							'rebuild_music_on_hold'			=> 'Y',
 							'sounds_update' 				=> 'Y'
-						);
+						];
 						$astDB->where('generate_vicidial_conf', 'Y');
 						$astDB->where('active_asterisk_server', 'Y');
 						$astDB->update('servers', $updateData);
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "success"
-						);
+						];
 					} else {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Try updating Moh Again"
-						);
+						];
 					}
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: MOH doesn't exist"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

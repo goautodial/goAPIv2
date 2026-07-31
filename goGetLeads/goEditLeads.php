@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
 	$lead_id 											= $astDB->escape($_REQUEST["lead_id"]);
@@ -49,64 +49,64 @@
 	$user_id 											= $astDB->escape($_REQUEST["user_id"]);
 	$user 												= $astDB->escape($_REQUEST["user"]);
 	$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
-	$defGender 											= array("M", "F", "U");
+	$defGender 											= ["M", "F", "U"];
     $custom_fields                                      = $_REQUEST["custom_fields"];
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($lead_id) || is_null($lead_id)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg 
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $first_name) && !empty($first_name)) {
+		];
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $first_name) && !empty($first_name)) {
 		$err_msg 										= error_handle("41004", "first_name");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $middle_initial) && !empty($middle_initial)) {
+		];
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $middle_initial) && !empty($middle_initial)) {
 		$err_msg 										= error_handle("41004", "middle_initial");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $last_name) && !empty($last_name)) {
+		];
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $last_name) && !empty($last_name)) {
 		$err_msg 										= error_handle("41004", "last_name");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $phone_number) && !empty($phone_number)) {
+		];
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $phone_number) && !empty($phone_number)) {
 		$err_msg 										= error_handle("41004", "phone_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 	} elseif (!in_array($gender,$defGender) && $gender != null) {
 		$err_msg 										= error_handle("41006", "gender");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		);
+		];
 	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $web_form_address)) {
 		$err_msg 										= error_handle("41004", "web_form_address");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -181,7 +181,7 @@
 				if (empty($status))
 					$status								= $data_status;
 					
-				$data									= array(
+				$data									= [
 					"first_name"							=> $first_name,
 					"middle_initial"						=> $middle_initial,
 					"last_name"								=> $last_name,
@@ -201,7 +201,7 @@
 					"title"									=> $title,
 					"status"								=> $status,
 					"comments"								=> $comments,
-				);
+				];
 
 				$astDB->where("lead_id", $lead_id);
 				$astDB->update("vicidial_list", $data);
@@ -231,11 +231,11 @@
 								
 				if ($goDB->count < 1) {
 					if ($is_customer > 0) {
-						$datago                                         = array(
+						$datago                                         = [
 							"lead_id"                                       => $lead_id,
 							"group_list_id"                         		=> $log_group,
 							"avatar"                                        => $avatar
-						);
+						];
 
 						$exec_go                                        = $goDB
 							->insert("go_customers", $datago);
@@ -251,23 +251,23 @@
 					}
 				}
 
-			$apiresults                                             = array(
+			$apiresults                                             = [
 				"result"                                                        => "success",
-			);
+			];
 
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id. Doesn't exist");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "41004", 
 					"result" 								=> $err_msg
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
 
 	if (checkIfTenant($groupId, $goDB)) {
 		$ul = "";
 	} else {
-		$stringv = go_getall_allowed_users($groupId, $astDB);
+		$stringv = go_getall_allowed_users($groupId);
 		if($groupId === 'ADMIN'){
 			$ul_online = " AND user IN ($stringv) ";
 			$ul_calls = " AND vicidial_live_agents.user IN ($stringv) ";
@@ -48,34 +48,30 @@
     $rsltvNoCalls = $astDB->rawQuery($query_OnlineAgentsNoCalls);
     $rsltvParkedChannels = $astDB->rawQuery($query_ParkedChannels);
     $rsltvCallerIDsFromVAC = $astDB->rawQuery($query_CallerIDsFromVAC);
-    
     //$countrsltvInCalls = mysqli_num_rows($rsltvInCalls);
     //$countrsltvNoCalls = mysqli_num_rows($rsltvNoCalls);
-
-    if($query_OnlineAgents != NULL) {
-        $dataInCalls = array();
-		foreach ($rsltvInCalls as $resultsInCalls){               
-			array_push($dataInCalls, $resultsInCalls);
+    $dataInCalls = [];
+    foreach ($rsltvInCalls as $resultsInCalls){               
+			$dataInCalls[] = $resultsInCalls;
 		}
-		//echo "pre";
-		//print_r($dataInCalls);
-		$dataNoCalls = array();
-		foreach ($rsltvNoCalls as $resultsNoCalls){               
-			array_push($dataNoCalls, $resultsNoCalls);
+    //echo "pre";
+    //print_r($dataInCalls);
+    $dataNoCalls = [];
+    foreach ($rsltvNoCalls as $resultsNoCalls){               
+			$dataNoCalls[] = $resultsNoCalls;
 		}
-		//echo "pre";
-		//print_r($dataNoCalls);
-		$dataParkedChannels = array();
-		foreach ($rsltvParkedChannels as $resultsParkedChannels){               
-			array_push($dataParkedChannels, $resultsParkedChannels);
+    //echo "pre";
+    //print_r($dataNoCalls);
+    $dataParkedChannels = [];
+    foreach ($rsltvParkedChannels as $resultsParkedChannels){               
+			$dataParkedChannels[] = $resultsParkedChannels;
 		}
-		$dataCallerIDsFromVAC = array();
-		foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAC){               
-			array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAC);
+    $dataCallerIDsFromVAC = [];
+    foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAC){               
+			$dataCallerIDsFromVAC[] = $resultsCallerIDsFromVAC;
 		}
-		$data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);            
-		$apiresults = array("result" => "success", "data" => $data);
-    } 
+    $data = array_merge($dataInCalls, $dataNoCalls, $dataParkedChannels, $dataCallerIDsFromVAC);
+    $apiresults = ["result" => "success", "data" => $data]; 
  
     
 ?>

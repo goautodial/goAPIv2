@@ -20,12 +20,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     $limit = $astDB->escape($_REQUEST['limit']);
-    if($limit < 1){ $limit = 20; } else { $limit = $limit; }
+    if($limit < 1){ $limit = 20; }
 
-    $groupId = go_get_groupid($goUser, $astDB);
+    $groupId = go_get_groupid($goUser);
     
     if (!checkIfTenant($groupId, $goDB)) {
         $ul='';
@@ -43,6 +43,6 @@
 		$dataTally[] =  $fresults['tally'];
 		$dataCampaignId[] =  $fresults['campaign_id'];
 		
-		$apiresults = array( "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId);
+		$apiresults = [ "result" => "success", "list_id" => $dataListId, "list_name" => $dataListName, "active" => $dataActive, "list_lastcalldate" => $dataListLastcallDate, "tally" => $dataTally, "campaign_id" => $dataCampaignId];
 	}
 ?>

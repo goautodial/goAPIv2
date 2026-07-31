@@ -64,22 +64,22 @@ if (isset($_GET['goCallVariables'])) { $call_variables = $astDB->escape($_GET['g
 $user = $agent->user;
 
 if ($is_logged_in) {
-	if ( (strlen($exten) < 1) || (strlen($channel) < 1) || (strlen($ext_context) < 1) || ( (strlen($queryCID) < 10) && ($alertCID < 1) ) ) {
-        $APIResult = array( "result" => "error", "message" => "Exten or queryCID is NOT valid, Originate command not inserted." );
+	if ( (strlen((string) $exten) < 1) || (strlen((string) $channel) < 1) || (strlen((string) $ext_context) < 1) || ( (strlen((string) $queryCID) < 10) && ($alertCID < 1) ) ) {
+        $APIResult = [ "result" => "error", "message" => "Exten or queryCID is NOT valid, Originate command not inserted." ];
 	} else {
         $notallowed = 0;
-		if ( (preg_match('/MANUAL/i', $agent_dialed_type)) && ( (preg_match("/^\d860\d\d\d\d$/i", $exten)) || (preg_match("/^860\d\d\d\d$/i", $exten)) ) ) {
-            $APIResult = array( "result" => "error", "message" => "You are not allowed to dial into other agent sessions $exten." );
+		if ( (preg_match('/MANUAL/i', (string) $agent_dialed_type)) && ( (preg_match("/^\d860\d\d\d\d$/i", (string) $exten)) || (preg_match("/^860\d\d\d\d$/i", (string) $exten)) ) ) {
+            $APIResult = [ "result" => "error", "message" => "You are not allowed to dial into other agent sessions $exten." ];
 			$notallowed = 1;
 		}
 
         if ($notallowed < 1) {
-            if (strlen($outbound_cid) > 1) {
+            if (strlen((string) $outbound_cid) > 1) {
                 $outCID = "\"$queryCID\" <$outbound_cid>";
             } else {
                 $outCID = "$queryCID";
             }
-            if ( ($usegroupalias > 0) && (strlen($account) > 1) ) {
+            if ( ($usegroupalias > 0) && (strlen((string) $account) > 1) ) {
                 $RAWaccount = $account;
                 $account = "Account: $account";
                 $variable = "Variable: _usegroupalias=1";
@@ -90,7 +90,7 @@ if ($is_logged_in) {
                 $account = "Variable: $call_variables";
             }
             //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$queryCID','Channel: $channel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','Callerid: $outCID','$account','$variable','','','');";
-            $insertData = array(
+            $insertData = [
                 'man_id' => '',
                 'uniqueid' => '',
                 'entry_date' => $NOW_TIME,
@@ -110,14 +110,14 @@ if ($is_logged_in) {
                 'cmd_line_i' => '',
                 'cmd_line_j' => '',
                 'cmd_line_k' => ''
-            );
+            ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
 
-            $APIResult = array( "result" => "success", "message" => "Originate command sent for Exten $exten Channel $channel on $server_ip.", "account" => $account, "variable" => $variable );
+            $APIResult = [ "result" => "success", "message" => "Originate command sent for Exten $exten Channel $channel on $server_ip.", "account" => $account, "variable" => $variable ];
     
             ### log outbound call in the dial log
             //$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$queryCID',lead_id='$lead_id',server_ip='$server_ip',call_date='$NOW_TIME',extension='$exten',channel='$channel',timeout='0',outbound_cid='$outCID',context='$ext_context';";
-            $insertData = array(
+            $insertData = [
                 'caller_code' => $queryCID,
                 'lead_id' => $lead_id,
                 'server_ip' => $server_ip,
@@ -127,16 +127,16 @@ if ($is_logged_in) {
                 'timeout' => '0',
                 'outbound_cid' => $outCID,
                 'context' => $ext_context
-            );
+            ];
             $rslt = $astDB->insert('vicidial_dial_log', $insertData);
     
             if ($agent_dialed_number > 0) {
-                if (strlen($lead_id) < 1) {$lead_id = '0';}
+                if (strlen((string) $lead_id) < 1) {$lead_id = '0';}
                 $customer_hungup = '';
-                if ( ($stage > 0) and (preg_match("/3WAY/", $agent_dialed_type)) ) 
+                if ( $stage > 0 && preg_match("/3WAY/", (string) $agent_dialed_type) ) 
                     {$customer_hungup = 'BEFORE_CALL';}
                 //$stmt = "INSERT INTO user_call_log (user,call_date,call_type,server_ip,phone_number,number_dialed,lead_id,callerid,group_alias_id,preset_name,campaign_id,customer_hungup) values('$user','$NOW_TIME','$agent_dialed_type','$server_ip','$exten','$channel','$lead_id','$outbound_cid','$RAWaccount','$preset_name','$campaign','$customer_hungup')";
-                $insertData = array(
+                $insertData = [
                     'user' => $user,
                     'call_date' => $NOW_TIME,
                     'call_type' => $agent_dialed_type,
@@ -149,10 +149,10 @@ if ($is_logged_in) {
                     'preset_name' => $preset_name,
                     'campaign_id' => $campaign,
                     'customer_hungup' => $customer_hungup
-                );
+                ];
                 $rslt = $astDB->insert('user_call_log', $insertData);
     
-                if (strlen($preset_name) > 0){
+                if ((string) $preset_name !== ''){
                     //$stmt = "SELECT count(*) from vicidial_xfer_stats where campaign_id='$campaign' and preset_name='$preset_name';";
                     $astDB->where('campaign_id', $campaign);
                     $astDB->where('preset_name', $preset_name);
@@ -163,16 +163,16 @@ if ($is_logged_in) {
                         $xfer_count++;
                         $astDB->where('campaign_id', $campaign);
                         $astDB->where('preset_name', $preset_name);
-                        $rslt = $astDB->update('vicidial_xfer_stats', array('xfer_count' => $xfer_count));
+                        $rslt = $astDB->update('vicidial_xfer_stats', ['xfer_count' => $xfer_count]);
                     } else {
                         //$stmt = "INSERT INTO vicidial_xfer_stats SET campaign_id='$campaign',preset_name='$preset_name',xfer_count='1';";
-                        $rslt = $astDB->insert('vicidial_xfer_stats', array('campaign_id' => $campaign, 'preset_name' => $preset_name, 'xfer_count' => 1));
+                        $rslt = $astDB->insert('vicidial_xfer_stats', ['campaign_id' => $campaign, 'preset_name' => $preset_name, 'xfer_count' => 1]);
                     }
                 }
             }
         }
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

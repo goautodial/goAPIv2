@@ -22,12 +22,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul=' AND vicidial_users.user_level != 4';
     } else { 
-        $stringv = go_getall_allowed_users($groupId, $astDB);
+        $stringv = go_getall_allowed_users($groupId);
         $ul = " AND vicidial_users.user IN ($stringv) AND vicidial_users.user_level != 4";
     }
     
@@ -38,19 +38,19 @@
     $countResultGo = $goDB->getRowCount();
         
     if($countResultGo > 0) {
-        $dataGo = array();
+        $dataGo = [];
         foreach ($rsltvGo as $fresultsGo){
-            array_push($dataGo, $fresultsGo);
+            $dataGo[] = $fresultsGo;
         }
     }
     
     $rsltvOfflineAgents = $astDB->rawQuery($query_OfflineActiveAgents);
-    $data = array();        
+    $data = [];        
     foreach ($rsltvOfflineAgents as $resultsOfflineAgents){               
-        array_push($data, $resultsOfflineAgents);            
+        $data[] = $resultsOfflineAgents;            
     }
     
     //$dataM = array_merge($data, $dataGo);        
-    $apiresults = array("result" => "success", "data" => $data, "dataGo" => $dataGo);
+    $apiresults = ["result" => "success", "data" => $data, "dataGo" => $dataGo];
 
 ?>

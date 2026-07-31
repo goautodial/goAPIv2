@@ -45,13 +45,13 @@
             $dataAgent_log_id[]	     = $fresults['agent_log_id'];
             $dataCallerid[]	         = $fresults['callerid'];
             
-            $apiresults = array("result" => "success", "station" => $dataStation, "user" => $dataUser, "tenant_id" => $dataTenant_id, "session_id" => $dataSession_id, "status" => $dataStatus, "comments" => $dataComments, "server_ip" => $dataServer_ip, "call_server_ip" => $dataCall_server_ip, "last_call_time" => $dataLast_call_time, "last_call_finish" => $dataLast_call_finish, "campaign" => $dataCampaign, "last_state_change" => $dataLast_state_change, "lead_id" => $dataLead_id, "agent_log_id" => $dataAgent_log_id, "caller_id" => $dataCallerid);
+            $apiresults = ["result" => "success", "station" => $dataStation, "user" => $dataUser, "tenant_id" => $dataTenant_id, "session_id" => $dataSession_id, "status" => $dataStatus, "comments" => $dataComments, "server_ip" => $dataServer_ip, "call_server_ip" => $dataCall_server_ip, "last_call_time" => $dataLast_call_time, "last_call_finish" => $dataLast_call_finish, "campaign" => $dataCampaign, "last_state_change" => $dataLast_state_change, "lead_id" => $dataLead_id, "agent_log_id" => $dataAgent_log_id, "caller_id" => $dataCallerid];
     
         }
     
     } else {
     
-            $apiresults = array("result" => "Error: No data to show.");
+            $apiresults = ["result" => "Error: No data to show."];
     
     }
 

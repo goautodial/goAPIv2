@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("../goFunctions.php");
+    include_once (__DIR__ . "/../goFunctions.php");
     
     $list_to   = $astDB->escape($_REQUEST['list_to']);
     $list_from = $astDB->escape($_REQUEST['list_from']);
@@ -38,7 +38,7 @@
         $astDB->where('list_id', $list_from);
         $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
         
-        $output = array();
+        $output = [];
         foreach($fromList as $fresults){
             $field_id          = $fresults['field_id'];
             $field_label       = $fresults['field_label'];
@@ -65,7 +65,7 @@
                 $checkTable = "SHOW TABLES LIKE 'custom_$list_to'";
                 $queryCheckTable = $astDB->rawQuery($checkTable);
                 
-                if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
+                if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
@@ -79,7 +79,7 @@
                         $te++;
                        }
                     
-                    $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                    $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                     $fieldcatch = $field_options_ENUM;
                     $field_cost = strlen($field_options_ENUM);
                     if ($field_cost < 1) {$field_cost=1;};
@@ -87,7 +87,7 @@
                 }
                  
                 
-                if ( ($field_type=='MULTI') or ($field_type=='CHECKBOX') ){
+                if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
@@ -100,7 +100,7 @@
                             }
                         $te++;
                        }
-                    $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                    $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                     $field_cost = strlen($field_options_ENUM);
                     if ($field_cost < 1) {$field_cost=1;};
                     $field_sql .= "VARCHAR($field_cost) ";
@@ -126,7 +126,7 @@
                     $field_cost = 8;
                 }
                 
-                if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+                if ( !empty($field_default) && $field_default != ' ' && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
                     //if($fieldcatch == "") {
                         $field_sql .= "default '$field_default'";
                     //} else {
@@ -142,23 +142,23 @@
                 $stmtCUSTOM="$field_sql";
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
 
-                $data_update = array(
+                $data_update = [
                     'field_label'       => $field_label,
                     'field_name'        => $field_name,
                     'field_description' => $field_description,
                     'field_rank'        => $field_rank,
-                    'field_help'        => (!empty($field_help) ? $field_help : ''),
+                    'field_help'        => (empty($field_help) ? '' : $field_help),
                     'field_type'        => $field_type,
-                    'field_options'     => (!empty($field_options) ? $field_options : ''),
+                    'field_options'     => (empty($field_options) ? '' : $field_options),
                     'field_size'        => $field_size,
                     'field_max'         => $field_max,
-                    'field_default'     => (!empty($field_default) ? $field_default : ''),
+                    'field_default'     => (empty($field_default) ? '' : $field_default),
                     'field_required'    => $field_required,
                     'field_cost'        => $field_cost,
                     'multi_position'    => $multi_position,
                     'name_position'     => $name_position,
                     'field_order'       => $field_order
-                );
+                ];
                 $astDB->where('list_id', $list_to);
                 $astDB->where('field_id', $field_id);
                 $queryUpdate = $astDB->update('vicidial_lists_fields', $data_update);
@@ -175,16 +175,16 @@
         }
         
         if(in_array("error", $output)){
-            $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
+            $apiresults = ["result" => "success", "data" => "some fields are detected as duplicate and skipped"];
         }else{
-            $apiresults = array("result" => "success", "query" => $field_sql);
+            $apiresults = ["result" => "success", "query" => $field_sql];
         }
     }elseif($copy_option == "APPEND"){
         $astDB->where('list_id', $list_from);
         $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
         
-        $output = array();
-        $output1 = array();
+        $output = [];
+        $output1 = [];
         $field_sql ='';
         foreach($fromList as $fresults){
             $field_label       = $fresults['field_label'];
@@ -220,7 +220,7 @@
                 }
 
                
-                if ( ($field_type==strtoupper('select')) or ($field_type=='RADIO') ) {
+                if ( $field_type == strtoupper('select') || $field_type == 'RADIO' ) {
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
@@ -237,13 +237,13 @@
                     
                     $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
                     $fieldcatch = $field_options_ENUM;
-                    $field_cost = strlen($field_options_ENUM);
+                    $field_cost = strlen((string) $field_options_ENUM);
                     if ($field_cost < 1) {$field_cost=1;};
                     $field_sql .= "ENUM($field_options_ENUM) ";
                 }
                  
                 
-                if ( ($field_type=='MULTI') or ($field_type=='CHECKBOX') ){
+                if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
                     $field_options_array = explode("\n",$field_options);
                     $field_options_count = count($field_options_array);
                     $te=0;
@@ -256,13 +256,13 @@
                             }
                         $te++;
                        }
-                    $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                    $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                     $field_cost = strlen($field_options_ENUM);
                     if ($field_cost < 1) {$field_cost=1;};
                     $field_sql .= "VARCHAR($field_cost) ";
                 }
                 
-                if ( ($field_type=='TEXT') or ($field_type=='HIDDEN') ) {
+                if ( $field_type == 'TEXT' || $field_type == 'HIDDEN' ) {
                     if ($field_max < 1) {$field_max=1;};
                     $field_sql .= "VARCHAR($field_max) ";
                 }
@@ -282,7 +282,7 @@
                     $field_cost = 8;
                 }
                 
-                if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+                if ( !empty($field_default) && $field_default != ' ' && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
                     //if($fieldcatch == "") {
                         $field_sql .= "default '$field_default'";
                     //} else {
@@ -308,24 +308,24 @@
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
                 // $output[] = mysqli_error($link);
 
-                $data_insert = array(
+                $data_insert = [
                     'list_id'           => $list_to,
                     'field_label'       => $field_label,
                     'field_name'        => $field_name,
                     'field_description' => $field_description,
                     'field_rank'        => $field_rank,
-                    'field_help'        => (!empty($field_help)) ? $field_help:"",
+                    'field_help'        => (empty($field_help)) ? "":$field_help,
                     'field_type'        => $field_type,
-                    'field_options'     => (!empty($field_options)) ? $field_options:"",
+                    'field_options'     => (empty($field_options)) ? "":$field_options,
                     'field_size'        => $field_size,
                     'field_max'         => $field_max,
-                    'field_default'     => (!empty($field_default)) ? $field_default:"",
-                    'field_required'    => (!empty($field_required)) ? $field_required:"N",
-                    'field_cost'        => (!empty($field_cost)) ? $field_cost:"0",
-                    'multi_position'    => (!empty($multi_position)) ? $multi_position:"HORIZONTAL",
-                    'name_position'     => (!empty($name_position)) ? $name_position:"LEFT",
+                    'field_default'     => (empty($field_default)) ? "":$field_default,
+                    'field_required'    => (empty($field_required)) ? "N":$field_required,
+                    'field_cost'        => (empty($field_cost)) ? "0":$field_cost,
+                    'multi_position'    => (empty($multi_position)) ? "HORIZONTAL":$multi_position,
+                    'name_position'     => (empty($name_position)) ? "LEFT":$name_position,
                     'field_order'       => $field_order
-                );
+                ];
                 $queryInsert = $astDB->insert('vicidial_lists_fields', $data_insert);
                 $insertQuery = $astDB->getLastQuery();
 
@@ -339,7 +339,7 @@
                 }
             }
         }
-        $apiresults = array("result" => "success", "query" => $output, "query1" => $output1);
+        $apiresults = ["result" => "success", "query" => $output, "query1" => $output1];
         // if(in_array("error", $output)){
         //     $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
         // }else{
@@ -364,7 +364,7 @@
                 $astDB->where('list_id', $list_from);
                 $fromList = $astDB->get('vicidial_lists_fields', null, 'field_id,field_label,field_name,field_description,field_rank,field_help,field_type,field_options,field_size,field_max,field_default,field_cost,field_required,multi_position,name_position,field_order');
                 
-                $output = array();
+                $output = [];
                 foreach($fromList as $fresults){
                     $field_label       = $fresults['field_label'];
                     $field_name        = $fresults['field_name'];
@@ -396,7 +396,7 @@
                         }
                         
                        
-                        if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
+                        if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
                             $field_options_array = explode("\n",$field_options);
                             $field_options_count = count($field_options_array);
                             $te=0;
@@ -410,7 +410,7 @@
                                 $te++;
                                }
                             
-                            $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                            $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                             $fieldcatch = $field_options_ENUM;
                             $field_cost = strlen($field_options_ENUM);
                             if ($field_cost < 1) {$field_cost=1;};
@@ -418,7 +418,7 @@
                         }
                          
                         
-                        if ( ($field_type=='MULTI') or ($field_type=='CHECKBOX') ){
+                        if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
                             $field_options_array = explode("\n",$field_options);
                             $field_options_count = count($field_options_array);
                             $te=0;
@@ -431,7 +431,7 @@
                                     }
                                 $te++;
                                }
-                            $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                            $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                             $field_cost = strlen($field_options_ENUM);
                             if ($field_cost < 1) {$field_cost=1;};
                             $field_sql .= "VARCHAR($field_cost) ";
@@ -457,7 +457,7 @@
                             $field_cost = 8;
                         }
                         
-                        if ( (!empty($field_default) ) and ($field_default != ' ') and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+                        if ( !empty($field_default) && $field_default != ' ' && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
                             //if($fieldcatch == "") {
                                 $field_sql .= "default '$field_default'";
                             //} else {
@@ -477,7 +477,7 @@
                         $stmtCUSTOM="$field_sql";
                         $rslt = $astDB->rawQuery($stmtCUSTOM);
         
-                        $data_insert = array(
+                        $data_insert = [
                             'field_label'       => $field_label,
                             'field_name'        => $field_name,
                             'field_description' => $field_description,
@@ -493,7 +493,7 @@
                             'multi_position'    => $multi_position,
                             'name_position'     => $name_position,
                             'field_order'       => $field_order
-                        );
+                        ];
                         $queryInsert = $astDB->insert('vicidial_lists_fields', $data_insert);
                         $insertQuery = $astDB->getLastQuery();
                         if($queryInsert){
@@ -507,18 +507,18 @@
                 }
                 
                 if(in_array("error", $output)){
-                    $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
+                    $apiresults = ["result" => "success", "data" => "some fields are detected as duplicate and skipped"];
                 }else{
-                    $apiresults = array("result" => "success");
+                    $apiresults = ["result" => "success"];
                 }
             }else{
-                $apiresults = array("result" => "Error: Custom Field does not exist");
+                $apiresults = ["result" => "Error: Custom Field does not exist"];
             }
         }else{
-            $apiresults = array("result" => "Error: List does not exist");
+            $apiresults = ["result" => "Error: List does not exist"];
         }
     }else{
-        $apiresults = array("result" => "Error: Unknown action submitted");
+        $apiresults = ["result" => "Error: Unknown action submitted"];
     }
 
 ?>

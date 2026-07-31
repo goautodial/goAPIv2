@@ -45,23 +45,23 @@ if (isset($type) && $type == 'sendNewMessage') {
     $session = uniqid();
     foreach($recipients as $to) {
         //$stmt = "INSERT INTO manager_chat SET `date`='$date',`from`='$userId',`to`='$manager', `text`='".$goDB->escape($post)."',`seen`=0, `session`='$session';";
-		$insertData = array(
+		$insertData = [
 			'date' => $date,
 			'from' => $userId,
 			'to' => $goDB->escape($to),
 			'text' => $goDB->escape($post),
 			'seen' => 0,
 			'session' => $session
-		);
+		];
         $goDB->insert('manager_chat', $insertData);
 		$errorLog = $goDB->getLastError();
     }
 
 	$thisClass = "agent-message";
-	if (preg_match("/^(MANAGERS|LOCATION_MANAGERS|ADMIN)$/", $userGroup)) {
+	if (preg_match("/^(MANAGERS|LOCATION_MANAGERS|ADMIN)$/", (string) $userGroup)) {
 		$thisClass = "manager-message";
 	}
-	$APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => "<div class='$thisClass col-md-12'><b>Me ($fullName):</b> <div class='{$thisClass}-text'>$post</div></div>", "error" => $errorLog );
+	$APIResult = [ "result" => "success", "code" => 200, "type" => $type, "data" => "<div class='$thisClass col-md-12'><b>Me ($fullName):</b> <div class='{$thisClass}-text'>$post</div></div>", "error" => $errorLog ];
 }
 
 
@@ -95,7 +95,7 @@ if (isset($type) && $type == 'getMessages') {
 		}
 	}
 
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
+    $APIResult = [ "result" => "success", "code" => 200, "type" => $type, "data" => $messages ];
 }
 
 // Gets new messages
@@ -118,10 +118,10 @@ if (isset($type) && $type == 'getNewMessages') {
     //$query = "UPDATE manager_chat SET `seen`=1 WHERE `to`='$userId' AND `seen`=0";
 	$goDB->where('`to`', $userId);
 	$goDB->where('`seen`', 0);
-    $goDB->update('manager_chat', array('seen' => 1));
+    $goDB->update('manager_chat', ['seen' => 1]);
 	$errorLog = $goDB->getLastError();
 	
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages, "error" => $errorLog );
+    $APIResult = [ "result" => "success", "code" => 200, "type" => $type, "data" => $messages, "error" => $errorLog ];
 }
 
 // Gets old messages
@@ -155,7 +155,7 @@ if(isset($type) && $type == 'getOldMessages') {
 		}
 	}
 
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $messages );
+    $APIResult = [ "result" => "success", "code" => 200, "type" => $type, "data" => $messages ];
 }
 
 // Gets active managers
@@ -170,19 +170,19 @@ if(isset($type) && $type == 'getActiveManagers') {
 		}
 	}
 	
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "data" => $managers );
+    $APIResult = [ "result" => "success", "code" => 200, "type" => $type, "data" => $managers ];
 }
 
 // Update Last Seen
 if (isset($type) && $type == 'updateSeen') {
 	//UPDATE vicidial_users SET last_seen_date='" . date("Y-m-d H:i:s") ."' WHERE user='$user';
-	$updateData = array(
+	$updateData = [
 		'last_seen_date' => date("Y-m-d H:i:s")
-	);
+	];
 	
 	$goDB->where('name', $user);
 	$goDB->update('users', $updateData);
 	
-    $APIResult = array( "result" => "success", "code" => 200, "type" => $type, "message" => "Last seen updated." );
+    $APIResult = [ "result" => "success", "code" => 200, "type" => $type, "message" => "Last seen updated." ];
 }
 ?>

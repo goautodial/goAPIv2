@@ -22,23 +22,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$limit 												= (isset($_REQUEST['limit'])) ? $astDB->escape($_REQUEST['limit']) : 1000;
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {		
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -52,13 +52,13 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) !== 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					//if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -66,7 +66,7 @@
 				}					
 			}
 			
-			$cols 										= array("moh_id", "moh_name", "active", "random", "user_group");
+			$cols 										= ["moh_id", "moh_name", "active", "random", "user_group"];
 			$astDB->where("remove", "N", "=");
 			$rsltv 										= $astDB->get("vicidial_music_on_hold", $limit, $cols);
 
@@ -77,21 +77,21 @@
 				$dataRandom[] 							= $fresults['random'];
 				$dataUserGroup[] 						= $fresults['user_group'];
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"moh_id" 								=> $dataModId, 
 					"moh_name" 								=> $dataMohName, 
 					"active" 								=> $dataActive, 
 					"random" 								=> $dataRandom, 
 					"user_group" 							=> $dataUserGroup
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}			
 ?>

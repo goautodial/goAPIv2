@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-	@include_once ("goAPI.php");
+	@include_once (__DIR__ . "/goAPI.php");
 
 	// POST or GET Variables
 	$extension = $_REQUEST['extension'];
@@ -31,12 +31,12 @@
 		//$query = "SELECT extension FROM phones WHERE extension='$extension';";
 
 		if($astDB->count < 1) {
-			$apiresults = array("result" => "success");
+			$apiresults = ["result" => "success"];
 		}else{
-			$apiresults = array("result" => "Error: Phone already exist.");
+			$apiresults = ["result" => "Error: Phone already exist."];
 		}  
 	}else{
-		$apiresults = array("result" => "Error: Missing parameters.");
+		$apiresults = ["result" => "Error: Missing parameters."];
 	}
 
 ?>

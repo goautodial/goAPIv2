@@ -25,9 +25,9 @@
     $ticketid = $ostDB->escape($_REQUEST['ticket_id']);
     
     if($ticketid == null && $ticketid == 0) { 
-        $apiresults = array("result" => "Error: Set a value for Ticket ID"); 
+        $apiresults = ["result" => "Error: Set a value for Ticket ID"]; 
     } else {
-        $groupId = go_get_groupid($goUser, $astDB);
+        $groupId = go_get_groupid($goUser);
 
         if (!checkIfTenant($groupId, $goDB)) {
             $ul='';
@@ -41,20 +41,20 @@
         $countResult = $ostDB->getRowCount();
         
         if($countResult > 0) {
-            $data = array();
+            $data = [];
             foreach ($rsltv as $fresults){
-                array_push($data, urlencode_array($fresults));
+                $data[] = urlencode_array($fresults);
             }
-            $apiresults = array("result" => "success", "data" => $data);
+            $apiresults = ["result" => "success", "data" => $data];
         } else {
-            $apiresults = array("result" => "Error: No data to show.");
+            $apiresults = ["result" => "Error: No data to show."];
         }                
     }
     
     function urlencode_array($array) {
-        $out_array = array();
+        $out_array = [];
         foreach($array as $key => $value) {
-            $out_array[rawurlencode($key)] = rawurlencode($value);
+            $out_array[rawurlencode((string) $key)] = rawurlencode((string) $value);
         }
         return $out_array;
     }

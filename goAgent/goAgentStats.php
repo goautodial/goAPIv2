@@ -105,17 +105,17 @@ function gatAllStatusCodes($campID, $salesYes=false){
 	$cstatuses = implode("','", $cstatuses);
 	$cstatuses = "'".$cstatuses."'";
 
-	if(strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+	if($cstatuses !== '')
 	{
 		$statuses = "{$sstatuses}','{$cstatuses}";
 	}
 	else
 	{
-		$statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+		$statuses = ($sstatuses !== '' && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
 	}
 
 	return $statuses;
 }
 
-$APIResult = array( "result" => "success", "data" => array( "disable_alter_custphone" => $disable_alter_custphone, "labels" => $rslt ) );
+$APIResult = [ "result" => "success", "data" => [ "disable_alter_custphone" => $disable_alter_custphone, "labels" => $rslt ] ];
 ?>

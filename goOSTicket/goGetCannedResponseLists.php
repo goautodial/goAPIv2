@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($goUser, $astDB);
+    $groupId = go_get_groupid($goUser);
 
     if (!checkIfTenant($groupId, $goDB)) {
         $ul='';
@@ -35,19 +35,19 @@
     $countResult = $ostDB->getRowCount();
     
     if($countResult > 0) {
-        $data = array();
+        $data = [];
         foreach ($rsltv as $fresults){
-            array_push($data, urlencode_array($fresults));
+            $data[] = urlencode_array($fresults);
         }
-        $apiresults = array("result" => "success", "data" => $data);
+        $apiresults = ["result" => "success", "data" => $data];
     } else {
-        $apiresults = array("result" => "Error: No data to show.");
+        $apiresults = ["result" => "Error: No data to show."];
     }
 
     function urlencode_array($array) {
-        $out_array = array();
+        $out_array = [];
         foreach($array as $key => $value) {
-            $out_array[urlencode($key)] = urlencode($value);
+            $out_array[urlencode((string) $key)] = urlencode((string) $value);
         }
         return $out_array;
     }

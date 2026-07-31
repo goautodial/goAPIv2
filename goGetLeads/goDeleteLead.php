@@ -22,30 +22,30 @@
 */
 
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
     $lead_id 											= $astDB->escape($_REQUEST['lead_id']);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($lead_id) || is_null($lead_id)) {
 		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -78,23 +78,23 @@
 
 				$log_id 								= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
 				
-				$apiresults								= array(
+				$apiresults								= [
 					"result" 								=> "success"
-				);
+				];
 			} else {
 				$err_msg 								= error_handle("10010");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "10010", 
 					"result" 								=> $err_msg
-				);
+				];
 				//$apiresults = array("result" => "Error: Lead ID does not exist.");
 			}		
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

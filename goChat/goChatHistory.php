@@ -35,8 +35,8 @@ if (isset($user) && $user !== '') {
 	$astDB->where('recipient', $user);
     $rslt = $astDB->get('go_chat_history', $limit);
     
-    $APIResult = array( "result" => "success", "data" => $rslt );
+    $APIResult = [ "result" => "success", "data" => $rslt ];
 } else {
-	$APIResult = array( "result" => "error", "message" => "Field 'user' should not be empty." );
+	$APIResult = [ "result" => "error", "message" => "Field 'user' should not be empty." ];
 }
 ?>

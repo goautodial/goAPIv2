@@ -20,56 +20,56 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("goAPI.php");
-    
+    include_once (__DIR__ . "/goAPI.php");
+
     // POST or GET Variables
     $extension 											= $astDB->escape($_REQUEST['extension']);
-        
+
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif (empty($extension) || is_null($extension)) { 
-		$apiresults										= array(
+		];
+	} elseif (empty($extension) || is_null($extension)) {
+		$apiresults										= [
 			"result" 										=> "Error: Phone Extension Not Defined."
-		); 
-	} else {        
+		];
+	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-			
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
+				}
 			}
-		
-			$cols 										= array(
+
+			$cols 										= [
 				"extension",
 				"protocol",
 				"server_ip",
@@ -81,8 +81,8 @@
 				"messages",
 				"old_messages",
 				"user_group"
-			);
-			
+			];
+
 			$astDB->where("extension", $extension);
 			$astDB->orderby("extension", "asc");
 			$fresults 									= $astDB->getOne("phones", $cols);
@@ -100,34 +100,34 @@
 				$dataOldMessages 						= $fresults['old_messages'];
 				$dataUserGroup 							= $fresults['user_group'];
 
-				$apiresults 							= array(
-					"result" 								=> "success", 
-					"extension" 							=> $dataExtension, 
-					"protocol" 								=> $dataProtocol, 
-					"server_ip" 							=> $dataServerIp, 
-					"dialplan_number" 						=> $dataDialplanNumber, 
-					"voicemail_id" 							=> $dataVoicemailId, 
-					"status" 								=> $dataStatus, 
-					"active" 								=> $dataActive, 
-					"fullname" 								=> $dataFullname, 
-					"messages" 								=> $dataMessages, 
-					"old_messages" 							=> $dataOldMessages, 
+				$apiresults 							= [
+					"result" 								=> "success",
+					"extension" 							=> $dataExtension,
+					"protocol" 								=> $dataProtocol,
+					"server_ip" 							=> $dataServerIp,
+					"dialplan_number" 						=> $dataDialplanNumber,
+					"voicemail_id" 							=> $dataVoicemailId,
+					"status" 								=> $dataStatus,
+					"active" 								=> $dataActive,
+					"fullname" 								=> $dataFullname,
+					"messages" 								=> $dataMessages,
+					"old_messages" 							=> $dataOldMessages,
 					"user_group" 							=> $dataUserGroup
-				);
-				
-				$log_id 								= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of Phone: $exten_id", $log_group);
+				];
+
+				$log_id 								= log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the info of Phone: $extension", $log_group);
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Phone doesn't exist."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
+			$apiresults 								= [
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			);		
+			];
 		}
 	}
-	
+
 ?>

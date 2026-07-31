@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
 	$call_time_name 									= $astDB->escape($_REQUEST['call_time_name']);
@@ -59,97 +59,97 @@
 
     // ERROR CHECKING 
 	if (empty ($goUser) || is_null ($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty ($goPass) || is_null ($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty ($log_user) || is_null ($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif (empty($call_time_id) || strlen($call_time_id) < 3) {
-		$apiresults 									= array(
+		];
+	} elseif (empty($call_time_id) || strlen((string) $call_time_id) < 3) {
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Call Time ID not less than 3 characters."
-		);
-	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_name) || empty($call_time_name)) {
-		$apiresults 									= array(
+		];
+	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',(string) $call_time_name) || empty($call_time_name)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in call time name and must not be empty"
-		);
-	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â]/',$call_time_id)) {
-		$apiresults 									= array(
+		];
+	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â]/',(string) $call_time_id)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in call time ID"
-		);
+		];
 	} elseif (preg_match('/[\'^Â£$%&*()}{@#~?><>,|=_+Â-]/',$call_time_comments)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in call time comments"
-		);
+		];
 	} elseif (!is_numeric($ct_default_start) && $ct_default_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_default_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_default_stop) && $ct_default_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_default_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_sunday_start) && $ct_sunday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_sunday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_sunday_stop) && $ct_sunday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_sunday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_monday_start) && $ct_monday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_monday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_monday_stop) && $ct_monday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_monday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_tuesday_start) && $ct_tuesday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_tuesday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_tuesday_stop) && $ct_tuesday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_tuesday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_wednesday_start) && $ct_wednesday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_wednesday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_wednesday_stop) && $ct_wednesday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_wednesday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_thursday_start) && $ct_thursday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_thursday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_thursday_stop) && $ct_thursday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_thursday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_friday_start) && $ct_friday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_friday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_friday_stop) && $ct_friday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_friday_stop must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_saturday_start) && $ct_saturday_start != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_saturday_start must be a number or combination of number"
-		);
+		];
 	} elseif (!is_numeric($ct_saturday_stop) && $ct_saturday_stop != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: ct_saturday_stop must be a number or combination of number"
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -169,7 +169,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -217,7 +217,7 @@
 					if (is_null($friday_audio)) {$friday_audio = $origData["friday_afterhours_filename_override"];}
 					if (is_null($saturday_audio)) {$saturday_audio = $origData["saturday_afterhours_filename_override"];}
 
-					$data 								= array(
+					$data 								= [
 						"call_time_name" 					=> $call_time_name,
 						"call_time_comments" 				=> $call_time_comments,
 						"user_group" 						=> $user_group,
@@ -245,37 +245,37 @@
 						"thursday_afterhours_filename_override" => $thursday_audio,
 						"friday_afterhours_filename_override" => $friday_audio,
 						"saturday_afterhours_filename_override" => $saturday_audio
-					);
+					];
 					
 					$astDB->where("call_time_id", $call_time_id);
 					$updateQuery 						= $astDB->update("vicidial_call_times", $data);
 					
 					if (!$updateQuery) {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Edit failed, check your details"
-						);
+						];
 					} else {
 						$log_id 						= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated Call Time ID: $call_time_id", $log_group, $astDB->getLastQuery());
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "success"
-						);
+						];
 					}
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Edit failed, Call Time doesn't exist!"
-					);
+					];
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Invalid User Group"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

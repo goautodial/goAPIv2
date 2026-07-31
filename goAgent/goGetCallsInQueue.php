@@ -43,11 +43,11 @@ if ($is_logged_in) {
 	$view_calls_in_queue =	$rslt['view_calls_in_queue'];
 	$grab_calls_in_queue =	$rslt['grab_calls_in_queue'];
 
-	if (preg_match('/NONE/i', $view_calls_in_queue)) {
+	if (preg_match('/NONE/i', (string) $view_calls_in_queue)) {
 		echo "Calls in Queue View Disabled for this campaign\n";
-        $APIResult = array( "result" => "error", "message" => "Calls in Queue View is disabled for this campaign" );
+        $APIResult = [ "result" => "error", "message" => "Calls in Queue View is disabled for this campaign" ];
 	} else {
-		$view_calls_in_queue = preg_replace('/ALL/', '99', $view_calls_in_queue);
+		$view_calls_in_queue = preg_replace('/ALL/', '99', (string) $view_calls_in_queue);
 	
 		### grab the status and campaign/in-group information for this agent to display
 		$ADsql = '';
@@ -58,7 +58,7 @@ if ($is_logged_in) {
 		$Alogin = $rslt['status'];
 		$Acampaign = $rslt['campaign_id'];
 		$AccampSQL = $rslt['closer_campaigns'];
-		$AccampSQL = preg_replace('/\s-/', '', $AccampSQL);
+		$AccampSQL = preg_replace('/\s-/', '', (string) $AccampSQL);
 		$AccampSQL = preg_replace('/\s/', "','", $AccampSQL);
 		if (preg_match('/AGENTDIRECT/i', $AccampSQL)) {
 			$AccampSQL = preg_replace('/AGENTDIRECT/', '', $AccampSQL);
@@ -126,15 +126,15 @@ if ($is_logged_in) {
 //		echo "</TR>";
 
 		### Print call information and gather more info on the calls as they are printed
-		$callsInQueue = array();
+		$callsInQueue = [];
 		$loop_count = 0;
-		while ( ($calls_count > $loop_count) and ($view_calls_in_queue > $loop_count) ) {
+		while ( $calls_count > $loop_count && $view_calls_in_queue > $loop_count ) {
 			$call_time = ($StarTtime - $OQcall_time[$loop_count]);
 			$Fminutes_M = ($call_time / 60);
 			$Fminutes_M_int = floor($Fminutes_M);
 			$Fminutes_M_int = intval("$Fminutes_M_int");
 			$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
-			$Fminutes_S = ($Fminutes_S * 60);
+			$Fminutes_S *= 60;
 			$Fminutes_S = round($Fminutes_S, 0);
 			if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
 			$call_time = "$Fminutes_M_int:$Fminutes_S";
@@ -167,13 +167,13 @@ if ($is_logged_in) {
 
 			if (strlen($caller_name) < 2)
 				{$caller_name =	$comments;}
-			if (strlen($caller_name) > 30) {$caller_name = substr("$caller_name", 0, 30);}
+			if (strlen((string) $caller_name) > 30) {$caller_name = substr("$caller_name", 0, 30);}
 
 			if (preg_match("/0$|2$|4$|6$|8$/i", $loop_count)) {$Qcolor = '#FCFCFC';} 
 			else{$Qcolor = '#ECECEC';}
 
             $call_id = $OQauto_call_id[$loop_count];
-			if ( (preg_match('/Y/i', $grab_calls_in_queue)) and ($OQcall_type[$loop_count] == 'IN') ) {
+			if ( preg_match('/Y/i', (string) $grab_calls_in_queue) && $OQcall_type[$loop_count] == 'IN' ) {
 				//echo "<TR $Qcolor>";
 				//echo "<TD> <a href=\"#\" onclick=\"callinqueuegrab('$OQauto_call_id[$loop_count]');return false;\"><font style=\"font-size: 11px; font-family: sans-serif;\">TAKE CALL</a> &nbsp; </TD>";
 				//echo "<TD><font style=\"font-size: 11px; font-family: sans-serif;\"> &nbsp; $OQphone_number[$loop_count] &nbsp; </font></TD>";
@@ -184,7 +184,7 @@ if ($is_logged_in) {
 				//echo "<TD><font style=\"font-size: 11px; font-family: sans-serif;\"> &nbsp; $OQcampaign_id[$loop_count] - $group_name &nbsp; </font></TD>";
 				//echo "<TD><font style=\"font-size: 11px; font-family: sans-serif;\"> &nbsp; $OQcall_type[$loop_count] &nbsp; </font></TD>";
 				//echo "</TR>";
-                $callsInQueue[$call_id] = array(
+                $callsInQueue[$call_id] = [
                     'phone' => $OQphone_number[$loop_count],
                     'name' => $caller_name,
                     'wait' => $call_time,
@@ -192,7 +192,7 @@ if ($is_logged_in) {
                     'call_group' => "{$OQcampaign_id[$loop_count]} - {$group_name}",
                     'type' => $OQcall_type[$loop_count],
                     'cangrab' => 1
-                );
+                ];
 			} else {
 				//echo "<TR $Qcolor>";
 				//echo "<TD> &nbsp; </TD>";
@@ -204,7 +204,7 @@ if ($is_logged_in) {
 				//echo "<TD><font style=\"font-size: 11px; font-family: sans-serif;\"> &nbsp; $OQcampaign_id[$loop_count] - $group_name &nbsp; </font></TD>";
 				//echo "<TD><font style=\"font-size: 11px; font-family: sans-serif;\"> &nbsp; $OQcall_type[$loop_count] &nbsp; </font></TD>";
 				//echo "</TR>";
-                $callsInQueue[$call_id] = array(
+                $callsInQueue[$call_id] = [
                     'phone' => $OQphone_number[$loop_count],
                     'name' => $caller_name,
                     'wait' => $call_time,
@@ -212,18 +212,18 @@ if ($is_logged_in) {
                     'call_group' => "{$OQcampaign_id[$loop_count]} - {$group_name}",
                     'type' => $OQcall_type[$loop_count],
                     'cangrab' => 0
-                );
+                ];
 			}
 			$loop_count++;
 		}
 		//echo "</TABLE><BR> &nbsp;\n";
         if (count($callsInQueue) > 0) {
-            $APIResult = array( "result" => "success", "data" => $callsInQueue );
+            $APIResult = [ "result" => "success", "data" => $callsInQueue ];
         } else {
-            $APIResult = array( "result" => "notice", "message" => "No Calls in Queue at the moment" );
+            $APIResult = [ "result" => "notice", "message" => "No Calls in Queue at the moment" ];
         }
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

@@ -22,16 +22,16 @@
 */
 
     $userid = $_REQUEST['userid'];
-    $groupId = go_get_groupid($goUser, $astDB);
+    $groupId = go_get_groupid($goUser);
     
     if($userid == null && $userid == 0) { 
-            $apiresults = array("result" => "Error: Set a value for User ID"); 
+            $apiresults = ["result" => "Error: Set a value for User ID"]; 
     } else {    
     
         if (!checkIfTenant($groupId, $goDB)) {
             $ul='';
         } else { 
-            $stringv = go_getall_allowed_users($groupId, $astDB);
+            $stringv = go_getall_allowed_users($groupId);
             $stringv .= "'j'";
             $ul = "and vcl.campaign_id IN ($stringv) and user_level != 4";
         }
@@ -41,7 +41,7 @@
 
         $fresults = $ostDB->rawQuery($query);
         //$fresults = mysqli_fetch_assoc($rsltv);
-        $apiresults = array_merge( array( "result" => "success" ), $fresults);
+        $apiresults = array_merge( [ "result" => "success" ], $fresults);
         
     }
 ?>

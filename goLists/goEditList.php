@@ -21,7 +21,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
@@ -45,110 +45,110 @@
 	// $values = $_REQUEST['items'];
 	
 	// Default values 
-	$defActive 											= array("Y","N");
+	$defActive 											= ["Y","N"];
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($list_id) || is_null($list_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
 	} elseif (!in_array($active,$defActive) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
 	} elseif (!in_array($reset_list,$defActive) && $reset_list != null) {
 		$err_msg 										= error_handle("41006", "reset_list");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Default value for reset_list is Y or N only.");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_name)) {
 		$err_msg 										= error_handle("41004", "list_name");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in list_name");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $reset_time)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', (string) $reset_time)) {
 		$err_msg 										= error_handle("41004", "reset_time");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in reset_time");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_a_number)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_a_number)) {
 		$err_msg 										= error_handle("41004", "xferconf_a_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in xferconf_a_number");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_b_number)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_b_number)) {
 		$err_msg 										= error_handle("41004", "xferconf_b_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in xferconf_b_number");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_c_number)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_c_number)) {
 		$err_msg 										= error_handle("41004", "xferconf_c_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in xferconf_c_number");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_d_number)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_d_number)) {
 		$err_msg 										= error_handle("41004", "xferconf_d_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in xferconf_d_number");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_e_number)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_e_number)) {
 		$err_msg 										= error_handle("41004", "xferconf_e_number");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in xferconf_e_number");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $agent_script_override)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $agent_script_override)) {
 		$err_msg 										= error_handle("41004", "agent_script_override");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in agent_script_override");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $drop_inbound_group_override)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $drop_inbound_group_override)) {
 		$err_msg 										= error_handle("41004", "drop_inbound_group_override");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in drop_inbound_group_override");
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $campaign_cid_override)) {
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $campaign_cid_override)) {
 		$err_msg 										= error_handle("41004", "campaign_cid_override");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
-		);
+		];
 		//$apiresults = array("result" => "Error: Special characters found in campaign_cid_override");
 	} else {
 		// check if goUser and goPass are valid
@@ -216,10 +216,10 @@
 				
                 if ($reset_list === 'Y') {
                     $astDB->where('list_id', $list_id);
-                    $astDB->update('vicidial_list', array('called_since_last_reset' => 'N'));
+                    $astDB->update('vicidial_list', ['called_since_last_reset' => 'N']);
                 }
 			
-				$updateData 							= array(
+				$updateData 							= [
 					'list_name' 							=> $list_name,
 					'list_description' 						=> $list_description,
 					'campaign_id' 							=> $campaign_id,
@@ -234,47 +234,47 @@
 					'drop_inbound_group_override' 			=> $drop_inbound_group_override,
 					'campaign_cid_override' 				=> $campaign_cid_override,
 					'web_form_address' 						=> $web_form_address
-				);
+				];
 				
 				$astDB->where('list_id', $list_id);
 				$resultQuery 							= $astDB->update('vicidial_lists', $updateData);
 			
 				if ($resultQuery == false ) {
 					$err_msg 							= error_handle("10010");
-					$apiresults 						= array(
+					$apiresults 						= [
 						"code" 								=> "10010", 
 						"result" 							=> $err_msg
-					);
+					];
 				} else {
 					$SQLdate 							= date("Y-m-d H:i:s");
 					
 					//$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
 					$astDB->where('list_id', $list_id);
-					$astDB->update('vicidial_lists', array('list_changedate' => $SQLdate));
+					$astDB->update('vicidial_lists', ['list_changedate' => $SQLdate]);
 					
 					//$queryresetback = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$list_id';";
 					$astDB->where('list_id', $list_id);
-					$astDB->update('vicidial_list', array('called_since_last_reset', 'N'));
+					$astDB->update('vicidial_list', ['called_since_last_reset', 'N']);
 					
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified the List ID: $list_id", $log_group, $astDB->getLastQuery());
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				}				
 			} else {
 				$err_msg 								= error_handle("41004", "list_id. Doesn't exist");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "41004", 
 					"result" 								=> $err_msg
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

@@ -22,21 +22,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -61,7 +61,7 @@
 				$astDB->where("user_group", $log_group);
 				//$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) !== 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -75,13 +75,13 @@
 				}					
 			}
 				
-			$cols 										= array(
+			$cols 										= [
 				"campaign_id",
 				"campaign_name",
 				"dial_method",
 				"active",
 				"use_custom_cid"
-			);
+			];
 			
 			$astDB->orderBy('campaign_id', 'desc');
 			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);		
@@ -95,26 +95,26 @@
 					$dataUseCID[]						= $fresults['use_custom_cid'];
 				}				
 			
-				$apiresults 								= array(
+				$apiresults 								= [
 					"result" 									=> "success", 
 					"campaign_id" 								=> $dataCampID,
 					"campaign_name" 							=> $dataCampName, 
 					"dial_method" 								=> $dataDialMethod, 
 					"active" 									=> $dataActive,
 					"use_custom_cid"							=> $dataUseCID
-				);
+				];
 			} else {
-				$apiresults								= array(
+				$apiresults								= [
 					"result"								=> "No Available Data"
-				);
+				];
 			}
 			
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

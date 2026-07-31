@@ -95,7 +95,7 @@ if (isset($_GET['goQMExtension'])) { $qm_extension = $astDB->escape($_GET['goQME
     else if (isset($_POST['goQMExtension'])) { $qm_extension = $astDB->escape($_POST['goQMExtension']); }
 
 $user = $agent->user;
-$server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
+$server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
 $VDCL_ingroup_recording_override = '';
 $VDCL_ingroup_rec_filename = '';
@@ -109,8 +109,8 @@ $testOutput = '';
 
 if ($is_logged_in) {
     if ($stage == "start") {
-        if ( (strlen($uniqueid) < 1) || (strlen($lead_id) < 1) || (strlen($list_id) < 1) || (strlen($phone_number) < 1) || (strlen($campaign) < 1) ) {
-            $APIResult = array( "result" => "error", "message" => "Log NOT Entered. Either one of the required parameters are missing." );
+        if ( (strlen((string) $uniqueid) < 1) || (strlen((string) $lead_id) < 1) || (strlen((string) $list_id) < 1) || (strlen((string) $phone_number) < 1) || (strlen((string) $campaign) < 1) ) {
+            $APIResult = [ "result" => "error", "message" => "Log NOT Entered. Either one of the required parameters are missing." ];
         } else {
             $user_group = $agent->user_group;
     
@@ -120,7 +120,7 @@ if ($is_logged_in) {
             $affected_rowsX = $astDB->getRowCount();
     
             $manualVLexists = 0;
-            $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
+            $beginUNIQUEID = preg_replace("/\..*/", "", (string) $uniqueid);
             //$stmt="SELECT count(*) from vicidial_log where lead_id='$lead_id' and user='$user' and phone_number='$phone_number' and uniqueid LIKE \"$beginUNIQUEID%\";";
             $astDB->where('lead_id', $lead_id);
             $astDB->where('user', $user);
@@ -137,7 +137,7 @@ if ($is_logged_in) {
             if ($manualVLexists < 1) {
                 ##### insert log into vicidial_log for manual VICIDiaL call
                 //$stmt="INSERT INTO vicidial_log (uniqueid,lead_id,list_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,comments,processed,user_group,alt_dial) values('$uniqueid','$lead_id','$list_id','$campaign','$NOW_TIME','$StarTtimE','INCALL','$phone_code','$phone_number','$user','MANUAL','N','$user_group','$alt_dial');";
-                $insertData = array(
+                $insertData = [
                     'uniqueid' => $uniqueid,
                     'lead_id' => $lead_id,
                     'list_id' => $list_id,
@@ -152,22 +152,22 @@ if ($is_logged_in) {
                     'processed' => 'N',
                     'user_group' => $user_group,
                     'alt_dial' => $alt_dial
-                );
+                ];
                 $astDB->insert('vicidial_log', $insertData);
                 $DUPerrno = $astDB->getLastError();
-                if (strlen($DUPerrno) > 0)
+                if ((string) $DUPerrno !== '')
                     {$manualVLexistsDUP = 1;}
                 $affected_rows = $astDB->getRowCount();
             }
-            if ( ($manualVLexists > 0) or ($manualVLexistsDUP > 0) ) {
+            if ( $manualVLexists > 0 || $manualVLexistsDUP > 0 ) {
                 ##### insert log into vicidial_log for manual VICIDiaL call
                 //$stmt="UPDATE vicidial_log SET list_id='$list_id',comments='MANUAL',user_group='$user_group',alt_dial='$alt_dial' where lead_id='$lead_id' and user='$user' and phone_number='$phone_number' and uniqueid LIKE \"$beginUNIQUEID%\";";
-                $updateData = array(
+                $updateData = [
                     'list_id' => $list_id,
                     'comments' => 'MANUAL',
                     'user_group' => $user_group,
                     'alt_dial' => $alt_dial
-                );
+                ];
                 $astDB->where('lead_id', $lead_id);
                 $astDB->where('user', $user);
                 $astDB->where('phone_number', $phone_number);
@@ -183,13 +183,13 @@ if ($is_logged_in) {
             }
     
             //$stmt = "UPDATE vicidial_auto_calls SET uniqueid='$uniqueid' where lead_id='$lead_id';";
-            $updateData = array(
+            $updateData = [
                 'uniqueid' => $uniqueid
-            );
+            ];
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update('vicidial_auto_calls', $updateData);
 
-            $APIResult = array( "result" => "success", "message" => $message );
+            $APIResult = [ "result" => "success", "message" => $message ];
 		}
 	}
 
@@ -211,10 +211,10 @@ if ($is_logged_in) {
             $VLA_inOUT = $row['comments'];
         }
     
-        if ( (strlen($uniqueid) < 1) && ($VLA_inOUT == 'INBOUND') ) {
+        if ( (strlen((string) $uniqueid) < 1) && ($VLA_inOUT == 'INBOUND') ) {
             $uniqueid = '6666.1';
         }
-        if ( (strlen($uniqueid) < 1) || (strlen($lead_id) < 1) ) {
+        if ( (strlen((string) $uniqueid) < 1) || (strlen((string) $lead_id) < 1) ) {
             $message = "LOG NOT ENTERED: uniqueid or lead_id is NOT value.";
             $log_no_enter = 1;
         } else {
@@ -277,16 +277,16 @@ if ($is_logged_in) {
                 $length_in_sec = ($StarTtimE - $start_epoch);
             }
             
-            if (strlen($VDcampaign_id) < 1) {$VDcampaign_id = $campaign;}
+            if (strlen((string) $VDcampaign_id) < 1) {$VDcampaign_id = $campaign;}
     
             $four_hours_ago = date("Y-m-d H:i:s", mktime(date("H")-4,date("i"),date("s"),date("m"),date("d"),date("Y")));
     
             if ($VLA_inOUT == 'INBOUND') {
                 $vcl_statusSQL = '';
-                $updateData = array(
+                $updateData = [
                     'end_epoch' => $StarTtimE,
                     'length_in_sec' => $length_in_sec
-                );
+                ];
                 if ($VDstatus == 'INCALL') {
                     //$vcl_statusSQL = ",status='$status_dispo'";
                     $updateData['status'] = $status_dispo;
@@ -300,7 +300,7 @@ if ($is_logged_in) {
                 $affected_rows = $astDB->getRowCount();
                 if ($affected_rows > 0) {
                     $message .= "$uniqueid\n$channel\n";
-    
+
                 #	$fp = fopen ("./vicidial_debug.txt", "a");
                 #	fwrite ($fp, "$NOW_TIME|INBND_LOG_4|$VDstatus|$uniqueid|$lead_id|$user|$inOUT|$length_in_sec|$VDterm_reason|$VDvicidial_id|$start_epoch|$stmt|\n");
                 #	fclose($fp);
@@ -349,9 +349,9 @@ if ($is_logged_in) {
                 } else {
                     $auto_alt_dial = 'NONE';
                 }
-                if (preg_match("/(ALT_ONLY|ADDR3_ONLY|ALT_AND_ADDR3|ALT_AND_EXTENDED|ALT_AND_ADDR3_AND_EXTENDED|EXTENDED_ONLY)/i", $auto_alt_dial)) {
+                if (preg_match("/(ALT_ONLY|ADDR3_ONLY|ALT_AND_ADDR3|ALT_AND_EXTENDED|ALT_AND_ADDR3_AND_EXTENDED|EXTENDED_ONLY)/i", (string) $auto_alt_dial)) {
                     ### check to see if lead should be alt_dialed
-                    if (strlen($alt_dial) < 2) {
+                    if (strlen((string) $alt_dial) < 2) {
                         $alt_dial = 'NONE';
                     }
     
@@ -361,7 +361,7 @@ if ($is_logged_in) {
                         ##### find a recent outbound call associated with this inbound call
                         //$stmt="SELECT alt_dial FROM vicidial_log where lead_id='$lead_id' and status IN('DROP','XDROP') and call_date > \"$one_hour_ago\" order by call_date desc limit 1;";
                         $astDB->where('lead_id', $lead_id);
-                        $astDB->where('status', array('DROP', 'XDROP'), 'in');
+                        $astDB->where('status', ['DROP', 'XDROP'], 'in');
                         $astDB->where('call_date', $one_hour_ago);
                         $astDB->orderBy('call_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_log', 'alt_dial');
@@ -372,7 +372,7 @@ if ($is_logged_in) {
                         }
                     }
     
-                    if ( (preg_match("/(NONE|MAIN)/i", $alt_dial)) && (preg_match("/(ALT_ONLY|ALT_AND_ADDR3|ALT_AND_EXTENDED)/i", $auto_alt_dial)) ) {
+                    if ( (preg_match("/(NONE|MAIN)/i", (string) $alt_dial)) && (preg_match("/(ALT_ONLY|ALT_AND_ADDR3|ALT_AND_EXTENDED)/i", (string) $auto_alt_dial)) ) {
                         $alt_dial_skip = 0;
                         //$stmt="SELECT alt_phone,gmt_offset_now,state,vendor_lead_code FROM vicidial_list where lead_id='$lead_id';";
                         $astDB->where('lead_id', $lead_id);
@@ -381,7 +381,7 @@ if ($is_logged_in) {
                         if ($VAC_mancall_ct > 0) {
                             $row = $rslt[0];
                             $alt_phone =		$row['alt_phone'];
-                            $alt_phone = preg_replace("/[^0-9]/i","",$alt_phone);
+                            $alt_phone = preg_replace("/[^0-9]/i","",(string) $alt_phone);
                             $gmt_offset_now =	$row['gmt_offset_now'];
                             $state =			$row['state'];
                             $vendor_lead_code =	$row['vendor_lead_code'];
@@ -389,12 +389,12 @@ if ($is_logged_in) {
                             $alt_phone = '';
                         }
                         if (strlen($alt_phone)>5) {
-                            if ( (preg_match("/Y/", $use_internal_dnc)) || (preg_match("/AREACODE/", $use_internal_dnc)) ) {
-                                if (preg_match("/AREACODE/", $use_internal_dnc)) {
+                            if ( (preg_match("/Y/", (string) $use_internal_dnc)) || (preg_match("/AREACODE/", (string) $use_internal_dnc)) ) {
+                                if (preg_match("/AREACODE/", (string) $use_internal_dnc)) {
                                     $alt_phone_areacode = substr($alt_phone, 0, 3);
                                     $alt_phone_areacode .= "XXXXXXX";
                                     //$stmtA="SELECT count(*) from vicidial_dnc where phone_number IN('$alt_phone','$alt_phone_areacode');";
-                                    $astDB->where('phone_number', array("$alt_phone", "$alt_phone_areacode"), 'in');
+                                    $astDB->where('phone_number', ["$alt_phone", "$alt_phone_areacode"], 'in');
                                 } else {
                                     //$stmtA="SELECT count(*) FROM vicidial_dnc where phone_number='$alt_phone';";
                                     $astDB->where('phone_number', $alt_phone);
@@ -407,14 +407,14 @@ if ($is_logged_in) {
                             } else {
                                 $VD_alt_dnc_count = 0;
                             }
-                            if ( (preg_match("/Y/", $use_campaign_dnc)) || (preg_match("/AREACODE/", $use_campaign_dnc)) ) {
+                            if ( (preg_match("/Y/", (string) $use_campaign_dnc)) || (preg_match("/AREACODE/", (string) $use_campaign_dnc)) ) {
                                 $temp_campaign_id = $campaign;
-                                if (strlen($use_other_campaign_dnc) > 0) {$temp_campaign_id = $use_other_campaign_dnc;}
-                                if (preg_match("/AREACODE/", $use_campaign_dnc)) {
+                                if ((string) $use_other_campaign_dnc !== '') {$temp_campaign_id = $use_other_campaign_dnc;}
+                                if (preg_match("/AREACODE/", (string) $use_campaign_dnc)) {
                                     $alt_phone_areacode = substr($alt_phone, 0, 3);
                                     $alt_phone_areacode .= "XXXXXXX";
                                     //$stmtA="SELECT count(*) from vicidial_campaign_dnc where phone_number IN('$alt_phone','$alt_phone_areacode') and campaign_id='$temp_campaign_id';";
-                                    $astDB->where('phone_number', array("$alt_phone", "$alt_phone_areacode"), 'in');
+                                    $astDB->where('phone_number', ["$alt_phone", "$alt_phone_areacode"], 'in');
                                 } else {
                                     //$stmtA="SELECT count(*) FROM vicidial_campaign_dnc where phone_number='$alt_phone' and campaign_id='$temp_campaign_id';";
                                     $astDB->where('phone_number', $alt_phone);
@@ -423,13 +423,13 @@ if ($is_logged_in) {
                                 $rslt = $astDB->get('vicidial_campaign_dnc');
                                 $VLAP_cdnc_ct = $astDB->getRowCount();
                                 if ($VLAP_cdnc_ct > 0) {
-                                    $VD_alt_dnc_count = ($VD_alt_dnc_count + $VLAP_cdnc_ct);
+                                    $VD_alt_dnc_count += $VLAP_cdnc_ct;
                                 }
                             }
                             if ($VD_alt_dnc_count < 1) {
                                 ### insert record into vicidial_hopper for alt_phone call attempt
                                 //$stmt = "INSERT INTO vicidial_hopper SET lead_id='$lead_id',campaign_id='$campaign',status='HOLD',list_id='$list_id',gmt_offset_now='$gmt_offset_now',state='$state',alt_dial='ALT',user='',priority='25',source='A',vendor_lead_code='$vendor_lead_code';";
-                                $insertData = array(
+                                $insertData = [
                                     'lead_id' => $lead_id,
                                     'campaign_id' => $campaign,
                                     'status' => 'HOLD',
@@ -441,7 +441,7 @@ if ($is_logged_in) {
                                     'priority' => '25',
                                     'source' => 'A',
                                     'vendor_lead_code' => $vendor_lead_code
-                                );
+                                ];
                                 $rslt = $astDB->insert('vicidial_hopper', $insertData);
                             } else {
                                 $alt_dial_skip = 1;
@@ -454,7 +454,7 @@ if ($is_logged_in) {
                         }
                     }
     
-                    if ( ( (preg_match("/(ALT)/i", $alt_dial)) && (preg_match("/ALT_AND_ADDR3/i", $auto_alt_dial)) ) || ( (preg_match("/(NONE|MAIN)/i", $alt_dial)) && (preg_match("/ADDR3_ONLY/i", $auto_alt_dial)) ) ) {
+                    if ( ( (preg_match("/(ALT)/i", (string) $alt_dial)) && (preg_match("/ALT_AND_ADDR3/i", (string) $auto_alt_dial)) ) || ( (preg_match("/(NONE|MAIN)/i", (string) $alt_dial)) && (preg_match("/ADDR3_ONLY/i", (string) $auto_alt_dial)) ) ) {
                         $addr3_dial_skip = 0;
                         //$stmt="SELECT address3,gmt_offset_now,state,vendor_lead_code FROM vicidial_list where lead_id='$lead_id';";
                         $astDB->where('lead_id', $lead_id);
@@ -463,7 +463,7 @@ if ($is_logged_in) {
                         if ($VAC_mancall_ct > 0) {
                             $row = $rslt[0];
                             $address3 =			$row['address3'];
-                            $address3 = preg_replace("/[^0-9]/i","",$address3);
+                            $address3 = preg_replace("/[^0-9]/i","",(string) $address3);
                             $gmt_offset_now =	$row['gmt_offset_now'];
                             $state =			$row['state'];
                             $vendor_lead_code = $row['vendor_lead_code'];
@@ -471,12 +471,12 @@ if ($is_logged_in) {
                             $address3 = '';
                         }
                         if (strlen($address3) > 5) {
-                            if ( (preg_match("/Y/", $use_internal_dnc)) || (preg_match("/AREACODE/", $use_internal_dnc)) ) {
-                                if (preg_match("/AREACODE/", $use_internal_dnc)) {
+                            if ( (preg_match("/Y/", (string) $use_internal_dnc)) || (preg_match("/AREACODE/", (string) $use_internal_dnc)) ) {
+                                if (preg_match("/AREACODE/", (string) $use_internal_dnc)) {
                                     $addr3_phone_areacode = substr($address3, 0, 3);
                                     $addr3_phone_areacode .= "XXXXXXX";
                                     //$stmtA="SELECT count(*) from vicidial_dnc where phone_number IN('$address3','$addr3_phone_areacode');";
-                                    $astDB->where('phone_number', array("$address3", "$addr3_phone_areacode"), 'in');
+                                    $astDB->where('phone_number', ["$address3", "$addr3_phone_areacode"], 'in');
                                 } else {
                                     //$stmtA="SELECT count(*) FROM vicidial_dnc where phone_number='$address3';";
                                     $astDB->where('phone_number', $address3);
@@ -489,14 +489,14 @@ if ($is_logged_in) {
                             } else {
                                 $VD_alt_dnc_count = 0;
                             }
-                            if ( (preg_match("/Y/", $use_campaign_dnc)) || (preg_match("/AREACODE/", $use_campaign_dnc)) ) {
+                            if ( (preg_match("/Y/", (string) $use_campaign_dnc)) || (preg_match("/AREACODE/", (string) $use_campaign_dnc)) ) {
                                 $temp_campaign_id = $campaign;
-                                if (strlen($use_other_campaign_dnc) > 0) {$temp_campaign_id = $use_other_campaign_dnc;}
-                                if (preg_match("/AREACODE/", $use_campaign_dnc)) {
+                                if ((string) $use_other_campaign_dnc !== '') {$temp_campaign_id = $use_other_campaign_dnc;}
+                                if (preg_match("/AREACODE/", (string) $use_campaign_dnc)) {
                                     $addr3_phone_areacode = substr($address3, 0, 3);
                                     $addr3_phone_areacode .= "XXXXXXX";
                                     //$stmtA="SELECT count(*) from vicidial_campaign_dnc where phone_number IN('$address3','$addr3_phone_areacode') and campaign_id='$temp_campaign_id';";
-                                    $astDB->where('phone_number', array("$address3", "$addr3_phone_areacode"), 'in');
+                                    $astDB->where('phone_number', ["$address3", "$addr3_phone_areacode"], 'in');
                                 } else {
                                     //$stmtA="SELECT count(*) FROM vicidial_campaign_dnc where phone_number='$address3' and campaign_id='$temp_campaign_id';";
                                     $astDB->where('phone_number', $address3);
@@ -505,13 +505,13 @@ if ($is_logged_in) {
                                 $rslt = $astDB->get('vicidial_campaign_dnc');
                                 $VLAP_cdnc_ct = $astDB->getRowCount();
                                 if ($VLAP_cdnc_ct > 0) {
-                                    $VD_alt_dnc_count = ($VD_alt_dnc_count + $VLAP_cdnc_ct);
+                                    $VD_alt_dnc_count += $VLAP_cdnc_ct;
                                 }
                             }
                             if ($VD_alt_dnc_count < 1) {
                                 ### insert record into vicidial_hopper for address3 call attempt
                                 //$stmt = "INSERT INTO vicidial_hopper SET lead_id='$lead_id',campaign_id='$campaign',status='HOLD',list_id='$list_id',gmt_offset_now='$gmt_offset_now',state='$state',alt_dial='ADDR3',user='',priority='20',source='A',vendor_lead_code='$vendor_lead_code';";
-                                $insertData = array(
+                                $insertData = [
                                     'lead_id' => $lead_id,
                                     'campaign_id' => $campaign,
                                     'status' => 'HOLD',
@@ -523,7 +523,7 @@ if ($is_logged_in) {
                                     'priority' => '20',
                                     'source' => 'A',
                                     'vendor_lead_code' => $vendor_lead_code
-                                );
+                                ];
                                 $rslt = $astDB->insert('vicidial_hopper', $insertData);
                             } else {
                                 $addr3_dial_skip = 1;
@@ -536,11 +536,11 @@ if ($is_logged_in) {
                         }
                     }
     
-                    if ( ( ( (preg_match("/(NONE|MAIN)/i", $alt_dial)) && (preg_match("/EXTENDED_ONLY/i", $auto_alt_dial)) ) || ( (preg_match("/(ALT)/i", $alt_dial)) && (preg_match("/(ALT_AND_EXTENDED)/i", $auto_alt_dial)) ) || ( (preg_match("/(ADDR3)/i", $alt_dial)) && (preg_match("/(ADDR3_AND_EXTENDED|ALT_AND_ADDR3_AND_EXTENDED)/i", $auto_alt_dial)) ) || ( (preg_match("/(X)/i", $alt_dial)) && (preg_match("/EXTENDED/i", $auto_alt_dial)) ) )  && (!preg_match("/LAST/i", $alt_dial)) ) {
-                        if (preg_match("/(ADDR3)/i", $alt_dial)) {
+                    if ( ( ( (preg_match("/(NONE|MAIN)/i", (string) $alt_dial)) && (preg_match("/EXTENDED_ONLY/i", (string) $auto_alt_dial)) ) || ( (preg_match("/(ALT)/i", (string) $alt_dial)) && (preg_match("/(ALT_AND_EXTENDED)/i", (string) $auto_alt_dial)) ) || ( (preg_match("/(ADDR3)/i", (string) $alt_dial)) && (preg_match("/(ADDR3_AND_EXTENDED|ALT_AND_ADDR3_AND_EXTENDED)/i", (string) $auto_alt_dial)) ) || ( (preg_match("/(X)/i", (string) $alt_dial)) && (preg_match("/EXTENDED/i", (string) $auto_alt_dial)) ) )  && (!preg_match("/LAST/i", (string) $alt_dial)) ) {
+                        if (preg_match("/(ADDR3)/i", (string) $alt_dial)) {
                             $Xlast = 0;
                         } else {
-                            $Xlast = preg_replace("/[^0-9]/", "", $alt_dial);
+                            $Xlast = preg_replace("/[^0-9]/", "", (string) $alt_dial);
                         }
                         if (strlen($Xlast) < 1) {
                             $Xlast = 0;
@@ -583,13 +583,13 @@ if ($is_logged_in) {
                                 $Xlast = 9999999999;
                             }
     
-                            if (preg_match("/Y/", $VD_altdial_active)) {
-                                if ( (preg_match("/Y/", $use_internal_dnc)) || (preg_match("/AREACODE/", $use_internal_dnc)) ) {
-                                    if (preg_match("/AREACODE/", $use_internal_dnc)) {
-                                        $vdap_phone_areacode = substr($VD_altdial_phone, 0, 3);
+                            if (preg_match("/Y/", (string) $VD_altdial_active)) {
+                                if ( (preg_match("/Y/", (string) $use_internal_dnc)) || (preg_match("/AREACODE/", (string) $use_internal_dnc)) ) {
+                                    if (preg_match("/AREACODE/", (string) $use_internal_dnc)) {
+                                        $vdap_phone_areacode = substr((string) $VD_altdial_phone, 0, 3);
                                         $vdap_phone_areacode .= "XXXXXXX";
                                         //$stmtA="SELECT count(*) from vicidial_dnc where phone_number IN('$VD_altdial_phone','$vdap_phone_areacode');";
-                                        $astDB->where('phone_number', array("$VD_altdial_phone", "$vdap_phone_areacode"), 'in');
+                                        $astDB->where('phone_number', ["$VD_altdial_phone", "$vdap_phone_areacode"], 'in');
                                     } else {
                                         //$stmtA="SELECT count(*) FROM vicidial_dnc where phone_number='$VD_altdial_phone';";
                                         $astDB->where('phone_number', $VD_altdial_phone);
@@ -602,14 +602,14 @@ if ($is_logged_in) {
                                 } else {
                                     $VD_alt_dnc_count = 0;
                                 }
-                                if ( (preg_match("/Y/", $use_campaign_dnc)) || (preg_match("/AREACODE/", $use_campaign_dnc)) ) {
+                                if ( (preg_match("/Y/", (string) $use_campaign_dnc)) || (preg_match("/AREACODE/", (string) $use_campaign_dnc)) ) {
                                     $temp_campaign_id = $campaign;
-                                    if (strlen($use_other_campaign_dnc) > 0) {$temp_campaign_id = $use_other_campaign_dnc;}
-                                    if (preg_match("/AREACODE/", $use_campaign_dnc)) {
-                                        $vdap_phone_areacode = substr($VD_altdial_phone, 0, 3);
+                                    if ((string) $use_other_campaign_dnc !== '') {$temp_campaign_id = $use_other_campaign_dnc;}
+                                    if (preg_match("/AREACODE/", (string) $use_campaign_dnc)) {
+                                        $vdap_phone_areacode = substr((string) $VD_altdial_phone, 0, 3);
                                         $vdap_phone_areacode .= "XXXXXXX";
                                         //$stmtA="SELECT count(*) from vicidial_campaign_dnc where phone_number IN('$VD_altdial_phone','$vdap_phone_areacode') and campaign_id='$temp_campaign_id';";
-                                        $astDB->where('phone_number', array("$VD_altdial_phone", "$vdap_phone_areacode"), 'in');
+                                        $astDB->where('phone_number', ["$VD_altdial_phone", "$vdap_phone_areacode"], 'in');
                                     } else {
                                         //$stmtA="SELECT count(*) FROM vicidial_campaign_dnc where phone_number='$VD_altdial_phone' and campaign_id='$temp_campaign_id';";
                                         $astDB->where('phone_number', $VD_altdial_phone);
@@ -619,7 +619,7 @@ if ($is_logged_in) {
                                     $VLAP_cdnc_ct = $astDB->getRowCount();
                                     if ($VLAP_cdnc_ct > 0) {
                                         $row=mysqli_fetch_row($rslt);
-                                        $VD_alt_dnc_count = ($VD_alt_dnc_count + $VLAP_cdnc_ct);
+                                        $VD_alt_dnc_count += $VLAP_cdnc_ct;
                                     }
                                 }
                                 if ($VD_alt_dnc_count < 1) {
@@ -627,7 +627,7 @@ if ($is_logged_in) {
                                         $Xlast = 'LAST';
                                     }
                                     //$stmt = "INSERT INTO vicidial_hopper SET lead_id='$lead_id',campaign_id='$campaign',status='HOLD',list_id='$EA_list_id',gmt_offset_now='$EA_gmt_offset_now',state='$EA_state',alt_dial='X$Xlast',user='',priority='15',source='A',vendor_lead_code='$EA_vendor_lead_code';";
-                                    $insertData = array(
+                                    $insertData = [
                                         'lead_id' => $lead_id,
                                         'campaign_id' => $campaign,
                                         'status' => 'HOLD',
@@ -639,7 +639,7 @@ if ($is_logged_in) {
                                         'priority' => '15',
                                         'source' => 'A',
                                         'vendor_lead_code' => $EA_vendor_lead_code
-                                    );
+                                    ];
                                     $rslt = $astDB->insert('vicidial_hopper', $insertData);
                                     $Xlast=9999999999;
                                 }
@@ -669,7 +669,7 @@ if ($is_logged_in) {
                         $CLuniqueid		= $row['uniqueid'];
                     }
     
-                    $CLstage = preg_replace("/.*-/", '', $CLstage);
+                    $CLstage = preg_replace("/.*-/", '', (string) $CLstage);
                     if (strlen($CLstage) < 1) {$CLstage = 0;}
     
                     //$stmt="SELECT count(*) from queue_log where call_id='$MDnextCID' and verb='COMPLETECALLER' and queue='$VDcampaign_id';";
@@ -699,7 +699,7 @@ if ($is_logged_in) {
                     $rslt = $astDB->delete('vicidial_auto_calls');
                 }
     
-                $updateData = array(
+                $updateData = [
                     'status' => 'PAUSED',
                     'uniqueid' => 0,
                     'callerid' => '',
@@ -708,7 +708,7 @@ if ($is_logged_in) {
                     'last_call_finish' => $NOW_TIME,
                     'comments' => '',
                     'last_state_change' => $NOW_TIME
-                );
+                ];
                 if ($VLA_inOUT == 'INBOUND') {
                     //$licf_SQL = ",last_inbound_call_finish='$NOW_TIME'";
                     $updateData['last_inbound_call_finish'] = $NOW_TIME;
@@ -719,7 +719,7 @@ if ($is_logged_in) {
                 $rslt = $astDB->update('vicidial_live_agents', $updateData);
                 $error = $astDB->getLastError();
                 $retry_count = 0;
-                while ( (strlen($error) > 0) and ($retry_count < 9) ) {
+                while ( strlen((string) $error) > 0 && $retry_count < 9 ) {
                     $astDB->where('user', $user);
                     $astDB->where('server_ip', $server_ip);
                     $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -737,7 +737,7 @@ if ($is_logged_in) {
                         $rslt = $astDB->get('vicidial_campaigns', null, 'queuemetrics_phone_environment');
                         $cqpe_ct = $astDB->getRowCount();
                         
-                        $insertData = array(
+                        $insertData = [
                             'partition' => 'P01',
                             'time_id' => $StarTtimE,
                             'call_id' => 'NONE',
@@ -745,11 +745,11 @@ if ($is_logged_in) {
                             'agent' => "Agent/$user",
                             'verb' => 'PAUSEALL',
                             'serverid' => $queuemetrics_log_id
-                        );
+                        ];
                         if ($cqpe_ct > 0) {
                             $row = $rslt[0];
                             $pe_append = '';
-                            if ( ($queuemetrics_pe_phone_append > 0) && (strlen($row['queuemetrics_phone_environment'])>0) ) {
+                            if ( ($queuemetrics_pe_phone_append > 0) && ((string) $row['queuemetrics_phone_environment'] !== '') ) {
                                 $pe_append = "-$qm_extension";
                             }
                             //$data4SQL = ",data4='$row[0]$pe_append'";
@@ -786,7 +786,7 @@ if ($is_logged_in) {
                         $CLqueue_position =		$row['queue_position'];
                     }
     
-                    $CLstage = preg_replace("/XFER|CLOSER|-/", '', $CLstage);
+                    $CLstage = preg_replace("/XFER|CLOSER|-/", '', (string) $CLstage);
                     if ($CLstage < 0.25) {$CLstage = 0;}
     
                     $data4SQL = '';
@@ -797,7 +797,7 @@ if ($is_logged_in) {
                     $rslt = $astDB->get('vicidial_campaigns', null, 'queuemetrics_phone_environment');
                     $cqpe_ct = $astDB->getRowCount();
                     
-                    $insertData = array(
+                    $insertData = [
                         'partition' => 'P01',
                         'time_id' => $StarTtimE,
                         'call_id' => $MDnextCID,
@@ -808,11 +808,11 @@ if ($is_logged_in) {
                         'data2' => $length_in_sec,
                         'data3' => $CLqueue_position,
                         'serverid' => $queuemetrics_log_id
-                    );
+                    ];
                     if ($cqpe_ct > 0) {
                         $row = $rslt[0];
                         $pe_append = '';
-                        if ( ($queuemetrics_pe_phone_append > 0) && (strlen($row['queuemetrics_phone_environment']) > 0) ) {
+                        if ( ($queuemetrics_pe_phone_append > 0) && ((string) $row['queuemetrics_phone_environment'] !== '') ) {
                             $pe_append = "-$qm_extension";
                         }
                         //$data4SQL = ",data4='$row[0]$pe_append'";
@@ -825,10 +825,10 @@ if ($is_logged_in) {
                     $rslt = $linkB->insert('queue_log', $insertData);
                     $affected_rows = $linkB->getRowCount();
     
-                    if ( ($queuemetrics_socket == 'CONNECT_COMPLETE') && (strlen($queuemetrics_socket_url) > 10) ) {
+                    if ( ($queuemetrics_socket == 'CONNECT_COMPLETE') && (strlen((string) $queuemetrics_socket_url) > 10) ) {
                         $socket_send_data_begin = '?';
                         $socket_send_data = "time_id=$StarTtimE&call_id=$MDnextCID&queue=$VDcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$length_in_sec&data3=$CLqueue_position$data4SS";
-                        if (preg_match("/\?/",$queuemetrics_socket_url))
+                        if (preg_match("/\?/",(string) $queuemetrics_socket_url))
                             {$socket_send_data_begin = '&';}
                         ### send queue_log data to the queuemetrics_socket_url ###
                         //if ($DB > 0) {echo "$queuemetrics_socket_url$socket_send_data_begin$socket_send_data<BR>\n";}
@@ -847,7 +847,7 @@ if ($is_logged_in) {
                 }
     
                 //$stmt = "UPDATE vicidial_live_agents set status='PAUSED',uniqueid=0,callerid='',channel='',call_server_ip='',last_call_finish='$NOW_TIME',comments='',last_state_change='$NOW_TIME' where user='$user' and server_ip='$server_ip';";
-                $updateData = array(
+                $updateData = [
                     'status' => 'PAUSED',
                     'uniqueid' => 0,
                     'callerid' => '',
@@ -856,13 +856,13 @@ if ($is_logged_in) {
                     'last_call_finish' => $NOW_TIME,
                     'comments' => '',
                     'last_state_change' => $NOW_TIME
-                );
+                ];
                 $astDB->where('user', $user);
                 $astDB->where('server_ip', $server_ip);
                 $rslt = $astDB->update('vicidial_live_agents', $updateData);
                 $error = $astDB->getLastError();
                 $retry_count = 0;
-                while ( (strlen($error) > 0) and ($retry_count < 9) ) {
+                while ( strlen((string) $error) > 0 && $retry_count < 9 ) {
                     $astDB->where('user', $user);
                     $astDB->where('server_ip', $server_ip);
                     $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -874,7 +874,7 @@ if ($is_logged_in) {
                 if ($affected_rows > 0) {
                     if ($enable_queuemetrics_logging > 0) {
                         //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='NONE',queue='NONE',agent='Agent/$user',verb='PAUSEALL',serverid='$queuemetrics_log_id' $data4SQL;";
-                        $insertData = array(
+                        $insertData = [
                             'partition' => 'P01',
                             'time_id' => $StarTtimE,
                             'call_id' => 'NONE',
@@ -883,17 +883,17 @@ if ($is_logged_in) {
                             'verb' => 'PAUSEALL',
                             'serverid' => $queuemetrics_log_id,
                             'data4' => $data4SQL
-                        );
+                        ];
                         $rslt = $linkB->insert('queue_log', $insertData);
                         $affected_rows = $linkB->getRowCount();
                     }
                 }
             }
     
-            if ( ($VLA_inOUT == 'AUTO') or ($VLA_inOUT == 'MANUAL') ) {
+            if ( $VLA_inOUT == 'AUTO' || $VLA_inOUT == 'MANUAL' ) {
                 $SQLterm = "term_reason='$term_reason',";
     
-                if ( (preg_match("/NONE/", $term_reason)) || (preg_match("/NONE/", $VDterm_reason)) || (strlen($VDterm_reason) < 1) ) {
+                if ( (preg_match("/NONE/", $term_reason)) || (preg_match("/NONE/", (string) $VDterm_reason)) || (strlen((string) $VDterm_reason) < 1) ) {
                     ### check to see if lead should be alt_dialed
                     //$stmt="SELECT term_reason,uniqueid,status from vicidial_log where uniqueid='$uniqueid' and lead_id='$lead_id' order by call_date desc limit 1;";
                     $astDB->where('uniqueid', $uniqueid);
@@ -908,7 +908,7 @@ if ($is_logged_in) {
                         $VDstatus =			$row['status'];
                         $VDIDselect =		"VDL_UIDLID $uniqueid $lead_id";
                     }
-                    if (preg_match("/CALLER/", $VDterm_reason)) {
+                    if (preg_match("/CALLER/", (string) $VDterm_reason)) {
                         $SQLterm = "";
                     } else {
                         $SQLterm = "term_reason='AGENT',";
@@ -922,7 +922,7 @@ if ($is_logged_in) {
     
                 ### check to see if the vicidial_log record exists, if not, insert it
                 $manualVLexists = 0;
-                $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
+                $beginUNIQUEID = preg_replace("/\..*/", "", (string) $uniqueid);
                 //$stmt="SELECT status from vicidial_log where lead_id='$lead_id' and user='$user' and phone_number='$phone_number' and uniqueid LIKE \"$beginUNIQUEID%\";";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->where('user', $user);
@@ -938,7 +938,7 @@ if ($is_logged_in) {
                 if ($manualVLexists < 1) {
                     ##### insert log into vicidial_log for manual VICIDiaL call
                     //$stmt="INSERT INTO vicidial_log (uniqueid,lead_id,list_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,comments,processed,user_group,alt_dial) values('$uniqueid','$lead_id','$list_id','$campaign','$NOW_TIME','$StarTtimE','DONEM','$phone_code','$phone_number','$user','MANUAL','N','$user_group','$alt_dial');";
-                    $insertData = array(
+                    $insertData = [
                         'uniqueid' => $uniqueid,
                         'lead_id' => $lead_id,
                         'list_id' => $list_id,
@@ -953,7 +953,7 @@ if ($is_logged_in) {
                         'processed' => 'N',
                         'user_group' => $user_group,
                         'alt_dial' => $alt_dial
-                    );
+                    ];
                     $rslt = $astDB->insert('vicidial_log', $insertData);
                     $affected_rows = $astDB->getRowCount();
     
@@ -968,15 +968,15 @@ if ($is_logged_in) {
                     $astDB->where('user', $user);
                     $astDB->where('phone_number', $phone_number);
                     $astDB->where('uniqueid', "$beginUNIQUEID%", 'like');
-                    $rslt = $astDB->update('vicidial_log', array('uniqueid' => $uniqueid));
+                    $rslt = $astDB->update('vicidial_log', ['uniqueid' => $uniqueid]);
                     $affected_rows = $astDB->getRowCount();
                 }
     
                 ##### update the duration and end time in the vicidial_log table
-                $updateData = array(
+                $updateData = [
                     'end_epoch' => $StarTtimE,
                     'length_in_sec' => $length_in_sec
-                );
+                ];
                 if ($VDstatus == 'INCALL') {
                     //$vl_statusSQL = ",status='$status_dispo'";
                     $updateData['status'] = $status_dispo;
@@ -998,7 +998,7 @@ if ($is_logged_in) {
                 $SQLterm = "term_reason='$term_reason'";
                 $QL_term = '';
     
-                if ( (preg_match("/NONE/", $term_reason)) || (preg_match("/NONE/", $VDterm_reason)) || (strlen($VDterm_reason) < 1) ) {
+                if ( (preg_match("/NONE/", $term_reason)) || (preg_match("/NONE/", (string) $VDterm_reason)) || (strlen((string) $VDterm_reason) < 1) ) {
                     ### find out who hung up the call
                     //$stmt="SELECT term_reason,closecallid,queue_position from vicidial_closer_log where lead_id='$lead_id' and call_date > \"$four_hours_ago\" order by call_date desc limit 1;";
                     $astDB->where('lead_id', $lead_id);
@@ -1013,7 +1013,7 @@ if ($is_logged_in) {
                         $VDqueue_position =		$row['queue_position'];
                         $VDIDselect = "VDCL_LID4HOUR $lead_id $four_hours_ago";
                     }
-                    if (preg_match("/CALLER/", $VDterm_reason)) {
+                    if (preg_match("/CALLER/", (string) $VDterm_reason)) {
                         $SQLterm = "";
                     } else {
                         $SQLterm = "term_reason='AGENT'";
@@ -1021,7 +1021,7 @@ if ($is_logged_in) {
                     }
                 }
     
-                if (strlen($SQLterm) > 0) {
+                if ($SQLterm !== '') {
                     ##### update the duration and end time in the vicidial_log table
                     $stmt="UPDATE vicidial_closer_log set $SQLterm where lead_id='$lead_id' and call_date > \"$four_hours_ago\" order by call_date desc limit 1;";
                     $rslt = $astDB->rawQuery($stmt);
@@ -1029,7 +1029,7 @@ if ($is_logged_in) {
                 }
     
                 if ($enable_queuemetrics_logging > 0) {
-                    if ( (strlen($QL_term) > 0) and ($leaving_threeway > 0) )
+                    if ( strlen($QL_term) > 0 && $leaving_threeway > 0 )
                         {
                         //$stmt="SELECT count(*) from queue_log where call_id='$MDnextCID' and verb='COMPLETEAGENT' and queue='$VDcampaign_id';";
                         $linkB->where('call_id', $MDnextCID);
@@ -1041,7 +1041,7 @@ if ($is_logged_in) {
                             $agent_complete	= $VAC_cc_ct;
                         }
                         if ($agent_complete < 1) {
-                            if (strlen($VDqueue_position) < 1) {
+                            if (strlen((string) $VDqueue_position) < 1) {
                                 ### find out who hung up the call
                                 $stmt="SELECT queue_position from vicidial_closer_log where lead_id='$lead_id' and call_date > \"$four_hours_ago\" order by call_date desc limit 1;";
                                 $astDB->where('lead_id', $lead_id);
@@ -1054,7 +1054,7 @@ if ($is_logged_in) {
                                     $VDqueue_position = $row['queue_position'];
                                 }
                             }
-                            if (strlen($VDqueue_position) < 1) {
+                            if (strlen((string) $VDqueue_position) < 1) {
                                 $VDqueue_position = 1;
                             }
     
@@ -1068,12 +1068,12 @@ if ($is_logged_in) {
                             if ($cqpe_ct > 0) {
                                 $row = $rslt[0];
                                 $pe_append = '';
-                                if ( ($queuemetrics_pe_phone_append > 0) and (strlen($row['queuemetrics_phone_environment'])>0) )
+                                if ( $queuemetrics_pe_phone_append > 0 && strlen($row['queuemetrics_phone_environment']) > 0 )
                                     {$pe_append = "-$qm_extension";}
                                 $data4SQL = "{$row['queuemetrics_phone_environment']}{$pe_append}";
                                 //$data4SS = "&data4=$row[0]$pe_append";
                             }
-                            $insertData = array(
+                            $insertData = [
                                 'partition' => 'P01',
                                 'time_id' => $StarTtimE,
                                 'call_id' => $MDnextCID,
@@ -1085,15 +1085,15 @@ if ($is_logged_in) {
                                 'data3' => $VDqueue_position,
                                 'serverid' => $queuemetrics_log_id,
                                 'data4' => $data4SQL
-                            );
+                            ];
                             //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$MDnextCID',queue='$VDcampaign_id',agent='Agent/$user',verb='COMPLETEAGENT',data1='$CLstage',data2='$length_in_sec',data3='$VDqueue_position',serverid='$queuemetrics_log_id' $data4SQL;";
                             $rslt = $linkB->insert('queue_log', $insertData);
                             $affected_rows = $linkB->getRowCount();
     
-                            if ( ($queuemetrics_socket == 'CONNECT_COMPLETE') and (strlen($queuemetrics_socket_url) > 10) ) {
+                            if ( $queuemetrics_socket == 'CONNECT_COMPLETE' && strlen((string) $queuemetrics_socket_url) > 10 ) {
                                 $socket_send_data_begin = '?';
                                 $socket_send_data = "time_id=$StarTtimE&call_id=$MDnextCID&queue=$VDcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$length_in_sec&data3=$VDqueue_position$data4SS";
-                                if (preg_match("/\?/",$queuemetrics_socket_url))
+                                if (preg_match("/\?/",(string) $queuemetrics_socket_url))
                                     {$socket_send_data_begin='&';}
                                 ### send queue_log data to the queuemetrics_socket_url ###
                                 //if ($DB > 0) {echo "$queuemetrics_socket_url$socket_send_data_begin$socket_send_data<BR>\n";}
@@ -1130,7 +1130,7 @@ if ($is_logged_in) {
                     $total_rec++;
                 } else {
             #		if (preg_match("/$agentchannel/i",$row[0]))
-                    if ( ($agentchannel == "{$row['channel']}") or (preg_match('/ASTblind/', $row['channel'])) ) {
+                    if ( $agentchannel == "{$row['channel']}" || preg_match('/ASTblind/', $row['channel']) ) {
                         $donothing = 1;
                     } else {
                         $hangup_channels[$total_hangup] = "{$row['channel']}";
@@ -1175,7 +1175,7 @@ if ($is_logged_in) {
                         $variable = "Variable: ctuserserverconfleadphone=$loop_count$US$user$US$server_ip$US$conf_exten$US$lead_id$US$phone_number";
     
                         //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','CH12346$StarTtimE$loop_count','Channel: $hangup_channels[$loop_count]','$variable','','','','','','','','');";
-                        $insertData = array(
+                        $insertData = [
                             'man_id' => '',
                             'uniqueid' => '',
                             'entry_date' => $NOW_TIME,
@@ -1195,7 +1195,7 @@ if ($is_logged_in) {
                             'cmd_line_i' => '',
                             'cmd_line_j' => '',
                             'cmd_line_k' => ''
-                        );
+                        ];
                         $rslt = $astDB->insert('vicidial_manager', $insertData);
                     }
                     $loop_count++;
@@ -1224,7 +1224,7 @@ if ($is_logged_in) {
             while($loop_count < $total_rec) {
                 if (strlen($rec_channels[$loop_count]) > 5) {
                     //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','RH12345$StarTtimE$loop_count','Channel: $rec_channels[$loop_count]','','','','','','','','','');";
-                    $insertData = array(
+                    $insertData = [
                         'man_id' => '',
                         'uniqueid' => '',
                         'entry_date' => $NOW_TIME,
@@ -1244,7 +1244,7 @@ if ($is_logged_in) {
                         'cmd_line_i' => '',
                         'cmd_line_j' => '',
                         'cmd_line_k' => ''
-                    );
+                    ];
                     $rslt = $astDB->insert('vicidial_manager', $insertData);
     
                     $message .= "REC_STOP|$rec_channels[$loop_count]|$filename[$loop_count]|";
@@ -1259,16 +1259,16 @@ if ($is_logged_in) {
                             $start_time =	$row['start_epoch'];
                             $vicidial_id =	$row['vicidial_id'];
                             $RClead_id =	$row['lead_id'];
-    
-                            if ( (strlen($RClead_id) < 1) || ($RClead_id < 1) || ($RClead_id == 'NULL') )
+
+                            if ( (strlen((string) $RClead_id) < 1) || ($RClead_id < 1) || ($RClead_id == 'NULL') )
                                 {$lidSQL = ",lead_id='$lead_id'";}
-                            if (strlen($vicidial_id) < 1) 
+                            if (strlen((string) $vicidial_id) < 1) 
                                 {$vidSQL = ",vicidial_id='$VDvicidial_id'";}
                             else {
-                                if ( (preg_match('/\./', $vicidial_id)) && ($VLA_inOUT == 'INBOUND') ) {
-                                    if (!preg_match('/\./',$VDvicidial_id))
+                                if ( (preg_match('/\./', (string) $vicidial_id)) && ($VLA_inOUT == 'INBOUND') ) {
+                                    if (!preg_match('/\./',(string) $VDvicidial_id))
                                         {$vidSQL = ",vicidial_id='$VDvicidial_id'";}
-    
+
                                     //if ($WeBRooTWritablE > 0) {
                                     //    $fp = fopen ("./vicidial_debug.txt", "a");
                                     //    fwrite ($fp, "$NOW_TIME|INBND_LOG_3|$uniqueid|$lead_id|$user|$inOUT|$VLA_inOUT|$length_in_sec|$VDterm_reason|$VDvicidial_id|$vicidial_id|$start_epoch|$recording_id|\n");
@@ -1279,12 +1279,12 @@ if ($is_logged_in) {
                             $length_in_sec = ($StarTtimE - $start_time);
                             $length_in_min = ($length_in_sec / 60);
                             $length_in_min = sprintf("%8.2f", $length_in_min);
-    
+
                             $stmt="UPDATE recording_log set end_time='$NOW_TIME',end_epoch='$StarTtimE',length_in_sec=$length_in_sec,length_in_min='$length_in_min' $vidSQL $lidSQL where filename='$filename[$loop_count]' and end_epoch is NULL;";
                             $rslt = $astDB->rawQuery($stmt);
-    
+
                             $message .= "$recording_id|$length_in_min|";
-    
+
                 #			$fp = fopen ("./recording_debug_$NOW_DATE$txt", "a");
                 #			fwrite ($fp, "$NOW_TIME|RECORD_LOG|$filename[$loop_count]|$uniqueid|$lead_id|$user|$inOUT|$VLA_inOUT|$length_in_sec|$VDterm_reason|$VDvicidial_id|$VDvicidial_id|$vicidial_id|$start_epoch|$recording_id|$VDIDselect|\n");
                 #			fclose($fp);
@@ -1309,11 +1309,11 @@ if ($is_logged_in) {
         if ($log_no_enter < 1) {
             $talk_sec = 0;
             //$StarTtimE = date("U");
-            $updateData = array(
+            $updateData = [
                 'talk_sec' => $talk_sec,
                 'dispo_epoch' => $StarTtimE,
                 'uniqueid' => $uniqueid
-            );
+            ];
             //$stmt = "SELECT talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->get('vicidial_agent_log', null, 'talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch');
@@ -1322,9 +1322,9 @@ if ($is_logged_in) {
                 $row = $rslt[0];
                 if ( (preg_match("/NULL/i", $row['talk_epoch'])) || ($row['talk_epoch'] < 1000) ) {
                     //$talk_epochSQL=",talk_epoch='$StarTtimE'";
-                    $talk_epochSQL = array(
+                    $talk_epochSQL = [
                         'talk_epoch' => $StarTtimE
-                    );
+                    ];
                     $row['talk_epoch'] = $row['wait_epoch'];
                     $updateData = array_merge($updateData, $talk_epochSQL);
                 }
@@ -1332,25 +1332,25 @@ if ($is_logged_in) {
                     $dead_sec = ($StarTtimE - $row['dead_epoch']);
                     if ($dead_sec < 0) {$dead_sec = 0;}
                     //$dead_secSQL=",dead_sec='$dead_sec'";
-                    $dead_secSQL = array(
+                    $dead_secSQL = [
                         'dead_sec' => $dead_sec
-                    );
+                    ];
                     $updateData = array_merge($updateData, $dead_secSQL);
                 }
                 $talk_sec = (($StarTtimE - $row['talk_epoch']) + $row['talk_sec']);
                 $updateData['talk_sec'] = $talk_sec;
-                if ( ( ($auto_dial_level < 1) || (preg_match('/^M/', $MDnextCID)) ) && (preg_match('/INBOUND_MAN/', $dial_method)) ) {
-                    if ( (preg_match("/NULL/i", $row['comments'])) or (strlen($row['comments']) < 1) ) {
+                if ( ( ($auto_dial_level < 1) || (preg_match('/^M/', (string) $MDnextCID)) ) && (preg_match('/INBOUND_MAN/', (string) $dial_method)) ) {
+                    if ( preg_match("/NULL/i", $row['comments']) || strlen($row['comments']) < 1 ) {
                         //$lead_id_commentsSQL .= ",comments='MANUAL'";
-                        $lead_id_commentsSQL = array(
+                        $lead_id_commentsSQL = [
                             'comments' => 'MANUAL'
-                        );
+                        ];
                     }
                     if ( (preg_match("/NULL/i", $row['lead_id'])) || ($row['lead_id'] < 1) || (strlen($row['lead_id']) < 1) ) {
                         //$lead_id_commentsSQL .= ",lead_id='$lead_id'";
-                        $lead_id_commentsSQL = array(
+                        $lead_id_commentsSQL = [
                             'lead_id' => $lead_id
-                        );
+                        ];
                     }
                     $updateData = array_merge($updateData, $lead_id_commentsSQL);
                 }
@@ -1361,16 +1361,16 @@ if ($is_logged_in) {
             $testOutput = $astDB->getLastQuery();
         
             ### update vicidial_carrier_log to match uniqueIDs
-            $beginUNIQUEID = preg_replace("/\..*/", "", $uniqueid);
+            $beginUNIQUEID = preg_replace("/\..*/", "", (string) $uniqueid);
             //$stmt="UPDATE vicidial_carrier_log set uniqueid='$uniqueid' where lead_id='$lead_id' and uniqueid LIKE \"$beginUNIQUEID%\";";
             $astDB->where('lead_id', $lead_id);
             $astDB->where('uniqueid', "$beginUNIQUEID%", 'like');
-            $rslt = $astDB->update('vicidial_carrier_log', array('uniqueid' => $uniqueid));
+            $rslt = $astDB->update('vicidial_carrier_log', ['uniqueid' => $uniqueid]);
         
             ### if queuemetrics_dispo_pause dispo tag is enabled, log it here
-            if (strlen($queuemetrics_dispo_pause) > 0) {
+            if ((string) $queuemetrics_dispo_pause !== '') {
                 //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$MDnextCID',queue='NONE',agent='Agent/$user',verb='PAUSEREASON',serverid='$queuemetrics_log_id',data1='$queuemetrics_dispo_pause';";
-                $insertData = array(
+                $insertData = [
                     'partition' => 'P01',
                     'time_id' => $StarTtimE,
                     'call_id' => $MDnextCID,
@@ -1379,14 +1379,14 @@ if ($is_logged_in) {
                     'verb' => 'PAUSEREASON',
                     'serverid' => $queuemetrics_log_id,
                     'data1' => $queuemetrics_dispo_pause
-                );
+                ];
                 $rslt = $linkB->insert('queue_log', $insertData);
                 $affected_rows = $linkB->getRowCount();
             }
         }
-        $APIResult = array( "result" => "success", "message" => $message, "test" => $testOutput );
+        $APIResult = [ "result" => "success", "message" => $message, "test" => $testOutput ];
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

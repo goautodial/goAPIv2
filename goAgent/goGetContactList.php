@@ -48,7 +48,7 @@ if (!$is_logged_in) {
         $astDB->where('campaign_id', $camp_array, 'in');
     }
 } else {
-    if (preg_match("/CAMPLISTS/", $agent_lead_search_method)) {
+    if (preg_match("/CAMPLISTS/", (string) $agent_lead_search_method)) {
         $astDB->where('campaign_id', $campaign);
     } else {
         if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
@@ -59,15 +59,15 @@ if (!$is_logged_in) {
 }
 $astDB->where('active', 'Y');
 $rslt = $astDB->get('vicidial_lists', null, 'list_id');
-$list_ids = array();
+$list_ids = [];
 foreach ($rslt as $val) {
     $list_ids[] = $val['list_id'];
 }
 
 if (count($list_ids) > 0 ) {
     $astDB->where('vl.list_id', $list_ids, 'in');
-    $astDB->where('vl.status', array('DNC', 'DNCL'), 'not in');
-    if (strlen($search_string) >= 3) {
+    $astDB->where('vl.status', ['DNC', 'DNCL'], 'not in');
+    if (strlen((string) $search_string) >= 3) {
         $astDB->where("CONCAT(first_name,' ',last_name)", "%$search_string%", 'like');
         $astDB->orWhere('phone_number', "%$search_string%", 'like');
         $astDB->orWhere('lead_id', "%$search_string%", 'like');
@@ -78,13 +78,13 @@ if (count($list_ids) > 0 ) {
     $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,campaign_id,status,comments,phone_code');
     $lastQuery = $astDB->getLastQuery();
 
-    $leads = array();
+    $leads = [];
     foreach ($rslt as $lead) {
         $leads[] = $lead;
     }
 
-    $APIResult = array( 'result' => 'success', 'leads' => $leads, 'lastQuery' => $lastQuery );
+    $APIResult = [ 'result' => 'success', 'leads' => $leads, 'lastQuery' => $lastQuery ];
 } else {
-    $APIResult = array( 'result' => 'error', 'message' => 'No leads found.' );
+    $APIResult = [ 'result' => 'error', 'message' => 'No leads found.' ];
 }
 ?>

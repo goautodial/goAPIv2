@@ -20,8 +20,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-        $user_id = $goDB->escape($_REQUEST['user_id']);
-        
+        $user_id = isset($_REQUEST['user_id']) ? $goDB->escape($_REQUEST['user_id']) : '';
+
         $goDB->where('setting', 'GO_agent_use_wss');
         $rslt = $goDB->getOne('settings', 'value');
 
@@ -30,14 +30,13 @@
                 if ($webrtc > 0 && (!empty($user_id) && !is_null($user_id))) {
                         $goDB->where('userid', $user_id);
                         $rsltu = $goDB->getOne('users', 'enable_webrtc');
-                        if ($rsltu['enable_webrtc'] > -1) {
+                        if (isset($rsltu['enable_webrtc']) && $rsltu['enable_webrtc'] > -1) {
                                 $webrtc = $rsltu['enable_webrtc'];
                         }
                 }
-                
-                $apiresults = array("result" => $webrtc);
+
+                $apiresults = ["result" => $webrtc];
         } else {
-                $apiresults = array("result" => "Failed to get Result.");
+                $apiresults = ["result" => "Failed to get Result."];
         }
 ?>
-

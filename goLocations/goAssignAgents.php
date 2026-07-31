@@ -38,7 +38,7 @@ foreach ($agents as $agent) {
 		$rslt = $astDB->get('vicidial_campaign_agents');
 		$existingCampaignUser = $astDB->getRowCount();
 		if($existingCampaignUser < 1) {
-			$insertData = array(
+			$insertData = [
 				'user' => $user,
 				'campaign_id' => $campaign,
 				'campaign_rank' => 0,
@@ -46,7 +46,7 @@ foreach ($agents as $agent) {
 				'calls_today' => 0,
 				'group_web_vars' => '',
 				'campaign_grade' => 1
-			);
+			];
 			$astDB->insert('vicidial_campaign_agents', $insertData);
 			
 			$astDB->where('vca.user', $user);
@@ -67,8 +67,8 @@ foreach ($agents as $agent) {
 	$location_id = $rslt['id'];
 	
 	$goDB->where('userid', $agent);
-	$goDB->update('users', array('location_id' => $location_id));
+	$goDB->update('users', ['location_id' => $location_id]);
 }
 
-$APIResult = array("result" => "success", "data" => $newAssignments);
+$APIResult = ["result" => "success", "data" => $newAssignments];
 ?>

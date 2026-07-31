@@ -23,7 +23,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
 	$is_selectable 										= $astDB->escape($_REQUEST['is_selectable']);
@@ -32,17 +32,17 @@
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -55,17 +55,17 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			//if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
-                $cols                                   = array(
+                $cols                                   = [
                     "status",
                     "status_name"
-                );
-                
+                ];
+
 				if ($is_selectable === "1") {
                     $astDB->where("selectable", "Y");
                 }
                 $astDB->orderBy("status", "desc");
                 $rsltv                                  = $astDB->get("vicidial_statuses", NULL, $cols);
-                
+
                 if ($astDB->count > 0) {
                     foreach ($rsltv as $fresults){
                         $thisStatus                     = $fresults['status'];
@@ -73,30 +73,30 @@
                         $systemStatuses[$thisStatus]    = $fresults['status_name'];
                     }
                 }
-                
+
                 ksort($systemStatuses);
                 foreach ($systemStatuses as $key => $status) {
                     $dataStatus['system'][]             = $key;
                     $dataStatusName['system'][]         = $status;
                 }
-				
-				if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
-					$cols 								= array(
+
+				if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", (string) $campaign_id)) {
+					$cols 								= [
 						"status", 
 						"status_name"
-					);
-					
+					];
+
                     if ($is_selectable === "1") {
                         $astDB->where("selectable", "Y");
                     }
-                    
-					if (!preg_match("/ALL/", $campaign_id)) {
+
+					if (!preg_match("/ALL/", (string) $campaign_id)) {
 						$astDB->where("campaign_id", $campaign_id);
 					}
-					
+
 					$astDB->orderBy("status", "desc");			
 					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
-							
+
 					if ($astDB->count > 0) {
 						foreach ($rsltv as $fresults){
                             $thisStatus                 = $fresults['status'];
@@ -105,18 +105,18 @@
 						}		
 					}			
 				}
-                
+
                 ksort($campStatuses);
                 foreach ($campStatuses as $key => $status) {
                     $dataStatus['campaign'][]           = $key;
                     $dataStatusName['campaign'][]       = $status;
                 }
-				
-				$apiresults                             = array(
+
+				$apiresults                             = [
                     "result"                                                => "success",
                     "status"                                                => $dataStatus,
                     "status_name"                                           => $dataStatusName,
-                );
+                ];
 			//} else {
 			//	$err_msg 								= error_handle("10108", "status. No campaigns available");
 			//	$apiresults								= array(
@@ -126,10 +126,10 @@
 			//}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 ?>

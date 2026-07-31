@@ -1,5 +1,7 @@
 <?php
-   ##################################################
+   declare(strict_types=1);
+
+    ##################################################
    ### Name: goSendSMS.php                        ###
    ### Description: API to send sms 	          ###
    ### Version: 0.9                               ###
@@ -8,19 +10,19 @@
    ### License: AGPLv2                            ###
    ##################################################
     
-	include_once("../goFunctions.php");
+	include_once(__DIR__ . "/../goFunctions.php");
 
 	try
     {
         $message_type = $_POST["message_type"];
     }
-    catch (Exception $e)
+    catch (Exception)
     {
         echo "Error 1";
         exit(0);
     }
 
-    if (strtoupper($message_type) == "INCOMING"){
+    if (strtoupper((string) $message_type) === "INCOMING"){
         try
         {
             $message = $_POST["message"];
@@ -32,7 +34,7 @@
             // echo "Accepted";
             // send reply
             $message = "We have received your text message. This is a reply message from GoAutoDial Inc.";
-            $arr_post_body = array(
+            $arr_post_body = [
 		        "message_type" 	=> "REPLY",
 		        "mobile_number" => $mobile_number,
 		        "shortcode" 	=> "29290462886",
@@ -41,7 +43,7 @@
 		        "message" 		=> $message,
 		        "client_id" 	=> "fdd645b7328431d8f21a6301de52b42fe4b06514f47fcaae0e70790e3fb8cd8d",
 		        "secret_key" 	=> "649dc271effa414ebfa2c3d473024cf4362f994b1d42c1a4b92d088f8a4c1bec"
-		    );
+		    ];
 
 		    $query_string = "";
 		    foreach($arr_post_body as $key => $frow)
@@ -58,11 +60,10 @@
 		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		    $response = curl_exec($ch);
 		    $curlError = curl_error($ch);
-		    curl_close($ch);
 
             exit(0);
         }
-        catch (Exception $e)
+        catch (Exception)
         {
             echo "Error 2";
             exit(0);
@@ -75,7 +76,7 @@
     function gen_random($length=32){
 		$final_rand='';
 		for($i=0;$i< $length;$i++){
-		    $final_rand .= rand(0,9);
+		    $final_rand .= random_int(0,9);
 
 		}
 

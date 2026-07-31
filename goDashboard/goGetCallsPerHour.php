@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-include_once ("goAPI.php");
+include_once (__DIR__ . "/goAPI.php");
 
 $allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
 $ul                                                 = "";
@@ -30,17 +30,17 @@ $uli                                                = "";
 
 // ERROR CHECKING
 if (empty($goUser) || is_null($goUser)) {
-    $apiresults 									= array(
+    $apiresults 									= [
         "result" 										=> "Error: goAPI User Not Defined."
-    );
+    ];
 } elseif (empty($goPass) || is_null($goPass)) {
-    $apiresults 									= array(
+    $apiresults 									= [
         "result" 										=> "Error: goAPI Password Not Defined."
-    );
+    ];
 } elseif (empty($log_user) || is_null($log_user)) {
-    $apiresults 									= array(
+    $apiresults 									= [
         "result" 										=> "Error: Session User Not Defined."
-    );
+    ];
 } else {
     // check if goUser and goPass are valid
     $fresults										= $astDB
@@ -53,16 +53,16 @@ if (empty($goUser) || is_null($goUser)) {
 
     if ($goapiaccess > 0 && $userlevel > 7) {
         if (is_array($allowed_campaigns)) {
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 //$allowed_campaigns	= allowed_campaigns($log_group, $goDB, $astDB);
                 $stringv = implode(",", $allowed_campaigns);
                 $ul = "and campaign_id IN ($stringv)";
 
                 $getIngroups                        = $astDB->where('user_group', $log_group)
                     //->orWhere("user_group", "---ALL---")
-                    ->get('vicidial_inbound_groups', NULL, array('group_id'));
+                    ->get('vicidial_inbound_groups', NULL, ['group_id']);
 
-                $ingroups                           = array();
+                $ingroups                           = [];
                 foreach ($getIngroups as $fresults) {
                     $ingroups[]                     = $fresults['group_id'];
                 }
@@ -78,7 +78,7 @@ if (empty($goUser) || is_null($goUser)) {
             //$fresults = mysqli_fetch_assoc($rsltv);
 
             if ($fresults == NULL) {
-                $fresults                           = array();
+                $fresults                           = [];
             }
 
             //dropped
@@ -87,7 +87,7 @@ if (empty($goUser) || is_null($goUser)) {
             //$dresults = mysqli_fetch_assoc($rsltd);
 
             if ($dresults == NULL) {
-                $dresults                           = array();
+                $dresults                           = [];
             }
 
             //outbound
@@ -96,17 +96,17 @@ if (empty($goUser) || is_null($goUser)) {
             //$oresults = mysqli_fetch_assoc($rsltOut);
 
             if ($oresults == NULL) {
-                $oresults                           = array();
+                $oresults                           = [];
             }
 
-            $apiresults = array_merge( array( "result" => "success" ), $fresults, $dresults, $oresults);
+            $apiresults = array_merge( [ "result" => "success" ], $fresults, $dresults, $oresults);
         }
     } else {
         $err_msg 									= error_handle("10001");
-        $apiresults 								= array(
+        $apiresults 								= [
             "code" 										=> "10001",
             "result" 									=> $err_msg
-        );
+        ];
     }
 }
 

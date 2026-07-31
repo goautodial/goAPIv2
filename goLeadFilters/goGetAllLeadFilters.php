@@ -20,9 +20,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
-	$groupId = go_get_groupid($goUser, $astDB);
+	$groupId = go_get_groupid($goUser);
 	
 	// if (!checkIfTenant($groupId, $goDB)) {
 	// 	//$ul = "";
@@ -36,7 +36,7 @@
         $astDB->where("user_group", $groupId);
         $astDB->orWhere("lead_filter_id", "FILTEMP");
     } else {
-        if (strtoupper($groupId) != 'ADMIN') {
+        if (strtoupper((string) $groupId) !== 'ADMIN') {
             if ($userlevel > 8) {
                 $astDB->where("user_group", $groupId);
                 $astDB->orWhere("lead_filter_id", "FILTEMP");
@@ -56,5 +56,5 @@
 		$dataLeadFilterID[] = $fresults['lead_filter_id'];
        	$dataLeadFilterName[] = $fresults['lead_filter_name'];
 	}
-    $apiresults = array("result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName);
+    $apiresults = ["result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName];
 ?>

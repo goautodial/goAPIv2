@@ -23,7 +23,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ( "goAPI.php" );
+    include_once ( __DIR__ . "/goAPI.php" );
 
 	$allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
@@ -125,42 +125,42 @@
     $vra_status                                         = $astDB->escape($_REQUEST["vra_status"]);
 
     // Default values 
-    $defActive 											= array( "Y", "N" );	
-    $defEnable 											= array( 0, 1 );	    
-    $defDialMethod 										= array( "MANUAL", "RATIO", "ADAPT_HARD_LIMIT", "ADAPT_TAPERED", "ADAPT_AVERAGE", "INBOUND_MAN" );
+    $defActive 											= [ "Y", "N" ];	
+    $defEnable 											= [ 0, 1 ];	    
+    $defDialMethod 										= [ "MANUAL", "RATIO", "ADAPT_HARD_LIMIT", "ADAPT_TAPERED", "ADAPT_AVERAGE", "INBOUND_MAN" ];
     
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     } elseif (!in_array($active,$defActive) && $active != null ) {
 		$err_msg 										= error_handle( "41006", "active" );
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		); 
+		]; 
 		//$apiresults = array("result" => "Error: Default value for active is Y or N only."); 
 	} elseif (!in_array( $dial_method,$defDialMethod ) && $dial_method != null ) {
 		$err_msg 										= error_handle( "41006", "dial_method" );
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
-		); 
+		]; 
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -187,29 +187,29 @@
 					$columnRows 						= $goDB->getRowCount();
 
 					if ( $columnRows > 0 ) {
-						$data_update_go					= array(
+						$data_update_go					= [
 							'dynamic_cid'					=> $dynamic_cid
-						);
+						];
 						
-						$data_insert_go 				= array(
+						$data_insert_go 				= [
 							'dynamic_cid' 					=> $dynamic_cid
-						);
+						];
 					}
 					
 					if (!empty($location)) {
-						$data_update_go 				= array(
+						$data_update_go 				= [
 							'location_id' 					=> $location
-						);
+						];
 						
-						$data_insert_go 				= array(
+						$data_insert_go 				= [
 							'location_id' 					=> $location
-						);
+						];
 					}
 					
 					if (!empty($nextdial_seconds)) {
-						$data_update 					= array(
+						$data_update 					= [
 							'nextdial_seconds' 				=> $nextdial_seconds
-						);
+						];
 					}
 
 					if ( $campaign_type == "SURVEY" ) {
@@ -235,150 +235,120 @@
 					} elseif ( $dial_method == "ADAPT_TAPERED" ) {
 						$autoDialLevel 					= 1;
 					} else {
-						switch ( $auto_dial_level ) {
-							case "OFF":
-							
-							$autoDialLevel 				= 0;
-							break;
-							
-							case "SLOW":
-						
-							$autoDialLevel 				= 1;
-							break;
-							
-							case "NORMAL":
-						
-							$autoDialLevel 				= 2;
-							break;
-							
-							case "HIGH":
-						
-							$autoDialLevel 				= 4;
-							break;
-							
-							case "MAX":
-						
-							$autoDialLevel 				= 6;
-							break;
-							
-							case "MAX_PREDICTIVE":
-						
-							$autoDialLevel 				= 10;
-							break;
-							
-							case "ADVANCE":
-						
-							$autoDialLevel 				= $auto_dial_level_adv;
-							break;
-							
-							default:
-							$autoDialLevel 				= 1;
-							//DEFAULT HERE
-						}
+						$autoDialLevel = match ($auto_dial_level) {
+                            "OFF" => 0,
+                            "SLOW" => 1,
+                            "NORMAL" => 2,
+                            "HIGH" => 4,
+                            "MAX" => 6,
+                            "MAX_PREDICTIVE" => 10,
+                            "ADVANCE" => $auto_dial_level_adv,
+                            default => 1,
+                        };
 					}
 					
 					if ( $campaign_type != 'SURVEY' ) {
-						$data_array01 						= array(
-							'campaign_allow_inbound' 			=> (!empty($campaign_allow_inbound)) ? $campaign_allow_inbound : $resultGet['campaign_allow_inbound'], 
-							'available_only_ratio_tally' 		=> (!empty($available_only_ratio_tally)) ? $available_only_ratio_tally : $resultGet['available_only_ratio_tally'], 
-							'campaign_recording' 				=> (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'], 
-							'campaign_rec_filename' 			=> (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'], 
-							'per_call_notes' 					=> (!empty($per_call_notes)) ? $per_call_notes : $resultGet['per_call_notes'], 
+						$data_array01 						= [
+							'campaign_allow_inbound' 			=> (empty($campaign_allow_inbound)) ? $resultGet['campaign_allow_inbound'] : $campaign_allow_inbound, 
+							'available_only_ratio_tally' 		=> (empty($available_only_ratio_tally)) ? $resultGet['available_only_ratio_tally'] : $available_only_ratio_tally, 
+							'campaign_recording' 				=> (empty($campaign_recording)) ? $resultGet['campaign_recording'] : $campaign_recording, 
+							'campaign_rec_filename' 			=> (empty($campaign_rec_filename)) ? $resultGet['campaign_rec_filename'] : $campaign_rec_filename, 
+							'per_call_notes' 					=> (empty($per_call_notes)) ? $resultGet['per_call_notes'] : $per_call_notes, 
 							'am_message_exten' 					=> $amMessageExten, 
-							'agent_pause_codes_active' 			=> (!empty($agent_pause_codes_active)) ? $agent_pause_codes_active : $resultGet['agent_pause_codes_active'], 
-							'manual_dial_filter' 				=> (!empty($manual_dial_filter)) ? $manual_dial_filter : $resultGet['manual_dial_filter'], 
-							'manual_dial_search_filter' 		=> (!empty($manual_dial_search_filter)) ? $manual_dial_search_filter : $resultGet['manual_dial_search_filter'],
-							'customer_3way_hangup_logging' 		=> (!empty($customer_3way_hangup_logging)) ? $customer_3way_hangup_logging : $resultGet['customer_3way_hangup_logging'], 
-							'customer_3way_hangup_seconds' 		=> (!empty($customer_3way_hangup_seconds)) ? $customer_3way_hangup_seconds : $resultGet['customer_3way_hangup_seconds'], 
-							'customer_3way_hangup_action' 		=> (!empty($customer_3way_hangup_action)) ? $customer_3way_hangup_action : $resultGet['customer_3way_hangup_action'],
-							'alt_number_dialing' 				=> (!empty($alt_number_dialing)) ? $alt_number_dialing : $resultGet['alt_number_dialing']
-						);
+							'agent_pause_codes_active' 			=> (empty($agent_pause_codes_active)) ? $resultGet['agent_pause_codes_active'] : $agent_pause_codes_active, 
+							'manual_dial_filter' 				=> (empty($manual_dial_filter)) ? $resultGet['manual_dial_filter'] : $manual_dial_filter, 
+							'manual_dial_search_filter' 		=> (empty($manual_dial_search_filter)) ? $resultGet['manual_dial_search_filter'] : $manual_dial_search_filter,
+							'customer_3way_hangup_logging' 		=> (empty($customer_3way_hangup_logging)) ? $resultGet['customer_3way_hangup_logging'] : $customer_3way_hangup_logging, 
+							'customer_3way_hangup_seconds' 		=> (empty($customer_3way_hangup_seconds)) ? $resultGet['customer_3way_hangup_seconds'] : $customer_3way_hangup_seconds, 
+							'customer_3way_hangup_action' 		=> (empty($customer_3way_hangup_action)) ? $resultGet['customer_3way_hangup_action'] : $customer_3way_hangup_action,
+							'alt_number_dialing' 				=> (empty($alt_number_dialing)) ? $resultGet['alt_number_dialing'] : $alt_number_dialing
+						];
 					}
 						
 					if ($campaign_type != 'SURVEY' && $dial_method != "INBOUND_MAN") {
-						$data_array02 						= array(
-							'use_internal_dnc' 					=> (!empty($use_internal_dnc)) ? $use_internal_dnc : $resultGet['use_internal_dnc'],
-							'use_campaign_dnc' 					=> (!empty($use_campaign_dnc)) ? $use_campaign_dnc : $resultGet['use_campaign_dnc'],
-							'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
+						$data_array02 						= [
+							'use_internal_dnc' 					=> (empty($use_internal_dnc)) ? $resultGet['use_internal_dnc'] : $use_internal_dnc,
+							'use_campaign_dnc' 					=> (empty($use_campaign_dnc)) ? $resultGet['use_campaign_dnc'] : $use_campaign_dnc,
+							'three_way_call_cid' 				=> (empty($three_way_call_cid)) ? $resultGet['three_way_call_cid'] : $three_way_call_cid,
 							//'three_way_call_cid' 				=> (!empty($three_way_call_cid)) ? $three_way_call_cid : "",
-							'hopper_level' 						=> (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
-							'alt_number_dialing' 				=> (!empty($alt_number_dialing)) ? $alt_number_dialing : $resultGet['alt_number_dialing']
-						);
+							'hopper_level' 						=> (empty($hopper_level)) ? $resultGet['hopper_level'] : $hopper_level,
+							'alt_number_dialing' 				=> (empty($alt_number_dialing)) ? $resultGet['alt_number_dialing'] : $alt_number_dialing
+						];
 					}
 
-					$data_array03							= array(
-						'campaign_name' 						=> (!empty($campaign_name)) ? $campaign_name : $resultGet['campaign_name'],
-						'campaign_description' 					=> (!empty($campaign_desc)) ? $campaign_desc : $resultGet['campaign_desc'], 
-						'active' 								=> (!empty($active)) ? $active : $resultGet['active'], 
+					$data_array03							= [
+						'campaign_name' 						=> (empty($campaign_name)) ? $resultGet['campaign_name'] : $campaign_name,
+						'campaign_description' 					=> (empty($campaign_desc)) ? $resultGet['campaign_desc'] : $campaign_desc, 
+						'active' 								=> (empty($active)) ? $resultGet['active'] : $active, 
 						'dial_method' 							=> (gettype($dial_method) != NULL) ? $dial_method : $resultGet['dial_method'], 
 						'auto_dial_level' 						=> $autoDialLevel, 
 						'dial_prefix' 							=> $dialprefix,
-						'web_form_address' 						=> (!empty($webform) OR empty($webform)) ? $webform : $resultGet['web_form_address'], 
+						'web_form_address' 						=> (!empty($webform) || empty($webform)) ? $webform : $resultGet['web_form_address'], 
 						'campaign_script' 						=> $campaign_script, 
-						'campaign_cid' 							=> (!empty($campaign_cid)) ? $campaign_cid : $resultGet['campaign_cid'], 
-						'campaign_vdad_exten' 					=> (!empty($campaign_vdad_exten)) ? $campaign_vdad_exten : $resultGet['campaign_vdad_exten'], 
-						'local_call_time' 						=> (!empty($local_call_time)) ? $local_call_time : $resultGet['local_call_time'],  
-						'dial_status_a' 						=> (!empty($dial_status)) ? $dial_status : $resultGet['dial_status'], 
+						'campaign_cid' 							=> (empty($campaign_cid)) ? $resultGet['campaign_cid'] : $campaign_cid, 
+						'campaign_vdad_exten' 					=> (empty($campaign_vdad_exten)) ? $resultGet['campaign_vdad_exten'] : $campaign_vdad_exten, 
+						'local_call_time' 						=> (empty($local_call_time)) ? $resultGet['local_call_time'] : $local_call_time,  
+						'dial_status_a' 						=> (empty($dial_status)) ? $resultGet['dial_status'] : $dial_status, 
 						//'lead_filter_id' 						=> (!empty($lead_filter)) ? $lead_filter : $resultGet['lead_filter_id'],
-						'lead_filter_id' 						=> (!empty($lead_filter)) ? $lead_filter : '',
+						'lead_filter_id' 						=> (empty($lead_filter)) ? '' : $lead_filter,
 						'call_count_limit' 						=> $call_count_limit,
 						'call_count_target' 					=> $call_count_target,
-						'dial_timeout' 							=> (!empty($dial_timeout)) ? $dial_timeout : $resultGet['dial_timeout'], 
+						'dial_timeout' 							=> (empty($dial_timeout)) ? $resultGet['dial_timeout'] : $dial_timeout, 
 						//'manual_dial_prefix' 					=> (!empty($manual_dial_prefix)) ? $manual_dial_prefix : $resultGet['manual_dial_prefix'],
 						'manual_dial_prefix' 					=> $manual_dial_prefix,
-						'manual_dial_list_id' 				    => (!empty($manual_dial_list_id)) ? $manual_dial_list_id : $resultGet['manual_dial_list_id'], 
-						'get_call_launch' 						=> (!empty($get_call_launch)) ? $get_call_launch : $resultGet['get_call_launch'], 
-						'next_agent_call' 						=> (!empty($next_agent_call)) ? $next_agent_call : $resultGet['next_agent_call'], 
-						'xferconf_a_number' 					=> (!empty($xferconf_a_number)) ? $xferconf_a_number : $resultGet['xferconf_a_number'], 
-						'xferconf_b_number' 					=> (!empty($xferconf_b_number)) ? $xferconf_b_number : $resultGet['xferconf_b_number'], 
+						'manual_dial_list_id' 				    => (empty($manual_dial_list_id)) ? $resultGet['manual_dial_list_id'] : $manual_dial_list_id, 
+						'get_call_launch' 						=> (empty($get_call_launch)) ? $resultGet['get_call_launch'] : $get_call_launch, 
+						'next_agent_call' 						=> (empty($next_agent_call)) ? $resultGet['next_agent_call'] : $next_agent_call, 
+						'xferconf_a_number' 					=> (empty($xferconf_a_number)) ? $resultGet['xferconf_a_number'] : $xferconf_a_number, 
+						'xferconf_b_number' 					=> (empty($xferconf_b_number)) ? $resultGet['xferconf_b_number'] : $xferconf_b_number, 
 															//nat: added the two following lines of code
-						'three_way_call_cid' 					=> (!empty($three_way_call_cid)) ? $three_way_call_cid : $resultGet['three_way_call_cid'],
-						'survey_response_digit_map' 			=> (!empty($survey_response_digit_map)) ? $survey_response_digit_map : $resultGet['survey_response_digit_map'],
+						'three_way_call_cid' 					=> (empty($three_way_call_cid)) ? $resultGet['three_way_call_cid'] : $three_way_call_cid,
+						'survey_response_digit_map' 			=> (empty($survey_response_digit_map)) ? $resultGet['survey_response_digit_map'] : $survey_response_digit_map,
 						//'three_way_dial_prefix' 				=> (!empty($three_way_dial_prefix)) ? $three_way_dial_prefix : $resultGet['three_way_dial_prefix'],
 						'three_way_dial_prefix' 				=> $three_way_dial_prefix,
 															//nat: made changes to the line of code below
-						'closer_campaigns' 						=> (!empty($closer_campaigns) OR empty($closer_campaigns)) ? $closer_campaigns : $resultGet['closer_campaigns'],
+						'closer_campaigns' 						=> (!empty($closer_campaigns) || empty($closer_campaigns)) ? $closer_campaigns : $resultGet['closer_campaigns'],
 															//nat: made changes to the line of code below
-						'xfer_groups' 							=> (!empty($xfer_groups) OR empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
-						'survey_first_audio_file' 				=> (!empty($survey_first_audio_file)) ? $survey_first_audio_file : $resultGet['survey_first_audio_file'],
-						'survey_method' 						=> (!empty($survey_method)) ? $survey_method : $resultGet['survey_method'],
-						'survey_menu_id' 						=> (!empty($survey_menu_id)) ? $survey_menu_id : $survey_menu_id,
-						'survey_dtmf_digits' 					=> (!empty($survey_dtmf_digits)) ? $survey_dtmf_digits : $resultGet['survey_dtmf_digits'],
-						'survey_xfer_exten' 					=> (!empty($survey_xfer_exten)) ? $survey_xfer_exten : $resultGet['survey_xfer_exten'],
-						'survey_ni_digit' 						=> (!empty($survey_ni_digit)) ? $survey_ni_digit : $resultGet['survey_ni_digit'],
-						'survey_ni_audio_file' 					=> (!empty($survey_ni_audio_file)) ? $survey_ni_audio_file : $resultGet['survey_ni_audio_file'],
-						'survey_ni_status' 						=> (!empty($survey_ni_status)) ? $survey_ni_status : $resultGet['survey_ni_status'],
-						'survey_third_digit' 					=> (!empty($survey_third_digit)) ? $survey_third_digit : $resultGet['survey_third_digit'],
-						'survey_third_audio_file' 				=> (!empty($survey_third_audio_file)) ? $survey_third_audio_file : $resultGet['survey_third_audio_file'],
-						'survey_third_status' 					=> (!empty($survey_third_status)) ? $survey_third_status : $resultGet['survey_third_status'],
-						'survey_third_exten' 					=> (!empty($survey_third_exten)) ? $survey_third_exten : $resultGet['survey_third_exten'],
-						'survey_fourth_digit' 					=> (!empty($survey_fourth_digit)) ? $survey_fourth_digit : $resultGet['survey_fourth_digit'],
-						'survey_fourth_audio_file' 				=> (!empty($survey_fourth_audio_file)) ? $survey_fourth_audio_file : $resultGet['survey_fourth_audio_file'],
-						'survey_fourth_status' 					=> (!empty($survey_fourth_status)) ? $survey_fourth_status : $resultGet['survey_fourth_status'],
-						'survey_fourth_exten' 					=> (!empty($survey_fourth_exten)) ? $survey_fourth_exten : $resultGet['survey_fourth_exten'],
-						'amd_send_to_vmx' 						=> (!empty($amd_send_to_vmx)) ? $amd_send_to_vmx : $resultGet['amd_send_to_vmx'],
+						'xfer_groups' 							=> (!empty($xfer_groups) || empty($xfer_groups)) ? $xfer_groups : $resultGet['xfer_groups'],
+						'survey_first_audio_file' 				=> (empty($survey_first_audio_file)) ? $resultGet['survey_first_audio_file'] : $survey_first_audio_file,
+						'survey_method' 						=> (empty($survey_method)) ? $resultGet['survey_method'] : $survey_method,
+						'survey_menu_id' 						=> (empty($survey_menu_id)) ? $survey_menu_id : $survey_menu_id,
+						'survey_dtmf_digits' 					=> (empty($survey_dtmf_digits)) ? $resultGet['survey_dtmf_digits'] : $survey_dtmf_digits,
+						'survey_xfer_exten' 					=> (empty($survey_xfer_exten)) ? $resultGet['survey_xfer_exten'] : $survey_xfer_exten,
+						'survey_ni_digit' 						=> (empty($survey_ni_digit)) ? $resultGet['survey_ni_digit'] : $survey_ni_digit,
+						'survey_ni_audio_file' 					=> (empty($survey_ni_audio_file)) ? $resultGet['survey_ni_audio_file'] : $survey_ni_audio_file,
+						'survey_ni_status' 						=> (empty($survey_ni_status)) ? $resultGet['survey_ni_status'] : $survey_ni_status,
+						'survey_third_digit' 					=> (empty($survey_third_digit)) ? $resultGet['survey_third_digit'] : $survey_third_digit,
+						'survey_third_audio_file' 				=> (empty($survey_third_audio_file)) ? $resultGet['survey_third_audio_file'] : $survey_third_audio_file,
+						'survey_third_status' 					=> (empty($survey_third_status)) ? $resultGet['survey_third_status'] : $survey_third_status,
+						'survey_third_exten' 					=> (empty($survey_third_exten)) ? $resultGet['survey_third_exten'] : $survey_third_exten,
+						'survey_fourth_digit' 					=> (empty($survey_fourth_digit)) ? $resultGet['survey_fourth_digit'] : $survey_fourth_digit,
+						'survey_fourth_audio_file' 				=> (empty($survey_fourth_audio_file)) ? $resultGet['survey_fourth_audio_file'] : $survey_fourth_audio_file,
+						'survey_fourth_status' 					=> (empty($survey_fourth_status)) ? $resultGet['survey_fourth_status'] : $survey_fourth_status,
+						'survey_fourth_exten' 					=> (empty($survey_fourth_exten)) ? $resultGet['survey_fourth_exten'] : $survey_fourth_exten,
+						'amd_send_to_vmx' 						=> (empty($amd_send_to_vmx)) ? $resultGet['amd_send_to_vmx'] : $amd_send_to_vmx,
 						'waitforsilence_options' 				=> ( gettype($waitforsilence_options) != NULL) ? $waitforsilence_options : $resultGet['waitforsilence_options'],
-						'agent_lead_search' 					=> (!empty($agent_lead_search)) ? $agent_lead_search : $resultGet['agent_lead_search'],
-						'agent_lead_search_method' 				=> (!empty($agent_lead_search_method)) ? $agent_lead_search_method : $resultGet['agent_lead_search_method'],
-						'omit_phone_code' 						=> (!empty($omit_phone_code)) ? $omit_phone_code : $resultGet['omit_phone_code'],
-						'disable_alter_custdata' 				=> (!empty($disable_alter_custdata)) ? $disable_alter_custdata : $resultGet['disable_alter_custdata'],
-						'disable_alter_custphone' 				=> (!empty($disable_alter_custphone)) ? $disable_alter_custphone : $resultGet['disable_alter_custphone'],
-						'my_callback_option' 					=> (!empty($my_callback_option)) ? $my_callback_option : $resultGet['my_callback_option'],
-						'lead_order' 							=> (!empty($lead_order)) ? $lead_order : $resultGet['lead_order'],
-						'lead_order_secondary'					=> (!empty($lead_order_secondary)) ? $lead_order_secondary : $resultGet['lead_order_secondary'],
-                        'campaign_recording'                    => (!empty($campaign_recording)) ? $campaign_recording : $resultGet['campaign_recording'],
-                        'campaign_rec_filename'                 => (!empty($campaign_rec_filename)) ? $campaign_rec_filename : $resultGet['campaign_rec_filename'],
-						'hopper_level'                          => (!empty($hopper_level)) ? $hopper_level : $resultGet['hopper_level'],
-						'use_custom_cid'					    => (!empty($use_custom_cid)) ? $use_custom_cid : $resultGet['use_custom_cid'],
-						'survey_wait_sec'					    => (!empty($survey_wait_sec)) ? $survey_wait_sec : $resultGet['survey_wait_sec'],
-						'survey_no_response_action'				=> (!empty($survey_no_response_action)) ? $survey_no_response_action : $resultGet['survey_no_response_action'],
+						'agent_lead_search' 					=> (empty($agent_lead_search)) ? $resultGet['agent_lead_search'] : $agent_lead_search,
+						'agent_lead_search_method' 				=> (empty($agent_lead_search_method)) ? $resultGet['agent_lead_search_method'] : $agent_lead_search_method,
+						'omit_phone_code' 						=> (empty($omit_phone_code)) ? $resultGet['omit_phone_code'] : $omit_phone_code,
+						'disable_alter_custdata' 				=> (empty($disable_alter_custdata)) ? $resultGet['disable_alter_custdata'] : $disable_alter_custdata,
+						'disable_alter_custphone' 				=> (empty($disable_alter_custphone)) ? $resultGet['disable_alter_custphone'] : $disable_alter_custphone,
+						'my_callback_option' 					=> (empty($my_callback_option)) ? $resultGet['my_callback_option'] : $my_callback_option,
+						'lead_order' 							=> (empty($lead_order)) ? $resultGet['lead_order'] : $lead_order,
+						'lead_order_secondary'					=> (empty($lead_order_secondary)) ? $resultGet['lead_order_secondary'] : $lead_order_secondary,
+                        'campaign_recording'                    => (empty($campaign_recording)) ? $resultGet['campaign_recording'] : $campaign_recording,
+                        'campaign_rec_filename'                 => (empty($campaign_rec_filename)) ? $resultGet['campaign_rec_filename'] : $campaign_rec_filename,
+						'hopper_level'                          => (empty($hopper_level)) ? $resultGet['hopper_level'] : $hopper_level,
+						'use_custom_cid'					    => (empty($use_custom_cid)) ? $resultGet['use_custom_cid'] : $use_custom_cid,
+						'survey_wait_sec'					    => (empty($survey_wait_sec)) ? $resultGet['survey_wait_sec'] : $survey_wait_sec,
+						'survey_no_response_action'				=> (empty($survey_no_response_action)) ? $resultGet['survey_no_response_action'] : $survey_no_response_action,
 						'am_message_exten'					    => $amMessageExten
-					);
+					];
 					
 					if ( $campaign_type == 'SURVEY' ) {
 						$data_update						= $data_array03;
 					} else {
-						if (gettype($data_array02) == "array" ) {
+						if (gettype($data_array02) === "array" ) {
 							$data_update 					= array_merge( $data_array01, $data_array02, $data_array03 );
 						} else {
 							$data_update 					= array_merge( $data_array01, $data_array03 );
@@ -397,21 +367,21 @@
 					$url_tab_second_url 					= str_replace( "http://", "https://", $url_tab_second_url );
 					
 					if ( $checkCampGODB ) {
-						$data_update_go 					= array(
-							'custom_fields_launch' 				=> (!empty($custom_fields_launch)) ? $custom_fields_launch : $resultGet['custom_fields_launch'], 
-							'custom_fields_list_id' 			=> (!empty($custom_fields_list_id)) ? $custom_fields_list_id : $resultGet['custom_fields_list_id'],
-							'url_tab_first_title' 				=> (!empty($url_tab_first_title)) ? $url_tab_first_title : $resultGet['url_tab_first_title'],
-							'url_tab_first_url' 				=> (!empty($url_tab_first_url)) ? $url_tab_first_url : $resultGet['url_tab_first_url'],
-							'url_tab_second_title' 				=> (!empty($url_tab_second_title)) ? $url_tab_second_title : $resultGet['url_tab_second_title'],
-							'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
-							'enable_callback_alert' 			=> (gettype($enable_callback_alert) != 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
-							'cb_noexpire' 						=> (gettype($cb_noexpire) != 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
-							'cb_sendemail' 						=> (gettype($cb_sendemail) != 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail'],
-                            				'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) != 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
+						$data_update_go 					= [
+							'custom_fields_launch' 				=> (empty($custom_fields_launch)) ? $resultGet['custom_fields_launch'] : $custom_fields_launch, 
+							'custom_fields_list_id' 			=> (empty($custom_fields_list_id)) ? $resultGet['custom_fields_list_id'] : $custom_fields_list_id,
+							'url_tab_first_title' 				=> (empty($url_tab_first_title)) ? $resultGet['url_tab_first_title'] : $url_tab_first_title,
+							'url_tab_first_url' 				=> (empty($url_tab_first_url)) ? $resultGet['url_tab_first_url'] : $url_tab_first_url,
+							'url_tab_second_title' 				=> (empty($url_tab_second_title)) ? $resultGet['url_tab_second_title'] : $url_tab_second_title,
+							'url_tab_second_url' 				=> (empty($url_tab_second_url)) ? $resultGet['url_tab_second_url'] : $url_tab_second_url,
+							'enable_callback_alert' 			=> (gettype($enable_callback_alert) !== 'NULL') ? $enable_callback_alert : $resultGet['enable_callback_alert'],
+							'cb_noexpire' 						=> (gettype($cb_noexpire) !== 'NULL') ? $cb_noexpire : $resultGet['cb_noexpire'],
+							'cb_sendemail' 						=> (gettype($cb_sendemail) !== 'NULL') ? $cb_sendemail : $resultGet['cb_sendemail'],
+                            				'manual_dial_min_digits'            => (gettype($manual_dial_min_digits) !== 'NULL') ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
 							'auto_dial_level'				=> $auto_dial_level,
 							'google_sheet_list_id'				=> $google_sheet_list_id,
 							'default_country_code'				=> $default_country_code
-						);
+						];
 						
 						$goDB->where( 'campaign_id', $campaign_id );
 						$goDB->update( 'go_campaigns', $data_update_go );
@@ -419,24 +389,24 @@
 						$log_id 							= log_action( $goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $goDB->getLastQuery());
 						
 					} else {
-						$campaign_type 						= ( strlen($campaign_type) > 0 ) ? $campaign_type : "OUTBOUND";
-						$data_insert_go 					= array(
+						$campaign_type 						= ( (string) $campaign_type !== '' ) ? $campaign_type : "OUTBOUND";
+						$data_insert_go 					= [
 							'campaign_id' 						=> $campaign_id, 
 							'campaign_type' 					=> $campaign_type, 
-							'custom_fields_launch' 				=> (!empty($custom_fields_launch)) ? $custom_fields_launch : $resultGet['custom_fields_launch'], 
-							'custom_fields_list_id' 			=> (!empty($custom_fields_list_id)) ? $custom_fields_list_id : $resultGet['custom_fields_list_id'],
-							'url_tab_first_title' 				=> (!empty($url_tab_first_title)) ? $url_tab_first_title : $resultGet['url_tab_first_title'],
-							'url_tab_first_url' 				=> (!empty($url_tab_first_url)) ? $url_tab_first_url : $resultGet['url_tab_first_url'],
-							'url_tab_second_title' 				=> (!empty($url_tab_second_title)) ? $url_tab_second_title : $resultGet['url_tab_second_title'],
-							'url_tab_second_url' 				=> (!empty($url_tab_second_url)) ? $url_tab_second_url : $resultGet['url_tab_second_url'],
-							'enable_callback_alert' 			=> ( gettype($enable_callback_alert) != 'NULL' ) ? $enable_callback_alert : $resultGet['enable_callback_alert'],
-							'cb_noexpire' 						=> ( gettype($cb_noexpire) != 'NULL' ) ? $cb_noexpire : $resultGet['cb_noexpire'],
-							'cb_sendemail' 						=> ( gettype($cb_sendemail) != 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail'],
-                            				'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) != 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
+							'custom_fields_launch' 				=> (empty($custom_fields_launch)) ? $resultGet['custom_fields_launch'] : $custom_fields_launch, 
+							'custom_fields_list_id' 			=> (empty($custom_fields_list_id)) ? $resultGet['custom_fields_list_id'] : $custom_fields_list_id,
+							'url_tab_first_title' 				=> (empty($url_tab_first_title)) ? $resultGet['url_tab_first_title'] : $url_tab_first_title,
+							'url_tab_first_url' 				=> (empty($url_tab_first_url)) ? $resultGet['url_tab_first_url'] : $url_tab_first_url,
+							'url_tab_second_title' 				=> (empty($url_tab_second_title)) ? $resultGet['url_tab_second_title'] : $url_tab_second_title,
+							'url_tab_second_url' 				=> (empty($url_tab_second_url)) ? $resultGet['url_tab_second_url'] : $url_tab_second_url,
+							'enable_callback_alert' 			=> ( gettype($enable_callback_alert) !== 'NULL' ) ? $enable_callback_alert : $resultGet['enable_callback_alert'],
+							'cb_noexpire' 						=> ( gettype($cb_noexpire) !== 'NULL' ) ? $cb_noexpire : $resultGet['cb_noexpire'],
+							'cb_sendemail' 						=> ( gettype($cb_sendemail) !== 'NULL' ) ? $cb_sendemail : $resultGet['cb_sendemail'],
+                            				'manual_dial_min_digits'            => ( gettype($manual_dial_min_digits) !== 'NULL' ) ? $manual_dial_min_digits : $resultGet['manual_dial_min_digits'],
 							'auto_dial_level'				=> $auto_dial_level,
 							'google_sheet_list_id'				=> $google_sheet_list_id,
 							'default_country_code'				=> $default_country_code
-						);
+						];
 
 						$goDB->insert('go_campaigns', $data_insert_go);
 						$log_id 						= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $goDB->getLastQuery());
@@ -444,7 +414,7 @@
 				
 					if ( $force_reset_hopper == "Y" ) {
 						$astDB->where( 'campaign_id', $campaign_id );
-						$astDB->where( 'status', array( 'READY','QUEUE','DONE' ), 'IN' );
+						$astDB->where( 'status', [ 'READY','QUEUE','DONE' ], 'IN' );
 						$astDB->delete( 'vicidial_hopper' );
 						
 						$log_id 						= log_action( $goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
@@ -466,47 +436,47 @@
 
                         if ($survey_method == "AGENT_XFER") {
                             $astDB->where( 'campaign_id', $campaign_id );
-                            $astDB->update( 'vicidial_remote_agents', array( 'status' => $vra_status, 'conf_exten' => $conf_exten));
+                            $astDB->update( 'vicidial_remote_agents', [ 'status' => $vra_status, 'conf_exten' => $conf_exten]);
 
                             $log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
                         } elseif ($survey_method == "EXTENSION") {
                             $astDB->where( 'campaign_id', $campaign_id );
-                            $astDB->update( 'vicidial_remote_agents', array( 'status' => $vra_status));
+                            $astDB->update( 'vicidial_remote_agents', [ 'status' => $vra_status]);
 
                             $log_id 					= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
                         }
 						
 						if (!empty($no_channels)) {
 							$astDB->where( 'campaign_id', $campaign_id );
-							$astDB->update( 'vicidial_remote_agents', array( 'number_of_lines' => $no_channels));
+							$astDB->update( 'vicidial_remote_agents', [ 'number_of_lines' => $no_channels]);
 							
 							$log_id 					= log_action( $goDB, 'MODIFY', $log_user, $log_ip, "Updated campaign settings for $campaign_id", $log_group, $astDB->getLastQuery());
 						}
 					}
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				} else {
 					$err_msg 							= error_handle( "10001", "Insufficient permision" );
-					$apiresults 						= array(
+					$apiresults 						= [
 						"code" 								=> "10001", 
 						"result" 							=> $err_msg
-					);			
+					];			
 				}
 			} else {
 				$err_msg 								= error_handle( "41004", "Campaign doesn't exist" );
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "41004", 
 					"result" 								=> $err_msg
-				); 
+				]; 
 			}				
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

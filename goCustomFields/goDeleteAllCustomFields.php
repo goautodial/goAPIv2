@@ -34,11 +34,11 @@
       if($queryDeleteCF){
         $astDB->dropTable($goTableName);
 
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
       }else{
-        $apiresults = array("result" => "Error: Custom Field does not exist");
+        $apiresults = ["result" => "Error: Custom Field does not exist"];
       }
   }else{
-      $apiresults = array("result" => "Error: List does not exist");
+      $apiresults = ["result" => "Error: List does not exist"];
   }
 ?>

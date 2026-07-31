@@ -20,24 +20,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
 	
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {		
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -54,7 +54,7 @@
 			$y 											= 0;
 			$phone_login 								= '';
 			
-			while ($x == $y) {
+			while ($x === $y) {
 				$random_digit 							= mt_rand(1000000000, 9999999999);
 				$astDB->where("phone_login", $random_digit);
 				$astDB->getOne("vicidial_users", "phone_login");
@@ -68,13 +68,13 @@
 			
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					//if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -82,14 +82,14 @@
 				}					
 			}
 		
-			$col 										= array(
+			$col 										= [
 				"extension", 
 				"protocol", 
 				"server_ip", 
 				"active", 
 				"messages", 
 				"old_messages"
-			);
+			];
 			
 			$getQuery 									= $astDB->get("phones", $limit, $col);
 			
@@ -103,7 +103,7 @@
 					$dataOldMessages[] 					= $fresults['old_messages'];
 				}
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"extension" 							=> $dataExtension, 
 					"protocol" 								=> $dataProtocol, 
@@ -112,14 +112,14 @@
 					"messages" 								=> $dataMessages, 
 					"old_messages" 							=> $dataOldMessages, 
 					"available_phone" 						=> $phone_login
-				);		
+				];		
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 		

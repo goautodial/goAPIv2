@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
     $menu_id 										= $_REQUEST['menu_id'];
@@ -51,48 +51,48 @@
 	// }
 
     // Default values 
-    $defActive = array("Y","N");
+    $defActive = ["Y","N"];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($menu_id) || is_null($menu_id)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Set a value for Menu ID."
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_name)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_name)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in menu_name"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_timeout)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_timeout)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in menu_timeout"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_repeat)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_repeat)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in menu_repeat"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', $call_time_id)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬]/', (string) $call_time_id)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in call_time_id"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $tracking_group)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $tracking_group)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in tracking_group"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $custom_dialplan_entry)) {
-		$apiresults 								= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $custom_dialplan_entry)) {
+		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in custom_dialplan_entry"
-		);
+		];
 	} elseif ($menu_time_check < 0 && !is_null($menu_time_check) || $menu_time_check > 1 && !is_null($menu_time_check)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: menu_time_check Value should be 0 or 1"
-		);
+		];
 	} elseif ($track_in_vdac < 0 && !is_null($track_in_vdac) || $track_in_vdac > 1 && !is_null($track_in_vdac)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: track_in_vdac Value should be 0 or 1"
-		);
+		];
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
             $astDB->where("user_group", $log_group);
@@ -103,7 +103,7 @@
         $rsltv_check 								= $astDB->get("vicidial_call_menu");
         
         if ($astDB->count > 0) {
-			$data 									= array(
+			$data 									= [
 				"menu_name" 							=> $menu_name,
 				"menu_prompt" 							=> $menu_prompt,
 				"menu_timeout" 							=> $menu_timeout,
@@ -116,7 +116,7 @@
 				"tracking_group" 						=> $tracking_group,
 				"user_group" 							=> $user_group,
 				"custom_dialplan_entry" 				=> $custom_dialplan_entry
-			);
+			];
 			
 			$astDB->where("menu_id", $menu_id);
 			$astDB->update("vicidial_call_menu", $data); 
@@ -125,8 +125,9 @@
 			//$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $astDB->getLastQuery());
 
 	        $items                                                                  = "";
+            $counter = count($route_option);
 
-            for ($i=0;$i < count($route_option);$i++) {
+            for ($i=0;$i < $counter;$i++) {
                 if($route_option[$i] == "A") $route_option[$i] = '#';
                 if($route_option[$i] == "B") $route_option[$i] = '*';
                 if($route_option[$i] == "C") $route_option[$i] = 'TIMECHECK';
@@ -137,7 +138,7 @@
                 $items                                                          .= "|";
             }		
 			// query for call menu options
-			if (!empty($items)) {
+			if ($items !== '' && $items !== '0') {
 				$return_query 						= "";
 				$astDB->where("menu_id", $menu_id);
 				$astDB->delete("vicidial_call_menu_options");
@@ -147,19 +148,20 @@
             
                 $exploded_items 							= explode("|", $items);
                 $filtered_items 							= array_filter($exploded_items);
+                $counter = count($filtered_items);
                 
-				for ($i=0; $i < count($filtered_items); $i++) {
+				for ($i=0; $i < $counter; $i++) {
 					$options 						= explode("+", $filtered_items[$i]);
 					
-					if (!empty($options[2])) {
-						$insertData 				= array(
+					if (isset($options[2]) && ($options[2] !== '' && $options[2] !== '0')) {
+						$insertData 				= [
 							"menu_id" 					=> $menu_id,
 							"option_value" 				=> $options[0],
 							"option_description" 		=> $options[1],
 							"option_route" 				=> $options[2],
 							"option_route_value" 		=> $options[3],
 							"option_route_value_context"=> $options[4]
-						);
+						];
 						
 						$astDB->insert("vicidial_call_menu_options", $insertData);
 						$qinsert					= $astDB->getLastQuery();
@@ -171,13 +173,13 @@
 			//reload asterisk
 			rebuildconfQuery($astDB);
 			
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "success"
-			);			
+			];			
 		} else {
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "Error: IVR doesn't exist."
-			);
+			];
 		}
 	}
 	

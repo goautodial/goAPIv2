@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");	 
+	include_once (__DIR__ . "/goAPI.php");	 
  
 	$lead_filter_id 									= $astDB->escape($_REQUEST["lead_filter_id"]); 	
     $lead_filter_name 									= $astDB->escape($_REQUEST["lead_filter_name"]); 
@@ -32,25 +32,25 @@
     
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($lead_filter_id) || is_null($lead_filter_id)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Filter ID."
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',$lead_filter_name) && $lead_filter_name != null) {
-		$apiresults 									= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',(string) $lead_filter_name) && $lead_filter_name != null) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in filter name"
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -64,12 +64,12 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
@@ -88,40 +88,40 @@
 					$datauser_group 					= $fresults['user_group'];
 				}
 				
-				$data_update 							= array(
+				$data_update 							= [
 					'lead_filter_name' 						=> ($lead_filter_name == null) ? $datafilter_name : $lead_filter_name,
 					'lead_filter_comments' 					=> ($lead_filter_comments == null) ? $datafilter_comments : $lead_filter_comments,
 					'lead_filter_sql' 						=> ($lead_filter_sql == null) ? ($datafilter_sql): $lead_filter_sql,
 					'user_group' 							=> ($user_group == null) ? $datauser_group : $user_group
-				);
+				];
 				
 				$astDB->where('lead_filter_id', $lead_filter_id);
 				$update 								= $astDB->update('vicidial_lead_filters', $data_update);
 			
 				if ($update) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Filter ID: $lead_filter_id", $log_group, $astDB->getLastQuery());
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Try updating Filter Again"
-					);
+					];
 				}
 			} else {
 				$err_msg 								= error_handle( "10001", "Insufficient permision" );
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "10001", 
 					"result" 								=> $err_msg
-				);			
+				];			
 			}				
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

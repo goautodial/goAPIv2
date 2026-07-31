@@ -20,30 +20,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
 	ini_set('memory_limit','2048M');
 	ini_set('upload_max_filesize', '600M');
 	ini_set('post_max_size', '600M');
     ini_set('max_execution_time', 3600);
-	
+
 	//ini_set('display_errors', 1);
 	//error_reporting(E_ALL);
-	
+
 	$thefile = $_FILES['goFileMe']['tmp_name'];
 	$theList = $astDB->escape($_REQUEST["goListId"]);
 	$goDupcheck = $astDB->escape($_REQUEST["goDupcheck"]);
 	$goCountInsertedLeads = 0;
 	$default_delimiter = ",";
 	$phone_code_override = $astDB->escape($_REQUEST["phone_code_override"]);
-	
+
 	$lead_mapping = NULL;
 	if(!empty($_REQUEST["lead_mapping"]))	
 		$lead_mapping = $astDB->escape($_REQUEST["lead_mapping"]);
 
-	$alex = array();
+	$alex = [];
 	$goGetCheckcustomFieldNamesCorrect = ""; //constant
-	
+
 	// path where your CSV file is located
 	define('CSV_PATH','/tmp/');
 
@@ -54,7 +54,7 @@
 	// REPLACE DELIMITER to SEMI-COLON -- CUSTOMIZATION!!!!!
 	if(!empty($_REQUEST["custom_delimiter"]) && isset($_REQUEST["custom_delimiter"])){
 		//$default_delimiter = $_REQUEST["custom_delimiter"];
-	
+
 		$delimiters = explode(" ", $_REQUEST["custom_delimiter"]);
 		$str = file_get_contents($csv_file);
 		$str1 = str_replace($delimiters, $default_delimiter, $str); 
@@ -71,15 +71,15 @@
     $gmt_recs = count($query['local_gmt']);
     if ($gmt_recs > 0) {
         $DBSERVER_GMT = $query['local_gmt'];
-        if (strlen($DBSERVER_GMT)>0)
+        if ((string) $DBSERVER_GMT !== '')
             {$SERVER_GMT = $DBSERVER_GMT;}
         if ($isdst)
             {$SERVER_GMT++;} 
     } else {
         $SERVER_GMT = date("O");
         $SERVER_GMT = preg_replace("/\+/i", "", $SERVER_GMT);
-        $SERVER_GMT = ($SERVER_GMT + 0);
-        $SERVER_GMT = ($SERVER_GMT / 100);
+        $SERVER_GMT += 0;
+        $SERVER_GMT /= 100;
     }
     $LOCAL_GMT_OFF_STD = $SERVER_GMT;
 
@@ -88,36 +88,38 @@
 	$goCountTheHeader = "";
 	//die($theList."<br>".$thefile."<br>".$csv_file);
 	if (($handle = fopen($csv_file, "r")) !== FALSE) {
-		$getHeder = fgetcsv($handle);
+		$getHeder = fgetcsv($handle, escape: '\\');
 		//$goInsertSuccess = 0;
 		//$array 21 last column
-		
+
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = count($getHeder);
-		
+
 		if($goCountTheHeader > 21 && !empty($lead_mapping)) {
-			for($x=21; $x < count($getHeder); $x++) {
+			$counter = count($getHeder);
+            for($x=21; $x < $counter; $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
 				$goGetLastCustomFiledsName .= $getHeder[$x].","; #get the digits for specific custom field
 			}
-			
-			$goGetLastHeader = preg_replace("/,$/",'',$goGetLastHeader);
+
+			$goGetLastHeader = preg_replace("/,$/",'',(string) $goGetLastHeader);
 			$goGetLastHeader2 = explode(",",$goGetLastHeader);
-			$goGetLastCustomFiledsName = preg_replace("/,$/",'',$goGetLastCustomFiledsName);
+			$goGetLastCustomFiledsName = preg_replace("/,$/",'',(string) $goGetLastCustomFiledsName);
 			$goGetLastCustomFiledsName2 = explode(",",$goGetLastCustomFiledsName);
-				
+
 		} elseif($goCountTheHeader > 21) {
-			for($x=21; $x < count($getHeder); $x++) {
+			$counter = count($getHeder);
+            for($x=21; $x < $counter; $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
 				$goGetLastCustomFiledsName .= $getHeder[$x].","; #get the digits for specific custom field
 			}
-			
-			$goGetLastHeader = preg_replace("/,$/",'',$goGetLastHeader);
+
+			$goGetLastHeader = preg_replace("/,$/",'',(string) $goGetLastHeader);
 			$goGetLastHeader2 = explode(",",$goGetLastHeader);
-			
-			$goGetLastCustomFiledsName = preg_replace("/,$/",'',$goGetLastCustomFiledsName);
+
+			$goGetLastCustomFiledsName = preg_replace("/,$/",'',(string) $goGetLastCustomFiledsName);
 			$goGetLastCustomFiledsName2 = explode(",",$goGetLastCustomFiledsName);
-			
+
 			# check custom field names are correct
 			$goGetLastCustomFiledsNameWithLeadID = "lead_id,".$goGetLastCustomFiledsName;
 			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
@@ -126,17 +128,17 @@
 			}
 		}
 		//end for custom fields start GLOBAL varaibles
-		
-		
-		while (($data = fgetcsv($handle, 1000, $default_delimiter)) !== FALSE) {
+
+
+		while (($data = fgetcsv($handle, 1000, $default_delimiter, escape: '\\')) !== FALSE) {
 			$num = count($data);
-			
+
 			for ($c=0; $c < $num; $c++) {
 				$col[$c] = $data[$c];
 			}
 			# REGEX to prevent weird characters from ending up in the fields
 			$field_regx = "/['|\"`\\\\;]/";
-			
+
 			# SQL Query to insert data into DataBase
 			$entry_date = date("Y-m-d H:i:s");
 			$status = "NEW";
@@ -145,7 +147,7 @@
 			$gmt_offset = "0";
 			// PHONE CODE OVERRIDE
 			if(!empty($phone_code_override)) {
-				$phone_code = preg_replace($field_regx, "", $phone_code_override);
+				$phone_code = preg_replace($field_regx, "", (string) $phone_code_override);
 			}
 			else {
 				$phone_code = preg_replace($field_regx, "", $col[2]);
@@ -172,15 +174,16 @@
 			$comments = preg_replace($field_regx, "", $col[20]);
 			$entry_list_id = 0;
 			$called_since_last_reset = "N";
-			
+
 			// LEAD MAPPING -- CUSTOMIZATION!!!!!
 			if(!empty($lead_mapping)){
 				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
 				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
-				$standard_fields = array("Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments");
+				$standard_fields = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
+                $counter = count($lead_mapping_fields);
 				// MAKE MAP FIELDS AN INDEX OF MAP DATA & SEPARATE STANDARD FROM CUSTOM ARRAYS
 
-				for($l=0; $l < count($lead_mapping_fields);$l++){
+				for($l=0; $l < $counter;$l++){
 					if(in_array($lead_mapping_fields[$l], $standard_fields))
 						$standard_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
 					else
@@ -212,7 +215,7 @@
 				$email = "";
 				$security_phrase = "";
 				$comments = "";				
-				
+
 				//get arrayed lead mapping requests
 				foreach($standard_array as $l => $map_data){
 					//$logthis[] = $map_data;
@@ -266,7 +269,7 @@
 					}// end if
 				}// end loop
 			} // END OF LEAD MAPPING
-			
+
 
 			if($goDupcheck === "DUPSYS"){ // Duplicate check all phone numbers in entire system
 				if($goGetCheckcustomFieldNamesCorrect == "error" && empty($lead_mapping)) {
@@ -276,20 +279,20 @@
 					$astDB->where('phone_number', $phone_number);
 					$resultCheckPhone = $astDB->getOne('vicidial_list', 'phone_number');
 					$countCheck1 = $astDB->getRowCount();
-					
+
 					//check in vicidial_dnc
 					$astDB->where('phone_number', $phone_number);
 					$resultCheckPhone = $astDB->getOne('vicidial_dnc', 'phone_number');
 					$countCheck2 = $astDB->getRowCount();
 
 					if($countCheck1 < 1 && $countCheck2 < 1){
-						$USarea = substr($phone_number, 0, 3);
+						$USarea = substr((string) $phone_number, 0, 3);
 						if (empty($phone_code)) {
 							$gmt_offset = $LOCAL_GMT_OFF_STD;
 						} else {
-							$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+							$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
 						}
-						$insertData = array(
+						$insertData = [
 							'lead_id' => '',
 							'entry_date' => $entry_date,
 							'status' => $status,
@@ -299,9 +302,9 @@
 							'phone_code' => $phone_code,
 							'phone_number' => $phone_number,
 							'title' => $title,
-							'first_name' => utf8_encode($first_name),
-							'middle_initial' => utf8_encode($middle_initial),
-							'last_name' => utf8_encode($last_name),
+							'first_name' => mb_convert_encoding((string) $first_name, 'UTF-8', 'ISO-8859-1'),
+							'middle_initial' => mb_convert_encoding((string) $middle_initial, 'UTF-8', 'ISO-8859-1'),
+							'last_name' => mb_convert_encoding((string) $last_name, 'UTF-8', 'ISO-8859-1'),
 							'address1' => $address1,
 							'address2' => $address2,
 							'address3' => $address3,
@@ -318,16 +321,16 @@
 							'comments' => $comments,
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
-						);
+						];
 						$insertQuery = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
-						
+
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
-							$goCustomKeyData = array();
-							$goCustomValuesData = array();
-							$goCustomUpdateData = array();
-							
+							$goCustomKeyData = [];
+							$goCustomValuesData = [];
+							$goCustomUpdateData = [];
+
 							foreach($custom_array as $custom_key => $map_data){
 								$goCustomValues = preg_replace($field_regx, "", $col[$map_data]);
 								//8626
@@ -335,15 +338,15 @@
 									$goCustomValues = "";
 								else
 									$goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
-									array_push($goCustomKeyData, "$custom_key");
-									array_push($goCustomValuesData, "'$goCustomValues'");
-									array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+									$goCustomKeyData[] = "$custom_key";
+									$goCustomValuesData[] = "'$goCustomValues'";
+									$goCustomUpdateData[] = "$custom_key='$goCustomValues'";
 							}
-							
+
 							$custom_keyValues = implode(",", $goCustomKeyData);
 							$goCustomValues = implode(",", $goCustomValuesData);
 							$goCustomUpdate = implode(", ",  $goCustomUpdateData);
-							
+
 							$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) 
 								VALUES('$goLastInsertedLeadIDDUPSYS', $goCustomValues) 
 								ON DUPLICATE KEY UPDATE $goCustomUpdate";
@@ -353,13 +356,13 @@
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
-					
+
 							if($countResultrsltgoShowCustomFields > 1) {
 								$totalExplode = count($goGetLastHeader2);
-								
-								$goCustomValuesData = array();
-								$goCustomUpdateData = array();
-								
+
+								$goCustomValuesData = [];
+								$goCustomUpdateData = [];
+
 								for($ax=0; $ax < $totalExplode; $ax++) {
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
 									$goCustomValues = preg_replace($field_regx, "",$col[$goGetLastHeader2[$ax]]); #get the values of the custom fielde"
@@ -368,8 +371,8 @@
 										$goCustomValues = "";
 									else
 										$goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
-									array_push($goCustomValuesData, "'$goCustomValues'");
-									array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
+									$goCustomValuesData[] = "'$goCustomValues'";
+									$goCustomUpdateData[] = "$goHeaderOfCustomFields='$goCustomValues'";
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
 								$goCustomValues = implode(",", $goCustomValuesData);
@@ -394,32 +397,32 @@
 					$astDB->where('list_id', $list_id);
 					$rsltCheckDupPhone = $astDB->get('vicidial_lists', null, 'campaign_id');
 					$countResult = $astDB->getRowCount();
-					
+
 					if($countResult > 0) {
 						foreach ($rsltCheckDupPhone as $fresults){
 							$goCampaignID = $fresults['campaign_id'];								
 							$goReturnCampList = goGetCampaignList($astDB, $goCampaignID);
 						}
 						$CampLists = $goReturnCampList;
-						
+
 						$goDUPLists = preg_replace("/,$/",'',$CampLists);
-						
+
 						//$goCheckCampPhoneList = "SELECT phone_number FROM vicidial_list WHERE phone_number='$phone_number' AND list_id IN($goDUPLists) LIMIT 1;";
 						$astDB->where('phone_number', $phone_number);
 						$astDB->where('list_id', explode(',', $goDUPLists), 'in');
 						$rsltgoCheckCampPhoneList = $astDB->getOne('vicidial_list', 'phone_number');
 						$countCheckCampPhoneList = $astDB->getRowCount();
-						
+
 						if($countCheckCampPhoneList < 1) {
-							$USarea = substr($phone_number, 0, 3);
+							$USarea = substr((string) $phone_number, 0, 3);
 							if (empty($phone_code)) {
 								$gmt_offset = $LOCAL_GMT_OFF_STD;
 							} else {
-								$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+								$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
 							}
-							
+
 							//$goQueryInsNotDUP = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id');";
-							$insertData = array(
+							$insertData = [
 								'lead_id' => '',
 								'entry_date' => $entry_date,
 								'status' => $status,
@@ -429,9 +432,9 @@
 								'phone_code' => $phone_code,
 								'phone_number' => $phone_number,
 								'title' => $title,
-								'first_name' => utf8_encode($first_name),
-								'middle_initial' => utf8_encode($middle_initial),
-								'last_name' => utf8_encode($last_name),
+								'first_name' => mb_convert_encoding((string) $first_name, 'UTF-8', 'ISO-8859-1'),
+								'middle_initial' => mb_convert_encoding((string) $middle_initial, 'UTF-8', 'ISO-8859-1'),
+								'last_name' => mb_convert_encoding((string) $last_name, 'UTF-8', 'ISO-8859-1'),
 								'address1' => $address1,
 								'address2' => $address2,
 								'address3' => $address3,
@@ -448,15 +451,15 @@
 								'comments' => $comments,
 								'entry_list_id' => $entry_list_id,
 								'last_local_call_time' => '0000-00-00 00:00:00'
-							);
+							];
 							$rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
 							$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
-							
+
 							# start set query for custom fields
 							if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
-								$goCustomKeyData = array();
-								$goCustomValuesData = array();
-								$goCustomUpdateData = array();
+								$goCustomKeyData = [];
+								$goCustomValuesData = [];
+								$goCustomUpdateData = [];
 
 								foreach($custom_array as $custom_key => $map_data){
 									$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
@@ -465,9 +468,9 @@
                                                                                 $goCustomValues = "";
 									else
                                                                                 $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
-									array_push($goCustomKeyData, "$custom_key");
-									array_push($goCustomValuesData, "'$goCustomValues'");
-									array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+									$goCustomKeyData[] = "$custom_key";
+									$goCustomValuesData[] = "'$goCustomValues'";
+									$goCustomUpdateData[] = "$custom_key='$goCustomValues'";
 
 									//$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_key) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $custom_key='$goCustomValues'";
 									//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
@@ -484,11 +487,11 @@
 								$goShowCustomFields = "DESC custom_$list_id;";
 								$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 								$countResultrsltgoShowCustomFields = $astDB->getRowCount();
-								
+
 								if($countResultrsltgoShowCustomFields > 1) {
 									$totalExplode = count($goGetLastHeader2);
-									$goCustomValuesData = array();
-																		$goCustomUpdateData = array();
+									$goCustomValuesData = [];
+																		$goCustomUpdateData = [];
 
 									for($ax=0; $ax < $totalExplode; $ax++) {
 										$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
@@ -500,13 +503,13 @@
 	                                                                                $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
 										#$goQueryCustomFields .= "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPCAMP','".$goCustomValues."');";
 										#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
-										
+
 										#$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPCAMP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 										#$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-										
+
 										#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
-										array_push($goCustomValuesData, "'$goCustomValues'");
-										array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
+										$goCustomValuesData[] = "'$goCustomValues'";
+										$goCustomUpdateData[] = "$goHeaderOfCustomFields='$goCustomValues'";
 
 									}
 
@@ -520,14 +523,14 @@
 							} 
 							# end set query for custom fields
 							$goCountInsertedLeads++;
-															$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
+															$apiresults = ["result" => "success", "message" => "$goCountInsertedLeads"];
 						}// end of IF
 						else{
 							$duplicates++;
 						}
 					}
 				}
-				
+
 			}elseif($goDupcheck == "DUPLIST") {
 				#Duplicate check within the LIST
 				if($goGetCheckcustomFieldNamesCorrect === "error" && empty($lead_mapping)) {
@@ -538,22 +541,22 @@
 					$astDB->where('list_id', $list_id);
 					$rsltCheckDupPhone = $astDB->get('vicidial_list', null, 'phone_number');
 					$countResult = $astDB->getRowCount();
-					
+
 					////check in vicidial_dnc
 					//$astDB->where('phone_number', $phone_number);
 					//$resultCheckPhone = $astDB->getOne('vicidial_dnc', 'phone_number');
 					//$countResult2 = $astDB->getRowCount();
-						
+
 					if($countResult < 1) {
-						$USarea = substr($phone_number, 0, 3);
+						$USarea = substr((string) $phone_number, 0, 3);
 						if (empty($phone_code)) {
 							$gmt_offset = $LOCAL_GMT_OFF_STD;
 						} else {
-							$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+							$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
 						}
 
 						//$goQueryInsDupList = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id');";
-						$insertData = array(
+						$insertData = [
 							'lead_id' => '',
 							'entry_date' => $entry_date,
 							'status' => $status,
@@ -563,9 +566,9 @@
 							'phone_code' => $phone_code,
 							'phone_number' => $phone_number,
 							'title' => $title,
-							'first_name' => utf8_encode($first_name),
-							'middle_initial' => utf8_encode($middle_initial),
-							'last_name' => utf8_encode($last_name),
+							'first_name' => mb_convert_encoding((string) $first_name, 'UTF-8', 'ISO-8859-1'),
+							'middle_initial' => mb_convert_encoding((string) $middle_initial, 'UTF-8', 'ISO-8859-1'),
+							'last_name' => mb_convert_encoding((string) $last_name, 'UTF-8', 'ISO-8859-1'),
 							'address1' => $address1,
 							'address2' => $address2,
 							'address3' => $address3,
@@ -582,15 +585,15 @@
 							'comments' => $comments,
 							'entry_list_id' => $entry_list_id,
 							'last_local_call_time' => '0000-00-00 00:00:00'
-						);
+						];
 						$rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
 						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
 						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
-							$goCustomKeyData = array();
-							$goCustomValuesData = array();
-							$goCustomUpdateData = array();
+							$goCustomKeyData = [];
+							$goCustomValuesData = [];
+							$goCustomUpdateData = [];
 
 							foreach($custom_array as $custom_key => $map_data){
 								$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
@@ -599,9 +602,9 @@
                                                                      $goCustomValues = "";
 								else
                                                                      $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
-								array_push($goCustomKeyData, "$custom_key");
-								array_push($goCustomValuesData, "'$goCustomValues'");
-								array_push($goCustomUpdateData, "$custom_key='$goCustomValues'");
+								$goCustomKeyData[] = "$custom_key";
+								$goCustomValuesData[] = "'$goCustomValues'";
+								$goCustomUpdateData[] = "$custom_key='$goCustomValues'";
 
 								//$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_key) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $custom_key='$goCustomValues'";
 								//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
@@ -617,12 +620,12 @@
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
-							
+
 							if($countResultrsltgoShowCustomFields > 1) {
 								$totalExplode = count($goGetLastHeader2);
 
-								$goCustomValuesData = array();
-	                                                        $goCustomUpdateData = array();
+								$goCustomValuesData = [];
+	                                                        $goCustomUpdateData = [];
 
 								for($ax=0; $ax < $totalExplode; $ax++) {
 									$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
@@ -635,10 +638,10 @@
 									#$goQueryCustomFields = "INSERT INTO custom_$theList (lead_id,".$goHeaderOfCustomFields.") VALUES ('$goLastInsertedLeadIDDUPLIST','".$goCustomValues."');";
 									#$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDDUPLIST', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues'";
 									#$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-									
+
 									#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
-									array_push($goCustomValuesData, "'$goCustomValues'");
-                                                                        array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
+									$goCustomValuesData[] = "'$goCustomValues'";
+                                                                        $goCustomUpdateData[] = "$goHeaderOfCustomFields='$goCustomValues'";
 
 								}
 								$goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
@@ -650,7 +653,7 @@
 							}
 						}
 						$goCountInsertedLeads++;
-                        $apiresults = array("result" => "success", "message" => "$goCountInsertedLeads"); 
+                        $apiresults = ["result" => "success", "message" => "$goCountInsertedLeads"]; 
 						# end set query for custom fields
 					}//end if
 					else{
@@ -664,15 +667,15 @@
 				if($goGetCheckcustomFieldNamesCorrect === "error" && empty($lead_mapping)) {
 					fclose($handle);
 				} else {
-					$USarea = substr($phone_number, 0, 3);
+					$USarea = substr((string) $phone_number, 0, 3);
 					if (empty($phone_code)) {
 						$gmt_offset = $LOCAL_GMT_OFF_STD;
 					} else {
-						$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
+						$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
 					}
 
 					//$test_query = "INSERT INTO vicidial_list (lead_id, entry_date, status, vendor_lead_code, list_id, gmt_offset_now, phone_code, phone_number, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, gender, date_of_birth, alt_phone, email, security_phrase, comments, entry_list_id, last_local_call_time) VALUES ('', '$entry_date', '$status', '$vendor_lead_code', '$list_id', '$gmt_offset', '$phone_code', '$phone_number', '$title',	'$first_name', '$middle_initial', '$last_name',	'$address1', '$address2', '$address3', '$city',	'$state', '$province', '$postal_code', '$country_code',	'$gender', '$date_of_birth', '$alt_phone', '$email', '$security_phrase', '$comments', '$entry_list_id', '0000-00-00 00:00:00');";
-					$insertData = array(
+					$insertData = [
 						'lead_id' => '',
 						'entry_date' => $entry_date,
 						'status' => $status,
@@ -682,9 +685,9 @@
 						'phone_code' => $phone_code,
 						'phone_number' => $phone_number,
 						'title' => $title,
-						'first_name' => utf8_encode($first_name),
-						'middle_initial' => utf8_encode($middle_initial),
-						'last_name' => utf8_encode($last_name),
+						'first_name' => mb_convert_encoding((string) $first_name, 'UTF-8', 'ISO-8859-1'),
+						'middle_initial' => mb_convert_encoding((string) $middle_initial, 'UTF-8', 'ISO-8859-1'),
+						'last_name' => mb_convert_encoding((string) $last_name, 'UTF-8', 'ISO-8859-1'),
 						'address1' => $address1,
 						'address2' => $address2,
 						'address3' => $address3,
@@ -701,18 +704,18 @@
 						'comments' => $comments,
 						'entry_list_id' => $entry_list_id,
 						'last_local_call_time' => '0000-00-00 00:00:00'
-					);
+					];
 					$rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
 					$goLastInsertedLeadIDNODUP = $astDB->getInsertId();
 
 					$alex["query_insert"] = $astDB->getLastQuery();
 					$alex["error_insert"] = $astDB->getLastError();
-	
+
 					# start set query for custom fields
 					if(!empty($lead_mapping) && !empty($custom_array)){ //LEAD MAPPING CUSTOMIZATION
-						$goCustomKeyData = array();
-						$goCustomValuesData = array();
-						$goCustomUpdateData = array();
+						$goCustomKeyData = [];
+						$goCustomValuesData = [];
+						$goCustomUpdateData = [];
 
 						foreach($custom_array as $custom_key => $map_data){
 							$goCustomValues = preg_replace($field_regx, "",$col[$map_data]);
@@ -721,9 +724,9 @@
 								$goCustomValues = "";
 							else
 								$goCustomValues = str_replace($default_delimiter, "", $goCustomValues);
-								array_push($goCustomKeyData, "`$custom_key`");								//nat: modified this line of code => added backticks
-								array_push($goCustomValuesData, "'$goCustomValues'");
-								array_push($goCustomUpdateData, "`$custom_key`='$goCustomValues'");			//nat: modified this line of code => added backticks
+								$goCustomKeyData[] = "`$custom_key`";								//nat: modified this line of code => added backticks
+								$goCustomValuesData[] = "'$goCustomValues'";
+								$goCustomUpdateData[] = "`$custom_key`='$goCustomValues'";			//nat: modified this line of code => added backticks
 
 							//$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_key) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $custom_key='$goCustomValues'";
                             //$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
@@ -732,20 +735,20 @@
 						$custom_keyValues = implode(",", $goCustomKeyData);
 						$goCustomValues = implode(",", $goCustomValuesData);
 						$goCustomUpdate = implode(", ",  $goCustomUpdateData);
-					
+
 						$goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
                         $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-					
+
 					}elseif($goCountTheHeader > 21) {
 						$goShowCustomFields = "DESC custom_$list_id;";
 						$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 						$countResultrsltgoShowCustomFields = $astDB->getRowCount();
-						
+
 						if($countResultrsltgoShowCustomFields > 1) {
 							$totalExplode = count($goGetLastHeader2);
 
-							$goCustomValuesData = array();
-							$goCustomUpdateData = array();
+							$goCustomValuesData = [];
+							$goCustomUpdateData = [];
 
 							for($ax=0; $ax < $totalExplode; $ax++) {
 								$goHeaderOfCustomFields = $goGetLastCustomFiledsName2[$ax]; #get the header name of the custom fields
@@ -756,14 +759,14 @@
 								else
                                                                      $goCustomValues = str_replace($default_delimiter, "", $goCustomValues);	
 								#$rsltGoQueryCustomFields = mysqli_query($link, $goQueryCustomFields);
-								
+
 //								$goQueryCustomFields .= "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', '$goCustomValues') ON DUPLICATE KEY UPDATE $goHeaderOfCustomFields='$goCustomValues';";
 								//$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
 								#$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads");
 
-								array_push($goCustomValuesData, "'$goCustomValues'");
-								array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
+								$goCustomValuesData[] = "'$goCustomValues'";
+								$goCustomUpdateData[] = "$goHeaderOfCustomFields='$goCustomValues'";
 
 							}
 
@@ -775,9 +778,9 @@
 							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 						} 	
 					}
-					
+
 					$goCountInsertedLeads++;
-					$apiresults = array("result" => "success", "message" => "$goCountInsertedLeads", "alex_data" => $alex);
+					$apiresults = ["result" => "success", "message" => "$goCountInsertedLeads", "alex_data" => $alex];
 
 				# end set query for custom fields
 				}
@@ -785,45 +788,45 @@
 			//fclose($handle);
 			$counter++;
 		} #end while
-	
+
 		fclose($handle);
 
 		if($goCountInsertedLeads > 0 && $duplicates < 1) {
-			$apiresults = array("result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex);
+			$apiresults = ["result" => "success", "message" => "Total Uploaded Leads: $goCountInsertedLeads" , "alex_data" => $alex];
 		}elseif($goCountInsertedLeads > 0 && $duplicates > 0){
-			$apiresults = array("result" => "success", "message" => "Uploaded:$goCountInsertedLeads    \nDuplicates:$duplicates");
+			$apiresults = ["result" => "success", "message" => "Uploaded:$goCountInsertedLeads    \nDuplicates:$duplicates"];
 		} elseif($goGetCheckcustomFieldNamesCorrect == "error"){
-			$apiresults = array("result" => "error" , "message" => "Error: Lead File Not Compatible with List. \nIncompatible File Headers \n\nPlease use \"Lead Mapping\" function instead");
+			$apiresults = ["result" => "error" , "message" => "Error: Lead File Not Compatible with List. \nIncompatible File Headers \n\nPlease use \"Lead Mapping\" function instead"];
 		}elseif($duplicates > 0){
-			$apiresults = array("result" => "error" , "message" => "Duplicates Found : $duplicates");
+			$apiresults = ["result" => "error" , "message" => "Duplicates Found : $duplicates"];
 		}else {
-			$apiresults = array("result" => "error", "message" => "$goCountInsertedLeads", "duplicates" => $duplicates, "alex_data" => $alex);
+			$apiresults = ["result" => "error", "message" => "$goCountInsertedLeads", "duplicates" => $duplicates, "alex_data" => $alex];
 		}
-		
+
 		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Uploaded {$goCountInsertedLeads} leads on List ID $theList", $log_group);
-		
+
 	} // END IF handle
-	
+
 	function goGetCampaignList($link, $goCampaignID) {
 		//$goCheckCamp = "SELECT list_id FROM vicidial_lists WHERE campaign_id='$goCampaignID';";
 		$link->where('campaign_id', $goCampaignID);
 		$rsltgoCheckCamp = $link->get('vicidial_lists', null, 'list_id');
-		$countResultCamp = $link->getRowCount();
-		
+		$link->getRowCount();
+
 		foreach ($rsltgoCheckCamp as $fresultsDup) {
 			$goDUPLists .= $fresultsDup['list_id'].",";
 		}
 		return $goDUPLists;
 	}
-	
+
 	function goCheckCustomFieldsName($link, $goCClistID, $gocustomFieldsCSV) {
 		// check fieldnames are correct
 		//$goSQLCheckFieldsCustom = "SELECT $gocustomFieldsCSV FROM custom_$goCClistID;";
 
 		$goCustomCheckQuery = "SELECT EXISTS(SELECT $gocustomFieldsCSV FROM custom_$goCClistID)";
-		$customCheck = $link->rawQuery($goCustomCheckQuery);
+		$link->rawQuery($goCustomCheckQuery);
 		$countCustomCheck = $link->getRowCount();
-	
+
 		if( $countCustomCheck === 0 ){
 			return "error";
 		} else {
@@ -832,7 +835,7 @@
 
 		/*$rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
 		$query = $link->getLastQuery();
-		
+
 		if(!$rsltSQLCHECK){
 			$goRetMessage = "error";
 			$goRetMessage = "$query";
@@ -840,20 +843,20 @@
 			/*$goShowCustomFields = "DESC custom_$goCClistID;";
 			$rsltgoShowCustomFields = $link->rawQuery($goShowCustomFields);
 			$countResultrsltgoShowCustomFields = $link->getRowCount();
-				
+
 			if($countResultrsltgoShowCustomFields > 1) {
 				foreach ($rsltgoShowCustomFields as $fresultsShow){
 					$goCustomFields .= $fresultsShow['Field'].",";
 				}
-				
+
 				$goRetMessage = preg_replace("/,$/",'',$goCustomFields);
 			}
 			$goRetMessage = "success";
 		}
-				
+
 		return $goRetMessage;*/
 	}
-	
+
 	// check 1st if fields are not less than 21
 	// check 2nd if greater than 21 check the field name spelling from csv vs on the DB custom_LISTID
 	// lookup_gmt extgetval

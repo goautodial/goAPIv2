@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
@@ -30,23 +30,23 @@
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -69,9 +69,9 @@
 							$astDB->delete("vicidial_campaign_statuses");
 							$log_id 					= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted custom statuses from Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
 							
-							$apiresults 				= array(
+							$apiresults 				= [
 								"result" 					=> "success"
-							);						
+							];						
 						} else {
 							// check if custom status/disposition exists
 							$astDB->where("status", $statuses);
@@ -93,36 +93,36 @@
 									$log_id 			= log_action($goDB, "DELETE", $log_user, $log_ip, "Deleted status: $statuses from Campaign: $campaign_id", $log_group, $goDB->getLastQuery());
 								}				
 								
-								$apiresults 			= array(
+								$apiresults 			= [
 									"result" 				=> "success"
-								);
+								];
 							} else {
-								$apiresults 			= array(
+								$apiresults 			= [
 									"result" 				=> "Error: Status doesn't exist"
-								);
+								];
 							}
 						}									
 					} else {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Campaign doesn't exist"
-						);
+						];
 					}			
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
-					);
+					];
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Current user ".$log_user." doesn't have enough permission to access this feature"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

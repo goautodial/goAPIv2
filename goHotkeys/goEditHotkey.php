@@ -31,8 +31,8 @@
 	  $dataHotkey[]   = $fresults['hotkey'];
 	}
   
-  $apiresults = array(
+  $apiresults = [
     "result"        => "success",
     "hotkey"        => $dataHotkey
-  );
+  ];
 ?>

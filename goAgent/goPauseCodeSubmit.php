@@ -58,8 +58,8 @@ $DO_NOT_UPDATE_text = '';
 if ($is_logged_in) {
 	$row = '';
 	$rowx = '';
-	if ( (strlen($status) < 1) || (strlen($agent_log_id) < 1) ) {
-		$APIResult = array( "result" => "error", "message" => "Either 'agent_log_id' or 'pause_code' submitted is NOT valid." );
+	if ( (strlen($status) < 1) || (strlen((string) $agent_log_id) < 1) ) {
+		$APIResult = [ "result" => "error", "message" => "Either 'agent_log_id' or 'pause_code' submitted is NOT valid." ];
 	} else {
 		### if this is the first pause code entry in a pause session, simply update and log to queue_log
 		if ($stage < 1) {
@@ -84,12 +84,12 @@ if ($is_logged_in) {
 			}
 			//$stmt="UPDATE vicidial_agent_log set pause_sec='$pause_sec' where agent_log_id='$agent_log_id';";
 			$astDB->where('agent_log_id', $agent_log_id);
-			$rslt = $astDB->update('vicidial_agent_log', array('pause_sec' => $pause_sec));
+			$rslt = $astDB->update('vicidial_agent_log', ['pause_sec' => $pause_sec]);
 
 			$user_group = $agent->user_group;
 
 			//$stmt="INSERT INTO vicidial_agent_log (user,server_ip,event_time,campaign_id,pause_epoch,pause_sec,wait_epoch,user_group,sub_status) values('$user','$server_ip','$NOW_TIME','$campaign','$StarTtimE','0','$StarTtimE','$user_group','$status');";
-			$insertData = array(
+			$insertData = [
 				'user' => $user,
 				'server_ip' => $server_ip,
 				'event_time' => $NOW_TIME,
@@ -99,14 +99,14 @@ if ($is_logged_in) {
 				'wait_epoch' => $StarTtimE,
 				'user_group' => $user_group,
 				'sub_status' => $status
-			);
+			];
 			$rslt = $astDB->insert('vicidial_agent_log', $insertData);
 			$affected_rows = $astDB->getRowCount();
 			$agent_log_id = $astDB->getInsertId();
 
 			//$stmt="UPDATE vicidial_live_agents SET agent_log_id='$agent_log_id',last_state_change='$NOW_TIME' where user='$user';";
 			$astDB->where('user', $user);
-			$rslt = $astDB->update('vicidial_live_agents', array('agent_log_id' => $agent_log_id, 'last_state_change' => $NOW_TIME));
+			$rslt = $astDB->update('vicidial_live_agents', ['agent_log_id' => $agent_log_id, 'last_state_change' => $NOW_TIME]);
 			$VLAaffected_rows_update = $astDB->getRowCount();
 		}
 
@@ -130,18 +130,18 @@ if ($is_logged_in) {
             }
 			##### END QUEUEMETRICS LOGGING LOOKUP #####
 			###########################################
-			if ( ($enable_sipsak_messages > 0) and ($allow_sipsak_messages > 0) and (preg_match("/SIP/i", $protocol)) ) {
+			if ( $enable_sipsak_messages > 0 && $allow_sipsak_messages > 0 && preg_match("/SIP/i", (string) $protocol) ) {
 				$SIPSAK_prefix = 'BK-';
 				passthru("/usr/local/bin/sipsak -M -O desktop -B \"$SIPSAK_prefix$status\" -r 5060 -s sip:$extension@$phone_ip > /dev/null");
 			}
 			if ($enable_queuemetrics_logging > 0) {
 				$pause_call_id = 'NONE';
-				if (strlen($campaign_cid) > 12) {$pause_call_id = $campaign_cid;}
+				if (strlen((string) $campaign_cid) > 12) {$pause_call_id = $campaign_cid;}
 				
 				$linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
 
 				//$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$pause_call_id',queue='NONE',agent='Agent/$user',verb='PAUSEREASON',serverid='$queuemetrics_log_id',data1='$status';";
-				$insertData = array(
+				$insertData = [
 					'partition' => 'P01',
 					'time_id' => $StarTtimE,
 					'call_id' => $pause_call_id,
@@ -150,16 +150,16 @@ if ($is_logged_in) {
 					'verb' => 'PAUSEREASON',
 					'serverid' => $queuemetrics_log_id,
 					'data1' => $status
-				);
+				];
 				$rslt = $linkB->insert('queue_log', $insertData);
 				$affected_rows = $linkB->getRowCount();
 
 				$linkB->__destruct();
 			}
 		}
-		$APIResult = array( "result" => "success", "message" => "Pause Code '$status' has been recorded", "agent_log_id" => $agent_log_id );
+		$APIResult = [ "result" => "success", "message" => "Pause Code '$status' has been recorded", "agent_log_id" => $agent_log_id ];
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

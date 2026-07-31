@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
  // POST or GET Variables
 	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
@@ -30,22 +30,22 @@
 	$active = $astDB->escape(strtoupper($_REQUEST['active']));
 
  // Default values
- $defActive = array('N','Y');
+ $defActive = ['N','Y'];
 
 // ERROR CHECKING ...
 if(empty($campaign_id) || empty($session_user) || empty($status)) {
  $err_msg = error_handle("40001", "campaign_id, session_user, and status");
- $apiresults = array("code" => "40001", "result" => $err_msg);
+ $apiresults = ["code" => "40001", "result" => $err_msg];
 } elseif(preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $status)){
- $apiresults = array("result" => "Error: Special characters found in Status and must not be empty");
-} elseif(strlen($attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay)){
- $apiresults = array("result" => "Error: Special characters found in Attempt Delay and must not be empty");
-} elseif(strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum)){
- $apiresults = array("result" => "Error: Special characters found in Attempt Maximum and must not be empty");
+ $apiresults = ["result" => "Error: Special characters found in Status and must not be empty"];
+} elseif(strlen((string) $attempt_delay) > 5 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $attempt_delay)){
+ $apiresults = ["result" => "Error: Special characters found in Attempt Delay and must not be empty"];
+} elseif(strlen((string) $attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $attempt_maximum)){
+ $apiresults = ["result" => "Error: Special characters found in Attempt Maximum and must not be empty"];
 } elseif(!in_array($active, $defActive) && !empty($active)) {
- $apiresults = array("result" => "Error: Default value for active is N for No and Y for Yes only.");
+ $apiresults = ["result" => "Error: Default value for active is N for No and Y for Yes only."];
 } else {
-	$groupId = go_get_groupid($session_user, $astDB);
+	$groupId = go_get_groupid($session_user);
  $check_usergroup = go_check_usergroup_campaign($astDB, $groupId, $campaign_id);
 
 	if($check_usergroup > 0){
@@ -72,15 +72,15 @@ if(empty($campaign_id) || empty($session_user) || empty($status)) {
 			$queryVM ="UPDATE vicidial_lead_recycle SET attempt_delay='$attempt_delay',attempt_maximum='$attempt_maximum', active='$active' WHERE status='$status' and campaign_id='$campaign_id'";
 			$rsltv1 = $astDB->rawQuery($queryVM);
 			if($rsltv1) {
-				$apiresults = array("result" => "success");
+				$apiresults = ["result" => "success"];
 
 				$log_id = log_action($goDB, 'MODIFY', $session, $log_ip, "Modified Lead Recycling: $status", $groupId, $queryVM);
    }
   } else {
-			$apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");
+			$apiresults = ["result" => "Error: Add failed, Campaign ID does not exist!"];
 		}
 	} else {
-		$apiresults = array("result" => "Error: Current user ".$session_user." doesn't have enough permission to access this feature");
+		$apiresults = ["result" => "Error: Current user ".$session_user." doesn't have enough permission to access this feature"];
 	}
 }
 ?>

@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");    
+    include_once (__DIR__ . "/goAPI.php");    
 
     // POST or GET Variables
     $menu_id 									= $astDB->escape($_REQUEST['menu_id']);
@@ -41,61 +41,61 @@
     $items 										= $_REQUEST['items'];
 	
     // Default values 
-	$defmenu_time_check 						= array('0','1');
-	$deftrack_in_vdac 							= array('0','1');
+	$defmenu_time_check 						= ['0','1'];
+	$deftrack_in_vdac 							= ['0','1'];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Session User Not Defined."
-		);
-	} elseif (empty($menu_id) || strlen($menu_id) < 4) {
-        $apiresults 							= array(
+		];
+	} elseif (empty($menu_id) || strlen((string) $menu_id) < 4) {
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for Menu ID not less than 4 characters."
-		);
+		];
     } elseif (empty($menu_name)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for menu_name."
-		);
+		];
     } elseif (empty($user_group)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for user_group."
-		);
+		];
     } elseif (empty($menu_timeout)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for menu_timeout."
-		);
+		];
     } elseif (empty($menu_repeat)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for menu_repeat."
-		);
+		];
     } elseif (empty($tracking_group)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for tracking_group."
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_id)){
-        $apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_id)){
+        $apiresults 							= [
 			"result" 								=> "Error: Special characters found in menu_id"
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_name)){
-        $apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_name)){
+        $apiresults 							= [
 			"result" 								=> "Error: Special characters found in menu_name"
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_timeout)){
-        $apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_timeout)){
+        $apiresults 							= [
 			"result" 								=> "Error: Special characters found in menu_timeout"
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_repeat)){
-        $apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $menu_repeat)){
+        $apiresults 							= [
 			"result" 								=> "Error: Special characters found in menu_repeat"
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $tracking_group)){
-        $apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $tracking_group)){
+        $apiresults 							= [
 			"result" 								=> "Error: Special characters found in tracking_group"
-		);
+		];
     } elseif (empty($user_group)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for user_group."
-		);
+		];
     } else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -109,9 +109,9 @@
             $astDB->get("vicidial_override_ids");
 
 			if ($astDB->count > 0) {
-                $datum 							= array(
+                $datum 							= [
 					"value" 						=> $menu_id
-				);
+				];
 				
 				$astDB->where("id_table", "vicidial_call_menu");
                 $astDB->where("active", 1);
@@ -122,11 +122,11 @@
 			$astDB->getOne("vicidial_call_menu", "menu_id");
 			      
 			if ($astDB->count > 0) {
-				$apiresults 					= array(
+				$apiresults 					= [
 					"result" 						=> "Error: Call menu ID already exists."
-				);
+				];
 			} else {
-                $data 							= array(
+                $data 							= [
 					"menu_id" 						=> $menu_id,
 					"menu_name" 					=> $menu_name,
 					"user_group" 					=> $user_group,
@@ -140,7 +140,7 @@
 					"track_in_vdac" 				=> $track_in_vdac,
 					"custom_dialplan_entry" 		=> $custom_dialplan_entry,
 					"tracking_group" 				=> $tracking_group
-				);				
+				];				
 				
 				$astDB->insert("vicidial_call_menu", $data);
 				$query							= $astDB->getLastQuery();
@@ -148,20 +148,21 @@
 				if (!empty($items)) {
 					$exploded_items 			= explode("|", $items);
 					$filtered_items 			= array_filter($exploded_items);
+                    $counter = count($filtered_items);
 					
 					//query for call menu options
-					for ($i=0; $i < count($filtered_items); $i++) {
+					for ($i=0; $i < $counter; $i++) {
 						$options 				= explode("+", $filtered_items[$i]);
 						
-						if (!empty($options[2])) {
-							$data2 					= array(
+						if (isset($options[2]) && ($options[2] !== '' && $options[2] !== '0')) {
+							$data2 					= [
 								"menu_id" 				=> $menu_id,
 								"option_value" 			=> $options[0],
 								"option_description"	=> $options[1],
 								"option_route"		 	=> $options[2],
 								"option_route_value" 	=> $options[3],
 								"option_route_value_context" => $options[4]
-							);
+							];
 							
 							$astDB->insert("vicidial_call_menu_options", $data2);
 							$query2				= $astDB->getLastQuery();
@@ -171,13 +172,13 @@
 				}
 		
 				// set default entry in vicidial_callmenu_options by Franco Hora 
-				$data3 							= array(
+				$data3 							= [
 					"menu_id" 						=> $menu_id,
 					"option_value" 					=> "TIMEOUT",
 					"option_description" 			=> "Hangup",
 					"option_route" 					=> "HANGUP",
 					"option_route_value" 			=> "vm-goodbye"
-				);
+				];
 				
                 $astDB->insert("vicidial_call_menu_options", $data3);
                 
@@ -188,14 +189,14 @@
                 // $server_ip = $astDB->getOne('servers', 'server_ip');
                 rebuildconfQuery($astDB);
 
-				$apiresults 					= array(
+				$apiresults 					= [
 					"result" 						=> "success"
-				);
+				];
 			}
 		} else {
-			$apiresults 						= array(
+			$apiresults 						= [
 				"result" 							=> "Error: INVALID USER GROUP"
-			);
+			];
 		}
 	}
 

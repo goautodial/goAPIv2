@@ -39,12 +39,12 @@
         //$data['column_name'] = $result['column_name'];
         //$this->load->view('go_campaign/go_campaign_wizard_fields',$data);
         $LF_name = $_FILES['leadFile']['name'];
-        if (preg_match("/\.csv$/i", $LF_name)) {
+        if (preg_match("/\.csv$/i", (string) $LF_name)) {
             $_FILES['leadFile']['type'] = "text/x-comma-separated-values";
         }
 
         if ( ! $this->upload->do_upload("leadFile")) {
-            $error = array('error' => $this->upload->display_errors());
+            $error = ['error' => $this->upload->display_errors()];
             $this->load->view('go_campaign/go_campaign_wizard_output', $error);
         } else {
             //$data = array('upload_data' => $this->upload->data());
@@ -86,17 +86,17 @@
 
         if ($tab_count>$pipe_count) {$delimiter="\t";  $delim_name="tab";} else {$delimiter="|";  $delim_name="pipe";}
         $field_check=explode($delimiter, $buffer);
-        
+
         if (count($field_check)>=2) {
             flush();
             $file = fopen("$lead_file", "r");
             //$data['processfile'] = "<center><font face='arial, helvetica' size=3 color='#009900'><B>Processing file...\n";
 
-            if (strlen($list_id_override)>0) {
+            if ((string) $list_id_override !== '') {
                 //print "<BR><BR>LIST ID OVERRIDE FOR THIS FILE: $list_id_override<BR><BR>";
             }
 
-            if (strlen($phone_code_override)>0) {
+            if ((string) $phone_code_override !== '') {
                 //print "<BR><BR>PHONE CODE OVERRIDE FOR THIS FILE: $phone_code_override<BR><BR>";
             }
 
@@ -111,7 +111,7 @@
                 $tablecount_to_print=0;
                 $fieldscount_to_print=0;
                 $fields_to_print=0;
-                
+
                 $stmt="SHOW TABLES LIKE \"custom_$list_id_override\";";
                 //$rslt = $this->db->query($stmt);
                 $rslt = $astDB->rawQuery($stmt);
@@ -148,8 +148,8 @@
                 $buffer = rtrim(fgets($file, 4096));
                 $buffer = stripslashes($buffer);
 
-                if (strlen($buffer)>0) {
-                    $row = explode($delimiter, preg_replace("/[\'\"]/", "", $buffer));
+                if ($buffer !== '') {
+                    $row = explode($delimiter, (string) preg_replace("/[\'\"]/", "", $buffer));
                     $lrow = $row;
 
                     $pulldate =                     date("Y-m-d H:i:s");
@@ -185,19 +185,19 @@
                     $comments =                     trim($row[$comments_field]);
                     $rank =                         $row[$rank_field];
                     $owner =                        $row[$owner_field];
-                    
+
                     ### REGEX to prevent weird characters from ending up in the fields
                     $field_regx =                   "/['\"`\\;]/";
-                    
-                    
-                    
+
+
+
                     # replace ' " ` \ ; with nothing
                     $vendor_lead_code =             preg_replace($field_regx, "", $vendor_lead_code);
                     $source_code =                  preg_replace($field_regx, "", $source_code);
                     $source_id =                    preg_replace($field_regx, "", $source_id);
                     $list_id =                      preg_replace($field_regx, "", $list_id);
-                    $phone_code =                   preg_replace($field_regx, "", $phone_code);
-                    $phone_number =                 preg_replace($field_regx, "", $phone_number);
+                    $phone_code =                   preg_replace($field_regx, "", (string) $phone_code);
+                    $phone_number =                 preg_replace($field_regx, "", (string) $phone_number);
                     $title =                        preg_replace($field_regx, "", $title);
                     $first_name =                   preg_replace($field_regx, "", $first_name);
                     $middle_initial =               preg_replace($field_regx, "", $middle_initial);
@@ -212,20 +212,20 @@
                     $country_code =                 preg_replace($field_regx, "", $country_code);
                     $gender =                       preg_replace($field_regx, "", $gender);
                     $date_of_birth =                preg_replace($field_regx, "", $date_of_birth);
-                    $alt_phone =                    preg_replace($field_regx, "", $alt_phone);
+                    $alt_phone =                    preg_replace($field_regx, "", (string) $alt_phone);
                     $email =                        preg_replace($field_regx, "", $email);
                     $security_phrase =              preg_replace($field_regx, "", $security_phrase);
                     $comments =                     preg_replace($field_regx, "", $comments);
                     $rank =                         preg_replace($field_regx, "", $rank);
                     $owner =                        preg_replace($field_regx, "", $owner);
-                    
-                    $USarea =                       substr($phone_number, 0, 3);
 
-                    if (strlen($list_id_override)>0) {
+                    $USarea =                       substr((string) $phone_number, 0, 3);
+
+                    if ((string) $list_id_override !== '') {
                         #print "<BR><BR>LIST ID OVERRIDE FOR THIS FILE: $list_id_override<BR><BR>";
                         $list_id = $list_id_override;
                     }
-                    if (strlen($phone_code_override)>0) {
+                    if ((string) $phone_code_override !== '') {
                         $phone_code = $phone_code_override;
                     }
                     ##### BEGIN custom fields columns list ###
@@ -240,7 +240,7 @@
 
                                     #if ($DB>0) {echo "$A_field_label[$o]|$A_field_type[$o]\n";}
 
-                                    if ( ($A_field_type[$o]!='DISPLAY') and ($A_field_type[$o]!='SCRIPT') ) {
+                                    if ( $A_field_type[$o] != 'DISPLAY' && $A_field_type[$o] != 'SCRIPT' ) {
                                         if (!preg_match("/\|$A_field_label[$o]\|/",$vicidial_list_fields)) {
                                             if (isset($_GET["$field_name_id"])) {$form_field_value=$_GET["$field_name_id"];}
                                             elseif (isset($_POST["$field_name_id"])) {$form_field_value=$_POST["$field_name_id"];}
@@ -273,14 +273,14 @@
                         $astDB->where('list_id', $list_id);
                         $rslt = $astDB->getOne('vicidial_lists');
                         $ci_recs = $astDB->getRowCount();
-    
+
                         if ($ci_recs > 0) {
                             $dup_camp = $rslt['campaign_id'];
                             //$stmt="select list_id from vicidial_lists where campaign_id='$dup_camp';";
                             $astDB->where('campaign_id', $dup_camp);
                             $rslt = $astDB->get('vicidial_lists');
                             $li_recs = $astDB->getRowCount();
-    
+
                             if ($li_recs > 0) {
                                 $L = 0;
                                 foreach ($rslt as $row) {
@@ -288,26 +288,26 @@
                                     $L++;
                                 }
                                 $dup_lists = preg_replace("/,$/",'',$dup_lists);
-    
+
                                 //$stmt="SELECT list_id FROM vicidial_list WHERE phone_number='$phone_number' AND list_id IN($dup_lists) LIMIT 1;";
                                 $astDB->where('phone_number', $phone_number);
-                                $astDB->where('list_id', explode(',', $dup_lists), 'in');
+                                $astDB->where('list_id', explode(',', (string) $dup_lists), 'in');
                                 $rslt = $astDB->getOne('vicidial_list', 'list_id');
                                 $pc_recs = $astDB->getRowCount();
-    
+
                                 if ($pc_recs > 0) {
                                     $dup_lead = 1;
                                     $dup_lead_list = $rslt['list_id'];
                                     $dup++;
                                 }
                                 if ($dup_lead < 1) {
-                                    if (eregi("$phone_number$US$list_id", $phone_list))
+                                    if (preg_match("$phone_number$US$list_id", $phone_list))
                                         {$dup_lead++; $dup++;}
                                 }
                             }
                         }
                     }
-    
+
                     ##### Check for duplicate phone numbers in vicidial_list table entire database #####
                     if ($dupcheck == "DUPSYS") {
                         $dup_lead = 0;
@@ -315,15 +315,15 @@
                         $astDB->where('phone_number', $phone_number);
                         $rslt = $astDB->get('vicidial_list', null, 'list_id');
                         $pc_recs = $astDB->getRowCount();
-    
+
                         if ($pc_recs > 0) {
                             $dup_lead = 1;
                             $dup_lead_list = $rslt['list_id'];
                             $dup++;
                         }
-    
+
                         if ($dup_lead < 1) {
-                            if (eregi("$phone_number$US$list_id",$phone_list))
+                            if (preg_match("$phone_number$US$list_id",$phone_list))
                                 {$dup_lead++; $dup++;}
                         }
                     }
@@ -335,22 +335,22 @@
                         $astDB->where('list_id', $list_id);
                         $rslt = $astDB->get('vicidial_list');
                         $pc_recs = $astDB->getRowCount();
-    
+
                         if ($pc_recs > 0) {
                             $dup_lead = $pc_recs;
                             $dup_lead_list = $list_id;
                             $dup++;
                             //die($dup_lead_list);
                         }
-                        
+
                         if ($dup_lead < 1) {
-                            if (eregi("$phone_number$US$list_id",$phone_list))
+                            if (preg_match("$phone_number$US$list_id",$phone_list))
                                 {$dup_lead++; $dup++;}
                         }
-    
-    
+
+
                     }
-    
+
                     ##### Check for duplicate title and alt-phone in vicidial_list table for one list_id #####
                     if ($dupcheck == "DUPTITLEALTPHONELIST") {
                         $dup_lead = 0;
@@ -366,11 +366,11 @@
                             $dup++;
                         }
                         if ($dup_lead < 1) {
-                            if (eregi("$alt_phone$title$US$list_id",$phone_list))
+                            if (preg_match("$alt_phone$title$US$list_id",$phone_list))
                                 {$dup_lead++; $dup++;}
                         }
                     }
-    
+
                     ##### Check for duplicate phone numbers in vicidial_list table entire database #####
                     if ($dupcheck == "DUPTITLEALTPHONESYS") {
                         $dup_lead = 0;
@@ -385,40 +385,40 @@
                             $dup++;
                         }
                         if ($dup_lead < 1) {
-                            if (eregi("$alt_phone$title$US$list_id",$phone_list))
+                            if (preg_match("$alt_phone$title$US$list_id",$phone_list))
                                 {$dup_lead++; $dup++;}
                         }
                     } #end check dups
-    
-                    if ( (strlen($phone_number)>6 && strlen($phone_number) < 11) and ($dup_lead<1) and ($list_id >= 100 )) {
-                        if (strlen($phone_code)<1) {$phone_code = '1';}
+
+                    if ( strlen((string) $phone_number) > 6 && strlen((string) $phone_number) < 11 && $dup_lead < 1 && $list_id >= 100) {
+                        if (strlen((string) $phone_code)<1) {$phone_code = '1';}
                         if ($dupcheck == "TITLEALTPHONE") {
                             $phone_list .= "$alt_phone$title$US$list_id|";
                         } else {
                             $phone_list .= "$phone_number$US$list_id|";
                         }
-    
-                        $gmt_offset = lookup_gmt($astDB,$phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code,$owner);
-    
+
+                        $gmt_offset = lookup_gmt($astDB,$phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
+
                         //$gmt_offset = 10.00; //ganito muna
-    
-                        if (strlen($custom_SQL)>3) {
+
+                        if (strlen((string) $custom_SQL)>3) {
                             $stmtZ = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values('','$entry_date','$modify_date','$status','$user','$vendor_lead_code','$source_id','$list_id','$gmt_offset','$called_since_last_reset','$phone_code','$phone_number','$title','$first_name','$middle_initial','$last_name','$address1','$address2','$address3','$city','$state','$province','$postal_code','$country_code','$gender','$date_of_birth','$alt_phone','$email','$security_phrase','$comments',0,'2008-01-01 00:00:00','$rank','$owner','$list_id');";
                             $rslt = $astDB->rawQuery($stmtZ);
                             $lead_id = $astDB->getInsertId();
                             $affected_rows = $astDB->getRowCount();
-    
+
                             $multistmt='';
-    
+
                             $custom_SQL_query = "INSERT INTO custom_$list_id_override SET lead_id='$lead_id',$custom_SQL;";
                             $rslt = $astDB->rawQuery($custom_SQL_query);
                         } else {
                             if ($multi_insert_counter > 8) {
                                 ### insert good record into vicidial_list table ###
                                 $stmtZx = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values$multistmt('','$entry_date','$modify_date','$status','$user','$vendor_lead_code','$source_id','$list_id','$gmt_offset','$called_since_last_reset','$phone_code','$phone_number','$title','$first_name','$middle_initial','$last_name','$address1','$address2','$address3','$city','$state','$province','$postal_code','$country_code','$gender','$date_of_birth','$alt_phone','$email','$security_phrase','$comments',0,'2008-01-01 00:00:00','$rank','$owner','0');";
-                                
+
                                 $rslt = $astDB->rawQuery($stmtZx);
-                                
+
                                 $multistmt = '';
                                 $multi_insert_counter = 0;
                             } else {
@@ -428,7 +428,7 @@
                         }
                         $good++;
                     } else {
-    
+
                         if ($bad < 1000000)     {
                             if ( $list_id < 100 ) {
                                 $resultHTML .= "<BR></b><font size=1 color=red>record $total BAD- PHONE: $phone_number ROW: |$lrow[0]| INVALID LIST ID</font><b>\n";
@@ -438,14 +438,14 @@
                         }
                         $bad++;
                     }
-                    
+
                     if ($bad < 1) {
                         $resultHTML = "<br /><font size=1 color=red>No duplicate numbers found.</font>";
                     }
-                    
+
                     $total++;
-                    
-                    if ($total%100 == 0) {
+
+                    if ($total % 100 === 0) {
                         usleep(1000);
                         flush();
                     }
@@ -454,7 +454,7 @@
             } // end while
 
             if ($multi_insert_counter!=0) {
-                $stmtZ = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values".substr($multistmt, 0, -1).";";
+                $stmtZ = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values".substr((string) $multistmt, 0, -1).";";
                 //$rslt = $this->db->query($stmtZ);
                 $rslt = $astDB->rawQuery($stmtZ);
             }
@@ -480,7 +480,7 @@
 
 ######### Test ##########
 
-    $apiresults = array("result" => "success");
+    $apiresults = ["result" => "success"];
     $stmtUpdate = "UPDATE servers SET sounds_update='Y';";
     $rsltUpdate = mysqli_query($link, $stmtUpdate);
 

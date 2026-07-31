@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$groupId = go_get_groupid($session_user, $astDB);
+	$groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
+        $stringv = go_getall_allowed_campaigns($groupId);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv)";
 		else
@@ -44,10 +44,10 @@
     //var_dump($rsltv);   
         
     if($countResult > 0) {
-        $data = array();
+        $data = [];
 		foreach ($rsltv as $fresults){       
-			array_push($data, $fresults);
+			$data[] = $fresults;
 		}
-		$apiresults = array("result" => "success", "data" => $data);
+		$apiresults = ["result" => "success", "data" => $data];
     }
 ?>

@@ -36,11 +36,11 @@
 
 	if($exist <= 0){
 		//$create_default_query = "INSERT INTO settings (setting, context, value) VALUES('GO_licensed_seats', 'module_licensedSeats', '$seats');";
-		$insertData = array(
+		$insertData = [
 			'setting' => 'GO_licensed_seats',
 			'context' => 'module_licensedSeats',
 			'value' => $seats
-		);
+		];
 		$exec_create_default = $goDB->insert('settings', $insertData);
 
 		if($exec_create_default) {
@@ -49,14 +49,14 @@
 			else
 				$msg_seats = "Unlimited";
 			
-			$apiresults = array("result" => "success", "msg" => "Created ( $msg_seats ) Default Licensed Seats.");
+			$apiresults = ["result" => "success", "msg" => "Created ( $msg_seats ) Default Licensed Seats."];
 		} else {
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => mysqli_error($exec_create_default) );
+			$apiresults = ["result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => mysqli_error($exec_create_default) ];
 		}
 	} else {
 		//$update_query = "UPDATE settings SET value = '$seats' WHERE setting = 'GO_licensed_seats';";
 		$goDB->where('setting', 'GO_licensed_seats');
-		$exec_update = $goDB->update('settings', array('value' => $seats));
+		$exec_update = $goDB->update('settings', ['value' => $seats]);
 		
 		if($goDB->getRowCount()){
 			if($seats > 0)
@@ -64,9 +64,9 @@
 			else
 				$msg_seats = "Unlimited";
 
-			$apiresults = array("result" => "success", "msg" => "Updated ( $msg_seats ) Licensed Seats.");
+			$apiresults = ["result" => "success", "msg" => "Updated ( $msg_seats ) Licensed Seats."];
 		} else {
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => mysqli_error($exec_update) );
+			$apiresults = ["result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => mysqli_error($exec_update) ];
 		}
 	}
 ?>

@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
 	$list_id = $astDB->escape($_REQUEST['list_id']);
@@ -42,55 +42,55 @@
 	// $values = $_REQUEST['items'];
    
     ### Default values 
-    $defActive = array("Y","N");
+    $defActive = ["Y","N"];
 
 ####################################
 	if($list_id == null) {
-		$apiresults = array("result" => "Error: Set a value for List ID.");
+		$apiresults = ["result" => "Error: Set a value for List ID."];
 	} else {
         if(!in_array($active,$defActive) && $active != null) {
-            $apiresults = array("result" => "Error: Default value for active is Y or N only.");
+            $apiresults = ["result" => "Error: Default value for active is Y or N only."];
         } else {
 			if(!in_array($reset_list,$defActive) && $reset_list != null) {
-				$apiresults = array("result" => "Error: Default value for reset_list is Y or N only.");
+				$apiresults = ["result" => "Error: Default value for reset_list is Y or N only."];
 			} else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name)){
-					$apiresults = array("result" => "Error: Special characters found in list_name");
+				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_name)){
+					$apiresults = ["result" => "Error: Special characters found in list_name"];
 				} else {
-					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_description)){
-						$apiresults = array("result" => "Error: Special characters found in list_description");
+					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_description)){
+						$apiresults = ["result" => "Error: Special characters found in list_description"];
 					} else {
-						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $reset_time)){
-							$apiresults = array("result" => "Error: Special characters found in reset_time");
+						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $reset_time)){
+							$apiresults = ["result" => "Error: Special characters found in reset_time"];
 						} else {
-							if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_a_number)){
-								$apiresults = array("result" => "Error: Special characters found in xferconf_a_number");
+							if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_a_number)){
+								$apiresults = ["result" => "Error: Special characters found in xferconf_a_number"];
 							} else {
-								if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_b_number)){
-									$apiresults = array("result" => "Error: Special characters found in xferconf_b_number");
+								if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_b_number)){
+									$apiresults = ["result" => "Error: Special characters found in xferconf_b_number"];
 								} else {
-									if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_c_number)){
-										$apiresults = array("result" => "Error: Special characters found in xferconf_c_number");
+									if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_c_number)){
+										$apiresults = ["result" => "Error: Special characters found in xferconf_c_number"];
 									} else {
-										if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_d_number)){
-											$apiresults = array("result" => "Error: Special characters found in xferconf_d_number");
+										if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_d_number)){
+											$apiresults = ["result" => "Error: Special characters found in xferconf_d_number"];
 										} else {
-											if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $xferconf_e_number)){
-												$apiresults = array("result" => "Error: Special characters found in xferconf_e_number");
+											if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $xferconf_e_number)){
+												$apiresults = ["result" => "Error: Special characters found in xferconf_e_number"];
 											} else {
-												if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $agent_script_override)){
-													$apiresults = array("result" => "Error: Special characters found in agent_script_override");
+												if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $agent_script_override)){
+													$apiresults = ["result" => "Error: Special characters found in agent_script_override"];
 												} else {
-													if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $drop_inbound_group_override)){
-														$apiresults = array("result" => "Error: Special characters found in drop_inbound_group_override");
+													if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $drop_inbound_group_override)){
+														$apiresults = ["result" => "Error: Special characters found in drop_inbound_group_override"];
 													} else {
-														if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $campaign_cid_override)){
-															$apiresults = array("result" => "Error: Special characters found in campaign_cid_override");
+														if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $campaign_cid_override)){
+															$apiresults = ["result" => "Error: Special characters found in campaign_cid_override"];
 														} else {
 															if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $web_form_address)){
-																$apiresults = array("result" => "Error: Special characters found in web_form_address");
+																$apiresults = ["result" => "Error: Special characters found in web_form_address"];
 															} else {
-																$groupId = go_get_groupid($goUser, $astDB);
+																$groupId = go_get_groupid($goUser);
 																if (!checkIfTenant($groupId, $goDB)) {
 																	//$ul = "WHERE campaign_id='$campaign_id'";
 																	$ulList = "WHERE list_id='$list_id'";
@@ -132,34 +132,34 @@
 											                		if($countResult > 0) {
 																		//$queryreset = "UPDATE vicidial_list set called_since_last_reset='N' where list_id='$listid_data';";
 																		$astDB->where('list_id', $listid_data);
-																		$rsltvreset = $astDB->update('vicidial_list', array('called_since_last_reset' => 'N'));
+																		$rsltvreset = $astDB->update('vicidial_list', ['called_since_last_reset' => 'N']);
 																		//$hopperreset = "DELETE from vicidial_hopper where list_id='$listid_data' and campaign_id='$campaign_id';";
 																		$astDB->where('list_id', $listid_data);
 																		$astDB->where('campaign_id', $campaign_id);
 																		$rsltvhopper = $astDB->delete('vicidial_hopper');
-																		$apiresults = array("result" => "success");
+																		$apiresults = ["result" => "success"];
 																	} else {
-																		$apiresults = array("result" => "Error: Campaign doesn't exist.");
+																		$apiresults = ["result" => "Error: Campaign doesn't exist."];
 																	}
 																} else {
 																	if($countList > 0) {
 																		if($countResult > 0) {
-																			if($list_name == null){ $list_name = $list_name_data;} else { $list_name = $list_name;}
-																			if($list_description == null) {$list_description = $list_description_data; } else { $list_description = $list_description;}
-																			if($campaign_id == null){ $campaign_id = $campaign_id_data;} else { $campaign_id = $campaign_id;}
-																			if($active == null){$active = $active_data;} else { $active = $active;}
-																			if($xferconf_a_number == null) { $xferconf_a_number = $xferconf_a_number_data;} else {$xferconf_a_number = $xferconf_a_number;}
-																			if($xferconf_b_number == null){ $xferconf_b_number = $xferconf_b_number_data;} else { $xferconf_b_number = $xferconf_b_number;}
-																			if($xferconf_c_number == null){ $xferconf_c_number = $xferconf_c_number_data;} else { $xferconf_c_number = $xferconf_c_number;}
-																			if($xferconf_d_number == null) { $xferconf_d_number = $xferconf_d_number_data;} else { $xferconf_d_number = $xferconf_d_number;}
-																			if($xferconf_e_number == null) { $xferconf_e_number = $xferconf_e_number_data;} else { $xferconf_e_number = $xferconf_e_number;}
-																			if($agent_script_override == null) { $agent_script_override = $agent_script_override_data;} else { $agent_script_override = $agent_script_override;}
-																			if($drop_inbound_group_override == null){ $drop_inbound_group_override = $drop_inbound_group_override_data;} else { $drop_inbound_group_override = $drop_inbound_group_override;}
-																			if($campaign_cid_override == null){ $campaign_cid_override = $campaign_cid_override_data;} else { $campaign_cid_override = $campaign_cid_override;}
-																			if($web_form_address == null){ $web_form_address = $web_form_address_data;} else { $web_form_address = $web_form_address;}
+																			if($list_name == null){ $list_name = $list_name_data;}
+																			if($list_description == null) {$list_description = $list_description_data; }
+																			if($campaign_id == null){ $campaign_id = $campaign_id_data;}
+																			if($active == null){$active = $active_data;}
+																			if($xferconf_a_number == null) { $xferconf_a_number = $xferconf_a_number_data;}
+																			if($xferconf_b_number == null){ $xferconf_b_number = $xferconf_b_number_data;}
+																			if($xferconf_c_number == null){ $xferconf_c_number = $xferconf_c_number_data;}
+																			if($xferconf_d_number == null) { $xferconf_d_number = $xferconf_d_number_data;}
+																			if($xferconf_e_number == null) { $xferconf_e_number = $xferconf_e_number_data;}
+																			if($agent_script_override == null) { $agent_script_override = $agent_script_override_data;}
+																			if($drop_inbound_group_override == null){ $drop_inbound_group_override = $drop_inbound_group_override_data;}
+																			if($campaign_cid_override == null){ $campaign_cid_override = $campaign_cid_override_data;}
+																			if($web_form_address == null){ $web_form_address = $web_form_address_data;}
 																			
 																			//$query = "UPDATE vicidial_lists set list_name = '$list_name', list_description = '$list_description', campaign_id = '$campaign_id', active = '$active', xferconf_a_number = '$xferconf_a_number', xferconf_b_number = '$xferconf_b_number', xferconf_c_number = '$xferconf_c_number', xferconf_d_number = '$xferconf_d_number', xferconf_e_number = '$xferconf_e_number',  agent_script_override = '$agent_script_override', drop_inbound_group_override = '$drop_inbound_group_override', campaign_cid_override = '$campaign_cid_override', web_form_address = '$web_form_address' WHERE list_id='$listid_data';";
-																			$updateData = array(
+																			$updateData = [
 																				'list_name' => $list_name,
 																				'list_description' => $list_description,
 																				'campaign_id' => $campaign_id,
@@ -173,7 +173,7 @@
 																				'drop_inbound_group_override' => $drop_inbound_group_override,
 																				'campaign_cid_override' => $campaign_cid_override,
 																				'web_form_address' => $web_form_address
-																			);
+																			];
 																			$astDB->where('list_id', $listid_data);
 																			$resultQuery = $astDB->update('vicidial_lists', $updateData);
 																			$logQuery = $astDB->getLastQuery();
@@ -181,19 +181,19 @@
 																			$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified List ID: $list_id", $log_group, $logQuery);
 
 																			if($resultQuery == false) {
-																				$apiresults = array("result" => "Error: Update failed, check your details.");
+																				$apiresults = ["result" => "Error: Update failed, check your details."];
 																			} else {
 																				$SQLdate = date("Y-m-d H:i:s");
 																				//$querydate="UPDATE vicidial_lists SET list_changedate='$SQLdate' WHERE list_id='$listid_data';";
 																				$astDB->where('list_id', $listid_data);
-																				$resultQueryDate = $astDB->update('vicidial_lists', array('list_changedate' => $SQLdate));
-																				$apiresults = array("result" => "success");
+																				$resultQueryDate = $astDB->update('vicidial_lists', ['list_changedate' => $SQLdate]);
+																				$apiresults = ["result" => "success"];
 																			}
 																		} else {
-																			$apiresults = array("result" => "Error: Campaign doesn't exist.");
+																			$apiresults = ["result" => "Error: Campaign doesn't exist."];
 																		}
 																	}  else {
-																		$apiresults = array("result" => "Error: List doesn't exist.");
+																		$apiresults = ["result" => "Error: List doesn't exist."];
 																	}
 																}
 															}

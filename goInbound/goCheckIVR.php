@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
     $menu_id = $astDB->escape($_REQUEST['menu_id']);
@@ -30,8 +30,8 @@
     //$stmtCheck = "SELECT menu_id from vicidial_call_menu where menu_id='$menu_id';";
     
     if ($row > 0) {
-        $apiresults = array("result" => "Error: CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID");
+        $apiresults = ["result" => "Error: CALL MENU NOT ADDED - there is already a CALL MENU in the system with this ID"];
     }else{
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     }
 ?>

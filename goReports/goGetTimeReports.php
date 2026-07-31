@@ -27,10 +27,10 @@
     $user = mysqli_real_escape_string($link, $_REQUEST['user']);
     $user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
     $start_date = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
-    if(empty($start_date))
+    if($start_date === '' || $start_date === '0')
     	$start_date = $def_start_date;
 	$end_date = mysqli_real_escape_string($link, $_REQUEST['toDate']);
-	if(empty($end_date))
+	if($end_date === '' || $end_date === '0')
 		$end_date = $def_end_date;
 	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
 	$groupId = go_get_groupid($session_user);
@@ -39,7 +39,7 @@
 	$export = mysqli_real_escape_string($link, $_REQUEST['export']);
 	$duration_cmd = mysqli_real_escape_string($link, $_REQUEST['duration_cmd']); //duration if 1, enabled
 
-	if(empty($duration_cmd))
+	if($duration_cmd === '' || $duration_cmd === '0')
 		$duration_cmd = 0;
 
 	$datetime1 = date_create($start_date);
@@ -50,15 +50,15 @@
     // Check user_id if its null or empty
     if(empty($session_user)) { 
         $err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
+		$apiresults = ["code" => "40001", "result" => $err_msg];
     }elseif($difference > 3){
     	$err_msg = error_handle("41004", "date range. The allowed date range is 3 months or less.");
-		$apiresults = array("code" => "41004", "result" => $err_msg);
-    }elseif(!is_numeric($id) && !empty($id)){
+		$apiresults = ["code" => "41004", "result" => $err_msg];
+    }elseif(!is_numeric($id) && ($id !== '' && $id !== '0')){
     	$err_msg = error_handle("41002", "id");
-		$apiresults = array("code" => "41002", "result" => $err_msg);
+		$apiresults = ["code" => "41002", "result" => $err_msg];
     } else{
-        if (checkIfTenant($groupId)) {
+        if (checkIfTenant($groupId, $goDB)) {
             $ul = "";
         } else {
 			if($groupId !== "ADMIN")
@@ -67,22 +67,22 @@
 				$ul = "";
         }
 
-        if(!empty($user))
+        if($user !== '' && $user !== '0')
         	$user_query = "AND vl.user = '$user'";
 		else
 			$user_query = "";
 
-		if(!empty($user_id))
+		if($user_id !== '' && $user_id !== '0')
         	$userid_query = "AND vu.user_id = '$user_id'";
 		else
 			$userid_query = "";
 
-		if(!empty($campaign_id))
+		if($campaign_id !== '' && $campaign_id !== '0')
         	$campaign_query = "AND vl.campaign_id = '$campaign_id'";
         else
         	$campaign_query = "";
 
-		if(!empty($start_date) && !empty($end_date)){
+		if($end_date !== '' && $end_date !== '0'){
 			$daterange1 = " AND (date_format(vl.event_time, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 			$daterange2 = " AND (date_format(vl.event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 			$limit = "LIMIT 10000";
@@ -94,7 +94,7 @@
 
 		$agent_id_query = "";
 		$user_id_query = "";
-		if(!empty($id)){
+		if($id !== '' && $id !== '0'){
 			// $check_agent = mysqli_query($link, "SELECT agent_log_id, event_time FROM vicidial_agent_log WHERE agent_log_id = '$id';");
 			// $num_check_agent = mysqli_num_rows($check_agent);
 
@@ -128,7 +128,7 @@
 			$campaign_id = $userlog_fetch['campaign_id'];
 			$user_group = $userlog_fetch['user_group'];
 
-			$userlog[] = array("id" => $log_id, "user_id" => $userlog_fetch['user_id'],"user" => $userlog_fetch['user'], "action" => $action, "event_time" => $event_time, "campaign_id" => $campaign_id, "user_group" => $user_group);
+			$userlog[] = ["id" => $log_id, "user_id" => $userlog_fetch['user_id'],"user" => $userlog_fetch['user'], "action" => $action, "event_time" => $event_time, "campaign_id" => $campaign_id, "user_group" => $user_group];
 			$row++;
 		}
 	
@@ -239,7 +239,7 @@
 		// 	$login_pause = 0;
 		// }
 
-		if(is_numeric($export) && !empty($export) && $export == 1){
+		if(is_numeric($export) && ($export !== '' && $export !== '0') && $export == 1){
 			if($userlog != NULL){
 				$filename = "Custom_Time_Report_".$start_date."_".$end_date.".csv";
 	        	header('Content-type: application/csv');
@@ -261,15 +261,15 @@
 			}else{
 				$err_msg = error_handle("40001");
 				//"query" => $userlog_query, 
-				$apiresults = array("result" => "No records retrieved from: ".$start_date." - ".$end_date);
+				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}
         }else{
 			if($userlog == NULL){
 				$err_msg = error_handle("40001");
 				//"query" => $userlog_query, 
-				$apiresults = array("result" => "No records retrieved from: ".$start_date." - ".$end_date);
+				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}else{
-				$apiresults = array("result" => "success", "data" => $userlog);
+				$apiresults = ["result" => "success", "data" => $userlog];
 			}
 		}
 		

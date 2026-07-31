@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    $groupId = go_get_groupid($goUser, $astDB);
+    $groupId = go_get_groupid($goUser);
     
     if (!checkIfTenant($groupId, $goDB)) {
         //$ul='';
@@ -32,8 +32,8 @@
 
     //$query = "select count(user) as num_seats from vicidial_users where user_level < '4' and user NOT IN ('VDAD','VDCL') $ul";
     $astDB->where('user_level', '4', '<');
-    $astDB->where('user', array('VDAD', 'VDCL'), 'not in');
+    $astDB->where('user', ['VDAD', 'VDCL'], 'not in');
     $fresults = $astDB->get('vicidial_users', null, 'COUNT(user) AS num_seats');
     //$fresults = mysql_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( [ "result" => "success" ], $fresults );
 ?>

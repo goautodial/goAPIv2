@@ -188,12 +188,12 @@
     // End of Campaign Stats Total
 
 
-    $apiresults = array(
+    $apiresults = [
     	"result" => "success", 
     	"campaignStatsToday" => $dataCampaignStatsToday,
     	"campaignStats" => $dataCampaignStats,
     	"campaignStatsTotal" => $dataCampaignStatsTotal
-    );
+    ];
 
     function getStatuses($dbase, $campaign_id="all"){
         if($campaign_id == "all"){
@@ -231,13 +231,13 @@
             }
         }
         $cstatuses = implode("','", $cstatuses);
-        if(strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+        if($cstatuses !== '')
         {
             $statuses = "{$sstatuses}','{$cstatuses}";
         }
         else
         {
-            $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+            $statuses = ($sstatuses !== '' && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
         }
 
         return $statuses;

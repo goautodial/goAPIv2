@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
+        $stringv = go_getall_allowed_campaigns($groupId);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv)";
 		else
@@ -39,5 +39,5 @@
     //$drop_percentage = ( ($line->drops_today / $line->answers_today) * 100); 
     $fresults = $astDB->rawQuery($query);
     //$fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( [ "result" => "success" ], $fresults );
 ?>

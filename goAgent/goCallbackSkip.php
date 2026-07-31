@@ -24,8 +24,8 @@ $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
 $user_group = $agent->user_group;
-$phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
-$phone_pass = (isset($phone_pass)) ? $phone_pass : $agent->phone_pass;
+$phone_login ??= $agent->phone_login;
+$phone_pass ??= $agent->phone_pass;
 
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
@@ -41,7 +41,7 @@ if ($sipIsLoggedIn) {
 
 
 	if ($cbExist < 1) {
-		$APIResult = array( "result" => "error", "message" => "Callback ID does NOT exist." );
+		$APIResult = [ "result" => "error", "message" => "Callback ID does NOT exist." ];
 	} else {
 		//$updateData = array(
 		//	'status' => 'INACTIVE',
@@ -59,12 +59,12 @@ if ($sipIsLoggedIn) {
 		//$rslt = $astDB->update('vicidial_list', $updateData);
 		
 		$callback_time = date("Y-m-d H:i:s", strtotime('+6 hours'));
-		$updateData = array(
+		$updateData = [
 			'status' => 'ACTIVE',
 			'callback_time' => $callback_time,
 			'user' => $user,
 			'recipient' => 'USERONLY'
-		);
+		];
 		$astDB->where('callback_id', $callback_id);
 		$rslt = $astDB->update('vicidial_callbacks', $updateData);
 		
@@ -73,7 +73,7 @@ if ($sipIsLoggedIn) {
 		$cbtime = date("h:i A", strtotime($callback_time));
 		$astDB->where('lead_id', $lead_id);
 		$rslt = $astDB->getOne('vicidial_list', 'phone_number');
-		$insertData = array(
+		$insertData = [
 			'user_id' => $agent->user_id,
 			'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
 			'description' => '',
@@ -84,17 +84,17 @@ if ($sipIsLoggedIn) {
 			'alarm' => '',
 			'notification_sent' => 0,
 			'color' => '#03a9f4'
-		);
+		];
 		$rslt = $goDB->insert('events', $insertData);
 
 		//$APIResult = array( "result" => "success", "message" => "Callback Lead reverted back to queue as NEW." );
-		$APIResult = array( "result" => "success", "message" => "Callback Lead re-scheduled in 6 hours." );
+		$APIResult = [ "result" => "success", "message" => "Callback Lead re-scheduled in 6 hours." ];
 	}
 } else {
     $message = "SIP exten '{$phone_login}' is NOT connected";
-    if (strlen($phone_login) < 1) {
+    if (strlen((string) $phone_login) < 1) {
         $message = "User '$user' does NOT have any phone extension assigned.";
     }
-    $APIResult = array( "result" => "error", "message" => $message );
+    $APIResult = [ "result" => "error", "message" => $message ];
 }
 ?>

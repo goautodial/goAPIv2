@@ -32,23 +32,23 @@ if ( file_exists($conf_path) )
     foreach ($DBCagc as $DBCline)
         {
         $DBCline = preg_replace("/ |>|\n|\r|\t|\#.*|;.*/","",$DBCline);
-        if (preg_match("/^PATHlogs/", $DBCline))
-                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",$PATHlogs);}
-        if (preg_match("/^PATHweb/", $DBCline))
-                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
-        if (preg_match("/^VARserver_ip/", $DBCline))
-                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}
+        if (preg_match("/^PATHlogs/", (string) $DBCline))
+                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",(string) $PATHlogs);}
+        if (preg_match("/^PATHweb/", (string) $DBCline))
+                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",(string) $WeBServeRRooT);}
+        if (preg_match("/^VARserver_ip/", (string) $DBCline))
+                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",(string) $WEBserver_ip);}
                 
-        if (preg_match("/^VARDBost_server/", $DBCline))
-                {$VARDBost_server = $DBCline;   $VARDBost_server = preg_replace("/.*=/","",$VARDBost_server);}
-        if (preg_match("/^VARDBost_database/", $DBCline))
-                {$VARDBost_database = $DBCline;   $VARDBost_database = preg_replace("/.*=/","",$VARDBost_database);}
-        if (preg_match("/^VARDBost_user/", $DBCline))
-                {$VARDBost_user = $DBCline;   $VARDBost_user = preg_replace("/.*=/","",$VARDBost_user);}
-        if (preg_match("/^VARDBost_pass/", $DBCline))
-                {$VARDBost_pass = $DBCline;   $VARDBost_pass = preg_replace("/.*=/","",$VARDBost_pass);}
-        if (preg_match("/^VARDBost_port/", $DBCline))
-                {$VARDBost_port = $DBCline;   $VARDBost_port = preg_replace("/.*=/","",$VARDBost_port);}
+        if (preg_match("/^VARDBost_server/", (string) $DBCline))
+                {$VARDBost_server = $DBCline;   $VARDBost_server = preg_replace("/.*=/","",(string) $VARDBost_server);}
+        if (preg_match("/^VARDBost_database/", (string) $DBCline))
+                {$VARDBost_database = $DBCline;   $VARDBost_database = preg_replace("/.*=/","",(string) $VARDBost_database);}
+        if (preg_match("/^VARDBost_user/", (string) $DBCline))
+                {$VARDBost_user = $DBCline;   $VARDBost_user = preg_replace("/.*=/","",(string) $VARDBost_user);}
+        if (preg_match("/^VARDBost_pass/", (string) $DBCline))
+                {$VARDBost_pass = $DBCline;   $VARDBost_pass = preg_replace("/.*=/","",(string) $VARDBost_pass);}
+        if (preg_match("/^VARDBost_port/", (string) $DBCline))
+                {$VARDBost_port = $DBCline;   $VARDBost_port = preg_replace("/.*=/","",(string) $VARDBost_port);}
         }
     }
 

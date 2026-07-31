@@ -38,10 +38,10 @@ if (isset($lead_id) && $lead_id !== '') {
         
         $astDB->has($custom_listid);
         $lastError = $astDB->getLastError();
-        if (strlen($lastError) < 1) {
-            $CFields = array();
+        if (strlen((string) $lastError) < 1) {
+            $CFields = [];
             $rslt = $astDB->rawQuery("SHOW COLUMNS FROM $custom_listid;");
-            foreach ($rslt as $key => $field) {
+            foreach ($rslt as $field) {
                 if ($field['Field'] == 'lead_id') continue;
                 $CFields[] = $field['Field'];
             }
@@ -57,11 +57,11 @@ if (isset($lead_id) && $lead_id !== '') {
         $rslt = $goDB->getOne('go_customers');
         $is_customer = $goDB->getRowCount();
         
-        $APIResult = array( "result" => "success", "lead_info" => $lead_info, "custom_info" => $custom_info, "is_customer" => $is_customer );
+        $APIResult = [ "result" => "success", "lead_info" => $lead_info, "custom_info" => $custom_info, "is_customer" => $is_customer ];
     } else {
-        $APIResult = array( "result" => "error", "message" => "Lead ID '$lead_id' does NOT exist on the database" );
+        $APIResult = [ "result" => "error", "message" => "Lead ID '$lead_id' does NOT exist on the database" ];
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "You did NOT specify a valid Lead ID" );
+    $APIResult = [ "result" => "error", "message" => "You did NOT specify a valid Lead ID" ];
 }
 ?>

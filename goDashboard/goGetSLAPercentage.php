@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId, $astDB);
+        $stringv = go_getall_allowed_users($groupId);
         $ul = "AND user_group not in ('','NULL','ADMIN') AND user_group in ($stringv)";
     }
 
@@ -42,10 +42,10 @@
     //var_dump($rsltv);   
         
     if($countResult > 0) {
-        $data = array();
+        $data = [];
         foreach ($rsltv as $fresults){       
-            array_push($data, $fresults);
+            $data[] = $fresults;
         }
-        $apiresults = array("result" => "success", "data" => $data);
+        $apiresults = ["result" => "success", "data" => $data];
     }
 ?>

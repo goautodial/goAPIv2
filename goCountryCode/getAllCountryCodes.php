@@ -29,11 +29,11 @@
 		foreach ($rsltv as $fresults){
 			$dataCountryCode[] = $fresults['country_code'];
 			$dataCountry[] = $fresults['country'];
-			$apiresults = array(
+			$apiresults = [
 				"result" => "success",
 				"country_code" => $dataCountryCode,
 				"country" => $dataCountry,
-			);
+			];
 		}
 	}
 ?>

@@ -35,7 +35,7 @@ if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP'
     else if (isset($_POST['goServerIP'])) { $server_ip = $astDB->escape($_POST['goServerIP']); }
 
 $user = $agent->user;
-$server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
+$server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
 $VDCL_ingroup_recording_override = '';
 $VDCL_ingroup_rec_filename = '';
@@ -51,11 +51,11 @@ $alt_phone_active = '';
 $alt_phone_count = '';
 $INclosecallid = '';
 $INxfercallid = '';
-$dataOutput1 = array();
-$dataOutput2 = array();
-$dataOutput3 = array();
-$dataOutput4 = array();
-$LeaD_InfO   = array();
+$dataOutput1 = [];
+$dataOutput2 = [];
+$dataOutput3 = [];
+$dataOutput4 = [];
+$LeaD_InfO   = [];
 $ACcount = '';
 $ACcomments = '';
 
@@ -78,16 +78,16 @@ if ($is_logged_in) {
         $call_server_ip	= $row['call_server_ip'];
         $VLAcomments    = $row['comments'];
 
-        if (strlen($call_server_ip) < 7) {$call_server_ip = $server_ip;}
+        if (strlen((string) $call_server_ip) < 7) {$call_server_ip = $server_ip;}
         //echo "1\n" . $lead_id . '|' . $uniqueid . '|' . $callerid . '|' . $channel . '|' . $call_server_ip . "|\n";
-        $dataOutput1 = array(
+        $dataOutput1 = [
             'has_call' => 1,
             'lead_id' => $lead_id,
             'uniqueid' => $uniqueid,
             'callerid' => $callerid,
             'channel' => $channel,
             'call_server_ip' => $call_server_ip
-        );
+        ];
 
         ##### grab number of calls today in this campaign and increment
         //$stmt="SELECT calls_today FROM vicidial_live_agents WHERE user='$user' and campaign_id='$campaign';";
@@ -105,7 +105,7 @@ if ($is_logged_in) {
 
         ### update the agent status to INCALL in vicidial_live_agents
         //$stmt = "UPDATE vicidial_live_agents set status='INCALL',last_call_time='$NOW_TIME',calls_today='$calls_today',external_hangup=0,external_status='',external_pause='',external_dial='',last_state_change='$NOW_TIME' where user='$user' and server_ip='$server_ip';";
-        $updateData = array(
+        $updateData = [
             'status' => 'INCALL',
             'last_call_time' => $NOW_TIME,
             'calls_today' => $calls_today,
@@ -114,13 +114,13 @@ if ($is_logged_in) {
             'external_pause' => '',
             'external_dial' => '',
             'last_state_change' => $NOW_TIME
-        );
+        ];
         $astDB->where('user', $user);
         $astDB->where('server_ip', $server_ip);
         $rslt = $astDB->update('vicidial_live_agents', $updateData);
         $errno = $astDB->getLastError();
         $retry_count = 0;
-        while ( (count($errno) > 3) and ($retry_count < 9) ) {
+        while ( count($errno) > 3 && $retry_count < 9 ) {
             $astDB->where('user', $user);
             $astDB->where('server_ip', $server_ip);
             $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -131,7 +131,7 @@ if ($is_logged_in) {
         //$stmt = "UPDATE vicidial_campaign_agents set calls_today='$calls_today' where user='$user' and campaign_id='$campaign';";
         $astDB->where('user', $user);
         $astDB->where('campaign_id', $campaign);
-        $rslt = $astDB->update('vicidial_campaign_agents', array( 'calls_today' => $calls_today ));
+        $rslt = $astDB->update('vicidial_campaign_agents', [ 'calls_today' => $calls_today ]);
 
         ##### grab the data from vicidial_list for the lead_id
         //$stmt="SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id FROM vicidial_list where lead_id='$lead_id' LIMIT 1;";
@@ -182,7 +182,7 @@ if ($is_logged_in) {
             }
             $ACcomments = strip_tags(htmlentities($ACcomments));
             $ACcomments = preg_replace("/\r/i", '', $ACcomments);
-            $ACcomments = preg_replace("/\n/i", '!N', $ACcomments);
+            $ACcomments = preg_replace("/\n/i", '!N', (string) $ACcomments);
         }
 
         ##### if lead is a callback, grab the callback comments
@@ -210,7 +210,7 @@ if ($is_logged_in) {
                 $CBstatus = $cb_record_ct;
             }
         }
-        if ( ($CBstatus > 0) or ($dispo == 'CBHOLD') ) {
+        if ( $CBstatus > 0 || $dispo == 'CBHOLD' ) {
             //$stmt="SELECT entry_time,callback_time,user,comments FROM vicidial_callbacks where lead_id='$lead_id' order by callback_id desc LIMIT 1;";
             $astDB->where('lead_id', $lead_id);
             $astDB->orderBy('callback_id', 'desc');
@@ -233,7 +233,7 @@ if ($is_logged_in) {
                 $thisDate = date('Y-m-d', $getDate);
                 $thisComment = $row['comments'];
                 $thisUser = $row['user'];
-                if (strlen($thisComment) > 0) {
+                if ((string) $thisComment !== '') {
                     $CBcommentsALL .= '<div class="col-sm-12" style="font-size: 14px;">';
                     $CBcommentsALL .= '	<strong>'.$thisDate.':</strong> '.$thisComment.' ~ <strong>'.$thisUser.'</strong>';
                     $CBcommentsALL .= '</div>';
@@ -250,16 +250,16 @@ if ($is_logged_in) {
         }
         
         $ownerSQL = '';
-        if ( ($owner_populate == 'ENABLED') and ( (strlen($owner) < 1) or ($owner == 'NULL') ) ) {
-            $ownerArray = array( 'owner' => $user );
+        if ( $owner_populate == 'ENABLED' && (strlen((string) $owner) < 1 || $owner == 'NULL') ) {
+            $ownerArray = [ 'owner' => $user ];
             $owner = $user;
         }
 
         ### update the lead status to INCALL
-        $updateData = array(
+        $updateData = [
             'status' => 'INCALL',
             'user' => $user
-        );
+        ];
         if (is_array($ownerArray)) {
             $updateData = array_merge($updateData, $ownerArray);
         }
@@ -301,7 +301,7 @@ if ($is_logged_in) {
             $dialed_number		= $row['phone_number'];
             $dialed_label		= $row['alt_dial'];
             $call_type			= $row['call_type'];
-            if ( ($dialed_number != $phone_number) and (strlen($dialed_label) < 3) ) {
+            if ( $dialed_number != $phone_number && strlen((string) $dialed_label) < 3 ) {
                 if ($dialed_number != $alt_phone) {
                     if ($dialed_number != $address3) {
                         $dialed_label = 'X1';
@@ -338,7 +338,7 @@ if ($is_logged_in) {
         } else {
             $dialed_number = $phone_number;
             $dialed_label = 'MAIN';
-            if (preg_match('/^M|^V/',$callerid)) {
+            if (preg_match('/^M|^V/',(string) $callerid)) {
                 $call_type = 'OUT';
                 $VDADchannel_group = $campaign;
             } else {
@@ -357,15 +357,15 @@ if ($is_logged_in) {
             }
         }
 
-        if ( ($call_type == 'OUT') or ($call_type == 'OUTBALANCE') ) {
+        if ( $call_type == 'OUT' || $call_type == 'OUTBALANCE' ) {
             //$stmt = "UPDATE vicidial_log set user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' where lead_id='$lead_id' and uniqueid='$uniqueid';";
-            $updateData = array(
+            $updateData = [
                 'user' => $user,
                 'comments' => 'AUTO',
                 'list_id' => $list_id,
                 'status' => 'INCALL',
                 'user_group' => $user_group
-            );
+            ];
             $astDB->where('lead_id', $lead_id);
             $astDB->where('uniqueid', $uniqueid);
             $rslt = $astDB->update('vicidial_log', $updateData);
@@ -392,7 +392,7 @@ if ($is_logged_in) {
                 $VDCL_xferconf_b_dtmf =			$row['xferconf_b_dtmf'];
                 $VDCL_xferconf_b_number =		$row['xferconf_b_number'];
                 $VDCL_default_xfer_group =		$row['default_xfer_group'];
-                if (strlen($VDCL_default_xfer_group) < 2) {$VDCL_default_xfer_group = 'X';}
+                if (strlen((string) $VDCL_default_xfer_group) < 2) {$VDCL_default_xfer_group = 'X';}
                 $VDCL_start_call_url =			$row['start_call_url'];
                 $VDCL_dispo_call_url =			$row['dispo_call_url'];
                 $VDCL_xferconf_c_number =		$row['xferconf_c_number'];
@@ -405,22 +405,22 @@ if ($is_logged_in) {
             }
 
             ### Check for List ID override settings
-            if (strlen($list_id)>0) {
+            if ((string) $list_id !== '') {
                 //$stmt = "SELECT xferconf_a_number,xferconf_b_number,xferconf_c_number,xferconf_d_number,xferconf_e_number from vicidial_lists where list_id='$list_id';";
                 $astDB->where('list_id', $list_id);
                 $rslt = $astDB->get('vicidial_lists', null, 'xferconf_a_number,xferconf_b_number,xferconf_c_number,xferconf_d_number,xferconf_e_number');
                 $VDIG_xferOR_ct = $astDB->getRowCount();
                 if ($VDIG_xferOR_ct > 0) {
                     $row = $rslt[0];
-                    if (strlen($row['xferconf_a_number']) > 0)
+                    if ((string) $row['xferconf_a_number'] !== '')
                         {$VDCL_xferconf_a_number = $row['xferconf_a_number'];}
-                    if (strlen($row['xferconf_b_number']) > 0)
+                    if ((string) $row['xferconf_b_number'] !== '')
                         {$VDCL_xferconf_b_number = $row['xferconf_b_number'];}
-                    if (strlen($row['xferconf_c_number']) > 0)
+                    if ((string) $row['xferconf_c_number'] !== '')
                         {$VDCL_xferconf_c_number = $row['xferconf_c_number'];}
-                    if (strlen($row['xferconf_d_number']) > 0)
+                    if ((string) $row['xferconf_d_number'] !== '')
                         {$VDCL_xferconf_d_number = $row['xferconf_d_number'];}
-                    if (strlen($row['xferconf_e_number']) > 0)
+                    if ((string) $row['xferconf_e_number'] !== '')
                         {$VDCL_xferconf_e_number = $row['xferconf_e_number'];}
                 }
             }
@@ -428,7 +428,7 @@ if ($is_logged_in) {
             //echo "|||||$VDCL_campaign_script|$VDCL_get_call_launch|$VDCL_xferconf_a_dtmf|$VDCL_xferconf_a_number|$VDCL_xferconf_b_dtmf|
             //$VDCL_xferconf_b_number|$VDCL_default_xfer_group|X|X|||||$VDCL_timer_action|$VDCL_timer_action_message|$VDCL_timer_action_seconds|
             //$VDCL_xferconf_c_number|$VDCL_xferconf_d_number|$VDCL_xferconf_e_number||||$VDCL_timer_action_destination||||||\n|\n";
-            $dataOutput2 = array(
+            $dataOutput2 = [
                 'group_web' => '',
                 'group_name' => '',
                 'group_color' => '',
@@ -464,16 +464,16 @@ if ($is_logged_in) {
                 'closecallid' => '',
                 'xfercallid' => '',
                 'fronter_full_name' => ''
-            );
+            ];
             
-            if (preg_match('/X/', $dialed_label)) {
-                if (preg_match('/LAST/', $dialed_label)) {
+            if (preg_match('/X/', (string) $dialed_label)) {
+                if (preg_match('/LAST/', (string) $dialed_label)) {
                     //$stmt = "SELECT phone_code,phone_number,alt_phone_note,active,alt_phone_count FROM vicidial_list_alt_phones where lead_id='$lead_id' order by alt_phone_count desc limit 1;";
                     $astDB->where('lead_id', $lead_id);
                     $astDB->orderBy('alt_phone_count', 'desc');
                     $limit = 1;
                 } else {
-                    $Talt_dial = preg_replace("/[^0-9]/","",$dialed_label);
+                    $Talt_dial = preg_replace("/[^0-9]/","",(string) $dialed_label);
                     //$stmt = "SELECT phone_code,phone_number,alt_phone_note,active,alt_phone_count FROM vicidial_list_alt_phones where lead_id='$lead_id' and alt_phone_count='$Talt_dial';";
                     $astDB->where('lead_id', $lead_id);
                     $astDB->where('alt_phone_count', $Talt_dial);
@@ -496,7 +496,7 @@ if ($is_logged_in) {
             //$stmt = "UPDATE vicidial_closer_log SET user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' WHERE lead_id='$lead_id' ORDER BY closecallid DESC LIMIT 1;";
             $rslt = $astDB->rawQuery("UPDATE vicidial_closer_log SET user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' WHERE lead_id='$lead_id' ORDER BY closecallid DESC LIMIT 1;");
 
-            if (strlen($closecallid)<1) {
+            if (strlen((string) $closecallid)<1) {
                 //$stmt = "SELECT closecallid,xfercallid from vicidial_closer_log where lead_id='$lead_id' and user='$user' and list_id='$list_id' order by call_date desc limit 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->where('user', $user);
@@ -568,36 +568,36 @@ if ($is_logged_in) {
                 $VDIG_cidOR_ct = $astDB->getRowCount();
                 if ($VDIG_cidOR_ct > 0) {
                     $row = $rslt[0];
-                    if (strlen($VDCL_xferconf_a_dtmf) < 1)
+                    if (strlen((string) $VDCL_xferconf_a_dtmf) < 1)
                         {$VDCL_xferconf_a_dtmf = $row['xferconf_a_dtmf'];}
-                    if (strlen($VDCL_xferconf_a_number) < 1)
+                    if (strlen((string) $VDCL_xferconf_a_number) < 1)
                         {$VDCL_xferconf_a_number = $row['xferconf_a_number'];}
-                    if (strlen($VDCL_xferconf_b_dtmf) < 1)
+                    if (strlen((string) $VDCL_xferconf_b_dtmf) < 1)
                         {$VDCL_xferconf_b_dtmf = $row['xferconf_b_dtmf'];}
-                    if (strlen($VDCL_xferconf_b_number) < 1)
+                    if (strlen((string) $VDCL_xferconf_b_number) < 1)
                         {$VDCL_xferconf_b_number = $row['xferconf_b_number'];}
                     if (strlen($VDCL_default_group_alias) < 1)
                         {$VDCL_default_group_alias = $row['default_group_alias'];}
-                    if (strlen($VDCL_timer_action) < 1)
+                    if (strlen((string) $VDCL_timer_action) < 1)
                         {$VDCL_timer_action = $row['timer_action'];}
-                    if (strlen($VDCL_timer_action_message) < 1)
+                    if (strlen((string) $VDCL_timer_action_message) < 1)
                         {$VDCL_timer_action_message = $row['timer_action_message'];}
                     if (strlen($VDCL_timer_action_seconds) < 1)
                         {$VDCL_timer_action_seconds = $row['timer_action_seconds'];}
-                    if (strlen($VDCL_start_call_url) < 1)
+                    if (strlen((string) $VDCL_start_call_url) < 1)
                         {$VDCL_start_call_url = $row['start_call_url'];}
-                    if (strlen($VDCL_dispo_call_url) < 1)
+                    if (strlen((string) $VDCL_dispo_call_url) < 1)
                         {$VDCL_dispo_call_url =	$row['dispo_call_url'];}
-                    if (strlen($VDCL_xferconf_c_number) < 1)
+                    if (strlen((string) $VDCL_xferconf_c_number) < 1)
                         {$VDCL_xferconf_c_number = $row['xferconf_c_number'];}
-                    if (strlen($VDCL_xferconf_d_number) < 1)
+                    if (strlen((string) $VDCL_xferconf_d_number) < 1)
                         {$VDCL_xferconf_d_number = $row['xferconf_d_number'];}
-                    if (strlen($VDCL_xferconf_e_number) < 1)
+                    if (strlen((string) $VDCL_xferconf_e_number) < 1)
                         {$VDCL_xferconf_e_number = $row['xferconf_e_number'];}
-                    if (strlen($VDCL_timer_action_destination) < 1)
+                    if (strlen((string) $VDCL_timer_action_destination) < 1)
                         {$VDCL_timer_action_destination = $row['timer_action_destination'];}
 
-                    if ( ( (preg_match('/NONE/', $VDCL_ingroup_script)) and (strlen($VDCL_ingroup_script) < 5) ) or (strlen($VDCL_ingroup_script) < 1) ) {
+                    if ( preg_match('/NONE/', (string) $VDCL_ingroup_script) && strlen((string) $VDCL_ingroup_script) < 5 || strlen((string) $VDCL_ingroup_script) < 1 ) {
                         $VDCL_ingroup_script = $row['campaign_script'];
                         $script_recording_delay = 0;
                         ##### find if script contains recording fields
@@ -634,10 +634,10 @@ if ($is_logged_in) {
 
                 ### update the comments in vicidial_live_agents record
                 //$stmt = "UPDATE vicidial_live_agents set comments='INBOUND',last_inbound_call_time='$NOW_TIME' where user='$user' and server_ip='$server_ip';";
-                $updateData = array(
+                $updateData = [
                     'comments' => 'INBOUND',
                     'last_inbound_call_time' => $NOW_TIME
-                );
+                ];
                 $astDB->where('user', $user);
                 $astDB->where('server_ip', $server_ip);
                 $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -701,22 +701,22 @@ if ($is_logged_in) {
             }
 
             ### Check for List ID override settings
-            if (strlen($list_id) > 0) {
+            if ((string) $list_id !== '') {
                 //$stmt = "SELECT xferconf_a_number,xferconf_b_number,xferconf_c_number,xferconf_d_number,xferconf_e_number,web_form_address,web_form_address_two from vicidial_lists where list_id='$list_id';";
                 $astDB->where('list_id', $list_id);
                 $rslt = $astDB->get('vicidial_lists', null, 'xferconf_a_number,xferconf_b_number,xferconf_c_number,xferconf_d_number,xferconf_e_number,web_form_address,web_form_address_two');
                 $VDIG_cidOR_ct = $astDB->getRowCount();
                 if ($VDIG_cidOR_ct > 0) {
                     $row = $rslt[0];
-                    if (strlen($row['xferconf_a_number']) > 0)
+                    if ((string) $row['xferconf_a_number'] !== '')
                         {$VDCL_xferconf_a_number =	$row['xferconf_a_number'];}
-                    if (strlen($row['xferconf_b_number']) > 0)
+                    if ((string) $row['xferconf_b_number'] !== '')
                         {$VDCL_xferconf_b_number =	$row['xferconf_b_number'];}
-                    if (strlen($row['xferconf_c_number']) > 0)
+                    if ((string) $row['xferconf_c_number'] !== '')
                         {$VDCL_xferconf_c_number =	$row['xferconf_c_number'];}
-                    if (strlen($row['xferconf_d_number']) > 0)
+                    if ((string) $row['xferconf_d_number'] !== '')
                         {$VDCL_xferconf_d_number =	$row['xferconf_d_number'];}
-                    if (strlen($row['xferconf_e_number']) > 0)
+                    if ((string) $row['xferconf_e_number'] !== '')
                         {$VDCL_xferconf_e_number =	$row['xferconf_e_number'];}
                     if (strlen($row['web_form_address']) > 5)
                         {$VDCL_group_web =			$row['web_form_address'];}
@@ -753,7 +753,7 @@ if ($is_logged_in) {
             }
 
             ### if web form is set then send on to vicidial.php for override of WEB_FORM address
-            if ( (strlen($VDCL_group_web) > 5) or (strlen($VDCL_group_name) > 0) ) {
+            if ( strlen((string) $VDCL_group_web) > 5 || strlen((string) $VDCL_group_name) > 0 ) {
                 //echo "$VDCL_group_web|$VDCL_group_name|$VDCL_group_color|$VDCL_fronter_display|$VDADchannel_group|$VDCL_ingroup_script|
                 //$VDCL_get_call_launch|$VDCL_xferconf_a_dtmf|$VDCL_xferconf_a_number|$VDCL_xferconf_b_dtmf|$VDCL_xferconf_b_number|
                 //$VDCL_default_xfer_group|$VDCL_ingroup_recording_override|$VDCL_ingroup_rec_filename|$VDCL_default_group_alias|
@@ -761,7 +761,7 @@ if ($is_logged_in) {
                 //$VDCL_timer_action_seconds|$VDCL_xferconf_c_number|$VDCL_xferconf_d_number|$VDCL_xferconf_e_number|
                 //$VDCL_uniqueid_status_display|$custom_call_id|$VDCL_uniqueid_status_prefix|$VDCL_timer_action_destination|$DID_id|
                 //$DID_extension|$DID_pattern|$DID_description|$INclosecallid|$INxfercallid|\n";
-                $dataOutput3 = array(
+                $dataOutput3 = [
                     'group_web' => $VDCL_group_web,
                     'group_name' => $VDCL_group_name,
                     'group_color' => $VDCL_group_color,
@@ -796,7 +796,7 @@ if ($is_logged_in) {
                     'did_description' => $DID_description,
                     'closecallid' => $INclosecallid,
                     'xfercallid' => $INxfercallid
-                );
+                ];
             } else {
                 //echo "X|$VDCL_group_name|$VDCL_group_color|$VDCL_fronter_display|$VDADchannel_group|$VDCL_ingroup_script|$VDCL_get_call_launch|
                 //$VDCL_xferconf_a_dtmf|$VDCL_xferconf_a_number|$VDCL_xferconf_b_dtmf|$VDCL_xferconf_b_number|$VDCL_default_xfer_group|
@@ -805,7 +805,7 @@ if ($is_logged_in) {
                 //$VDCL_xferconf_c_number|$VDCL_xferconf_d_number|$VDCL_xferconf_e_number|$VDCL_uniqueid_status_display|$custom_call_id|
                 //$VDCL_uniqueid_status_prefix|$VDCL_timer_action_destination|$DID_id|$DID_extension|$DID_pattern|$DID_description|
                 //$INclosecallid|$INxfercallid|\n";
-                $dataOutput3 = array(
+                $dataOutput3 = [
                     'group_web' => 'X',
                     'group_name' => $VDCL_group_name,
                     'group_color' => $VDCL_group_color,
@@ -840,7 +840,7 @@ if ($is_logged_in) {
                     'did_description' => $DID_description,
                     'closecallid' => $INclosecallid,
                     'xfercallid' => $INxfercallid
-                );
+                ];
             }
 
             //$stmt = "SELECT full_name from vicidial_users where user='$tsr';";
@@ -851,14 +851,14 @@ if ($is_logged_in) {
                 $row = $rslt[0];
                 $fronter_full_name		= $row['full_name'];
                 //echo $fronter_full_name . '|' . $tsr . "\n";
-                $dataOutput4 = array(
+                $dataOutput4 = [
                     'fronter_full_name' => $fronter_full_name
-                );
+                ];
             } else {
                 //echo '|' . $tsr . "\n";
-                $dataOutput4 = array(
+                $dataOutput4 = [
                     'fronter_full_name' => ''
-                );
+                ];
             }
         }
 
@@ -888,8 +888,8 @@ if ($is_logged_in) {
         ### find the names of all custom fields, if any
         //$stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
         $astDB->where('list_id', $entry_list_id);
-        $astDB->where('field_type', array('SCRIPT','DISPLAY'), 'not in');
-        $astDB->where('field_label', array('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner'), 'not in');
+        $astDB->where('field_type', ['SCRIPT','DISPLAY'], 'not in');
+        $astDB->where('field_label', ['vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner'], 'not in');
         $rslt = $astDB->get('vicidial_lists_fields', null, 'field_label,field_type');
         $cffn_ct = $astDB->getRowCount();
         if ($cffn_ct > 0) {
@@ -899,8 +899,6 @@ if ($is_logged_in) {
                 $custom_field_types .=	"{$row['field_type']}|";
                 $custom_field_values .=	"----------";
             }
-        }
-        if ($cffn_ct > 0) {
             $custom_field_names_SQL = preg_replace("/.$/i", "", $custom_field_names_SQL);
             ### find the values of the named custom fields
             //$stmt = "SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' limit 1;";
@@ -909,11 +907,11 @@ if ($is_logged_in) {
             $cffv_ct = $astDB->getRowCount();
             if ($cffv_ct > 0) {
                 $custom_field_values = '----------'; 
-                foreach ($rslt as $idx => $row) {
+                foreach ($rslt as $row) {
                     $custom_field_values .=	"{$row}----------";
                 }
                 $custom_field_values = preg_replace("/\n/", " ", $custom_field_values);
-                $custom_field_values = preg_replace("/\r/", "", $custom_field_values);
+                $custom_field_values = preg_replace("/\r/", "", (string) $custom_field_values);
             }
         }
 
@@ -921,13 +919,13 @@ if ($is_logged_in) {
         $comments = preg_replace("/\r/i", '', $comments);
         $comments = preg_replace("/\n/i", '!N!', $comments);
 
-        $address1 = preg_replace("/\r/i", '', $address1);
+        $address1 = preg_replace("/\r/i", '', (string) $address1);
         $address1 = preg_replace("/\n/i", '!N!', $address1);
 
-        $address2 = preg_replace("/\r/i", '', $address2);
+        $address2 = preg_replace("/\r/i", '', (string) $address2);
         $address2 = preg_replace("/\n/i", '!N!', $address2);
 
-        $areacode = substr($phone_number, 0, 3);
+        $areacode = substr((string) $phone_number, 0, 3);
         //$stmt="SELECT country FROM vicidial_phone_codes where country_code='$phone_code' and areacode='$areacode' LIMIT 1;";
         $astDB->where('country_code', $phone_code);
         $astDB->where('areacode', $areacode);
@@ -947,9 +945,9 @@ if ($is_logged_in) {
         $astDB->where('lead_id', $lead_id);
         $astDB->orderBy('notesid', 'desc');
         $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
-        $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
+        $call_notes = $CNotes['call_notes'] ?? '';
 
-        $LeaD_InfO = array(
+        $LeaD_InfO = [
             'callerid' => $callerid,
             'lead_id' => $lead_id,
             'dispo' => $dispo,
@@ -1004,7 +1002,7 @@ if ($is_logged_in) {
             'converted_dial_code' => $converted_dial_code,
             'call_notes' => $call_notes,
             'CBcommentsALL' => $CBcommentsALL
-        );
+        ];
 
         $wait_sec = 0;
         //$StarTtime = date("U");
@@ -1018,7 +1016,7 @@ if ($is_logged_in) {
         }
         //$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtimE',lead_id='$lead_id' where agent_log_id='$agent_log_id';";
         $astDB->where('agent_log_id', $agent_log_id);
-        $rslt = $astDB->update('vicidial_agent_log', array( 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtimE, 'lead_id' => $lead_id ));
+        $rslt = $astDB->update('vicidial_agent_log', [ 'wait_sec' => $wait_sec, 'talk_epoch' => $StarTtimE, 'lead_id' => $lead_id ]);
 
         ### If a scheduled callback, change vicidial_callback record to INACTIVE
         $CBstatus = 0;
@@ -1041,11 +1039,11 @@ if ($is_logged_in) {
                 $CBstatus = $cb_record_ct;
             }
         }
-        if ( ($CBstatus > 0) or (preg_match("/CALLBK|CBHOLD/i", $dispo)) ) {
+        if ( $CBstatus > 0 || preg_match("/CALLBK|CBHOLD/i", (string) $dispo) ) {
             //$stmt="UPDATE vicidial_callbacks set status='INACTIVE' where lead_id='$lead_id' and status NOT IN('INACTIVE','DEAD','ARCHIVE');";
             $astDB->where('lead_id', $lead_id);
-            $astDB->where('status', array( 'INACTIVE', 'DEAD', 'ARCHIVE' ), 'not in');
-            $rslt = $astDB->update('vicidial_callbacks', array( 'status' => 'INACTIVE' ));
+            $astDB->where('status', [ 'INACTIVE', 'DEAD', 'ARCHIVE' ], 'not in');
+            $rslt = $astDB->update('vicidial_callbacks', [ 'status' => 'INACTIVE' ]);
         }
 
         ##### check if system is set to generate logfile for transfers
@@ -1067,8 +1065,8 @@ if ($is_logged_in) {
         //    }
 
         ### Issue Start Call URL if defined
-        if (strlen($VDCL_start_call_url) > 7) {
-            if (preg_match('/--A--user_custom_/i', $VDCL_start_call_url)) {
+        if (strlen((string) $VDCL_start_call_url) > 7) {
+            if (preg_match('/--A--user_custom_/i', (string) $VDCL_start_call_url)) {
                 //$stmt = "SELECT custom_one,custom_two,custom_three,custom_four,custom_five from vicidial_users where user='$user';";
                 $astDB->where('user', $user);
                 $rslt = $astDB->get('vicidial_users', null, 'custom_one,custom_two,custom_three,custom_four,custom_five');
@@ -1082,83 +1080,83 @@ if ($is_logged_in) {
                     $user_custom_five	= urlencode(trim($row['custom_five']));
                 }
             }
-            $VDCL_start_call_url = preg_replace('/^VAR/', '', $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--lead_id--B--/i', urlencode(trim($lead_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--vendor_id--B--/i', urlencode(trim($vendor_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--vendor_lead_code--B--/i', urlencode(trim($vendor_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--list_id--B--/i', urlencode(trim($list_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--gmt_offset_now--B--/i', urlencode(trim($gmt_offset_now)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--phone_code--B--/i', urlencode(trim($phone_code)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--phone_number--B--/i', urlencode(trim($phone_number)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--title--B--/i', urlencode(trim($title)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--first_name--B--/i', urlencode(trim($first_name)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--middle_initial--B--/i', urlencode(trim($middle_initial)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--last_name--B--/i', urlencode(trim($last_name)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/^VAR/', '', (string) $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--lead_id--B--/i', urlencode(trim((string) $lead_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--vendor_id--B--/i', urlencode(trim((string) $vendor_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--vendor_lead_code--B--/i', urlencode(trim((string) $vendor_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--list_id--B--/i', urlencode(trim((string) $list_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--gmt_offset_now--B--/i', urlencode(trim((string) $gmt_offset_now)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--phone_code--B--/i', urlencode(trim((string) $phone_code)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--phone_number--B--/i', urlencode(trim((string) $phone_number)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--title--B--/i', urlencode(trim((string) $title)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--first_name--B--/i', urlencode(trim((string) $first_name)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--middle_initial--B--/i', urlencode(trim((string) $middle_initial)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--last_name--B--/i', urlencode(trim((string) $last_name)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--address1--B--/i', urlencode(trim($address1)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--address2--B--/i', urlencode(trim($address2)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--address3--B--/i', urlencode(trim($address3)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--city--B--/i', urlencode(trim($city)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--state--B--/i', urlencode(trim($state)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--province--B--/i', urlencode(trim($province)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--postal_code--B--/i', urlencode(trim($postal_code)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--country_code--B--/i', urlencode(trim($country_code)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--gender--B--/i', urlencode(trim($gender)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--date_of_birth--B--/i', urlencode(trim($date_of_birth)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--alt_phone--B--/i', urlencode(trim($alt_phone)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--email--B--/i', urlencode(trim($email)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--security_phrase--B--/i', urlencode(trim($security_phrase)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--address3--B--/i', urlencode(trim((string) $address3)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--city--B--/i', urlencode(trim((string) $city)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--state--B--/i', urlencode(trim((string) $state)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--province--B--/i', urlencode(trim((string) $province)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--postal_code--B--/i', urlencode(trim((string) $postal_code)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--country_code--B--/i', urlencode(trim((string) $country_code)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--gender--B--/i', urlencode(trim((string) $gender)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--date_of_birth--B--/i', urlencode(trim((string) $date_of_birth)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--alt_phone--B--/i', urlencode(trim((string) $alt_phone)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--email--B--/i', urlencode(trim((string) $email)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--security_phrase--B--/i', urlencode(trim((string) $security_phrase)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--comments--B--/i', urlencode(trim($comments)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user--B--/i', urlencode(trim($user)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user--B--/i', urlencode(trim((string) $user)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--pass--B--/i', urlencode(trim($pass)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--campaign--B--/i', urlencode(trim($campaign)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--phone_login--B--/i', urlencode(trim($phone_login)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--original_phone_login--B--/i', urlencode(trim($original_phone_login)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--campaign--B--/i', urlencode(trim((string) $campaign)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--phone_login--B--/i', urlencode(trim((string) $phone_login)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--original_phone_login--B--/i', urlencode(trim((string) $original_phone_login)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--phone_pass--B--/i', urlencode(trim($phone_pass)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--fronter--B--/i', urlencode(trim($fronter)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--closer--B--/i', urlencode(trim($closer)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--group--B--/i', urlencode(trim($VDADchannel_group)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--channel_group--B--/i', urlencode(trim($VDADchannel_group)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--SQLdate--B--/i', urlencode(trim($SQLdate)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--epoch--B--/i', urlencode(trim($epoch)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--uniqueid--B--/i', urlencode(trim($uniqueid)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--customer_zap_channel--B--/i', urlencode(trim($customer_zap_channel)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--customer_server_ip--B--/i', urlencode(trim($customer_server_ip)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--server_ip--B--/i', urlencode(trim($server_ip)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--SIPexten--B--/i', urlencode(trim($SIPexten)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--session_id--B--/i', urlencode(trim($session_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--phone--B--/i', urlencode(trim($phone)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--parked_by--B--/i', urlencode(trim($parked_by)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--dispo--B--/i', urlencode(trim($dispo)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--dialed_number--B--/i', urlencode(trim($dialed_number)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--dialed_label--B--/i', urlencode(trim($dialed_label)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--source_id--B--/i', urlencode(trim($source_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--rank--B--/i', urlencode(trim($rank)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--owner--B--/i', urlencode(trim($owner)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--camp_script--B--/i', urlencode(trim($camp_script)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--in_script--B--/i', urlencode(trim($in_script)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--fullname--B--/i', urlencode(trim($fullname)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user_custom_one--B--/i', urlencode(trim($user_custom_one)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user_custom_two--B--/i', urlencode(trim($user_custom_two)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user_custom_three--B--/i', urlencode(trim($user_custom_three)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user_custom_four--B--/i', urlencode(trim($user_custom_four)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--user_custom_five--B--/i', urlencode(trim($user_custom_five)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--fronter--B--/i', urlencode(trim((string) $fronter)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--closer--B--/i', urlencode(trim((string) $closer)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--group--B--/i', urlencode(trim((string) $VDADchannel_group)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--channel_group--B--/i', urlencode(trim((string) $VDADchannel_group)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--SQLdate--B--/i', urlencode(trim((string) $SQLdate)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--epoch--B--/i', urlencode(trim((string) $epoch)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--uniqueid--B--/i', urlencode(trim((string) $uniqueid)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--customer_zap_channel--B--/i', urlencode(trim((string) $customer_zap_channel)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--customer_server_ip--B--/i', urlencode(trim((string) $customer_server_ip)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--server_ip--B--/i', urlencode(trim((string) $server_ip)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--SIPexten--B--/i', urlencode(trim((string) $SIPexten)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--session_id--B--/i', urlencode(trim((string) $session_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--phone--B--/i', urlencode(trim((string) $phone)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--parked_by--B--/i', urlencode(trim((string) $parked_by)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--dispo--B--/i', urlencode(trim((string) $dispo)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--dialed_number--B--/i', urlencode(trim((string) $dialed_number)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--dialed_label--B--/i', urlencode(trim((string) $dialed_label)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--source_id--B--/i', urlencode(trim((string) $source_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--rank--B--/i', urlencode(trim((string) $rank)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--owner--B--/i', urlencode(trim((string) $owner)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--camp_script--B--/i', urlencode(trim((string) $camp_script)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--in_script--B--/i', urlencode(trim((string) $in_script)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--fullname--B--/i', urlencode(trim((string) $fullname)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user_custom_one--B--/i', urlencode(trim((string) $user_custom_one)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user_custom_two--B--/i', urlencode(trim((string) $user_custom_two)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user_custom_three--B--/i', urlencode(trim((string) $user_custom_three)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user_custom_four--B--/i', urlencode(trim((string) $user_custom_four)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--user_custom_five--B--/i', urlencode(trim((string) $user_custom_five)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--talk_time--B--/i', "0", $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--talk_time_min--B--/i', "0", $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--entry_list_id--B--/i', urlencode(trim($entry_list_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--did_id--B--/i', urlencode(trim($DID_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--did_extension--B--/i', urlencode(trim($DID_extension)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--did_pattern--B--/i', urlencode(trim($DID_pattern)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--did_description--B--/i', urlencode(trim($DID_description)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--closecallid--B--/i', urlencode(trim($INclosecallid)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--xfercallid--B--/i', urlencode(trim($INxfercallid)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--agent_log_id--B--/i', urlencode(trim($agent_log_id)), $VDCL_start_call_url);
-            $VDCL_start_call_url = preg_replace('/--A--call_id--B--/i', urlencode(trim($callerid)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--entry_list_id--B--/i', urlencode(trim((string) $entry_list_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--did_id--B--/i', urlencode(trim((string) $DID_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--did_extension--B--/i', urlencode(trim((string) $DID_extension)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--did_pattern--B--/i', urlencode(trim((string) $DID_pattern)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--did_description--B--/i', urlencode(trim((string) $DID_description)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--closecallid--B--/i', urlencode(trim((string) $INclosecallid)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--xfercallid--B--/i', urlencode(trim((string) $INxfercallid)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--agent_log_id--B--/i', urlencode(trim((string) $agent_log_id)), $VDCL_start_call_url);
+            $VDCL_start_call_url = preg_replace('/--A--call_id--B--/i', urlencode(trim((string) $callerid)), $VDCL_start_call_url);
             $VDCL_start_call_url = preg_replace('/--A--user_group--B--/i', urlencode(trim($user_group)), $VDCL_start_call_url);
 
             if (strlen($custom_field_names) > 2) {
                 $custom_field_names = preg_replace("/^\||\|$/", '', $custom_field_names);
-                $custom_field_names = preg_replace("/\|/", ",", $custom_field_names);
-                $custom_field_names_ARY = explode(',', $custom_field_names);
+                $custom_field_names = preg_replace("/\|/", ",", (string) $custom_field_names);
+                $custom_field_names_ARY = explode(',', (string) $custom_field_names);
                 $custom_field_names_ct = count($custom_field_names_ARY);
                 $custom_field_names_SQL = $custom_field_names;
 
@@ -1179,7 +1177,7 @@ if ($is_logged_in) {
 
             //$stmt="UPDATE vicidial_log_extended set start_url_processed='Y' where uniqueid='$uniqueid';";
             $astDB->where('uniqueid', $uniqueid);
-            $rslt = $astDB->update('vicidial_log_extended', array( 'start_url_processed' => 'Y' ));
+            $rslt = $astDB->update('vicidial_log_extended', [ 'start_url_processed' => 'Y' ]);
             $vle_update = $astDB->getRowCount();
 
             ### insert a new url log entry
@@ -1187,7 +1185,7 @@ if ($is_logged_in) {
             $SQL_log = preg_replace('/;/','',$SQL_log);
             $SQL_log = addslashes($SQL_log);
             //$stmt = "INSERT INTO vicidial_url_log SET uniqueid='$uniqueid',url_date='$NOW_TIME',url_type='start',url='$SQL_log',url_response='';";
-            $rslt = $astDB->insert('vicidial_url_log', array( 'uniqueid' => $uniqueid, 'url_date' => $NOW_TIME, 'url_type' => 'start', 'url' => $SQL_log, 'url_response' => '' ));
+            $rslt = $astDB->insert('vicidial_url_log', [ 'uniqueid' => $uniqueid, 'url_date' => $NOW_TIME, 'url_type' => 'start', 'url' => $SQL_log, 'url_response' => '' ]);
             $affected_rows = $astDB->getRowCount();
             $url_id = $astDB->getInsertId();
 
@@ -1203,10 +1201,10 @@ if ($is_logged_in) {
             $URLdiff_sec = ($URLend_sec - $URLstart_sec);
             $SCUfile_contents = implode("", $SCUfile);
             $SCUfile_contents = preg_replace('/;/', '', $SCUfile_contents);
-            $SCUfile_contents = addslashes($SCUfile_contents);
+            $SCUfile_contents = addslashes((string) $SCUfile_contents);
             //$stmt = "UPDATE vicidial_url_log SET response_sec='$URLdiff_sec',url_response='$SCUfile_contents' where url_log_id='$url_id';";
             $astDB->where('url_log_id', $url_id);
-            $rslt = $astDB->update('vicidial_url_log', array( 'response_sec' => $URLdiff_sec, 'url_response' => $SCUfile_contents ));
+            $rslt = $astDB->update('vicidial_url_log', [ 'response_sec' => $URLdiff_sec, 'url_response' => $SCUfile_contents ]);
             $affected_rows = $astDB->getRowCount();
 
             ##### BEGIN special filtering and response for Vtiger account balance function #####
@@ -1218,12 +1216,12 @@ if ($is_logged_in) {
                 $row = $rslt;
                 $enable_vtiger_integration = $row['enable_vtiger_integration'];
             }
-            if ( ( ($enable_vtiger_integration > 0) and (preg_match('/callxfer/', $VDCL_start_call_url)) and (preg_match('/contactwsid/', $VDCL_start_call_url)) ) or (preg_match("/minuteswarning/", $VDCL_start_call_url)) ) {
+            if ( $enable_vtiger_integration > 0 && preg_match('/callxfer/', $VDCL_start_call_url) && preg_match('/contactwsid/', $VDCL_start_call_url) || preg_match("/minuteswarning/", $VDCL_start_call_url) ) {
                 $SCUoutput = '';
                 foreach ($SCUfile as $SCUline) 
                     {$SCUoutput .= "$SCUline";}
                 # {"result":true,"durationLimit":3071}
-                if ( (strlen($SCUoutput) > 4) or (preg_match("/minuteswarning/", $VDCL_start_call_url)) ) {
+                if ( strlen($SCUoutput) > 4 || preg_match("/minuteswarning/", $VDCL_start_call_url) ) {
                     $minuteswarning = 3; # default to 3
                     if (preg_match("/minuteswarning/",$VDCL_start_call_url)) {
                         $minuteswarningARY = explode('minuteswarning=', $VDCL_start_call_url);
@@ -1243,18 +1241,18 @@ if ($is_logged_in) {
                             //$stmt="UPDATE callcard_log set agent_time='$NOW_TIME',agent='$user' where uniqueid='$uniqueid' order by call_time desc LIMIT 1;";
                             $astDB->where('uniqueid', $uniqueid);
                             $astDB->orderBy('call_time', 'desc');
-                            $rslt = $astDB->update('callcard_log', array( 'agent_time' => $NOW_TIME, 'agent' => $user ), 1);
+                            $rslt = $astDB->update('callcard_log', [ 'agent_time' => $NOW_TIME, 'agent' => $user ], 1);
                             $ccl_update = $astDB->getRowCount();
                         }
                     } else {
                         $SCUresponse = explode('durationLimit', $SCUoutput);
                         $durationLimit = preg_replace('/\D/', '', $SCUresponse[1]);
                     }
-                    if (strlen($durationLimit) < 1) {$durationLimit = 0;}
+                    if (strlen((string) $durationLimit) < 1) {$durationLimit = 0;}
                     $durationLimitSECnext = ( ($minuteswarning + 0) * 60);
                     $durationLimitSEC = ( ( ($durationLimit + 0) - $minuteswarning) * 60);  # minutes - 3 for 3-minute-warning
                     if ($durationLimitSEC < 5) {$durationLimitSEC = 5;}
-                    if ( ($durationLimitSECnext < 30) or (strlen($durationLimitSECnext)<1) ) {$durationLimitSECnext = 30;}
+                    if ( $durationLimitSECnext < 30 || strlen($durationLimitSECnext) < 1 ) {$durationLimitSECnext = 30;}
 
                     $timer_action_destination = '';
                     if (preg_match("/nextstep=/", $VDCL_start_call_url)) {
@@ -1268,12 +1266,12 @@ if ($is_logged_in) {
                     }
 
                     //$stmt="UPDATE vicidial_live_agents set external_timer_action='D1_DIAL',external_timer_action_message='$minuteswarning minute warning for customer',external_timer_action_seconds='$durationLimitSEC',external_timer_action_destination='$timer_action_destination' where user='$user';";
-                    $updateData = array(
+                    $updateData = [
                         'external_timer_action' => 'D1_DIAL',
                         'external_timer_action_message' => "{$minuteswarning} minute warning for customer",
                         'external_timer_action_seconds' => $durationLimitSEC,
                         'external_timer_action_destination' => $timer_action_destination
-                    );
+                    ];
                     $astDB->where('user', $user);
                     $rslt = $astDB->update('vicidial_live_agents', $updateData);
                     $vla_update_timer = $astDB->getRowCount();
@@ -1287,12 +1285,12 @@ if ($is_logged_in) {
         }
         
         $outputData = array_merge($dataOutput1, $dataOutput2, $dataOutput3, $dataOutput4, $LeaD_InfO);
-        $APIResult = array( "result" => "success", "data" => $outputData );
+        $APIResult = [ "result" => "success", "data" => $outputData ];
     } else {
-        $APIResult = array( "result" => "error", "message" => "No calls in QUEUE for $user on $server_ip", "data" => array( "has_call" => 0 ));
+        $APIResult = [ "result" => "error", "message" => "No calls in QUEUE for $user on $server_ip", "data" => [ "has_call" => 0 ]];
     #	echo "No calls in QUEUE for $user on $server_ip\n";
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

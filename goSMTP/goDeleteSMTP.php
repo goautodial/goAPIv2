@@ -28,8 +28,8 @@
 	if($exist <= 1){
 		//$delete_query = "DELETE FROM smtp_settings;";
 		$execute_delete = $goDB->delete('smtp_settings');
-		$apiresults = array("result" => "success");
+		$apiresults = ["result" => "success"];
 	} else {
-		$apiresults = array("result" => "No SMTP Setting exists. Please configure a valid SMTP Setting first.");
+		$apiresults = ["result" => "No SMTP Setting exists. Please configure a valid SMTP Setting first."];
 	}
 ?>

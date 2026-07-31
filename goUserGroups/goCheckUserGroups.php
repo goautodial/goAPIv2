@@ -21,15 +21,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
     $user_group							= $astDB->escape($_REQUEST['user_group']);
     
     if (!isset($user_group) || is_null($user_group)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Missing Required Parameters."
-		);
+		];
     } else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -40,13 +40,13 @@
 		//$query = "SELECT user_group FROM vicidial_user_groups WHERE user_group='$user_group';";
 		
 		if($astDB->count > 0) {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "Error: User Group already exist."
-			);
+			];
 		} else {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "success"
-			);
+			];
 		}
     }
 ?>

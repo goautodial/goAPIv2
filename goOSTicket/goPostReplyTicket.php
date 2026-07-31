@@ -31,7 +31,7 @@
     $body       = $ostDB->escape($_REQUEST['body']);
     $status     = $ostDB->escape($_REQUEST['status']);
     $date       = date('Y-m-d H:i:s');
-    $resultsArray = array();
+    $resultsArray = [];
     
     //insert thread entry
     //$queryInsertThreadEntry = "INSERT  INTO ost_thread_entry(
@@ -43,7 +43,7 @@
     //                                            '$flags','$fullname','$title','$body',
     //                                            'html','$ip_address','$date',''
     //                                        )";
-    $insertData = array(
+    $insertData = [
         'thread_id' => $threadID,
         'staff_id' => $staffID,
         'user_id' => $userID,
@@ -56,7 +56,7 @@
         'ip_address' => $ip_address,
         'created' => $date,
         'updated' => ''
-    );
+    ];
     $resultInsertThreadEntry = $ostDB->insert('ost_thread_entry', $insertData);
     if($resultInsertThreadEntry){
         //update thread table
@@ -64,25 +64,25 @@
         //                    lastresponse = '$date',                  
         //                    lastmessage = '$date'
         //                WHERE object_id='$ticketID' AND id='$threadID' LIMIT 1;";
-        $updateData = array(
+        $updateData = [
             'lastresponse' => $date,
             'lastmessage' => $date
-        );
+        ];
         $ostDB->where('object_id', $ticketID);
         $ostDB->where('id', $threadID);
         $resultUpdateThread = $ostDB->update('ost_thread', $updateData, 1);
         if($ostDB->getRowCount() > 0){
-            array_push($resultsArray, "ok");
+            $resultsArray[] = "ok";
         }else{
-            array_push($resultsArray, "error");
+            $resultsArray[] = "error";
         }                
     }else{
-        array_push($resultsArray, "error");
+        $resultsArray[] = "error";
     }
     
     if(in_array("error", $resultsArray)){
-        $apiresults = array("result" => "Error: Something went wrong.");
+        $apiresults = ["result" => "Error: Something went wrong."];
     }else{
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     }
 ?>

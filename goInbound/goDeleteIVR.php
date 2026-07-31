@@ -21,24 +21,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
  
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
     $menu_id 									= $astDB->escape($_REQUEST['menu_id']);
 	
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($menu_id) || is_null($menu_id)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for Menu ID."
-		);
+		];
     } else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($user_level > 8) {
 					$astDB->where("user_group", $log_group);
 				}
@@ -60,13 +60,13 @@
 			
 			$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted call menu ID: $menu_id", $log_group, $astDB->getLastQuery());
 
-			$apiresults 						= array(
+			$apiresults 						= [
 				"result" 							=> "success"
-			);			
+			];			
 		} else {
-			$apiresults 						= array(
+			$apiresults 						= [
 				"result" 							=> "Error: Call menu doesn't exist or insufficient rights."
-			);
+			];
 		}
 	}
 ?>

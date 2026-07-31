@@ -22,12 +22,12 @@
 */
 
 	
-	$groupId = go_get_groupid($goUser, $astDB);
+	$groupId = go_get_groupid($goUser);
 	
 	if (checkIfTenant($groupId, $goDB)) {
 		$ul = "";
 	} else {
-		$stringv = go_getall_allowed_campaigns($groupId, $astDB);
+		$stringv = go_getall_allowed_campaigns($groupId);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and campaign_id IN ($stringv) ";
 		else
@@ -52,7 +52,7 @@
 		$dataStat[] = $fresult['status_name'];			
 		$dataStat[] = $fresult['campaign_id'];
 	
-		$apiresults = array("result" => "success", "campaign_name" => $dataCampName, "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat);
+		$apiresults = ["result" => "success", "campaign_name" => $dataCampName, "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat];
 	}
 ?>
 

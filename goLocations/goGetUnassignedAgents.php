@@ -54,6 +54,6 @@ foreach ($rsltv as $row) {
 	$dataLocation[] = $row['location_name'];
 	$dataRole[] = $row['role'];
 }
-$APIResult = array("result" => "success", "user_id" => $dataUserID, "location_id" => $dataLocationID, "user" => $dataName, "full_name" => $dataFullName, "location_name" => $dataLocation, "role" => $dataRole);
+$APIResult = ["result" => "success", "user_id" => $dataUserID, "location_id" => $dataLocationID, "user" => $dataName, "full_name" => $dataFullName, "location_name" => $dataLocation, "role" => $dataRole];
 
 ?>

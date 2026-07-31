@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
@@ -31,39 +31,39 @@
 	$attempt_delay 										= $astDB->escape($_REQUEST['attempt_delay']);
 	$attempt_maximum 									= $astDB->escape($_REQUEST['attempt_maximum']);
 	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));
-	$defActive 											= array('N', 'Y');
+	$defActive 											= ['N', 'Y'];
 
     ### ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($recycle_id) || is_null($recycle_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
-    } elseif (!empty($attempt_delay) && ($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_delay) || $attempt_delay < 120)) {
-		$apiresults 									= array(
+		];
+    } elseif (!empty($attempt_delay) && ($attempt_delay > 99999 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $attempt_delay) || $attempt_delay < 120)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Maximum is 5 digits. No special characters allowed. Must be atleast 120 seconds"
-		);
-	} elseif (!empty($attempt_delay) && (strlen($attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", $attempt_maximum))) {
-		$apiresults 									= array(
+		];
+	} elseif (!empty($attempt_delay) && (strlen((string) $attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $attempt_maximum))) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in Attempt Maximum and must not be empty"
-		);
+		];
 	} elseif (!in_array($active, $defActive) && $active != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is N for No and Y for Yes only."
-		);
+		];
 	} elseif (is_array($campaigns)) {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -109,11 +109,11 @@
 						$active 						= $dataActive;
 					}
 
-					$updateData 						= array(
+					$updateData 						= [
 						'attempt_delay' 					=> $attempt_delay,
 						'attempt_maximum' 					=> $attempt_maximum,
 						'active' 							=> $active
-					);
+					];
 						
 					$astDB->where('recycle_id', $recycle_id);
 					$astDB->where('campaign_id', $campaign_id);
@@ -122,32 +122,32 @@
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());					
 					
 					if ($rsltv1) {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "success"
-						);
+						];
 					} else {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Try updating Lead Recycling again"
-						);				
+						];				
 					}
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Lead Recycle ID does not exist!"
-					);
+					];
 				}
 			} else {
 				$err_msg 								= error_handle("10001", "Insufficient permision");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "10001", 
 					"result" 								=> $err_msg
-				);			
+				];			
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 		

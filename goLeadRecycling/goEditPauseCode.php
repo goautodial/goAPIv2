@@ -20,35 +20,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['campaign_id']);
 	$status = $astDB->escape($_REQUEST['status']);
 	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
 	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
-	$active = strtoupper($astDB->escape($_REQUEST['active']));
+	$active = strtoupper((string) $astDB->escape($_REQUEST['active']));
 		
     ### Default values 
-    $defActive = array('N','Y');
+    $defActive = ['N','Y'];
 
     ### ERROR CHECKING ...
-	if($camp == null || strlen($camp) < 3) {
-		$apiresults = array("result" => "Error: Set a value for CAMP ID not less than 3 characters.");
+	if($camp == null || strlen((string) $camp) < 3) {
+		$apiresults = ["result" => "Error: Set a value for CAMP ID not less than 3 characters."];
 	} else {
         if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status)){
-            $apiresults = array("result" => "Error: Special characters found in pause code and must not be empty");
+            $apiresults = ["result" => "Error: Special characters found in pause code and must not be empty"];
         } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $attempt_delay)){
-                $apiresults = array("result" => "Error: Special characters found in pause code name and must not be empty");
+			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $attempt_delay)){
+                $apiresults = ["result" => "Error: Special characters found in pause code name and must not be empty"];
 			} else {
-				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $attempt_maximum)){
-					$apiresults = array("result" => "Error: Special characters found in pause code name and must not be empty");
+				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $attempt_maximum)){
+					$apiresults = ["result" => "Error: Special characters found in pause code name and must not be empty"];
 				} else {
 					if(!in_array($active,$defActive) && $active != null) {
-						$apiresults = array("result" => "Error: Default value for billable is No, Yes or half only.");
+						$apiresults = ["result" => "Error: Default value for billable is No, Yes or half only."];
 					} else {
-						$groupId = go_get_groupid($goUser, $astDB);
+						$groupId = go_get_groupid($goUser);
 		
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "";
@@ -89,17 +89,17 @@
 								$rsltv1 = $astDB->rawQuery($queryVM);
 								
 								if (!$rsltv1){
-									$apiresults = array("result" => "Error: Try updating Pause Code Again");
+									$apiresults = ["result" => "Error: Try updating Pause Code Again"];
 								} else {
-									$apiresults = array("result" => "success");
+									$apiresults = ["result" => "success"];
 									
 									$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Pause Code: $status", $log_group, $queryVM);
 								}
 							} else {
-								$apiresults = array("result" => "Error: Pause code doesn't exist");
+								$apiresults = ["result" => "Error: Pause code doesn't exist"];
 							}
 						} else {
-							$apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");
+							$apiresults = ["result" => "Error: Add failed, Campaign ID does not exist!"];
 						}
 					}
 				}

@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-  include_once ("goAPI.php");
+  include_once (__DIR__ . "/goAPI.php");
 
   // POST or GET Variables
   $did_pattern = $astDB->escape($_REQUEST['did_pattern']);
@@ -30,8 +30,8 @@
   //$stmtdf = "SELECT did_pattern from vicidial_inbound_dids where did_pattern='$did_pattern';";
   
   if ($rowdf > 0) {
-    $apiresults = array("result" => "<br>DID NOT ADDED - DID already exist.\n");
+    $apiresults = ["result" => "<br>DID NOT ADDED - DID already exist.\n"];
   } else {
-    $apiresults = array("result" => "success");
+    $apiresults = ["result" => "success"];
   }
 ?>

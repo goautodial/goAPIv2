@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$limit 	= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
 	
@@ -33,17 +33,17 @@
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults = array(
+		$apiresults = [
 			"result" => "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults = array(
+		$apiresults = [
 			"result" => "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults = array(
+		$apiresults = [
 			"result" => "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -57,12 +57,12 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$ul										= "AND vl.user_group = '$log_group'";
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$ul								= "AND vl.user_group = '$log_group'";
 					} else {
@@ -122,9 +122,9 @@
 				foreach ($rsltv as $fresults) {
 					$location 							= $fresults['location'];
 					
-					if (strlen($location) > 2) {
+					if (strlen((string) $location) > 2) {
 						$URLserver_ip 					= $location;
-						$URLserver_ip 					= preg_replace('/http:\/\//i', '', $URLserver_ip);
+						$URLserver_ip 					= preg_replace('/http:\/\//i', '', (string) $URLserver_ip);
 						$URLserver_ip 					= preg_replace('/https:\/\//i', '', $URLserver_ip);
 						$URLserver_ip 					= preg_replace('/\/.*/i', '', $URLserver_ip);
 						//$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
@@ -132,20 +132,20 @@
 						$astDB->get('servers');
 						
 						if ($astDB->count > 0) {
-							$cols 						= array(
+							$cols 						= [
 								"recording_web_link",
 								"alt_server_ip",
 								"external_server_ip"
-							);
+							];
 							
 							$astDB->where('server_ip', $URLserver_ip);
 							$rsltx 					= $astDB->getOne('servers', NULL, $cols);
 							
 							if (preg_match("/ALT_IP/i", $rsltx['recording_web_link'])) {
-								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['alt_server_ip']}", $location);
+								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['alt_server_ip']}", (string) $location);
 							}
 							if (preg_match("/EXTERNAL_IP/i", $rsltx['recording_web_link'])) {
-								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['external_server_ip']}", $location);
+								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['external_server_ip']}", (string) $location);
 							}
 						}
 					}
@@ -172,9 +172,8 @@
 
 				$log_id 							= log_action($goDB, 'VIEW', $log_user, $log_ip, "View the Call Recording List", $log_group);
 
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "success",
-					"query" 							=> $query,
 					"cnt" 								=> $dataCount,
 					"lead_id" 							=> $dataLeadId,
 					"uniqueid" 							=> $dataUniqueid,
@@ -189,19 +188,19 @@
 					"recording_id" 						=> $dataRecordingID,
 					"b64encoded" 						=> $dataB64encoded,
 					"query" 							=> $query
-				);
+				];
 			} else {
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "success",
 					"query" => $query
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

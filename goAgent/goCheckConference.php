@@ -38,9 +38,9 @@ if (isset($_GET['goCampAgentDisp'])) { $campagentstdisp = $astDB->escape($_GET['
     else if (isset($_POST['goCampAgentDisp'])) { $campagentstdisp = $astDB->escape($_POST['goCampAgentDisp']); }
 
 # default optional vars if not set
-if (strlen($ACTION) < 1) {$ACTION = "refresh";}
+if (strlen((string) $ACTION) < 1) {$ACTION = "refresh";}
 //if (strlen($client) < 1) {$client = "agc";}
-if (strlen($client) < 1) {$client = "vdc";}
+if (strlen((string) $client) < 1) {$client = "vdc";}
 
 $Alogin = 'N';
 $RingCalls = 'N';
@@ -51,14 +51,14 @@ $NOW_DATE = date("Y-m-d");
 $NOW_TIME = date("Y-m-d H:i:s");
 $FILE_TIME = date("Ymd_His");
 if (!isset($query_date)) {$query_date = $NOW_DATE;}
-$random = (rand(1000000, 9999999) + 10000000);
+$random = (random_int(1000000, 9999999) + 10000000);
 $error_catched = 0;
 
 $server_ip = $phone_settings->server_ip;
 $user = $agent->user;
 
-if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
-    $APIResult = array( "result" => "error", "message" => "Session name is invalid or missing" );
+if( strlen((string) $session_name) < 12 || !isset($session_name) ) {
+    $APIResult = [ "result" => "error", "message" => "Session name is invalid or missing" ];
 } else {
     //$stmt="SELECT count(*) from web_client_sessions where session_name='$session_name' and server_ip='$server_ip';";
     $astDB->where('session_name', $session_name);
@@ -67,14 +67,14 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
     $SNauth = $astDB->getRowCount();
     
     if($SNauth < 1) {
-        $APIResult = array( "result" => "error", "message" => "Invalid session_name: $session_name" );
+        $APIResult = [ "result" => "error", "message" => "Invalid session_name: $session_name" ];
     } else {
         if ($ACTION == 'refresh') {
             $MT[0] = '';
             $channel_live = 1;
-            if (strlen($conf_exten) < 1) {
+            if (strlen((string) $conf_exten) < 1) {
                 $channel_live = 0;
-                $APIResult = array( "result" => "error", "message" => "Conf Exten is invalid or missing" );
+                $APIResult = [ "result" => "error", "message" => "Conf Exten is invalid or missing" ];
                 $error_catched++;
             } else {
                 if ($client == 'vdc') {
@@ -135,7 +135,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         $Alogin = $rslt['status'];
                         $Acampaign = $rslt['campaign_id'];
                         $AccampSQL = $rslt['closer_campaigns'];
-                        $AccampSQL = preg_replace('/\s\-/', '', $AccampSQL);
+                        $AccampSQL = preg_replace('/\s\-/', '', (string) $AccampSQL);
                         $AccampSQL = preg_replace('/\s/', "','", $AccampSQL);
                         if (preg_match('/AGENTDIRECT/i', $AccampSQL)) {
                             $AccampSQL = preg_replace('/AGENTDIRECT/i', '', $AccampSQL);
@@ -145,8 +145,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         ### grab the number of calls being placed from this server and campaign
                         $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status IN('LIVE') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) $ADsql)");
                         $RingCalls = $astDB->getRowCount();
-                        if ($RingCalls > 0) {$RingCalls = "Calls in Queue: $RingCalls";}
-                        else {$RingCalls = "Calls in Queue: $RingCalls";}
+                        $RingCalls = "Calls in Queue: $RingCalls";
         
                         ### grab the number of calls being placed from this server and campaign
                         $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status NOT IN('XFER') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) );");
@@ -163,13 +162,13 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         //$stmt="UPDATE vicidial_live_agents set random_id='$random' where user='$user' and server_ip='$server_ip';";
                         $astDB->where('user', $user);
                         $astDB->where('server_ip', $server_ip);
-                        $rslt = $astDB->update('vicidial_live_agents', array('random_id'=>$random));
+                        $rslt = $astDB->update('vicidial_live_agents', ['random_id'=>$random]);
                         $errno = $astDB->getLastError();
                         $retry_count = 0;
-                        while ( (strlen($errno) > 0) and ($retry_count < 5) ) {
+                        while ( strlen((string) $errno) > 0 && $retry_count < 5 ) {
                             $astDB->where('user', $user);
                             $astDB->where('server_ip', $server_ip);
-                            $rslt = $astDB->update('vicidial_live_agents', array('random_id'=>$random));
+                            $rslt = $astDB->update('vicidial_live_agents', ['random_id'=>$random]);
                             $errno = $astDB->getLastError();
                             $retry_count++;
                         }
@@ -181,14 +180,14 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         $rslt = $astDB->get('vicidial_auto_calls');
                         $AcalleridCOUNT = $astDB->getRowCount();
         
-                        if ( ($AcalleridCOUNT > 0) and (preg_match("/INCALL/i", $Astatus)) and (preg_match("/^M/", $Acallerid)) ) {
+                        if ( $AcalleridCOUNT > 0 && preg_match("/INCALL/i", $Astatus) && preg_match("/^M/", (string) $Acallerid) ) {
                             $updateNOW_TIME = date("Y-m-d H:i:s");
                             //$stmt="UPDATE vicidial_auto_calls set last_update_time='$updateNOW_TIME' where callerid='$Acallerid';";
                             $astDB->where('callerid', $Acallerid);
-                            $rslt = $astDB->update('vicidial_auto_calls', array('last_update_time'=>$updateNOW_TIME));
+                            $rslt = $astDB->update('vicidial_auto_calls', ['last_update_time'=>$updateNOW_TIME]);
                         }
         
-                        if ( ($AcalleridCOUNT < 1) and (preg_match("/INCALL/i", $Astatus)) and (strlen($Aagent_log_id) > 0) ) {
+                        if ( $AcalleridCOUNT < 1 && preg_match("/INCALL/i", $Astatus) && strlen((string) $Aagent_log_id) > 0 ) {
                             $DEADcustomer++;
                             ### find whether the agent log record has already logged DEAD
                             $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) );");
@@ -199,11 +198,11 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                                 $deadNOW_TIME = date("Y-m-d H:i:s");
                                 //$stmt="UPDATE vicidial_agent_log set dead_epoch='$NEWdead_epoch' where agent_log_id='$Aagent_log_id';";
                                 $astDB->where('agent_log_id', $Aagent_log_id);
-                                $rslt = $astDB->update('vicidial_agent_log', array('dead_epoch'=>$NEWdead_epoch));
+                                $rslt = $astDB->update('vicidial_agent_log', ['dead_epoch'=>$NEWdead_epoch]);
         
                                 //$stmt="UPDATE vicidial_live_agents set last_state_change='$deadNOW_TIME' where agent_log_id='$Aagent_log_id';";
                                 $astDB->where('agent_log_id', $Aagent_log_id);
-                                $rslt = $astDB->update('vicidial_live_agents', array('last_state_change'=>$deadNOW_TIME));
+                                $rslt = $astDB->update('vicidial_live_agents', ['last_state_change'=>$deadNOW_TIME]);
                             }
                         }
                         ##### END DEAD logging section #####
@@ -212,13 +211,13 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         //$stmt="UPDATE vicidial_live_agents set random_id='$random' where user='$user' and server_ip='$server_ip';";
                         $astDB->where('user', $user);
                         $astDB->where('server_ip', $server_ip);
-                        $rslt = $astDB->update('vicidial_live_agents', array('random_id'=>$random));
+                        $rslt = $astDB->update('vicidial_live_agents', ['random_id'=>$random]);
                         $errno = $astDB->getLastError();
                         $retry_count = 0;
-                        while ( (strlen($errno) > 0) and ($retry_count < 5) ) {
+                        while ( strlen((string) $errno) > 0 && $retry_count < 5 ) {
                             $astDB->where('user', $user);
                             $astDB->where('server_ip', $server_ip);
-                            $rslt = $astDB->update('vicidial_live_agents', array('random_id'=>$random));
+                            $rslt = $astDB->update('vicidial_live_agents', ['random_id'=>$random]);
                             $errno = $astDB->getLastError();
                             $retry_count++;
                         }
@@ -229,14 +228,14 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         $rslt = $astDB->get('vicidial_auto_calls');
                         $AcalleridCOUNT = $astDB->getRowCount();
         
-                        if ( ($AcalleridCOUNT > 0) and (preg_match("/INCALL/i", $Astatus)) ) {
+                        if ( $AcalleridCOUNT > 0 && preg_match("/INCALL/i", $Astatus) ) {
                             $updateNOW_TIME = date("Y-m-d H:i:s");
                             //$stmt="UPDATE vicidial_auto_calls set last_update_time='$updateNOW_TIME' where callerid='$Acallerid';";
                             $astDB->where('callerid', $Acallerid);
-                            $rslt = $astDB->update('vicidial_auto_calls', array('last_update_time'=>$updateNOW_TIME));
+                            $rslt = $astDB->update('vicidial_auto_calls', ['last_update_time'=>$updateNOW_TIME]);
                         }
         
-                        if ( ($AcalleridCOUNT < 1) and (preg_match("/INCALL/i", $Astatus)) and (strlen($Aagent_log_id) > 0) ) {
+                        if ( $AcalleridCOUNT < 1 && preg_match("/INCALL/i", $Astatus) && strlen((string) $Aagent_log_id) > 0 ) {
                             $DEADcustomer++;
                             ### find whether the agent log record has already logged DEAD
                             $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) );");
@@ -247,11 +246,11 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                                 $deadNOW_TIME = date("Y-m-d H:i:s");
                                 //$stmt="UPDATE vicidial_agent_log set dead_epoch='$NEWdead_epoch' where agent_log_id='$Aagent_log_id';";
                                 $astDB->where('agent_log_id', $Aagent_log_id);
-                                $rslt = $astDB->update('vicidial_agent_log', array('dead_epoch'=>$NEWdead_epoch));
+                                $rslt = $astDB->update('vicidial_agent_log', ['dead_epoch'=>$NEWdead_epoch]);
         
                                 //$stmt="UPDATE vicidial_live_agents set last_state_change='$deadNOW_TIME' where agent_log_id='$Aagent_log_id';";
                                 $astDB->where('agent_log_id', $Aagent_log_id);
-                                $rslt = $astDB->update('vicidial_live_agents', array('last_state_change'=>$deadNOW_TIME));
+                                $rslt = $astDB->update('vicidial_live_agents', ['last_state_change'=>$deadNOW_TIME]);
                             }
                         }
                         ##### END DEAD logging section #####
@@ -279,7 +278,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                     $external_recording =			$row['external_recording'];
         
                     $MDQ_count = 0;
-                    if ( ($api_manual_dial=='QUEUE') or ($api_manual_dial=='QUEUE_AND_AUTOCALL') ) {
+                    if ( $api_manual_dial == 'QUEUE' || $api_manual_dial == 'QUEUE_AND_AUTOCALL' ) {
                         //$stmt="SELECT count(*) FROM vicidial_manual_dial_queue where user='$user' and status='READY';";
                         $astDB->where('user', $user);
                         $astDB->where('status', 'READY');
@@ -289,7 +288,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                             $MDQ_count = $mdq_count_record_ct;
                         }
         
-                        if ( ($MDQ_count > 0) and (strlen($external_dial) < 16) and ($Astatus=='PAUSED') and ($Alead_id < 1) ) {
+                        if ( $MDQ_count > 0 && strlen((string) $external_dial) < 16 && $Astatus == 'PAUSED' && $Alead_id < 1 ) {
                             //$stmt="SELECT mdq_id,external_dial FROM vicidial_manual_dial_queue where user='$user' and status='READY' order by entry_time limit 1;";
                             $astDB->where('user', $user);
                             $astDB->where('status', 'READY');
@@ -304,14 +303,14 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
         
                                 //$stmt="UPDATE vicidial_manual_dial_queue SET status='QUEUE' where mdq_id='$MDQ_mdq_id';";
                                 $astDB->where('mdq_id', $MDQ_mdq_id);
-                                $rslt = $astDB->update('vicidial_manual_dial_queue', array('status', 'QUEUE'));
+                                $rslt = $astDB->update('vicidial_manual_dial_queue', ['status', 'QUEUE']);
                                 $UMDQaffected_rows_update = $astDB->getRowCount();
         
                                 if ($UMDQaffected_rows_update > 0) {
                                     //$stmt="UPDATE vicidial_live_agents SET external_dial='$MDQ_external_dial' where user='$user' and server_ip='$server_ip';";
                                     $astDB->where('user', $user);
                                     $astDB->where('server_ip', $server_ip);
-                                    $rslt = $astDB->update('vicidial_live_agents', array('external_dial'=>$MDQ_external_dial));
+                                    $rslt = $astDB->update('vicidial_live_agents', ['external_dial'=>$MDQ_external_dial]);
                                     $VLAMDQaffected_rows_update = $astDB->getRowCount();
                                 }
                             }
@@ -351,7 +350,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
 
                         $astDB->where('user', $user);
                         $astDB->where('manager_ingroup_set', 'SET');
-                        $rslt = $astDB->update('vicidial_live_agents', array( 'closer_campaigns' => $Aexternal_ingroups, 'manager_ingroup_set' => 'Y' ));
+                        $rslt = $astDB->update('vicidial_live_agents', [ 'closer_campaigns' => $Aexternal_ingroups, 'manager_ingroup_set' => 'Y' ]);
                         $VLAMISaffected_rows_update = $astDB->getRowCount();
                         if ($VLAMISaffected_rows_update > 0) {
                             $rslt = $astDB->rawQuery("SELECT external_ingroups,external_blended,external_igb_set_user,outbound_autodial,dial_method FROM vicidial_live_agents vla, vicidial_campaigns vc WHERE user='$user' AND manager_ingroup_set='Y' AND vla.campaign_id=vc.campaign_id;");
@@ -374,25 +373,25 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                                 }
                                 
                                 $NEWoutbound_autodial = 'N';
-                                if ( ($external_blended > 0) and ($dial_method != "INBOUND_MAN") and ($dial_method != "MANUAL") )
+                                if ( $external_blended > 0 && $dial_method != "INBOUND_MAN" && $dial_method != "MANUAL" )
                                     {$NEWoutbound_autodial = 'Y';}
         
                                 //$stmt="UPDATE vicidial_live_agents SET outbound_autodial='$NEWoutbound_autodial' where user='$user';";
                                 $astDB->where('user', $user);
-                                $rslt = $astDB->update('vicidial_live_agents', array('outbound_autodial'=>$NEWoutbound_autodial));
+                                $rslt = $astDB->update('vicidial_live_agents', ['outbound_autodial'=>$NEWoutbound_autodial]);
                                 $VLAMIBaffected_rows_update = $astDB->getRowCount();
         
                                 $InGroupChangeDetails = "1|$external_blended|$external_igb_set_user|$external_igb_set_name";
         
                                 //$stmt="INSERT INTO vicidial_user_closer_log set user='$user',campaign_id='$Acampaign_id',event_date='$NOW_TIME',blended='$external_blended',closer_campaigns='$external_ingroups',manager_change='$external_igb_set_user';";
-                                $insertData = array(
+                                $insertData = [
                                     'user' => $user,
                                     'campaign_id' => $Acampaign_id,
                                     'event_date' => $NOW_TIME,
                                     'blended' => $external_blended,
                                     'closer_campaigns' => $external_ingroups,
                                     'manager_change' => $external_igb_set_user
-                                );
+                                ];
                                 $rslt = $astDB->insert('vicidial_user_closer_log', $insertData);
                             }
                         }
@@ -418,7 +417,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
         
                     ### CHECK TO SEE IF AGENT IS WITHIN THEIR SHIFT IF RESTRICTED, IF NOT, OUTPUT ERROR
                     $Ashift_logout = 0;
-                    if ( ( (preg_match("/ALL/", $shift_enforcement)) and (!preg_match("/OFF|START/", $VU_agent_shift_enforcement_override)) ) or (preg_match("/ALL/", $VU_agent_shift_enforcement_override)) ) {
+                    if ( preg_match("/ALL/", (string) $shift_enforcement) && !preg_match("/OFF|START/", (string) $VU_agent_shift_enforcement_override) || preg_match("/ALL/", (string) $VU_agent_shift_enforcement_override) ) {
                         $shift_ok = 0;
                         if (strlen($LOGgroup_shiftsSQL) < 3) {
                             $Ashift_logout++;
@@ -441,26 +440,24 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                                         $shift_weekdays =	$rowx['shift_weekdays'];
                 
                                         if (preg_match("/$wday/i",$shift_weekdays)) {
-                                            $HHshift_length = substr($shift_length, 0, 2);
-                                            $MMshift_length = substr($shift_length, 3, 2);
-                                            $HHshift_start_time = substr($shift_start_time, 0, 2);
-                                            $MMshift_start_time = substr($shift_start_time, 2, 2);
+                                            $HHshift_length = substr((string) $shift_length, 0, 2);
+                                            $MMshift_length = substr((string) $shift_length, 3, 2);
+                                            $HHshift_start_time = substr((string) $shift_start_time, 0, 2);
+                                            $MMshift_start_time = substr((string) $shift_start_time, 2, 2);
                                             $HHshift_end_time = ($HHshift_length + $HHshift_start_time);
                                             $MMshift_end_time = ($MMshift_length + $MMshift_start_time);
                                             if ($MMshift_end_time > 59) {
-                                                $MMshift_end_time = ($MMshift_end_time - 60);
+                                                $MMshift_end_time -= 60;
                                                 $HHshift_end_time++;
                                             }
                                             if ($HHshift_end_time > 23)
-                                                {$HHshift_end_time = ($HHshift_end_time - 24);}
+                                                {$HHshift_end_time -= 24;}
                                             $HHshift_end_time = sprintf("%02s", $HHshift_end_time);	
                                             $MMshift_end_time = sprintf("%02s", $MMshift_end_time);	
                                             $shift_end_time = "$HHshift_end_time$MMshift_end_time";
                 
                                             if ( 
-                                                ( ($HHMM >= $shift_start_time) and ($HHMM < $shift_end_time) ) or
-                                                ( ($HHMM < $shift_start_time) and ($HHMM < $shift_end_time) and ($shift_end_time <= $shift_start_time) ) or
-                                                ( ($HHMM >= $shift_start_time) and ($HHMM >= $shift_end_time) and ($shift_end_time <= $shift_start_time) )
+                                                $HHMM >= $shift_start_time && $HHMM < $shift_end_time || $HHMM < $shift_start_time && $HHMM < $shift_end_time && $shift_end_time <= $shift_start_time || $HHMM >= $shift_start_time && $HHMM >= $shift_end_time && $shift_end_time <= $shift_start_time
                                                 )
                                                 {$shift_ok++;}
                                         }
@@ -476,9 +473,9 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                     }
         
         
-                    if ( ( ($time_diff > 8) or ($time_diff < -8) or ($web_diff > 8) or ($web_diff < -8) ) and (preg_match("/0\$/i", $StarTtime)) ) 
+                    if ( ($time_diff > 8 || $time_diff < -8 || $web_diff > 8 || $web_diff < -8) && preg_match("/0\$/i", $StarTtime) ) 
                         {$Alogin = 'TIME_SYNC';}
-                    if ( ($Acount < 1) or ($Scount < 1) )
+                    if ( $Acount < 1 || $Scount < 1 )
                         {$Alogin = 'DEAD_VLA|'.$Scount.'|'.$Acount;}
                     if ($AexternalDEAD > 0) 
                         {$Alogin = 'DEAD_EXTERNAL';}
@@ -489,36 +486,36 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         $external_pause = '';
                     }
         
-                    $confOutput = array(
+                    $confOutput = [
                         'datetime' => $NOW_TIME,
                         'unixtime' => $StarTtime,
                         'logged_in' => $Alogin,
                         'camp_calls' => $RingCalls,
-                        'status' => (isset($Astatus)) ? $Astatus : '',
-                        'dial_calls' => (isset($DiaLCalls)) ? $DiaLCalls : 'N',
-                        'api_hangup' => (isset($external_hangup)) ? $external_hangup : '',
+                        'status' => $Astatus ?? '',
+                        'dial_calls' => $DiaLCalls ?? 'N',
+                        'api_hangup' => $external_hangup ?? '',
                         'api_status' => $external_status,
-                        'api_pause' => (isset($external_pause)) ? $external_pause : '',
-                        'api_dial' => (isset($external_dial)) ? $external_dial : '',
+                        'api_pause' => $external_pause ?? '',
+                        'api_dial' => $external_dial ?? '',
                         'dead_call' => $DEADcustomer,
                         'ingroup_change' => $InGroupChangeDetails,
-                        'api_fields' => (isset($external_update_fields)) ? $external_update_fields : '',
-                        'api_fields_data' => (isset($external_update_fields_data)) ? $external_update_fields_data : '',
-                        'api_timer_action' => (isset($timer_action)) ? $timer_action : '',
-                        'api_timer_message' => (isset($timer_action_message)) ? $timer_action_message : '',
-                        'api_timer_seconds' => (isset($timer_action_seconds)) ? $timer_action_seconds : '',
-                        'api_dtmf' => (isset($external_dtmf)) ? $external_dtmf : '',
-                        'api_transferconf' => (isset($external_transferconf)) ? $external_transferconf : '',
-                        'api_park' => (isset($external_park)) ? $external_park : '',
-                        'api_timer_destination' => (isset($timer_action_destination)) ? $timer_action_destination : '',
+                        'api_fields' => $external_update_fields ?? '',
+                        'api_fields_data' => $external_update_fields_data ?? '',
+                        'api_timer_action' => $timer_action ?? '',
+                        'api_timer_message' => $timer_action_message ?? '',
+                        'api_timer_seconds' => $timer_action_seconds ?? '',
+                        'api_dtmf' => $external_dtmf ?? '',
+                        'api_transferconf' => $external_transferconf ?? '',
+                        'api_park' => $external_park ?? '',
+                        'api_timer_destination' => $timer_action_destination ?? '',
                         'api_manual_dial_queue' => $MDQ_count,
-                        'api_recording' => (isset($external_recording)) ? $external_recording : ''
-                    );
+                        'api_recording' => $external_recording ?? ''
+                    ];
         
-                    if (strlen($timer_action) > 3) {
+                    if (strlen((string) $timer_action) > 3) {
                         //$stmt="UPDATE vicidial_live_agents SET external_timer_action='' where user='$user';";
                         $astDB->where('user', $user);
-                        $rslt = $astDB->update('vicidial_live_agents', array('external_timer_action'=>''));
+                        $rslt = $astDB->update('vicidial_live_agents', ['external_timer_action'=>'']);
                         $VLAETAaffected_rows_update = $astDB->getRowCount();
                     }
                 }
@@ -549,7 +546,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
             }
             
             if ($error_catched < 1) {
-                $channels_list = ($channels_list + $sip_list);
+                $channels_list += $sip_list;
             
                 $counter = 0;
                 $countecho = '';
@@ -559,26 +556,26 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                 #	echo "$ChannelA[$counter] ~";
                 }
                 
-                $APIResult = array( "result" => "success", "data" => array( "conf_output" => $confOutput, "channels_list" => $channels_list, "count_echo" => $countecho ) );
+                $APIResult = [ "result" => "success", "data" => [ "conf_output" => $confOutput, "channels_list" => $channels_list, "count_echo" => $countecho ] ];
             }
         }
         
         if ($ACTION == 'register') {
             $MT[0] = '';
             $channel_live = 1;
-            if ( (strlen($conf_exten)<1) || (strlen($exten)<1) ) {
+            if ( (strlen((string) $conf_exten)<1) || (strlen((string) $exten)<1) ) {
                 $channel_live = 0;
-                $APIResult = array( "result" => "error", "message" => "Conf Exten $conf_exten is not valid or Exten $exten is not valid" );
+                $APIResult = [ "result" => "error", "message" => "Conf Exten $conf_exten is not valid or Exten $exten is not valid" ];
                 $error_catched++;
             } else {
                 //$stmt="UPDATE conferences set extension='$exten' where server_ip = '$server_ip' and conf_exten = '$conf_exten';";
                 $astDB->where('server_ip', $server_ip);
                 $astDB->where('conf_exten', $conf_exten);
-                $rslt = $astDB->update('conferences', array('extension' => $exten) );
+                $rslt = $astDB->update('conferences', ['extension' => $exten] );
             }
             
             if ($error_catched < 1) {
-                $APIResult = array( "result" => "success", "message" => "Conference $conf_exten has been registered to $exten" );
+                $APIResult = [ "result" => "success", "message" => "Conference $conf_exten has been registered to $exten" ];
             }
         }
     }

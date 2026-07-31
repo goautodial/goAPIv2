@@ -20,33 +20,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
 	$allow_voicemail_greeting					= $astDB->escape($_REQUEST["allow_voicemail_greeting"]); 
 
 	### ERROR CHECKING 					
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		
 		$resultGet = $astDB->getOne("system_settings", "allow_voicemail_greeting");
 
 		if ( $resultGet["allow_voicemail_greeting"] !== $allow_voicemail_greeting ){
 			$result = $resultGet["allow_voicemail_greeting"];
-			$data 						= array(
+			$data 						= [
 				"allow_voicemail_greeting"				=> $allow_voicemail_greeting
-			);
+			];
 			
 			$update					= $astDB->update("system_settings", $data);
 		
 			if ($update) {
-				$apiresults 			= array(
+				$apiresults 			= [
 					"result" 				=> "success",
 					"data" 					=> $data
-				);
+				];
 
 				if ( $allow_voicemail_greeting ) { 
 					$act = "Enabled"; 
@@ -57,9 +57,9 @@
 				$log_message = "$act Voicemail Greeting";
 
 			} else {
-				$apiresults				= array(
+				$apiresults				= [
 					"result" 				=> "Error: Allow voicemail greeting update failed, check your details"
-				);
+				];
 
 				$log_message = "Failed to Update System Settings: Voicemail Setting";
 
@@ -68,9 +68,9 @@
 			$log_id = log_action( $goDB, 'MODIFY', $log_user, $log_ip, $log_message, $log_group, $astDB->getLastQuery() );
 		}
 
-		$apiresults = array(
+		$apiresults = [
 			"result"                                => "success",
 			"message"				=> "Allow Voicemail Geeting Unchanged"
-                ); 
+                ]; 
 	}
 ?>

@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-include_once ("includes/MySQLiDB.php");
+include_once (__DIR__ . "/includes/MySQLiDB.php");
 
 if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf";
@@ -34,22 +34,22 @@ if ( file_exists($conf_path) )
     foreach ($DBCagc as $DBCline)
         {
         $DBCline = preg_replace("/ |>|\n|\r|\t|\#.*|;.*/","",$DBCline);
-        if (preg_match("/^PATHlogs/", $DBCline))
-                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",$PATHlogs);}
-        if (preg_match("/^PATHweb/", $DBCline))
-                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
-        if (preg_match("/^VARserver_ip/", $DBCline))
-                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}                
-        if (preg_match("/^VARDBgo_server/", $DBCline))
-                {$VARDBgo_server = $DBCline;   $VARDBgo_server = preg_replace("/.*=/","",$VARDBgo_server);}
-        if (preg_match("/^VARDBgo_database/", $DBCline))
-                {$VARDBgo_database = $DBCline;   $VARDBgo_database = preg_replace("/.*=/","",$VARDBgo_database);}
-        if (preg_match("/^VARDBgo_user/", $DBCline))
-                {$VARDBgo_user = $DBCline;   $VARDBgo_user = preg_replace("/.*=/","",$VARDBgo_user);}
-        if (preg_match("/^VARDBgo_pass/", $DBCline))
-                {$VARDBgo_pass = $DBCline;   $VARDBgo_pass = preg_replace("/.*=/","",$VARDBgo_pass);}
-        if (preg_match("/^VARDBgo_port/", $DBCline))
-                {$VARDBgo_port = $DBCline;   $VARDBgo_port = preg_replace("/.*=/","",$VARDBgo_port);}
+        if (preg_match("/^PATHlogs/", (string) $DBCline))
+                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",(string) $PATHlogs);}
+        if (preg_match("/^PATHweb/", (string) $DBCline))
+                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",(string) $WeBServeRRooT);}
+        if (preg_match("/^VARserver_ip/", (string) $DBCline))
+                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",(string) $WEBserver_ip);}                
+        if (preg_match("/^VARDBgo_server/", (string) $DBCline))
+                {$VARDBgo_server = $DBCline;   $VARDBgo_server = preg_replace("/.*=/","",(string) $VARDBgo_server);}
+        if (preg_match("/^VARDBgo_database/", (string) $DBCline))
+                {$VARDBgo_database = $DBCline;   $VARDBgo_database = preg_replace("/.*=/","",(string) $VARDBgo_database);}
+        if (preg_match("/^VARDBgo_user/", (string) $DBCline))
+                {$VARDBgo_user = $DBCline;   $VARDBgo_user = preg_replace("/.*=/","",(string) $VARDBgo_user);}
+        if (preg_match("/^VARDBgo_pass/", (string) $DBCline))
+                {$VARDBgo_pass = $DBCline;   $VARDBgo_pass = preg_replace("/.*=/","",(string) $VARDBgo_pass);}
+        if (preg_match("/^VARDBgo_port/", (string) $DBCline))
+                {$VARDBgo_port = $DBCline;   $VARDBgo_port = preg_replace("/.*=/","",(string) $VARDBgo_port);}
         }
     }
 

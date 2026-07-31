@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 
     // need function go_sec_convert();
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
@@ -40,15 +40,15 @@
     }
 		
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($campaignID) || is_null($campaignID) ) {
 		$err_msg 									= error_handle("40001");
-        	$apiresults 							= array(
+        	$apiresults 							= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
 	} elseif (empty($fromDate) && empty($toDate)) {
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
@@ -64,12 +64,12 @@
 
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
-		$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+		$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 		
 		if ($tenant) {
 			$astDB->where("user_group", $log_group);
 		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($userlevel < 8) {
 					$astDB->where("user_group", $log_group);
 				}
@@ -108,7 +108,7 @@
 			->get("vicidial_statuses", NULL, "status");
 				
 		$sstatusRX 									= "";
-		$sstatuses 									= array();			
+		$sstatuses 									= [];			
 		$a 											= 0;
 			
 		if ($astDB->count > 0) {
@@ -124,7 +124,7 @@
 		$sstatuses 									= implode("','",$sstatuses);
 		
 		//ALL CAMPAIGNS
-		if ("ALL" === strtoupper($campaignID)) {
+		if ("ALL" === strtoupper((string) $campaignID)) {
 			$SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
 			foreach($SELECTQuery as $camp_val){
@@ -155,7 +155,7 @@
 
 		// Statewide Customization 
 		foreach($array_list as $list){
-			$custom_list_id = "custom_" . (!empty($list['list_id']) ? $list['list_id'] : $list);
+			$custom_list_id = "custom_" . (empty($list['list_id']) ? $list : $list['list_id']);
 			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {
 				foreach ($query_CF_list as $field_list) {
@@ -177,7 +177,7 @@
 			->get("vicidial_campaign_statuses", NULL, "status");
 			
 		$cstatusRX = "";
-		$cstatuses = array();			
+		$cstatuses = [];			
 		$b = 0;
 			
 		if ($astDB->count > 0) {
@@ -211,7 +211,7 @@
 		$totagents										= 0;
 		$total_in_sales_amount 							= 0;
 
-		if (strtolower($request) == "outbound") {
+		if (strtolower((string) $request) === "outbound") {
 			// Outbound Sales //
 			$outbound_query = "
 				SELECT us.full_name AS full_name, us.user AS user, 
@@ -249,7 +249,7 @@
 				$i++;
 			}
 			
-			if($outbound_select_query_sales != ''){
+			if($outbound_select_query_sales !== ''){
 				$col_exists = 1;
 			} else {
 				$col_exists = 0;
@@ -283,7 +283,7 @@
 					    }
 
 					    $display_amount = "<td nowrap>".$amount_row."</td>";
-					    $total_out_sales_amount          = $total_out_sales_amount + $amount_row;
+					    $total_out_sales_amount += $amount_row;
 					} else {
 					    $total_out_sales_amount = 0;
 					    $display_amount = "";
@@ -298,11 +298,11 @@
 						$TOPsorted_output               .= $display_amount;
 					}
 					$TOPsorted_output 		.= "</tr>";
-					$total_out_sales		 = $total_out_sales+$row['sale'];
+					$total_out_sales += $row['sale'];
 				}
 			}
 		}
-		if (strtolower($request) == "inbound") {
+		if (strtolower((string) $request) === "inbound") {
 			//GET ALL CLOSER CAMAPIGNS
 			$closer_camps = go_getall_closer_campaigns("ALL", $astDB);
 	
@@ -341,7 +341,7 @@
 					$i++;
 			}
 
-			if($inbound_select_query_sales != ''){
+			if($inbound_select_query_sales !== ''){
 				$col_exists = 1;
 			} else {
 				$col_exists = 0;
@@ -373,7 +373,7 @@
                                             if(empty($amount_row)){
                                                 $amount_row = 0;
                                             }
-                                            $total_in_sales_amount          = $total_in_sales_amount + $amount_row;
+                                            $total_in_sales_amount += $amount_row;
 					    $display_amount = "<td nowrap> ".$amount_row." </td>";
 					} else {
 						$total_in_sales_amount = 0;
@@ -389,12 +389,12 @@
 					$BOTsorted_output               .= $display_amount;
 					}
 					$BOTsorted_output 		.= "</tr>";
-					$total_in_sales 		= $total_in_sales + $row['sale'];
+					$total_in_sales += $row['sale'];
 				}
 			}
 		}
-
-		$apiresults = array(
+			
+		return [
 			"result"			=> "success",
 			"TOPsorted_output"	=> $TOPsorted_output, 
 			"BOTsorted_output"	=> $BOTsorted_output, 
@@ -405,9 +405,7 @@
 			"TOTINamount"		=> $total_in_sales_amount,
 			"col_exists"		=> $col_exists,
 			"testVar"			=> " "
-		);
-			
-		return $apiresults;
+		];
 	}
 
 ?>

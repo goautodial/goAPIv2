@@ -44,10 +44,10 @@ $startMS = microtime();
 $action = $stage;
 
 if ($is_logged_in) {
-	if(strlen($source) < 2) {
+	if(strlen((string) $source) < 2) {
 		$result = 'ERROR';
 		$result_reason = "Invalid Source";
-        $apiresults = array( "result" => "error", "message" => "$result_reason - $source" );
+        $apiresults = [ "result" => "error", "message" => "$result_reason - $source" ];
 	} else {
         $hasError = 0;
         
@@ -57,7 +57,7 @@ if ($is_logged_in) {
 		$user_group = $rslt['user_group'];
         
 		if ( (!preg_match("/ $function /", $rslt['api_allowed_functions'])) && (!preg_match("/ALL_FUNCTIONS/", $rslt['api_allowed_functions'])) ) {
-			$apiresults = array( "result" => "error", "message" => "User does NOT have permission to use this function" );
+			$apiresults = [ "result" => "error", "message" => "User does NOT have permission to use this function" ];
 			$hasError = 1;
 		}
         
@@ -70,7 +70,7 @@ if ($is_logged_in) {
             $rslt = $astDB->get('vicidial_users');
             $allowed_user = $astDB->getRowCount();
             if ( ($allowed_user < 1) && ($source != 'queuemetrics') ) {
-                $apiresults = array( "result" => "error", "message" => "User does NOT have permission to use blind monitoring" );
+                $apiresults = [ "result" => "error", "message" => "User does NOT have permission to use blind monitoring" ];
                 $hasError = 1;
             } else {
                 //Confbridge
@@ -89,7 +89,7 @@ if ($is_logged_in) {
                 $session_exists = $astDB->getRowCount();
     
                 if ($session_exists < 1) {
-                    $apiresults = array( "result" => "error", "message" => "Invalid Session ID", "session_id" => $session_id, "server_ip" => $server_ip, "user" => $goUser );
+                    $apiresults = [ "result" => "error", "message" => "Invalid Session ID", "session_id" => $session_id, "server_ip" => $server_ip, "user" => $goUser ];
                     $hasError = 1;
                 } else {
                     //$stmt="SELECT count(*) from phones where login='$phone_login';";
@@ -98,7 +98,7 @@ if ($is_logged_in) {
                     $phone_exists = $astDB->getRowCount();
     
                     if ( ($phone_exists < 1) && ($source != 'queuemetrics') ) {
-                        $apiresults = array( "result" => "error", "message" => "Invalid Phone Login", "phone_login" => $phone_login, "user" => $goUser );
+                        $apiresults = [ "result" => "error", "message" => "Invalid Phone Login", "phone_login" => $phone_login, "user" => $goUser ];
                         $hasError = 1;
                     } else {
                         if ($source == 'queuemetrics') {
@@ -107,7 +107,7 @@ if ($is_logged_in) {
                             $monitor_server_ip =	$rslt['active_voicemail_server'];
                             $dialplan_number =		$phone_login;
                             $outbound_cid =			'';
-                            if (strlen($monitor_server_ip)<7)
+                            if (strlen((string) $monitor_server_ip)<7)
                                 {$monitor_server_ip = $server_ip;}
                         } else {
                             //$stmt="SELECT dialplan_number,server_ip,outbound_cid from phones where login='$phone_login';";
@@ -120,7 +120,7 @@ if ($is_logged_in) {
                         }
     
                         $S = '*';
-                        $D_s_ip = explode('.', $server_ip);
+                        $D_s_ip = explode('.', (string) $server_ip);
                         if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
                         if (strlen($D_s_ip[0])<3) {$D_s_ip[0] = "0$D_s_ip[0]";}
                         if (strlen($D_s_ip[1])<2) {$D_s_ip[1] = "0$D_s_ip[1]";}
@@ -138,25 +138,25 @@ if ($is_logged_in) {
                         $rslt = $astDB->getOne('system_settings', 'agent_whisper_enabled');
                         $agent_whisper_enabled = $rslt['agent_whisper_enabled'];
     
-                        if ( (preg_match('/MONITOR/', $stage)) || (strlen($stage) < 1) ) {
+                        if ( (preg_match('/MONITOR/', (string) $stage)) || (strlen((string) $stage) < 1) ) {
                             $stage = '0';
                             if ($rsltvc == "CONFBRIDGE") {
                                 $stage = '4';
                             }
                             $wAction = 'listened';
                         }
-                        if (preg_match('/BARGE/', $stage)) {
+                        if (preg_match('/BARGE/', (string) $stage)) {
                             $stage = '';
                             if ($rsltvc == "CONFBRIDGE") {
                                 $stage = '6';
                             }
                             $wAction = 'barged';
                         }
-                        if (preg_match('/HIJACK/', $stage)) {
+                        if (preg_match('/HIJACK/', (string) $stage)) {
                             $stage = '';
                             $wAction = 'hijacking';
                         }
-                        if (preg_match('/WHISPER/', $stage)) {
+                        if (preg_match('/WHISPER/', (string) $stage)) {
                             $wAction = 'whispered';
                             if ($agent_whisper_enabled == '1') {
                                 $stage = '47378218';
@@ -168,7 +168,7 @@ if ($is_logged_in) {
     
                         ### insert a new lead in the system with this phone number
                         //$stmt = "INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$monitor_server_ip','','Originate','$BMquery','Channel: Local/$monitor_dialstring$stage$session_id@default','Context: default','Exten: $dialplan_number','Priority: 1','Callerid: \"VC Blind Monitor\" <$outbound_cid>','','','','','');";
-                        $insertData = array(
+                        $insertData = [
                             'man_id' => '',
                             'uniqueid' => '',
                             'entry_date' => $NOW_TIME,
@@ -188,14 +188,14 @@ if ($is_logged_in) {
                             'cmd_line_i' => '',
                             'cmd_line_j' => '',
                             'cmd_line_k' => ''
-                        );
+                        ];
                         $rslt = $astDB->insert('vicidial_manager', $insertData);
                         $affected_rows = $astDB->getRowCount();
                         if ($affected_rows > 0) {
                             $man_id = $astDB->getInsertId();
     
                             //$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$BMquery',lead_id='0',server_ip='$monitor_server_ip',call_date='$NOW_TIME',extension='$dialplan_number',channel='Local/$monitor_dialstring$stage$session_id@default',timeout='0',outbound_cid='\"VC Blind Monitor\" <$outbound_cid>',context='default';";
-                            $insertData = array(
+                            $insertData = [
                                 'caller_code' => $BMquery,
                                 'lead_id' => '0',
                                 'server_ip' => $monitor_server_ip,
@@ -205,7 +205,7 @@ if ($is_logged_in) {
                                 'timeout' => '0',
                                 'outbound_cid' => "\"VC Blind Monitor\" <$outbound_cid>",
                                 'context' => 'default'
-                            );
+                            ];
                             $rslt = $astDB->insert('vicidial_dial_log', $insertData);
     
                             ##### BEGIN log visit to the vicidial_report_log table #####
@@ -216,7 +216,7 @@ if ($is_logged_in) {
                             $runM = ($endMSary[1] - $startMSary[1]);
                             $TOTALrun = ($runS + $runM);
                             //$stmt="INSERT INTO vicidial_report_log set event_date=NOW(), user='$user', ip_address='1.1.1.1', report_name='API Blind Monitor', browser='API', referer='realtime_report.php', notes='$user, $monitor_server_ip, $dialplan_number, $session_id, $phone_login', url='REALTIME BLIND MONITOR',run_time='$TOTALrun';";
-                            $insertData = array(
+                            $insertData = [
                                 'event_date' => 'NOW()',
                                 'user' => $goUser,
                                 'ip_address' => '1.1.1.1',
@@ -226,19 +226,19 @@ if ($is_logged_in) {
                                 'notes' => "$goUser, $monitor_server_ip, $dialplan_number, $session_id, $phone_login",
                                 'url' => 'REALTIME BLIND MONITOR',
                                 'run_time' => $TOTALrun
-                            );
+                            ];
                             $rslt = $astDB->insert('vicidial_report_log', $insertData);
                             ##### END log visit to the vicidial_report_log table #####
     
                             $message = "Blind monitor has been launched";
-                            $data = array(
+                            $data = [
                                 'phone_login' => $phone_login,
                                 'dialed_session' => "$monitor_dialstring$stage$session_id",
                                 'dialplan_number' => $dialplan_number,
                                 'session_id' => $session_id,
                                 'man_id' => $man_id,
                                 'user' => $goUser
-                            );
+                            ];
                         }
                     }
                 }
@@ -247,11 +247,11 @@ if ($is_logged_in) {
             if ($hasError < 1) {
 				$log_id = log_action($goDB, $action, $goUser, $ip_address, "{$goUser} {$wAction} in to {$agent}'s call", $user_group);
 				
-                $apiresults = array( "result" => "success", "message" => $message, "data" => $data );
+                $apiresults = [ "result" => "success", "message" => $message, "data" => $data ];
             }
         }
 	}
 } else {
-    $apiresults = array( "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." );
+    $apiresults = [ "result" => "error", "message" => "User '{$agent}' using phone exten '{$phone_login}' is currently NOT logged in." ];
 }
 ?>

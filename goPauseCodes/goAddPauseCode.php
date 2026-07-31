@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
 	$campaign_id		 								= $astDB->escape($_REQUEST['pauseCampID']);
@@ -31,37 +31,37 @@
 	$billable 											= $astDB->escape(strtoupper($_REQUEST['billable']));
 
 	### Default values 
-	$defBill 											= array( 'NO', 'YES', 'HALF' );
+	$defBill 											= [ 'NO', 'YES', 'HALF' ];
 
 	### ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif ($campaign_id == null || strlen($campaign_id) < 3) {
-		$apiresults 									= array(
+		];
+	} elseif ($campaign_id == null || strlen((string) $campaign_id) < 3) {
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for CAMP ID not less than 3 characters."
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code) || $pause_code == null) {
-		$apiresults 									= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $pause_code) || $pause_code == null) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in pause code and must not be empty"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code_name)) {
-		$apiresults 									= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $pause_code_name)) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in pause code name"
-		);
+		];
 	} elseif (!in_array($billable, $defBill)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for billable is No, Yes or half only."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -75,13 +75,13 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -100,41 +100,41 @@
 				
 				// Check if pause code is available
 				if (!$checkPC) { 
-					$data_insert 						= array(
+					$data_insert 						= [
 						'pause_code'      					=> $pause_code,
 						'pause_code_name' 					=> $pause_code_name,
 						'campaign_id'     					=> $campaign_id,
 						'billable'        					=> $billable
-					);
+					];
 					
 					$q_insert 							= $astDB->insert('vicidial_pause_codes', $data_insert);
 					$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Pause Code $pause_code under Campaign $campaign_id", $log_group, $astDB->getLastQuery());
 
 					if ($q_insert) {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "success"
-						);
+						];
 					} else {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Add failed, check your details"
-						);
+						];
 					}
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 							"result" 						=> "Error: Add failed, Pause Code already exist!"
-						);
+						];
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Add failed, Campaign ID does not exist!"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

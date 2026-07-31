@@ -57,7 +57,7 @@ if (isset($_GET['goFromAPI'])) { $FROMapi = $astDB->escape($_GET['goFromAPI']); 
     else if (isset($_POST['goFromAPI'])) { $FROMapi = $astDB->escape($_POST['goFromAPI']); }
 
 $user = $agent->user;
-$server_ip = (strlen($server_ip) > 0) ? $server_ip : $phone_settings->server_ip;
+$server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
 $VDCL_ingroup_recording_override = '';
 $VDCL_ingroup_rec_filename = '';
@@ -67,8 +67,8 @@ $row = '';
 $rowx = '';
 $vidSQL = '';
 $VDterm_reason = '';
-$ext_priority = (!isset($ext_priority)) ? 1 : $ext_priority;
-$FROMvdc = (!isset($FROMvdc)) ? 'YES' : $FROMvdc;
+$ext_priority ??= 1;
+$FROMvdc ??= 'YES';
 
 if ($is_logged_in) {
     if ( ($ACTION=="Monitor") || ($ACTION=="StopMonitor") ) {
@@ -80,9 +80,9 @@ if ($is_logged_in) {
 		$row = '';
 		$rowx = '';
 		$channel_live = 1;
-		if ( (strlen($channel) < 3) || (strlen($queryCID) < 15) || (strlen($filename) < 8) ) {
+		if ( (strlen((string) $channel) < 3) || (strlen((string) $queryCID) < 15) || (strlen((string) $filename) < 8) ) {
 			$channel_live = 0;
-			$APIResult = array( "result" => "error", "message" => "Either channel, queryCID or filename is NOT valid, $ACTION command not inserted" );
+			$APIResult = [ "result" => "error", "message" => "Either channel, queryCID or filename is NOT valid, $ACTION command not inserted" ];
 		} else {
 			//$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$channel';";
 			$astDB->where('server_ip', $server_ip);
@@ -97,12 +97,12 @@ if ($is_logged_in) {
 				$rowx_ct = $astDB->getRowCount();
 				if ($rowx_ct == 0) {
 					$channel_live = 0;
-					$APIResult = array( "result" => "error", "message" => "Channel $channel is not live on $server_ip, $ACTION command not inserted" );
+					$APIResult = [ "result" => "error", "message" => "Channel $channel is not live on $server_ip, $ACTION command not inserted" ];
 				}
 			}
-			if ($channel_live == 1) {
+			if ($channel_live === 1) {
 				//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','$ACTION','$queryCID','Channel: $channel','$SQLfile','','','','','','','','');";
-				$insertData = array(
+				$insertData = [
                     'man_id' => '',
                     'uniqueid' => '',
                     'entry_date' => $NOW_TIME,
@@ -122,12 +122,12 @@ if ($is_logged_in) {
                     'cmd_line_i' => '',
                     'cmd_line_j' => '',
                     'cmd_line_k' => ''
-                );
+                ];
 				$rslt = $astDB->insert('vicidial_manager', $insertData);
 	
 				if ($ACTION == "Monitor") {
 					//$stmt = "INSERT INTO recording_log (channel,server_ip,extension,start_time,start_epoch,filename,lead_id,user) values('$channel','$server_ip','$exten','$NOW_TIME','$StarTtimE','$filename','$lead_id','$user')";
-					$insertData = array(
+					$insertData = [
 						'channel' => $channel,
 						'server_ip' => $server_ip,
 						'extension' => $exten,
@@ -136,7 +136,7 @@ if ($is_logged_in) {
 						'filename' => $filename,
 						'lead_id' => $lead_id,
 						'user' => $user
-					);
+					];
 					$rslt = $astDB->insert('recording_log', $insertData);
 	
 					//$stmt="SELECT recording_id FROM recording_log where filename='$filename'";
@@ -157,18 +157,18 @@ if ($is_logged_in) {
 						$length_in_min = sprintf("%8.2f", $length_in_min);
 	
 						//$stmt = "UPDATE recording_log set end_time='$NOW_TIME',end_epoch='$StarTtimE',length_in_sec=$length_in_sec,length_in_min='$length_in_min' where filename='$filename'";
-						$updateData = array(
+						$updateData = [
 							'end_time' => $NOW_TIME,
 							'end_epoch' => $StarTtimE,
 							'length_in_sec' => $length_in_sec,
 							'length_in_min' => $length_in_min
-						);
+						];
 						$astDB->where('filename', $filename);
 						$rslt = $astDB->update('recording_log', $updateData);
 					}
 				}
 				
-				$APIResult = array( "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id );
+				$APIResult = [ "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id ];
 			}
 		}
 	}
@@ -182,15 +182,15 @@ if ($is_logged_in) {
 		$channel_live = 1;
 		$uniqueidSQL = '';
 	
-		if ( (strlen($exten) < 3) || (strlen($channel) < 4) || (strlen($filename) < 8) ) {
+		if ( (strlen((string) $exten) < 3) || (strlen((string) $channel) < 4) || (strlen((string) $filename) < 8) ) {
 			$channel_live = 0;
-			$APIResult = array( "result" => "error", "message" => "Either the channel, exten or filename is NOT valid, $ACTION command not inserted" );
+			$APIResult = [ "result" => "error", "message" => "Either the channel, exten or filename is NOT valid, $ACTION command not inserted" ];
 		} else {
 			$VDvicidial_id = '';
 	
 			if ($ACTION=="MonitorConf") {
 				//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$filename','Channel: $channel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','Callerid: $filename','','','','','');";
-				$insertData = array(
+				$insertData = [
                     'man_id' => '',
                     'uniqueid' => '',
                     'entry_date' => $NOW_TIME,
@@ -210,11 +210,11 @@ if ($is_logged_in) {
                     'cmd_line_i' => '',
                     'cmd_line_j' => '',
                     'cmd_line_k' => ''
-                );
+                ];
 				$rslt = $astDB->insert('vicidial_manager', $insertData);
 	
 				//$stmt = "INSERT INTO recording_log (channel,server_ip,extension,start_time,start_epoch,filename,lead_id,user) values('$channel','$server_ip','$exten','$NOW_TIME','$StarTtimE','$filename','$lead_id','$user')";
-				$insertData = array(
+				$insertData = [
 					'channel' => $channel,
 					'server_ip' => $server_ip,
 					'extension' => $exten,
@@ -223,7 +223,7 @@ if ($is_logged_in) {
 					'filename' => $filename,
 					'lead_id' => $lead_id,
 					'user' => $user
-				);
+				];
 				$rslt = $astDB->insert('recording_log', $insertData);
 				$RLaffected_rows = $astDB->getRowCount();
 				if ($RLaffected_rows > 0) {
@@ -234,7 +234,7 @@ if ($is_logged_in) {
 					##### update vla record with recording_id
 					//$stmt = "UPDATE vicidial_live_agents SET external_recording='$recording_id' where user='$user';";
 					$astDB->where('user', $user);
-					$rslt = $astDB->update('vicidial_live_agents', array('external_recording' => $recording_id));
+					$rslt = $astDB->update('vicidial_live_agents', ['external_recording' => $recording_id]);
 	
 					##### get call type from vicidial_live_agents table
 					$VLA_inOUT = 'NONE';
@@ -271,7 +271,7 @@ if ($is_logged_in) {
 	
 						//$stmt = "UPDATE recording_log SET vicidial_id='$VDvicidial_id' where recording_id='$recording_id';";
 						$astDB->where('recording_id', $recording_id);
-						$rslt = $astDB->update('recording_log', array('vicidial_id' => $VDvicidial_id));
+						$rslt = $astDB->update('recording_log', ['vicidial_id' => $VDvicidial_id]);
 					}
 				}
 			}
@@ -293,7 +293,7 @@ if ($is_logged_in) {
 						$uniqueidSQL	= $row['closercallid'];
 					}
 				} else {
-					if (strlen($uniqueid) > 8) {
+					if (strlen((string) $uniqueid) > 8) {
 						$uniqueidSQL	= $uniqueid;
 					}
 				}
@@ -302,7 +302,7 @@ if ($is_logged_in) {
 					##### update vla recording record to blank
 					//$stmt = "UPDATE vicidial_live_agents SET external_recording='' where user='$user';";
 					$astDB->where('user', $user);
-					$rslt = $astDB->update('vicidial_live_agents', array('external_recording' => ''));
+					$rslt = $astDB->update('vicidial_live_agents', ['external_recording' => '']);
 				}
 				
 				//$stmt="SELECT recording_id,start_epoch FROM recording_log where filename='$filename'";
@@ -318,13 +318,13 @@ if ($is_logged_in) {
 					$length_in_min = sprintf("%8.2f", $length_in_min);
 	
 					//$stmt = "UPDATE recording_log set end_time='$NOW_TIME',end_epoch='$StarTtimE',length_in_sec=$length_in_sec,length_in_min='$length_in_min' $uniqueidSQL where filename='$filename'";
-					$updateData = array(
+					$updateData = [
 						'end_time' => $NOW_TIME,
 						'end_epoch' => $StarTtimE,
 						'length_in_sec' => $length_in_sec,
 						'length_in_min' => $length_in_min,
 						'vicidial_id' => $uniqueidSQL
-					);
+					];
 					$astDB->where('filename', $filename);
 					$rslt = $astDB->update('recording_log', $updateData);
 				}
@@ -343,7 +343,7 @@ if ($is_logged_in) {
 				$i = 0;
 				while ($h > $i) {
 					//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Hangup','RH12345$StarTtimE$i','Channel: $HUchannel[$i]','','','','','','','','','');";
-					$insertData = array(
+					$insertData = [
 						'man_id' => '',
 						'uniqueid' => '',
 						'entry_date' => $NOW_TIME,
@@ -363,16 +363,16 @@ if ($is_logged_in) {
 						'cmd_line_i' => '',
 						'cmd_line_j' => '',
 						'cmd_line_k' => ''
-					);
+					];
 					$rslt = $astDB->insert('vicidial_manager', $insertData);
 					$i++;
 				}
 			}
 			
-			$APIResult = array( "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id, "rec_message" => "RECORDING WILL LAST UP TO 60 MINUTES" );
+			$APIResult = [ "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id, "rec_message" => "RECORDING WILL LAST UP TO 60 MINUTES" ];
 		}
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

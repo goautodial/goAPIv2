@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
@@ -34,41 +34,41 @@
 	$voicemail_greeting					= $astDB->escape($_REQUEST["voicemail_greeting"]); 
 
 	### Default values
-    $defActive 							= array(
+    $defActive 							= [
 		"Y",
 		"N"
-	); 
+	]; 
 
-	$defDelVM 							= array(
+	$defDelVM 							= [
 		"N",
 		"Y"
-	);
+	];
 	
 	### ERROR CHECKING 					
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
-	} elseif ($voicemail_id == null || strlen($voicemail_id) < 3) {
-		$apiresults 					= array(
+		];
+	} elseif ($voicemail_id == null || strlen((string) $voicemail_id) < 3) {
+		$apiresults 					= [
 			"result" 						=> "Error: Set a value for Voicemail ID."
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", $fullname) || $fullname == null) {
-		$apiresults 					= array(
+		];
+	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $fullname) || $fullname == null) {
+		$apiresults 					= [
 			"result" 						=> "Error: Special characters found in fullname and must not be empty"
-		);
+		];
 	} elseif (!in_array($active,$defActive) && $active != null) {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Invalid email format."
-		);
+		];
 	} elseif (!in_array($delete_vm_after_email,$defDelVM) && $delete_vm_after_email != null) {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Default value for delete_vm_after_email is Y or N only."
-		);
+		];
 	} else {
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -108,34 +108,34 @@
                                 $voicemail_greeting                     = $dataVM_greeting;
                         }
 
-			$data 						= array(
+			$data 						= [
 				"pass" 						=> $pass,
 				"fullname" 					=> $fullname,
 				"email" 					=> $email,
 				"active" 					=> $active,
 				"delete_vm_after_email" 			=> $delete_vm_after_email,
 				"voicemail_greeting"				=> $voicemail_greeting
-			);
+			];
 			
 			$astDB->where("voicemail_id", $voicemail_id);
 			$q_update					= $astDB->update("vicidial_voicemail", $data);
 			$log_id 					= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Voicemail ID: $voicemail_id", $log_group, $astDB->getLastQuery());
 			
 			if ($query) {
-				$apiresults 			= array(
+				$apiresults 			= [
 					"result" 				=> "success",
 					"data" 					=> $q_update
-				);
+				];
 			} else {
-				$apiresults				= array(
+				$apiresults				= [
 					"result" 				=> "Error: Add failed, check your details"
-				);
+				];
 			} 
 			
 		} else {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "Error: Voicemail doesn't exist"
-			);
+			];
 		}
 	}
 ?>

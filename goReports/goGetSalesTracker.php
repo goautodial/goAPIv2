@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 	
 	// need function go_sec_convert();
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
@@ -39,15 +39,15 @@
     }
 		
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($campaignID) || is_null($campaignID) ) {
 		$err_msg 									= error_handle("40001");
-        $apiresults 								= array(
+        $apiresults 								= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
 	} elseif (empty($fromDate) && empty($toDate)) {
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
@@ -64,12 +64,12 @@
 
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
-		$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+		$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 		
 		if ($tenant) {
 			$astDB->where("user_group", $log_group);
 		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($userlevel < 8) {
 					$astDB->where("user_group", $log_group);
 				}
@@ -108,7 +108,7 @@
                     ->get("vicidial_statuses", NULL, "status");
 
 		$sstatusRX = "";
-		$sstatuses = array();
+		$sstatuses = [];
 		$a = 0;
 
 		if ($astDB->count > 0) {
@@ -121,7 +121,7 @@
 		}
 
 		//ALL CAMPAIGNS
-		if ("ALL" === strtoupper($campaignID)) {
+		if ("ALL" === strtoupper((string) $campaignID)) {
             $astDB->where('user_group', $log_group);
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
     
@@ -140,7 +140,7 @@
 		}
 		$imploded_camp = "'".implode("','", $array_camp)."'";
 
-		if (!empty($sstatuses))
+		if ($sstatuses !== [])
 			$sstatuses = implode("','",$sstatuses);
 
 		// $Qstatus2 = $astDB
@@ -152,7 +152,7 @@
 		$Qstatus2 = $astDB->rawQuery($rawQstatus2);
 
 		$cstatusRX = "";
-		$cstatuses = array();
+		$cstatuses = [];
 		$b = 0;
 
 		if ($astDB->count > 0) {
@@ -164,7 +164,7 @@
 			}
 		}
 
-		if (!empty($cstatuses)) {
+		if ($cstatuses !== []) {
 				$cstatuses = implode("','",$cstatuses);
 		}
 
@@ -182,7 +182,7 @@
 		$total_in_sales                                 = "";
 		$total_out_sales                                = "";
 
-		if (strtolower($request) === 'outbound') {
+		if (strtolower((string) $request) === 'outbound') {
 			$outbound_query 				= "
 				SELECT distinct(vl.phone_number) as phone_number, 
 					vl.lead_id as lead_id, 
@@ -228,8 +228,8 @@
 				$comments[] 				= $row['comments'];
 				$sale_num_value++;
 			}
-
-			$apiresults = array(
+				
+			return [
 				"result" => "success",
 				"outbound_result" 				=> $outbound_result, 
 				"sale_num" 					=> $sale_num, 
@@ -246,12 +246,10 @@
 				"email" 					=> $email, 
 				"alt_phone" 					=> $alt_phone, 
 				"comments" 					=> $comments
-			);
-				
-			return $apiresults;
+			];
 		}
 	
-		if (strtolower($request) === 'inbound') {
+		if (strtolower((string) $request) === 'inbound') {
 			$inbound_query = "
 				SELECT closer_campaigns FROM vicidial_campaigns
 				WHERE campaign_id IN ($imploded_camp)
@@ -316,8 +314,8 @@
 				$comments[] 				= $row['comments'];
 				$sale_num_value++;
 			}
-
-			$apiresults = array(
+				
+			return [
 				"result" => "success",
 				"inbound_result" 				=> $inbound_result, 
 				"sale_num" 						=> $sale_num, 
@@ -334,9 +332,7 @@
 				"email" 						=> $email, 
 				"alt_phone" 					=> $alt_phone, 
 				"comments" 						=> $comments
-			);
-				
-			return $apiresults;
+			];
 		}
 	}
 

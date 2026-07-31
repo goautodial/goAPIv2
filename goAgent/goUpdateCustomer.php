@@ -29,7 +29,7 @@ if (isset($_GET['goSaveAsCustomer'])) { $save_as_customer = $astDB->escape($_GET
 
 $agent = get_settings('user', $astDB, $goUser);
 
-$lead_array = array();
+$lead_array = [];
 foreach ($lead_info as $idx => $info) {
     $lName = str_replace('viewCust_', '', $info['name']);
     $delim = "";
@@ -47,10 +47,10 @@ $astDB->where('lead_id', $lead_id);
 $rslt = $astDB->update('vicidial_list', $lead_array);
 $errorMsg = $astDB->getLastError();
 
-if (strlen($errorMsg) < 1) {
+if (strlen((string) $errorMsg) < 1) {
     if (isset($custom_info) || $custom_info != null) {
-        $CF_array = array();
-        foreach ($custom_info as $idx => $info) {
+        $CF_array = [];
+        foreach ($custom_info as $info) {
             $lName = preg_replace("/^viewCustom_|\[\]$/", '', $info['name']);
             $delim = "";
             if (array_key_exists($lName, $CF_array)) {
@@ -87,12 +87,12 @@ if (strlen($errorMsg) < 1) {
         $cust_exist = $goDB->getRowCount();
         
         if ($cust_exist < 1) {
-            $rslt = $goDB->insert('go_customers', array('lead_id' => $lead_id, 'group_list_id' => $group_list_id));
+            $rslt = $goDB->insert('go_customers', ['lead_id' => $lead_id, 'group_list_id' => $group_list_id]);
             $message .= "<br><br>Lead file also converted to customer.";
         }
     }
     
-    if (strlen($errorMsg) > 0) {
+    if ((string) $errorMsg !== '') {
         $message = "Lead file '{$lead_id}' updated but encountered an error on custom fields: {$errorMsg}";
     }
 } else {
@@ -100,5 +100,5 @@ if (strlen($errorMsg) < 1) {
     $message = "Failed to updated lead file '{$lead_id}'";
 }
 
-$APIResult = array( "result" => $result, "lead_id" => $lead_id, "message" => $message );
+$APIResult = [ "result" => $result, "lead_id" => $lead_id, "message" => $message ];
 ?>

@@ -21,14 +21,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
     
     $campaign_id = $_REQUEST['campaign_id'];
     
     if(empty($campaign_id)){
-        $apiresults = array("result" => "Error: Set a value for campaign_id.");
+        $apiresults = ["result" => "Error: Set a value for campaign_id."];
     }else{
-        $cols = Array("did_id", "did_pattern", "did_description", "did_actived", "did_route");
+        $cols = ["did_id", "did_pattern", "did_description", "did_actived", "did_route"];
         $astDB->where("campaign_id", $campaign_id);
         $query =  $astDB->get("vicidial_inbound_dids", NULL, $cols);
 
@@ -41,14 +41,14 @@
             $dataActive[]           =  $fresults['did_active'];
             $dataDidRoute[]         =  $fresults['did_route'];
         }
-        $apiresults = array(
+        $apiresults = [
                         "result" => "success",
                         "did_id" => $dataDidID,
                         "did_pattern" => $dataDidPattern,
                         "did_description" => $dataDidDescription,
                         "active" => $dataActive,
                         "did_route" => $dataDidRoute
-                    );
+                    ];
     }
 
     

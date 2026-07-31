@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once("goAPI.php");
+	include_once(__DIR__ . "/goAPI.php");
 	
 	$limit 											= 50; 
 	
@@ -31,9 +31,9 @@
 	
     // Error Checking
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} else {	
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where('user_group', $log_group);
@@ -46,9 +46,9 @@
 		if ($astDB->count < 1) {
 			$result 								= 'ERROR';
 			$result_reason 							= "sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST";
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "Error".$result_reason
-			);
+			];
 		} else {
 			//$query = "SELECT goFilename, goFileDate, goFilesize, goDirectory FROM sounds $ul";
 			if($log_group === 'ADMIN'){
@@ -65,17 +65,17 @@
 					$file_directory[] 				= $rslt['goDirectory'];
 				}
 				
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "success", 
 					"file_name" 						=> $file_names, 
 					"file_date" 						=> $file_dates, 
 					"file_size" 						=> $file_size, 
 					"file_directory" 					=> $file_directory
-				);
+				];
 			} else {
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "Error"
-				);
+				];
 			}
 		}
 	}

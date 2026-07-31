@@ -21,57 +21,57 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    include_once ("../goDBasterisk.php");
-    include_once ("../goDBgoautodial.php");
-    include_once ("../goDBkamailio.php");
-    include_once ("../goFunctions.php");
-    
+    require_once (__DIR__ . "/goDBasterisk.php");
+    require_once (__DIR__ . "/goDBgoautodial.php");
+    require_once (__DIR__ . "/goDBkamailio.php");
+    require_once (__DIR__ . "/goFunctions.php");
+
     /* Check if DB variables are not set */
-	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-	$VARDB_user     = (!isset($VARDB_user)) ? "asterisku" : $VARDB_user;
-	$VARDB_pass     = (!isset($VARDB_pass)) ? "asterisku1234" : $VARDB_pass;
-	$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
+	$VARDB_server ??= "localhost";
+	$VARDB_user ??= "asterisku";
+	$VARDB_pass ??= "asterisku1234";
+	$VARDB_database ??= "asterisk";
 
-	$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialu1234" : $VARDBgo_pass;
-	$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
+	$VARDBgo_server ??= "localhost";
+	$VARDBgo_user ??= "goautodialu";
+	$VARDBgo_pass ??= "goautodialu1234";
+	$VARDBgo_database ??= "goautodial";
 
-	$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
-	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
-	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+	$VARDBgokam_server ??= "localhost";
+	$VARDBgokam_user ??= "kamailiou";
+	$VARDBgokam_pass ??= "kamailiou1234";
+	$VARDBgokam_database ??= "kamailio";
     /* End of DB variables */
-    
-    /* Variables */    
-    if (isset($_GET["goAction"])) { $goAction = $astDB->escape($_GET["goAction"]); } 
+
+    /* Variables */
+    if (isset($_GET["goAction"])) { $goAction = $astDB->escape($_GET["goAction"]); }
 		elseif (isset($_POST["goAction"])) { $goAction = $astDB->escape($_POST["goAction"]); }
-    
-    if (isset($_GET["goUser"])) { $goUser = $astDB->escape($_GET["goUser"]); } 
+
+    if (isset($_GET["goUser"])) { $goUser = $astDB->escape($_GET["goUser"]); }
 		elseif (isset($_POST["goUser"])) { $goUser = $astDB->escape($_POST["goUser"]); }
-    
-    if (isset($_GET["goPass"])) { $goPass = $astDB->escape($_GET["goPass"]); } 
+
+    if (isset($_GET["goPass"])) { $goPass = $astDB->escape($_GET["goPass"]); }
 		elseif (isset($_POST["goPass"])) { $goPass = $astDB->escape($_POST["goPass"]); }
-    
+
     if (isset($_GET["goURL"])) { $goURL = $astDB->escape($_GET["goURL"]); }
 		else if (isset($_POST["goURL"])) { $goURL = $astDB->escape($_POST["goURL"]); }
-    
+
 	if (isset($_GET['responsetype'])) { $userResponseType = $astDB->escape($_GET['responsetype']); }
-		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }    
-		
+		else if (isset($_POST['responsetype'])) { $userResponseType = $astDB->escape($_POST['responsetype']); }
+
 	/* Standard goAPI variables */
-	
+
     $log_user     = $session_user ?? '';
-    $log_group    = go_get_groupid($session_user ?? '', $astDB);    
-    $log_ip       = $astDB->escape($_REQUEST['log_ip']);
+    $log_group    = go_get_groupid($session_user ?? '', $astDB);
+    $log_ip       = $astDB->escape($_REQUEST['log_ip'] ?? '');
     $goUser       = $astDB->escape($_REQUEST['goUser']);
-    $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));		
-		
-    define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI'));
+    $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+
+    define('DEFAULT_USERS', ['VDAD','VDCL', 'goAPI']);
 
     $goCharset = "UTF-8";
     $goVersion = "4.0";
-    
+
 	##### getting timezone ######
     $goDB->where('setting', 'timezone');
     $rslt = $goDB->getOne('settings', 'value');
@@ -80,61 +80,51 @@
         ini_set('date.timezone', $tz);
         date_default_timezone_set($tz);
 	}
-    
-    /* check credentials */
-	$pass_hash = '';
-	$cwd = $_SERVER['DOCUMENT_ROOT'];
-	$bcrypt = 0;
 
-	$user = preg_replace("/\'|\"|\\\\|;| /", "", $goUser);
-	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
-	
+    /* check credentials */
+	$user = preg_replace("/\'|\"|\\\\|;| /", "", (string) $goUser);
+	$pass = (string) $goPass;
+
     //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
     $system_settings = $astDB->getOne("system_settings", "pass_hash_enabled,pass_cost,pass_key");
 
-	$passSQL = "pass='$pass'";
-	if ($system_settings['pass_hash_enabled'] > 0) {
-        if (strlen($pass) > 20) $bcrypt = 1;
-        
-		if ($bcrypt < 1) {
-			$pass_hash = encrypt_passwd($pass, $system_settings['pass_cost'], $system_settings['pass_key']);
-		} else {$pass_hash = $pass;}
-		$passSQL = "pass_hash='$pass_hash'";
-        if ($user === 'goAPI')
-            $bcrypt = 0;
-	}
-	
-    //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser' AND $passSQL";
+    //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser'";
     //$rslt=mysqli_query($link, $query_user);
     $astDB->where("user", $goUser);
-    if($system_settings['pass_hash_enabled'] > 0 )
-    	$astDB->where("pass_hash", $pass_hash);
-    else
-        $astDB->where("pass", $pass);
-    $rslt = $astDB->getOne("vicidial_users");
-    $check_result = $astDB->count;
-	
+    $rslt = $astDB->getOne("vicidial_users", "pass,pass_hash");
+    $storedHash = $rslt['pass_hash'] ?? '';
+    $storedPass = $rslt['pass'] ?? '';
+    $check_result = 0;
+
+    if (($system_settings['pass_hash_enabled'] ?? 0) > 0) {
+        if (is_string($storedHash) && preg_match('/^\$2y\$/', $storedHash)) {
+            $check_result = (password_verify($pass, $storedHash) || hash_equals($storedHash, $pass)) ? 1 : 0;
+        }
+    } else {
+        $check_result = hash_equals((string) $storedPass, $pass) ? 1 : 0;
+    }
+
     if ($check_result > 0) {
         //$includeAction = basename(realpath($goAction . ".php"));
-        if (strpos($goAction, '/') === false && file_exists($goAction . ".php")) {
+        if (!str_contains((string) $goAction, '/') && file_exists($goAction . ".php")) {
             include $goAction . ".php";
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
-    		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
-        }    
-    } else {        
-        $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );        
+    		$apiresults = [ "result" => "error", "message" => "Command Not Found" ];
+        }
+    } else {
+        $apiresults = [ "result" => "error", "message" => "Invalid Username/Password" ];
     }
-    
+
 	if (!isset($userResponseType) || strlen($userResponseType) < 1) {
 		$userResponseType = "xml";
 	}
-    
+
     /* API OUTPUT */
     ob_start();
     header("Access-Control-Allow-Origin: *");
-    
-	if (count($apiresults)) {
+
+	if (isset($apiresults) && count($apiresults)) {
 		if ($userResponseType == "json") {
 			$apiresults = json_encode( $apiresults );
 			echo $apiresults;
@@ -153,4 +143,3 @@
     ob_end_clean();
     echo $apioutput;
 ?>
-

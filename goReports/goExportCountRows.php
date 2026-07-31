@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-	include_once("goAPI.php");
+	include_once(__DIR__ . "/goAPI.php");
 	
 	$campaigns 		= $astDB->escape($_REQUEST['campaigns']);
 	$inbounds 		= $astDB->escape($_REQUEST['inbounds']);
@@ -30,7 +30,7 @@
 	$custom_fields 	= $astDB->escape($_REQUEST['custom_fields']);
 	$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
 	$rec_location 	= $astDB->escape($_REQUEST['rec_location']);
-	$log_group 		= go_get_groupid($session_user, $astDB);
+	$log_group 		= go_get_groupid($session_user);
 	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
 	$toDate = $astDB->escape($_REQUEST['toDate']);
 	
@@ -83,7 +83,7 @@
 		if (in_array("ALL", $campaigns)) {
 			$campaign_SQL = "";
 			// $i = 0;
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -101,7 +101,7 @@
             }
             
 			$imp_camp = implode("','", $array_camp);
-			if (strtoupper($log_group) !== 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($log_group !== 'SUPERVISOR') {
 					$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
 				}
@@ -123,7 +123,7 @@
 		if (in_array("ALL", $inbounds)) {
 			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
 
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -142,8 +142,6 @@
             $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
                 ->orderBy("campaign_id")
                 ->get("vicidial_campaigns", NULL, "closer_campaigns");
-
-            $closer_camp;
             foreach($closer_campaigns as $row){
                 if(!empty($row['closer_campaigns'])){
                     $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
@@ -151,7 +149,7 @@
                 }
             }
 			
-			if (strtoupper($log_group) !== 'ADMIN') {
+			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			}
@@ -161,14 +159,14 @@
 				$closer_camp .= " ".$row["group_id"];
 			}
 
-            $explodedCloserCamps = explode(" ", ltrim($closer_camp));
+            $explodedCloserCamps = explode(" ", ltrim((string) $closer_camp));
 			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
 
 			$i=1;
 		} else {
 			$i = 0;
 			while ($i < $group_ct) {
-				if (strlen($inbounds[$i]) > 0) {
+				if ($inbounds[$i] !== '') {
 				  //$group_SQL .= "'$inbounds[$i]',";
 					$group_SQL .= "'$inbounds[$i]',";
 					//array_push($array_inbound, $inbounds[$i]);
@@ -325,10 +323,10 @@
 		$row_count = intval($result['row_count']);
 	}
 	
-	$apiresults = array(
+	$apiresults = [
 		"result" => "success", 
 		"query" => $query,
 		"row_count" => $row_count
-	);
+	];
 ?>
 

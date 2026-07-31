@@ -21,26 +21,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    include_once ("../goDBasterisk.php");
-    include_once ("../goDBgoautodial.php");
-    include_once ("../goDBkamailio.php");
-    include_once ("../goFunctions.php");
+    include_once (__DIR__ . "/../goDBasterisk.php");
+    include_once (__DIR__ . "/../goDBgoautodial.php");
+    include_once (__DIR__ . "/../goDBkamailio.php");
+    include_once (__DIR__ . "/../goFunctions.php");
     
     /* Check if DB variables are not set */
-	$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-	$VARDB_user     = (!isset($VARDB_user)) ? "asterisku" : $VARDB_user;
-	$VARDB_pass     = (!isset($VARDB_pass)) ? "asterisku1234" : $VARDB_pass;
-	$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
+	$VARDB_server ??= "localhost";
+	$VARDB_user ??= "asterisku";
+	$VARDB_pass ??= "asterisku1234";
+	$VARDB_database ??= "asterisk";
 
-	$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-	$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-	$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialu1234" : $VARDBgo_pass;
-	$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
+	$VARDBgo_server ??= "localhost";
+	$VARDBgo_user ??= "goautodialu";
+	$VARDBgo_pass ??= "goautodialu1234";
+	$VARDBgo_database ??= "goautodial";
 
-	$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-	$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
-	$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
-	$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+	$VARDBgokam_server ??= "localhost";
+	$VARDBgokam_user ??= "kamailiou";
+	$VARDBgokam_pass ??= "kamailiou1234";
+	$VARDBgokam_database ??= "kamailio";
     /* End of DB variables */
     
     /* Variables */    
@@ -61,12 +61,12 @@
 		
 	/* Standard goAPI variables */
     $log_user     = $session_user;
-    $log_group    = go_get_groupid($session_user, $astDB);     
+    $log_group    = go_get_groupid($session_user);     
     $log_ip       = $astDB->escape($_REQUEST['log_ip']);
     $goUser       = $astDB->escape($_REQUEST['goUser']);
     $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));		
 		
-    define('DEFAULT_USERS', array('VDAD','VDCL', 'goAPI'));
+    define('DEFAULT_USERS', ['VDAD','VDCL', 'goAPI']);
 
     $goCharset = "UTF-8";
     $goVersion = "4.0";
@@ -85,7 +85,7 @@
 	$cwd = $_SERVER['DOCUMENT_ROOT'];
 	$bcrypt = 0;
 
-	$user = preg_replace("/\'|\"|\\\\|;| /", "", $goUser);
+	$user = preg_replace("/\'|\"|\\\\|;| /", "", (string) $goUser);
 	$pass = preg_replace("/\'|\"|\\\\|;| /", "", $goPass);
 	
     //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
@@ -114,10 +114,10 @@
             include $goAction . ".php";
             //$apiresults = array( "result" => "success", "message" => "Command Not Found" );
         } else {
-    		$apiresults = array( "result" => "error", "message" => "Command Not Found" );
+    		$apiresults = [ "result" => "error", "message" => "Command Not Found" ];
         }    
     } else {        
-        $apiresults = array( "result" => "error", "message" => "Invalid Username/Password" );        
+        $apiresults = [ "result" => "error", "message" => "Invalid Username/Password" ];        
     }
     
 	if (!isset($userResponseType) || strlen($userResponseType) < 1) {

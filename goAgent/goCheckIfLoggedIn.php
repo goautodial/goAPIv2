@@ -54,8 +54,6 @@ if (!isset($task) || (isset($task) && $task === '')) {
     $last_call_is_not_null = 0;
     $added_message = '';
     if ($check_last_call) {
-        //$stmt = "SELECT * FROM vicidial_agent_log WHERE user='$goUser' AND (lead_id IS NOT NULL AND lead_id > '0') AND pause_sec >= '65535' AND status IS NULL AND sub_status IS NULL AND event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY event_time DESC LIMIT 1;";
-        $stmt = "SELECT * FROM vicidial_agent_log val LEFT JOIN vicidial_log vl ON val.uniqueid=vl.uniqueid AND val.lead_id!=vl.lead_id WHERE val.user='$goUser' AND (val.lead_id IS NOT NULL AND val.lead_id > '0') AND val.pause_sec >= '65535' AND val.status IS NULL AND val.sub_status IS NULL AND val.event_time >= NOW() - INTERVAL 30 MINUTE ORDER BY val.event_time DESC LIMIT 1;";
         $stmt = "SELECT val.lead_id,vla.lead_id,vl.lead_id,val.user,val.event_time,val.uniqueid,vl.uniqueid FROM vicidial_agent_log val INNER JOIN vicidial_log vl ON vl.lead_id=val.lead_id AND vl.user=val.user INNER JOIN vicidial_live_agents vla ON val.lead_id=vla.lead_id AND val.user=vla.user WHERE val.user='$goUser' AND (val.lead_id IS NOT NULL AND val.lead_id > '0') AND vla.status='INCALL' ORDER BY val.event_time DESC,vl.call_date DESC LIMIT 1;";
         $rslt = $astDB->rawQuery($stmt);
         $last_call_is_not_null = $astDB->getRowCount();
@@ -71,7 +69,7 @@ if (!isset($task) || (isset($task) && $task === '')) {
         }
     }
 
-    $APIResult = array( "result" => "success", "logged_in" => $is_logged_in, "last_call_is_not_null" => $last_call_is_not_null, "message" => $message );
+    $APIResult = [ "result" => "success", "logged_in" => $is_logged_in, "last_call_is_not_null" => $last_call_is_not_null, "message" => $message ];
 } else {
     if ($task == 'check') {
         $is_online = 0;
@@ -82,9 +80,9 @@ if (!isset($task) || (isset($task) && $task === '')) {
         }
     } else if ($task == 'update') {
         $goDB->where('name', $goUser);
-        $rslt = $goDB->update('users', array('online' => $is_online));
+        $rslt = $goDB->update('users', ['online' => $is_online]);
     }
     
-    $APIResult = array( "result" => "success", "is_online" => (int)$is_online );
+    $APIResult = [ "result" => "success", "is_online" => (int)$is_online ];
 }
 ?>

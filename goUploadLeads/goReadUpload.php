@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
@@ -52,7 +52,7 @@
 	$field_regx = str_replace($delimiters, "", $field_regx);	
 	
 	// STANDARD FIELDS
-	$getSF = array("Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments");
+	$getSF = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
 	
 	// GET CUSTOM FIELDS OF LIST
 	$astDB->where('list_id', $theList);
@@ -69,11 +69,11 @@
 	}
 
 	if (($file = fopen($csv_file, "r")) !== FALSE) { //$handle = $file
-		$getHeader = fgetcsv($file, 1000, $default_delimiter);
+		$getHeader = fgetcsv($file, 1000, $default_delimiter, escape: '\\');
 		fclose($file);
-		$apiresults = array("result" => "success", "data" => $getHeader, "standard_fields" => $getSF, "custom_fields" => $getCF);
+		$apiresults = ["result" => "success", "data" => $getHeader, "standard_fields" => $getSF, "custom_fields" => $getCF];
 	}else{
-		$apiresults = array("result" => "csv read fail");
+		$apiresults = ["result" => "csv read fail"];
 	}
 
 ?>

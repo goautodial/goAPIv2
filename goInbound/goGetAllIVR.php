@@ -21,23 +21,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
 	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -57,7 +57,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) !== 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					//if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -65,7 +65,7 @@
 				}					
 			}
 
-			$cols 										= array("menu_id", "menu_name", "menu_prompt", "menu_timeout");
+			$cols 										= ["menu_id", "menu_name", "menu_prompt", "menu_timeout"];
 			$astDB->where("menu_id", "defaultlog", "!=");
 			$selectQuery 								= $astDB->get("vicidial_call_menu", $limit, $cols);
 			
@@ -76,19 +76,19 @@
 				$dataMenuTimeout[] 						= $fresults['menu_timeout'];
 			}
 
-			$apiresults 								= array(
+			$apiresults 								= [
 				"result" 									=> "success", 
 				"menu_id" 									=> $dataMenuId, 
 				"menu_name" 								=> $dataMenuName, 
 				"menu_prompt" 								=> $dataMenuPrompt, 
 				"menu_timeout" 								=> $dataMenuTimeout
-			);
+			];
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}			
 ?>

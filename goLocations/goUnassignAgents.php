@@ -29,8 +29,8 @@ if (isset($unassigned) && count($unassigned) > 0) {
 		$astDB->delete('vicidial_campaign_agents');
 	}
 	
-	$APIResult = array("result" => "success");
+	$APIResult = ["result" => "success"];
 } else {
-	$APIResult = array("result" => "error");
+	$APIResult = ["result" => "error"];
 }
 ?>

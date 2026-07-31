@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
     $did_id 										= $astDB->escape($_REQUEST['did_id']);
@@ -46,15 +46,15 @@
 	$agent_search_method     						= $astDB->escape($_REQUEST['agent_search_method']);
    
     // Default values 
-    $defUUA 										= array(
+    $defUUA 										= [
 		'IN_GROUP',
 		'EXTEN',
 		'VOICEMAIL',
 		'PHONE',
 		'VMAIL_NO_INST'
-	);
+	];
 	
-    $defRoute 										= array(
+    $defRoute 										= [
 		'EXTEN',
 		'VOICEMAIL',
 		'AGENT',
@@ -62,79 +62,79 @@
 		'IN_GROUP',
 		'CALLMENU',
 		'VMAIL_NO_INST'
-	);
+	];
 	
-    $defRecordCall 									= array(
+    $defRecordCall 									= [
 		'Y',
 		'N',
 		'Y_QUEUESTOP'
-	);
+	];
 	
-    $defActive 										= array(
+    $defActive 										= [
 		"Y",
 		"N"
-	);
+	];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($did_id) || is_null($did_id)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Set a value for DID ID."
-		);
-	} elseif (!empty($did_pattern) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $did_pattern)) {
-        $apiresults 								= array(
+		];
+	} elseif (!empty($did_pattern) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $did_pattern)) {
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in did_pattern"
-		);
+		];
     } elseif (!is_null($did_description) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $did_description)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in did_description"
-		);
+		];
     } elseif (!in_array($user_unavailable_action,$defUUA) && !is_null($user_unavailable_action)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'."
-		);
+		];
 	} elseif (!in_array($active,$defActive) && !is_null($active)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!in_array($did_route,$defRoute) && !is_null($did_route)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only."
-		);
+		];
 	} elseif (!in_array($record_call,$defRecordCall) && !is_null($record_call)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only."
-		);
+		];
 	} elseif (!is_null($group_id) && preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬]/', $group_id)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in group_id"
-		);
+		];
     } elseif (!is_null($phone) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $phone)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in phone"
-		);
+		];
     } elseif (!is_null($server_ip) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $server_ip)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in server_ip"
-		);
+		];
     } elseif (!is_null($menu_id) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $menu_id)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in menu_id"
-		);
+		];
     } elseif (!is_null($voicemail_ext) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $voicemail_ext)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in voicemail_ext"
-		);
+		];
     } elseif (!is_null($extension) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $extension)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in extension"
-		);
+		];
     } elseif (!is_null($exten_context) && preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $exten_context)) {
-        $apiresults 								= array(
+        $apiresults 								= [
 			"result" 									=> "Error: Special characters found in exten_context"
-		);
+		];
     } else {
 		if (checkIfTenant($log_group, $goDB)) {
             $astDB->where("user_group", $log_group);
@@ -243,7 +243,7 @@
             $astDB->getOne("vicidial_inbound_dids", "did_pattern");
 
             if ($astDB->count < 1) {				
-                $data 								= array(
+                $data 								= [
 					"did_pattern"						=> $did_pattern,
 					"did_description" 					=> $did_description,
 					"did_active" 						=> $did_active,
@@ -262,25 +262,25 @@
                     'list_id'                           => $list_id,
                     'call_handle_method'                => $call_handle_method,
                     'agent_search_method'               => $agent_search_method
-				);
+				];
 				
 				$astDB->where("did_id", $did_id);
 				$astDB->update("vicidial_inbound_dids", $data);
 									
 				$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified DID ID $did_id", $log_group, $astDB->getLastQuery());
              
-				$apiresults 						= array(
+				$apiresults 						= [
 					"result" 							=> "success"
-				);             
+				];             
             } else {
-                $apiresults 						= array(
+                $apiresults 						= [
 					"result" 							=> "Duplicate did_pattern, It must be unique!\n"
-				);
+				];
             }
         } else {
-			$apiresults 							= array(
+			$apiresults 							= [
 				"result" 								=> "Error: DID doesn't exist."
-			);        
+			];        
         }
     }
     

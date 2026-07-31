@@ -21,30 +21,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
 	} else {		
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -100,7 +100,7 @@
 					$dataxferconf_e_number[] 			= $fresults['xferconf_e_number'];
 				}
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result"								=> "success",
 					"list_id" 								=> $dataListId,
 					"list_name" 							=> $dataListName,
@@ -121,18 +121,18 @@
 					"xferconf_c_number" 					=> $dataxferconf_c_number,
 					"xferconf_d_number" 					=> $dataxferconf_d_number,
 					"xferconf_e_number" 					=> $dataxferconf_e_number
-				);
+				];
 			} else {
-				$apiresults								= array(
+				$apiresults								= [
 					"result" 								=> "Error: No record found."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

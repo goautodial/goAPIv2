@@ -27,15 +27,13 @@
 	$status = $astDB->escape($_REQUEST["status"]);
 	
 	$sortBy = $astDB->escape($_REQUEST["sortBy"]);
-	if(!empty($sortBy)){
-		$sortBy = $sortBy;
-	}else{
+	if(empty($sortBy)){
 		$sortBy = "status";
 	}
 	
 	if($camp == null) {
 		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
+		$apiresults = ["code" => "40001", "result" => $err_msg];
 		//$apiresults = array("result" => "Error: Set a value for Campaign ID.");
 	} else {
 		$campSQL = "";
@@ -44,14 +42,11 @@
 		if (!is_null($camp))
 			$campSQL = "AND campaign_id='$camp'";
 		if (is_null($camp)) {
-			$camps = go_getall_allowed_campaigns($goUser, $astDB);
-			if ($select=="N")
-				$campSQL = "AND campaign_id IN ($camps)";
-			else
-				$campSQL = "AND campaign_id IN ($camps)";
+			$camps = go_getall_allowed_campaigns($goUser);
+			$campSQL = "AND campaign_id IN ($camps)";
 		}
 
-		$groupId = go_get_groupid($goUser, $astDB);
+		$groupId = go_get_groupid($goUser);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "";
@@ -93,7 +88,7 @@
 					$goDB->where('campaign_id', $fresult['campaign_id']);
 					$statusData = $goDB->getOne('go_statuses', 'priority,color');
 				}
-				
+
 				$dataStat[] = $fresult['status'];
 				$dataStatName[] = $fresult['status_name'];
 				$dataCampID[] = $fresult['campaign_id'];
@@ -105,19 +100,19 @@
 				$dataNot_interested[] = $fresult['not_interested'];
 				$dataUnworkable[] = $fresult['unworkable'];
 				$dataScheduled_callback[] = $fresult['scheduled_callback'];
-				$dataPriority[] = (!is_null($statusData['priority'])) ? $statusData['priority'] : "1";
-				$dataColor[] = (!is_null($statusData['color'])) ? $statusData['color'] : "#b5b5b5";
-				
+				$dataPriority[] = $statusData['priority'] ?? "1";
+				$dataColor[] = $statusData['color'] ?? "#b5b5b5";
+
 				//$apiresults = array("result" => "success", "campaign_id" => $dataCampID, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback);
 			}
 			
-			$apiresults = array("result" => "success", "campaign_id" => $camp, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback, "priority" => $dataPriority, "color" => $dataColor);
+			$apiresults = ["result" => "success", "campaign_id" => $camp, "status_name" => $dataStatName, "status" => $dataStat, "selectable" => $dataSelectable, "human_answered" => $dataHuman_answered, "sale" => $dataSale, "dnc" => $dataDnc, "customer_contact" => $dataCustomer_contact, "not_interested" => $dataNot_interested, "unworkable" => $dataUnworkable, "scheduled_callback" => $dataScheduled_callback, "priority" => $dataPriority, "color" => $dataColor];
 			
 			$log_id = log_action($goDB, 'VIEW', $log_user, $log_ip, "Viewed the dispositions of campaign $camp", $log_group);
 			
 		} else {
 			$err_msg = error_handle("41004", "campaign_id. Campaign Disposition does not exist!");
-			$apiresults = array("code" => "41004", "result" => $err_msg);
+			$apiresults = ["code" => "41004", "result" => $err_msg];
 			//$apiresults = array("result" => "Error: Campaign disposition does not exist.");
 		}
 	}

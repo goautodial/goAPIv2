@@ -20,16 +20,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
-	
+	include_once (__DIR__ . "/goAPI.php");
+
     ### POST or GET Variables
 	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
-    
+
     ### Check lead filter ID if its null or empty
 	if($lead_filter_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for Lead Filter ID."); 
+		$apiresults = ["result" => "Error: Set a value for Lead Filter ID."]; 
 	} else {
-		$groupId = go_get_groupid($goUser, $astDB);
+		$groupId = go_get_groupid($goUser);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "";
@@ -50,14 +50,14 @@
 				//$deleteQuery = "DELETE FROM vicidial_lead_filters WHERE lead_filter_id='$dataLeadFilterID';";
 				$astDB->where('lead_filter_id', $dataLeadFilterID);
    				$deleteResult = $astDB->delete('vicidial_lead_filters');
-				
+
 				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Filter ID: $dataLeadFilterID", $log_group, $astDB->getLastQuery());
-				$apiresults = array("result" => "success");
+				$apiresults = ["result" => "success"];
 			} else {
-				$apiresults = array("result" => "Error: Lead Filter doesn't exist.");
+				$apiresults = ["result" => "Error: Lead Filter doesn't exist."];
 			}
 		} else {
-			$apiresults = array("result" => "Error: Lead Filter doesn't exist.");
+			$apiresults = ["result" => "Error: Lead Filter doesn't exist."];
 		}
 	}//end
 ?>

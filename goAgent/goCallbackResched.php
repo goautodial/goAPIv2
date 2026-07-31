@@ -24,8 +24,8 @@ $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
 $user_group = $agent->user_group;
-$phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
-$phone_pass = (isset($phone_pass)) ? $phone_pass : $agent->phone_pass;
+$phone_login ??= $agent->phone_login;
+$phone_pass ??= $agent->phone_pass;
 
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
@@ -47,28 +47,28 @@ if ($sipIsLoggedIn) {
 
 
 	if ($cbExist < 1) {
-		$APIResult = array( "result" => "error", "message" => "Callback ID does NOT exist." );
+		$APIResult = [ "result" => "error", "message" => "Callback ID does NOT exist." ];
 	} else {
 		if (!isset($callback_date) || strlen($callback_date) < 10) {
 			$callback_date = date("Y-m-d H:i:s", strtotime('+6 hours'));
 		}
 		$callback_only = ($callback_only ? 'USERONLY' : 'ANYONE');
 		$user_only = ($callback_only === 'USERONLY' ? $user : '');
-		$updateData = array(
+		$updateData = [
 			'status' => 'ACTIVE',
 			'callback_time' => $callback_date,
 			'user' => $user_only,
 			'recipient' => $callback_only,
 			'comments' => $callback_comments
-		);
+		];
 		$astDB->where('callback_id', $callback_id);
 		$rslt = $astDB->update('vicidial_callbacks', $updateData);
 		
 		// Check Callback Lists
-		$updateData = array(
+		$updateData = [
 			'callback_time' => $callback_date,
 			'seen' => false
-		);
+		];
 		$goDB->where('callback_id', $callback_id);
 		$rslt = $goDB->update('go_callback_lists', $updateData);
 		
@@ -77,7 +77,7 @@ if ($sipIsLoggedIn) {
 		$cbtime = date("h:i A", strtotime($callback_date));
 		$astDB->where('lead_id', $lead_id);
 		$rslt = $astDB->getOne('vicidial_list', 'phone_number');
-		$insertData = array(
+		$insertData = [
 			'user_id' => $agent->user_id,
 			'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
 			'description' => $callback_comments,
@@ -88,16 +88,16 @@ if ($sipIsLoggedIn) {
 			'alarm' => '',
 			'notification_sent' => 0,
 			'color' => '#03a9f4'
-		);
+		];
 		$rslt = $goDB->insert('events', $insertData);
 
-		$APIResult = array( "result" => "success", "message" => "Callback Lead re-scheduled in {$callback_date}." );
+		$APIResult = [ "result" => "success", "message" => "Callback Lead re-scheduled in {$callback_date}." ];
 	}
 } else {
     $message = "SIP exten '{$phone_login}' is NOT connected";
-    if (strlen($phone_login) < 1) {
+    if (strlen((string) $phone_login) < 1) {
         $message = "User '$user' does NOT have any phone extension assigned.";
     }
-    $APIResult = array( "result" => "error", "message" => $message );
+    $APIResult = [ "result" => "error", "message" => $message ];
 }
 ?>

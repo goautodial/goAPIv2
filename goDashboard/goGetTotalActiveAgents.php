@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul='';
@@ -33,6 +33,6 @@
 
     $fresults = $astDB->rawQuery($query);
     //$fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( [ "result" => "success" ], $fresults );
 	
 ?>

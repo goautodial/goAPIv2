@@ -21,19 +21,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
 		$stringv = '';
         $ul_online='';
 		$ul_calls='';
     } else { 
-        $stringv = go_getall_allowed_users($groupId, $astDB);
+        $stringv = go_getall_allowed_users($groupId);
 		$ul = " and user IN ($stringv) and user_level != '4'";
     }
     
     $query = "SELECT count(*) as getTotalAgentsOnline FROM vicidial_live_agents $ul"; 
     $data = $astDB->rawQuery($query);
     //$data = mysqli_fetch_assoc($rsltv);
-    $apiresults = array("result" => "success", "data" => $data);
+    $apiresults = ["result" => "success", "data" => $data];
 ?>

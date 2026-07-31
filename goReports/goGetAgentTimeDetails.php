@@ -21,9 +21,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 	
-	$pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
+	$pageTitle 										= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
 	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
@@ -33,23 +33,23 @@
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 									= error_handle("40001");
-        $apiresults 								= array(
+        $apiresults 								= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
 	} else {            
 		// check if goUser and goPass are valid
 		$fresults 									= $astDB
@@ -62,7 +62,7 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// Agent Time Detail
-			if ($pageTitle == "agent_detail") {
+			if ($pageTitle === "agent_detail") {
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
 				//$tenant	= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
@@ -89,18 +89,18 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
 				}
 				
-				$TOTtimeTC = array();
+				$TOTtimeTC = [];
 				
 				$timeclock_ct = $astDB
-					->where("event", array("LOGIN", "START"), "IN")
-					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("event", ["LOGIN", "START"], "IN")
+					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->groupBy("user")
 					->get("vicidial_timeclock_log", "user, SUM(login_sec) as login_sec");
 				
@@ -109,7 +109,7 @@
 						$TCuser 					= $row['user'];
 						$TCtime 					= $row['login_sec'];
 						
-						array_push($TOTtimeTC, $TCtime);
+						$TOTtimeTC[] = $TCtime;
 					}
 				}
 				
@@ -118,15 +118,15 @@
 				$sub_statusesHEAD 					= '';
 				$sub_statusesHTML 					= '';
 				$sub_statusesFILE 					= '';
-				$sub_statusesTOP 					= array();
-				$sub_statusesARY 					= array();
+				$sub_statusesTOP 					= [];
+				$sub_statusesARY 					= [];
 				
 				$PCusers 							= '-';
-				$PCuser_namesARY					= array();
-				$PCusersARY 						= array();
-				$PCpause_secsARY					= array();
+				$PCuser_namesARY					= [];
+				$PCusersARY 						= [];
+				$PCpause_secsARY					= [];
 				
-				if ("ALL" === strtoupper($campaign_id)) {
+				if ("ALL" === strtoupper((string) $campaign_id)) {
                     $astDB->where('user_group', $log_group);
                     $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
             
@@ -150,28 +150,28 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
 				}
 
-				$cols = array(
+				$cols = [
 					"vu.full_name",
 					"val.user",
 					"SUM(pause_sec) as pause_sec",
 					"sub_status"
-				);
+				];
 				
 				$pcs_data = $astDB
 					->join("vicidial_users as vu", "val.user = vu.user", "LEFT")
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					//->where("pause_sec", 0, ">")
 					//->where("pause_sec", 65000, "<")
                     //->where("pause_sec", array(0, 65000), "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
-					->where("sub_status", array("LAGGED", "LOGIN"), "NOT IN")
+					->where("sub_status", ["LAGGED", "LOGIN"], "NOT IN")
 					->groupBy("vu.user,sub_status")
 					->orderBy("vu.user,sub_status")
 					->get("vicidial_agent_log as val", $limit, $cols);
@@ -184,24 +184,24 @@
 						$sub_status[] 	= $pc_data['sub_status'];
 					}
 					
-					$Boutput = array(
+					$Boutput = [
 						"full_name" 	=> $PCfull_name, 
 						"user" 		=> $PCuser, 
 						"pause_sec" 	=> $PCpause_sec,
 						"sub_status"	=> $sub_status
-					);
+					];
 					
 					$SUMstatuses = array_sum($PCpause_secsARY);
 					
-					$BoutputFile = array(
+					$BoutputFile = [
 						"statuses" => $PCpause_secsARY
-					);				
+					];				
 				}
 				
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($userlevel < 8) {
 							$astDB->where("user_group", $log_group);
 						}
@@ -233,7 +233,7 @@
 				$usercount = $astDB->getRowCount();
 				*/
 
-				$cols = array(
+				$cols = [
 					"vu.full_name",
 			    	"val.user",
 					"SUM(wait_sec) as wait_sec",
@@ -242,12 +242,12 @@
 					"SUM(pause_sec) as pause_sec",
 					"status",
 					"SUM(dead_sec) as dead_sec",
-				);
+				];
         
 				
 				$agenttd = $astDB
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					//->where("status != 'LAGGED'")
 				    ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
@@ -269,7 +269,7 @@
 				*/
 				$agenttotalcalls = $astDB
 					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->where("campaign_id", $array_camp, "IN")
 					//->where("sub_status != 'LAGGED'")
 					->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
@@ -357,16 +357,16 @@
 					$TOTcalls	= array_sum($TOTcalls);
 					*/
 
-					$nameARY	= array();
-					$userARY	= array();
-					$wait_secARY	= array();
-					$talk_secARY	= array();
-					$dispo_secARY	= array();
-					$pause_secARY	= array();
-					$dead_secARY	= array();
-					$customerARY	= array();
-					$agent_timeARY	= array();
-					$callsARY	= array();
+					$nameARY	= [];
+					$userARY	= [];
+					$wait_secARY	= [];
+					$talk_secARY	= [];
+					$dispo_secARY	= [];
+					$pause_secARY	= [];
+					$dead_secARY	= [];
+					$customerARY	= [];
+					$agent_timeARY	= [];
+					$callsARY	= [];
 
 					$i=0;
 
@@ -375,11 +375,11 @@
 						$name		= $row['full_name'];
                        
 						if(!in_array($user, $userARY) && isset($name)){
-							array_push($userARY, $user);
-							array_push($nameARY, $name);
+							$userARY[] = $user;
+							$nameARY[] = $name;
 							foreach ($agenttotalcalls as $call){
 								if($call['user'] == $user){
-									array_push($callsARY, $call['calls']);
+									$callsARY[] = $call['calls'];
 								}
 							}	
 						}
@@ -392,24 +392,24 @@
 						$customer = $row['talk_sec'] - $row['dead_sec'];
 				
 									//if ($wait > 65000) {$wait=0;}
-						if ($wait > (strtotime($toDate) - strtotime($fromDate))) {$wait = 0;}
+						if ($wait > (strtotime((string) $toDate) - strtotime((string) $fromDate))) {$wait = 0;}
 										//if ($talk > 65000) {$talk=0;}
-						if ($talk > (strtotime($toDate) - strtotime($fromDate))) {$talk = 0;}
+						if ($talk > (strtotime((string) $toDate) - strtotime((string) $fromDate))) {$talk = 0;}
 										//if ($dispo > 65000) {$dispo=0;}
-						if ($dispo > (strtotime($toDate) - strtotime($fromDate))) {$dispo = 0;}
+						if ($dispo > (strtotime((string) $toDate) - strtotime((string) $fromDate))) {$dispo = 0;}
 										//if ($pause > 65000) {$pause=0;}
-						if ($pause > (strtotime($toDate) - strtotime($fromDate))) {$pause = 0;}
+						if ($pause > (strtotime((string) $toDate) - strtotime((string) $fromDate))) {$pause = 0;}
 										//if ($dead > 65000) {$dead=0;}
-						if ($dead > (strtotime($toDate) - strtotime($fromDate))) {$dead = 0;}			
+						if ($dead > (strtotime((string) $toDate) - strtotime((string) $fromDate))) {$dead = 0;}			
 		
 						if ($customer < 1) {$customer=0;}
 
-						$TOTwait =      ($TOTwait + $wait);
-						$TOTtalk =      ($TOTtalk + $talk);
-						$TOTdispo =     ($TOTdispo + $dispo);
-						$TOTpause =     ($TOTpause + $pause);
-						$TOTdead =      ($TOTdead + $dead);
-						$TOTcustomer =  ($TOTcustomer + $customer);
+						$TOTwait += $wait;
+						$TOTtalk += $talk;
+						$TOTdispo += $dispo;
+						$TOTpause += $pause;
+						$TOTdead += $dead;
+						$TOTcustomer += $customer;
 						$TOTALtime = ($TOTALtime + $pause + $dispo + $talk + $wait);
 						
 						$user_found=0;
@@ -419,12 +419,12 @@
 							if ($user == $userARY[$m]){
 								$user_found++;
 
-								$wait_secARY[$m] =    ($wait_secARY[$m] + $wait);
-								$talk_secARY[$m] =    ($talk_secARY[$m] + $talk);
-								$dispo_secARY[$m] =   ($dispo_secARY[$m] + $dispo);
-								$pause_secARY[$m] =   ($pause_secARY[$m] + $pause);
-								$dead_secARY[$m] =    ($dead_secARY[$m] + $dead);
-								$customerARY[$m] =    ($customerARY[$m] + $customer);
+								$wait_secARY[$m] += $wait;
+								$talk_secARY[$m] += $talk;
+								$dispo_secARY[$m] += $dispo;
+								$pause_secARY[$m] += $pause;
+								$dead_secARY[$m] += $dead;
+								$customerARY[$m] += $customer;
 								$agent_timeARY[$m] =  ($agent_timeARY[$m] + $wait + $talk + $dispo + $pause);
 							}
 							$m++;
@@ -432,8 +432,8 @@
 
 						$i++;
 					} //end of while
-					$d_fromDate = strtotime($fromDate);
-					$d_toDate = strtotime($toDate);
+					$d_fromDate = strtotime((string) $fromDate);
+					$d_toDate = strtotime((string) $toDate);
 					$difference = $d_toDate - $d_fromDate;
 					//$no_days = $difference->days;
 
@@ -477,14 +477,14 @@
 				$timeclock_ct = $astDB						
 					->where("event", "AUTOLOGOUT")
 					->where("user", $user)
-					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->getValue("vicidial_timeclock_log", "count(*)");
 					
 				if ($timeclock_ct > 0) {
 					$TCuserAUTOLOGOUT = '*';
 				}				
 
-				$Toutput = array(
+				$Toutput = [
 					"name" 			=> $nameARY, 
 					"user" 			=> $userARY, 
 					"number_of_calls" 	=> $callsARY, 
@@ -497,11 +497,11 @@
 					"customer_time" 	=> $customerARY,
 					//"usercount" 		=> $usercount,
 					"no_days"		=> $difference
-				);						
+				];						
 
 				$TOPsorted_output = $Toutput;
 		
-				if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
+				if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",(string) $stage)) {
 					if ($file_download > 0) {
 						$file_output .= "$fileToutput";
 					}
@@ -598,7 +598,7 @@
 					$m++			
 				}*/
 
-				$apiresults = array(
+				$apiresults = [
 					"result" 		=> "success", 
 					"TOPsorted_output" 	=> $TOPsorted_output, 
 					"PC_statuses"		=> $pcs_data, //Pause Code data
@@ -618,16 +618,16 @@
 					//"SstatusesBSUM"         => $SstatusesBSUM,
 					//"MIDsorted_output"	=> $MIDsorted_output,
 					//"legend"		=> $legend
-				);
+				];
 				
 				return $apiresults;				
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

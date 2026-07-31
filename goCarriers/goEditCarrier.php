@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     $carrier_id 										= $astDB->escape($_REQUEST['carrier_id']);
     $carrier_name 										= $astDB->escape($_REQUEST['carrier_name']);
@@ -37,34 +37,34 @@
     //$values 											= $_REQUEST['item'];
    
     ### Default values 
-	$defProtocol 										= array( "SIP", "Zap", "IAX2", "EXTERNAL" );	
-    $defActive 											= array( "Y", "N" );  
+	$defProtocol 										= [ "SIP", "Zap", "IAX2", "EXTERNAL" ];	
+    $defActive 											= [ "Y", "N" ];  
 
     ### Check carrier ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty ($goPass) || is_null ($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty ($log_user) || is_null ($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty ($carrier_id) || is_null ($carrier_id)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Server ID not less than 3 characters."
-		);
+		];
 	} elseif (!in_array($active,$defActive) && $active != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!in_array($protocol,$defProtocol) && $protocol != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -78,13 +78,13 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										= (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -97,7 +97,7 @@
 			$carrier_data								= $astDB->getOne("vicidial_server_carriers");
 
 			if ($carrier_data) {	
-				$data 									= array(
+				$data 									= [
 					'carrier_name' 							=> $carrier_name,
 					'carrier_description' 					=> $carrier_description,
 					'protocol' 								=> $protocol,
@@ -107,16 +107,16 @@
 					'account_entry' 						=> $account_entry,
 					'dialplan_entry' 						=> $dialplan_entry,
 					'globals_string' 						=> $globals_string
-				);
+				];
 				
 				$astDB->where('carrier_id', $carrier_id);
 				$q_update 								= $astDB->update('vicidial_server_carriers', $data);
 				$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Updated the carrier settings for: $carrier_id", $log_group, $astDB->getLastQuery());
 				
 				if ($q_update) {
-					$data 								= array(
+					$data 								= [
 						"rebuild_conf_files" 				=> "Y"
-					);
+					];
 					
 					$astDB->where("generate_vicidial_conf", "Y");
 					$astDB->where("active_asterisk_server", "Y");
@@ -125,28 +125,28 @@
 
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Reloaded sip.conf for: $carrier_id", $log_group, $astDB->getLastQuery());
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success", 
 						"data" 								=> $q_update
-					);
+					];
 				} else{
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error in Saving: It appears something has occured, please consult your GOautodial administrator."
-					);
+					];
 				}
 			} else {
 				$err_msg 								= error_handle("10001");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "10001", 
 					"result" 								=> $err_msg
-				);		
+				];		
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

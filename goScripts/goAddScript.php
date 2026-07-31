@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");	 
+	include_once (__DIR__ . "/goAPI.php");	 
  	
 	$script_id 											= $astDB->escape($_REQUEST["script_id"]); 
 	$script_type 										= $astDB->escape($_REQUEST["script_type"]);
@@ -34,33 +34,33 @@
     $active 											= $astDB->escape($_REQUEST["active"]);
     
     ### Default values
-    $defActive 											= array("Y","N");    
+    $defActive 											= ["Y","N"];    
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($script_id) || is_null($script_id) ) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Script ID."
-		);
-	} elseif ( preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/",$script_name) && $script_name != null ) {
-		$apiresults 									= array(
+		];
+	} elseif ( preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/",(string) $script_name) && $script_name != null ) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in script name"
-		);
+		];
 	} elseif ( !in_array($active,$defActive) && $active != null ) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -90,43 +90,43 @@
 				$resultColumn 							= $astDB->rawQuery($queryColumn);	
 
 				if ($resultColumn) {
-					$data_script 						= array(
+					$data_script 						= [
 						"subscript" 						=> $subscript
-					);
+					];
 				}
 				
-				$data_script 							= array(
+				$data_script 							= [
 					"script_id" 							=> $script_id, 
 					"script_comments" 						=> $script_comments, 
 					"script_name" 							=> $script_name, 
 					"active" 								=> $active, 
 					"user_group" 							=> $user_group, 
 					"script_text" 							=> $script_text
-				);
+				];
 				
 				$insertScript 							= $astDB->insert("vicidial_scripts", $data_script);
 					
 				if (!$insertScript) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Add failed, check your details"
-					);
+					];
 				} else {
 					$log_id 							= log_action($goDB, "ADD", $log_user, $log_ip, "Added New Script: $script_id", $log_group, $astDB->getLastQuery());
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				}
 			} else {
-				$apiresults	 							= array(
+				$apiresults	 							= [
 					"result" 								=> "Error: Add failed, Script already already exist!"
-				);
+				];
 			}		
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

@@ -36,11 +36,11 @@ $user = $agent->user;
 if ($is_logged_in) {
 	//$stmt="UPDATE vicidial_live_agents SET $comments='' where user='$user';";
     $astDB->where('user', $user);
-    $rslt = $astDB->update('vicidial_live_agents', array( "$comments" => '' ));
+    $rslt = $astDB->update('vicidial_live_agents', [ "$comments" => '' ]);
 
 	//echo "DONE: $comments";
-    $APIResult = array( "result" => "success", "message" => "DONE: $comments" );
+    $APIResult = [ "result" => "success", "message" => "DONE: $comments" ];
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

@@ -22,38 +22,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
- 
+    include_once (__DIR__ . "/goAPI.php");
+
 	// $campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
-	// ERROR CHECKING 
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
         $astDB->where('user_group', $log_group);
         $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
         $allowed_campaigns = $allowed_camps['allowed_campaigns'];
         $allowed_campaigns = explode(" ", trim($allowed_campaigns));
-        
+
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
@@ -63,7 +63,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					$astDB->where("user_group", $log_group);
 					if ($userlevel > 8) {
 						$astDB->orWhere("user_group", "---ALL---");
@@ -73,35 +73,35 @@
 						}
 					}
 				}
-			}	
-			
-			$rsltvGo									= $goDB->get("users", NULL, "userid,avatar");		
-				
+			}
+
+			$rsltvGo									= $goDB->get("users", NULL, "userid,avatar");
+
 			if ($goDB->count > 0) {
-				$dataGo 								= array();
+				$dataGo 								= [];
 				foreach ($rsltvGo as $fresultsGo){
-					array_push($dataGo, $fresultsGo);
+					$dataGo[] = $fresultsGo;
 				}
-			} 
-			
-			$cols 										= array(
+			}
+
+			$cols 										= [
 				"channel as 'pc_channel'",
 				"server_ip as 'pc_server_ip'",
 				"channel_group as 'pc_channel_group'",
 				"extension as 'pc_extension'",
 				"parked_by as 'pc_parked_by'",
 				"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
-			);
-				
+			];
+
 			$resultsPCs									= $astDB
 				->where("channel", 0, ">")
-				->get("parked_channels", NULL, $cols);	
-				
+				->get("parked_channels", NULL, $cols);
+
 			$tableQuery 								= "SHOW tables LIKE 'online'";
 			$checkTable 								= $astDB->rawQuery($tableQuery);
-			
+
 			if ($checkTable) {
-				$cols 									= array(
+				$cols 									= [
 					"vl.phone_number as 'vl_phone_number'",
 					"vla.extension as 'vla_extension'",
 					"vla.user as 'vla_user'",
@@ -127,13 +127,13 @@
 					"vc.campaign_name as 'vla_campaign_name'",
 					"ol.conference as 'ol_conference'",
 					"ol.name as 'ol_callerid'"
-				);
-				
-				$table									= "vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, online as ol, vicidial_live_agents as vla";				
+				];
+
+				$table									= "vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, online as ol, vicidial_live_agents as vla";
 				//$onlineAgents 							= $astDB
 				//	->join("vicidial_list as vl", "vla.lead_id = vl.lead_id", "LEFT")
 				//	//->join("online as ol", "ol.name = vla.callerid", "LEFT")
-				//	//->joinOrWhere("online as ol", "ol.conference", "vla.conf_exten")			
+				//	//->joinOrWhere("online as ol", "ol.conference", "vla.conf_exten")
 				//	->where("ol.name = vla.callerid")
 				//	->orWhere("ol.conference = vla.conf_exten")
 				//	->where("vla.campaign_id", $campaigns, "IN")
@@ -143,23 +143,23 @@
 				//	->where("vla.user", DEFAULT_USERS, "NOT IN")
 				//	->where("vla.agent_log_id = val.agent_log_id")
 				//	->groupBy("ol.conference")
-				//	->orderBy("last_call_time")		
+				//	->orderBy("last_call_time")
 				//	->get($table, NULL, $cols);
-                
+
                 $SQLuser_group = "";
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel < 8) {
 						$SQLuser_group = "AND vu.user_group = '$log_group'";
 					}
 				}
-                
+
                 $campaignFilters = '';
                 if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $allowedCampaigns = implode("','", $allowed_campaigns);
                     $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
                 }
                 $defaultUsers = implode("','", DEFAULT_USERS);
-		
+
                 $online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
                 $online_query = "AND (ol.name = vla.callerid OR ol.conference = vla.conf_exten)";
                 $online_group = "GROUP BY ol.conference";
@@ -175,37 +175,37 @@
                         vc.campaign_name as 'vla_campaign_name'
                     FROM vicidial_users as vu, vicidial_agent_log as val, vicidial_campaigns as vc, vicidial_live_agents as vla
                     LEFT JOIN vicidial_list as vl ON vla.lead_id = vl.lead_id
-                    WHERE ($campaignFilters vla.campaign_id = vc.campaign_id) 
-                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id 
+                    WHERE ($campaignFilters vla.campaign_id = vc.campaign_id)
+                        AND (vla.user = vu.user AND vla.user NOT IN ('$defaultUsers')) AND vla.user_level != '4' AND vla.agent_log_id = val.agent_log_id
                         $SQLuser_group
                     ORDER BY last_call_time";
                 $onlineAgents = $astDB->rawQuery($SQLquery);
-				$queryoa = $SQLquery; //$astDB->getLastQuery();	
+				$queryoa = $SQLquery; //$astDB->getLastQuery();
 				if ($astDB->count > 0) {
-					$dataPCs 							= array();
-					
+					$dataPCs 							= [];
+
 					if ($resultsPCs) {
-						foreach ($resultsPCs as $resultsPC) {               
-							array_push($dataPCs, $resultsPC);
-						}				
-					}                        
-					
-					$apiresults 						= array(
-						"result" 							=> "success", 
+						foreach ($resultsPCs as $resultsPC) {
+							$dataPCs[] = $resultsPC;
+						}
+					}
+
+					$apiresults 						= [
+						"result" 							=> "success",
 						//"query" 							=> $astDB->getLastQuery(),
                         //"query"                             => $SQLquery,
-						"data" 								=> $onlineAgents, 
+						"data" 								=> $onlineAgents,
 						"dataGo" 							=> $dataGo,
 						"parked" 							=> $dataPCs
-					);			
+					];
 				} else {
-					$apiresults 						= array(
-						"result" 							=> "success", 
+					$apiresults 						= [
+						"result" 							=> "success",
 						"data" 								=> $queryoa
-					);		
+					];
 				}
-					
-			} else {	
+
+			} else {
 				// online agents
                 if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
@@ -214,31 +214,22 @@
 					->where("user_level < 8")
 					->where("user_level != 4")
 					->where("user", DEFAULT_USERS, "NOT IN")
-					->getValue("vicidial_live_agents", "count(*)");		
-					
-				$cols 									= array(
-					"channel as 'pc_channel'",
-					"server_ip as 'pc_server_ip'",
-					"channel_group as 'pc_channel_group'",
-					"extension as 'pc_extension'",
-					"parked_by as 'pc_parked_by'",
-					"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
-				);
-				
+					->getValue("vicidial_live_agents", "count(*)");
+
 				// caller id
-				$cols 									= array(
+				$cols 									= [
 					"callerid as 'vac_callerid'",
 					"lead_id as 'vac_lead_id'",
 					"phone_number as 'vac_phone_number'"
-				);
-				
+				];
+
                 if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
                 }
 				$rsltvCallerIDsFromVAC					= $astDB->get("vicidial_auto_calls", NULL, $cols);
-					
+
 				// waiting for calls
-				$cols 									= array(
+				$cols 									= [
 					"vicidial_live_agents.extension as 'vla_extension'",
 					"vicidial_live_agents.user as 'vla_user'",
 					"vicidial_users.full_name as 'vu_full_name'",
@@ -259,18 +250,18 @@
 					"vicidial_users.user_id as 'vu_user_id'",
 					"vicidial_users.user as 'vu_user'",
 					"vicidial_live_agents.callerid as 'vla_callerid'",
-					"vicidial_agent_log.sub_status as 'vla_pausecode'", 
+					"vicidial_agent_log.sub_status as 'vla_pausecode'",
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
-				);
-				
+				];
+
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";
-                
-				if (strtoupper($log_group) != 'ADMIN') {
+
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel < 8) {
 						$astDB->where("vicidial_users.user_group", $log_group);
 					}
 				}
-                
+
                 if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
@@ -281,11 +272,11 @@
 					->where("vicidial_live_agents.user_level != 4")
 					->where("vicidial_live_agents.user", DEFAULT_USERS, "NOT IN")
 					->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
-					->orderBy("last_call_time")		
+					->orderBy("last_call_time")
 					->get($table, NULL, $cols);
-				
+
 				// live call
-				$cols 									= array(
+				$cols 									= [
 					"vicidial_live_agents.extension as 'vla_extension'",
 					"vicidial_live_agents.user as 'vla_user'",
 					"vicidial_users.full_name as 'vu_full_name'",
@@ -307,18 +298,18 @@
 					"vicidial_users.user as 'vu_user'",
 					"vicidial_live_agents.callerid as 'vla_callerid'",
 					"vicidial_list.phone_number as 'vl_phone_number'",
-					"vicidial_agent_log.sub_status as 'vla_pausecode'", 
+					"vicidial_agent_log.sub_status as 'vla_pausecode'",
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
-				);
-				
+				];
+
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";
-                
-				if (strtoupper($log_group) != 'ADMIN') {
+
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel < 8) {
 						$astDB->where("vicidial_users.user_group", $log_group);
 					}
 				}
-                
+
                 if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("vicidial_campaigns.campaign_id", $allowed_campaigns, "IN");
                 }
@@ -328,54 +319,54 @@
 					->where("vicidial_live_agents.lead_id = vicidial_list.lead_id")
 					->where("vicidial_live_agents.user_level != 4")
 					->where("vicidial_live_agents.agent_log_id = vicidial_agent_log.agent_log_id")
-					->orderBy("last_call_time")		
-					->get($table, NULL, $cols);				   
+					->orderBy("last_call_time")
+					->get($table, NULL, $cols);
 
-				if ($query_OnlineAgents > 0) {				
-					$dataInCalls 						= array();
-					$dataCallerIDsFromVAC 				= array();
-					$dataPCs 							= array();
-					$dataNoCalls 						= array();
-					
-					foreach ($rsltvInCalls as $resultsInCalls){              
-						array_push($dataInCalls, $resultsInCalls);
+				if ($query_OnlineAgents > 0) {
+					$dataInCalls 						= [];
+					$dataCallerIDsFromVAC 				= [];
+					$dataPCs 							= [];
+					$dataNoCalls 						= [];
+
+					foreach ($rsltvInCalls as $resultsInCalls){
+						$dataInCalls[] = $resultsInCalls;
 					}
-											
-					foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAc) {               
-						array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAc);
+
+					foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAc) {
+						$dataCallerIDsFromVAC[] = $resultsCallerIDsFromVAc;
 					}
-					
-					foreach ($resultsPCs as $resultsPC) {               
-						array_push($dataPCs, $resultsPC);
-					}       
-										        
-					foreach ($rsltvNoCalls as $resultsNoCalls) {               
-						array_push($dataNoCalls, $resultsNoCalls);
-					}                
+
+					foreach ($resultsPCs as $resultsPC) {
+						$dataPCs[] = $resultsPC;
+					}
+
+					foreach ($rsltvNoCalls as $resultsNoCalls) {
+						$dataNoCalls[] = $resultsNoCalls;
+					}
 
 					$data 								= array_merge($dataInCalls, $dataNoCalls);
-					$apiresults 						= array(
-						"result" 							=> "success", 
+					$apiresults 						= [
+						"result" 							=> "success",
 						//"query" 							=> $astDB->getLastQuery(),
-						"data" 								=> $data, 
-						"dataGo" 							=> $dataGo, 
-						"parked" 							=> $dataPCs, 
+						"data" 								=> $data,
+						"dataGo" 							=> $dataGo,
+						"parked" 							=> $dataPCs,
 						"callerids" 						=> $dataCallerIDsFromVAC
-					);		
+					];
 				} else {
-					$apiresults 						= array(
-						"result" 							=> "success", 
-						"data" 								=> 0 
-					);		
+					$apiresults 						= [
+						"result" 							=> "success",
+						"data" 								=> 0
+					];
 				}
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
+			$apiresults 								= [
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			);		
+			];
 		}
 	}
-	
+
 ?>

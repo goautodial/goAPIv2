@@ -44,7 +44,7 @@ if (isset($_GET['goUserGroup'])) { $user_group = $astDB->escape($_GET['goUserGro
 if (isset($_GET['goUserRole'])) { $user_role = $astDB->escape($_GET['goUserRole']); }
     else if (isset($_POST['goUserRole'])) { $user_role = $astDB->escape($_POST['goUserRole']); }
 
-if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '')) {
+if ($is_logged_in || (strlen((string) $campaign) < 1 && $user_role < 2 && $user_role != '')) {
 	$agent_status_viewable_groupsSQL = '';
 	### Gather timeclock and shift enforcement restriction settings
 	//$stmt="SELECT agent_status_viewable_groups,agent_status_view_time from vicidial_user_groups where user_group='$VU_user_group';";
@@ -63,7 +63,7 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 	if ($rslt['agent_status_view_time'] == 'Y')
 		{$agent_status_view_time = 1;}
 	$andSQL = '';
-	if (!preg_match("/ALL-GROUPS/", $agent_status_viewable_groups) && strlen($campaign) > 0) {
+	if (!preg_match("/ALL-GROUPS/", $agent_status_viewable_groups) && (string) $campaign !== '') {
 		//$AGENTviewSQL = "($agent_status_viewable_groupsSQL)";
 		//
 		//if (preg_match("/CAMPAIGN-AGENTS/",$agent_status_viewable_groups))
@@ -87,10 +87,10 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
     $rslt = $astDB->get('vicidial_live_agents vla', null, 'vla.user,vla.status,vu.full_name,UNIX_TIMESTAMP(last_call_time) AS call_time,UNIX_TIMESTAMP(last_call_finish) AS call_finish');
 	$agents_count = $astDB->getRowCount();
 	$loop_count = 0;
-    $agentviewlist = array();
-    $agentViewLogin = array();
-    $agentViewLogout = array();
-    $agentViewXFER = array();
+    $agentviewlist = [];
+    $agentViewLogin = [];
+    $agentViewLogout = [];
+    $agentViewXFER = [];
 	while ($agents_count > $loop_count) {
 		$row = $rslt[$loop_count];
 		$user =			$row['user'];
@@ -101,12 +101,12 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 		//$agentviewlistSQL .= "'$user',";
         $agentviewlist[] = $user;
 
-		if ( ($status == 'READY') or ($status == 'CLOSER') ) {
+		if ( $status == 'READY' || $status == 'CLOSER' ) {
 			$statuscolor = '#ADD8E6';
 			$textcolor = '#222';
 			$call_time = ($StarTtimE - $call_finish);
 		}
-		if ( ($status == 'QUEUE') or ($status == 'INCALL') ) {
+		if ( $status == 'QUEUE' || $status == 'INCALL' ) {
 			$statuscolor = '#D8BFD8';
 			$textcolor = '#222';
 			$call_time = ($StarTtimE - $call_start);
@@ -124,7 +124,7 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 			$Fminutes_M_int = floor($Fminutes_M);
 			$Fminutes_M_int = intval("$Fminutes_M_int");
 			$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
-			$Fminutes_S = ($Fminutes_S * 60);
+			$Fminutes_S *= 60;
 			$Fminutes_S = round($Fminutes_S, 0);
 			if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
 			if ($Fminutes_M_int < 10) {$Fminutes_M_int = "0$Fminutes_M_int";}
@@ -150,9 +150,9 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 		$loop_count++;
 	}
     
-    $agentsList = array(
+    $agentsList = [
         'logged_in' => $agentViewLogin
-    );
+    ];
     
 	//$agentviewlistSQL = preg_replace("/.$/i","",$agentviewlistSQL);
 	//if (strlen($agentviewlistSQL)<3)
@@ -185,7 +185,7 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 			}
 			$loop_count++;
         }
-        $agentsList = array_merge($agentsList, array( "logged_out" => $agentViewLogout ));
+        $agentsList = array_merge($agentsList, [ "logged_out" => $agentViewLogout ]);
     }
 	
 	### BEGIN Display the agent transfer select view ###
@@ -210,12 +210,12 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 		$AXVSrecords = ($j / $AXVScolumns);
 		$AXVSrecords = round($AXVSrecords, 0);
 		$m = 0;
-	
+
 		sort($AXVSuserORDER);
 		while ($j > $k) {
 			$order_split = explode("_", $AXVSuserORDER[$k]);
 			$i = $order_split[1];
-	
+
 			//echo "<TR BGCOLOR=\"$AXVSstatuscolor[$i]\"><TD><font style=\"font-size: $AXVSfontsize; font-family: sans-serif;\"> &nbsp; <a href=\"#\" onclick=\"AgentsXferSelect('$AXVSuser[$i]','AgentXferViewSelect');return false;\">$AXVSuser[$i] - $AXVSfull_name[$i]</a>&nbsp;</font></TD>";
 			//if ($agent_status_view_time > 0)
 				//{echo "<TD><font style=\"font-size: $AXVSfontsize;  font-family: sans-serif;\">&nbsp; $AXVScall_time[$i] &nbsp;</font></TD>";}
@@ -226,7 +226,7 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
             $agentViewXFER[$xferUser]['call_time'] = $AXVScall_time[$i];
             $agentViewXFER[$xferUser]['statcolor'] = $AXVSstatuscolor[$i];
             $agentViewXFER[$xferUser]['textcolor'] = $AXVStextcolor[$i];
-	
+
 			$k++;
 			$m++;
 			if ($m >= $AXVSrecords) {
@@ -235,7 +235,7 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 				$m = 0;
 			}
 		}
-        $agentsList = array_merge($agentsList, array( "xfer" => $agentViewXFER ));
+        $agentsList = array_merge($agentsList, [ "xfer" => $agentViewXFER ]);
 		//echo "</TD></TR></TABLE>";
 	}
 	
@@ -245,8 +245,8 @@ if ($is_logged_in || (strlen($campaign) < 1 && $user_role < 2 && $user_role != '
 		//{echo "<font style=\"background-color:#FFFFFF;\"> &nbsp; &nbsp;</font>-LOGGED-OUT &nbsp;\n";}
 	
 	//echo "</font>\n";
-    $APIResult = array( "result" => "success", "data" => array( "agents" => $agentsList ), "debug" => $debugging );
+    $APIResult = [ "result" => "success", "data" => [ "agents" => $agentsList ], "debug" => $debugging ];
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

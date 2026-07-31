@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$allowed_campaigns 									= allowed_campaigns($log_group, $goDB, $astDB);
 	
@@ -33,29 +33,29 @@
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($allowed_campaigns) || is_null($allowed_campaigns)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
-	} elseif (empty($phone_numbers) || is_null($phone_numbers)) {
+		];
+	} elseif ($phone_numbers === [] || is_null($phone_numbers)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -79,7 +79,7 @@
 						if ($idnc) {
 							$error_count 				= 1;
 						} else {					
-							$astDB->insert( 'vicidial_dnc', array( 'phone_number' => $dnc) );
+							$astDB->insert( 'vicidial_dnc', [ 'phone_number' => $dnc] );
 							
 							$log_id 					= log_action($goDB, $stage, $log_user, $log_ip, "$dnc added to internal DNC list", $log_group, $astDB->getLastQuery());				
 						}								
@@ -93,10 +93,10 @@
 							
 						if ($astDB->count <= 0) {
 							$error_count 				= 0;
-							$data						= array(
+							$data						= [
 								'phone_number' 				=> $dnc,
 								'campaign_id'				=> $campaign_id
-							);
+							];
 							
 							$astDB->insert('vicidial_campaign_dnc', $data);
 							
@@ -106,26 +106,26 @@
 						}				
 					}
 					
-					if ( $error_count == 0 ) { 
-						$apiresults 					= array ( 
+					if ( $error_count === 0 ) { 
+						$apiresults 					=  [ 
 							"result" 						=> "success"
-						); 
+						]; 
 					}	
 					
-					if ( $error_count == 1 ) {
+					if ( $error_count === 1 ) {
 						$err_msg 						= error_handle( "10116", " internal DNC list" );
-						$apiresults 					= array(
+						$apiresults 					= [
 							"code" 							=> "10116", 
 							"result" 						=> $err_msg
-						);
+						];
 					}	
 					
-					if ( $error_count == 2 ) {
+					if ( $error_count === 2 ) {
 						$err_msg 						= error_handle( "10001", "Insufficient permision. You must belong to the ADMIN user group" );
-						$apiresults 					= array(
+						$apiresults 					= [
 							"code" 							=> "10001", 
 							"result" 						=> $err_msg
-						);	
+						];	
 					}			
 				}						
 			} 
@@ -173,35 +173,35 @@
 						}				
 					}	
 					
-					if ( $error_count == 0 ) { 
-						$apiresults 					= array ( 
+					if ( $error_count === 0 ) { 
+						$apiresults 					=  [ 
 							"result" 						=> "success"
-						); 
+						]; 
 					}	
 					
-					if ( $error_count == 1 ) {
+					if ( $error_count === 1 ) {
 						$err_msg 						= error_handle("10117");
-						$apiresults 					= array(
+						$apiresults 					= [
 							"code" 							=> "10117", 
 							"result" 						=> $err_msg
-						);	
+						];	
 					}	
 					
-					if ( $error_count == 2 ) {
+					if ( $error_count === 2 ) {
 						$err_msg 						= error_handle( "10004", " goAPIs. You must belong to the ADMIN user group" );
-						$apiresults 					= array(
+						$apiresults 					= [
 							"code" 							=> "10004", 
 							"result" 						=> $err_msg
-						);
+						];
 					}			
 				}		
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}			
 

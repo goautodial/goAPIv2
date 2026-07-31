@@ -21,21 +21,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once('../MySQLiDB.php');
-	@include_once('../goDBasterisk.php');
-	@include_once('../goDBgoautodial.php');
-	@include_once('../goFunctions.php');
+	include_once(__DIR__ . '/../MySQLiDB.php');
+	@include_once(__DIR__ . '/../goDBasterisk.php');
+	@include_once(__DIR__ . '/../goDBgoautodial.php');
+	@include_once(__DIR__ . '/../goFunctions.php');
 	
 	### Check if DB variables are not set ###
-		$VARDB_server   = (!isset($VARDB_server)) ? "162.254.144.92" : $VARDB_server;
-		$VARDB_user     = (!isset($VARDB_user)) ? "justgocloud" : $VARDB_user;
-		$VARDB_pass     = (!isset($VARDB_pass)) ? "justgocloud1234" : $VARDB_pass;
-		$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
+		$VARDB_server ??= "162.254.144.92";
+		$VARDB_user ??= "justgocloud";
+		$VARDB_pass ??= "justgocloud1234";
+		$VARDB_database ??= "asterisk";
 		
-		$VARDBgo_server   = (!isset($VARDBgo_server)) ? "162.254.144.92" : $VARDBgo_server;
-		$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-		$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "pancit8888" : $VARDBgo_pass;
-		$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
+		$VARDBgo_server ??= "162.254.144.92";
+		$VARDBgo_user ??= "goautodialu";
+		$VARDBgo_pass ??= "pancit8888";
+		$VARDBgo_database ??= "goautodial";
 	### End of DB variables ###
 	
 	$goGMTastDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);

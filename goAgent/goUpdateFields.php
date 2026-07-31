@@ -24,15 +24,15 @@ $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
 $user_group = $agent->user_group;
-$phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
-$phone_pass = (isset($phone_pass)) ? $phone_pass : $agent->phone_pass;
+$phone_login ??= $agent->phone_login;
+$phone_pass ??= $agent->phone_pass;
 
 $is_logged_in = check_agent_login($astDB, $user);
 
 if ($is_logged_in) {
 	//$stmt="UPDATE vicidial_live_agents set external_update_fields='0',external_update_fields_data='' where user='$user';";
     $astDB->where('user', $user);
-    $rslt = $astDB->update('vicidial_live_agents', array( 'external_update_fields' => '0', 'external_update_fields_data' => '' ));
+    $rslt = $astDB->update('vicidial_live_agents', [ 'external_update_fields' => '0', 'external_update_fields_data' => '' ]);
 
 	//$stmt="SELECT lead_id from vicidial_live_agents where user='$user';";
     $astDB->where('user', $user);
@@ -83,13 +83,13 @@ if ($is_logged_in) {
 			$owner			= trim("{$row['owner']}");
 
 			$comments = preg_replace("/\r/i", '', $comments);
-			$comments = preg_replace("/\n/i", '!N', $comments);
+			$comments = preg_replace("/\n/i", '!N', (string) $comments);
 
 			$address1 = preg_replace("/\r/i", '', $address1);
-			$address1 = preg_replace("/\n/i", '!N', $address1);
+			$address1 = preg_replace("/\n/i", '!N', (string) $address1);
 
 			$address2 = preg_replace("/\r/i", '', $address2);
-			$address2 = preg_replace("/\n/i", '!N', $address2);
+			$address2 = preg_replace("/\n/i", '!N', (string) $address2);
  
             $areacode = substr($phone_number, 0, 3);
             //$stmt="SELECT country FROM vicidial_phone_codes where country_code='$phone_code' and areacode='$areacode' LIMIT 1;";
@@ -101,7 +101,7 @@ if ($is_logged_in) {
                 $converted_dial_code = trim("{$rslt['country']}");
             }
 
-			$LeaD_InfO  = array(
+			$LeaD_InfO  = [
                 'status' => 'GOOD',
 			    'vendor_id' => $vendor_id,
 			    'source_id' => $source_id,
@@ -130,16 +130,16 @@ if ($is_logged_in) {
 			    'owner' => $owner,
 			    'lead_comment_count' => $lead_comment_count,
 			    'converted_dial_code' => $converted_dial_code
-            );
+            ];
 
-            $APIResult = array( "result" => "success", "data" => $LeaD_InfO );
+            $APIResult = [ "result" => "success", "data" => $LeaD_InfO ];
 		} else {
-            $APIResult = array( "result" => "error", "message" => "No lead info in the system: $lead_id" );
+            $APIResult = [ "result" => "error", "message" => "No lead info in the system: $lead_id" ];
 		}
 	} else {
-        $APIResult = array( "result" => "error", "message" => "No lead active for agent $user" );
+        $APIResult = [ "result" => "error", "message" => "No lead active for agent $user" ];
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" );
+    $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];
 }
 ?>

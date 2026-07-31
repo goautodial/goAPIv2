@@ -21,25 +21,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	$type												= (!isset($_REQUEST["type"])) ? "all-daily" : $astDB->escape($_REQUEST['type']);
+	$type												= (isset($_REQUEST["type"])) ? $astDB->escape($_REQUEST['type']) : "all-daily";
 	$NOW 												= date("Y-m-d");
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -54,7 +54,7 @@
             $astDB->where('user_group', $log_group);
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
             
-            if (strtoupper($log_group) !== 'ADMIN') {
+            if (strtoupper((string) $log_group) !== 'ADMIN') {
                 $allowed_campaigns = trim($allowed_camps['allowed_campaigns'], "-");
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
                     $campaigns = explode(" ", trim($allowed_campaigns));
@@ -62,9 +62,9 @@
 
                 //get inbound groups
                 $getIngroups                            = $astDB->where('user_group', $log_group)
-                    ->get('vicidial_inbound_groups', NULL, array('group_id'));
+                    ->get('vicidial_inbound_groups', NULL, ['group_id']);
 
-                $ingroups                               = array();
+                $ingroups                               = [];
                 foreach ($getIngroups as $fresults) {
                     $ingroups[]                         = $fresults['group_id'];
                 }
@@ -72,7 +72,7 @@
 
 			if (is_array($campaigns)) {
 				//$status									= array("SALE");
-				$default_status = array("SALE");
+				$default_status = ["SALE"];
 				$camp_sql = $astDB->where("sale", "Y")
 					->where("campaign_id", $campaigns, "IN")
 					->get("vicidial_campaign_statuses",NULL, "status");
@@ -97,7 +97,7 @@
 					$data 								= $astDB
 						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
 						->where("vlog.status", $status, "IN")
-						->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vlog.call_date", ["$datetoday 00:00:00", "$datetoday 23:59:59"], "BETWEEN")
 						->where("vlog.campaign_id", $campaigns, "IN")
 						->getValue("vicidial_log as vlog", "count(*)");
 						
@@ -108,33 +108,33 @@
 					$data = $astDB
 						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
 						->where("vlog.status", $status, "IN")
-						->where("vlog.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+						->where("vlog.call_date", ["$datehourly:00:00", "$datehourly:59:59"], "BETWEEN")
 						->where("vlog.campaign_id", $campaigns, "IN")
 						->getValue("vicidial_log as vlog", "count(*)");
 					break;
 					
 					case "in-daily":
 					
-                    if (strtoupper($log_group) !== 'ADMIN') {
+                    if (strtoupper((string) $log_group) !== 'ADMIN') {
                         $astDB->where("vcl.campaign_id", $ingroups, "IN");
                     }
 					$data 								= $astDB
 						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
 						->where("vcl.status", $status, "IN")
-						->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vcl.call_date", ["$datetoday 00:00:00", "$datetoday 23:59:59"], "BETWEEN")
 						// ->where("vcl.campaign_id", $ingroups, "IN")
 						->getValue("vicidial_closer_log vcl", "count(*)");
 					break;
 					
 					case "in-hourly":
 					
-                    if (strtoupper($log_group) !== 'ADMIN') {
+                    if (strtoupper((string) $log_group) !== 'ADMIN') {
                         $astDB->where("vcl.campaign_id", $ingroups, "IN");
                     }
 					$data 								= $astDB
 						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
 						->where("vcl.status", $status, "IN")
-						->where("vcl.call_date", array("$datehourly:00:00", "$datehourly:59:59"), "BETWEEN")
+						->where("vcl.call_date", ["$datehourly:00:00", "$datehourly:59:59"], "BETWEEN")
 						// ->where("vcl.campaign_id", $ingroups, "IN")
 						->getValue("vicidial_closer_log  vcl", "count(*)");
 					break;			
@@ -143,17 +143,17 @@
 					$outsales = $astDB
 						->join("vicidial_list vl", "vlog.lead_id = vl.lead_id", "LEFT")
 						->where("vlog.status", $status, "IN")
-						->where("vlog.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vlog.call_date", ["$datetoday 00:00:00", "$datetoday 23:59:59"], "BETWEEN")
 						->where("vlog.campaign_id", $campaigns, "IN")
 						->getValue("vicidial_log as vlog", "count(*)");
 				
-                    if (strtoupper($log_group) !== 'ADMIN') {
+                    if (strtoupper((string) $log_group) !== 'ADMIN') {
                         $astDB->where("vcl.campaign_id", $ingroups, "IN");
                     }
 					$insales = $astDB
 						->join("vicidial_list vl", "vcl.lead_id = vl.lead_id", "LEFT")
 						->where("vcl.status", $status, "IN")
-						->where("vcl.call_date", array("$datetoday 00:00:00", "$datetoday 23:59:59"), "BETWEEN")
+						->where("vcl.call_date", ["$datetoday 00:00:00", "$datetoday 23:59:59"], "BETWEEN")
 						// ->where("vcl.campaign_id", $ingroups, "IN")
 						->getValue("vicidial_closer_log  vcl", "count(*)");
                         $test = $astDB->getLastQuery();
@@ -162,7 +162,7 @@
 					break;
 				}
 						
-				$apiresults = array(
+				$apiresults = [
 					"result" => "success",
 					//"query"	=> $astDB->getLastQuery(),
 					"data" => $data,
@@ -173,14 +173,14 @@
 					//"type" => $type,
 					//"alex" => $alex
 					//"camp" => "'".implode("','",$campaigns)."'"
-				); 
+				]; 
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

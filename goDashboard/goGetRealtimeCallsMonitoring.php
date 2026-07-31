@@ -22,23 +22,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
         $astDB->where('user_group', $log_group);
         $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -55,13 +55,13 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
-			$cols										= array(
+			$cols										= [
 				"status",
 				"phone_number",
 				"call_type",
 				"UNIX_TIMESTAMP(call_time) as call_time",
 				"vac.campaign_id"
-			);
+			];
 			
 			$table 										= "vicidial_auto_calls as vac, vicidial_campaigns as vc, vicidial_inbound_groups as vig ";
             if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
@@ -72,28 +72,28 @@
 				->get($table, 1000, $cols);
 			
 			if ($astDB->count > 0) {
-				$data 									= array();				
+				$data 									= [];				
 				foreach ($rsltv as $fresults) {       
-					array_push($data, $fresults);
+					$data[] = $fresults;
 				}
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					//"query"								=> $astDB->getLastQuery(),
 					"data" 									=> $data
-				);
+				];
 			} else {			
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"data" 									=> 0
-				);		
+				];		
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
     

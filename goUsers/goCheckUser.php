@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
 	$user 												= $astDB->escape($_REQUEST['user']);
@@ -29,17 +29,17 @@
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -57,14 +57,14 @@
 				$astDB->get("vicidial_users", null, "user");
 			
 				if ($astDB->count > 0) {
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "fail", 
 						"data" 								=> "There are 1 or more users with that User ID."
-					);
+					];
 				} else {		
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "success"
-					);
+					];
 				}
 			}
 			
@@ -74,14 +74,14 @@
 				$astDB->get("phones", null, "extension");
 
 				if ($astDB->count > 0) {
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "fail", 
 						"data" 								=> "Duplicate phone extension found."
-					);
+					];
 				} else {		
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "success"
-					);
+					];
 				}		
 			}
 			
@@ -90,23 +90,23 @@
 				$astDB->get("phones", null, "extension");
 
 				if ($astDB->count > 0) {
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "success"
 						//"data" 								=> "Phone extension found." 
-					);
+					];
 				} else {		
-					$apiresults 						= array (
+					$apiresults 						=  [
 						"result" 							=> "fail",
 						"data" 								=> "Phone extension not found."
-					);
+					];
 				}		
 			}		
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

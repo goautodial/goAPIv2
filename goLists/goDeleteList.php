@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
         
     // POST or GET Variables
     $list_ids 											= $_REQUEST['list_id'];
@@ -30,24 +30,24 @@
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($list_ids) || is_null($list_ids)) {
 		$err_msg 										= error_handle("10107");
-		$apiresults 									= array(
+		$apiresults 									= [
 			"code" 											=> "10107", 
 			"result" 										=> $err_msg
-		); 
-	} elseif ($action == "delete_selected") {
+		]; 
+	} elseif ($action === "delete_selected") {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -80,25 +80,25 @@
 			
 					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				} else {				
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: List doesn't exist."
-					);
+					];
 				}
 			}
 			
-			$apiresults 								= array(
+			$apiresults 								= [
 				"result" 									=> "success"
-			);			
+			];			
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

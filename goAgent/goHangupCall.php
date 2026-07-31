@@ -56,17 +56,17 @@ $user = $agent->user;
 if ($is_logged_in) {
     //$stmt="UPDATE vicidial_live_agents SET external_hangup='0' where user='$user';";
     $astDB->where('user', $user);
-    $rslt = $astDB->update('vicidial_live_agents', array( 'external_hangup' => 0 ));
+    $rslt = $astDB->update('vicidial_live_agents', [ 'external_hangup' => 0 ]);
 
     $channel_live = 1;
-    if ( (strlen($channel)<3) or (strlen($queryCID)<15) ) {
+    if ( strlen((string) $channel) < 3 || strlen((string) $queryCID) < 15 ) {
         $channel_live = 0;
         //echo "Channel $channel is not valid or queryCID $queryCID is not valid, Hangup command not inserted";
-        $APIResult = array( "result" => "error", "message" => "Channel '{$channel}' is NOT valid or queryCID '{$queryCID}' is NOT valid. Hangup command not inserted." );
+        $APIResult = [ "result" => "error", "message" => "Channel '{$channel}' is NOT valid or queryCID '{$queryCID}' is NOT valid. Hangup command not inserted." ];
     } else {
-        if (strlen($call_server_ip) < 7) {$call_server_ip = $server_ip;}
+        if (strlen((string) $call_server_ip) < 7) {$call_server_ip = $server_ip;}
         
-        if ( ($auto_dial_level > 0) and (strlen($CallCID)>2) and (strlen($exten) > 2) and ($seconds > 0)) {
+        if ( $auto_dial_level > 0 && strlen((string) $CallCID) > 2 && strlen((string) $exten) > 2 && $seconds > 0) {
             //$stmt="SELECT count(*) FROM vicidial_auto_calls where channel='$channel' and callerid='$CalLCID';";
             $astDB->where('channel', $channel);
             $astDB->where('callerid', $CallCID);
@@ -87,7 +87,7 @@ if ($is_logged_in) {
                 }
             }
         }
-        if ( ($auto_dial_level < 1) and (strlen($stage)>2) and (strlen($channel)>2) and (strlen($exten)>2) ) {
+        if ( $auto_dial_level < 1 && strlen((string) $stage) > 2 && strlen((string) $channel) > 2 && strlen((string) $exten) > 2 ) {
             //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel' and extension NOT LIKE \"%$exten%\";";
             $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM live_channels WHERE server_ip = '$call_server_ip' AND channel='$channel' AND extension NOT LIKE \"%$exten%\";");
             if ($rslt[0]['cnt'] > 0) {
@@ -99,8 +99,8 @@ if ($is_logged_in) {
             }
         }
     
-        if ($channel_live == 1) {
-            if ( (strlen($CallCID) > 15) and ($seconds > 0)) {
+        if ($channel_live === 1) {
+            if ( strlen((string) $CallCID) > 15 && $seconds > 0) {
                 //$stmt="SELECT count(*) FROM vicidial_auto_calls where callerid='$CalLCID';";
                 $astDB->where('callerid', $CallCID);
                 $rslt = $astDB->get('vicidial_auto_calls');
@@ -145,7 +145,7 @@ if ($is_logged_in) {
                                 $CLqueue_position =		$rslt['queue_position'];
                             }
     
-                            $CLstage = preg_replace("/.*-/", '', $CLstage);
+                            $CLstage = preg_replace("/.*-/", '', (string) $CLstage);
                             if (strlen($CLstage) < 1) {$CLstage = 0;}
 
                             //$stmt="SELECT count(*) from queue_log where call_id='$CalLCID' and verb='COMPLETECALLER' and queue='$CLcampaign_id';";
@@ -162,7 +162,7 @@ if ($is_logged_in) {
                                 $time_id = 0;
                                 //$stmt="SELECT time_id from queue_log where call_id='$CalLCID' and verb IN('ENTERQUEUE','CALLOUTBOUND') and queue='$CLcampaign_id';";
                                 $qmDB->where('call_id', $CallCID);
-                                $qmDB->where('verb', array('ENTERQUEUE', 'CALLOUTBOUND'), 'in');
+                                $qmDB->where('verb', ['ENTERQUEUE', 'CALLOUTBOUND'], 'in');
                                 $qmDB->where('queue', $CLcampaign_id);
                                 $rslt = $qmDB->get('queue_log', null, 'time_id');
                                 $VAC_eq_ct = $qmDB->getRowCount();
@@ -183,16 +183,16 @@ if ($is_logged_in) {
                                 if ($cqpe_ct > 0) {
                                     $row = $rslt[0];
                                     $pe_append = '';
-                                    if ( ($queuemetrics->queuemetrics_pe_phone_append > 0) and (strlen($row['queuemetrics_phone_environment']) > 0) )
+                                    if ( $queuemetrics->queuemetrics_pe_phone_append > 0 && strlen($row['queuemetrics_phone_environment']) > 0 )
                                         {$pe_append = "-$qm_extension";}
                                     $data4SQL = ",data4='{$row['queuemeterics_phone_enviromene']}{$pe_append}'";
                                     $data4SS = "&data4={$row['queuemeterics_phone_enviromene']}{$pe_append}";
-                                    $data4SQL = array(
+                                    $data4SQL = [
                                         'data4' => "{$row['queuemeterics_phone_enviromene']}{$pe_append}"
-                                    );
+                                    ];
                                 }
 
-                                $insertData = array(
+                                $insertData = [
                                     'partition' => 'P01',
                                     'time_id' => $StarTtime,
                                     'call_id' => $CallCID,
@@ -203,7 +203,7 @@ if ($is_logged_in) {
                                     'data2' => $seconds,
                                     'data3' => $CLqueue_position,
                                     'serverid' => $queuemetrics_log_id
-                                );
+                                ];
                                 
                                 if (is_array($data4SQL)) {
                                     $insertData = array_merge($insertData, $data4SQL);
@@ -212,10 +212,10 @@ if ($is_logged_in) {
                                 $rslt = $qmDB->insert('queue_log', $insertData);
                                 $affected_rows = $qmDB->getRowCount();
     
-                                if ( ($queuemetrics->queuemetrics_socket == 'CONNECT_COMPLETE') and (strlen($queuemetrics->queuemetrics_socket_url) > 10) ) {
+                                if ( $queuemetrics->queuemetrics_socket == 'CONNECT_COMPLETE' && strlen((string) $queuemetrics->queuemetrics_socket_url) > 10 ) {
                                     $socket_send_data_begin='?';
                                     $socket_send_data = "time_id=$StarTtime&call_id=$CallCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$secondS&data3=$CLqueue_position$data4SS";
-                                    if (preg_match("/\?/",$queuemetrics->queuemetrics_socket_url))
+                                    if (preg_match("/\?/",(string) $queuemetrics->queuemetrics_socket_url))
                                         {$socket_send_data_begin='&';}
                                     ### send queue_log data to the queuemetrics_socket_url ###
                                     //if ($DB > 0) {echo "$queuemetrics_socket_url$socket_send_data_begin$socket_send_data<BR>\n";}
@@ -229,7 +229,7 @@ if ($is_logged_in) {
             }
     
             //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Hangup','$queryCID','Channel: $channel','','','','','','','','','');";
-            $insertData = array(
+            $insertData = [
                 'man_id' => '',
                 'uniqueid' => '',
                 'entry_date' => $NOW_TIME,
@@ -249,19 +249,19 @@ if ($is_logged_in) {
                 'cmd_line_i' => '',
                 'cmd_line_j' => '',
                 'cmd_line_k' => ''
-            );
+            ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
             $errmsg = $astDB->getLastError();
-            if (strlen($errmsg) < 1) {
-                $APIResult = array( "result" => "success", "message" => "Hangup command sent for Channel {$channel} on {$call_server_ip}" );
+            if (strlen((string) $errmsg) < 1) {
+                $APIResult = [ "result" => "success", "message" => "Hangup command sent for Channel {$channel} on {$call_server_ip}" ];
             } else {
-                $APIResult = array( "result" => "error", "message" => $errmsg );
+                $APIResult = [ "result" => "error", "message" => $errmsg ];
             }
         } else {
-            $APIResult = array( "result" => "error", "message" => $errmsg );
+            $APIResult = [ "result" => "error", "message" => $errmsg ];
         }
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

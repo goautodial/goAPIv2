@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
 	### POST or GET Variables
 	$list_id = $astDB->escape($_REQUEST['list_id']);
@@ -30,26 +30,26 @@
 	$list_description = $astDB->escape($_REQUEST['list_description']);
 
     ### Default values 
-    $defActive = array("Y","N");
+    $defActive = ["Y","N"];
     
     ### Check campaign_id if its null or empty
 	if($list_id == null || $list_id == "") { 
-		$apiresults = array("result" => "Error: List ID field is required."); 
+		$apiresults = ["result" => "Error: List ID field is required."]; 
 	} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_name) || $list_name == null){
-            $apiresults = array("result" => "Error: Special characters found in list_name and must not be empty");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_name) || $list_name == null){
+            $apiresults = ["result" => "Error: Special characters found in list_name and must not be empty"];
         } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $list_description) || $list_description == null){
-                $apiresults = array("result" => "Error: Special characters found in list_description and must not be empty");
+			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_description) || $list_description == null){
+                $apiresults = ["result" => "Error: Special characters found in list_description and must not be empty"];
 			} else {
 				### Check value compare to default values
 				if(!in_array($active,$defActive) && $active != null) { 
-					$apiresults = array("result" => "Error: Default value for active is Y or N only."); 
+					$apiresults = ["result" => "Error: Default value for active is Y or N only."]; 
 				} else {
 					if(!is_numeric($list_id)){
-						$apiresults = array("result" => "Error: List ID must be a number or combination of number");
+						$apiresults = ["result" => "Error: List ID must be a number or combination of number"];
 					} else {
-						$groupId = go_get_groupid($goUser, $astDB);
+						$groupId = go_get_groupid($goUser);
 					
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "WHERE list_id='$list_id'";
@@ -80,7 +80,7 @@
 							$countResult = $astDB->getRowCount();
 						
 							if($countResult > 0) {
-								$apiresults = array("result" => "Error: there is already a LIST ID in the system with this ID.");
+								$apiresults = ["result" => "Error: there is already a LIST ID in the system with this ID."];
 							} else {
 								$SQLdate = date("Y-m-d H:i:s");
 								$addQuery = "INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description,list_changedate) values('$list_id','".mysqli_real_escape_string($list_name)."','$campaign_id','$active','$list_description','$SQLdate');";
@@ -89,13 +89,13 @@
 								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added New List: $list_id", $log_group, $addQuery);
 						
 								if(!$addResult) {
-									$apiresults = array("result" => "Error: Failed to add");
+									$apiresults = ["result" => "Error: Failed to add"];
 								} else {
-									$apiresults = array("result" => "success");
+									$apiresults = ["result" => "success"];
 								}
 							}
 						} else {
-							$apiresults = array("result" => "Error: Invalid Campaign ID");
+							$apiresults = ["result" => "Error: Invalid Campaign ID"];
 						}
 					}
 				}

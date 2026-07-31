@@ -30,8 +30,8 @@
     $countCheck = $astDB->getRowCount();
     
     if($countCheck > 0) {
-        $apiresults = array("result" => "Error: Carrier already exist.");
+        $apiresults = ["result" => "Error: Carrier already exist."];
     } else {
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     }
 ?>

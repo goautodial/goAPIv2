@@ -21,13 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once("goAPI.php");
-	include_once("goReportsFunctions.php");
+    include_once(__DIR__ . "/goAPI.php");
+	include_once(__DIR__ . "/goReportsFunctions.php");
 	
 	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// need function go_sec_convert();
-    $pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
+    $pageTitle 										= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
@@ -42,7 +42,7 @@
     	$toDate 									= date("Y-m-d")." 23:59:59";
 	}
 		
-	$defPage 										= array(
+	$defPage 										= [
 		"stats", 
 		"agent_detail", 
 		"agent_pdetail", 
@@ -51,35 +51,35 @@
 		"sales_agent", 
 		"sales_tracker", 
 		"inbound_report"
-	);
+	];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($fromDate) && empty($toDate)) {
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
 		//die($fromDate." - ".$toDate);
-	} elseif ($pageTitle == "sales_tracker" && empty($request)) {
+	} elseif ($pageTitle === "sales_tracker" && empty($request)) {
 		$err_msg 									= error_handle("40001");
-		$apiresults 								= array(
+		$apiresults 								= [
 			"code" 										=> "40001", 
 			"result" 									=> $err_msg
-		);
-	} elseif ($pageTitle == "sales_agent" && empty($request)) {
+		];
+	} elseif ($pageTitle === "sales_agent" && empty($request)) {
 		$err_msg 									= error_handle("40001");
-		$apiresults 								= array(
+		$apiresults 								= [
 			"code" 										=> "40001", 
 			"result" 									=> $err_msg
-		);
+		];
 	} elseif (!in_array($pageTitle, $defPage)) {
 	 	$err_msg 									= error_handle("10004");
-		$apiresults 								= array(
+		$apiresults 								= [
 			"code" 										=> "10004", 
 			"result" 									=> $err_msg
-		);
-	} elseif ($pageTitle == "call_export_report") {
+		];
+	} elseif ($pageTitle === "call_export_report") {
 		$campaigns 									= $astDB->escape($_REQUEST['campaigns']);
 		$inbounds 									= $astDB->escape($_REQUEST['inbounds']);
 		$lists 										= $astDB->escape($_REQUEST['lists']);
@@ -88,16 +88,16 @@
 		$rec_location 									= $astDB->escape($_REQUEST['rec_location']);
 		
 		$goReportsReturn 							= go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $log_group, $astDB);		
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 								=> "success", 
 			"getReports" 								=> $goReportsReturn
-		);
+		];
 	} else {
 		$goReportsReturn 							= go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group,$astDB, $dispo_stats, $goDB);
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "success", 
 			"getReports" 								=> $goReportsReturn
-		);
+		];
 	}
 	return $apiresults;	
  
@@ -123,12 +123,12 @@
 
 		if ($campaigns != "") {
 			$i								= 0;
-			$array_campaign 						= Array();
+			$array_campaign 						= [];
 
 			while ($i < $campaign_ct) {
 				//$campaign_SQL .= "'$campaigns[$i]',";
 				$campaign_SQL 						.= "'?',";
-				array_push($array_campaign, $campaigns[$i]);
+				$array_campaign[] = $campaigns[$i];
 				$i++;
 			}
 			
@@ -142,13 +142,13 @@
 		
 		if ($inbounds != "") {
 			$i								= 0;
-			$array_inbound 							= Array();
+			$array_inbound 							= [];
 
 			while ($i < $group_ct) {
-				if (strlen($inbounds[$i]) > 0) {
+				if ($inbounds[$i] !== '') {
 				  //$group_SQL .= "'$inbounds[$i]',";
 					$group_SQL 						.= "'?',";
-					array_push($array_inbound, $inbounds[$i]);
+					$array_inbound[] = $inbounds[$i];
 				}
 				$i++;
 			}
@@ -167,11 +167,11 @@
 			$list_SQL 								= "";
 			
 			$i									= 0;
-			$array_list 								= Array();
+			$array_list 								= [];
 			while ($i < $list_ct) {
 				//$list_SQL .= "'$lists[$i]',";
 				$list_SQL 							.= "'?',";
-				array_push($array_list, $lists[$i]);
+				$array_list[] = $lists[$i];
 				$i++;
 			}
 			if (in_array("ALL", $lists)) {
@@ -204,16 +204,16 @@
 		
 		if ($dispo_stats != "") {
 			$i									= 0;
-			$array_status 								= Array();
+			$array_status 								= [];
 
 			while ($i < $status_ct) {
 				//$status_SQL .= "'$dispo_stats[$i]',";
 				$status_SQL 							.= "'?',";
-				array_push($array_status, $dispo_stats[$i]);
+				$array_status[] = $dispo_stats[$i];
 				$i++;
 			}
 			
-			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ) {
+			if ( in_array("ALL", $dispo_stats) || $status_ct < 1 ) {
 				$status_SQL 						= "";
 			} else {
 				$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
@@ -231,12 +231,12 @@
 		$export_fields_SQL 							= "";
 		
 		if ($RUNcampaign > 0 && $RUNgroup < 1) {
-			$WHERE_data 							= Array($fromDate, $toDate);
+			$WHERE_data 							= [$fromDate, $toDate];
 			$result 								= $astDB->rawQuery("SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL FROM vicidial_users vu, vicidial_log vl,vicidial_list vi WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '?' AND '?') AND vu.user=vl.user AND vi.lead_id=vl.lead_id $list_SQL $campaign_SQL $user_group_SQL $status_SQL order by vl.call_date", $WHERE_data);
 		}
 		
 		if ($RUNgroup > 0 && $RUNcampaign < 1) {
-			$WHERE_data 							= Array($fromDate, $toDate);
+			$WHERE_data 							= [$fromDate, $toDate];
 			$result 								= $astDB->rawQuery("
 				SELECT vcl.call_date,
 					vcl.phone_number,
@@ -288,7 +288,7 @@
 		}
 		
 		if ($RUNcampaign > 0 && $RUNgroup > 0) {
-			$WHERE_data = Array($fromDate, $toDate);
+			$WHERE_data = [$fromDate, $toDate];
 			$result = $astDB->rawQuery("
 				(SELECT vl.call_date,
 					vl.phone_number,
@@ -393,17 +393,18 @@
 		}
 		
 		if ($per_call_notes == "Y") {
-			array_push($csv_header, "call_notes");
+			$csv_header[] = "call_notes";
 		}
 
 		if ($rec_location == "Y") {
-			array_push($csv_header, "recording_location");
+			$csv_header[] = "recording_location";
 		}
 		if ($custom_fields == "Y")	{
-		    for ($i = 0 ; $i < count($array_list); $i++) {
+		    $counter = count($array_list);
+            for ($i = 0 ; $i < $counter; $i++) {
 				$list_id 								= $array_list[$i];
 				//$query_CF_list = "DESC custom_$list_id;");
-				$cflist_data 							= Array("custom_".$list_id);
+				$cflist_data 							= ["custom_".$list_id];
 				$query_CF_list 							= rawQuery("DESC ?;", $cflist_data);
 				if ($query_CF_list) {
 					$n 									= 0;
@@ -419,10 +420,11 @@
 				}
 			}
 
-			$header_CF 									= array();
+			$header_CF 									= [];
 			$keys 										= array_keys($active_list_fields);
+            $counter = count($keys);
 			
-			for ($i = 0; $i < count($keys); $i++) {
+			for ($i = 0; $i < $counter; $i++) {
 				$list_id 								= $keys[$i];
 				for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
 					$field 								= $active_list_fields[$list_id][$x];
@@ -449,12 +451,12 @@
 				
 				if ($notes_ct > 0) {
 					$notes_data 						= $fetch_callnotes["call_notes"];
-					$notes_data 						= rawurldecode($notes_data);
+					$notes_data 						= rawurldecode((string) $notes_data);
 				} else {
 					$notes_data 						= "";
 				}
 				
-				array_push($row,$notes_data);
+				$row[] = $notes_data;
 			}
 
 			if ($rec_location == "Y") {
@@ -478,7 +480,7 @@
 					$rec_data 							= "";
 				}
 				
-				array_push($row,$rec_data);
+				$row[] = $rec_data;
 			}
 
 			// Replace special characters [,] with -
@@ -497,9 +499,10 @@
             }
 
 			if ($custom_fields == "Y")	{
-				$keys 									= array_keys($active_list_fields); // list of active custom lists
+				$keys 									= array_keys($active_list_fields);
+                $counter = count($keys); // list of active custom lists
 				
-				for ($i = 0 ; $i < count($keys); $i++) {
+				for ($i = 0 ; $i < $counter; $i++) {
 				    $list_id 							= $keys[$i];
 					$fields 							= implode(",", $active_list_fields[$list_id]);
 					
@@ -521,7 +524,7 @@
 					
 
 					for ($a=0;$a < count($fetch_row);$a++) {
-						array_push($row, $fetch_row[$a]);
+						$row[] = $fetch_row[$a];
 					}
 					
 					$queries[] 							= $row;
@@ -534,19 +537,17 @@
 		}
 		// new
 		// ----
-		$campFilter 									= (strlen($campaigns) > 0) ? "Campaign(s): $campaigns" : "";
-		$inbFilter  									= (strlen($inbounds) > 0) ? "Inbound Groups(s): $inbounds" : "";
-		$listFilter 									= (strlen($lists) > 0) ? "List(s): $lists" : "";
-		$log_id 									= log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
+		$campFilter 									= ((string) $campaigns !== '') ? "Campaign(s): $campaigns" : "";
+		$inbFilter  									= ((string) $inbounds !== '') ? "Inbound Groups(s): $inbounds" : "";
+		$listFilter 									= ((string) $lists !== '') ? "List(s): $lists" : "";
+        log_action($goDB, 'DOWNLOAD', $log_user, $log_ip, "Exported Call Reports starting FROM $fromDate to $toDate using the following filters, $campFilter $inbFilter $listFilter", $log_group);
 		
-		$return 										= array(
+		return [
 			"query" 										=> $query, 
 			"header" 										=> $csv_header, 
 			"rows" 											=> $csv_row, 
 			"return_this" 									=> $query
-		);
-		
-		return $return; 
+		]; 
 	}
 	
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group, $astDB, $dispo_stats, $goDB) {		
@@ -561,14 +562,14 @@
             
             // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
             // every time we need to filter out requests
-			if (checkIfTenant ($log_group, $goDB)) {
+			if (checkIfTenant($log_group, $goDB)) {
 				$tenant									= 1;
 			}
 			
             		if ($tenant) {
 				$astDB->where("user_group", $log_group);
             		} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($user_level < 9) {
 						$astDB->where("user_group", $log_group);
 					}
@@ -588,10 +589,10 @@
             
 			if ($astDB->count < 1) {
 				$err_msg 								= error_handle("41004", "campaignID. Doesn't exist");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "41006", 
 					"result" 								=> $err_msg
-				); 
+				]; 
 			} else {
 				//foreach ($resultu as $campaign_name) {
 					//$return['campaign_name'] 			= $resultu['campaign_name'];
@@ -610,7 +611,7 @@
 				->getOne("vicidial_statuses", "status");
 				
 			$sstatusRX 									= "";
-			$sstatuses 									= array();			
+			$sstatuses 									= [];			
 			$a 											= 0;
 			
 			if ($Qstatus) {
@@ -622,7 +623,7 @@
 				//}			
 			}
 			
-			if (!empty($sstatuses))
+			if ($sstatuses !== [])
 			$sstatuses 									= implode("','",$sstatuses);
 			
 			$Qstatus									= $astDB
@@ -631,7 +632,7 @@
 				->getOne("vicidial_campaign_statuses", "status");
 			
 			$cstatusRX 									= "";
-			$cstatuses 									= array();			
+			$cstatuses 									= [];			
 			$b 										= 0;
 			
 			if ($Qstatus) {
@@ -643,7 +644,7 @@
 				//}			
 			}
 			
-			if (!empty($cstatuses)) {
+			if ($cstatuses !== []) {
 				$cstatuses 								= implode("','",$cstatuses);
 			}
 			
@@ -673,7 +674,7 @@
 						$ul 							= "";
 					}
 					
-					if (strlen($stringv) > 0 && $stringv != '') {
+					if ((string) $stringv !== '' && $stringv != '') {
 						$MunionSQL 						= "UNION select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_closer_log where length_in_sec>'0' $ul and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns group by cdate";
 						$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul";
 						$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul group by status";
@@ -712,7 +713,7 @@
 						}						
 					}	
 					
-					$data_calls 						= array(
+					$data_calls 						= [
 						"cdate" 							=> $cdate, 
 						"hour0" 							=> $hour0, 
 						"hour1" 							=> $hour1, 
@@ -738,7 +739,7 @@
 						"hour21" 							=> $hour21, 
 						"hour22" 							=> $hour22, 
 						"hour23" 							=> $hour23
-					);					
+					];					
 					
 					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
 					
@@ -766,7 +767,7 @@
 						->where("campaign_id", $campaignID)
 						->where("date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate'")
 						->groupBy("cuser")
-						->get("vicidial_agent_log", NULL, array("date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"));					
+						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);					
 					
 					$total_agents						= $astDB->getRowCount();
 					
@@ -777,10 +778,10 @@
 						}											
 					}
 					
-					$data_agents 						= array(
+					$data_agents 						= [
 						"cdate" 							=> $cdate, 
 						"cuser" 							=> $cuser
-					);
+					];
 					
 					// Disposition of Calls
 					$astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
@@ -811,12 +812,12 @@
 						}
 					}
 					
-					$data_status 						= array(
+					$data_status 						= [
 						"status" 							=> $status, 
 						"status_name" 						=> $status_name, 
 						"ccount" 							=> $ccount, 
 						"query" 							=> $qtotalcallsmade
-					);
+					];
 				}
 				
 				if ($return['request'] == 'weekly') {
@@ -824,7 +825,7 @@
 					$closerCampaigns 					= " AND campaign_id IN ('$stringv') ";
 					$vcloserCampaigns 					= " AND vclog.campaign_id IN ('$stringv') ";
 
-					if (strlen($stringv) > 0 && $stringv != '') {
+					if ((string) $stringv !== '' && $stringv != '') {
 						$MunionSQL 						= "UNION select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_closer_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns group by weekno";
 						$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns";
 						$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns group by status";
@@ -846,7 +847,7 @@
 						}
 					}
 					
-					$data_calls 						= array(
+					$data_calls 						= [
 						"weekno" 							=> $weekno, 
 						"Day0" 								=> $day0, 
 						"Day1" 								=> $day1, 
@@ -855,7 +856,7 @@
 						"Day4" 								=> $day4, 
 						"Day5" 								=> $day5, 
 						"Day6" 								=> $day6
-					);
+					];
 					
 					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");
 					
@@ -883,7 +884,7 @@
 						->where("campaign_id", $campaignID)
 						->where("date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate'")
 						->groupBy("cuser")
-						->get("vicidial_agent_log", NULL, array("date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"));
+						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);
 					
 					$total_agents						= $astDB->getRowCount();
 					
@@ -894,10 +895,10 @@
 						}
 					}
 					
-					$data_agents 						= array(
+					$data_agents 						= [
 						"cdate" 							=> $cdate, 
 						"cuser" 							=> $cuser
-					);
+					];
 					
 					// Disposition of Calls
 					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
@@ -926,11 +927,11 @@
 						}
 					}
 					
-					$data_status 						= array(
+					$data_status 						= [
 						"status" 						=> $status, 
 						"status_name" 					=> $status_name, 
 						"ccount" 						=> $ccount
-					);
+					];
 				}
 				
 				if ($return['request'] == 'monthly') {
@@ -938,7 +939,7 @@
 					$closerCampaigns 					= " AND campaign_id IN ('$stringv') ";
 					$vcloserCampaigns 					= " AND vclog.campaign_id IN ('$stringv') ";
 
-					if (strlen($stringv) > 0 && $stringv != '') {
+					if ((string) $stringv !== '' && $stringv != '') {
 						$MunionSQL 						= "UNION select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_closer_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by monthname";							
 						$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns";
 						$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by status";
@@ -965,7 +966,7 @@
 						}											
 					}
 					
-					$data_calls 						= array(
+					$data_calls 						= [
 						"monthname" 						=> $monthname, 
 						"Month1" 							=> $month0, 
 						"Month2" 							=> $month1, 
@@ -979,7 +980,7 @@
 						"Month10" 							=> $month9, 
 						"Month11" 							=> $month10, 
 						"Month12" 							=> $month11
-					);
+					];
 					
 					$astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");
 					
@@ -1007,7 +1008,7 @@
 						->where("campaign_id", $campaignID)
 						->where("MONTH(event_time)", "MONTH(event_time) between MONTH('$fromDate') and MONTH('$toDate')")
 						->groupBy("cuser")
-						->get("vicidial_agent_log", NULL, array("date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"));
+						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);
 						
 					$total_agents						= $astDB->getRowCount();
 					
@@ -1018,10 +1019,10 @@
 						}											
 					}
 					
-					$data_agents 						= array(
+					$data_agents 						= [
 						"cdate" 							=> $cdate, 
 						"cuser" 							=> $cuser
-					);					
+					];					
 					
 					// Disposition of Calls					
 					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
@@ -1050,14 +1051,14 @@
 						}
 					}
 					
-					$data_status 						= array(
+					$data_status 						= [
 						"status" 							=> $status, 
 						"status_name" 						=> $status_name, 
 						"ccount" 							=> $ccount
-					);
+					];
 				}
 				
-				$apiresults 							= array(
+				return [
 					"call_time" 							=> $call_time, 
 					"data_calls" 							=> $data_calls, 
 					"data_status" 							=> $data_status, 
@@ -1066,9 +1067,7 @@
 					"total_leads" 							=> $total_leads, 
 					"total_new" 							=> $total_new, 
 					"total_status" 							=> $total_status
-				);
-				
-				return $apiresults;
+				];
 			}
 			
 			// Agent Time Detail
@@ -1091,7 +1090,7 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
@@ -1100,7 +1099,7 @@
 				
 				$quserct 								= $astDB
 					->orderBy("user")
-					->get("vicidial_users", 1000, array("full_name" ,"user"));
+					->get("vicidial_users", 1000, ["full_name" ,"user"]);
 					
 				$user_ct								= $astDB->getRowCount();
 					
@@ -1130,7 +1129,7 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
@@ -1138,8 +1137,8 @@
 				}
 				
 				$timeclock_ct 							= $astDB
-					->where("event", array("LOGIN", "START"), "IN")
-					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("event", ["LOGIN", "START"], "IN")
+					->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->get("vicidial_timeclock_log", "user, SUM(login_sec) as login_sec");
 				
 				if ($astDB->count > 0) {
@@ -1161,7 +1160,7 @@
 				$sub_statusesHEAD 						= '';
 				$sub_statusesHTML 						= '';
 				$sub_statusesFILE 						= '';
-				$sub_statusesTOP 						= array();
+				$sub_statusesTOP 						= [];
 				$sub_statusesARY 						= $MT;
 				
 				$PCusers 							= '-';
@@ -1176,7 +1175,7 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
@@ -1184,12 +1183,12 @@
 				}
 			
 				$pause_sec_ct 							= $astDB
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->where("pause_sec", 0, ">")
 					->where("pause_sec", 65000, "<")
 					->where("campaign_id", $campaignID)
 					->groupBy("user, sub_status")
-					->orderBy("user", "DESC", array("sub_status"))
+					->orderBy("user", "DESC", ["sub_status"])
 					->get("vicidial_agent_log", 1000, "user, SUM(pause_sec) as pause_sec, sub_status");
 		
 				if ($astDB->count > 0) {
@@ -1220,14 +1219,14 @@
 				if ($tenant) {
 					$astDB->where("user_group", $log_group);
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
 					}					
 				}
 				
-				$cols									= array(
+				$cols									= [
 					"user",
 					"wait_sec",
 					"talk_sec",
@@ -1236,10 +1235,10 @@
 					"lead_id",
 					"status",
 					"dead_sec"
-				);
+				];
 				
 				$agent_time_ct 							= $astDB
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->where("campaign_id", $campaignID)
 					->get("vicidial_agent_log", 1000, $cols);
 					
@@ -1266,15 +1265,15 @@
 							$customer					= 0;
 						}
 						
-						$TOTwait 						= ($TOTwait + $wait);
-						$TOTtalk 						= ($TOTtalk + $talk);
-						$TOTdispo 						= ($TOTdispo + $dispo);
-						$TOTpause 						= ($TOTpause + $pause);
-						$TOTdead 						= ($TOTdead + $dead);
-						$TOTcustomer 						= ($TOTcustomer + $customer);
+						$TOTwait += $wait;
+						$TOTtalk += $talk;
+						$TOTdispo += $dispo;
+						$TOTpause += $pause;
+						$TOTdead += $dead;
+						$TOTcustomer += $customer;
 						$TOTALtime 						= ($TOTALtime + $pause + $dispo + $talk + $wait);
 						
-						if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
+						if ( $lead > 0 && (!preg_match("/NULL/",$status) && strlen($status) > 0) ) {
 							$TOTcalls++;
 						}
 						
@@ -1287,17 +1286,17 @@
 						
 						$m								= 0;
 						
-						while ( ($m < $uc) AND ($m < 50000) ) {
+						while ( $m < $uc && $m < 50000 ) {
 							if ($user == $Suser[$m]) {
 								$user_found++;
-								$Swait[$m] 				= ($Swait[$m] + $wait);
-								$Stalk[$m] 				= ($Stalk[$m] + $talk);
-								$Sdispo[$m] 				= ($Sdispo[$m] + $dispo);
-								$Spause[$m] 				= ($Spause[$m] + $pause);
-								$Sdead[$m] 				= ($Sdead[$m] + $dead);
-								$Scustomer[$m] 				= ($Scustomer[$m] + $customer);
+								$Swait[$m] += $wait;
+								$Stalk[$m] += $talk;
+								$Sdispo[$m] += $dispo;
+								$Spause[$m] += $pause;
+								$Sdead[$m] += $dead;
+								$Scustomer[$m] += $customer;
 								
-								if ( ($lead > 0) AND ((!preg_match("/NULL/",$status)) AND (strlen($status) > 0)) ) {
+								if ( $lead > 0 && (!preg_match("/NULL/",$status) && strlen($status) > 0) ) {
 									$Scalls[$m]++;
 								}
 							}
@@ -1428,7 +1427,7 @@
 				$m								= 0;
 				$rowId								= 1;
 				
-				while ( ($m < $uc) AND ($m < 50000) ) {
+				while ( $m < $uc && $m < 50000 ) {
 					$SstatusesHTML						= "";
 					$SstatusesFILE						= "";
 					$Stime[$m] 						= ($Swait[$m] + $Stalk[$m] + $Sdispo[$m] + $Spause[$m]);
@@ -1477,7 +1476,7 @@
 						if ($Suser[$m] == $TCuser[$n]) {
 							$punches_found++;
 							$RAWtimeTCsec					= $TCtime[$n];
-							$TOTtimeTC 					= ($TOTtimeTC + $TCtime[$n]);
+							$TOTtimeTC += $TCtime[$n];
 							$StimeTC[$m] 					= gmdate('H:i:s', $TCtime[$n]); 
 							$RAWtimeTC 					= $StimeTC[$m];
 							$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
@@ -1506,7 +1505,7 @@
 					$timeclock_ct						= $astDB						
 						->where("event", "AUTOLOGOUT")
 						->where("user", $user[$m])
-						->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+						->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 						->getValue("vicidial_timeclock_log", "count(*)");
 						
 					if ($timeclock_ct > 0) {
@@ -1525,8 +1524,8 @@
 						$i						= 0;
 						$status_found					= 0;
 						
-						while ( ($i < $pause_sec_ct) AND ($status_found < 1) ) {
-							if ( ($Suser[$m] == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
+						while ( $i < $pause_sec_ct && $status_found < 1 ) {
+							if ( $Suser[$m] == $PCuser[$i] && $Sstatus == $sub_status[$i] ) {
 								$USERcodePAUSE_MS 		= gmdate('H:i:s', $PCpause_sec[$i]);
 								
 								if (strlen($USERcodePAUSE_MS)<1) {
@@ -1552,7 +1551,7 @@
 						
 						$n++;
 						
-						if (!empty($Sstatuses[$m])) {
+						if (isset($Sstatuses[$m]) && ($Sstatuses[$m] !== '' && $Sstatuses[$m] !== '0')) {
 							$Sstatuses[$m] 				.= ",";
 						}
 					}
@@ -1562,7 +1561,7 @@
 						$Scalls[$m] 					= 0;
 					}
 
-					$Toutput 						= array(
+					$Toutput 						= [
 						"name" 							=> $Sname[$m], 
 						"user" 							=> $Suser[$m], 
 						"number_of_calls" 					=> $Scalls[$m], 
@@ -1573,28 +1572,26 @@
 						"pause_time" 						=> $Spause[$m], 
 						"wrap_up" 						=> $Sdead[$m], 
 						"customer_time" 					=> $Scustomer[$m]
-					);
+					];
 			
 					$Sstatuses[$m] 						= rtrim( $Sstatuses[$m], ",");
 					
-					$Boutput 						= array(
+					$Boutput 						= [
 						"rowID" 						=> $rowId, 
 						"name" 							=> $Sname[$m], 
 						"statuses" 						=> $Sstatuses[$m]
-					);
+					];
 					
-					$BoutputFile 						= array(
+					$BoutputFile 						= [
 						"statuses" 						=> $Sstatuses[$m]
-					);
+					];
 
 					$TOPsorted_output[$m] 				= $Toutput;
 					$BOTsorted_output[$m] 				= $Boutput;
 					$TOPsorted_outputFILE[$m] 			= array_merge($Toutput, $BoutputFile);
 			
 					if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
-						if ($file_download > 0) {
-							$file_output 				.= "$fileToutput";
-						}
+						$file_output 				.= "$fileToutput";
 					}
 					
 					if ($TOPsortMAX < $TOPsortTALLY[$m]) {
@@ -1608,7 +1605,7 @@
 								
 				$TOT_AGENTS 							= 'AGENTS: '.$m;
 				// 	// BEGIN sort through output to display properly //
-				if ( ($TOT_AGENTS > 0) AND (preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) ) {
+				if ( $TOT_AGENTS > 0 && preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage) ) {
 					if (preg_match("/ID/",$stage)) {
 						sort($TOPsort, SORT_NUMERIC);
 					}
@@ -1659,7 +1656,7 @@
 					
 					while ($i < $pause_sec_ct) {
 						if ($Sstatus == "$sub_status[$i]") {
-							$Scalls 					= ($Scalls + $PCpause_sec[$i]);
+							$Scalls += $PCpause_sec[$i];
 							$status_found++;
 						}
 						
@@ -1669,7 +1666,7 @@
 					if ($status_found < 1) {
 						$SUMstatuses[$n] 				= "00:00:00";
 					} else {
-						$TOTtotPAUSE 					= ($TOTtotPAUSE + $Scalls);
+						$TOTtotPAUSE += $Scalls;
 			
 						//$USERsumstatPAUSE_MS 			= gmdate('H:i:s', $Scalls);
 						$USERsumstatPAUSE_MS			= convert($Scalls); 
@@ -1702,7 +1699,7 @@
                                 $TOTALtime                                                              = convert($TOTALtime);
                                 $TOTtimeTC                                                              = convert($TOTtimeTC);
 				
-				$apiresults 							= array(
+				return [
 					"result" 							=> "success", 
 					"TOPsorted_output" 						=> $TOPsorted_output, 
 					"sub_statusesTOP" 						=> $sub_statusesTOP, 
@@ -1719,9 +1716,7 @@
 					"TOT_AGENTS" 							=> $TOT_AGENTS, 
 					"TOTcalls" 							=> $TOTcalls, 
 					"FileExport" 							=> $TOPsorted_outputFILE
-				);
-				
-				return $apiresults;				
+				];				
 			}
 			
 			// Agent Performance Detail
@@ -1766,7 +1761,7 @@
 						$customer_sec[$i]				= 0;
 					}
 					
-					if ( (!preg_match("/-$status[$i]-/", $statuses)) AND (strlen($status[$i])>0) ) {
+					if ( !preg_match("/-$status[$i]-/", $statuses) && strlen($status[$i]) > 0 ) {
 						$statusesFILE 					.= ",$status[$i]";
 						$statuses 						.= "$status[$i]-";
 						$SUMstatuses 					.= "$status[$i] ";
@@ -1811,12 +1806,9 @@
 					
 					$i++;
 				}
-								
-				if ($file_download > 0) {
-					$file_output  						= "CAMPAIGN,$campaignID - ".$resultu->campaign_name."\n";
-					$file_output 						.= "DATE RANGE,$fromDate TO $toDate\n\n";
-					$file_output 						.= "USER NAME,ID,CALLS,AGENT TIME,PAUSE,PAUSE AVG,WAIT,WAIT AVG,TALK,TALK AVG,DISPO,DISPO AVG,WRAPUP,WRAPUP AVG,CUSTOMER,CUST AVG $statusesFILE\n";
-				}
+                $file_output  						= "CAMPAIGN,$campaignID - ".$resultu->campaign_name."\n";
+                $file_output 						.= "DATE RANGE,$fromDate TO $toDate\n\n";
+                $file_output 						.= "USER NAME,ID,CALLS,AGENT TIME,PAUSE,PAUSE AVG,WAIT,WAIT AVG,TALK,TALK AVG,DISPO,DISPO AVG,WRAPUP,WRAPUP AVG,CUSTOMER,CUST AVG $statusesFILE\n";
 				
 				// BEGIN loop through each user //
 				$m										= 0;
@@ -1846,14 +1838,14 @@
 						$status_found					= 0;
 						
 						while ($i < $rows_to_print) {
-							if ( ($Suser=="$user[$i]") AND ($Sstatus == "$status[$i]") ) {
-								$Scalls 				= ($Scalls + $calls[$i]);
-								$Stalk_sec 				= ($Stalk_sec + $talk_sec[$i]);
-								$Spause_sec 			= ($Spause_sec + $pause_sec[$i]);
-								$Swait_sec 				= ($Swait_sec + $wait_sec[$i]);
-								$Sdispo_sec 			= ($Sdispo_sec + $dispo_sec[$i]);
-								$Sdead_sec 				= ($Sdead_sec + $dead_sec[$i]);
-								$Scustomer_sec 			= ($Scustomer_sec + $customer_sec[$i]);
+							if ( $Suser == "$user[$i]" && $Sstatus == "$status[$i]" ) {
+								$Scalls += $calls[$i];
+								$Stalk_sec += $talk_sec[$i];
+								$Spause_sec += $pause_sec[$i];
+								$Swait_sec += $wait_sec[$i];
+								$Sdispo_sec += $dispo_sec[$i];
+								$Sdead_sec += $dead_sec[$i];
+								$Scustomer_sec += $customer_sec[$i];
 								$SstatusesFILE 			.= ",$calls[$i]";
 								$SstatusesMID[$m] 		.= "<td> $calls[$i] </td>";
 								$status_found++;
@@ -1872,47 +1864,47 @@
 					
 					// END loop through each status //
 					$Stime 								= ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
-					$TOTcalls							= ($TOTcalls + $Scalls);
-					$TOTtime							= ($TOTtime + $Stime);
-					$TOTtotTALK							= ($TOTtotTALK + $Stalk_sec);
-					$TOTtotWAIT							= ($TOTtotWAIT + $Swait_sec);
-					$TOTtotPAUSE						= ($TOTtotPAUSE + $Spause_sec);
-					$TOTtotDISPO						= ($TOTtotDISPO + $Sdispo_sec);
-					$TOTtotDEAD							= ($TOTtotDEAD + $Sdead_sec);
-					$TOTtotCUSTOMER						= ($TOTtotCUSTOMER + $Scustomer_sec);
+					$TOTcalls += $Scalls;
+					$TOTtime += $Stime;
+					$TOTtotTALK += $Stalk_sec;
+					$TOTtotWAIT += $Swait_sec;
+					$TOTtotPAUSE += $Spause_sec;
+					$TOTtotDISPO += $Sdispo_sec;
+					$TOTtotDEAD += $Sdead_sec;
+					$TOTtotCUSTOMER += $Scustomer_sec;
 					$Stime 								= ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
 					
-					if ( ($Scalls > 0) AND ($Stalk_sec > 0) ) {
+					if ( $Scalls > 0 && $Stalk_sec > 0 ) {
 						$Stalk_avg 						= ($Stalk_sec/$Scalls);
 					} else {
 						$Stalk_avg						= 0;					
 					}
 					
-					if ( ($Scalls > 0) AND ($Spause_sec > 0) ) {
+					if ( $Scalls > 0 && $Spause_sec > 0 ) {
 						$Spause_avg 					= ($Spause_sec/$Scalls);
 					} else {
 						$Spause_avg						= 0;
 					}
 					
-					if ( ($Scalls > 0) AND ($Swait_sec > 0) ) {
+					if ( $Scalls > 0 && $Swait_sec > 0 ) {
 						$Swait_avg 						= ($Swait_sec/$Scalls);
 					} else {
 						$Swait_avg						= 0;
 					}
 					
-					if ( ($Scalls > 0) AND ($Sdispo_sec > 0) ) {
+					if ( $Scalls > 0 && $Sdispo_sec > 0 ) {
 						$Sdispo_avg 					= ($Sdispo_sec/$Scalls); 
 					} else {
 						$Sdispo_avg						= 0;
 					}
 					
-					if ( ($Scalls > 0) AND ($Sdead_sec > 0) ) {
+					if ( $Scalls > 0 && $Sdead_sec > 0 ) {
 						$Sdead_avg 						= ($Sdead_sec/$Scalls);
 					} else {
 						$Sdead_avg						= 0;
 					}
 					
-					if ( ($Scalls > 0) AND ($Scustomer_sec > 0) ) {
+					if ( $Scalls > 0 && $Scustomer_sec > 0 ) {
 						$Scustomer_avg 					= ($Scustomer_sec/$Scalls);
 					} else {
 						$Scustomer_avg					= 0;
@@ -1937,11 +1929,9 @@
 				
 					$PAUSEtotal[$m] 					= $pfUSERtotPAUSE_MS;
 				
-					if ($file_download > 0) {
-						$fileToutput 					= "$Sfull_name,=\"$Suser\",$Scalls,$pfUSERtime_MS,$pfUSERtotPAUSE_MS,$pfUSERavgPAUSE_MS,$pfUSERtotWAIT_MS,$pfUSERavgWAIT_MS,$pfUSERtotTALK_MS,$pfUSERavgTALK_MS,$pfUSERtotDISPO_MS,$pfUSERavgDISPO_MS,$pfUSERtotDEAD_MS,$pfUSERavgDEAD_MS,$pfUSERtotCUSTOMER_MS,$pfUSERavgCUSTOMER_MS$SstatusesFILE\n";
-					}
+					$fileToutput 					= "$Sfull_name,=\"$Suser\",$Scalls,$pfUSERtime_MS,$pfUSERtotPAUSE_MS,$pfUSERavgPAUSE_MS,$pfUSERtotWAIT_MS,$pfUSERavgWAIT_MS,$pfUSERtotTALK_MS,$pfUSERavgTALK_MS,$pfUSERtotDISPO_MS,$pfUSERavgDISPO_MS,$pfUSERtotDEAD_MS,$pfUSERavgDEAD_MS,$pfUSERtotCUSTOMER_MS,$pfUSERavgCUSTOMER_MS$SstatusesFILE\n";
 					
-					if ($x == 0) {
+					if ($x === 0) {
 						$bgcolor 						= "#E0F8E0";
 						$x								= 1;
 					} else {
@@ -1978,9 +1968,7 @@
 					$TOPsorted_outputFILE[$m] 			= $fileToutput;
 				
 					if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
-						if ($file_download > 0) {
-							$file_output 				.= "$fileToutput";
-						}
+						$file_output 				.= "$fileToutput";
 				
 						$m++;
 					}
@@ -2004,9 +1992,7 @@
 						$i 								= $sort_split[1];
 						$sort_order[$m] 				= "$i";
 						
-						if ($file_download > 0) {
-							$file_output 				.= "$TOPsorted_outputFILE[$i]";
-						}
+						$file_output 				.= "$TOPsorted_outputFILE[$i]";
 						
 						$m++;
 					}
@@ -2028,7 +2014,7 @@
 					
 					while ($i < $rows_to_print) {
 						if ($Sstatus == "$status[$i]") {
-							$Scalls 					= ($Scalls + $calls[$i]);
+							$Scalls += $calls[$i];
 							$status_found++;
 						}
 						
@@ -2100,9 +2086,7 @@
 				$TOTavgWAIT_MS 							= '<th nowrap>'.gmdate('H:i:s', $TOTavgWAIT).'</th>'; 
 				$TOTavgCUSTOMER_MS 						= '<th nowrap>'.gmdate('H:i:s', $TOTavgCUSTOMER).'</th>'; 
 				
-				if ($file_download > 0) {
-					$file_output 						.= "TOTAL AGENTS: $TOT_AGENTS,$TOTcalls,$TOTtime_MS,$TOTtotPAUSE_MS,$TOTavgPAUSE_MS,$TOTtotWAIT_MS,$TOTavgWAIT_MS,$TOTtotTALK_MS,$TOTavgTALK_MS,$TOTtotDISPO_MS,$TOTavgDISPO_MS,$TOTtotDEAD_MS,$TOTavgDEAD_MS,$TOTtotCUSTOMER_MS,$TOTavgCUSTOMER_MS$SUMstatusesFILE\n";
-				}
+				$file_output 						.= "TOTAL AGENTS: $TOT_AGENTS,$TOTcalls,$TOTtime_MS,$TOTtotPAUSE_MS,$TOTavgPAUSE_MS,$TOTtotWAIT_MS,$TOTavgWAIT_MS,$TOTtotTALK_MS,$TOTavgTALK_MS,$TOTtotDISPO_MS,$TOTavgDISPO_MS,$TOTtotDEAD_MS,$TOTavgDEAD_MS,$TOTtotCUSTOMER_MS,$TOTavgCUSTOMER_MS$SUMstatusesFILE\n";
 				
 				$sub_statuses							= '-';
 				$sub_statusesTXT						= "";
@@ -2158,9 +2142,7 @@
 					$i++;
 				}
 				
-				if ($file_download > 0) {
-					$file_output 						.= "\n\nUSER NAME,ID,TOTAL,NONPAUSE,PAUSE,$sub_statusesFILE\n";
-				}
+				$file_output 						.= "\n\nUSER NAME,ID,TOTAL,NONPAUSE,PAUSE,$sub_statusesFILE\n";
 				
 				// BEGIN loop through each user //
 				$m										= 0;
@@ -2198,9 +2180,9 @@
 						$status_found					= 0;
 						
 						while ($i < $subs_to_print) {
-							if ( ($Suser == "$PCuser[$i]") AND ($Sstatus == "$sub_status[$i]") ) {
-								$Spause_sec 			= ($Spause_sec + $PCpause_sec[$i]);
-								$Snon_pause_sec 		= ($Snon_pause_sec + $PCnon_pause_sec[$i]);
+							if ( $Suser == "$PCuser[$i]" && $Sstatus == "$sub_status[$i]" ) {
+								$Spause_sec += $PCpause_sec[$i];
+								$Snon_pause_sec += $PCnon_pause_sec[$i];
 								$Stotal_sec 			= ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
 				
 								$USERcodePAUSE_MS 		= gmdate('H:i:s', $PCpause_sec[$i]); 
@@ -2222,19 +2204,17 @@
 						$n++;
 					}
 					// END loop through each status //
-					$TOTtotPAUSE						= ($TOTtotPAUSE + $Spause_sec);				
-					$TOTtotNONPAUSE 					= ($TOTtotNONPAUSE + $Snon_pause_sec);
-					$TOTtotTOTAL 						= ($TOTtotTOTAL + $Stotal_sec);
+					$TOTtotPAUSE += $Spause_sec;				
+					$TOTtotNONPAUSE += $Snon_pause_sec;
+					$TOTtotTOTAL += $Stotal_sec;
 				
 					$pfUSERtotPAUSE_MS					= gmdate('H:i:s', $Spause_sec); 
 					$pfUSERtotNONPAUSE_MS				= gmdate('H:i:s', $Snon_pause_sec); 
 					$pfUSERtotTOTAL_MS					= gmdate('H:i:s', $Stotal_sec); 
 				
-					if ($file_download > 0) {
-						$fileToutput 					= "$Sfull_name,=\"$Suser\",$pfUSERtotTOTAL_MS,$pfUSERtotNONPAUSE_MS,$pfUSERtotPAUSE_MS,$Ssub_statusesFILE\n";
-					}
+					$fileToutput 					= "$Sfull_name,=\"$Suser\",$pfUSERtotTOTAL_MS,$pfUSERtotNONPAUSE_MS,$pfUSERtotPAUSE_MS,$Ssub_statusesFILE\n";
 					
-					if ($x == 1) {
+					if ($x === 1) {
 						$bgcolor 						= "#E0F8E0";
 						$x								= 0;
 					} else {
@@ -2253,9 +2233,7 @@
 					$BOTsorted_output[$m] 				= $Boutput;
 				
 					if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
-						if ($file_download > 0) {
-							$file_output 				.= "$fileToutput";
-						}
+						$file_output 				.= "$fileToutput";
 				
 						$m++;
 					}
@@ -2267,9 +2245,7 @@
 					$n									= 0;
 					while ($n <= $m) {
 						$i 								= $sort_order[$m];
-						if ($file_download > 0) {
-							$file_output 				.= "$TOPsorted_outputFILE[$i]";
-						}
+						$file_output 				.= "$TOPsorted_outputFILE[$i]";
 						
 						$m--;
 					}
@@ -2293,7 +2269,7 @@
 					
 					while ($i < $subs_to_print) {
 						if ($Sstatus == "$sub_status[$i]") {
-							$Scalls 					= ($Scalls + $PCpause_sec[$i]);
+							$Scalls += $PCpause_sec[$i];
 							$status_found++;
 						}
 						
@@ -2304,7 +2280,7 @@
 						$SUMsub_statusesFILE 			.= ",0";
 						$SstatusesBSUM 					.= "<th nowrap> 0:00 </th>";
 					} else {
-						$TOTtotPAUSE 					= ($TOTtotPAUSE + $Scalls);				
+						$TOTtotPAUSE += $Scalls;				
 						$USERsumstatPAUSE_MS			= gmdate('H:i:s', $Scalls); 				
 						$SUMsub_statusesFILE 			.= ",$USERsumstatPAUSE_MS";
 						$SstatusesBSUM 					.= "<th nowrap> $USERsumstatPAUSE_MS </th>";
@@ -2316,13 +2292,10 @@
 				$TOT_AGENTS 							= '<th nowrap>AGENTS: '.$m.'</th>';			
 				$TOTtotPAUSEB_MS 						= '<th nowrap>'.gmdate('H:i:s', $TOTtotPAUSE).'</th>'; 
 				$TOTtotNONPAUSE_MS 						= '<th nowrap>'.gmdate('H:i:s', $TOTtotNONPAUSE).'</th>'; 
-				$TOTtotTOTAL_MS 						= '<th nowrap>'.gmdate('H:i:s', $TOTtotTOTAL).'</th>'; 
-			
-				if ($file_download > 0) {
-					$file_output 						.= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
-				}
+				$TOTtotTOTAL_MS 						= '<th nowrap>'.gmdate('H:i:s', $TOTtotTOTAL).'</th>';
+                $file_output 						.= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
 				
-				$apiresults 							= array(
+				return [
 					"result" 							=> "success",
 					"TOPsorted_output" 					=> $TOPsorted_output,
 					"BOTsorted_output" 					=> $BOTsorted_output,
@@ -2363,9 +2336,7 @@
 					"SstatusesBSUM"						=> $SstatusesBSUM,
 					"Legend" 							=> $legend,
 					"query" 							=> $perfdetails_sql
-				);
-				
-				return $apiresults;
+				];
 			}
 			
 			//Dial Statuses Summary
@@ -2373,26 +2344,26 @@
 				$list_ids[0] 						= "ALL";
 				$total_all							= ($list_ids[0] == "ALL") ? 'ALL List IDs under '.$campaignID : 'List ID(s): '.implode(',',$list_ids);
 				
-				if (isset($list_ids) && $list_ids[0] == "ALL") {
+				if ($list_ids[0] == "ALL") {
 					/*$query 							= "
 						SELECT list_id FROM vicidial_lists 
 						WHERE campaign_id = '$campaignID' 
 						ORDER BY list_id
 					";*/
-	
+
 					$qlistid						= $astDB
 						->where("campaign_id", $campaignID)
 						->orderBy("list_id")
 						->get("vicidial_lists", NULL, "list_id");
-						
+
 					if ($astDB->count > 0) {
 						foreach ($qlistid as $row) {
 							$list_ids[]				= $row['list_id'];
 						}
 					}
-					
+
 					//$i								= 0;
-					
+
 					/*while ($row = $astDB->rawQuery($query, MYSQLI_ASSOC)) {
 						$list_ids[$i]				= $row['list_id'];
 						$i++;
@@ -2409,7 +2380,7 @@
 				
 				$qsstatuses							= $astDB
 					->orderBy("status")
-					->get("vicidial_statuses", NULL, array("status", "status_name"));
+					->get("vicidial_statuses", NULL, ["status", "status_name"]);
 				
 				if ($astDB->count > 0) {
 					foreach ($qsstatuses as $row) {
@@ -2419,7 +2390,7 @@
 				
 				$qcstatuses							= $astDB
 					->where("campaign_id", $campaignID)
-					->get("vicidial_campaign_statuses", NULL, array("status", "status_name"));
+					->get("vicidial_campaign_statuses", NULL, ["status", "status_name"]);
 				
 				if ($astDB->count > 0) {
 					foreach ($qcstatuses as $row) {
@@ -2459,15 +2430,15 @@
 					order by status,called_count
 				";*/
 				
-				$cols								= array(
+				$cols								= [
 					"status", 
 					"if (called_count >= 10, 10, called_count) as called_count", 
 					"count(*) as count"
-				);
+				];
 				
 				$queryx								= $astDB
 					->where("list_id", $list_ids, "IN")
-					->where("status", array("DC", "DNCC", "XDROP"), "NOT IN")
+					->where("status", ["DC", "DNCC", "XDROP"], "NOT IN")
 					->groupBy("status, if (called_count >= 10, 10, called_count)")
 					->orderBy("status, called_count")
 					->get("vicidial_list", NULL, $cols);
@@ -2482,14 +2453,14 @@
 				
 				if ($astDB->count >0) {
 					foreach ($queryx as $row) {
-						$leads_in_list 				= ($leads_in_list + $row['count']);
+						$leads_in_list += $row['count'];
 						$count_statuses[]			= $row['status'];
 						$count_called[]				= $row['called_count'];
 						$count_count[]				= $row['count'];
 						
-						$all_called_count[$row['called_count']] = ($all_called_count[$row['called_count']] + $row['count']);					
+						$all_called_count[$row['called_count']] += $row['count'];					
 						
-						if ( (strlen($status) < 1) or ($status != $row['status']) ) {
+						if ( strlen($status) < 1 || $status != $row['status'] ) {
 							if ($first_row) {
 								$first_row			= 0;
 							}
@@ -2588,7 +2559,7 @@
 						$o							= 0;
 						
 						while ($status_called_to_print > $o) {
-							if ( ($count_statuses[$o] == "$Pstatus") AND ($count_called[$o] == "$first") ) {
+							if ( $count_statuses[$o] == "$Pstatus" && $count_called[$o] == "$first" ) {
 								$called_printed++;
 								$TOPsorted_output 	.= "<td nowrap> ".$count_count[$o]." </td>";
 							}
@@ -2684,16 +2655,14 @@
 				$return['TOPsorted_output']			= $TOPsorted_output;
 				$return['SUMstatuses']				= $sts;
 				
-				$apiresults 						= array(
+				return [
 					"result" 							=> "success", 
 					"SUMstatuses" 						=> $sts, 
 					"TOPsorted_output" 					=> $TOPsorted_output, 
 					"BOTsorted_output" 					=> $BOTsorted_output, 
 					"query_list" 						=> $query_list, 
 					"queryx" 							=> $queryx
-				);
-				
-				return $apiresults;
+				];
 			}
 			
 			// SALES PER AGENT
@@ -2719,7 +2688,7 @@
 					
 					$query 							= $outbound_query;
 					
-					$TOPsorted_output 				= "";
+					$TOPsorted_output 				= [];
 					$total_out_sales 				= "";
 					
 					if ($query) {
@@ -2731,7 +2700,7 @@
 							$TOPsorted_output 		.= "<td nowrap>".$row['user']."</td>";
 							$TOPsorted_output		.= "<td nowrap>".$row['sale']."</td>";
 							$TOPsorted_output 		.= "</tr>";
-							$total_out_sales		 = $total_out_sales+$row['sale'];							
+							$total_out_sales += $row['sale'];							
 						}
 					}
 				}
@@ -2784,20 +2753,18 @@
 							$BOTsorted_output 		.= "<td nowrap> ".$row['user']." </td>";
 							$BOTsorted_output 		.= "<td nowrap> ".$row['sale']." </td>";
 							$BOTsorted_output 		.= "</tr>";
-							$total_in_sales 		= $total_in_sales + $row['sale'];
+							$total_in_sales += $row['sale'];
 						}
 					}
 				}
 				
-				$apiresults 						= array(
+				return [
 					"TOPsorted_output" 					=> $TOPsorted_output, 
 					"BOTsorted_output" 					=> $BOTsorted_output, 
 					"TOToutbound" 						=> $total_out_sales, 
 					"TOTinbound" 						=> $total_in_sales, 
 					"query" 							=> $outbound_query
-				);
-				
-				return $apiresults;
+				];
 			}
 			
 			// SALES TRACKER
@@ -2930,7 +2897,7 @@
 				
 				//$return['TOPsorted_output']		= $TOPsorted_output;
 				//$return['file_output']			= $file_output;
-				$apiresults 						= array(
+				$apiresults 						= [
 					"outbound_result" 					=> $outbound_result, 
 					"inbound_result" 					=> $inbound_result, 
 					"sale_num" 							=> $sale_num, 
@@ -2948,7 +2915,7 @@
 					"alt_phone" 						=> $alt_phone, 
 					"comments" 							=> $comments,
 					"query" 							=> $outbound_query
-				);
+				];
 				
 				return $apiresults;
 			}
@@ -2968,38 +2935,37 @@
 				";
 				
 				$query 								= $inbound_report_query;
-				$TOPsorted_output 					= "";
+				$TOPsorted_output 					= [];
 				$number 							= 1;
 				
 				while ($row = $astDB->rawQuery($query)) {
-					$TOPsorted_output[] 			.= '<tr>';
-					$TOPsorted_output[] 			.= '<td nowrap>'.$number.'</td>';
+					$TOPsorted_output[] = '<tr>';
+					$TOPsorted_output[] = '<td nowrap>'.$number.'</td>';
 					
 					$date 							= strtotime($row['call_date']);
 					$date 							= date("Y-m-d", $date);
-					$TOPsorted_output[] 			.= '<td nowrap>'.$date.'</td>';
+					$TOPsorted_output[] = '<td nowrap>'.$date.'</td>';
 					
-					$TOPsorted_output[] 			.= '<td nowrap>'.$row['user'].'</td>';
-					$TOPsorted_output[] 			.= '<td nowrap>'.$row['phone_number'].'</td>';
+					$TOPsorted_output[] = '<td nowrap>'.$row['user'].'</td>';
+					$TOPsorted_output[] = '<td nowrap>'.$row['phone_number'].'</td>';
 					
 					//$time = strtotime($row['call_date']);
 					$time 							= $row['end_epoch'] + $row['start_epoch'];
 					$time 							= date("h:i:s", $time);
-					$TOPsorted_output[] 			.= '<td nowrap>'.$time.'</td>';					
-					$TOPsorted_output[] 			.= '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';					
-					$TOPsorted_output[] 			.= '<td nowrap>'.$row['status'].'</td>';
-					$TOPsorted_output[] 			.= '</tr>';
+					$TOPsorted_output[] = '<td nowrap>'.$time.'</td>';					
+					$TOPsorted_output[] = '<td nowrap style="padding-left:40px;">'.$row['length_in_sec'].'</td>';					
+					$TOPsorted_output[] = '<td nowrap>'.$row['status'].'</td>';
+					$TOPsorted_output[] = '</tr>';
 					$number++;
 				}
 				
-				$apiresults 						= array(
+				return [
 					"TOPsorted_output" 					=> $TOPsorted_output, 
 					"query" 							=> $inbound_report_query
-				);
-				
-				return $apiresults;
+				];
 			}
 		}
+        return null;
 	}
 
 ?>

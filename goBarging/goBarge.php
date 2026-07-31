@@ -28,11 +28,11 @@ $goServerIP = $astDB->escape($_REQUEST['server_ip']);
 $goPhone = $astDB->escape($_REQUEST['phone']);
 $type = $astDB->escape($_REQUEST['type']);
 
-if($goUserID == "") {  array("result" => "Error: No UserID"); }
-if($goConfExten == "") {  array("result" => "Error: No Conference Room"); }
-if($goServerIP == "") {  array("result" => "Error: No Server IP"); }
-if($goPhone == "") {  array("result" => "Error: No Phone"); }
-if($type == "") {  array("result" => "Error: No Type"); }
+if($goUserID == "") {  ["result" => "Error: No UserID"]; }
+if($goConfExten == "") {  ["result" => "Error: No Conference Room"]; }
+if($goServerIP == "") {  ["result" => "Error: No Server IP"]; }
+if($goPhone == "") {  ["result" => "Error: No Phone"]; }
+if($type == "") {  ["result" => "Error: No Type"]; }
 
 $StarTtime = date("U");
 $NOW_TIME = date("Y-m-d H:i:s");
@@ -66,7 +66,7 @@ if ($session_exist > 0) {
 	}
 
 	$S='*';
-	$D_s_ip = explode('.', $goServerIP);
+	$D_s_ip = explode('.', (string) $goServerIP);
 	if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
 	if (strlen($D_s_ip[0])<3) {$D_s_ip[0] = "0$D_s_ip[0]";}
 	if (strlen($D_s_ip[1])<2) {$D_s_ip[1] = "0$D_s_ip[1]";}
@@ -81,16 +81,16 @@ if ($session_exist > 0) {
 	while (strlen($GADuser) > 8) {$GADuser = substr("$GADuser", 0, -1);}
 	$BMquery = "BM$StarTtime$GADuser";
 
-	if ( (preg_match('/LISTEN/',$type)) or (strlen($type)<1) ) {$type = '0';}
-	if (preg_match('/BARGE/',$type)) {$type = '';}
-	if (preg_match('/HIJACK/',$type)) {$type = '';}
+	if ( preg_match('/LISTEN/',(string) $type) || strlen((string) $type) < 1 ) {$type = '0';}
+	if (preg_match('/BARGE/',(string) $type)) {$type = '';}
+	if (preg_match('/HIJACK/',(string) $type)) {$type = '';}
 
 	### insert a new lead in the system with this phone number
 	$query4 = "INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','".$fresults3['server_ip']."','','Originate','$BMquery','Channel: Local/$monitor_dialstring$type$goConfExten@default','Context; default','Exten: ".$fresults3['dialplan_number']."','Priority: 1','Callerid: \"VC Blind Monitor\" <".$fresults3['outbound_cid'].">','','','','','')";
 
 	$rsltv4 = $astDB->rawQuery($query4);
 
-	$apiresults = array("result" => "success");
+	$apiresults = ["result" => "success"];
 }
 
 ?>

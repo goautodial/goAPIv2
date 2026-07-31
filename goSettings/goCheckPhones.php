@@ -25,9 +25,9 @@
         if($rslt){
                 $modify_phones = $rslt['value'];
                 
-                $apiresults = array("result" => $modify_phones);
+                $apiresults = ["result" => $modify_phones];
         } else {
-                $apiresults = array("result" => "Failed to get Result.");
+                $apiresults = ["result" => "Failed to get Result."];
         }
 ?>
 

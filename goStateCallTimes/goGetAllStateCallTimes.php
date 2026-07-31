@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$groupId = go_get_groupid($goUser, $astDB);
+	$groupId = go_get_groupid($goUser);
 
 	if (!checkIfTenant($groupId, $goDB)) {
 		//$ul = "";
@@ -41,6 +41,6 @@
 		$dataDefStart[] = $fresults['sct_default_start'];
 		$dataDefStop[] = $fresults['sct_default_stop'];
 		$dataUserGroup[] = $fresults['user_group'];
-		$apiresults = array("result" => "success", "state_call_time_id" => $dataStateID, "state_call_time_state" => $dataStateState, "state_call_time_name" => $dataStateName, "sct_default_start" => $dataDefStart, "sct_default_stop" => $dataDefStop, "user_group" => $dataUserGroup);
+		$apiresults = ["result" => "success", "state_call_time_id" => $dataStateID, "state_call_time_state" => $dataStateState, "state_call_time_name" => $dataStateName, "sct_default_start" => $dataDefStart, "sct_default_stop" => $dataDefStop, "user_group" => $dataUserGroup];
 	}
 ?>

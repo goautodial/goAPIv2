@@ -36,7 +36,7 @@
     
     //atatchments if necessary
     $attachment     = $_FILES['attachment']['tmp_name'];
-    $resultsArray = array();
+    $resultsArray = [];
     //insert to ticket
     //$queryInsertTicket = "INSERT INTO ost_ticket(
     //                                        number,user_id,user_email_id,status_id,
@@ -51,7 +51,7 @@
     //                                        '$ip_address','$source','$isoverdue','$isanswered',
     //                                        '$date','$date'
     //                                    )";
-    $insertData = array(
+    $insertData = [
         'number' => $ticketNO,
         'user_id' => $userID,
         'user_email_id' => $userEmailID,
@@ -70,14 +70,14 @@
         'isanswered' => $isanswered,
         'created' => $date,
         'updated' => $date
-    );
+    ];
     $resultInsertTicket = $ostDB->insert('ost_ticket', $insertData);
     if($resultInsertTicket){
         $ticketID = $ostDB->getInsertId();
-        array_push($resultsArray, "ok");
+        $resultsArray[] = "ok";
     }else{
         $ticketID = '';
-        array_push($resultsArray, "error");
+        $resultsArray[] = "error";
     }
     
     //insert to ticket__cdata
@@ -86,11 +86,11 @@
     //                                        ) VALUES(
     //                                            '$ticketID','$title','$priority'
     //                                        )";
-    $resultInsertTicketCData = $ostDB->insert('ost_ticket__cdata', array('ticket_id' => $ticketID, 'subject' => $title, 'priority' => $priority));
+    $resultInsertTicketCData = $ostDB->insert('ost_ticket__cdata', ['ticket_id' => $ticketID, 'subject' => $title, 'priority' => $priority]);
     if($ostDB->getInsertId() > 0){
-        array_push($resultsArray, "ok");
+        $resultsArray[] = "ok";
     }else{
-        array_push($resultsArray, "error");
+        $resultsArray[] = "error";
     }
     
     //insert to thread
@@ -99,21 +99,21 @@
     //                                    ) VALUES(
     //                                        '$ticketID','T','','','','$date'
     //                                    )";
-    $insertData = array(
+    $insertData = [
         'object_id' => $ticketID,
         'object_type' => 'T',
         'extra' => '',
         'lastresponse' => '',
         'lastmessage' => '',
         'created' => $date
-    );
+    ];
     $resultInsertThread = $ostDB->insert('ost_thread', $insertData);
     if($resultInsertThread){
         $threadID = $ostDB->getInsertId();
-        array_push($resultsArray, "ok");
+        $resultsArray[] = "ok";
     }else{
         $threadID = '';
-        array_push($resultsArray, "error");
+        $resultsArray[] = "error";
     }
     
     //insert to thread entry
@@ -126,7 +126,7 @@
     //                                            '$flags','$fullname','$title','$body',
     //                                            'html','$ip_address','$date',''
     //                                        )";
-    $insertData = array(
+    $insertData = [
         'thread_id' => $threadID,
         'staff_id' => $staffID,
         'user_id' => $userID,
@@ -139,17 +139,17 @@
         'ip_address' => $ip_address,
         'created' => $date,
         'updated' => ''
-    );
+    ];
     $resultInsertThreadEntry = $ostDB->insert('ost_thread_entry', $insertData);
     if($resultInsertThreadEntry){
-        array_push($resultsArray, "ok");
+        $resultsArray[] = "ok";
     }else{
-        array_push($resultsArray, "error");
+        $resultsArray[] = "error";
     }
     
     if(in_array("error", $resultsArray)){
-        $apiresults = array("result" => "Error: Something went wrong.");
+        $apiresults = ["result" => "Error: Something went wrong."];
     }else{
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     }
 ?>

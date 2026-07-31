@@ -223,13 +223,13 @@
     // End of campaign stats
 
 
-    $apiresults = array(
+    $apiresults = [
         "result" => "success", 
         "newLeadsCounter" => $dataNewLeads,
         "oldLeadsCounter" => $dataOldLeads,
         "statsToday" => $dataStatsToday,
         "statsCampaign" => $dataStatsCampaign
-    );
+    ];
 
     function getTimezoneNameByOffset($offset) {
         if ($offset == -5) {
@@ -245,6 +245,7 @@
         } else if ($offset == -10) {
             return "tz_hawaii_time";
         }
+        return null;
     }
 
     function getStatuses($dbase, $campaign_id="all"){
@@ -283,13 +284,13 @@
             }
         }
         $cstatuses = implode("','", $cstatuses);
-        if(strlen($sstatuses) > 0 && strlen($cstatuses) > 0)
+        if($cstatuses !== '')
         {
             $statuses = "{$sstatuses}','{$cstatuses}";
         }
         else
         {
-            $statuses = (strlen($sstatuses) > 0 && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
+            $statuses = ($sstatuses !== '' && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
         }
 
         return $statuses;

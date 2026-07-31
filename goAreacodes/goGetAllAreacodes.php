@@ -3,7 +3,7 @@
  * @file 		goGetAllAreacodes.php
  * @brief 		API to get all areacodes
  * @copyright 	Copyright (c) 2019 GOautodial Inc.
- * @author		Thom Bernarth Patacsil 
+ * @author		Thom Bernarth Patacsil
  * @author		Christopher Lomuntad
  *
  * @par <b>License</b>:
@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	$draw   = (isset($_REQUEST['draw']) ? $astDB->escape($_REQUEST['draw']) : 0);
 	$start  = (isset($_REQUEST['start']) ? $astDB->escape($_REQUEST['start']) : 0);
 	$length = (isset($_REQUEST['length']) ? $astDB->escape($_REQUEST['length']) : 10);
@@ -29,43 +29,43 @@
 	$dir    = (isset($_REQUEST['dir']) ? $astDB->escape($_REQUEST['dir']) : "desc");
 	$search = (isset($_REQUEST['search']) ? $astDB->escape($_REQUEST['search']) : "");
 	$can_update = (isset($_REQUEST['can_update']) ? $astDB->escape($_REQUEST['can_update']) : "N");
-	  
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-			
+
 			$astDB->where('user_group', $log_group);
 			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) !== 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -76,17 +76,17 @@
 							$astDB->orWhere('vcid.campaign_id', $allowed_campaigns, 'in');
 						}
 					}
-				}					
+				}
 			}
-			
+
 			/*$dataCampID								= "";
 			$dataCampName								= "";
 			$dataAreacode								= "";
 			$dataOutboundCID							= "";
 			$dataActive									= "";
-			$dataDescription							= "";	
+			$dataDescription							= "";
 			$dataCallCountToday							= "";*/
-			$cols 										= array(
+			$cols 										= [
 				"vcid.campaign_id",
 				"vc.campaign_name",
 				"vcid.areacode",
@@ -94,18 +94,18 @@
 				"vcid.active",
 				"vcid.cid_description",
 				"vcid.call_count_today"
-			);
-			
+			];
+
 			$astDB->orderBy($order, $dir);
 			$astDB->join('vicidial_campaigns vc', 'vcid.campaign_id=vc.campaign_id', 'LEFT');
-			if (isset($search) && strlen($search) > 0) {
+			if (isset($search) && (string) $search !== '') {
 				$astDB->where('vcid.campaign_id', $search)
 					  ->orWhere('vc.campaign_name', $search)
 					  ->orWhere('vcid.areacode', $search)
 					  ->orWhere('vcid.outbound_cid', $search);
 			}
-			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', array($start, $length), $cols, true);
-			
+			$result	= $astDB->get('vicidial_campaign_cid_areacodes vcid', [$start, $length], $cols, true);
+
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
 					if (!$draw) {
@@ -129,8 +129,8 @@
 							$avatar_link .= '</a>';
 							$campaign_link .= '</a>';
 						}
-						
-						$dataOutput[]						= array(
+
+						$dataOutput[]						= [
 							"avatar"							=> $avatar_link,
 							"campaign_id"						=> $campaign_link,
 							"campaign_name"						=> $fresults['campaign_name'],
@@ -138,42 +138,42 @@
 							"outbound_cid"						=> $fresults['outbound_cid'],
 							"active"							=> $fresults['active'],
 							"action"							=> "",
-						);
+						];
 					}
-				}				
-			
+				}
+
 				if (!$draw) {
-					$apiresults 							= array(
-						"result" 								=> "success", 
+					$apiresults 							= [
+						"result" 								=> "success",
 						"campaign_id" 							=> $dataCampID,
 						"campaign_name"							=> $dataCampName,
-						"areacode" 								=> $dataAreacode, 
-						"outbound_cid" 							=> $dataOutboundCID, 
+						"areacode" 								=> $dataAreacode,
+						"outbound_cid" 							=> $dataOutboundCID,
 						"active" 								=> $dataActive,
 						"description"							=> $dataDescription,
 						"call_count_today"						=> $dataCallCountToday
-					);
+					];
 				} else {
-					$apiresults								= array(
+					$apiresults								= [
 						"draw"									=> $draw,
 						"recordsTotal"							=> $astDB->getUnlimitedRowCount(),
 						"recordsFiltered"						=> $astDB->getUnlimitedRowCount(),
-						"data"									=> (!is_null($dataOutput) ? $dataOutput : [])
-					);
+						"data"									=> ($dataOutput ?? [])
+					];
 				}
 			} else {
-				$apiresults                             = array(
+				$apiresults                             = [
 					"result"								=> "No data available in table",
 					//"test"									=> $astDB->getLastError()
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
+			$apiresults 								= [
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			);		
+			];
 		}
 	}
-	
+
 ?>

@@ -22,108 +22,108 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
  
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
     $id 										= $astDB->escape($_REQUEST['inbound_id']);
     $type	 									= $astDB->escape($_REQUEST['type']);
 	
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($id) || is_null($id)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Inbound ID Not Defined."
-		);
+		];
     } else {			
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere("user_group", "---ALL---");
 		}
-		
+
 		switch ($type) {				
             case "ingroup":				
 				$astDB->where("group_id", $id);
 				$astDB->where("group_id", "AGENTDIRECT", "!=");
 				$astDB->getOne("vicidial_inbound_groups");
-				
+
 				if ($astDB->count > 0) {
 					$astDB->where("group_id", $id);
 					$astDB->delete("vicidial_inbound_groups");
-					
-					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted ingroup ID: $id", $log_group, $astDB->getLastQuery());
-					
-					$astDB->where("group_id", $id);
-					$astDB->delete("vicidial_inbound_group_agents");
-					
-					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted ingroup ID: $id", $log_group, $astDB->getLastQuery());
-					
-					$astDB->where("campaign_id", $id);
-					$astDB->delete("vicidial_campaign_stats");
-					
+
 					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted ingroup ID: $id", $log_group, $astDB->getLastQuery());
 
-					$apiresults 				= array(
+					$astDB->where("group_id", $id);
+					$astDB->delete("vicidial_inbound_group_agents");
+
+					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted ingroup ID: $id", $log_group, $astDB->getLastQuery());
+
+					$astDB->where("campaign_id", $id);
+					$astDB->delete("vicidial_campaign_stats");
+
+					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted ingroup ID: $id", $log_group, $astDB->getLastQuery());
+
+					$apiresults 				= [
 						"result" 					=> "success"
-					);					
+					];					
 				} else {
-					$apiresults 				= array(
+					$apiresults 				= [
 						"result" 					=> "Error: Call menu doesn't exist or insufficient rights."
-					);
+					];
 				}					
-				
+
 			break;
-                
+
 			case "ivr":
 				$astDB->where("menu_id", $id);
 				$astDB->where("menu_id", "defaultlog", "!=");
 				$astDB->getOne("vicidial_call_menu");
-				
+
 				if ($astDB->count > 0) {
 					$astDB->where("menu_id", $id);
 					$astDB->delete("vicidial_call_menu");
-					
-					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted call menu ID: $id", $log_group, $astDB->getLastQuery());
-					
-					$astDB->where("menu_id", $id);
-					$astDB->delete("vicidial_call_menu_options");			
-					
+
 					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted call menu ID: $id", $log_group, $astDB->getLastQuery());
 
-					$apiresults 				= array(
+					$astDB->where("menu_id", $id);
+					$astDB->delete("vicidial_call_menu_options");			
+
+					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted call menu ID: $id", $log_group, $astDB->getLastQuery());
+
+					$apiresults 				= [
 						"result" 					=> "success"
-					);					
+					];					
 				} else {
-					$apiresults 				= array(
+					$apiresults 				= [
 						"result" 					=> "Error: Call menu doesn't exist or insufficient rights."
-					);
+					];
 				}
-				
+
 			break;
-				
+
 			case "did":
 				$astDB->where("did_id", $id);
 				$astDB->getOne("vicidial_inbound_dids");
-				
+
 				if ($astDB->count > 0) {
 					$astDB->where("did_id", $id);
 					$astDB->delete("vicidial_inbound_dids");
-					
+
 					$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted DID ID: $id", $log_group, $astDB->getLastQuery());
 
-					$apiresults 				= array(
+					$apiresults 				= [
 						"result" 					=> "success"
-					);				
+					];				
 				} else {
-					$apiresults 				= array(
+					$apiresults 				= [
 						"result" 					=> "Error: Call DID doesn't exist or insufficient rights."
-					);
+					];
 				}
-				
+
 			break;
 		}
-		
+
 		//print_r($apiresults);
 		
 	}

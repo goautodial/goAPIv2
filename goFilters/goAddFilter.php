@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");	 
+	include_once (__DIR__ . "/goAPI.php");	 
  	
 	$lead_filter_id 									= $astDB->escape($_REQUEST["lead_filter_id"]);
     $lead_filter_name 									= $astDB->escape($_REQUEST["lead_filter_name"]); 
@@ -31,25 +31,25 @@
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($lead_filter_id) || is_null($lead_filter_id) ) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Filter ID."
-		);
-	} elseif ( preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/",$lead_filter_name) && $lead_filter_name != null ) {
-		$apiresults 									= array(
+		];
+	} elseif ( preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬-]/",(string) $lead_filter_name) && $lead_filter_name != null ) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in filter name"
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -69,37 +69,37 @@
 			$results 									= $astDB->getOne("vicidial_lead_filters", "lead_filter_id");
 					
 			if (!$results) {
-				$data_filter 							= array(
+				$data_filter 							= [
 					"lead_filter_id" 						=> $lead_filter_id,
 					"lead_filter_comments" 					=> $lead_filter_comments,
 					"lead_filter_name" 						=> $lead_filter_name,
 					"user_group" 							=> $user_group, 
 					"lead_filter_sql" 						=> $lead_filter_sql
-				);
+				];
 				
 				$insertFilter 							= $astDB->insert("vicidial_lead_filters", $data_filter);
 					
 				if (!$insertFilter) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Add failed, check your details"
-					);
+					];
 				} else {
 					$log_id 							= log_action($goDB, "ADD", $log_user, $log_ip, "Added New Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				}
 			} else {
-				$apiresults	 							= array(
+				$apiresults	 							= [
 					"result" 								=> "Error: Add failed, Filter already already exist!"
-				);
+				];
 			}		
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

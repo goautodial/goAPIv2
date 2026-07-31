@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
@@ -39,68 +39,68 @@
 	$priority 											= $astDB->escape($_REQUEST['priority']);
 	$color 												= $astDB->escape($_REQUEST['color']);
 	$edit_type 											= $astDB->escape($_REQUEST['type']);	
-	$type 												= (!in_array($edit_type, array('SYSTEM', 'CUSTOM'))) ? 'CUSTOM' : $edit_type;
-    $defVal 											= array("Y","N");
+	$type 												= (in_array($edit_type, ['SYSTEM', 'CUSTOM'])) ? $edit_type : 'CUSTOM';
+    $defVal 											= ["Y","N"];
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     }  elseif (empty($status) || is_null($status)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for status."
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $status_name) && $status_name != null){
-		$apiresults 									= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $status_name) && $status_name != null){
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in status name and must not be empty"
-		);
+		];
 	} elseif (!in_array($scheduled_callback,$defVal) && $scheduled_callback != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for scheduled_callback is Y or N only."
-		);
+		];
 	} elseif (!in_array($unworkable,$defVal) && $unworkable != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for unworkable is Y or N only."
-		);
+		];
 	} elseif (!in_array($selectable,$defVal) && $selectable != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for selectable is Y or N only."
-		);
+		];
 	} elseif (!in_array($human_answered,$defVal) && $human_answered != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for human_answered is Y or N only."
-		);
+		];
 	} elseif (!in_array($sale,$defVal) && $sale != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for sale is Y or N only."
-		);
+		];
 	} elseif (!in_array($dnc,$defVal) && $dnc != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for dnc is Y or N only."
-		);
+		];
 	} elseif (!in_array($customer_contact,$defVal) && $customer_contact != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for customer_contact is Y or N only."
-		);
+		];
 	} elseif (!in_array($not_interested,$defVal) && $not_interested != NULL) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for not_interested is Y or N only."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -170,7 +170,7 @@
 						$scheduled_callback 			= $dataSched;
 					}
 
-					$updateData 						= array(
+					$updateData 						= [
 						'status_name' 						=> $status_name,
 						'selectable' 						=> $selectable,
 						'human_answered' 					=> $human_answered,
@@ -181,7 +181,7 @@
 						'not_interested' 					=> $not_interested,
 						'unworkable' 						=> $unworkable,
 						'scheduled_callback' 				=> $scheduled_callback
-					);
+					];
 					
 					$astDB->where('status', $status);
 					$astDB->where('campaign_id', $campaign_id);
@@ -190,13 +190,13 @@
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $astDB->getLastQuery());
 					
 					if ($rsltv1 == false) {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "Error: Try updating Disposition Again"
-						);
+						];
 					} else {
-						$apiresults 					= array(
+						$apiresults 					= [
 							"result" 						=> "success"
-						);
+						];
 						
 						$statusRslt 					= $goDB->rawQuery("SHOW TABLES LIKE 'go_statuses'");
 						
@@ -206,11 +206,11 @@
 							$goDB->get('go_statuses');
 							
 							if ($goDB->count > 0) {
-								$updateData 			= array(
+								$updateData 			= [
 									'priority' 				=> $priority,
 									'color' 				=> $color,
 									'type' 					=> $type
-								);
+								];
 								
 								$goDB->where('status', $status);
 								$goDB->where('campaign_id', $campaign_id);
@@ -218,13 +218,13 @@
 								$log_id 				= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
 								
 							} else {
-								$insertData 			= array(
+								$insertData 			= [
 									'status' 				=> $status,
 									'campaign_id' 			=> $campaign_id,
 									'priority' 				=> $priority,
 									'color' 				=> $color,
 									'type' 					=> $type
-								);
+								];
 								
 								$goDB->insert('go_statuses', $insertData);
 								$log_id 				= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified dispositions on campaign $campaign_id", $log_group, $goDB->getLastQuery());
@@ -232,21 +232,21 @@
 						}														
 					}
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Campaign Status doesn't exist"
-					);
+					];
 				}
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: Campaign Status doesn't exist"
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 		

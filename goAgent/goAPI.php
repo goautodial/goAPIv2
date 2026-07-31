@@ -24,32 +24,32 @@
 //error_reporting(E_ALL);
 
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
-$version = file_get_contents("{$webRoot}/version.txt");
+$versionFile = "{$webRoot}/version.txt";
+$version = is_readable($versionFile) ? file_get_contents($versionFile) : '';
 $goCharset = "UTF-8";
 $goVersion = "4.0";
 
-include_once('./includes/MySQLiDB.php');
-@include_once('../goDBasterisk.php');
-@include_once('../goDBgoautodial.php');
-@include_once('../goDBkamailio.php');
-@include_once('../goFunctions.php');
-include_once('./includes/XMLParser.php');
+@include_once(__DIR__ . '/../goDBasterisk.php');
+@include_once(__DIR__ . '/../goDBgoautodial.php');
+@include_once(__DIR__ . '/../goDBkamailio.php');
+@include_once(__DIR__ . '/../goFunctions.php');
+include_once(__DIR__ . '/includes/XMLParser.php');
 
 ### Check if DB variables are not set ###
-$VARDB_server   = (!isset($VARDB_server)) ? "localhost" : $VARDB_server;
-$VARDB_user     = (!isset($VARDB_user)) ? "asterisku" : $VARDB_user;
-$VARDB_pass     = (!isset($VARDB_pass)) ? "asterisku1234" : $VARDB_pass;
-$VARDB_database = (!isset($VARDB_database)) ? "asterisk" : $VARDB_database;
+$VARDB_server ??= "localhost";
+$VARDB_user ??= "asterisku";
+$VARDB_pass ??= "asterisku1234";
+$VARDB_database ??= "asterisk";
 
-$VARDBgo_server   = (!isset($VARDBgo_server)) ? "localhost" : $VARDBgo_server;
-$VARDBgo_user     = (!isset($VARDBgo_user)) ? "goautodialu" : $VARDBgo_user;
-$VARDBgo_pass     = (!isset($VARDBgo_pass)) ? "goautodialu1234" : $VARDBgo_pass;
-$VARDBgo_database = (!isset($VARDBgo_database)) ? "goautodial" : $VARDBgo_database;
+$VARDBgo_server ??= "localhost";
+$VARDBgo_user ??= "goautodialu";
+$VARDBgo_pass ??= "goautodialu1234";
+$VARDBgo_database ??= "goautodial";
 
-$VARDBgokam_server   = (!isset($VARDBgokam_server)) ? "localhost" : $VARDBgokam_server;
-$VARDBgokam_user     = (!isset($VARDBgokam_user)) ? "kamailiou" : $VARDBgokam_user;
-$VARDBgokam_pass     = (!isset($VARDBgokam_pass)) ? "kamailiou1234" : $VARDBgokam_pass;
-$VARDBgokam_database = (!isset($VARDBgokam_database)) ? "kamailio" : $VARDBgokam_database;
+$VARDBgokam_server ??= "localhost";
+$VARDBgokam_user ??= "kamailiou";
+$VARDBgokam_pass ??= "kamailiou1234";
+$VARDBgokam_database ??= "kamailio";
 ### End of DB variables ###
 
 $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
@@ -130,14 +130,14 @@ $Smon = date("m");
 $Smday = date("d");
 $Syear = date("Y");
 
-$SIPserver = (!isset($SIPserver)) ? 'kamailio' : $SIPserver; // Put 'asterisk' if not using 'kamailio'.
+$SIPserver ??= 'kamailio'; // Put 'asterisk' if not using 'kamailio'.
 ### End Variables ###
 
 ### Check Credentials ###
 $path = getcwd();
 $files = scandir($path);
 foreach ($files as $file) {
-    if ($file != "." && $file != "..") {
+    if ($file !== "." && $file !== "..") {
         $fileName = str_replace('.php', '', $file);
         if (!preg_match('/^(index|goAPI|includes)$/', $fileName)) {
             $fileList[] = $fileName;
@@ -146,7 +146,7 @@ foreach ($files as $file) {
 }
 $actions = implode('|', $fileList);
 if (isset($goAction) && $goAction != "") {
-    if (preg_match("/$actions/", $goAction)) {
+    if (preg_match("/$actions/", (string) $goAction)) {
         $system = get_settings('system', $astDB);
         //$bcrypt = (isset($bcrypt)) ? $bcrypt : 0;
         $bcrypt = (strlen($goPass) > 30) ? 1 : 0;
@@ -169,28 +169,28 @@ if (isset($goAction) && $goAction != "") {
 
 
         if ($auth < 1) {
-            $APIResult = array( "result" => "error", "message" => $err_message, "auth_message" => $auth_message );
+            $APIResult = [ "result" => "error", "message" => $err_message, "auth_message" => $auth_message ];
         } else {
             $astDB->where('user', $goUser);
             $rslt = $astDB->getOne('vicidial_users', 'vdc_agent_api_access');
             $allowedAPIAccess = $rslt['vdc_agent_api_access'];
             if ($allowedAPIAccess) {
                 if (isset($phone_login) && !is_valid_phone_extension($phone_login)) {
-                    $APIResult = array( "result" => "error", "message" => "Invalid phone extension" );
-                } else if (!preg_match("/goGetCallbackCount|goCheckIfLoggedIn|goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect|goGetAgentsLoggedIn|goGetContactList|goGetCustomerInfo|goUpdateCustomer|goAgentStats/", $goAction) && (!isset($campaign) || $campaign == '')) {
-                    $APIResult = array( "result" => "error", "message" => "Please select a campaign" );
+                    $APIResult = [ "result" => "error", "message" => "Invalid phone extension" ];
+                } else if (!preg_match("/goGetCallbackCount|goCheckIfLoggedIn|goGetScriptContents|goCheckConference|goGetLoginInfo|goGetAllowedCampaigns|goLogoutUser|goManualDialLookCall|goClearAPIField|goGetLabels|goXFERSendRedirect|goGetAgentsLoggedIn|goGetContactList|goGetCustomerInfo|goUpdateCustomer|goAgentStats/", (string) $goAction) && (!isset($campaign) || $campaign == '')) {
+                    $APIResult = [ "result" => "error", "message" => "Please select a campaign" ];
                 } else {
                     include("{$goAction}.php");
                 }
             } else {
-                $APIResult = array( "result" => "error", "message" => "User '$goUser' is NOT allowed to access GOagent API" );
+                $APIResult = [ "result" => "error", "message" => "User '$goUser' is NOT allowed to access GOagent API" ];
             }
         }
     } else {
-        $APIResult = array( "result" => "error", "message" => "Command NOT Found" );
+        $APIResult = [ "result" => "error", "message" => "Command NOT Found" ];
     }
 } else {
-    $APIResult = array( "result" => "error", "message" => "goAction should NOT be empty" );
+    $APIResult = [ "result" => "error", "message" => "goAction should NOT be empty" ];
 }
 
 if (!isset($userResponseType) || strlen($userResponseType) < 1) {

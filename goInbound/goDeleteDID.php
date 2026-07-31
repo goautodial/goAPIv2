@@ -21,24 +21,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
     $did_id = $astDB->escape($_REQUEST['did_id']);
     $ip_address = $_REQUEST['hostname'];
     
 	if($did_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for DID ID."); 
+		$apiresults = ["result" => "Error: Set a value for DID ID."]; 
 	} else {
- 
-    	$groupId = go_get_groupid($goUser, $astDB);
+
+    	$groupId = go_get_groupid($goUser);
 		$log_user = $goUser;
 		$log_group = $groupId;
 
 		if(!empty($did_id)){
-			$exploded = explode(",", $did_id);
+			$exploded = explode(",", (string) $did_id);
 		}
-		for($i=0;$i < count($exploded);$i++){
+        $counter = count($exploded);
+		for($i=0;$i < $counter;$i++){
 			$id = $exploded[$i];
 
 			if (!checkIfTenant($groupId, $goDB)) {
@@ -52,7 +53,7 @@
 
 			$selectData = $astDB->getOne("vicidial_inbound_dids");
 			//$query = "SELECT did_id,did_pattern from vicidial_inbound_dids $ul order by did_pattern LIMIT 1";
-	   		
+
 			if($astDB->count > 0) {
 				$dataDIDID = $selectData['did_id'];
 
@@ -60,20 +61,20 @@
 					$astDB->where("did_id", $dataDIDID);
 					$deleteAction = $astDB->delete("vicidial_inbound_dids");
 					$deleteQuery = "DELETE from vicidial_inbound_dids where did_id='$dataDIDID' limit 1;"; 
-	   				
+
 	       			$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted DID ID $dataDIDID", $log_group, $deleteQuery);
 
 					if($deleteAction)
-						$apiresults = array("result" => "success");
+						$apiresults = ["result" => "success"];
 					else
-						$apiresults = array("result" => "Error: Error in Query");
-					
+						$apiresults = ["result" => "Error: Error in Query"];
+
 				} else {
-					$apiresults = array("result" => "Error: DID doesn't exist.");
+					$apiresults = ["result" => "Error: DID doesn't exist."];
 				}
 
 			} else {
-				$apiresults = array("result" => "Error: DID doesn't exist.");
+				$apiresults = ["result" => "Error: DID doesn't exist."];
 			}
 		}//end of loop
 	}

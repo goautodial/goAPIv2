@@ -43,59 +43,57 @@
 	$sortBy = mysqli_real_escape_string($link, $_REQUEST['sortBy']);
 	
 
-	if(empty($limit))
+	if($limit === '' || $limit === '0')
     	$limit = 1000;
 
-	if(empty($sortBy)){
+	if($sortBy === '' || $sortBy === '0'){
 		$sortBy = "AfterDispo";
 	}else{
 		switch($sortBy){
-			case "callId";
+			case "callId":
+            case "call_notes":
 				$sortBy = "vl.uniqueid";
 			break;
-			case "leadId";
+			case "leadId":
 				$sortBy = "vi.lead_id";
 			break;
-			case "Phone_code";
+			case "Phone_code":
 				$sortBy = "vl.phone_code";
 			break;
-			case "Last_name";
+			case "Last_name":
 				$sortBy = "vi.last_name";
 			break;
-			case "Phone_number";
+			case "Phone_number":
 				$sortBy = "vl.phone_number";
 			break;
-			case "CallDuration";
+			case "CallDuration":
 				$sortBy = "vl.length_in_sec";
 			break;
-			case "agentName";
+			case "agentName":
 				$sortBy = "vl.user";
 			break;
-			case "agentId";
+			case "agentId":
 				$sortBy = "vu.user_id";
 			break;
-			case "CampaignId";
+			case "CampaignId":
 				$sortBy = "vl.campaign_id";
 			break;
-			case "CampaignName";
+			case "CampaignName":
 				$sortBy = "vc.campaign_name";
 			break;
-			case "TransactionDate";
+			case "TransactionDate":
 				$sortBy = "vl.call_date";
 			break;
-			case "ResultCode";
+			case "ResultCode":
 				$sortBy = "vl.status";
 			break;
-			case "isConversion";
+			case "isConversion":
 				$sortBy = "isConversion";
-			break;
-			case "call_notes";
-				$sortBy = "vl.uniqueid";
 			break;
 		}
 	}
 
-	if(empty($sortOrder)){
+	if($sortOrder === '' || $sortOrder === '0'){
 		$sortOrder = "";
 	}
 	
@@ -109,18 +107,18 @@
 	$difference = $date_difference->format("%m");
     
     // Check user_id if its null or empty
-    if(empty($session_user) || (empty($start_date) && empty($id))) { 
+    if(empty($session_user) || (($start_date === '' || $start_date === '0') && ($id === '' || $id === '0'))) { 
         $err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
+		$apiresults = ["code" => "40001", "result" => $err_msg];
     }elseif($difference > 3){
     	$err_msg = error_handle("41004", "date range. The allowed date range is 3 months or less.");
-		$apiresults = array("code" => "41004", "result" => $err_msg);
-    }elseif(!is_numeric($id) && !empty($id)){
+		$apiresults = ["code" => "41004", "result" => $err_msg];
+    }elseif(!is_numeric($id) && ($id !== '' && $id !== '0')){
     	$err_msg = error_handle("41002", "id");
-		$apiresults = array("code" => "41002", "result" => $err_msg);
+		$apiresults = ["code" => "41002", "result" => $err_msg];
     } else{
 
-        if (checkIfTenant($groupId)) {
+        if (checkIfTenant($groupId, $goDB)) {
             $ul = "";
         } else {
 			if($groupId !== "ADMIN")
@@ -135,25 +133,25 @@
 		// else
 		// 	$id = array("ALL");
 
-        if(!empty($user))
+        if($user !== '' && $user !== '0')
         	$user = explode(",",$user);
 		else
-			$user = array("ALL");
+			$user = ["ALL"];
 		
 		if($campaigns != "")
 			$campaigns = explode(",",$campaign_id);
 		else
-			$campaigns = array("ALL");
+			$campaigns = ["ALL"];
 
 		if($lists != "")	
 		    $lists = explode(",",$list_id);
 		else
-			$lists = array("ALL");
+			$lists = ["ALL"];
 		
 		if($dispo_stats != "")	
 		    $dispo_stats = explode(",",$dispo_stats);
 		else
-			$dispo_stats = array("ALL");
+			$dispo_stats = ["ALL"];
 
 		$id_SQL = "";
 		$campaign_SQL = "";
@@ -182,7 +180,7 @@
 			}
 		}
 
-		if($id != ""){
+		if($id !== ""){
 			// if (in_array("ALL", $id)){
 			// 	$id_SQL = "";
 			// }else{
@@ -200,10 +198,10 @@
 				$end_epoch = $fetch_end['end_epoch'];
 				$time_end = $fetch_end['time_end'];
 
-				if(!empty($start_date) || !empty($end_date)){
-					if(empty($start_date))
+				if($start_date !== '' && $start_date !== '0' || $end_date !== '' && $end_date !== '0'){
+					if($start_date === '' || $start_date === '0')
 				    	$start_date = $def_start_date;
-					if(empty($end_date))
+					if($end_date === '' || $end_date === '0')
 						$end_date = $def_end_date;
 
 					$id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
@@ -215,10 +213,8 @@
 					if(!empty($time_end))
 						$id_SQL = "(val.dispo_sec + val.dispo_epoch) > '$time_end'";
 					else{
-						if(empty($start_date))
-			                $start_date = $def_start_date;
-	                    if(empty($end_date))
-	                           $end_date = $def_end_date;
+						$start_date = $def_start_date;
+	                    $end_date = $def_end_date;
 	                    $id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 					}
 				}
@@ -227,9 +223,9 @@
 				$RUNcampaign=1;
 			//}
 		}else{
-			if(empty($start_date))
+			if($start_date === '0')
 		    	$start_date = $def_start_date;
-			if(empty($end_date))
+			if($end_date === '' || $end_date === '0')
 				$end_date = $def_end_date;
 
 			$id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
@@ -312,7 +308,7 @@
 				$status_SQL .= "'$dispo_stats[$i]',";
 				$i++;
 			}
-			if ( (in_array("ALL", $dispo_stats) ) or ($status_ct < 1) ){
+			if ( in_array("ALL", $dispo_stats) || $status_ct < 1 ){
 				$status_SQL = "";
 			}
 			else{
@@ -321,7 +317,7 @@
 			}
 		}
 		
-		if($rec_location == "Y"){
+		if($rec_location === "Y"){
 			$rec_location_fields = ", asteriskV4.re.location as recording_location";
 			$rec_location_from = ", recording_log re";
 			$rec_location_where = "and re.lead_id=vl.lead_id and vl.uniqueid = re.vicidial_id";
@@ -356,7 +352,7 @@
 			$query = "SELECT vl.uniqueid as callId, vi.lead_id as leadId, vl.phone_code as Phone_code, vi.first_name as First_name, vi.last_name as Last_name, vl.phone_number as Phone_number, vi.email as Email, vi.address1 as Address1, vi.city as City, vi.state as State, vi.postal_code as Zip, vl.length_in_sec as CallDuration, vl.user as agentName, vu.user_id as agentId, vl.list_id as ListId, vl.campaign_id as CampaignId, vc.campaign_name as CampaignName $location_fields, vl.call_date as TransactionDate, vl.status as ResultCode, (val.dispo_sec + val.dispo_epoch) as AfterDispo $sale_field $export_fields_SQL $rec_location_fields FROM asteriskV4.vicidial_users vu, asteriskV4.vicidial_log vl, asteriskV4.vicidial_agent_log val, asteriskV4.vicidial_list vi, asteriskV4.vicidial_campaigns vc $location_from $rec_location_from WHERE $id_SQL and val.uniqueid = vl.uniqueid and vu.user=vl.user $location_where and vi.lead_id=vl.lead_id and vl.campaign_id=vc.campaign_id and vl.status NOT IN ('INCALL', 'DISPO') and vl.end_epoch IS NOT NULL $rec_location_where $list_SQL  $user_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by $sortBy $sortOrder LIMIT $limit";
 		}else{
 			$err_msg = error_handle("40001");
-			$apiresults = array("code" => "40001", "result" => $err_msg);
+			$apiresults = ["code" => "40001", "result" => $err_msg];
 		}
 		
 		$result = mysqli_query($linkgo, $query) or die(mysqli_error($linkgo));
@@ -366,13 +362,10 @@
 		{
 			$csv_header[] = $fieldinfo->name;
 		}
-		if($per_call_notes == "Y"){
-			array_push($csv_header, "call_notes");
-		}
-
-		//OUTPUT CUSTOM FIELDS IN HEADER
-		if($custom_fields === "Y") {
-		    for($i = 0 ; $i < count($array_list); $i++){
+        $csv_header[] = "call_notes";
+        $counter = count($array_list);
+        //OUTPUT CUSTOM FIELDS IN HEADER
+        for($i = 0 ; $i < $counter; $i++){
 				$list_id = $array_list[$i];
 				$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
 				if($query_CF_list){
@@ -387,9 +380,10 @@
 					}
 				}
 			}
-			$header_CF = array();
-			$keys = array_keys($active_list_fields);
-			for($i = 0 ; $i < count($keys); $i++){
+        $header_CF = [];
+        $keys = array_keys($active_list_fields);
+        $counter = count($keys);
+        for($i = 0 ; $i < $counter; $i++){
 				$list_id = $keys[$i];
 				for($x=0;$x < count($active_list_fields[$list_id]);$x++){
 					$field = $active_list_fields[$list_id][$x];
@@ -399,10 +393,10 @@
 				}
 				
 			}
-			$csv_header = array_merge($csv_header,$header_CF);
-			//$active_list_fields = array_unique($active_list_fields, SORT_REGULAR);
-			//$active_list_fields2 = array_values($active_list_fields);
-		}
+        $csv_header = array_merge($csv_header,$header_CF);
+        //$active_list_fields = array_unique($active_list_fields, SORT_REGULAR);
+        //$active_list_fields2 = array_values($active_list_fields);
+        
 
 		//OUTPUT DATA ROW//
 		$count_row = 1;
@@ -410,37 +404,33 @@
 
 			$lead_id = $row[1];
 			$list_id_spec = $row[14];
-			// $row[3] = str_replace("\'", "'", $row[3]);
-			// $row[4] = str_replace("\'", "'", $row[4]);
-			// $row[5] = str_replace("\'", "'", $row[7]);
-			// $row[6] = str_replace("\'", "'", $row[8]);
-
-			// $row[3] = str_replace("\\", "", $row[3]);
-			// $row[4] = str_replace("\\", "", $row[4]);
-			// $row[5] = str_replace("\\", "", $row[7]);
-			// $row[6] = str_replace("\\", "", $row[8]);
-
-			if($per_call_notes == "Y"){
-				$query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
-				$notes_ct = mysqli_num_rows($query_callnotes);
-				if ($notes_ct > 0){
+            // $row[3] = str_replace("\'", "'", $row[3]);
+            // $row[4] = str_replace("\'", "'", $row[4]);
+            // $row[5] = str_replace("\'", "'", $row[7]);
+            // $row[6] = str_replace("\'", "'", $row[8]);
+            // $row[3] = str_replace("\\", "", $row[3]);
+            // $row[4] = str_replace("\\", "", $row[4]);
+            // $row[5] = str_replace("\\", "", $row[7]);
+            // $row[6] = str_replace("\\", "", $row[8]);
+            $query_callnotes = mysqli_query($link, "SELECT call_notes from vicidial_call_notes where lead_id='$lead_id' LIMIT 1;");
+            $notes_ct = mysqli_num_rows($query_callnotes);
+            if ($notes_ct > 0){
 					$fetch_callnotes = mysqli_fetch_array($query_callnotes);
 					$notes_data =	$fetch_callnotes["call_notes"];
-					$notes_data = rawurldecode($notes_data);
+					$notes_data = rawurldecode((string) $notes_data);
 				}else{
 					$notes_data = "";
 				}
-				array_push($row,$notes_data);
-			}
-
+            $row[] = $notes_data;
             //OUTPUT CUSTOM FIELDS IN ROW
-			if($custom_fields == "Y"){
-				$keys = array_keys($active_list_fields); // list of active custom lists
-				//var_dump($active_list_fields["custom_104"][0]);
-				// var_dump($header_CF);
-				// die();
-				/* FOR CSV */
-				for($i = 0 ; $i < count($keys); $i++){
+            $keys = array_keys($active_list_fields);
+            $counter = count($keys);
+            // list of active custom lists
+            //var_dump($active_list_fields["custom_104"][0]);
+            // var_dump($header_CF);
+            // die();
+            /* FOR CSV */
+            for($i = 0 ; $i < $counter; $i++){
 				    $list_id = $keys[$i];
 					//var_dump($active_list_fields[$list_id]);
 					$fields = implode(",", $active_list_fields[$list_id]);
@@ -469,20 +459,20 @@
 					
 
 					for($a=0;$a < count($fetch_row);$a++){
-						array_push($row, $fetch_row[$a]);
+						$row[] = $fetch_row[$a];
 					}
 					$queries[] = $row;
 					unset($fetch_row);
 					unset($fetch_CF);
 			    }
-			}
 			$csv_row[] = $row;
 			$count_row++;
 		}
 		//var_dump($queries);
-		$main_row = array();
+		$main_row = [];
+        $counter = count($csv_row);
 		//put keys in each row
-		for($i=0; $i < count($csv_row); $i++){
+		for($i=0; $i < $counter; $i++){
 			//unset($re_head);
 			for($a=0;$a<count($csv_header);$a++){
 				//$re_head[] = $csv_header[$a];
@@ -490,16 +480,16 @@
 				$re_row[$csv_header[$a]] = str_replace("\\", "", $csv_row[$i][$a]);
 			}
 			
-			array_push($main_row,$re_row);
+			$main_row[] = $re_row;
 		}
 		//var_dump($main_row);
 		//var_dump($query_fields);
 		//"query" => $query, "header" => $csv_header, 
-		$paging = array("totalElements" => $count_row, "limit" => $limit); 
+		$paging = ["totalElements" => $count_row, "limit" => $limit]; 
 		
 
 		//var_dump($return);
-		if(is_numeric($export) && !empty($export) && $export == 1){
+		if(is_numeric($export) && ($export !== '' && $export !== '0') && $export == 1){
 			if($count_row >= 1){
 				$filename = "Call_Details_".$start_date."_".$end_date.".csv";
 	        	 header('Content-type: application/csv');
@@ -508,10 +498,11 @@
 	        	echo implode(",",$csv_header)."\n";
 
 	        	$count = 0;
-		        for($i=0; $i <= count($csv_row); $i++){
+                $counter = count($csv_row);
+		        for($i=0; $i <= $counter; $i++){
 		            $count_row = $csv_row[$i];
 		            for($x=0; $x <= count($count_row); $x++){
-		                if($x == count($count_row)){
+		                if($x === count($count_row)){
 		                    echo $count_row[$x]."\n";
 		                }else{
 		                    echo $count_row[$x].",";
@@ -524,15 +515,15 @@
 			}else{
 				$err_msg = error_handle("40001");
 				//"query" => $userlog_query, 
-				$apiresults = array("result" => "No records retrieved from: ".$start_date." - ".$end_date);
+				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}
         }else{
 			if($count_row < 1){
 				$err_msg = error_handle("40001");
 				//"query" => $userlog_query, 
-				$apiresults = array("result" => "No records retrieved from: ".$start_date." - ".$end_date);
+				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}else{
-				$apiresults = array("paging" => $paging, "rows" => $main_row);
+				$apiresults = ["paging" => $paging, "rows" => $main_row];
 			}
 		}
 		

@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
     $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
@@ -31,45 +31,45 @@
     //$access_phones = $_REQUEST['access_phones'];
     //$access_voicemails = $_REQUEST['access_voicemails'];
    // $values = $_REQUEST['item'];
-    $active = strtoupper($astDB->escape($_REQUEST['active']));
+    $active = strtoupper((string) $astDB->escape($_REQUEST['active']));
    //tenant_id, tenant_name, admin, active
     ### Default values 
-    $defActive = array("Y","N");
-    $defaccess_call_times = array("Y","N");
-    $defaccess_carriers = array("Y","N");
-    $defaccess_phones = array("Y","N");
-	$defaccess_voicemails = array("Y","N");
+    $defActive = ["Y","N"];
+    $defaccess_call_times = ["Y","N"];
+    $defaccess_carriers = ["Y","N"];
+    $defaccess_phones = ["Y","N"];
+	$defaccess_voicemails = ["Y","N"];
 	
 ###########################
 //Error Checking
     if($tenant_id == null) {
-        $apiresults = array("result" => "Error: Set a value for Tenant ID.");
+        $apiresults = ["result" => "Error: Set a value for Tenant ID."];
     } else {
 		if(!in_array($active,$defActive) && $active != null) {
-			$apiresults = array("result" => "Error: Default value for active is Y or N only.");
+			$apiresults = ["result" => "Error: Default value for active is Y or N only."];
 		} else {
 			if(!in_array($access_call_times,$defaccess_call_times) && $access_call_times != null) {
-				$apiresults = array("result" => "Error: Default value for access_call_times is Y or N only.");
+				$apiresults = ["result" => "Error: Default value for access_call_times is Y or N only."];
 			} else {
                 if(!in_array($access_carriers,$defaccess_carriers) && $access_carriers != null) {
-                    $apiresults = array("result" => "Error: Default value for access_carriers is Y or N only.");
+                    $apiresults = ["result" => "Error: Default value for access_carriers is Y or N only."];
                 } else {
 					if(!in_array($access_voicemails,$defaccess_voicemails) && $access_voicemails != null) {
-						$apiresults = array("result" => "Error: Default value for access_voicemails is Y or N only.");
+						$apiresults = ["result" => "Error: Default value for access_voicemails is Y or N only."];
 					} else {
-						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $tenant_id)){
-							$apiresults = array("result" => "Error: Special characters found in tenant_id");
+						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $tenant_id)){
+							$apiresults = ["result" => "Error: Special characters found in tenant_id"];
 						} else {
-							if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $tenant_name)){
-								$apiresults = array("result" => "Error: Special characters found in tenant_name");
+							if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $tenant_name)){
+								$apiresults = ["result" => "Error: Special characters found in tenant_name"];
 							} else {
-								if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $admin)){
-									$apiresults = array("result" => "Error: Special characters found in admin");
+								if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $admin)){
+									$apiresults = ["result" => "Error: Special characters found in admin"];
 								} else {
 									if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass)){
-										$apiresults = array("result" => "Error: Special characters found in pass");
+										$apiresults = ["result" => "Error: Special characters found in pass"];
 									} else {
-										$groupId = go_get_groupid($goUser, $astDB);
+										$groupId = go_get_groupid($goUser);
 						
 										if (!checkIfTenant($groupId, $goDB)) {
 											//$ul = "WHERE tenant_id='$tenant_id'";
@@ -98,20 +98,20 @@
 											if($active == null) { $active = $dataactive; }
 											
 											//$query = "UPDATE go_multi_tenant SET tenant_id = '$tenant_id', tenant_name = '$tenant_name', admin = '$admin', active = '$active' WHERE tenant_id='$tenant_id';";
-											$insertData = array(
+											$insertData = [
 												'tenant_id' => $tenant_id,
 												'tenant_name' => $tenant_name,
 												'admin' => $admin,
 												'active' => $active
-											);
+											];
 											$goDB->where('tenant_id', $tenant_id);
 											$result = $goDB->update('go_multi_tenant', $insertData);
 											$logQuery = $goDB->getLastQuery();
 											
 											$log_id = log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Multi-Tenant: $tenant_id", $log_group, $logQuery);
-											$apiresults = array("result" => "success");
+											$apiresults = ["result" => "success"];
 										} else {
-											$apiresults = array("result" => "Error: Tenant doesn't exist");
+											$apiresults = ["result" => "Error: Tenant doesn't exist"];
 										}
 									}
 								}

@@ -23,7 +23,7 @@
 //ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL);
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 	
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
@@ -38,15 +38,15 @@
     }
 		
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ( empty($campaignID) || is_null($campaignID) ) {
 		$err_msg 									= error_handle("40001");
-        	$apiresults 								= array(
+        	$apiresults 								= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
 	} elseif (empty($fromDate) && empty($toDate)) {
 		$fromDate 									= date("Y-m-d") . " 00:00:00";
 		$toDate 									= date("Y-m-d") . " 23:59:59";
@@ -94,7 +94,7 @@
 		// }
 		
 		//ALL CAMPAIGNS
-		if ("ALL" === strtoupper($campaignID)) {
+		if ("ALL" === strtoupper((string) $campaignID)) {
             $astDB->where('user_group', $log_group);
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
     
@@ -129,7 +129,7 @@
 			->orderBy("list_id")
 			->get("vicidial_lists", NULL, "list_id");
 		$test_query = $astDB->getLastQuery();
-        $list_ids = array();
+        $list_ids = [];
 		if ($astDB->count > 0) {
 			foreach ($qlistid as $row) {
 				$list_ids[]							= $row['list_id'];
@@ -144,7 +144,7 @@
 		
 		$qsstatuses 								= $astDB
 			->orderBy("status")
-			->get("vicidial_statuses", NULL, array("status", "status_name"));
+			->get("vicidial_statuses", NULL, ["status", "status_name"]);
 		
 		if ($astDB->count > 0) {
 			foreach ($qsstatuses as $row) {
@@ -154,7 +154,7 @@
 		
 		$qcstatuses = $astDB
 			->where("campaign_id", $array_camp, "IN")
-			->get("vicidial_campaign_statuses", NULL, array("status", "status_name"));
+			->get("vicidial_campaign_statuses", NULL, ["status", "status_name"]);
 		
 		if ($astDB->count > 0) {
 			foreach ($qcstatuses as $row) {
@@ -195,14 +195,14 @@
 		
 		if ($astDB->count >0) {
 			foreach ($queryx as $row) {
-				$leads_in_list 			= ($leads_in_list + $row['count']);
+				$leads_in_list += $row['count'];
 				$count_statuses[$o]		= $row['status'];
 				$count_called[$o]		= $row['called_count'];
 				$count_count[$o]		= $row['count'];
 				
-				$all_called_count[$row['called_count']] = ($all_called_count[$row['called_count']] + $row['count']);					
+				$all_called_count[$row['called_count']] += $row['count'];					
 				
-				if ( (strlen($status[$sts]) < 1) or ($status[$sts] != $row['status']) ) {
+				if ( strlen($status[$sts]) < 1 || $status[$sts] != $row['status'] ) {
 					if ($first_row) {
 						$first_row = 0;
 					} else{
@@ -217,7 +217,7 @@
 					}
 				}
 				
-				$leads_in_sts[$sts] 			= ($leads_in_sts[$sts] + $row['count']);
+				$leads_in_sts[$sts] += $row['count'];
 				$status_called_last[$sts] 		= $row['called_count'];
 				
 				if ($status_called_last[$sts] > $all_called_last) {
@@ -273,7 +273,7 @@
 				$o = 0;
 				
 				while ($statuses_count_called_to_print > $o) {
-					if ( ($count_statuses[$o] == "$Pstatus") AND ($count_called[$o] == "$first") ) {
+					if ( $count_statuses[$o] == "$Pstatus" && $count_called[$o] == "$first" ) {
 						$called_printed++;
 						$TOPsorted_output .= "<td nowrap> ".$count_count[$o]." </td>";
 					}
@@ -375,17 +375,14 @@
 		}	
 		
 		$BOTsorted_output 					.= "</tbody></TABLE>";
-
-		
-		$apiresults 						= array(
+		return [
 			"result" 							=> "success", 
 			"SUMstatuses" 						=> $sts, 
 			"TOPsorted_output" 					=> $TOPsorted_output, 
 			"BOTsorted_output" 					=> $BOTsorted_output,
 			"query"								=> $NOTCALLEDsql,
 			"test"								=> $userlevel
-		);
-		return $apiresults;
+		];
 	}
 
 ?>

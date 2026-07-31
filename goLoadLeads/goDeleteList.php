@@ -20,15 +20,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
     $list_id = $astDB->escape($_REQUEST['list_id']);
-    
+
 	if($list_id == null) { 
-		$apiresults = array("result" => "Error: Set a value for List ID."); 
+		$apiresults = ["result" => "Error: Set a value for List ID."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser, $astDB);
+    	$groupId = go_get_groupid($goUser);
 		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "WHERE list_id='$list_id'";
 			$astDB->where('list_id', $list_id);
@@ -53,14 +53,14 @@
    				$deleteResultLeads = $astDB->rawQuery($deleteQueryLeads);
 				$deleteQueryStmt = "DELETE FROM vicidial_lists_fields WHERE list_id='$dataListID' LIMIT 1;"; 
    				$deleteResultStmt = $astDB->rawQuery($deleteQueryStmt);
-				
+
 				$log_id = log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $deleteQuery);
-				$apiresults = array("result" => "success");
+				$apiresults = ["result" => "success"];
 			} else {
-				$apiresults = array("result" => "Error: List doesn't exist.");
+				$apiresults = ["result" => "Error: List doesn't exist."];
 			}
 		} else {
-			$apiresults = array("result" => "Error: List doesn't exist.");
+			$apiresults = ["result" => "Error: List doesn't exist."];
 		}
 	}//end
 ?>

@@ -30,15 +30,15 @@ if (isset($_GET['goMessage'])) { $message = $astDB->escape($_GET['goMessage']); 
 
 
 if ((isset($sender) && $sender !== '') && (isset($recipient) && $recipient !== '') && (isset($message) && $message !== '')) {
-	$insertData = array(
+	$insertData = [
 		'sender' => $sender,
 		'recipient' => $recipient,
 		'message' => $message,
 		'entry_date' => date("Y-m-d H:i:s")
-	);
+	];
     
     $rslt = $goDB->insert('go_chat_history', $insertData);
     
-    $APIResult = array( "result" => "success", "chat_id" => $goDB->getInsertId() );
+    $APIResult = [ "result" => "success", "chat_id" => $goDB->getInsertId() ];
 }
 ?>

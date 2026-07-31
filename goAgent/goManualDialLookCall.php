@@ -49,31 +49,31 @@ if ($is_logged_in) {
 	$MT[0] = '';
 	$call_good = 0;
     
-	if (strlen($MDnextCID) < 18) {
+	if (strlen((string) $MDnextCID) < 18) {
 		//echo "NO\n";
 		//echo "MDnextCID $MDnextCID is not valid\n";
-        $APIResult = array( "result" => "error", "lookCID" => "NO", "message" => "MDnextCID {$MDnextCID} is NOT valid." );
+        $APIResult = [ "result" => "error", "lookCID" => "NO", "message" => "MDnextCID {$MDnextCID} is NOT valid." ];
 	} else {
 		##### look for the channel in the UPDATED vicidial_manager record of the call initiation
 		//$stmt="SELECT uniqueid,channel FROM vicidial_manager where callerid='$MDnextCID' and server_ip='$server_ip' and status IN('UPDATED','DEAD') LIMIT 1;";
         $astDB->where('callerid', $MDnextCID);
         $astDB->where('server_ip', $server_ip);
-        $astDB->where('status', array( 'UPDATED', 'DEAD' ), 'in');
+        $astDB->where('status', [ 'UPDATED', 'DEAD' ], 'in');
         $rslt = $astDB->getOne('vicidial_manager', 'uniqueid,channel');
 		$VM_mancall_ct = $astDB->getRowCount();
 		if ($VM_mancall_ct > 0) {
             $row = $rslt;
 			$uniqueid = $row['uniqueid'];
 			$channel = $row['channel'];
-			$call_output = array(
+			$call_output = [
                 'uniqueid' => $uniqueid,
                 'channel' => $channel,
                 'MDalert' => ''
-            );
+            ];
 			$call_good++;
 		} else {
 			### after 10 seconds, start checking for call termination in the carrier log
-			if ( ($Dial_Seconds > 0) and (preg_match("/0$/", $Dial_Seconds)) ) {
+			if ( $Dial_Seconds > 0 && preg_match("/0$/", $Dial_Seconds) ) {
 				//$stmt="SELECT uniqueid,channel,end_epoch FROM call_log where caller_code='$MDnextCID' and server_ip='$server_ip' order by start_time desc LIMIT 1;";
                 $astDB->where('caller_code', $MDnextCID);
                 $astDB->where('server_ip', $server_ip);
@@ -92,7 +92,7 @@ if ($is_logged_in) {
                     $astDB->where('uniqueid', $uniqueid);
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('channel', $channel);
-                    $astDB->where('dialstatus', array( 'BUSY', 'CHANUNAVAIL', 'CONGESTION' ), 'in');
+                    $astDB->where('dialstatus', [ 'BUSY', 'CHANUNAVAIL', 'CONGESTION' ], 'in');
                     $rslt = $astDB->getOne('vicidial_carrier_log', 'dialstatus,hangup_cause,sip_hangup_cause,sip_hangup_reason');
 					$CL_mancall_ct = $astDB->getRowCount();
 					if ($CL_mancall_ct > 0) {
@@ -105,22 +105,22 @@ if ($is_logged_in) {
 						$channel = $dialstatus;
 						$hangup_cause_msg = "Cause: " . $hangup_cause . " - " . hangup_cause_description($hangup_cause);
 						$sip_hangup_cause_msg = '';
-						if (strlen($sip_hangup_cause) > 1) {
+						if (strlen((string) $sip_hangup_cause) > 1) {
 							$sip_hangup_cause_msg = "SIP: " . $sip_hangup_cause . " - ";
-							if (strlen($sip_hangup_reason) < 2)
+							if (strlen((string) $sip_hangup_reason) < 2)
 								{$sip_hangup_cause_msg .= sip_hangup_cause_description($sip_hangup_cause);}
 							else
 								{$sip_hangup_cause_msg .= $sip_hangup_reason;}
 						}
 
 						//$call_output = "$uniqueid\n$channel\nERROR\n" . $hangup_cause_msg . "\n<br>" . $sip_hangup_cause_msg;
-                        $call_output = array(
+                        $call_output = [
                             'uniqueid' => $uniqueid,
                             'channel' => $channel,
                             'MDalert' => 'ERROR',
                             'MDerrorDesc' => $hangup_cause_msg,
                             'MDerrorDescSIP' => $sip_hangup_cause_msg
-                        );
+                        ];
 						$call_good++;
 
 						### Delete call record
@@ -130,7 +130,7 @@ if ($is_logged_in) {
 
 						//$stmt="UPDATE vicidial_live_agents set ring_callerid='' where ring_callerid='$MDnextCID';";
                         $astDB->where('ring_callerid', $MDnextCID);
-                        $rslt = $astDB->update('vicidial_live_agents', array( 'ring_callerid' => '' ));
+                        $rslt = $astDB->update('vicidial_live_agents', [ 'ring_callerid' => '' ]);
                     }
                 }
             }
@@ -148,15 +148,15 @@ if ($is_logged_in) {
                     $row = $rslt[0];
 					$wait_sec = (($StarTtimE - $row['wait_epoch']) + $row['wait_sec']);
 					$now_dead_epoch = $row['dead_epoch'];
-					if ( ($now_dead_epoch > 1000) and ($now_dead_epoch < $StarTtimE) )
-						{$dead_epochSQL = array( 'dead_epoch' => $StarTtimE );}
+					if ( $now_dead_epoch > 1000 && $now_dead_epoch < $StarTtimE )
+						{$dead_epochSQL = [ 'dead_epoch' => $StarTtimE ];}
 				}
 				//$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtimE',lead_id='$lead_id' $dead_epochSQL where agent_log_id='$agent_log_id';";
-                $updateData = array(
+                $updateData = [
                     'wait_sec' => $wait_sec,
                     'talk_epoch' => $StarTtimE,
                     'lead_id' => $lead_id,
-                );
+                ];
                 
                 if (is_array($dead_epochSQL)) {
                     $updateData = array_merge( $updateData, $dead_epochSQL );
@@ -166,21 +166,21 @@ if ($is_logged_in) {
 
 				//$stmt="UPDATE vicidial_auto_calls set uniqueid='$uniqueid',channel='$channel' where callerid='$MDnextCID';";
                 $astDB->where('callerid', $MDnextCID);
-                $rslt = $astDB->update('vicidial_auto_calls', array( 'uniqueid' => $uniqueid, 'channel' => $channel ));
+                $rslt = $astDB->update('vicidial_auto_calls', [ 'uniqueid' => $uniqueid, 'channel' => $channel ]);
             }
             
 			//$stmt="UPDATE call_log set uniqueid='$uniqueid',channel='$channel' where caller_code='$MDnextCID';";
             $astDB->where('caller_code', $MDnextCID);
-            $rslt = $astDB->update('call_log', array( 'uniqueid' => $uniqueid, 'channel' => $channel ));
+            $rslt = $astDB->update('call_log', [ 'uniqueid' => $uniqueid, 'channel' => $channel ]);
 
 			//echo "$call_output";
-            $APIResult = array( "result" => "success", "lookCID" => "", "data" => $call_output );
+            $APIResult = [ "result" => "success", "lookCID" => "", "data" => $call_output ];
 		} else {
             //echo "NO\n$DiaL_SecondS\n";
-            $APIResult = array( "result" => "error", "lookCID" => "NO", "message" => $Dial_Seconds );
+            $APIResult = [ "result" => "error", "lookCID" => "NO", "message" => $Dial_Seconds ];
         }
 	}
 } else {
-    $APIResult = array( "result" => "error", "message" => "User ID '{$user}' is NOT logged in." );
+    $APIResult = [ "result" => "error", "message" => "User ID '{$user}' is NOT logged in." ];
 }
 ?>

@@ -21,38 +21,38 @@
 */
  
 	ini_set('memory_limit', '2048M');
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($list_id) || is_null($list_id)) {
 		$err_msg 										= error_handle("10107");
-	        $apiresults 									= array(
+	        $apiresults 									= [
 			"code" 											=> "10107",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		
 		$result 									= $astDB->where('list_id', $list_id)
 													->getOne("vicidial_list", "count(lead_id) as row_count");
 		
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 								=> "success", 
 			"row_count" 								=> $result['row_count']
-		);
+		];
 	}
 	
 

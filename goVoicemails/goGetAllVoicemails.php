@@ -23,12 +23,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");	
+	include_once (__DIR__ . "/goAPI.php");	
     
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
+		];
 	} 
 	
 	if (isset($_REQUEST['limit'])) {
@@ -56,7 +56,7 @@
 			$dataUserGroup[] 			= $fresults['user_group'];			
 		}
 		
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "success", 
 			"voicemail_id" 					=> $dataVoicemailID, 
 			"fullname" 						=> $dataFullname, 
@@ -65,11 +65,11 @@
 			"old_messages" 					=> $dataOldMessages, 
 			"delete_vm_after_email" 		=> $dataDeleteVMAfterEmail, 
 			"user_group" 					=> $dataUserGroup
-		);
+		];
 	} else {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Empty"
-		);
+		];
 	}
 
 ?>

@@ -7,11 +7,11 @@
     #### Written by: Demian Lizandro Biscocho          ####
     #### License: AGPLv2                               ####
     #######################################################
-    include_once("../goFunctions.php");
+    include_once(__DIR__ . "/../goFunctions.php");
      
     $groupId = go_get_groupid($goUser);
 
-    if (!checkIfTenant($groupId)) {
+    if (!checkIfTenant($groupId, $goDB)) {
             $ul='';
     } else { 
             $ul = "AND p.user_group='$groupId'";  
@@ -24,19 +24,19 @@
     $countResult = mysqli_num_rows($rsltv);
     
     if($countResult > 0) {
-        $data = array();
+        $data = [];
         while($fresults = mysqli_fetch_array($rsltv, MYSQLI_ASSOC)){
-            array_push($data, urlencode_array($fresults));
+            $data[] = urlencode_array($fresults);
         }
-        $apiresults = array("result" => "success", "data" => $data);
+        $apiresults = ["result" => "success", "data" => $data];
     } else {
-        $apiresults = array("result" => "Error: No data to show.");
+        $apiresults = ["result" => "Error: No data to show."];
     }
 
     function urlencode_array($array){
-        $out_array = array();
+        $out_array = [];
         foreach($array as $key => $value){
-        $out_array[rawurlencode($key)] = rawurlencode($value);
+        $out_array[rawurlencode((string) $key)] = rawurlencode((string) $value);
         }
     return $out_array;
     }

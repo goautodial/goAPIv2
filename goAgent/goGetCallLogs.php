@@ -32,7 +32,7 @@ if (!isset($date) || (isset($date) && strlen($date) !== 10)) {
 	$date = date("Y-m-d");
 }
 
-$statuses = array();
+$statuses = [];
 $rslt = $astDB->get('vicidial_statuses', null, 'status,status_name');
 foreach ($rslt as $row) {
 	$status = $row['status'];
@@ -48,12 +48,12 @@ foreach ($rslt as $row) {
 
 $astDB->where('campaign_id', $campaign);
 $astDB->where('user', $goUser);
-$astDB->where('event_time', array("$date 00:00:00", "$date 23:59:59"), 'between');
+$astDB->where('event_time', ["$date 00:00:00", "$date 23:59:59"], 'between');
 $astDB->where('talk_sec', '0', '>');
 $astDB->orderBy('event_time', 'desc');
 $rslt = $astDB->get('vicidial_agent_log', $limit, 'event_time AS time,lead_id,status');
 
-$return = array();
+$return = [];
 foreach ($rslt as $row) {
 	$astDB->where('lead_id', $row['lead_id']);
 	$rslt2 = $astDB->getOne('vicidial_list', 'first_name,last_name');
@@ -66,5 +66,5 @@ foreach ($rslt as $row) {
 	$return[] = $row;
 }
 
-$APIResult = array( "result" => "success", "data" => $return );
+$APIResult = [ "result" => "success", "data" => $return ];
 ?>

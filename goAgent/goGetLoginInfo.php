@@ -21,48 +21,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user, $astDB);
+	$log_group 										= go_get_groupid($session_user);
 	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
 	
 	$user 											= $astDB->escape($_REQUEST['goUserID']);
 	$isPBP 											= $astDB->escape($_REQUEST['isPBP']);
 	$campaign	 									= $astDB->escape($_REQUEST['goCampaign']);
 
-	$SIP_server 									= (!isset($SIP_server)) ? 'kamailio' : $SIP_server;
+	$SIP_server ??= 'kamailio';
 
 	if (empty($log_user) || is_null($log_user)) {
-		$APIResult 									= array(
+		$APIResult 									= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($user) || is_null($user)) {
 		$err_msg 									= error_handle("40001");
-        $APIResult 									= array(
+        $APIResult 									= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
     } else {    
 		$is_logged_in 								= check_agent_login($astDB, $user);			
 		$forever_stop 								= 0;
 		$HKuser_level 								= 1;						
 		$user_abb 									= "{$user}{$user}{$user}{$user}";
 		
-		$data 										= array(
+		$data 										= [
 			'is_logged_in' 								=> $is_logged_in
-		);
+		];
 		
-		while ((strlen($user_abb) > 4) and ($forever_stop < 200)) {
-			$user_abb 								= preg_replace("/^\./i","",$user_abb);   
+		while (strlen((string) $user_abb) > 4 && $forever_stop < 200) {
+			$user_abb 								= preg_replace("/^\./i","",(string) $user_abb);   
 			$forever_stop++;
 		}	
 			
-			$default_settings 						= array(
-				'LCAe' 									=> array(),
-				'LCAc' 									=> array(),
-				'LCAt' 									=> array(),
-				'LMAe' 									=> array(),
+			$default_settings 						= [
+				'LCAe' 									=> [],
+				'LCAc' 									=> [],
+				'LCAt' 									=> [],
+				'LMAe' 									=> [],
 				'session_id' 							=> '',
 				'session_name' 							=> '',
 				'conf_exten' 							=> '',
@@ -330,7 +330,7 @@
 				'threeway_end' 							=> 0,
 				'threeway_cid' 							=> '',
 				'nextdial_seconds' 						=> 3
-			);
+			];
 			
 		$cols										= "
 			user,
@@ -393,9 +393,9 @@
 			$userinfo['user_closer_campaigns'] 		= $userinfo['closer_campaigns'];
 			unset($userinfo['closer_campaigns']);
 		
-			$data 									= array_merge($data, array(
+			$data 									= array_merge($data, [
 				'user_info' 							=> $userinfo 
-			));
+			]);
 		
 			$usergroup 								= get_settings('usergroup', $astDB, $user_group);	
 			
@@ -489,7 +489,7 @@
 					->getOne('phones', $cols);
 				
 				if (!$phoneinfo) {
-					$phoneinfo 						= array(
+					$phoneinfo 						= [
 						'extension' 					=> '',
 						'dialplan_number' 				=> '',
 						'voicemail_id' 					=> '',
@@ -551,7 +551,6 @@
 						'template_id' 					=> '',
 						'conf_override' 				=> '',
 						'phone_context' 				=> '',
-						'phone_ring_timeout' 			=> '',
 						'conf_secret' 					=> '',
 						'is_webphone' 					=> '',
 						'use_external_server_ip' 		=> '',
@@ -560,7 +559,7 @@
 						'phone_ring_timeout' 			=> '',
 						'on_hook_agent' 				=> '',
 						'webphone_auto_answer' 			=> ''
-					);
+					];
 				}
 				
 				$asterisk_version 					= $astDB
@@ -578,8 +577,8 @@
 					$extension 						= "$dialplan_number@$ext_context";
 				}
 				
-				if (preg_match("/Zap/i", $protocol)) {
-					if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", $asterisk_version)) {
+				if (preg_match("/Zap/i", (string) $protocol)) {
+					if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", (string) $asterisk_version)) {
 						$do_nothing 				= 1;
 					} else {
 						$protocol					= 'DAHDI';
@@ -590,14 +589,14 @@
 				$SIP_user_DiaL 						= "$protocol/$extension";
 				$qm_extension 						= $extension;
 				
-				if ((preg_match('/8300/', $dialplan_number)) and (strlen($dialplan_number)<5) and ($protocol == 'Local')) {
+				if (preg_match('/8300/', (string) $dialplan_number) && strlen((string) $dialplan_number) < 5 && $protocol == 'Local') {
 					$SIP_user 						= "$protocol/$extension$phone_login";
 					$qm_extension 					= "$extension$phone_login";
 				}
 				
-				$data 								= array_merge($data, array(
+				$data 								= array_merge($data, [
 					'phone_info' 						=> $phoneinfo 
-				));
+				]);
 			}	
 			
 			$cols									= "
@@ -625,9 +624,9 @@
 			
 			$systeminfo 							= $astDB->getOne('system_settings', $cols);
 			
-			$data 									= array_merge($data, array(
+			$data 									= array_merge($data, [
 				'system_info' 							=> $systeminfo 
-			));
+			]);
 			
 			$nextdial_secondsSQL 					= '';
 			$nextResult 							= $astDB->rawQuery("SHOW COLUMNS FROM `vicidial_campaigns` LIKE 'nextdial_seconds'");
@@ -745,11 +744,11 @@
 				owner_populate{$nextdial_secondsSQL}			
 			";
 			
-			if (isset($campaign) && strlen($campaign) > 0) {
+			if (isset($campaign) && (string) $campaign !== '') {
 				$astDB->where('campaign_id', $campaign);
 			} else {
 				if ($user_level >= 7) {
-					$astDB->where('user_group', array('---ALL---', $user_group), 'IN');
+					$astDB->where('user_group', ['---ALL---', $user_group], 'IN');
 					$astDB->where('LENGTH(dial_prefix)', '7', '>=');
 					$astDB->where('active', 'Y');
 					$astDB->orderBy('campaign_id', 'desc');
@@ -765,7 +764,7 @@
 					->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
 				
 				$pause_codes_ct 					= $astDB->getRowCount();
-				$pause_codes						= array();
+				$pause_codes						= [];
 				
 				if ($astDB->count > 0) {
 					foreach ($rslt as $row) {
@@ -779,10 +778,10 @@
 					}			
 				}
 				
-				$VARingroups 						= array();
-				$VARingroup_handlers 				= array();
-				$VARphonegroups 					= array();
-				$VARemailgroups 					= array();
+				$VARingroups 						= [];
+				$VARingroup_handlers 				= [];
+				$VARphonegroups 					= [];
+				$VARemailgroups 					= [];
 				$INgrpCT 							= 0;
 				$EMAILgrpCT 						= 0;
 				$PHONEgrpCT 						= 0;
@@ -838,8 +837,8 @@
 				$xfer_groups 						= preg_replace("/^ | -$/", "", $campinfo['xfer_groups']);
 				$xfer_groups 						= explode(" ", $xfer_groups);
 				$XFgrpCT 							= 0;
-				$VARxferGroups 						= array();
-				$VARxferGroupsNames 				= array();
+				$VARxferGroups 						= [];
+				$VARxferGroupsNames 				= [];
 				$default_xfer_group_name 			= '';
 				
 				if ($campinfo['allow_closers'] == 'Y') {
@@ -924,7 +923,7 @@
 					$custom_3way_button_transfer_view 	= 1;
 					$custom_3way_button_transfer_enabled = 1;
 				}
-				if ( (preg_match("/VIEW_CONTACTS/", $campinfo['custom_3way_button_transfer'])) and ($campinfo['enable_xfer_presets'] == 'CONTACTS') and ($userinfo['preset_contact_search'] != 'DISABLED') ) {
+				if ( preg_match("/VIEW_CONTACTS/", $campinfo['custom_3way_button_transfer']) && $campinfo['enable_xfer_presets'] == 'CONTACTS' && $userinfo['preset_contact_search'] != 'DISABLED' ) {
 					$custom_3way_button_transfer_contacts = 1;
 					$custom_3way_button_transfer_enabled = 1;
 				}
@@ -987,19 +986,19 @@
 					$campinfo['no_hopper_dialing'] 				= 0;
 				}
 
-				if ( (preg_match("/Y/", $campinfo['call_requeue_button'])) and ($campinfo['auto_dial_level'] > 0) ) {
+				if ( preg_match("/Y/", $campinfo['call_requeue_button']) && $campinfo['auto_dial_level'] > 0 ) {
 					$campinfo['call_requeue_button'] 			= 1;
 				} else {
 					$campinfo['call_requeue_button'] 			= 0;
 				}
 
-				if ( (preg_match("/AUTO/", $campinfo['view_calls_in_queue_launch'])) and ($campinfo['auto_dial_level'] > 0) ) {
+				if ( preg_match("/AUTO/", $campinfo['view_calls_in_queue_launch']) && $campinfo['auto_dial_level'] > 0 ) {
 					$campinfo['view_calls_in_queue_launch'] 	= 1;
 				} else {
 					$campinfo['view_calls_in_queue_launch'] 	= 0;
 				}
 
-				if ( (!preg_match("/NONE/", $campinfo['view_calls_in_queue'])) and ($campinfo['auto_dial_level'] > 0) ) {
+				if ( !preg_match("/NONE/", $campinfo['view_calls_in_queue']) && $campinfo['auto_dial_level'] > 0 ) {
 					$campinfo['view_calls_in_queue'] 			= 1;
 				} else {
 					$campinfo['view_calls_in_queue'] 			= 0;
@@ -1097,9 +1096,9 @@
 				$default_settings['default_web_vars'] 	= $default_web_vars;
 				$default_settings['LIVE_web_vars'] 		= $default_web_vars;
 
-				$data 									= array_merge($data, array( 
+				$data 									= array_merge($data, [ 
 					'camp_info' 							=> $campinfo 
-				));				
+				]);				
 			}
 			
 			$rslt 									= $astDB
@@ -1119,7 +1118,7 @@
 
 			$VARCBstatusesLIST 						= '';
 			$statuses_ct 							= 0;
-			$statuses 								= array();
+			$statuses 								= [];
 			
 			if ($isPBP !== 'Y') {
 				##### grab the statuses that can be used for dispositioning by an agent
@@ -1145,7 +1144,7 @@
 				}
 			}
 			
-			if (isset($campaign) && strlen($campaign) > 0) {
+			if (isset($campaign) && (string) $campaign !== '') {
 				##### grab the campaign-specific statuses that can be used for dispositioning by an agent
 				$query 								= $astDB
 					->where('selectable', 'Y')
@@ -1170,7 +1169,7 @@
 				}
 
 				//ksort($statuses);
-				$statuses_ct 						= ($statuses_ct + $statuses_camp_ct);
+				$statuses_ct += $statuses_camp_ct;
 				//$testVal 							= $astDB->getLastQuery();
 			}
 			
@@ -1233,11 +1232,11 @@
 				$default_settings['no_empty_session_warnings'] = 1;
 			}
 			
-			if ( ($phoneinfo['enable_sipsak_messages'] > 0) and ($systeminfo['allow_sipsak_messages'] > 0) and (preg_match("/SIP/i", $protocol)) ) {
+			if ( $phoneinfo['enable_sipsak_messages'] > 0 && $systeminfo['allow_sipsak_messages'] > 0 && preg_match("/SIP/i", (string) $protocol) ) {
 				$default_settings['enable_sipsak'] = 1;
 			}
 			
-			if (strlen($usergroup->agent_status_viewable_groups) > 2)
+			if (strlen((string) $usergroup->agent_status_viewable_groups) > 2)
 				{$default_settings['agent_status_view'] = 1;}
 			
 			if ($usergroup->agent_status_view_time == 'Y')
@@ -1247,9 +1246,9 @@
 				$default_settings['scheduled_callbacks'] = 1;
 			}
 			
-			$data 										= array_merge($data, array( 
+			$data 										= array_merge($data, [ 
 				'default_settings' 							=> $default_settings 
-			));
+			]);
 
 			$rslt 										= $astDB
 				->where('tld', '', '!=')
@@ -1257,7 +1256,7 @@
 				->groupBy('country_code,country')
 				->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
 			
-			$country_code 								= array();
+			$country_code 								= [];
 			
 			if ($astDB->count > 0) {
 				foreach ($rslt as $country) {
@@ -1268,20 +1267,20 @@
 				}			
 			}			
 			
-			$data 									= array_merge($data, array( 
+			$data 									= array_merge($data, [ 
 				'country_codes' 						=> $country_code 
-			));
+			]);
 			
-			$APIResult 							= array( 
+			$APIResult 							= [ 
 				"result" 								=> "success", 
 				"data" 									=> $data 
 				//"test" 								=> $testVal 
-			);
+			];
 		} else {
-			$APIResult 							= array( 
+			$APIResult 							= [ 
 				"result" 								=> "error", 
 				"message" 								=> "User ID $user does NOT exist." 
-			);
+			];
 		}
 	}
 ?>

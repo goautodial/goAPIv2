@@ -22,24 +22,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	$ingroup 										    = $astDB->escape( $_REQUEST['ingroup'] );
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
         $astDB->where('user_group', $log_group);
         $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
@@ -64,7 +64,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					$astDB->where("user_group", $log_group);
 					if ($userlevel > 8) {
 						$astDB->orWhere("user_group", "---ALL---");
@@ -79,20 +79,20 @@
 			$rsltvGo									= $goDB->get("users", NULL, "userid,avatar");		
 				
 			if ($goDB->count > 0) {
-				$dataGo 								= array();
+				$dataGo 								= [];
 				foreach ($rsltvGo as $fresultsGo){
-					array_push($dataGo, $fresultsGo);
+					$dataGo[] = $fresultsGo;
 				}
 			} 	
 			
-			$cols 										= array(
+			$cols 										= [
 				"channel as 'pc_channel'",
 				"server_ip as 'pc_server_ip'",
 				"channel_group as 'pc_channel_group'",
 				"extension as 'pc_extension'",
 				"parked_by as 'pc_parked_by'",
 				"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
-			);
+			];
 				
 			$resultsPCs									= $astDB
 				->where("channel", 0, ">")
@@ -130,8 +130,8 @@
                 $onlineAgents = $astDB->rawQuery($SQLquery);
 				$queryoa = $SQLquery; //$astDB->getLastQuery();	
 				if ($astDB->count > 0) {
-					$dataPCs 							= array();
-                    $calls_in_queue                     = array();
+					$dataPCs 							= [];
+                    $calls_in_queue                     = [];
                     
                     foreach ($onlineAgents as $agent) {
                         $aUser = $agent['vu_user'];
@@ -142,7 +142,7 @@
                             $astDB->where("campaign_id", $closer_campaigns, "IN");
                         }
                         $cData							= $astDB
-                            ->where("status", array("XFER", "CLOSER"), "NOT IN")
+                            ->where("status", ["XFER", "CLOSER"], "NOT IN")
                             ->where("call_type", "IN", "=")		
                             ->get("vicidial_auto_calls");
                         
@@ -151,11 +151,11 @@
 					
 					if ($resultsPCs) {
 						foreach ($resultsPCs as $resultsPC) {               
-							array_push($dataPCs, $resultsPC);
+							$dataPCs[] = $resultsPC;
 						}				
 					}                        
 					
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success", 
 						//"query" 							=> $astDB->getLastQuery(),
                         //"query"                             => $SQLquery,
@@ -164,12 +164,12 @@
 						"dataGo" 							=> $dataGo,
 						"parked" 							=> $dataPCs,
                         "calls_in_queue"                    => $calls_in_queue
-					);
+					];
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success", 
 						"data" 								=> $queryoa
-					);		
+					];		
 				}
 					
 			} else {	
@@ -181,23 +181,14 @@
 					->where("user_level < 8")
 					->where("user_level != 4")
 					->where("user", DEFAULT_USERS, "NOT IN")
-					->getValue("vicidial_live_agents", "count(*)");		
-					
-				$cols 									= array(
-					"channel as 'pc_channel'",
-					"server_ip as 'pc_server_ip'",
-					"channel_group as 'pc_channel_group'",
-					"extension as 'pc_extension'",
-					"parked_by as 'pc_parked_by'",
-					"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
-				);
+					->getValue("vicidial_live_agents", "count(*)");
 				
 				// caller id
-				$cols 									= array(
+				$cols 									= [
 					"callerid as 'vac_callerid'",
 					"lead_id as 'vac_lead_id'",
 					"phone_number as 'vac_phone_number'"
-				);
+				];
 				
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
                     $astDB->where("campaign_id", $allowed_campaigns, "IN");
@@ -205,7 +196,7 @@
 				$rsltvCallerIDsFromVAC					= $astDB->get("vicidial_auto_calls", NULL, $cols);
 					
 				// waiting for calls
-				$cols 									= array(
+				$cols 									= [
 					"vicidial_live_agents.extension as 'vla_extension'",
 					"vicidial_live_agents.user as 'vla_user'",
 					"vicidial_users.full_name as 'vu_full_name'",
@@ -228,7 +219,7 @@
 					"vicidial_live_agents.callerid as 'vla_callerid'",
 					"vicidial_agent_log.sub_status as 'vla_pausecode'", 
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
-				);
+				];
 				
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_agent_log, vicidial_campaigns";
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
@@ -245,7 +236,7 @@
 					->get($table, NULL, $cols);
 				
 				// live call
-				$cols 									= array(
+				$cols 									= [
 					"vicidial_live_agents.extension as 'vla_extension'",
 					"vicidial_live_agents.user as 'vla_user'",
 					"vicidial_users.full_name as 'vu_full_name'",
@@ -269,7 +260,7 @@
 					"vicidial_list.phone_number as 'vl_phone_number'",
 					"vicidial_agent_log.sub_status as 'vla_pausecode'", 
 					"vicidial_campaigns.campaign_name as 'vla_campaign_name'"
-				);
+				];
 				
 				$table									= "vicidial_live_agents, vicidial_users, vicidial_list, vicidial_agent_log, vicidial_campaigns ";
                 if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
@@ -285,49 +276,49 @@
 					->get($table, NULL, $cols);				   
 
 				if ($query_OnlineAgents > 0) {				
-					$dataInCalls 						= array();
-					$dataCallerIDsFromVAC 				= array();
-					$dataPCs 							= array();
-					$dataNoCalls 						= array();
+					$dataInCalls 						= [];
+					$dataCallerIDsFromVAC 				= [];
+					$dataPCs 							= [];
+					$dataNoCalls 						= [];
 					
 					foreach ($rsltvInCalls as $resultsInCalls){              
-						array_push($dataInCalls, $resultsInCalls);
+						$dataInCalls[] = $resultsInCalls;
 					}
 											
 					foreach ($rsltvCallerIDsFromVAC as $resultsCallerIDsFromVAc) {               
-						array_push($dataCallerIDsFromVAC, $resultsCallerIDsFromVAc);
+						$dataCallerIDsFromVAC[] = $resultsCallerIDsFromVAc;
 					}
 					
 					foreach ($resultsPCs as $resultsPC) {               
-						array_push($dataPCs, $resultsPC);
+						$dataPCs[] = $resultsPC;
 					}       
 										        
 					foreach ($rsltvNoCalls as $resultsNoCalls) {               
-						array_push($dataNoCalls, $resultsNoCalls);
+						$dataNoCalls[] = $resultsNoCalls;
 					}                
 
 					$data 								= array_merge($dataInCalls, $dataNoCalls);
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success", 
 						//"query" 							=> $astDB->getLastQuery(),
 						"data" 								=> $data, 
 						"dataGo" 							=> $dataGo, 
 						"parked" 							=> $dataPCs, 
 						"callerids" 						=> $dataCallerIDsFromVAC
-					);		
+					];		
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success", 
 						"data" 								=> 0 
-					);		
+					];		
 				}
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
 	$areacode 										= $astDB->escape($_REQUEST['areacode']);
@@ -29,25 +29,25 @@
 	$active 										= 'Y';
 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: Campaign ID not Defined."
-                ); 
+                ]; 
 	} elseif (empty($areacode) || is_null($areacode)) {
-                $apiresults                                                                     = array(
+                $apiresults                                                                     = [
                         "result"                                                                                => "Error: Areacode not Defined."
-                );
+                ];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -68,30 +68,30 @@
 		    
 			if ( $astDB->count > 0 ) {
 				$err_msg 									= "Areacode is Invalid";
-				$apiresults 								= array(
+				$apiresults 								= [
 					"result" 									=> $err_msg
-				);
+				];
 			} else { 
 
-					$data						= array(
+					$data						= [
 						'campaign_id' 						=> $campaign_id, 
 						'areacode' 						=> $areacode, 
 						'outbound_cid' 						=> $outbound_cid,
 						'active'						=> $active,
 						'cid_description' 					=> $cid_description 
-					);
+					];
 					
 					$insertdata 					= $astDB->insert( 'vicidial_campaign_cid_areacodes', $data );					
 				if($insertdata){
 					$log_id                                         = log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New ACCID: $areacode at Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );
-					$apiresults = array (
+					$apiresults =  [
 						"result"		=> 'success',
 						"data"			=> $data
-					);
+					];
 				} else {
-					$apiresults = array (
+					$apiresults =  [
 						"result"		=> $astDB->getLastError()
-					);
+					];
 				}
 			}
 		}

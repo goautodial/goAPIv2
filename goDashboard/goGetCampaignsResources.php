@@ -21,21 +21,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
  	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -58,7 +58,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -92,25 +92,25 @@
 			$astDB->orderBy("mycnt", "DESC");
 			$astDB->orderBy("campaign_id", "ASC");			 
 			$rsltv 										= $astDB->get("vicidial_hopper as vh", 100, "COUNT(vh.campaign_id) as mycnt, vl.campaign_id, vl.campaign_name, vl.local_call_time, vl.user_group");			
-			$data 										= array();
+			$data 										= [];
 			
 			if ($astDB->count > 0) {
 				foreach ($rsltv as $fresults) {
-					array_push($data, $fresults);
+					$data[] = $fresults;
 				}						
 			}
 			
-			$apiresults 								= array(
+			$apiresults 								= [
 				"result" 									=> "success", 
 				//"query"									=> $astDB->getLastQuery(),
 				"data" 										=> $data
-			);
+			];
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 

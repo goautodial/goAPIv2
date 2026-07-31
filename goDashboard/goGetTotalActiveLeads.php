@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($session_user, $astDB);
+    $groupId = go_get_groupid($session_user);
     
     if (checkIfTenant($groupId, $goDB)) {
         $ul='';
     } else { 
-        $stringv = go_getall_allowed_campaigns($groupId, $astDB);
+        $stringv = go_getall_allowed_campaigns($groupId);
 		if($stringv !== "'ALLCAMPAIGNS'")
 			$ul = " and vls.campaign_id IN ($stringv)";
 		else
@@ -36,5 +36,5 @@
     $query = "SELECT count(*) as getTotalActiveLeads from vicidial_lists as vls,vicidial_list as vl where vl.list_id=vls.list_id and active='Y' $ul"; 
     $fresults = $astDB->rawQuery($query);
     //$fresults = mysqli_fetch_assoc($rsltv);
-    $apiresults = array_merge( array( "result" => "success" ), $fresults );
+    $apiresults = array_merge( [ "result" => "success" ], $fresults );
 ?>

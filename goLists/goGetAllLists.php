@@ -22,29 +22,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaigns) || is_null($campaigns)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -78,7 +78,7 @@
 				} else {
 					$ul									= "";
 					
-					if (strtoupper($log_group) != 'ADMIN') {
+					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						//if ($userlevel > 8) {
 							$ul							= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
 						//}
@@ -102,7 +102,7 @@
 				
 				#get next list id
 				//$query2 = "SELECT list_id from vicidial_lists WHERE list_id NOT IN ('999', '998') order by list_id;";
-				$astDB->where('list_id', array('999','998'), 'not in');
+				$astDB->where('list_id', ['999','998'], 'not in');
 				$astDB->orderBy('list_id', 'desc');
 				$rsltv2 								= $astDB->get('vicidial_lists', null, 'list_id');
 				
@@ -124,7 +124,7 @@
 					$next_list 							= $max_list + 1;
 				}
 				
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success",
 					"list_id" 								=> $dataListId,
 					"list_name" 							=> $dataListName,
@@ -136,20 +136,20 @@
 					"next_listID" 							=> $next_list, 
 					"campaign_name" 						=> $dataCampaignName,
                     //"test_SQL"                              => $testSQL
-				);
+				];
 			} else {
 				$err_msg 								= error_handle("40001");
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "40001", 
 					"result" 								=> $err_msg
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

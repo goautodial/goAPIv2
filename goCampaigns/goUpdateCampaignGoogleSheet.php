@@ -9,7 +9,7 @@
    #### License: AGPLv2                            ####
    ####################################################
     
-   include_once ("goAPI.php");
+   include_once (__DIR__ . "/goAPI.php");
    $goUser                    = $astDB->escape($_REQUEST['goUser']);
    $ip_address                = $astDB->escape($_REQUEST['hostname']);
    $campaign_id               = $astDB->escape($_REQUEST['campaign_id']);
@@ -20,17 +20,17 @@
    if($campaign_id != null) {
       //$updateQuery = "UPDATE go_campaigns SET google_sheet_ids = '$google_sheet_ids' WHERE campaign_id='$campaign_id' LIMIT 1;";
       //echo $updateQuery;
-      $updateData = array(
+      $updateData = [
          'google_sheet_ids' => $google_sheet_ids
-      );
+      ];
       $goDB->where('campaign_id', $campaign_id);
       $updateResult = $goDB->update('go_campaigns', $updateData, 1);
       $updateQuery = $goDB->getLastQuery();
       
       $log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Updated Google Sheets for Campaign ID: $campaign_id", $log_group, $updateQuery);
       
-      $apiresults = array("result" => "success");
+      $apiresults = ["result" => "success"];
    }else{
-      $apiresults = array("result" => "Error: Campaign doens't exist.");
+      $apiresults = ["result" => "Error: Campaign doens't exist."];
    }
 ?>

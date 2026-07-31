@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-include_once ("includes/MySQLiDB.php");
+include_once (__DIR__ . "/includes/MySQLiDB.php");
 
 if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf")) {
 	$conf_path = "{$_SERVER['DOCUMENT_ROOT']}/astguiclient.conf";
@@ -34,24 +34,24 @@ if ( file_exists($conf_path) )
     foreach ($DBCagc as $DBCline)
         {
         $DBCline = preg_replace("/ |>|\n|\r|\t|\#.*|;.*/","",$DBCline);
-        if (preg_match("/^PATHlogs/", $DBCline))
-                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",$PATHlogs);}
-        if (preg_match("/^PATHweb/", $DBCline))
-                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",$WeBServeRRooT);}
-         if (preg_match("/^PATHsounds/", $DBCline))
-                {$path_sounds = $DBCline;   $path_sounds = preg_replace("/.*=/","",$path_sounds);}
-        if (preg_match("/^VARserver_ip/", $DBCline))
-                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",$WEBserver_ip);}
-        if (preg_match("/^VARDB_server/", $DBCline))
-                {$VARDB_server = $DBCline;   $VARDB_server = preg_replace("/.*=/","",$VARDB_server);}
-        if (preg_match("/^VARDB_database/", $DBCline))
-                {$VARDB_database = $DBCline;   $VARDB_database = preg_replace("/.*=/","",$VARDB_database);}
-        if (preg_match("/^VARDB_user/", $DBCline))
-                {$VARDB_user = $DBCline;   $VARDB_user = preg_replace("/.*=/","",$VARDB_user);}
-        if (preg_match("/^VARDB_pass/", $DBCline))
-                {$VARDB_pass = $DBCline;   $VARDB_pass = preg_replace("/.*=/","",$VARDB_pass);}
-        if (preg_match("/^VARDB_port/", $DBCline))
-                {$VARDB_port = $DBCline;   $VARDB_port = preg_replace("/.*=/","",$VARDB_port);}
+        if (preg_match("/^PATHlogs/", (string) $DBCline))
+                {$PATHlogs = $DBCline;   $PATHlogs = preg_replace("/.*=/","",(string) $PATHlogs);}
+        if (preg_match("/^PATHweb/", (string) $DBCline))
+                {$WeBServeRRooT = $DBCline;   $WeBServeRRooT = preg_replace("/.*=/","",(string) $WeBServeRRooT);}
+         if (preg_match("/^PATHsounds/", (string) $DBCline))
+                {$path_sounds = $DBCline;   $path_sounds = preg_replace("/.*=/","",(string) $path_sounds);}
+        if (preg_match("/^VARserver_ip/", (string) $DBCline))
+                {$WEBserver_ip = $DBCline;   $WEBserver_ip = preg_replace("/.*=/","",(string) $WEBserver_ip);}
+        if (preg_match("/^VARDB_server/", (string) $DBCline))
+                {$VARDB_server = $DBCline;   $VARDB_server = preg_replace("/.*=/","",(string) $VARDB_server);}
+        if (preg_match("/^VARDB_database/", (string) $DBCline))
+                {$VARDB_database = $DBCline;   $VARDB_database = preg_replace("/.*=/","",(string) $VARDB_database);}
+        if (preg_match("/^VARDB_user/", (string) $DBCline))
+                {$VARDB_user = $DBCline;   $VARDB_user = preg_replace("/.*=/","",(string) $VARDB_user);}
+        if (preg_match("/^VARDB_pass/", (string) $DBCline))
+                {$VARDB_pass = $DBCline;   $VARDB_pass = preg_replace("/.*=/","",(string) $VARDB_pass);}
+        if (preg_match("/^VARDB_port/", (string) $DBCline))
+                {$VARDB_port = $DBCline;   $VARDB_port = preg_replace("/.*=/","",(string) $VARDB_port);}
         }
     }
 

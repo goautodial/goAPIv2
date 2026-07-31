@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	// POST or GET Variables
     $group_id 									= $astDB->escape($_REQUEST['group_id']);
@@ -44,19 +44,19 @@
 
 
     // Default values 
-    $defActive 									= array("Y","N");
-    $deffronter_display 						= array("Y","N");
+    $defActive 									= ["Y","N"];
+    $deffronter_display 						= ["Y","N"];
     
-    $defget_call_launch 						= array(
+    $defget_call_launch 						= [
 		'NONE',
 		'SCRIPT',
 		'WEBFORM',
 		'WEBFORMTWO',
 		'FORM',
 		'EMAIL'
-	);
+	];
 	
-    $defnext_agent_call 						= array(
+    $defnext_agent_call 						= [
 		'fewest_calls_campaign',
 		'longest_wait_time',
 		'ring_all',
@@ -67,46 +67,46 @@
 		'inbound_group_rank',
 		'campaign_rank',
 		'fewest_calls'
-	);
+	];
 
 	if (empty($log_user) || is_null($log_user)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($group_id)) {
-        $apiresults 							= array(
+        $apiresults 							= [
 			"result" 								=> "Error: Set a value for Group ID."
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_id)) {
-		$apiresults 							= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_id)) {
+		$apiresults 							= [
 			"result" 								=> "Error: Special characters found in group_id"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_name) || empty($group_name)) {
-		$apiresults 							= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_name) || empty($group_name)) {
+		$apiresults 							= [
 			"result" 								=> "Error: Special characters found in group_name and must not be empty"
-		);
-	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $group_color) || empty($group_color)) {
-		$apiresults 							= array(
+		];
+	} elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $group_color) || empty($group_color)) {
+		$apiresults 							= [
 			"result" 								=> "Error: Special characters found in group_color must not be empty"
-		);
+		];
 	} elseif (!in_array($active,$defActive)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Default value for active is Y or N only."
-		);
+		];
 	} elseif (!in_array($fronter_display,$deffronter_display)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Default value for fronter_display is Y or N only."
-		);
+		];
 	} elseif (!in_array($get_call_launch,$defget_call_launch)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Default value for get_call_launch is NONE, SCRIPT, WEBFORM, WEBFORMTWO, FORM or EMAIL only."
-		);
+		];
 	} elseif (!in_array($next_agent_call,$defnext_agent_call)) {
-		$apiresults 							= array(
+		$apiresults 							= [
 			"result" 								=> "Error: Default value for next_agent_call is fewest_calls_campaign, longest_wait_time, ring_all, random, oldest_call_start, oldest_call_finish, overall_user_level, inbound_group_rank, campaign_rank or fewest_calls only."
-		);
+		];
 	} else {
-		if (checkIfTenant ($log_group, $goDB)) {
+		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where ("user_group", $log_group);
 		}
 		
@@ -118,9 +118,9 @@
 			$voi_ct 							= $astDB->getValue("vicidial_override_ids", "count(*)");
 			
 			if ($voi_ct > 0) {
-				$datum 							= Array(
+				$datum 							= [
 					"value" 						=> $group_id
-				);
+				];
 				
 				$astDB->where("id_table", "vicidial_inbound_groups");
 				$astDB->where("active", 1);
@@ -131,24 +131,24 @@
 			$row 								= $astDB->getValue("vicidial_inbound_groups", "count(*)");
 			
 			if ($row > 0) {
-				$apiresults 					= array(
+				$apiresults 					= [
 					"result" 						=> "GROUP NOT ADDED - there is already a Inbound in the system with this ID\n"
-				);
+				];
 			} else {
 				$astDB->where("campaign_id", $group_id);
 				$count 							= $astDB->getValue("vicidial_campaigns", "count(*)");
 				
 				if ($count > 0) {
-					$apiresults 				= array(
+					$apiresults 				= [
 						"result" 					=> "<br>GROUP NOT ADDED - there is already a campaign in the system with this ID\n"
-					);
+					];
 				} else {
-					if ( (strlen($group_id) < 2) || (strlen($group_name) < 2)  || (strlen($group_color) < 2) || (strlen($group_id) > 20) || (preg_match('/ /i',$group_id)) or (preg_match("/\-/i",$group_id)) || (preg_match("/\+/i",$group_id)) ) {
-						$apiresults 			= array(
+					if ( strlen((string) $group_id) < 2 || strlen((string) $group_name) < 2 || strlen((string) $group_color) < 2 || strlen((string) $group_id) > 20 || preg_match('/ /i',(string) $group_id) || (preg_match("/\-/i",(string) $group_id) || preg_match("/\+/i",(string) $group_id)) ) {
+						$apiresults 			= [
 							"result" 				=> "<br>GROUP NOT ADDED - Please go back and look at the data you entered\n <br>Group ID must be between 2 and 20 characters in length and contain no ' -+'.\n <br>Group name and group color must be at least 2 characters in length\n"
-						);
+						];
 					} else {
-						$col 					= Array(
+						$col 					= [
 							"group_id" 				=> $group_id,
 							"group_name" 			=> $group_name,
 							"group_color" 			=> $group_color,
@@ -166,7 +166,7 @@
 							"uniqueid_status_prefix" => $accounts,
 							"call_time_id" 			=> "24hours",
 							"user_group" 			=> $user_group
-						);
+						];
 						$astDB->insert("vicidial_inbound_groups", $col);
 						//$stmtInsert 			= "INSERT INTO vicidial_inbound_groups (group_id,group_name,group_color,active,web_form_address,voicemail_ext,next_agent_call,fronter_display,ingroup_script,get_call_launch,web_form_address_two,start_call_url,dispo_call_url,add_lead_url,uniqueid_status_prefix,call_time_id,user_group) values('$group_id','$group_name','$group_color','$active','$web_form_address','$voicemail_ext','$next_agent_call','$fronter_display','$script_id','$get_call_launch','','','','','$accounts','24hours','$user_group');";
 						//$query 							= mysqli_query($link, $stmtInsert);
@@ -175,9 +175,9 @@
 						$countAdd 				= $astDB->getValue("vicidial_inbound_groups", "count(*)");
 						//$resultQueryAddCheck 							= "SELECT group_id from vicidial_inbound_groups where group_id='$group_id';";
 						
-						$datum 					= Array(
+						$datum 					= [
 							"campaign_id" 			=> $group_id
-						);
+						];
 						
 						$astDB->insert("vicidial_campaign_stats", $datum);
 						//$stmtA="INSERT INTO vicidial_campaign_stats (campaign_id) values('$group_id');";
@@ -188,22 +188,22 @@
 						
 						if ($countAdd1 > 0 && $countAdd > 0) {
 							$log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Group $group_id", $log_group, $stmtInsert);
-							$apiresults 		= array(
+							$apiresults 		= [
 								"result" 			=> "success"
-							);
+							];
 						} else {
-							$apiresults 		= array(
+							$apiresults 		= [
 								"result" 			=> "GROUP NOT ADDED - Check the name and value you type\n"
-							);
+							];
 						}
 					}
 				}
 			}
 
 		} else  {
-			$apiresults 						= array(
+			$apiresults 						= [
 				"result" 							=> "INVALID User Group"
-			);
+			];
 		}
 	}
 	

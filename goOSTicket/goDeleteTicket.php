@@ -49,8 +49,8 @@
             $resultDeleteThread = $ostDB->delete('ost_thread');
         }
         
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     } else {
-        $apiresults = array("result" => "Error: Ticket id not found.");
+        $apiresults = ["result" => "Error: Ticket id not found."];
     }
 ?>

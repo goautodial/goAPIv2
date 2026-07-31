@@ -16,7 +16,7 @@
 	$log_user = $_REQUEST['log_user'];
 	$log_group = $_REQUEST['log_group'];
 
-	$arr_post_body = array(
+	$arr_post_body = [
         "message_type" 	=> "SEND",
         "mobile_number" => mysqli_real_escape_string($link, $_REQUEST['phone_number']),
         "shortcode" 	=> "29290462886",
@@ -24,7 +24,7 @@
         "message" 		=> mysqli_real_escape_string($link, urlencode($_REQUEST['message'])),
         "client_id" 	=> "fdd645b7328431d8f21a6301de52b42fe4b06514f47fcaae0e70790e3fb8cd8d",
         "secret_key" 	=> "649dc271effa414ebfa2c3d473024cf4362f994b1d42c1a4b92d088f8a4c1bec"
-    );
+    ];
 
     $query_string = "";
     foreach($arr_post_body as $key => $frow)
@@ -41,10 +41,9 @@
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $response = curl_exec($ch);
     $curlError = curl_error($ch);
-    curl_close($ch);
 
     if(strpos($response, '200') && strpos($response, 'ACCEPTED')){
-        $data_insert = array(
+        $data_insert = [
             'message_type'  => $arr_post_body["message_type"], 
             'mobile_number' => $arr_post_body["mobile_number"], 
             'shortcode'     => $arr_post_body["shortcode"], 
@@ -56,23 +55,23 @@
             'status'        => 1, 
             'is_deleted'    => 0, 
             'user_id'       => $user_id
-        );
+        ];
         $queryGoSMS = $goDB->insert('go_sms', $data_insert);
 
     	if($queryGoSMS) {
-    		$apiresults = array("result" => "success");
+    		$apiresults = ["result" => "success"];
     	}else{
-    		$apiresults = array("result" => "error");
+    		$apiresults = ["result" => "error"];
     	}
     }else{
-    	$apiresults = array("result" => "error", "error_message" => $response);
+    	$apiresults = ["result" => "error", "error_message" => $response];
     }
 	
 
 	function gen_random($length=32){
 		$final_rand='';
 		for($i=0;$i< $length;$i++){
-		    $final_rand .= rand(0,9);
+		    $final_rand .= random_int(0,9);
 
 		}
 

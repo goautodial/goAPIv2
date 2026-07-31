@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
 	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
@@ -30,22 +30,22 @@
 	$user_group = $astDB->escape($_REQUEST['user_group']);
 
     ### ERROR CHECKING 
-	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
-		$apiresults = array("result" => "Error: Special characters found in lead_filter_id, must not be empty and not less than 3 characters");
+	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
+		$apiresults = ["result" => "Error: Special characters found in lead_filter_id, must not be empty and not less than 3 characters"];
 	} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_name) || $lead_filter_name == null){
-            $apiresults = array("result" => "Error: Special characters found in lead_filter_name and must not be empty");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $lead_filter_name) || $lead_filter_name == null){
+            $apiresults = ["result" => "Error: Special characters found in lead_filter_name and must not be empty"];
         } else {
 			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $lead_filter_comments) || $lead_filter_comments == null){
-                $apiresults = array("result" => "Error: Special characters found in lead_filter_comments and must not be empty");
+                $apiresults = ["result" => "Error: Special characters found in lead_filter_comments and must not be empty"];
 			} else {
 				if($lead_filter_sql == null){
-					$apiresults = array("result" => "Error: lead_filter_sql must not be empty");
+					$apiresults = ["result" => "Error: lead_filter_sql must not be empty"];
 				} else {
-					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $user_group) || $user_group == null){
-						$apiresults = array("result" => "Error: Special characters found in user_group and must not be empty");
+					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $user_group) || $user_group == null){
+						$apiresults = ["result" => "Error: Special characters found in user_group and must not be empty"];
 					} else {
-						$groupId = go_get_groupid($goUser, $astDB);
+						$groupId = go_get_groupid($goUser);
 		
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "";
@@ -68,26 +68,26 @@
 							$countCheck = $astDB->getRowCount();
 							if($countCheck <= 0){
 								//$newQuery = "INSERT INTO vicidial_lead_filters (lead_filter_id, lead_filter_name, lead_filter_comments, lead_filter_sql, user_group) VALUES ('".mysqli_real_escape_string($link, $lead_filter_id)."', '".mysqli_real_escape_string($link, $lead_filter_name)."', '".mysqli_real_escape_string($link, $lead_filter_comments)."', '".mysqli_real_escape_string($link, $lead_filter_sql)."', '".mysqli_real_escape_string($link, $user_group)."');";
-								$insertData = array(
+								$insertData = [
 									'lead_filter_id' => $lead_filter_id,
 									'lead_filter_name' => $lead_filter_name,
 									'lead_filter_comments' => $lead_filter_comments,
 									'lead_filter_sql' => $lead_filter_sql,
 									'user_group' => $user_group
-								);
+								];
 								$rsltv = $astDB->insert('vicidial_lead_filters');
 								$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Lead Filter: $lead_filter_id", $log_group, $astDB->getLastQuery());
 
 								if(!$rsltv){
-									$apiresults = array("result" => "Error: Add failed, check your details");
+									$apiresults = ["result" => "Error: Add failed, check your details"];
 								} else {
-                                    $apiresults = array("result" => "success");
+                                    $apiresults = ["result" => "success"];
 								}
 							} else {
-                                $apiresults = array("result" => "Error: Add failed, Lead Filter already exist!");
+                                $apiresults = ["result" => "Error: Add failed, Lead Filter already exist!"];
 							}
 						} else {
-							$apiresults = array("result" => "Error: Invalid User Group");
+							$apiresults = ["result" => "Error: Invalid User Group"];
 						}
 					}
 				}

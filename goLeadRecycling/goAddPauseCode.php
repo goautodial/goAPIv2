@@ -20,31 +20,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
 	$camp = $astDB->escape($_REQUEST['pauseCampID']);
 	$pause_code = $astDB->escape($_REQUEST['pause_code']);
 	$pause_code_name = $astDB->escape($_REQUEST['pause_code_name']);
-	$billable = strtoupper($astDB->escape($_REQUEST['billable']));
+	$billable = strtoupper((string) $astDB->escape($_REQUEST['billable']));
 		
     ### Default values 
-    $defBill = array('NO','YES','HALF');
+    $defBill = ['NO','YES','HALF'];
 
     ### ERROR CHECKING 
-	if($camp == null || strlen($camp) < 3) {
-		$apiresults = array("result" => "Error: Set a value for CAMP ID not less than 3 characters.");
+	if($camp == null || strlen((string) $camp) < 3) {
+		$apiresults = ["result" => "Error: Set a value for CAMP ID not less than 3 characters."];
 	} else {
-        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code) || $pause_code == null){
-            $apiresults = array("result" => "Error: Special characters found in pause code and must not be empty");
+        if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $pause_code) || $pause_code == null){
+            $apiresults = ["result" => "Error: Special characters found in pause code and must not be empty"];
         } else {
-			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pause_code_name)){
-                $apiresults = array("result" => "Error: Special characters found in pause code name");
+			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $pause_code_name)){
+                $apiresults = ["result" => "Error: Special characters found in pause code name"];
 			} else {
                 if(!in_array($billable,$defBill)) {
-                    $apiresults = array("result" => "Error: Default value for billable is No, Yes or half only.");
+                    $apiresults = ["result" => "Error: Default value for billable is No, Yes or half only."];
                 } else {
-					$groupId = go_get_groupid($goUser, $astDB);
+					$groupId = go_get_groupid($goUser);
 	
 					if (!checkIfTenant($groupId, $goDB)) {
 						//$ul = "";
@@ -70,15 +70,15 @@
 							$log_id = log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Pause Code $pause_code under Campaign ID $camp", $log_group, $newQuery);
 
 							if(!$rsltv) {
-								$apiresults = array("result" => "Error: Add failed, check your details");
+								$apiresults = ["result" => "Error: Add failed, check your details"];
 							} else {
-								$apiresults = array("result" => "success");
+								$apiresults = ["result" => "success"];
 							}
 						} else {
-							$apiresults = array("result" => "Error: Add failed, Pause Code already exist!");
+							$apiresults = ["result" => "Error: Add failed, Pause Code already exist!"];
 						}
 					} else {
-						$apiresults = array("result" => "Error: Add failed, Campaign ID does not exist!");
+						$apiresults = ["result" => "Error: Add failed, Campaign ID does not exist!"];
 					}
 				}
 			}

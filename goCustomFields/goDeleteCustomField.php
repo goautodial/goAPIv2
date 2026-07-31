@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     $list_id        = $astDB->escape($_REQUEST['list_id']);
-    $field_label    = str_replace(" ","_",trim($astDB->escape($_REQUEST['field_label'])));
+    $field_label    = str_replace(" ","_",trim((string) $astDB->escape($_REQUEST['field_label'])));
     $field_id       = $astDB->escape($_REQUEST['field_id']);
     
     $selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
@@ -49,15 +49,15 @@
             if($queryDeleteCF){
               $astDB->dropColumnFromTable($table_name, $field_label);
 
-              $apiresults = array("result" => "success");
+              $apiresults = ["result" => "success"];
             }else{
-              $apiresults = array("result" => "Error: Custom Field does not exist");
+              $apiresults = ["result" => "Error: Custom Field does not exist"];
             }
         }else{
-            $apiresults = array("result" => "Error: $field_label does not exist");
+            $apiresults = ["result" => "Error: $field_label does not exist"];
         }
     }else{
-        $apiresults = array("result" => "Error: List does not exist");
+        $apiresults = ["result" => "Error: List does not exist"];
     }
 
 ?>

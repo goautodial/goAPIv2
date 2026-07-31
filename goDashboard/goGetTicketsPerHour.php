@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($goUser, $astDB);
+    $groupId = go_get_groupid($goUser);
 
     if (!checkIfTenant($groupId, $goDB)) {
         $ul = "";
     } else {
-        $stringv = go_getall_allowed_campaigns($goUser, $astDB);
+        $stringv = go_getall_allowed_campaigns($goUser);
         $ul = " and campaign_id IN ('$stringv') ";
     }
 
@@ -38,9 +38,9 @@
     //$fresults = mysqli_fetch_assoc($rsltv);
 	
     if ($fresults == NULL) {
-        $fresults = array();
+        $fresults = [];
     }
     
-    $apiresults = array_merge( array( "result" => "success" ), $fresults);
+    $apiresults = array_merge( [ "result" => "success" ], $fresults);
     
 ?>

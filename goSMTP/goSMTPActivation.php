@@ -46,18 +46,18 @@
 			
 			if($setting_exist <= 0){
 				//$insert_enable_smtp = mysqli_query($linkgo, "INSERT INTO settings (setting, context, value) VALUES('enable_smtp', 'smtp_settings', '0');");
-				$insertData = array(
+				$insertData = [
 					'setting' => 'enable_smtp',
 					'context' => 'smtp_settings',
 					'value' => '0'
-				);
+				];
 				$insert_enable_smtp = $goDB->insert('settings', $insertData);
 			}
 			
-			$apiresults = array("result" => "success");
+			$apiresults = ["result" => "success"];
 			$log_id = log_action($goDB, 'CREATE', $log_user, $ip_address, "Created SMTP Settings!", $log_group, $new_smtp_default_query);
 		}else{
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => $insert_query);
+			$apiresults = ["result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.", "query" => $insert_query];
 		}
 	}
 	
@@ -69,34 +69,34 @@
 	
 	if($setting_exist <= 0){
 		//$insert_enable_smtp = mysqli_query($linkgo, "INSERT INTO settings (setting, context, value) VALUES('enable_smtp', 'smtp_settings', '0');");
-		$insertData = array(
+		$insertData = [
 			'setting' => 'enable_smtp',
 			'context' => 'smtp_settings',
 			'value' => '0'
-		);
+		];
 		$insert_enable_smtp = $goDB->insert('settings', $insertData);
 	}
 	
-	$default_action = array(0, 1); // 0 = deactivate, 1 = activate
+	$default_action = [0, 1]; // 0 = deactivate, 1 = activate
 	if(in_array($action, $default_action)){
 		//$action_smtp_query = "UPDATE settings SET value = '$action' WHERE setting = 'enable_smtp';";
-		$updateData = array(
+		$updateData = [
 			'value' => $action
-		);
+		];
 		$goDB->where('setting', 'enable_smtp');
 		$exec_action_smtp = $goDB->update('settings', $updateData);
 		
 		if($goDB->getRowCount() > 0){
-			$apiresults = array("result" => "success");
+			$apiresults = ["result" => "success"];
 			if($action == 1)
 				$act = "Enabled";
 			else
 				$act = "Disabled";
 			$log_id = log_action($goDB, 'UPDATE', $log_user, $ip_address, "$log_user $act SMTP Settings!", $log_group, $goDB->getLastQuery());
 		}else{
-			$apiresults = array("result" => "error");
+			$apiresults = ["result" => "error"];
 		}
 	}else{
-		$apiresults = array("result" => "error");
+		$apiresults = ["result" => "error"];
 	}
 ?>

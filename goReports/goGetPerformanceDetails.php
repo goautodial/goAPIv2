@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	error_reporting(E_ERROR | E_PARSE);
-    include_once("goAPI.php");
+    include_once(__DIR__ . "/goAPI.php");
 
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
@@ -31,23 +31,23 @@
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result"						 			=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 								= array(
+		$apiresults 								= [
 			"result" 									=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 									= error_handle("40001");
-        $apiresults 								= array(
+        $apiresults 								= [
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
-		);
+		];
 	} else {            
 		// check if goUser and goPass are valid
 		$fresults 									= $astDB
@@ -83,7 +83,7 @@
 				}			
 			}
 			
-            if ("ALL" === strtoupper($campaign_id)) {
+            if ("ALL" === strtoupper((string) $campaign_id)) {
                 $astDB->where('user_group', $log_group);
                 $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
         
@@ -109,8 +109,8 @@
                         $statusesARY[0] = "";
                         $j = 0;
                         $users = '-';
-                        $usersARY = array();
-                        $user_namesARY = array();
+                        $usersARY = [];
+                        $user_namesARY = [];
                         $k = 0;
 
                         if ($date_diff <= 0) {
@@ -123,14 +123,14 @@
 			if ($tenant) {
 				$astDB->where("vu.user_group", $usergroup);
 			} else {
-				if (strtoupper($usergroup) != 'ADMIN') {
+				if (strtoupper((string) $usergroup) !== 'ADMIN') {
 					if ($userlevel < 9) {
 						$astDB->where("vu.user_group", $usergroup);
 					}
 				}					
 			}
 
-                        $cols = array(
+                        $cols = [
                                 "COUNT(lead_id) as calls",
                                 "full_name",
                                 "vu.user as user",
@@ -141,14 +141,14 @@
                                 "status",
                                 "sum(dead_sec) as dead_sec",
                                 "(sum(talk_sec) - sum(dead_sec)) as customer"
-                        );
+                        ];
 
                         $rows_to_print = $astDB
                                 ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-                                ->where("date_format(val.event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
+                                ->where("date_format(val.event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
                                 ->where("campaign_id", $array_camp, "IN")
                                 ->where("vu.user_level != '4'")
-                                ->where("status", array('NULL', 'LAGGED'), "NOT IN")
+                                ->where("status", ['NULL', 'LAGGED'], "NOT IN")
                                 ->groupBy("val.user, full_name, status")
                                 ->orderBy("full_name, val.user, status", "DESC")
                                 ->get("vicidial_agent_log val", "500000", $cols);
@@ -173,7 +173,7 @@
                                                 $customer_sec[$i] = 0;
                                         }
 
-                                        if ( (!preg_match("/-$status[$i]-/", $statuses)) AND (strlen($status[$i])>0) ) {
+                                        if ( !preg_match("/-$status[$i]-/", $statuses) && strlen($status[$i]) > 0 ) {
                                                 $statusesFILE .= ",$status[$i]";
                                                 $statuses .= "$status[$i]-";
                                                 $SUMstatuses .= "$status[$i] ";
@@ -247,13 +247,13 @@
                                                 $status_found = 0;
                                                 foreach ($rows_to_print as $i => $val) {
                                                         if ( ($Suser == $Puser[$i]) && ($Sstatus == $status[$i]) ) {
-                                                                $Scalls = ($Scalls + $calls[$i]);
-                                                                $Stalk_sec = ($Stalk_sec + $talk_sec[$i]);
-                                                                $Spause_sec = ($Spause_sec + $pause_sec[$i]);
-                                                                $Swait_sec = ($Swait_sec + $wait_sec[$i]);
-                                                                $Sdispo_sec = ($Sdispo_sec + $dispo_sec[$i]);
-                                                                $Sdead_sec = ($Sdead_sec + $dead_sec[$i]);
-                                                                $Scustomer_sec = ($Scustomer_sec + $customer_sec[$i]);
+                                                                $Scalls += $calls[$i];
+                                                                $Stalk_sec += $talk_sec[$i];
+                                                                $Spause_sec += $pause_sec[$i];
+                                                                $Swait_sec += $wait_sec[$i];
+                                                                $Sdispo_sec += $dispo_sec[$i];
+                                                                $Sdead_sec += $dead_sec[$i];
+                                                                $Scustomer_sec += $customer_sec[$i];
                                                                 $SstatusesFILE .= ",$calls[$i]";
                                                                 $SstatusesMID[$m] .= "<td> $calls[$i] </td>";
                                                                 $status_found++;
@@ -273,8 +273,8 @@
                                         
 					$Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
 
-                                        $d_fromDate = strtotime($fromDate);
-                                        $d_toDate = strtotime($toDate);
+                                        $d_fromDate = strtotime((string) $fromDate);
+                                        $d_toDate = strtotime((string) $toDate);
                                         $difference = $d_toDate - $d_fromDate;
 
                                         if($Stime >= $difference){
@@ -282,47 +282,47 @@
 						$Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
                                         }
 
-                                        $TOTcalls = ($TOTcalls + $Scalls);
-                                        $TOTtime = ($TOTtime + $Stime);
-                                        $TOTtotTALK = ($TOTtotTALK + $Stalk_sec);
-                                        $TOTtotWAIT = ($TOTtotWAIT + $Swait_sec);
-                                        $TOTtotPAUSE = ($TOTtotPAUSE + $Spause_sec);
-                                        $TOTtotDISPO = ($TOTtotDISPO + $Sdispo_sec);
-                                        $TOTtotDEAD = ($TOTtotDEAD + $Sdead_sec);
-                                        $TOTtotCUSTOMER = ($TOTtotCUSTOMER + $Scustomer_sec);
+                                        $TOTcalls += $Scalls;
+                                        $TOTtime += $Stime;
+                                        $TOTtotTALK += $Stalk_sec;
+                                        $TOTtotWAIT += $Swait_sec;
+                                        $TOTtotPAUSE += $Spause_sec;
+                                        $TOTtotDISPO += $Sdispo_sec;
+                                        $TOTtotDEAD += $Sdead_sec;
+                                        $TOTtotCUSTOMER += $Scustomer_sec;
                                         $Stime = ($Stalk_sec + $Spause_sec + $Swait_sec + $Sdispo_sec);
 
-                                        if ( ($Scalls > 0) AND ($Stalk_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Stalk_sec > 0 ) {
                                                 $Stalk_avg = ($Stalk_sec/$Scalls);
                                         } else {
                                                 $Stalk_avg = 0;
                                         }
 
-                                        if ( ($Scalls > 0) AND ($Spause_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Spause_sec > 0 ) {
                                                 $Spause_avg = ($Spause_sec/$Scalls);
                                         } else {
                                                 $Spause_avg = 0;
                                         }
 
-                                        if ( ($Scalls > 0) AND ($Swait_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Swait_sec > 0 ) {
                                                 $Swait_avg = ($Swait_sec/$Scalls);
                                         } else {
                                                 $Swait_avg = 0;
                                         }
 
-                                        if ( ($Scalls > 0) AND ($Sdispo_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Sdispo_sec > 0 ) {
                                                 $Sdispo_avg = ($Sdispo_sec/$Scalls);
                                         } else {
                                                 $Sdispo_avg = 0;
                                         }
 
-                                        if ( ($Scalls > 0) AND ($Sdead_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Sdead_sec > 0 ) {
                                                 $Sdead_avg = ($Sdead_sec/$Scalls);
                                         } else {
                                                 $Sdead_avg = 0;
                                         }
 
-                                        if ( ($Scalls > 0) AND ($Scustomer_sec > 0) ) {
+                                        if ( $Scalls > 0 && $Scustomer_sec > 0 ) {
                                                 $Scustomer_avg = ($Scustomer_sec/$Scalls);
                                         } else {
                                                 $Scustomer_avg = 0;
@@ -387,7 +387,7 @@
                                         $MIDsorted_output[] = $Moutput;
                                         $TOPsorted_outputFILE[] = $fileToutput;
 
-                                        if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
+                                        if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",(string) $stage)) {
                                                 if ($file_download > 0) {
                                                         $file_output .= "$fileToutput";
                                                 }
@@ -397,12 +397,12 @@
                                 // END loop through each user //
 
                                 // BEGIN sort through output to display properly //
-                                if (preg_match("/ID|TIME|LEADS/",$stage)) {
-                                        if (preg_match("/ID/",$stage)) {
+                                if (preg_match("/ID|TIME|LEADS/",(string) $stage)) {
+                                        if (preg_match("/ID/",(string) $stage)) {
                                                 sort($TOPsort, SORT_NUMERIC);
                                         }
 
-                                        if (preg_match("/TIME|LEADS/",$stage)) {
+                                        if (preg_match("/TIME|LEADS/",(string) $stage)) {
                                                 rsort($TOPsort, SORT_NUMERIC);
                                         }
 
@@ -437,7 +437,7 @@
 
                                         foreach ($rows_to_print as $i => $val) {
                                                 if ($Sstatus == "$status[$i]") {
-                                                $Scalls = ($Scalls + $calls[$i]);
+                                                $Scalls += $calls[$i];
                                                         $status_found++;
                                                 }
 
@@ -521,11 +521,11 @@
                                 $sub_statusesFILE = "";
                                 $sub_statusesHEAD = "";
                                 $sub_statusesHTML = "";
-                                $sub_statusesARY = array();
+                                $sub_statusesARY = [];
                                 $j = 0;
                                 $PCusers = '-';
-                                $PCusersARY = array();
-                                $PCuser_namesARY = array();
+                                $PCusersARY = [];
+                                $PCuser_namesARY = [];
                                 $k = 0;
 				$pause_condition = "AND pause_sec < 65000";
 
@@ -568,8 +568,8 @@
                                 $TOTtotTOTAL = 0;
 
 				// Time Difference Filter
-				$d_fromDate = strtotime($fromDate);
-                                $d_toDate = strtotime($toDate);
+				$d_fromDate = strtotime((string) $fromDate);
+                                $d_toDate = strtotime((string) $toDate);
                                 $difference = $d_toDate - $d_fromDate;
 
 				while ($m < $k) {
@@ -601,21 +601,21 @@
                                                 $status_found = 0;
 
                                                 foreach($subs_to_print as $i => $val) {
-                                                        if ( ($Suser == $PCuser[$i]) AND ($Sstatus == $sub_status[$i]) ) {
+                                                        if ( $Suser == $PCuser[$i] && $Sstatus == $sub_status[$i] ) {
 								//if( ($sub_status[$i] != NULL) && ($sub_status[$i] != "undefi") ){ 
 									if($PCpause_sec[$i] >= $difference){
                                                                                 $PCpause_sec[$i] = ($difference - $Snon_pause_sec);
                                                                         }
 
-                        	                                        $Spause_sec = ($Spause_sec + $PCpause_sec[$i]);
-                	                                                $Snon_pause_sec = ($Snon_pause_sec + $PCnon_pause_sec[$i]);
+                        	                                        $Spause_sec += $PCpause_sec[$i];
+                	                                                $Snon_pause_sec += $PCnon_pause_sec[$i];
 									$Stotal_sec = ($Stotal_sec + $PCnon_pause_sec[$i] + $PCpause_sec[$i]);
 
 	                                                                $USERcodePAUSE_MS = /*go_sec_convert($PCpause_sec[$i], 'H');*/convert($PCpause_sec[$i]);
                 	                                                $pfUSERcodePAUSE_MS = sprintf("%6s", $USERcodePAUSE_MS);
 
         	                                                        $Ssub_statusesFILE .= ",$USERcodePAUSE_MS";
-	
+
 	                                                                $SstatusesBOTR[$m] .= "<td> $USERcodePAUSE_MS </td>";
                                                                 	$status_found++;
 								//}
@@ -637,9 +637,9 @@
                                                 $Stotal_sec = ($Spause_sec + $Snon_pause_sec);
                                         }
 
-                                        $TOTtotPAUSE = ($TOTtotPAUSE + $Spause_sec);
-                                        $TOTtotNONPAUSE = ($TOTtotNONPAUSE + $Snon_pause_sec);
-                                        $TOTtotTOTAL = ($TOTtotTOTAL + $Stotal_sec);
+                                        $TOTtotPAUSE += $Spause_sec;
+                                        $TOTtotNONPAUSE += $Snon_pause_sec;
+                                        $TOTtotTOTAL += $Stotal_sec;
 
                                         $pfUSERtotPAUSE_MS = convert($Spause_sec);
                                         $pfUSERtotNONPAUSE_MS = convert($Snon_pause_sec);
@@ -667,7 +667,7 @@
 
                                         $BOTsorted_output[$m] = $Boutput;
 
-                                        if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",$stage)) {
+                                        if (!preg_match("/NAME|ID|TIME|LEADS|TCLOCK/",(string) $stage)) {
                                                 if ($file_download > 0) {
                                                         $file_output .= "$fileToutput";
                                                 }
@@ -678,7 +678,7 @@
                                 // END loop through each user //
 
                                 // BEGIN sort through output to display properly //
-                                if (preg_match("/ID|TIME|LEADS/",$stage)) {
+                                if (preg_match("/ID|TIME|LEADS/",(string) $stage)) {
                                         $n = 0;
                                         while ($n <= $m) {
                                                 $i = $sort_order[$m];
@@ -706,7 +706,7 @@
 
                                         foreach ($subs_to_print as $i => $val) {
                                                 if ($Sstatus == "$sub_status[$i]") {
-                                                        $Scalls = ($Scalls + $PCpause_sec[$i]);
+                                                        $Scalls += $PCpause_sec[$i];
                                                         $status_found++;
                                                 }
 
@@ -717,7 +717,7 @@
                                                 $SUMsub_statusesFILE .= ",0";
                                                 $SstatusesBSUM .= "<th nowrap> 0:00 </th>";
                                         } else {
-                                                $TOTtotPAUSE = ($TOTtotPAUSE + $Scalls);
+                                                $TOTtotPAUSE += $Scalls;
                                                 $USERsumstatPAUSE_MS = convert($Scalls);
                                                 $SUMsub_statusesFILE .= ",$USERsumstatPAUSE_MS";
                                                 $SstatusesBSUM .= "<th nowrap> $USERsumstatPAUSE_MS </th>";
@@ -738,7 +738,7 @@
                                         $file_output .= "TOTAL AGENTS: $TOT_AGENTS,$TOTtotTOTAL_MS,$TOTtotNONPAUSE_MS,$TOTtotPAUSE_MS,$SUMsub_statusesFILE\n";
                                 }
 
-                                $apiresults = array(
+                                $apiresults = [
                                         "result"                => "success",
 					"query"			=> $perfdetails_sql,
                                         "TOPsorted_output"      => $TOPsorted_output,
@@ -780,14 +780,14 @@
                                         "SstatusesBSUM"         => $SstatusesBSUM,
                                         "Legend"                => $legend,
                                         "test"                  => $usercount
-                                );
+                                ];
 
 		} else {
 			$err_msg= error_handle("10001");
-			$apiresults = array(
+			$apiresults = [
 				"code" => "10001", 
 				"result" => $err_msg
-			);		
+			];		
 		}
 	}
 

@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");	 
+	include_once (__DIR__ . "/goAPI.php");	 
  
 	$script_id 											= $astDB->escape($_REQUEST["script_id"]); 	
     $script_name 										= $astDB->escape($_REQUEST["script_name"]); 
@@ -33,33 +33,33 @@
     $active 											= $astDB->escape($_REQUEST['active']);
     
     ### Default values
-    $defActive 											= array("Y","N");    
+    $defActive 											= ["Y","N"];    
     
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($script_id) || is_null($script_id)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Script ID."
-		);
-    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',$script_name) && $script_name != null) {
-		$apiresults 									= array(
+		];
+    } elseif (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/',(string) $script_name) && $script_name != null) {
+		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in script name"
-		);
+		];
 	} elseif (!in_array($active,$defActive) && $active != null) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -73,12 +73,12 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
@@ -98,41 +98,41 @@
 					$datauser_group 					= $fresults['user_group'];
 				}
 				
-				$data_update 							= array(
+				$data_update 							= [
 					'script_name' 							=> ($script_name == null) ? $datascript_name : $script_name,
 					'script_comments' 						=> ($script_comments == null) ? $datascript_comments : $script_comments,
 					'script_text' 							=> ($script_text == null) ? ($datascript_text): $script_text,
 					'active' 								=> ($active == null) ? $dataactive : $active,
 					'user_group' 							=> ($user_group == null) ? $datauser_group : $user_group
-				);
+				];
 				
 				$astDB->where('script_id', $script_id);
 				$update 								= $astDB->update('vicidial_scripts', $data_update);
 			
 				if ($update) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Script ID: $script_id", $log_group, $astDB->getLastQuery());
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "Error: Try updating Script Again"
-					);
+					];
 				}
 			} else {
 				$err_msg 								= error_handle( "10001", "Insufficient permision" );
-				$apiresults 							= array(
+				$apiresults 							= [
 					"code" 									=> "10001", 
 					"result" 								=> $err_msg
-				);			
+				];			
 			}				
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

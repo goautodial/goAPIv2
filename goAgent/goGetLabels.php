@@ -26,8 +26,8 @@ if (isset($_GET['goTableName'])) { $table_name = $astDB->escape($_GET['goTableNa
     else if (isset($_POST['goTableName'])) { $table_name = $astDB->escape($_POST['goTableName']); }
 
 
-if (!preg_match("/system_settings|vicidial_screen_labels/", $table_name)) {
-    $APIResult = array( "result" => "error", "message" => "Getting label info from '{$table_name}' NOT allowed." );
+if (!preg_match("/system_settings|vicidial_screen_labels/", (string) $table_name)) {
+    $APIResult = [ "result" => "error", "message" => "Getting label info from '{$table_name}' NOT allowed." ];
 } else {
 	$astDB->where('campaign_id', $campaign);
 	$rslt = $astDB->getOne('vicidial_campaigns', 'disable_alter_custphone');
@@ -40,6 +40,6 @@ if (!preg_match("/system_settings|vicidial_screen_labels/", $table_name)) {
     
     $rslt = $astDB->getOne($table_name, 'label_title,label_first_name,label_middle_initial,label_last_name,label_address1,label_address2,label_address3,label_city,label_state,label_province,label_postal_code,label_vendor_lead_code,label_gender,label_phone_number,label_phone_code,label_alt_phone,label_security_phrase,label_email,label_comments');
     
-    $APIResult = array( "result" => "success", "data" => array( "disable_alter_custphone" => $disable_alter_custphone, "labels" => $rslt ) );
+    $APIResult = [ "result" => "success", "data" => [ "disable_alter_custphone" => $disable_alter_custphone, "labels" => $rslt ] ];
 }
 ?>

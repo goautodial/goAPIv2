@@ -21,28 +21,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 		
     // POST or GET Variables
     $user_group 										= $astDB->escape($_REQUEST["user_group"]);	
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($user_group) || is_null($user_group)) { 
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Set a value for User Group."
-		); 
+		]; 
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -56,26 +56,26 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
+			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
-				if (strtoupper($log_group) != "ADMIN") {
+				if (strtoupper((string) $log_group) !== "ADMIN") {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
 				}	
 			}	
 		
-			$cols										= array(
+			$cols										= [
 				"user_group", 
 				"group_name", 
 				"allowed_campaigns", 
 				"forced_timeclock_login", 
 				"shift_enforcement", 
 				"admin_viewable_groups"
-			);
+			];
 			
 			$query 										= $astDB
 				->where("user_group", $user_group)
@@ -94,21 +94,21 @@
 			
 			
 			if ($astDB->count > 0) {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"data" 									=> $data
-				);
+				];
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: User Group doesn't exist."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

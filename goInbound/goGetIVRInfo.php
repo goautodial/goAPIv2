@@ -22,27 +22,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
     $menu_id 											= $astDB->escape($_REQUEST['menu_id']);
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	}  elseif (empty($menu_id) || is_null($menu_id)) {
-        $apiresults 									= array(
+        $apiresults 									= [
 			"result" 										=> "Error: Inbound ID Not Defined."
-		);
+		];
     } else {  
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -62,7 +62,7 @@
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
@@ -75,21 +75,21 @@
 			$fresults 									= $astDB->getOne("vicidial_call_menu");
 			
 			if ($fresults) {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"data" 									=> $fresults
-				);
+				];
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "Error: IVR Menu doesn't exist."
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

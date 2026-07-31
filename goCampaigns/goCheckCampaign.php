@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
     $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
@@ -30,23 +30,23 @@
     
     // Check exisiting status
 	if (empty ($goUser) || is_null ($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty ($goPass) || is_null ($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty ($log_user) || is_null ($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaign_id) || is_null($campaign_id)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -70,15 +70,15 @@
 							$astDB->get("vicidial_campaign_statuses", NULL, "status");
 							
 							if ($astDB->count < count($campaigns)) {
-								$apiresults 		= array(
+								$apiresults 		= [
 									"result" 			=> "success"
-								);						
+								];						
 							} else {
 								$err_msg 			= error_handle("41004", "status. Campaign Status already exists");
-								$apiresults			= array(
+								$apiresults			= [
 									"code" 				=> "41004", 
 									"result" 			=> $err_msg
-								);
+								];
 							}	
 							
 							//foreach ($campaigns as $campaignid) {
@@ -104,52 +104,52 @@
 							$astDB->get("vicidial_campaign_statuses", NULL, "status");
 							
 							if($astDB->count <= 0) {
-								$apiresults 			= array(
+								$apiresults 			= [
 									"result" 				=> "success"
-								);						
+								];						
 							} else {
 								$err_msg 				= error_handle("41004", "status. Campaign Status already exists");
-								$apiresults				= array(
+								$apiresults				= [
 									"code" 					=> "41004", 
 									"result" 				=> $err_msg
-								);
+								];
 							}					
 						}
 					} else {
 						$err_msg 						= error_handle("41004", "status. Status already exists in the default statuses");
-						$apiresults 					= array(
+						$apiresults 					= [
 							"code" 							=> "41004", 
 							"result" 						=> $err_msg
-						);
+						];
 					}
 				} else {		
 					$err_msg 							= error_handle("10108", "status. No campaigns available");
-					$apiresults							= array(
+					$apiresults							= [
 						"code" 								=> "10108", 
 						"result" 							=> $err_msg
-					);
+					];
 				}
 			} elseif (!empty($campaign_id) && empty($status)) {
 				$astDB->where('campaign_id', $campaign_id);
 				$astDB->get('vicidial_campaigns', null, 'campaign_id');
 
 				if ($astDB->count > 0) {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "fail", 
 						"status" 							=> "Campaign already exist."
-					);
+					];
 				} else {
-					$apiresults 						= array(
+					$apiresults 						= [
 						"result" 							=> "success"
-					);
+					];
 				}
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

@@ -21,21 +21,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -57,7 +57,7 @@
 				$astDB->where("user_group", $log_group);
 				$group_type								= "Multi-tenant";
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					//if ($userlevel > 8) {
 					$astDB->where("user_group", $log_group);
 					//}
@@ -66,11 +66,11 @@
 				$group_type 							= "Default";				
 			}			
 			
-			$cols 										= array(
+			$cols 										= [
 				"user_group", 
 				"group_name", 
 				"forced_timeclock_login"
-			);
+			];
 			
 			$select 									= $astDB->get("vicidial_user_groups", NULL, $cols);
 			
@@ -82,20 +82,20 @@
 					$dataForced[] 						= $fresults['forced_timeclock_login'];
 				}
 
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"user_group" 							=> $dataUserGroup, 
 					"group_name" 							=> $dataGroupName, 
 					"group_type" 							=> $dataGroupType, 
 					"forced_timeclock_login" 				=> $dataForced
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

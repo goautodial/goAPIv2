@@ -22,20 +22,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once ("goAPI.php");
+	include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape($_REQUEST['voicemail_id']);
 
 	### ERROR CHECKING 					
 	if (!isset($session_user) || is_null($session_user)){
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif ($voicemail_id == null) {
-		$apiresults 					= array(
+		$apiresults 					= [
 			"result" 						=> "Error: Set a value for Voicemail ID."
-		);
+		];
 	} else {		
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
@@ -51,13 +51,13 @@
 			$astDB->delete('vicidial_voicemail');			
 
 			$log_id 					= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Voicemail ID: $voicemail_id", $log_group, $astDB->getLastQuery());			
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "success"
-			);
+			];
 		} else {
-			$apiresults 				= array(
+			$apiresults 				= [
 				"result" 					=> "Error: Voicemail doesn't exist."
-			);
+			];
 		}
 	}
 ?>

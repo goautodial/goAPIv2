@@ -23,7 +23,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	$search 											= $astDB->escape($_REQUEST['search']);
@@ -37,27 +37,27 @@
 	$start_date										= $astDB->escape($_REQUEST["start_date"]);
 	$end_date                                                                           	= $astDB->escape($_REQUEST["end_date"]);
 	$limit 												= 1000;	
-	$list_ids											= array();
+	$list_ids											= [];
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
-		);
+		];
 	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: goAPI Password Not Defined."
-		);
+		];
 	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
+		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
-		);
+		];
 	} elseif (empty($campaigns) || is_null($campaigns)) {
 		$err_msg 										= error_handle("40001");
-        $apiresults 									= array(
+        $apiresults 									= [
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
-		);
+		];
     } else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -83,7 +83,7 @@
                     $astDB->where('campaign_id', $allowed_campaigns, 'in');
                 }
             } else {
-                if (strtoupper($usergroup) != 'ADMIN') {
+                if (strtoupper((string) $usergroup) !== 'ADMIN') {
                     if ($user_level < 9) {
                         // $astDB->where("user_group", $usergroup);
                         $allowed_campaigns = $allowed_camps['allowed_campaigns'];
@@ -96,7 +96,7 @@
             }
             $SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
             $testLastQuery = $astDB->getLastQuery();
-            $array_camp = array();
+            $array_camp = [];
             foreach($SELECTQuery as $camp_val){
                 $array_camp[] 						= $camp_val["campaign_id"];
             }
@@ -113,7 +113,8 @@
 				}
 
                 if (!in_array(998, $list_ids) || !in_array(999, $list_ids)) {
-                    array_push($list_ids, 998, 999);
+                    $list_ids[] = 998;
+                    $list_ids[] = 999;
                 }
 			}
             
@@ -165,8 +166,8 @@
 
             $date_filter = "";
 			if (!empty($start_date) && !empty($end_date)) {
-				$start_date = date("Y-m-d G:i:s", strtotime($start_date));
-				$end_date = date("Y-m-d G:i:s", strtotime($end_date));
+				$start_date = date("Y-m-d G:i:s", strtotime((string) $start_date));
+				$end_date = date("Y-m-d G:i:s", strtotime((string) $end_date));
 
 				// $astDB->where("last_local_call_time", array( date($start_date), date($end_date)), "BETWEEN");
                 $date_filter = "AND last_local_call_time BETWEEN '$start_date' AND '$end_date'";
@@ -178,7 +179,7 @@
 			}
 			
             if (count($list_ids) < 1) {
-                $list_ids = array("-1");
+                $list_ids = ["-1"];
             }
 
             if (empty($list_filter)) {
@@ -216,16 +217,16 @@
 			
 			// GET CUSTOMER LIST
 			$fresultsvgo 								= $goDB->get("go_customers", null, "lead_id");
-			$lead_ids_go								= array();
+			$lead_ids_go								= [];
 			
 			foreach ($fresultsvgo as $fresultsgo) {
 				$lead_id_go								= $fresultsgo["lead_id"];
 				
-				array_push($lead_ids_go, $lead_id_go);
+				$lead_ids_go[] = $lead_id_go;
 			}
 			
-			$datago 									= array();
-			$data 										= array();
+			$datago 									= [];
+			$data 										= [];
 			
 			foreach ($fresultsv as $fresults) {
 				if (in_array($fresults['lead_id'], $lead_ids_go)) {
@@ -238,7 +239,7 @@
 					$dataDispo[] 						= $fresults['status'];
 					// $dataLastCallTime[] 				= $fresults['last_local_call_time'];
 					
-					array_push($datago, $fresults);
+					$datago[] = $fresults;
 				} else {
                         $dataLeadid2[] 						= $fresults['lead_id'];
                         $dataListid2[] 						= $fresults['list_id'];
@@ -249,12 +250,12 @@
                         $dataDispo2[] 						= $fresults['status'];
                         // $dataLastCallTime2[] 				= $fresults['last_local_call_time'];
                     
-                        array_push($data, $fresults);
+                        $data[] = $fresults;
 				}
 			}
 			
 			if ($search_customers) {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"lead_id" 								=> $dataLeadid, 
 					"list_id" 								=> $dataListid, 
@@ -265,9 +266,9 @@
 					"status" 								=> $dataDispo, 
 					"last_call_time" 						=> $dataLastCallTime, 
 					"data" 									=> $datago
-				);
+				];
 			} else {
-				$apiresults 							= array(
+				$apiresults 							= [
 					"result" 								=> "success", 
 					"lead_id" 								=> $dataLeadid2, 
 					"list_id" 								=> $dataListid2, 
@@ -278,14 +279,14 @@
 					"status" 								=> $dataDispo2, 
 					"last_call_time" 						=> $dataLastCallTime2,
 					"data" 									=> $data
-				);
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
+			$apiresults 								= [
 				"code" 										=> "10001", 
 				"result" 									=> $err_msg
-			);		
+			];		
 		}
 	}
 	

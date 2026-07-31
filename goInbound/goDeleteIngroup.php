@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    include_once ("goAPI.php");
+    include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
     $group_id = $astDB->escape($_REQUEST['group_id']);
@@ -28,14 +28,14 @@
     $ip_address = $_REQUEST['hostname'];
     
 	if(empty($group_id)) { 
-		$apiresults = array("result" => "Error: Set a value for Group ID."); 
+		$apiresults = ["result" => "Error: Set a value for Group ID."]; 
 	} else {
- 		$groupId = go_get_groupid($goUser, $astDB);
+ 		$groupId = go_get_groupid($goUser);
     	$log_user = $goUser;
 		$log_group = $groupId;
 
 		if(!empty($group_id)){
-			$exploded = explode(",", $group_id);
+			$exploded = explode(",", (string) $group_id);
 		}
 
 		for($i=0;$i > count($exploded);$i++){
@@ -53,14 +53,14 @@
 
 			if($astDB->count > 0) {
 				$dataGroupID = $selectData['group_id'];
-				
+
 				if(!$dataGroupID == null) {
 					$astDB->where("group_id", $dataGroupID);
-					$astDB->where("group_id", Array("AGENTDIRECT"), "NOT IN");
+					$astDB->where("group_id", ["AGENTDIRECT"], "NOT IN");
 					$astDB->delete("vicidial_inbound_groups");
 					$deleteQueryA = "DELETE from vicidial_inbound_groups where group_id='$dataGroupID' and group_id NOT IN('AGENTDIRECT') limit 1;"; 
 	   				//$deleteResultA = mysqli_query($link, $deleteQueryA);
-					
+
 					$astDB->where("group_id", $dataGroupID);
 					$astDB->delete("vicidial_inbound_group_agents");
 					//$deleteQueryB ="DELETE from vicidial_inbound_group_agents where group_id='$dataGroupID';";
@@ -75,15 +75,15 @@
 					$astDB->delete("vicidial_campaign_stats");
 					//$deleteQueryD = "DELETE from vicidial_campaign_stats where campaign_id='$dataGroupID';";
 	   				//$deleteResultD = mysqli_query($link, $deleteQueryD);
-					
+
 					$log_id = log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Inbound Group $dataGroupID", $log_group, $deleteQueryA);
 
-					$apiresults = array("result" => "success");
+					$apiresults = ["result" => "success"];
 				} else {
-					$apiresults = array("result" => "Error: Group  doesn't exist.");
+					$apiresults = ["result" => "Error: Group  doesn't exist."];
 				}
 			} else {
-				$apiresults = array("result" => "Error: Group doesn't exist.");
+				$apiresults = ["result" => "Error: Group doesn't exist."];
 			}
 		}// end of loop
 	}

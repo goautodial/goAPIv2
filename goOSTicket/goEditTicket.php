@@ -34,17 +34,17 @@
     //                        body = '$body',
     //                        updated = '$date'
     //                    WHERE thread_id='$threadID' LIMIT 1;";
-    $updateData = array(
+    $updateData = [
         'title' => $title,
         'body' => $body,
         'updated' => $date
-    );
+    ];
     $ostDB->where('thread_id', $threadID);
     $resultUpdateThreadEntry = $ostDB->update('vicidial_campaigns', $updateData, 1);
     
     if($ostDB->getRowCount() > 0){
-        $apiresults = array("result" => "success");
+        $apiresults = ["result" => "success"];
     }else{
-        $apiresults = array("result" => "Error: Something went wrong.");
+        $apiresults = ["result" => "Error: Something went wrong."];
     }
 ?>

@@ -57,7 +57,7 @@
 		WHERE host = '$host'";
 */
 		if($password != NULL || $password != ""){
-			$data = Array(
+			$data = [
 				'debug' => $debug,
                 		'ipv6_support' => $ipv6_support,
         		        'host' => $host,
@@ -66,9 +66,9 @@
         		        'smtp_auth' => $smtp_auth,
 		                'username' => $username,
                 		'password' => $password
-			);
+			];
 		}else{
-			$data = Array(
+			$data = [
         	                'debug' => $debug,
                 	        'ipv6_support' => $ipv6_support,
                         	'host' => $host,
@@ -76,7 +76,7 @@
         	                'smtp_security' => $smtp_security,
                 	        'smtp_auth' => $smtp_auth,
                         	'username' => $username,
-	                );
+	                ];
 		}
 		
 //		$execute_update = $goDB->rawQuery($update_query);
@@ -84,12 +84,12 @@
 		$execute_update = $goDB->update('smtp_settings', $data);
 
 		if($execute_update){
-			$apiresults = array("result" => "success");
+			$apiresults = ["result" => "success"];
 		}else{
-			$apiresults = array("result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue.");
+			$apiresults = ["result" => "error", "msg" => "An error has occured, please contact the System Administrator to fix the issue."];
 		}
 	} else {
-		$apiresults = array("result" => "SMTP Setting already exists. Only one SMTP Setting is allowed. You can either delete and recreate or update the current SMTP Settings.");
+		$apiresults = ["result" => "SMTP Setting already exists. Only one SMTP Setting is allowed. You can either delete and recreate or update the current SMTP Settings."];
 	}
 	
 	function encrypt_decrypt($action, $string) {
@@ -110,7 +110,7 @@
             $output = base64_encode($output);
         }
         else if( $action == 'decrypt' ){
-            $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+            $output = openssl_decrypt(base64_decode((string) $string), $encrypt_method, $key, 0, $iv);
         }
         return $output;
    	}

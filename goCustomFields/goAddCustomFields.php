@@ -26,7 +26,7 @@
     $field_name         = $_REQUEST['field_name'];
     $field_description  = $_REQUEST['field_description'];
     $field_rank         = $_REQUEST['field_rank'];
-    $field_help         = (isset($_REQUEST['field_help'])) ? $_REQUEST['field_help']:"";
+    $field_help         = $_REQUEST['field_help'] ?? "";
     $field_type         = $_REQUEST['field_type'];
     $field_options      = $_REQUEST['field_options'];
     $field_size         = $_REQUEST['field_size'];
@@ -45,9 +45,9 @@
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
-    if ( (strlen($field_label)<1) or (strlen($field_name)<2) or (strlen($field_size)<1) ) {
+    if ( strlen($field_label) < 1 || strlen((string) $field_name) < 2 || strlen((string) $field_size) < 1 ) {
 		$err_msg = error_handle("40001");
-		$apiresults = array("code" => "40001", "result" => $err_msg);
+		$apiresults = ["code" => "40001", "result" => $err_msg];
         //$apiresults = array("result" => "ERROR: You must enter a field label, field name and field size  - ".$list_id." | ".$field_label." | ".$field_name." | ".$field_size);
     }else{
         
@@ -56,8 +56,7 @@
 		$field_sql=''; $field_cost='';
         if($astDB->getRowCount() > 0){
             $err_msg = error_handle("41004", "");
-            $apiresults = array("code" => "41004", "result" => $err_msg);
-            $apiresults = array("result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label);
+            $apiresults = ["result" => "ERROR: Field already exists for this list - ".$list_id." | ".$field_label];
         }else{
             $tableName = "custom_".$list_id;
             #$tableCheck="SHOW TABLES LIKE '$tableName'";
@@ -76,7 +75,7 @@
                 $field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
             }
             
-            if ( ($field_type=='SELECT') or ($field_type=='RADIO') ) {
+            if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
                 $field_options_array = explode("\n",$field_options);
                 $field_options_count = count($field_options_array);
                 $te=0;
@@ -90,7 +89,7 @@
                     $te++;
                    }
                 
-                $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                 $fieldcatch = $field_options_ENUM;
                 $field_cost = strlen($field_options_ENUM);
                 if ($field_cost < 1) {$field_cost=1;};
@@ -98,7 +97,7 @@
             }
              
             
-            if ( ($field_type=='MULTI') or ($field_type=='CHECKBOX') ){
+            if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
                 $field_options_array = explode("\n",$field_options);
                 $field_options_count = count($field_options_array);
                 $te=0;
@@ -111,7 +110,7 @@
                         }
                     $te++;
                    }
-                $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
+                $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
                 $field_cost = strlen($field_options_ENUM);
                 if ($field_cost < 1) {$field_cost=1;};
                 $field_sql .= "VARCHAR($field_cost) ";
@@ -137,7 +136,7 @@
                 $field_cost = 8;
             }
             
-            if ( (!empty($field_default) ) and ($field_type!='AREA') and ($field_type!='DATE') and ($field_type!='TIME') ){
+            if ( !empty($field_default) && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
                 $field_sql .= "DEFAULT '$field_default'";
             }
             
@@ -158,7 +157,7 @@
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
             }
 
-            $data_cf = array(
+            $data_cf = [
                 'field_label'       => $field_label, 
                 'field_name'        => $field_name, 
                 'field_description' => $field_description, 
@@ -175,16 +174,16 @@
                 'multi_position'    => $multi_position, 
                 'name_position'     => $name_position, 
                 'field_order'       => $field_order
-            );
+            ];
             $insertCF = $astDB->insert('vicidial_lists_fields', $data_cf);
             $insertQuery = $astDB->getLastQuery();
             
             if($astDB->getInsertId()){
                 $log_id = log_action($goDB, 'ADD', $log_user, $ip_address, "Added a New Custom Field $field_label on List ID $list_id", $log_group, $insertQuery);
                
-                $apiresults = array("result" => "success");
+                $apiresults = ["result" => "success"];
             }else{
-                $apiresults = array("result" => "Error: Failed to add custom field.", "query" => $insertQuery);
+                $apiresults = ["result" => "Error: Failed to add custom field.", "query" => $insertQuery];
             }
         }
     }
