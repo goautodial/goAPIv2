@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$seats_param = $astDB->escape($_REQUEST["seats"]);
+	$seats_param = $astDB->escape(($_REQUEST["seats"] ?? ''));
 	
 	if(!empty($seats_param) && $seats_param > 0) {
 		$seats = $seats_param;

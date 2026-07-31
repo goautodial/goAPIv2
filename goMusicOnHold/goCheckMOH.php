@@ -22,7 +22,7 @@
 */
 
     ### POST or GET Variables
-    $moh_id = $astDB->escape($_REQUEST['moh_id']);
+    $moh_id = $astDB->escape(($_REQUEST['moh_id'] ?? ''));
     
     //$queryCheck = "SELECT moh_id from vicidial_music_on_hold where moh_id='".$moh_id."';";
     $astDB->where('moh_id', $moh_id);

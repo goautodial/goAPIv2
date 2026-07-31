@@ -23,9 +23,9 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-	$location = $goDB->escape($_REQUEST['location']);
-	$description = $goDB->escape($_REQUEST['description']);
-	$user_group = explode(",", (string) $goDB->escape($_REQUEST['user_group']));
+	$location = $goDB->escape(($_REQUEST['location'] ?? ''));
+	$description = $goDB->escape(($_REQUEST['description'] ?? ''));
+	$user_group = explode(",", (string) $goDB->escape(($_REQUEST['user_group'] ?? '')));
 
     // Error checking
 	if($location == null || $location == "") {
@@ -44,7 +44,7 @@
 					$err_msg = error_handle("41004", "description");
 					$APIResult = ["code" => "41004","result" => $err_msg];
 				} else {
-					$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($goUser, $astDB);
 		
 					$goDB->where('name', $location);
 					if (checkIfTenant($groupId, $goDB)) {

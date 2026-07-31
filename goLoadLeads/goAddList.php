@@ -23,11 +23,11 @@
 	include_once (__DIR__ . "/goAPI.php");
 
 	### POST or GET Variables
-	$list_id = $astDB->escape($_REQUEST['list_id']);
-	$list_name = $astDB->escape($_REQUEST['list_name']);
-	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-	$active = $astDB->escape($_REQUEST['active']);
-	$list_description = $astDB->escape($_REQUEST['list_description']);
+	$list_id = $astDB->escape(($_REQUEST['list_id'] ?? ''));
+	$list_name = $astDB->escape(($_REQUEST['list_name'] ?? ''));
+	$campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$active = $astDB->escape(($_REQUEST['active'] ?? ''));
+	$list_description = $astDB->escape(($_REQUEST['list_description'] ?? ''));
 
     ### Default values 
     $defActive = ["Y","N"];
@@ -43,13 +43,13 @@
                 $apiresults = ["result" => "Error: Special characters found in list_description and must not be empty"];
 			} else {
 				### Check value compare to default values
-				if(!in_array($active,$defActive) && $active != null) { 
+				if(!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) { 
 					$apiresults = ["result" => "Error: Default value for active is Y or N only."]; 
 				} else {
 					if(!is_numeric($list_id)){
 						$apiresults = ["result" => "Error: List ID must be a number or combination of number"];
 					} else {
-						$groupId = go_get_groupid($goUser);
+						$groupId = go_get_groupid($goUser, $astDB);
 					
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "WHERE list_id='$list_id'";

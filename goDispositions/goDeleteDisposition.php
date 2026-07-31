@@ -25,8 +25,8 @@
     include_once (__DIR__ . "/goAPI.php");
     
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
-	$statuses 											= $astDB->escape($_REQUEST["statuses"]);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));	
+	$statuses 											= $astDB->escape(($_REQUEST["statuses"] ?? ''));
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -59,7 +59,7 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
 			if (is_array($campaigns)) {
-				if (in_array($campaign_id, $campaigns)) {
+				if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 					$astDB->where("campaign_id", $campaign_id);
 					$astDB->get("vicidial_campaign_statuses");
 					

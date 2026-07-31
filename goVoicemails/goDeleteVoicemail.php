@@ -25,7 +25,7 @@
 	include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$voicemail_id 						= $astDB->escape($_REQUEST['voicemail_id']);
+	$voicemail_id 						= $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
 
 	### ERROR CHECKING 					
 	if (!isset($session_user) || is_null($session_user)){

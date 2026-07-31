@@ -22,11 +22,11 @@
 */
 
     
-    $camp = $astDB->escape($_REQUEST["campaign_id"]);
+    $camp = $astDB->escape(($_REQUEST["campaign_id"] ?? ''));
     $camp = $astDB->escape($camp);
-	$status = $astDB->escape($_REQUEST["status"]);
+	$status = $astDB->escape(($_REQUEST["status"] ?? ''));
 	
-	$sortBy = $astDB->escape($_REQUEST["sortBy"]);
+	$sortBy = $astDB->escape(($_REQUEST["sortBy"] ?? ''));
 	if(empty($sortBy)){
 		$sortBy = "status";
 	}
@@ -46,7 +46,7 @@
 			$campSQL = "AND campaign_id IN ($camps)";
 		}
 
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "";

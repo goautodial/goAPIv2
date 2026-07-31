@@ -21,13 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    //$userid = $_REQUEST['userid'];
-    $ticketid = $ostDB->escape($_REQUEST['ticket_id']);
+    //$userid = ($_REQUEST['userid'] ?? '');
+    $ticketid = $ostDB->escape(($_REQUEST['ticket_id'] ?? ''));
     
     if($ticketid == null && $ticketid == 0) { 
         $apiresults = ["result" => "Error: Set a value for Ticket ID"]; 
     } else {
-        $groupId = go_get_groupid($goUser);
+        $groupId = go_get_groupid($goUser, $astDB);
 
         if (!checkIfTenant($groupId, $goDB)) {
             $ul='';

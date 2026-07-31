@@ -23,7 +23,7 @@
     include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
-    $menu_id = $astDB->escape($_REQUEST['menu_id']);
+    $menu_id = $astDB->escape(($_REQUEST['menu_id'] ?? ''));
     
     $astDB->where("menu_id", $menu_id);
     $row = $astDB->getValue("vicidial_call_menu", "count(*)");

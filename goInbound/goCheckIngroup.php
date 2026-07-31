@@ -22,7 +22,7 @@
   include_once (__DIR__ . "/goAPI.php");
   
   // POST or GET Variables
-  $group_id = $astDB->escape($_REQUEST['group_id']);
+  $group_id = $astDB->escape(($_REQUEST['group_id'] ?? ''));
   
   $astDB->where("group_id", $group_id);
   $row = $astDB->getValue("vicidial_inbound_groups", "count(*)");

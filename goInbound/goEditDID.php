@@ -25,25 +25,25 @@
     include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
-    $did_id 										= $astDB->escape($_REQUEST['did_id']);
-	$did_pattern 									= $astDB->escape($_REQUEST['did_pattern']);
-	$did_description 								= $astDB->escape($_REQUEST['did_description']);
-	$did_active 									= $astDB->escape(strtoupper($_REQUEST['did_active']));
-	$did_route 										= $astDB->escape(strtoupper($_REQUEST['did_route']));
-	$filter_clean_cid_number 						= $astDB->escape($_REQUEST['filter_clean_cid_number']);
-	$user 											= $astDB->escape($_REQUEST['user']);
-	$user_unavailable_action 						= $astDB->escape(strtoupper($_REQUEST['user_unavailable_action']));
-	$user_route_settings_ingroup 					= $astDB->escape($_REQUEST['user_route_settings_ingroup']);
-	$group_id 										= $astDB->escape($_REQUEST['group_id']);
-	$phone 											= $astDB->escape($_REQUEST['phone']);
-	$server_ip 										= $astDB->escape($_REQUEST['server_ip']);
-	$menu_id 										= $astDB->escape($_REQUEST['menu_id']);
-	$voicemail_ext 									= $astDB->escape($_REQUEST['voicemail_ext']);
-	$extension 										= $astDB->escape($_REQUEST['extension']);
-	$exten_context 									= $astDB->escape($_REQUEST['exten_context']);
-	$list_id     									= $astDB->escape($_REQUEST['list_id']);
-	$call_handle_method 							= $astDB->escape($_REQUEST['call_handle_method']);
-	$agent_search_method     						= $astDB->escape($_REQUEST['agent_search_method']);
+    $did_id 										= $astDB->escape(($_REQUEST['did_id'] ?? ''));
+	$did_pattern 									= $astDB->escape(($_REQUEST['did_pattern'] ?? ''));
+	$did_description 								= $astDB->escape(($_REQUEST['did_description'] ?? ''));
+	$did_active 									= $astDB->escape(strtoupper(($_REQUEST['did_active'] ?? '')));
+	$did_route 										= $astDB->escape(strtoupper(($_REQUEST['did_route'] ?? '')));
+	$filter_clean_cid_number 						= $astDB->escape(($_REQUEST['filter_clean_cid_number'] ?? ''));
+	$user 											= $astDB->escape(($_REQUEST['user'] ?? ''));
+	$user_unavailable_action 						= $astDB->escape(strtoupper(($_REQUEST['user_unavailable_action'] ?? '')));
+	$user_route_settings_ingroup 					= $astDB->escape(($_REQUEST['user_route_settings_ingroup'] ?? ''));
+	$group_id 										= $astDB->escape(($_REQUEST['group_id'] ?? ''));
+	$phone 											= $astDB->escape(($_REQUEST['phone'] ?? ''));
+	$server_ip 										= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+	$menu_id 										= $astDB->escape(($_REQUEST['menu_id'] ?? ''));
+	$voicemail_ext 									= $astDB->escape(($_REQUEST['voicemail_ext'] ?? ''));
+	$extension 										= $astDB->escape(($_REQUEST['extension'] ?? ''));
+	$exten_context 									= $astDB->escape(($_REQUEST['exten_context'] ?? ''));
+	$list_id     									= $astDB->escape(($_REQUEST['list_id'] ?? ''));
+	$call_handle_method 							= $astDB->escape(($_REQUEST['call_handle_method'] ?? ''));
+	$agent_search_method     						= $astDB->escape(($_REQUEST['agent_search_method'] ?? ''));
    
     // Default values 
     $defUUA 										= [
@@ -91,19 +91,19 @@
         $apiresults 								= [
 			"result" 									=> "Error: Special characters found in did_description"
 		];
-    } elseif (!in_array($user_unavailable_action,$defUUA) && !is_null($user_unavailable_action)) {
+    } elseif (!in_array($user_unavailable_action, (is_array($defUUA) ? $defUUA : [])) && !is_null($user_unavailable_action)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'."
 		];
-	} elseif (!in_array($active,$defActive) && !is_null($active)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && !is_null($active)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($did_route,$defRoute) && !is_null($did_route)) {
+	} elseif (!in_array($did_route, (is_array($defRoute) ? $defRoute : [])) && !is_null($did_route)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only."
 		];
-	} elseif (!in_array($record_call,$defRecordCall) && !is_null($record_call)) {
+	} elseif (!in_array($record_call, (is_array($defRecordCall) ? $defRecordCall : [])) && !is_null($record_call)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only."
 		];

@@ -23,11 +23,11 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
-	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
-	$lead_filter_name = $astDB->escape($_REQUEST['lead_filter_name']);
-	$lead_filter_comments = $astDB->escape($_REQUEST['lead_filter_comments']);
-	$lead_filter_sql = $astDB->escape($_REQUEST['lead_filter_sql']);
-	$user_group = $astDB->escape($_REQUEST['user_group']);
+	$lead_filter_id = $astDB->escape(($_REQUEST['lead_filter_id'] ?? ''));
+	$lead_filter_name = $astDB->escape(($_REQUEST['lead_filter_name'] ?? ''));
+	$lead_filter_comments = $astDB->escape(($_REQUEST['lead_filter_comments'] ?? ''));
+	$lead_filter_sql = $astDB->escape(($_REQUEST['lead_filter_sql'] ?? ''));
+	$user_group = $astDB->escape(($_REQUEST['user_group'] ?? ''));
 
     ### ERROR CHECKING ...
     if($lead_filter_id == null) { 
@@ -41,7 +41,7 @@
 			} else {
 				$lead_filter_id = $astDB->escape($lead_filter_id);
 
-                $groupId = go_get_groupid($goUser);
+                $groupId = go_get_groupid($goUser, $astDB);
 
                 if (!checkIfTenant($groupId, $goDB)) {
                     //$ul = "";

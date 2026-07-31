@@ -26,23 +26,23 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
 	// POST or GET Variables
-	$list_id 											= $astDB->escape($_REQUEST['list_id']);
-	$list_name 											= $astDB->escape($_REQUEST['list_name']);
-	$list_description 									= $astDB->escape($_REQUEST['list_description']);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));
-	$reset_time 										= $astDB->escape($_REQUEST['reset_time']);
-	$xferconf_a_number 									= $astDB->escape($_REQUEST['xferconf_a_number']);
-	$xferconf_b_number									= $astDB->escape($_REQUEST['xferconf_b_number']);
-	$xferconf_c_number 									= $astDB->escape($_REQUEST['xferconf_c_number']);
-	$xferconf_d_number 									= $astDB->escape($_REQUEST['xferconf_d_number']);
-	$xferconf_e_number 									= $astDB->escape($_REQUEST['xferconf_e_number']);
-	$agent_script_override 								= $astDB->escape($_REQUEST['agent_script_override']);
-	$drop_inbound_group_override 						= $astDB->escape($_REQUEST['drop_inbound_group_override']);
-	$campaign_cid_override 								= $astDB->escape($_REQUEST['campaign_cid_override']);
-	$web_form_address 									= $astDB->escape($_REQUEST['web_form_address']);
-	$reset_list 										= $astDB->escape(strtoupper($_REQUEST['reset_list']));
-	// $values = $_REQUEST['items'];
+	$list_id 											= $astDB->escape(($_REQUEST['list_id'] ?? ''));
+	$list_name 											= $astDB->escape(($_REQUEST['list_name'] ?? ''));
+	$list_description 									= $astDB->escape(($_REQUEST['list_description'] ?? ''));
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$active 											= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
+	$reset_time 										= $astDB->escape(($_REQUEST['reset_time'] ?? ''));
+	$xferconf_a_number 									= $astDB->escape(($_REQUEST['xferconf_a_number'] ?? ''));
+	$xferconf_b_number									= $astDB->escape(($_REQUEST['xferconf_b_number'] ?? ''));
+	$xferconf_c_number 									= $astDB->escape(($_REQUEST['xferconf_c_number'] ?? ''));
+	$xferconf_d_number 									= $astDB->escape(($_REQUEST['xferconf_d_number'] ?? ''));
+	$xferconf_e_number 									= $astDB->escape(($_REQUEST['xferconf_e_number'] ?? ''));
+	$agent_script_override 								= $astDB->escape(($_REQUEST['agent_script_override'] ?? ''));
+	$drop_inbound_group_override 						= $astDB->escape(($_REQUEST['drop_inbound_group_override'] ?? ''));
+	$campaign_cid_override 								= $astDB->escape(($_REQUEST['campaign_cid_override'] ?? ''));
+	$web_form_address 									= $astDB->escape(($_REQUEST['web_form_address'] ?? ''));
+	$reset_list 										= $astDB->escape(strtoupper(($_REQUEST['reset_list'] ?? '')));
+	// $values = ($_REQUEST['items'] ?? '');
 	
 	// Default values 
 	$defActive 											= ["Y","N"];
@@ -66,14 +66,14 @@
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
-	} elseif (!in_array($reset_list,$defActive) && $reset_list != null) {
+	} elseif (!in_array($reset_list, (is_array($defActive) ? $defActive : [])) && $reset_list != null) {
 		$err_msg 										= error_handle("41006", "reset_list");
 		$apiresults 									= [
 			"code" 											=> "41006", 

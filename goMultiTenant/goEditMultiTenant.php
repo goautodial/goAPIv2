@@ -23,15 +23,15 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-    $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
-    $tenant_name = $astDB->escape($_REQUEST['tenant_name']);
-    $admin = $astDB->escape($_REQUEST['admin']);
-    //$access_call_times = $_REQUEST['access_call_times'];
-    //$access_carriers = $_REQUEST['access_carriers'];
-    //$access_phones = $_REQUEST['access_phones'];
-    //$access_voicemails = $_REQUEST['access_voicemails'];
-   // $values = $_REQUEST['item'];
-    $active = strtoupper((string) $astDB->escape($_REQUEST['active']));
+    $tenant_id = $astDB->escape(($_REQUEST['tenant_id'] ?? ''));
+    $tenant_name = $astDB->escape(($_REQUEST['tenant_name'] ?? ''));
+    $admin = $astDB->escape(($_REQUEST['admin'] ?? ''));
+    //$access_call_times = ($_REQUEST['access_call_times'] ?? '');
+    //$access_carriers = ($_REQUEST['access_carriers'] ?? '');
+    //$access_phones = ($_REQUEST['access_phones'] ?? '');
+    //$access_voicemails = ($_REQUEST['access_voicemails'] ?? '');
+   // $values = ($_REQUEST['item'] ?? '');
+    $active = strtoupper((string) $astDB->escape(($_REQUEST['active'] ?? '')));
    //tenant_id, tenant_name, admin, active
     ### Default values 
     $defActive = ["Y","N"];
@@ -45,16 +45,16 @@
     if($tenant_id == null) {
         $apiresults = ["result" => "Error: Set a value for Tenant ID."];
     } else {
-		if(!in_array($active,$defActive) && $active != null) {
+		if(!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 			$apiresults = ["result" => "Error: Default value for active is Y or N only."];
 		} else {
-			if(!in_array($access_call_times,$defaccess_call_times) && $access_call_times != null) {
+			if(!in_array($access_call_times, (is_array($defaccess_call_times) ? $defaccess_call_times : [])) && $access_call_times != null) {
 				$apiresults = ["result" => "Error: Default value for access_call_times is Y or N only."];
 			} else {
-                if(!in_array($access_carriers,$defaccess_carriers) && $access_carriers != null) {
+                if(!in_array($access_carriers, (is_array($defaccess_carriers) ? $defaccess_carriers : [])) && $access_carriers != null) {
                     $apiresults = ["result" => "Error: Default value for access_carriers is Y or N only."];
                 } else {
-					if(!in_array($access_voicemails,$defaccess_voicemails) && $access_voicemails != null) {
+					if(!in_array($access_voicemails, (is_array($defaccess_voicemails) ? $defaccess_voicemails : [])) && $access_voicemails != null) {
 						$apiresults = ["result" => "Error: Default value for access_voicemails is Y or N only."];
 					} else {
 						if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $tenant_id)){
@@ -69,7 +69,7 @@
 									if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $pass)){
 										$apiresults = ["result" => "Error: Special characters found in pass"];
 									} else {
-										$groupId = go_get_groupid($goUser);
+										$groupId = go_get_groupid($goUser, $astDB);
 						
 										if (!checkIfTenant($groupId, $goDB)) {
 											//$ul = "WHERE tenant_id='$tenant_id'";

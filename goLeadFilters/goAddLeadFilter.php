@@ -23,11 +23,11 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
-	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
-	$lead_filter_name = $astDB->escape($_REQUEST['lead_filter_name']);
-	$lead_filter_comments = $astDB->escape($_REQUEST['lead_filter_comments']);
-	$lead_filter_sql = $astDB->escape($_REQUEST['lead_filter_sql']);
-	$user_group = $astDB->escape($_REQUEST['user_group']);
+	$lead_filter_id = $astDB->escape(($_REQUEST['lead_filter_id'] ?? ''));
+	$lead_filter_name = $astDB->escape(($_REQUEST['lead_filter_name'] ?? ''));
+	$lead_filter_comments = $astDB->escape(($_REQUEST['lead_filter_comments'] ?? ''));
+	$lead_filter_sql = $astDB->escape(($_REQUEST['lead_filter_sql'] ?? ''));
+	$user_group = $astDB->escape(($_REQUEST['user_group'] ?? ''));
 
     ### ERROR CHECKING 
 	if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $lead_filter_id) || $lead_filter_id == null || $lead_filter_id < 4){
@@ -45,7 +45,7 @@
 					if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $user_group) || $user_group == null){
 						$apiresults = ["result" => "Error: Special characters found in user_group and must not be empty"];
 					} else {
-						$groupId = go_get_groupid($goUser);
+						$groupId = go_get_groupid($goUser, $astDB);
 		
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "";

@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $deptid = $ostDB->escape($_REQUEST['deptid']);
+    $deptid = $ostDB->escape(($_REQUEST['deptid'] ?? ''));
     ### Check user_id if its null or empty
     if($deptid == null && $deptid == 0) { 
         $apiresults = ["result" => "Error: Set a value for Department ID."]; 
     } else {         
-        $groupId = go_get_groupid($goUser);
+        $groupId = go_get_groupid($goUser, $astDB);
 
         if (!checkIfTenant($groupId, $goDB)) {
             $ul='';

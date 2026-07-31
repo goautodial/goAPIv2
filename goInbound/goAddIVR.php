@@ -25,20 +25,20 @@
     include_once (__DIR__ . "/goAPI.php");    
 
     // POST or GET Variables
-    $menu_id 									= $astDB->escape($_REQUEST['menu_id']);
-    $menu_name 									= $astDB->escape($_REQUEST['menu_name']);
-    $user_group 								= $astDB->escape($_REQUEST['user_group']);
-    $menu_prompt 								= $astDB->escape($_REQUEST['menu_prompt']);
-    $menu_timeout 								= $astDB->escape($_REQUEST['menu_timeout']);
-    $menu_timeout_prompt 						= $astDB->escape($_REQUEST['menu_timeout_prompt']);
-    $menu_invalid_prompt 						= $astDB->escape($_REQUEST['menu_invalid_prompt']);
-    $menu_repeat 								= $astDB->escape($_REQUEST['menu_repeat']);
-    $menu_time_check 							= $astDB->escape($_REQUEST['menu_time_check']);
-    $call_time_id 								= $astDB->escape($_REQUEST['call_time_id']);
-    $track_in_vdac 								= $astDB->escape($_REQUEST['track_in_vdac']);
-    $custom_dialplan_entry 						= $astDB->escape($_REQUEST['custom_dialplan_entry']);
-    $tracking_group 							= $astDB->escape($_REQUEST['tracking_group']);	
-    $items 										= $_REQUEST['items'];
+    $menu_id 									= $astDB->escape(($_REQUEST['menu_id'] ?? ''));
+    $menu_name 									= $astDB->escape(($_REQUEST['menu_name'] ?? ''));
+    $user_group 								= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+    $menu_prompt 								= $astDB->escape(($_REQUEST['menu_prompt'] ?? ''));
+    $menu_timeout 								= $astDB->escape(($_REQUEST['menu_timeout'] ?? ''));
+    $menu_timeout_prompt 						= $astDB->escape(($_REQUEST['menu_timeout_prompt'] ?? ''));
+    $menu_invalid_prompt 						= $astDB->escape(($_REQUEST['menu_invalid_prompt'] ?? ''));
+    $menu_repeat 								= $astDB->escape(($_REQUEST['menu_repeat'] ?? ''));
+    $menu_time_check 							= $astDB->escape(($_REQUEST['menu_time_check'] ?? ''));
+    $call_time_id 								= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
+    $track_in_vdac 								= $astDB->escape(($_REQUEST['track_in_vdac'] ?? ''));
+    $custom_dialplan_entry 						= $astDB->escape(($_REQUEST['custom_dialplan_entry'] ?? ''));
+    $tracking_group 							= $astDB->escape(($_REQUEST['tracking_group'] ?? ''));	
+    $items 										= ($_REQUEST['items'] ?? '');
 	
     // Default values 
 	$defmenu_time_check 						= ['0','1'];
@@ -146,13 +146,13 @@
 				$query							= $astDB->getLastQuery();
 
 				if (!empty($items)) {
-					$exploded_items 			= explode("|", $items);
+					$exploded_items 			= explode("|", (string) ($items ?? ''));
 					$filtered_items 			= array_filter($exploded_items);
-                    $counter = count($filtered_items);
+                    $counter = (is_countable($filtered_items) ? count($filtered_items) : 0);
 					
 					//query for call menu options
 					for ($i=0; $i < $counter; $i++) {
-						$options 				= explode("+", $filtered_items[$i]);
+						$options 				= explode("+", (string) ($filtered_items[$i] ?? ''));
 						
 						if (isset($options[2]) && ($options[2] !== '' && $options[2] !== '0')) {
 							$data2 					= [

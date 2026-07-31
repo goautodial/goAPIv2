@@ -12,16 +12,16 @@
 
 	$datenow = date('Y-m-d H:i:s');
 
-	$user_id = $_REQUEST['user_id'];
-	$log_user = $_REQUEST['log_user'];
-	$log_group = $_REQUEST['log_group'];
+	$user_id = ($_REQUEST['user_id'] ?? '');
+	$log_user = ($_REQUEST['log_user'] ?? '');
+	$log_group = ($_REQUEST['log_group'] ?? '');
 
 	$arr_post_body = [
         "message_type" 	=> "SEND",
-        "mobile_number" => mysqli_real_escape_string($link, $_REQUEST['phone_number']),
+        "mobile_number" => mysqli_real_escape_string($link, ($_REQUEST['phone_number'] ?? '')),
         "shortcode" 	=> "29290462886",
         "message_id" 	=> gen_random(),
-        "message" 		=> mysqli_real_escape_string($link, urlencode($_REQUEST['message'])),
+        "message" 		=> mysqli_real_escape_string($link, urlencode(($_REQUEST['message'] ?? ''))),
         "client_id" 	=> "fdd645b7328431d8f21a6301de52b42fe4b06514f47fcaae0e70790e3fb8cd8d",
         "secret_key" 	=> "649dc271effa414ebfa2c3d473024cf4362f994b1d42c1a4b92d088f8a4c1bec"
     ];
@@ -36,7 +36,7 @@
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $URL);
-    curl_setopt($ch, CURLOPT_POST, count($arr_post_body));
+    curl_setopt($ch, CURLOPT_POST, (is_countable($arr_post_body) ? count($arr_post_body) : 0));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $query_string);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $response = curl_exec($ch);

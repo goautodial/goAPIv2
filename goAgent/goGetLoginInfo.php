@@ -24,12 +24,12 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
 	$log_user 										= $session_user;
-	$log_group 										= go_get_groupid($session_user);
-	$log_ip 										= $astDB->escape($_REQUEST['log_ip']);
+	$log_group 										= go_get_groupid($session_user, $astDB);
+	$log_ip 										= $astDB->escape(($_REQUEST['log_ip'] ?? ''));
 	
-	$user 											= $astDB->escape($_REQUEST['goUserID']);
-	$isPBP 											= $astDB->escape($_REQUEST['isPBP']);
-	$campaign	 									= $astDB->escape($_REQUEST['goCampaign']);
+	$user 											= $astDB->escape(($_REQUEST['goUserID'] ?? ''));
+	$isPBP 											= $astDB->escape(($_REQUEST['isPBP'] ?? ''));
+	$campaign	 									= $astDB->escape(($_REQUEST['goCampaign'] ?? ''));
 
 	$SIP_server ??= 'kamailio';
 
@@ -774,6 +774,7 @@
 						$pause_codes[$pause] 		= "{$pause_name}";
 						//if ($billable == 'Y')
 						//    {$VARCBstatusesLIST .= " {$status}";}
+						$pause_codes = is_array($pause_codes) ? $pause_codes : [];
 						ksort($pause_codes);
 					}			
 				}
@@ -788,7 +789,7 @@
 				
 				if ( ($campinfo['campaign_allow_inbound'] == 'Y') && ($campinfo['dial_method'] != 'MANUAL') ) {
 					$closer_campaigns 				= preg_replace("/^ | -$/", "", $campinfo['closer_campaigns']);
-					$closer_campaigns 				= explode(" ", $closer_campaigns);
+					$closer_campaigns 				= explode(" ", (string) ($closer_campaigns ?? ''));
 					
 					//$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
 					$rslt 							= $astDB
@@ -826,16 +827,20 @@
 							$PHONEgrpCT++;
 						}
 						
+						$VARingroups = is_array($VARingroups) ? $VARingroups : [];
+						
 						ksort($VARingroups);
 						asort($VARingroup_handlers);
+						$VARemailgroups = is_array($VARemailgroups) ? $VARemailgroups : [];
 						ksort($VARemailgroups);
+						$VARphonegroups = is_array($VARphonegroups) ? $VARphonegroups : [];
 						ksort($VARphonegroups);
 						$INgrpCT++;
 					}*/
 				}
 				
 				$xfer_groups 						= preg_replace("/^ | -$/", "", $campinfo['xfer_groups']);
-				$xfer_groups 						= explode(" ", $xfer_groups);
+				$xfer_groups 						= explode(" ", (string) ($xfer_groups ?? ''));
 				$XFgrpCT 							= 0;
 				$VARxferGroups 						= [];
 				$VARxferGroupsNames 				= [];
@@ -867,6 +872,7 @@
 						$row 							= $result[$XFgrpCT];
 						$VARxferGroups[$row['group_id']] = $row['group_id'];
 						$VARxferGroupsNames[$row['group_name']] = $row['group_id'];
+						$VARxferGroups = is_array($VARxferGroups) ? $VARxferGroups : [];
 						ksort($VARxferGroups);
 						asort($VARxferGroupsNames);
 						
@@ -1172,6 +1178,8 @@
 				$statuses_ct += $statuses_camp_ct;
 				//$testVal 							= $astDB->getLastQuery();
 			}
+			
+			$statuses = is_array($statuses) ? $statuses : [];
 			
 			ksort($statuses); // Sorting of disposition statuses
 			

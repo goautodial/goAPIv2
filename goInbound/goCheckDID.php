@@ -23,7 +23,7 @@
   include_once (__DIR__ . "/goAPI.php");
 
   // POST or GET Variables
-  $did_pattern = $astDB->escape($_REQUEST['did_pattern']);
+  $did_pattern = $astDB->escape(($_REQUEST['did_pattern'] ?? ''));
 
   $astDB->where("did_pattern", $did_pattern);
   $rowdf = $astDB->getValue("vicidial_inbound_dids", "count(*)");

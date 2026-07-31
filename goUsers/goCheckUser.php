@@ -23,9 +23,9 @@
     include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
-	$user 												= $astDB->escape($_REQUEST['user']);
-	$phone_login 										= $astDB->escape($_REQUEST['phone_login']);
-	$type												= $astDB->escape($_REQUEST['type']);
+	$user 												= $astDB->escape(($_REQUEST['user'] ?? ''));
+	$phone_login 										= $astDB->escape(($_REQUEST['phone_login'] ?? ''));
+	$type												= $astDB->escape(($_REQUEST['type'] ?? ''));
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {

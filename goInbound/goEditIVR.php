@@ -25,28 +25,28 @@
     include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-    $menu_id 										= $_REQUEST['menu_id'];
-	$menu_name 										= $_REQUEST['menu_name'];
-	$menu_prompt 									= $_REQUEST['menu_prompt'];
-	$menu_timeout 									= $_REQUEST['menu_timeout'];
-	$menu_timeout_prompt 							= $_REQUEST['menu_timeout_prompt'];
-	$menu_invalid_prompt 							= $_REQUEST['menu_invalid_prompt'];
-	$menu_repeat 									= $_REQUEST['menu_repeat'];
-	$menu_time_check 								= $_REQUEST['menu_time_check'];
-	$call_time_id 									= $_REQUEST['call_time_id'];
-	$track_in_vdac 									= $_REQUEST['track_in_vdac'];
-	$tracking_group 								= $_REQUEST['tracking_group'];
-	$user_group 									= $_REQUEST['user_group'];
-	$custom_dialplan_entry 							= $_REQUEST['custom_dialplan_entry'];	
-	// $items 											= $_REQUEST['items'];
-	$route_option 									= $_REQUEST['route_option'];
-	$route_desc 									= $_REQUEST['route_desc'];
-	$route_menu 									= $_REQUEST['route_menu'];
-	$option_route_value                             = $_REQUEST['option_route_value'];
-	$option_route_context 							= $_REQUEST['option_route_context'];
+    $menu_id 										= ($_REQUEST['menu_id'] ?? '');
+	$menu_name 										= ($_REQUEST['menu_name'] ?? '');
+	$menu_prompt 									= ($_REQUEST['menu_prompt'] ?? '');
+	$menu_timeout 									= ($_REQUEST['menu_timeout'] ?? '');
+	$menu_timeout_prompt 							= ($_REQUEST['menu_timeout_prompt'] ?? '');
+	$menu_invalid_prompt 							= ($_REQUEST['menu_invalid_prompt'] ?? '');
+	$menu_repeat 									= ($_REQUEST['menu_repeat'] ?? '');
+	$menu_time_check 								= ($_REQUEST['menu_time_check'] ?? '');
+	$call_time_id 									= ($_REQUEST['call_time_id'] ?? '');
+	$track_in_vdac 									= ($_REQUEST['track_in_vdac'] ?? '');
+	$tracking_group 								= ($_REQUEST['tracking_group'] ?? '');
+	$user_group 									= ($_REQUEST['user_group'] ?? '');
+	$custom_dialplan_entry 							= ($_REQUEST['custom_dialplan_entry'] ?? '');	
+	// $items 											= ($_REQUEST['items'] ?? '');
+	$route_option 									= ($_REQUEST['route_option'] ?? '');
+	$route_desc 									= ($_REQUEST['route_desc'] ?? '');
+	$route_menu 									= ($_REQUEST['route_menu'] ?? '');
+	$option_route_value                             = ($_REQUEST['option_route_value'] ?? '');
+	$option_route_context 							= ($_REQUEST['option_route_context'] ?? '');
 	
 	// if (!empty($items)) {
-	// 	$exploded_items 							= explode("|", $items);
+	// 	$exploded_items 							= explode("|", (string) ($items ?? ''));
 	// 	$filtered_items 							= array_filter($exploded_items);
 	// }
 
@@ -125,7 +125,7 @@
 			//$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $astDB->getLastQuery());
 
 	        $items                                                                  = "";
-            $counter = count($route_option);
+            $counter = (is_countable($route_option) ? count($route_option) : 0);
 
             for ($i=0;$i < $counter;$i++) {
                 if($route_option[$i] == "A") $route_option[$i] = '#';
@@ -146,12 +146,12 @@
 				$qdelete							= $astDB->getLastQuery();
 				//$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Call Menu ID $menu_id", $log_group, $astDB->getLastQuery());
             
-                $exploded_items 							= explode("|", $items);
+                $exploded_items 							= explode("|", (string) ($items ?? ''));
                 $filtered_items 							= array_filter($exploded_items);
-                $counter = count($filtered_items);
+                $counter = (is_countable($filtered_items) ? count($filtered_items) : 0);
                 
 				for ($i=0; $i < $counter; $i++) {
-					$options 						= explode("+", $filtered_items[$i]);
+					$options 						= explode("+", (string) ($filtered_items[$i] ?? ''));
 					
 					if (isset($options[2]) && ($options[2] !== '' && $options[2] !== '0')) {
 						$insertData 				= [

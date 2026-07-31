@@ -24,11 +24,11 @@
     include_once(__DIR__ . "/goAPI.php");
 	
 	// need function go_sec_convert();
-    $pageTitle 											= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
+    $pageTitle 											= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
     $fromDate 											= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
     $toDate 											= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-    $campaign_id 										= $astDB->escape($_REQUEST['campaignID']);
-    $request 											= $astDB->escape($_REQUEST['request']);
+    $campaign_id 										= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+    $request 											= $astDB->escape(($_REQUEST['request'] ?? ''));
 	$defPage 											= "stats";	
 
     // Error Checking
@@ -125,7 +125,7 @@
 					$qtotalcallsmade = $astDB->rawQuery("select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where  
                     campaign_id IN ($imploded_camp) and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cdate $MunionSQL) t group by cdate;");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$cdate[] 					= $row['cdate'];
 							$hour0[] 					= $row['Hour0'];
@@ -224,7 +224,7 @@
 
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -241,7 +241,7 @@
                     date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
 					$total_status                                           = $astDB->getRowCount();
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
@@ -298,7 +298,7 @@
 					$qtotalcallsmade 					= $astDB->rawQuery("select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where 
                     campaign_id IN ($imploded_camp) and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') group by weekno $MunionSQL) t group by weekno;");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$weekno[] 					= "Week ".$row['weekno'];
 							$day0[] 					= $row['Day0'];
@@ -369,7 +369,7 @@
 					
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -386,7 +386,7 @@
                     DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' ) between '$fromDate' and '$toDate' $ul and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
@@ -442,7 +442,7 @@
 					$qtotalcallsmade					= $astDB->rawQuery("select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where  
                     campaign_id IN ($imploded_camp) and  MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') group by monthname $MunionSQL) t group by monthname;");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$monthname[] 				= $row['monthname'];
 							$month0[] 					= $row['Month1'];
@@ -525,7 +525,7 @@
 						
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -542,7 +542,7 @@
                     call_date between '$fromDate' and '$toDate' and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];

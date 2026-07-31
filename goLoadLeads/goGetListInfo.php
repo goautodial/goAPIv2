@@ -23,12 +23,12 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-    $list_id = $astDB->escape($_REQUEST['list_id']);
+    $list_id = $astDB->escape(($_REQUEST['list_id'] ?? ''));
     
 	if($list_id == null) { 
 		$apiresults = ["result" => "Error: Set a value for List ID."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
 		
 		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "WHERE list_id='$list_id'";

@@ -24,51 +24,51 @@
 
 	include_once (__DIR__ . "/goAPI.php");
 	
-	$carrier_type 										= $astDB->escape($_REQUEST['carrier_type']);
+	$carrier_type 										= $astDB->escape(($_REQUEST['carrier_type'] ?? ''));
 	
 	if ($carrier_type == "justgo") {
-		$company										= $astDB->escape($_REQUEST['company']);
-		$firstname 										= $astDB->escape($_REQUEST['firstname']);
-		$lastname 										= $astDB->escape($_REQUEST['lastname']);
-		$address 										= $astDB->escape($_REQUEST['address']);
-		$city 											= $astDB->escape($_REQUEST['city']);
-		$state 											= $astDB->escape($_REQUEST['state']);
-		$postal 										= $astDB->escape($_REQUEST['postal']);
-		$country 										= $astDB->escape($_REQUEST['country']);
-		$timezone 										= $astDB->escape($_REQUEST['timezone']);
-		$phone 											= $astDB->escape($_REQUEST['phone']);
-		$mobilephone 									= $astDB->escape($_REQUEST['mobilephone']);
-		$email 											= $astDB->escape($_REQUEST['email']);
+		$company										= $astDB->escape(($_REQUEST['company'] ?? ''));
+		$firstname 										= $astDB->escape(($_REQUEST['firstname'] ?? ''));
+		$lastname 										= $astDB->escape(($_REQUEST['lastname'] ?? ''));
+		$address 										= $astDB->escape(($_REQUEST['address'] ?? ''));
+		$city 											= $astDB->escape(($_REQUEST['city'] ?? ''));
+		$state 											= $astDB->escape(($_REQUEST['state'] ?? ''));
+		$postal 										= $astDB->escape(($_REQUEST['postal'] ?? ''));
+		$country 										= $astDB->escape(($_REQUEST['country'] ?? ''));
+		$timezone 										= $astDB->escape(($_REQUEST['timezone'] ?? ''));
+		$phone 											= $astDB->escape(($_REQUEST['phone'] ?? ''));
+		$mobilephone 									= $astDB->escape(($_REQUEST['mobilephone'] ?? ''));
+		$email 											= $astDB->escape(($_REQUEST['email'] ?? ''));
 	}
 	
 	if ($carrier_type == "manual" || $carrier_type == "copy") {
-		$carrier_id										= $astDB->escape($_REQUEST['carrier_id']);
-		$carrier_name 									= $astDB->escape($_REQUEST['carrier_name']);
-		$active											= $astDB->escape($_REQUEST['active']);
+		$carrier_id										= $astDB->escape(($_REQUEST['carrier_id'] ?? ''));
+		$carrier_name 									= $astDB->escape(($_REQUEST['carrier_name'] ?? ''));
+		$active											= $astDB->escape(($_REQUEST['active'] ?? ''));
 	}
 		
 	if ($carrier_type == "manual") {
-		$carrier_description							= $astDB->escape($_REQUEST['carrier_description']);
-		$user_group										= $astDB->escape($_REQUEST['user_group']);
-		$authentication									= $astDB->escape($_REQUEST['authentication']);
+		$carrier_description							= $astDB->escape(($_REQUEST['carrier_description'] ?? ''));
+		$user_group										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+		$authentication									= $astDB->escape(($_REQUEST['authentication'] ?? ''));
 		
 		if ($authentication == "auth_ip") {
-			$host 										= $astDB->escape($_REQUEST['sip_server_ip']);
+			$host 										= $astDB->escape(($_REQUEST['sip_server_ip'] ?? ''));
 		}
 		
 		if ($authentication == "auth_reg") {
-			$host 										= $astDB->escape($_REQUEST['reg_host']);
-			$username 									= $astDB->escape($_REQUEST['username']);
-			$password 									= $astDB->escape($_REQUEST['password']);
-			$reg_port 									= $astDB->escape($_REQUEST['reg_port']);
+			$host 										= $astDB->escape(($_REQUEST['reg_host'] ?? ''));
+			$username 									= $astDB->escape(($_REQUEST['username'] ?? ''));
+			$password 									= $astDB->escape(($_REQUEST['password'] ?? ''));
+			$reg_port 									= $astDB->escape(($_REQUEST['reg_port'] ?? ''));
 		}
 		
-		$codecs											= $_REQUEST['codecs'];
-		$dtmf											= $astDB->escape($_REQUEST['dtmf']);
-		$custom_dtmf									= $astDB->escape($_REQUEST['custom_dtmf']);
-		$dialprefix										= $astDB->escape($_REQUEST['dialprefix']);
-		$protocol										= $astDB->escape($_REQUEST['protocol']);
-		$server_ip										= $astDB->escape($_REQUEST['manual_server_ip']);
+		$codecs											= ($_REQUEST['codecs'] ?? '');
+		$dtmf											= $astDB->escape(($_REQUEST['dtmf'] ?? ''));
+		$custom_dtmf									= $astDB->escape(($_REQUEST['custom_dtmf'] ?? ''));
+		$dialprefix										= $astDB->escape(($_REQUEST['dialprefix'] ?? ''));
+		$protocol										= $astDB->escape(($_REQUEST['protocol'] ?? ''));
+		$server_ip										= $astDB->escape(($_REQUEST['manual_server_ip'] ?? ''));
 		
 		if ($protocol != "CUSTOM") {
 			$registration_string 						= "";
@@ -82,11 +82,11 @@
 			$account_entry 								.= "[".$carrier_id."]\r\n";
 			$account_entry 								.= "disallow=all\r\n";
 			
-			if (in_array("GSM", $codecs)) { 
+			if (in_array("GSM", (is_array($codecs) ? $codecs : []))) { 
 				$account_entry 							.= "allow=gsm\r\n"; 
 			}
 			
-			if (in_array("ULAW", $codecs)) { 
+			if (in_array("ULAW", (is_array($codecs) ? $codecs : []))) { 
 				$account_entry 							.= "allow=ulaw\r\n";
 			}
 			
@@ -109,11 +109,11 @@
 				$account_entry 							.= "secret=".$password."\r\n";
 			}
 			
-			if (in_array("ALAW", $codecs)) { 
+			if (in_array("ALAW", (is_array($codecs) ? $codecs : []))) { 
 				$account_entry 							.= "allow=alaw\r\n"; 
 			}
 			
-			if (in_array("G729", $codecs)) { 
+			if (in_array("G729", (is_array($codecs) ? $codecs : []))) { 
 				$account_entry 							.= "allow=g729\r\n"; 
 			}
 			
@@ -125,17 +125,17 @@
 			$dialplan_entry 							.= "exten => _". $dialprefix .".,3,Hangup";
 			
 		} else {
-			$protocol									= $astDB->escape($_REQUEST['cust_protocol']);
-			$registration_string						= $astDB->escape($_REQUEST['registration_string']);
-			$account_entry								= $astDB->escape($_REQUEST['account_entry']);
-			$globals_string								= $astDB->escape($_REQUEST['globals_string']);
-			$dialplan_entry								= $astDB->escape($_REQUEST['dialplan_entry']);
+			$protocol									= $astDB->escape(($_REQUEST['cust_protocol'] ?? ''));
+			$registration_string						= $astDB->escape(($_REQUEST['registration_string'] ?? ''));
+			$account_entry								= $astDB->escape(($_REQUEST['account_entry'] ?? ''));
+			$globals_string								= $astDB->escape(($_REQUEST['globals_string'] ?? ''));
+			$dialplan_entry								= $astDB->escape(($_REQUEST['dialplan_entry'] ?? ''));
 		}		
 	}
 		
 	if ($carrier_type == "copy") {
-		$server_ip										= $astDB->escape($_REQUEST['copy_server_ip']);
-		$source_carrier									= $astDB->escape($_REQUEST['source_carrier']);
+		$server_ip										= $astDB->escape(($_REQUEST['copy_server_ip'] ?? ''));
+		$source_carrier									= $astDB->escape(($_REQUEST['source_carrier'] ?? ''));
 	}
 	
 	$defProtocol 										= [ "SIP", "Zap", "IAX2", "EXTERNAL" ];	
@@ -162,11 +162,11 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Carrier Name."
 		];
-	} elseif (!in_array($active,$defActive) && $active != null && $carrier_type != "justgo") {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null && $carrier_type != "justgo") {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($protocol,$defProtocol) && $protocol != null && $carrier_type != "justgo") {
+	} elseif (!in_array($protocol, (is_array($defProtocol) ? $defProtocol : [])) && $protocol != null && $carrier_type != "justgo") {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only."
 		];

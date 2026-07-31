@@ -23,7 +23,7 @@
 
     include_once (__DIR__ . "/goAPI.php");
  
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

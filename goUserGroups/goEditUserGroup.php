@@ -23,14 +23,14 @@
     include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
-    $user_group 										= $astDB->escape($_REQUEST['user_group']);
-    $group_name 										= $astDB->escape($_REQUEST['group_name']);
-    $group_level 										= $astDB->escape($_REQUEST['group_level']);
-    $allowed_campaigns 									= $_REQUEST['allowed_campaigns'];
-    $allowed_usergroups 								= $_REQUEST['allowed_usergroups'];
-	$permissions										= $_REQUEST['permissions'];
-    $forced_timeclock_login 							= strtoupper((string) $astDB->escape($_REQUEST['forced_timeclock_login']));
-    $shift_enforcement 									= strtoupper((string) $astDB->escape($_REQUEST['shift_enforcement']));
+    $user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+    $group_name 										= $astDB->escape(($_REQUEST['group_name'] ?? ''));
+    $group_level 										= $astDB->escape(($_REQUEST['group_level'] ?? ''));
+    $allowed_campaigns 									= ($_REQUEST['allowed_campaigns'] ?? '');
+    $allowed_usergroups 								= ($_REQUEST['allowed_usergroups'] ?? '');
+	$permissions										= ($_REQUEST['permissions'] ?? '');
+    $forced_timeclock_login 							= strtoupper((string) $astDB->escape(($_REQUEST['forced_timeclock_login'] ?? '')));
+    $shift_enforcement 									= strtoupper((string) $astDB->escape(($_REQUEST['shift_enforcement'] ?? '')));
 
     // Defaul Values
     $defFTL 											= [ "Y", "N", "ADMIN_EXEMPT" ];	
@@ -65,11 +65,11 @@
         $apiresults 									= [
 			"result" 										=> "Error: Group Level Value should be in between 1 and 9"
 		];
-    } elseif (!in_array($forced_timeclock_login,$defFTL) && $forced_timeclock_login != null) {
+    } elseif (!in_array($forced_timeclock_login, (is_array($defFTL) ? $defFTL : [])) && $forced_timeclock_login != null) {
         $apiresults 									= [
 			"result" 										=> "Error: Default value for forced_timeclock_login is Y, N or ADMIN_EXEMPT only."
 		];
-    } elseif (!in_array($shift_enforcement,$defSE) && $shift_enforcement != null) {
+    } elseif (!in_array($shift_enforcement, (is_array($defSE) ? $defSE : [])) && $shift_enforcement != null) {
         $apiresults	 									= [
 			"result" 										=> "Error: Default value for shift_enforcement is OFF, START or ALL only."
 		];

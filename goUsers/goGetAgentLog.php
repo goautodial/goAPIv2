@@ -24,10 +24,10 @@
     include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-    $user 												= $astDB->escape($_REQUEST['user']);
-    $start_date 										= $astDB->escape($_REQUEST['start_date']);
-	$end_date 											= $astDB->escape($_REQUEST['end_date']);
-	$agentlog 											= $astDB->escape($_REQUEST['agentlog']);
+    $user 												= $astDB->escape(($_REQUEST['user'] ?? ''));
+    $start_date 										= $astDB->escape(($_REQUEST['start_date'] ?? ''));
+	$end_date 											= $astDB->escape(($_REQUEST['end_date'] ?? ''));
+	$agentlog 											= $astDB->escape(($_REQUEST['agentlog'] ?? ''));
 
     // Check user_id if its null or empty
 	if (empty($goUser) || is_null($goUser)) {

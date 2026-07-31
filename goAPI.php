@@ -64,7 +64,7 @@
     $log_user     = $session_user ?? '';
     $log_group    = go_get_groupid($session_user ?? '', $astDB);
     $log_ip       = $astDB->escape($_REQUEST['log_ip'] ?? '');
-    $goUser       = $astDB->escape($_REQUEST['goUser']);
+    $goUser       = $astDB->escape(($_REQUEST['goUser'] ?? ''));
     $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
 
     define('DEFAULT_USERS', ['VDAD','VDCL', 'goAPI']);
@@ -124,7 +124,7 @@
     ob_start();
     header("Access-Control-Allow-Origin: *");
 
-	if (isset($apiresults) && count($apiresults)) {
+	if (isset($apiresults) && (is_countable($apiresults) ? count($apiresults) : 0)) {
 		if ($userResponseType == "json") {
 			$apiresults = json_encode( $apiresults );
 			echo $apiresults;

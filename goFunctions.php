@@ -281,7 +281,7 @@
 
                         //iterate thru array closer_camp to separate merged closer campaignsi
                         $imploded = implode(" ", $closer_camp);
-                        $exploded = explode(" ", $imploded);
+                        $exploded = explode(" ", (string) ($imploded ?? ''));
 			$allCloserCampaigns = "'".implode("','",$exploded)."'";
 		}else{
 			$resultsu = $astDB
@@ -289,7 +289,7 @@
 				->orderBy("campaign_id")
 				->getValue("vicidial_campaigns", "trim(closer_campaigns)");
 
-			if (count($resultsu) > 0) {
+			if ((is_countable($resultsu) ? count($resultsu) : 0) > 0) {
 			//$fresults = $resultsu['qresult'];
 				$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
 				$allCloserCampaigns = "'".implode("','",$closerCampaigns)."'";
@@ -337,7 +337,7 @@
     				echo "<{$lastk}>\n";
     			}
     			else {
-    				if (( !is_numeric( key( $v ) ) && count( $v ) )) {
+    				if (( !is_numeric( key( $v ) ) && (is_countable($v) ? count($v) : 0) )) {
     					echo "<{$k}>\n";
     				}
     			}
@@ -350,7 +350,7 @@
     			}
 
 
-    			if (( !is_numeric( key( $v ) ) && count( $v ) )) {
+    			if (( !is_numeric( key( $v ) ) && (is_countable($v) ? count($v) : 0) )) {
     				echo "</{$k}>\n";
     				continue;
     			}
@@ -463,7 +463,7 @@
                 // $lastLine = exec('/usr/share/goautodial/goautodialc.pl '.escapeshellarg($asteriskCommand), $asteriskVars);
                 // if (strlen($asteriskVars[1]) < 1) {
                 //     foreach ($asteriskVars as $vars) {
-                //         $list = explode(':', $vars);
+                //         $list = explode(':', (string) ($vars ?? ''));
                 //         if (trim($list[0]) == "Status" && preg_match('/^OK/', trim($list[1]))) {
                 //             return true;
                 //         }
@@ -1893,7 +1893,7 @@
 
             $user_group_array = explode(",",(string) $goUser_group);
 
-            if(in_array($usergroup, $user_group_array)){
+            if(in_array($usergroup, (is_array($user_group_array) ? $user_group_array : []))){
                 $result = 1;
             }
             return $result;

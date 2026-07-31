@@ -31,15 +31,15 @@
 	//error_reporting(E_ALL);
 
 	$thefile = $_FILES['goFileMe']['tmp_name'];
-	$theList = $astDB->escape($_REQUEST["goListId"]);
-	$goDupcheck = $astDB->escape($_REQUEST["goDupcheck"]);
+	$theList = $astDB->escape(($_REQUEST["goListId"] ?? ''));
+	$goDupcheck = $astDB->escape(($_REQUEST["goDupcheck"] ?? ''));
 	$goCountInsertedLeads = 0;
 	$default_delimiter = ",";
-	$phone_code_override = $astDB->escape($_REQUEST["phone_code_override"]);
+	$phone_code_override = $astDB->escape(($_REQUEST["phone_code_override"] ?? ''));
 
 	$lead_mapping = NULL;
 	if(!empty($_REQUEST["lead_mapping"]))	
-		$lead_mapping = $astDB->escape($_REQUEST["lead_mapping"]);
+		$lead_mapping = $astDB->escape(($_REQUEST["lead_mapping"] ?? ''));
 
 	$alex = [];
 	$goGetCheckcustomFieldNamesCorrect = ""; //constant
@@ -53,9 +53,9 @@
 
 	// REPLACE DELIMITER to SEMI-COLON -- CUSTOMIZATION!!!!!
 	if(!empty($_REQUEST["custom_delimiter"]) && isset($_REQUEST["custom_delimiter"])){
-		//$default_delimiter = $_REQUEST["custom_delimiter"];
+		//$default_delimiter = ($_REQUEST["custom_delimiter"] ?? '');
 
-		$delimiters = explode(" ", $_REQUEST["custom_delimiter"]);
+		$delimiters = explode(" ", ($_REQUEST["custom_delimiter"] ?? ''));
 		$str = file_get_contents($csv_file);
 		$str1 = str_replace($delimiters, $default_delimiter, $str); 
 		file_put_contents($csv_file, $str1);
@@ -93,10 +93,10 @@
 		//$array 21 last column
 
 		//for custom fields start GLOBAL varaibles
-		$goCountTheHeader = count($getHeder);
+		$goCountTheHeader = (is_countable($getHeder) ? count($getHeder) : 0);
 
 		if($goCountTheHeader > 21 && !empty($lead_mapping)) {
-			$counter = count($getHeder);
+			$counter = (is_countable($getHeder) ? count($getHeder) : 0);
             for($x=21; $x < $counter; $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
 				$goGetLastCustomFiledsName .= $getHeder[$x].","; #get the digits for specific custom field
@@ -108,7 +108,7 @@
 			$goGetLastCustomFiledsName2 = explode(",",$goGetLastCustomFiledsName);
 
 		} elseif($goCountTheHeader > 21) {
-			$counter = count($getHeder);
+			$counter = (is_countable($getHeder) ? count($getHeder) : 0);
             for($x=21; $x < $counter; $x++) {
 				$goGetLastHeader .= $x.","; #get digits for specific data
 				$goGetLastCustomFiledsName .= $getHeder[$x].","; #get the digits for specific custom field
@@ -131,7 +131,7 @@
 
 
 		while (($data = fgetcsv($handle, 1000, $default_delimiter, escape: '\\')) !== FALSE) {
-			$num = count($data);
+			$num = (is_countable($data) ? count($data) : 0);
 
 			for ($c=0; $c < $num; $c++) {
 				$col[$c] = $data[$c];
@@ -177,14 +177,14 @@
 
 			// LEAD MAPPING -- CUSTOMIZATION!!!!!
 			if(!empty($lead_mapping)){
-				$lead_mapping_data = explode(",",$_REQUEST["lead_mapping_data"]);
-				$lead_mapping_fields = explode(",", $_REQUEST["lead_mapping_fields"]);
+				$lead_mapping_data = explode(",",($_REQUEST["lead_mapping_data"] ?? ''));
+				$lead_mapping_fields = explode(",", ($_REQUEST["lead_mapping_fields"] ?? ''));
 				$standard_fields = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
-                $counter = count($lead_mapping_fields);
+                $counter = (is_countable($lead_mapping_fields) ? count($lead_mapping_fields) : 0);
 				// MAKE MAP FIELDS AN INDEX OF MAP DATA & SEPARATE STANDARD FROM CUSTOM ARRAYS
 
 				for($l=0; $l < $counter;$l++){
-					if(in_array($lead_mapping_fields[$l], $standard_fields))
+					if(in_array($lead_mapping_fields[$l], (is_array($standard_fields) ? $standard_fields : [])))
 						$standard_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
 					else
 						$custom_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
@@ -358,7 +358,7 @@
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
 
 							if($countResultrsltgoShowCustomFields > 1) {
-								$totalExplode = count($goGetLastHeader2);
+								$totalExplode = (is_countable($goGetLastHeader2) ? count($goGetLastHeader2) : 0);
 
 								$goCustomValuesData = [];
 								$goCustomUpdateData = [];
@@ -489,7 +489,7 @@
 								$countResultrsltgoShowCustomFields = $astDB->getRowCount();
 
 								if($countResultrsltgoShowCustomFields > 1) {
-									$totalExplode = count($goGetLastHeader2);
+									$totalExplode = (is_countable($goGetLastHeader2) ? count($goGetLastHeader2) : 0);
 									$goCustomValuesData = [];
 																		$goCustomUpdateData = [];
 
@@ -622,7 +622,7 @@
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
 
 							if($countResultrsltgoShowCustomFields > 1) {
-								$totalExplode = count($goGetLastHeader2);
+								$totalExplode = (is_countable($goGetLastHeader2) ? count($goGetLastHeader2) : 0);
 
 								$goCustomValuesData = [];
 	                                                        $goCustomUpdateData = [];
@@ -745,7 +745,7 @@
 						$countResultrsltgoShowCustomFields = $astDB->getRowCount();
 
 						if($countResultrsltgoShowCustomFields > 1) {
-							$totalExplode = count($goGetLastHeader2);
+							$totalExplode = (is_countable($goGetLastHeader2) ? count($goGetLastHeader2) : 0);
 
 							$goCustomValuesData = [];
 							$goCustomUpdateData = [];

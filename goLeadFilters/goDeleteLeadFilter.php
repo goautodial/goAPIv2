@@ -23,13 +23,13 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-	$lead_filter_id = $astDB->escape($_REQUEST['lead_filter_id']);
+	$lead_filter_id = $astDB->escape(($_REQUEST['lead_filter_id'] ?? ''));
 
     ### Check lead filter ID if its null or empty
 	if($lead_filter_id == null) { 
 		$apiresults = ["result" => "Error: Set a value for Lead Filter ID."]; 
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "";

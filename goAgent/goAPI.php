@@ -107,7 +107,7 @@ $loginDATE = date("Ymd");
 $CIDdate = date("mdHis");
 $ENTRYdate = date("YmdHis");
 
-if ($_REQUEST['debugX']) {
+if (($_REQUEST['debugX'] ?? '')) {
     var_dump($NOW_TIME, $tz);
     die();
 }
@@ -202,7 +202,7 @@ ob_start();
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Max-Age: 1000');
-if (count($APIResult)) {
+if ((is_countable($APIResult) ? count($APIResult) : 0)) {
     if ($userResponseType == "json") {
         $APIResult = json_encode( $APIResult );
         echo $APIResult;

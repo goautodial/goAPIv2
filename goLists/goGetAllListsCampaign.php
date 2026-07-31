@@ -24,7 +24,7 @@
     include_once (__DIR__ . "/goAPI.php");
 
 	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

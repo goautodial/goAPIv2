@@ -24,23 +24,23 @@
     include_once (__DIR__ . "/goAPI.php");
 
 	// POST or GET Variables
-    $group_id 									= $astDB->escape($_REQUEST['group_id']);
-    $group_name 								= $astDB->escape($_REQUEST['group_name']);
-    $group_color 								= $astDB->escape($_REQUEST['group_color']);
-    $active 									= $astDB->escape($_REQUEST['active']);
-    $web_form_address 							= $astDB->escape($_REQUEST['web_form_address']);
-    $voicemail_ext 								= $astDB->escape($_REQUEST['voicemail_ext']);
-    $next_agent_call 							= $astDB->escape($_REQUEST['next_agent_call']);
-    $fronter_display 							= $astDB->escape($_REQUEST['fronter_display']);
-    $ingroup_script 							= $astDB->escape($_REQUEST['ingroup_script']);
-    $get_call_launch 							= $astDB->escape($_REQUEST['get_call_launch']);
+    $group_id 									= $astDB->escape(($_REQUEST['group_id'] ?? ''));
+    $group_name 								= $astDB->escape(($_REQUEST['group_name'] ?? ''));
+    $group_color 								= $astDB->escape(($_REQUEST['group_color'] ?? ''));
+    $active 									= $astDB->escape(($_REQUEST['active'] ?? ''));
+    $web_form_address 							= $astDB->escape(($_REQUEST['web_form_address'] ?? ''));
+    $voicemail_ext 								= $astDB->escape(($_REQUEST['voicemail_ext'] ?? ''));
+    $next_agent_call 							= $astDB->escape(($_REQUEST['next_agent_call'] ?? ''));
+    $fronter_display 							= $astDB->escape(($_REQUEST['fronter_display'] ?? ''));
+    $ingroup_script 							= $astDB->escape(($_REQUEST['ingroup_script'] ?? ''));
+    $get_call_launch 							= $astDB->escape(($_REQUEST['get_call_launch'] ?? ''));
     // $web_form_address_two 					= "";
     // $start_call_url 							= "";
     // $dispo_call_url 							= "";
     // $add_lead_url 							= "";
     // $uniqueid_status_prefix 							= "";
     // $call_time_id 							= "";
-    $user_group 								= $_REQUEST['user_group'];
+    $user_group 								= ($_REQUEST['user_group'] ?? '');
 
 
     // Default values 
@@ -89,19 +89,19 @@
 		$apiresults 							= [
 			"result" 								=> "Error: Special characters found in group_color must not be empty"
 		];
-	} elseif (!in_array($active,$defActive)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : []))) {
 		$apiresults 							= [
 			"result" 								=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($fronter_display,$deffronter_display)) {
+	} elseif (!in_array($fronter_display, (is_array($deffronter_display) ? $deffronter_display : []))) {
 		$apiresults 							= [
 			"result" 								=> "Error: Default value for fronter_display is Y or N only."
 		];
-	} elseif (!in_array($get_call_launch,$defget_call_launch)) {
+	} elseif (!in_array($get_call_launch, (is_array($defget_call_launch) ? $defget_call_launch : []))) {
 		$apiresults 							= [
 			"result" 								=> "Error: Default value for get_call_launch is NONE, SCRIPT, WEBFORM, WEBFORMTWO, FORM or EMAIL only."
 		];
-	} elseif (!in_array($next_agent_call,$defnext_agent_call)) {
+	} elseif (!in_array($next_agent_call, (is_array($defnext_agent_call) ? $defnext_agent_call : []))) {
 		$apiresults 							= [
 			"result" 								=> "Error: Default value for next_agent_call is fewest_calls_campaign, longest_wait_time, ring_all, random, oldest_call_start, oldest_call_finish, overall_user_level, inbound_group_rank, campaign_rank or fewest_calls only."
 		];

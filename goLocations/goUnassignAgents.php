@@ -23,7 +23,7 @@
 if (isset($_GET['unassigned'])) { $unassigned = $_GET['unassigned']; }
     else if (isset($_POST['unassigned'])) { $unassigned = $_POST['unassigned']; }
 
-if (isset($unassigned) && count($unassigned) > 0) {
+if (isset($unassigned) && (is_countable($unassigned) ? count($unassigned) : 0) > 0) {
 	foreach ($unassigned as $unassign) {
 		$astDB->where('id', $unassign);
 		$astDB->delete('vicidial_campaign_agents');

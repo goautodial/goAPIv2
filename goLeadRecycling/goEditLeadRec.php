@@ -23,11 +23,11 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
  // POST or GET Variables
-	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-	$status = $astDB->escape($_REQUEST['status']);
-	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
-	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
-	$active = $astDB->escape(strtoupper($_REQUEST['active']));
+	$campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$status = $astDB->escape(($_REQUEST['status'] ?? ''));
+	$attempt_delay = $astDB->escape(($_REQUEST['attempt_delay'] ?? ''));
+	$attempt_maximum = $astDB->escape(($_REQUEST['attempt_maximum'] ?? ''));
+	$active = $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
 
  // Default values
  $defActive = ['N','Y'];
@@ -42,10 +42,10 @@ if(empty($campaign_id) || empty($session_user) || empty($status)) {
  $apiresults = ["result" => "Error: Special characters found in Attempt Delay and must not be empty"];
 } elseif(strlen((string) $attempt_maximum) > 3 || preg_match("/[\'^£$%&*()}{@#~?><>,|=_+¬-]/", (string) $attempt_maximum)){
  $apiresults = ["result" => "Error: Special characters found in Attempt Maximum and must not be empty"];
-} elseif(!in_array($active, $defActive) && !empty($active)) {
+} elseif(!in_array($active, (is_array($defActive) ? $defActive : [])) && !empty($active)) {
  $apiresults = ["result" => "Error: Default value for active is N for No and Y for Yes only."];
 } else {
-	$groupId = go_get_groupid($session_user);
+	$groupId = go_get_groupid($session_user, $astDB);
  $check_usergroup = go_check_usergroup_campaign($astDB, $groupId, $campaign_id);
 
 	if($check_usergroup > 0){

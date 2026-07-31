@@ -25,8 +25,8 @@
 
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
-	$request 										= $astDB->escape($_REQUEST['request']);
+	$campaign_id 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+	$request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
 	$limit											= 100;
     
 	// Error Checking
@@ -409,7 +409,7 @@
                                         $m = 0;
 
                                         while ($m < $k) {
-                                                $sort_split = explode("-----",$TOPsort[$m]);
+                                                $sort_split = explode("-----", (string) ($TOPsort[$m] ?? ''));
                                                 $i = $sort_split[1];
                                                 $sort_order[$m] = "$i";
 
@@ -563,7 +563,7 @@
 
                                 // BEGIN loop through each user //
                                 $m = 0;
-                                $Suser_ct = count($usersARY);
+                                $Suser_ct = (is_countable($usersARY) ? count($usersARY) : 0);
                                 $TOTtotNONPAUSE = 0;
                                 $TOTtotTOTAL = 0;
 

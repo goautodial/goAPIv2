@@ -24,10 +24,10 @@
 	include_once (__DIR__ . "/goAPI.php");
 
 	$log_user = $session_user;
-	$log_group = go_get_groupid($session_user);
+	$log_group = go_get_groupid($session_user, $astDB);
 
 	if (isset($_REQUEST['limit'])) {
-			$limit = $astDB->escape($_REQUEST['limit']);
+			$limit = $astDB->escape(($_REQUEST['limit'] ?? ''));
 	} else { $limit = 100; }
 
     if(!isset($session_user) || is_null($session_user)){

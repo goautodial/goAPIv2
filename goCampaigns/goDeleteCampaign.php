@@ -25,10 +25,12 @@
     include_once( __DIR__ . "/goAPI.php" );
 
     $allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
-	$campaign_ids 										= $_REQUEST["campaign_id"];
-	$action 											= $astDB->escape( $_REQUEST["action"] );
-	
-	
+	$campaign_ids 										= ($_REQUEST["campaign_id"] ?? '');
+	$campaign_id 										= is_array($campaign_ids) ? $campaign_ids : array_filter(array_map('trim', explode(',', (string) $campaign_ids)));
+	$allowed_campaigns 							= is_array($allowed_campaigns) ? $allowed_campaigns : [];
+	$action 											= $astDB->escape( ($_REQUEST["action"] ?? '') );
+
+
     // Check campaign_id if its null or empty
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -42,7 +44,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
 		];
-	}  elseif (empty($campaign_ids) || is_null($campaign_ids)) {
+	}  elseif (empty($campaign_id)) {
 		$err_msg 										= error_handle("40001");
         $apiresults 									= [
 			"code" 											=> "40001",
@@ -54,55 +56,60 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
-			if ( !array_diff( $campaign_id, $allowed_campaigns ) ) {				
-				$astDB->where( "campaign_id", $campaign_ids, "IN" );
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			if ( !array_diff( $campaign_id, $allowed_campaigns ) ) {
+				$campaignLabel = implode(', ', $campaign_id);
+
+				$astDB->where( "campaign_id", $campaign_id, "IN" );
 				$astDB->getOne( "vicidial_campaigns", "campaign_id" );
-				
-				if ( $astDB->count > 0 ) {					
-					$astDB->where( "campaign_id", $campaign_ids, "IN" );
-					$astDB->delete( "vicidial_campaigns" );					
-					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );
-					
-					$astDB->where( "campaign_id", $campaign_ids, "IN" );
-					$astDB->delete( "vicidial_campaign_statuses" );					
-					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Dispositions in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );
-					
-					$astDB->where( "campaign_id", $campaign_ids, "IN" );
-					$goDB->delete( "vicidial_lead_recycle" );					
-					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Recycles in Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );					
-					
-					$astDB->where( "campaign_id", $campaign_ids, "IN" );
+
+				if ( $astDB->count > 0 ) {
+					$astDB->where( "campaign_id", $campaign_id, "IN" );
+					$astDB->delete( "vicidial_campaigns" );
+					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Campaign ID: $campaignLabel", $log_group, $astDB->getLastQuery() );
+
+					$astDB->where( "campaign_id", $campaign_id, "IN" );
+					$astDB->delete( "vicidial_campaign_statuses" );
+					$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Dispositions in Campaign ID: $campaignLabel", $log_group, $astDB->getLastQuery() );
+
+					$leadRecycleTable = $astDB->rawQuery("SHOW TABLES LIKE 'vicidial_lead_recycle'");
+					if (!empty($leadRecycleTable)) {
+						$astDB->where( "campaign_id", $campaign_id, "IN" );
+						$astDB->delete( "vicidial_lead_recycle" );
+						$log_id 							= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Lead Recycles in Campaign ID: $campaignLabel", $log_group, $astDB->getLastQuery() );
+					}
+
+					$astDB->where( "campaign_id", $campaign_id, "IN" );
 					$astDB->delete( "vicidial_campaign_cid_areacodes" );
-					$log_id								= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Areacodes with Campaign ID: $campaign_id", $log_group, $astDB->getLastQuery() );	
-			
+					$log_id								= log_action( $goDB, 'DELETE', $log_user, $log_ip, "Deleted Areacodes with Campaign ID: $campaignLabel", $log_group, $astDB->getLastQuery() );
+
 					$apiresults 						= [
 						"result" 							=> "success"
 					];
 				} else {
 					$err_msg 							= error_handle( "10109" );
 					$apiresults 						= [
-						"code" 								=> "10109", 
+						"code" 								=> "10109",
 						"result" 							=> "Error: Campaign doesn't exist."
 					];
 				}
 			} else {
 				$err_msg 								= error_handle( "10001", "Insufficient permision" );
 				$apiresults 							= [
-					"code" 									=> "10001", 
+					"code" 									=> "10001",
 					"result" 								=> $err_msg
-				];			
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

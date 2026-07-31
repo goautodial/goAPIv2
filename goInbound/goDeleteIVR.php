@@ -24,7 +24,7 @@
     include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-    $menu_id 									= $astDB->escape($_REQUEST['menu_id']);
+    $menu_id 									= $astDB->escape(($_REQUEST['menu_id'] ?? ''));
 	
 	if (empty($log_user) || is_null($log_user)) {
 		$apiresults 							= [

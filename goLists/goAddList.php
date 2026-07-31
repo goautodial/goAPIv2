@@ -24,12 +24,12 @@
     include_once (__DIR__ . "/goAPI.php");
 	
 	// POST or GET Variables
-	$list_id 											= $astDB->escape($_REQUEST['list_id']);
-	$list_name 											= $astDB->escape($_REQUEST['list_name']);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$active 											= $astDB->escape($_REQUEST['active']);
-	$list_description 									= $astDB->escape($_REQUEST['list_description']);
-	$ip_address 										= $astDB->escape($_REQUEST['hostname']);
+	$list_id 											= $astDB->escape(($_REQUEST['list_id'] ?? ''));
+	$list_name 											= $astDB->escape(($_REQUEST['list_name'] ?? ''));
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
+	$list_description 									= $astDB->escape(($_REQUEST['list_description'] ?? ''));
+	$ip_address 										= $astDB->escape(($_REQUEST['hostname'] ?? ''));
 
     // Default values 
     $defActive 											= ["Y","N"];
@@ -65,7 +65,7 @@
 			"code" 											=> "41006", 
 			"result" 										=> $err_msg
 		];
-    } elseif (!in_array($active,$defActive) && $active != null) {
+    } elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
 			"code" 											=> "41006", 

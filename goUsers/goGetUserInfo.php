@@ -24,7 +24,7 @@
     include_once (__DIR__ . "/goAPI.php");
     
 	if(isset($_REQUEST['filter'])){
-		$filter 											= $astDB->escape($_REQUEST['filter']);
+		$filter 											= $astDB->escape(($_REQUEST['filter'] ?? ''));
 	} else { 
 		$filter                                                                                         = "default";
 	}
@@ -59,16 +59,16 @@
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	   
 			if (isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])) {
-				$user_id 								= $astDB->escape($_REQUEST['user_id']);
-				$user 									= $astDB->escape($_REQUEST['user']);
+				$user_id 								= $astDB->escape(($_REQUEST['user_id'] ?? ''));
+				$user 									= $astDB->escape(($_REQUEST['user'] ?? ''));
 			} 
 			
 			if (isset($_REQUEST['user_id'])  && !isset($_REQUEST['user'])) {
-				$user_id 								= $astDB->escape($_REQUEST['user_id']);
+				$user_id 								= $astDB->escape(($_REQUEST['user_id'] ?? ''));
 			} 
 			
 			if (!isset($_REQUEST['user_id'])  && isset($_REQUEST['user'])) {
-				$user									= $astDB->escape($_REQUEST['user']);
+				$user									= $astDB->escape(($_REQUEST['user'] ?? ''));
 			}
 			
 			if (!empty($user_id) && empty($user)) { // Am I (agent/user) alive in whole system?

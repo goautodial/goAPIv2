@@ -736,7 +736,7 @@ class MySQLiDB {
         $allowedTypes = ['LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER'];
         $joinType = strtoupper(trim($joinType));
 
-        if ($joinType && !in_array($joinType, $allowedTypes)) {
+        if ($joinType && !in_array($joinType, (is_array($allowedTypes) ? $allowedTypes : []))) {
             die ('Wrong JOIN type: '.$joinType);
         }
 
@@ -866,7 +866,7 @@ class MySQLiDB {
         $orderbyDirection = strtoupper(trim((string) $orderbyDirection));
         $orderByField = preg_replace("/[^-a-z0-9\.\(\),_]+/i",'', $orderByField);
 
-        if ($orderbyDirection === '' || $orderbyDirection === '0' || !in_array($orderbyDirection, $allowedDirection)) {
+        if ($orderbyDirection === '' || $orderbyDirection === '0' || !in_array($orderbyDirection, (is_array($allowedDirection) ? $allowedDirection : []))) {
             die ('Wrong order direction: '.$orderbyDirection);
         }
 

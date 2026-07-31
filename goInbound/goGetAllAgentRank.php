@@ -25,8 +25,8 @@
     include_once (__DIR__ . "/goAPI.php");
 
     $limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
-    $ingroup_id 										= $astDB->escape($_REQUEST['group_id']);
-    $find_user 											= $astDB->escape($_REQUEST['findUser']);
+    $ingroup_id 										= $astDB->escape(($_REQUEST['group_id'] ?? ''));
+    $find_user 											= $astDB->escape(($_REQUEST['findUser'] ?? ''));
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

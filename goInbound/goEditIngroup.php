@@ -24,44 +24,44 @@
     include_once (__DIR__ . "/goAPI.php");
 	
     // POST or GET Variables
-    $group_id 										= $astDB->escape($_REQUEST['group_id']);
-    $group_name 									= $astDB->escape($_REQUEST['group_name']);
-    $group_color 									= $astDB->escape($_REQUEST['group_color']);
-    $active 										= $astDB->escape($_REQUEST['active']);
-    $web_form_address 								= $astDB->escape($_REQUEST['web_form_address']);
-    $next_agent_call 								= $astDB->escape($_REQUEST['next_agent_call']);
-    $fronter_display 								= $astDB->escape($_REQUEST['fronter_display']);
-    $ingroup_script 								= $astDB->escape($_REQUEST['ingroup_script']);
-	$queue_priority 								= $astDB->escape($_REQUEST['queue_priority']);
-	$call_time_id 									= $astDB->escape($_REQUEST['call_time_id']);
+    $group_id 										= $astDB->escape(($_REQUEST['group_id'] ?? ''));
+    $group_name 									= $astDB->escape(($_REQUEST['group_name'] ?? ''));
+    $group_color 									= $astDB->escape(($_REQUEST['group_color'] ?? ''));
+    $active 										= $astDB->escape(($_REQUEST['active'] ?? ''));
+    $web_form_address 								= $astDB->escape(($_REQUEST['web_form_address'] ?? ''));
+    $next_agent_call 								= $astDB->escape(($_REQUEST['next_agent_call'] ?? ''));
+    $fronter_display 								= $astDB->escape(($_REQUEST['fronter_display'] ?? ''));
+    $ingroup_script 								= $astDB->escape(($_REQUEST['ingroup_script'] ?? ''));
+	$queue_priority 								= $astDB->escape(($_REQUEST['queue_priority'] ?? ''));
+	$call_time_id 									= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
 	
 	// ADVANCED SETTINGS 
-	$drop_call_seconds 								= $astDB->escape($_REQUEST['drop_call_seconds']);
-	$drop_action 									= $astDB->escape($_REQUEST['drop_action']);
-	$drop_exten 									= $astDB->escape($_REQUEST['drop_exten']);
-	$voicemail_ext 									= $astDB->escape($_REQUEST['voicemail_ext']);
-	$drop_inbound_group 							= $astDB->escape($_REQUEST['drop_inbound_group']);
-	$drop_callmenu 									= $astDB->escape($_REQUEST['drop_callmenu']);
-	$after_hours_action 							= $astDB->escape($_REQUEST['after_hours_action']);
-	$after_hours_voicemail 							= $astDB->escape($_REQUEST['after_hours_voicemail']);
-	$after_hours_exten 								= $astDB->escape($_REQUEST['after_hours_exten']);
-	$after_hours_message_filename 					= $astDB->escape($_REQUEST['after_hours_message_filename']);
-	$after_hours_callmenu 							= $astDB->escape($_REQUEST['after_hours_callmenu']);
-	//afterhours_xfer_group 						= $astDB->escape($_REQUEST['afterhours_xfer_group']);
-	$get_call_launch 								= $astDB->escape($_REQUEST['get_call_launch']);
-	$no_agent_no_queue 								= $astDB->escape($_REQUEST['no_agent_no_queue']);
-	$no_agent_action 								= $astDB->escape($_REQUEST['no_agent_action']);
-	$no_agents_exten 								= $astDB->escape($_REQUEST['no_agents_exten']);
-	$no_agents_voicemail 							= $astDB->escape($_REQUEST['no_agents_voicemail']);
-	$no_agents_ingroup 								= $astDB->escape($_REQUEST['no_agents_ingroup']);
-	$no_agents_callmenu 							= $astDB->escape($_REQUEST['no_agents_callmenu']);
-	$no_agents_did	 							= $astDB->escape($_REQUEST['no_agents_did']);
-	$no_agents_extension 							= $astDB->escape($_REQUEST['no_agents_extension']);
-	$no_agents_extension_context						= $astDB->escape($_REQUEST['no_agents_extension_context']);
-	$welcome_message_filename 						= $astDB->escape($_REQUEST['welcome_message_filename']);
-	$play_welcome_message 							= $astDB->escape($_REQUEST['play_welcome_message']);
-	$moh_context 									= $astDB->escape($_REQUEST['moh_context']);
-	$onhold_prompt_filename 						= $astDB->escape($_REQUEST['onhold_prompt_filename']);
+	$drop_call_seconds 								= $astDB->escape(($_REQUEST['drop_call_seconds'] ?? ''));
+	$drop_action 									= $astDB->escape(($_REQUEST['drop_action'] ?? ''));
+	$drop_exten 									= $astDB->escape(($_REQUEST['drop_exten'] ?? ''));
+	$voicemail_ext 									= $astDB->escape(($_REQUEST['voicemail_ext'] ?? ''));
+	$drop_inbound_group 							= $astDB->escape(($_REQUEST['drop_inbound_group'] ?? ''));
+	$drop_callmenu 									= $astDB->escape(($_REQUEST['drop_callmenu'] ?? ''));
+	$after_hours_action 							= $astDB->escape(($_REQUEST['after_hours_action'] ?? ''));
+	$after_hours_voicemail 							= $astDB->escape(($_REQUEST['after_hours_voicemail'] ?? ''));
+	$after_hours_exten 								= $astDB->escape(($_REQUEST['after_hours_exten'] ?? ''));
+	$after_hours_message_filename 					= $astDB->escape(($_REQUEST['after_hours_message_filename'] ?? ''));
+	$after_hours_callmenu 							= $astDB->escape(($_REQUEST['after_hours_callmenu'] ?? ''));
+	//afterhours_xfer_group 						= $astDB->escape(($_REQUEST['afterhours_xfer_group'] ?? ''));
+	$get_call_launch 								= $astDB->escape(($_REQUEST['get_call_launch'] ?? ''));
+	$no_agent_no_queue 								= $astDB->escape(($_REQUEST['no_agent_no_queue'] ?? ''));
+	$no_agent_action 								= $astDB->escape(($_REQUEST['no_agent_action'] ?? ''));
+	$no_agents_exten 								= $astDB->escape(($_REQUEST['no_agents_exten'] ?? ''));
+	$no_agents_voicemail 							= $astDB->escape(($_REQUEST['no_agents_voicemail'] ?? ''));
+	$no_agents_ingroup 								= $astDB->escape(($_REQUEST['no_agents_ingroup'] ?? ''));
+	$no_agents_callmenu 							= $astDB->escape(($_REQUEST['no_agents_callmenu'] ?? ''));
+	$no_agents_did	 							= $astDB->escape(($_REQUEST['no_agents_did'] ?? ''));
+	$no_agents_extension 							= $astDB->escape(($_REQUEST['no_agents_extension'] ?? ''));
+	$no_agents_extension_context						= $astDB->escape(($_REQUEST['no_agents_extension_context'] ?? ''));
+	$welcome_message_filename 						= $astDB->escape(($_REQUEST['welcome_message_filename'] ?? ''));
+	$play_welcome_message 							= $astDB->escape(($_REQUEST['play_welcome_message'] ?? ''));
+	$moh_context 									= $astDB->escape(($_REQUEST['moh_context'] ?? ''));
+	$onhold_prompt_filename 						= $astDB->escape(($_REQUEST['onhold_prompt_filename'] ?? ''));
 
     // Default values 
     $defActive 										= ["Y","N"];
@@ -117,19 +117,19 @@
 		$apiresults 								= [
 			"result" 									=> "Error: Special characters found in group_color"
 		];
-	} elseif (!in_array($active,$defActive) && !is_null($active)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && !is_null($active)) {
 	   $apiresults 									= [
 			"result" 									=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($fronter_display,$deffronter_display) && !is_null($fronter_display)) {
+	} elseif (!in_array($fronter_display, (is_array($deffronter_display) ? $deffronter_display : [])) && !is_null($fronter_display)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for fronter_display is Y or N only."
 		];
-	} elseif (!in_array($get_call_launch,$defget_call_launch) && !is_null($get_call_launch)) {
+	} elseif (!in_array($get_call_launch, (is_array($defget_call_launch) ? $defget_call_launch : [])) && !is_null($get_call_launch)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for get_call_launch is NONE, SCRIPT, WEBFORM, WEBFORMTWO, FORM or EMAIL only."
 		];
-	} elseif (!in_array($next_agent_call,$defnext_agent_call) && !is_null($next_agent_call)) {
+	} elseif (!in_array($next_agent_call, (is_array($defnext_agent_call) ? $defnext_agent_call : [])) && !is_null($next_agent_call)) {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for next_agent_call is fewest_calls_campaign, longest_wait_time, ring_all, random, oldest_call_start, oldest_call_finish, overall_user_level, inbound_group_rank, campaign_rank or fewest_calls only."
 		];

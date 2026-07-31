@@ -23,14 +23,14 @@
     include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
-    $group_id = $astDB->escape($_REQUEST['group_id']);
+    $group_id = $astDB->escape(($_REQUEST['group_id'] ?? ''));
     
-    $ip_address = $_REQUEST['hostname'];
+    $ip_address = ($_REQUEST['hostname'] ?? '');
     
 	if(empty($group_id)) { 
 		$apiresults = ["result" => "Error: Set a value for Group ID."]; 
 	} else {
- 		$groupId = go_get_groupid($goUser);
+ 		$groupId = go_get_groupid($goUser, $astDB);
     	$log_user = $goUser;
 		$log_group = $groupId;
 
@@ -38,7 +38,7 @@
 			$exploded = explode(",", (string) $group_id);
 		}
 
-		for($i=0;$i > count($exploded);$i++){
+		for($i=0;$i > (is_countable($exploded) ? count($exploded) : 0);$i++){
 			if (!checkIfTenant($groupId, $goDB)) {
 				$astDB->where("group_id", $exploded[$i]);
 	    		//$ul = "WHERE group_id='$group_id'";

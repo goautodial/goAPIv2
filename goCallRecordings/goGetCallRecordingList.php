@@ -26,10 +26,10 @@
 	$limit 	= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
 	
 	// POST or GET Variables
-	$requestDataPhone = $astDB->escape($_REQUEST['requestDataPhone']);
-	$start_filterdate = $astDB->escape($_REQUEST['start_filterdate']);
-	$end_filterdate = $astDB->escape($_REQUEST['end_filterdate']);
-	$agent_filter = $astDB->escape($_REQUEST['agent_filter']);
+	$requestDataPhone = $astDB->escape(($_REQUEST['requestDataPhone'] ?? ''));
+	$start_filterdate = $astDB->escape(($_REQUEST['start_filterdate'] ?? ''));
+	$end_filterdate = $astDB->escape(($_REQUEST['end_filterdate'] ?? ''));
+	$agent_filter = $astDB->escape(($_REQUEST['agent_filter'] ?? ''));
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {

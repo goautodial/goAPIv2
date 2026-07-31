@@ -120,7 +120,7 @@ if ($is_logged_in) {
         $rslt = $astDB->update('vicidial_live_agents', $updateData);
         $errno = $astDB->getLastError();
         $retry_count = 0;
-        while ( count($errno) > 3 && $retry_count < 9 ) {
+        while ( (is_countable($errno) ? count($errno) : 0) > 3 && $retry_count < 9 ) {
             $astDB->where('user', $user);
             $astDB->where('server_ip', $server_ip);
             $rslt = $astDB->update('vicidial_live_agents', $updateData);
@@ -1157,7 +1157,7 @@ if ($is_logged_in) {
                 $custom_field_names = preg_replace("/^\||\|$/", '', $custom_field_names);
                 $custom_field_names = preg_replace("/\|/", ",", (string) $custom_field_names);
                 $custom_field_names_ARY = explode(',', (string) $custom_field_names);
-                $custom_field_names_ct = count($custom_field_names_ARY);
+                $custom_field_names_ct = (is_countable($custom_field_names_ARY) ? count($custom_field_names_ARY) : 0);
                 $custom_field_names_SQL = $custom_field_names;
 
                 ##### BEGIN grab the data from custom table for the lead_id
@@ -1224,7 +1224,7 @@ if ($is_logged_in) {
                 if ( strlen($SCUoutput) > 4 || preg_match("/minuteswarning/", $VDCL_start_call_url) ) {
                     $minuteswarning = 3; # default to 3
                     if (preg_match("/minuteswarning/",$VDCL_start_call_url)) {
-                        $minuteswarningARY = explode('minuteswarning=', $VDCL_start_call_url);
+                        $minuteswarningARY = explode('minuteswarning=', (string) ($VDCL_start_call_url ?? ''));
                         $minuteswarning = preg_replace('/&.*/', '', $minuteswarningARY[1]);
                     }
                     ### add this to the Start Call URL for callcard calls to be logged "&minuteswarning=1&callcard=1"
@@ -1245,7 +1245,7 @@ if ($is_logged_in) {
                             $ccl_update = $astDB->getRowCount();
                         }
                     } else {
-                        $SCUresponse = explode('durationLimit', $SCUoutput);
+                        $SCUresponse = explode('durationLimit', (string) ($SCUoutput ?? ''));
                         $durationLimit = preg_replace('/\D/', '', $SCUresponse[1]);
                     }
                     if (strlen((string) $durationLimit) < 1) {$durationLimit = 0;}
@@ -1256,11 +1256,11 @@ if ($is_logged_in) {
 
                     $timer_action_destination = '';
                     if (preg_match("/nextstep=/", $VDCL_start_call_url)) {
-                        $nextstepARY = explode('nextstep=', $VDCL_start_call_url);
+                        $nextstepARY = explode('nextstep=', (string) ($VDCL_start_call_url ?? ''));
                         $nextstep = preg_replace("/&.*/", '', $nextstepARY[1]);
-                        $nextmessageARY = explode('nextmessage=', $VDCL_start_call_url);
+                        $nextmessageARY = explode('nextmessage=', (string) ($VDCL_start_call_url ?? ''));
                         $nextmessage = preg_replace("/&.*/", '', $nextmessageARY[1]);
-                        $destinationARY = explode('destination=', $VDCL_start_call_url);
+                        $destinationARY = explode('destination=', (string) ($VDCL_start_call_url ?? ''));
                         $destination = preg_replace("/&.*/", '', $destinationARY[1]);
                         $timer_action_destination = "nextstep---$nextstep--$durationLimitSECnext--$destination--$nextmessage--";
                     }

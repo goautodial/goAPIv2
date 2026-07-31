@@ -23,13 +23,13 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-    $tenant_id = $astDB->escape($_REQUEST['tenant_id']);
+    $tenant_id = $astDB->escape(($_REQUEST['tenant_id'] ?? ''));
 
     ### Check tenant_id if its null or empty
 	if($tenant_id == null) { 
 		$apiresults = ["result" => "Error: Set a value for Tenant ID."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
 		// Get Allowed Campaigns
 		$allowed_campaigns = go_getall_allowed_campaigns($tenant_id);
 

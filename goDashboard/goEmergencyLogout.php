@@ -23,7 +23,7 @@
 
 	include_once (__DIR__ . "/goAPI.php");
 
-	$user_name 											= $astDB->escape($_REQUEST['goUserAgent']);
+	$user_name 											= $astDB->escape(($_REQUEST['goUserAgent'] ?? ''));
 	$LogoutKickAll										= isset($_REQUEST['LogoutKickAll']) ? $astDB->escape($_REQUEST['LogoutKickAll']) : null;
 
 	// ERROR CHECKING

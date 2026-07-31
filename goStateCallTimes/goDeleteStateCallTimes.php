@@ -23,13 +23,13 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
+	$state_call_time_id = $astDB->escape(($_REQUEST['state_call_time_id'] ?? ''));
 
     ### Check Voicemail ID if its null or empty
 	if($state_call_time_id == null) { 
 		$apiresults = ["result" => "Error: Set a value for State Call Time ID."]; 
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			//$ul = "";

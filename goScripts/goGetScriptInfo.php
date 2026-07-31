@@ -24,7 +24,7 @@
 
 	include_once (__DIR__ . "/goAPI.php");	 
  
-	$script_id 											= $astDB->escape($_REQUEST["script_id"]); 
+	$script_id 											= $astDB->escape(($_REQUEST["script_id"] ?? '')); 
 	
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {

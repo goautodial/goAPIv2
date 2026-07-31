@@ -25,19 +25,19 @@
 	include_once(__DIR__ . "/../licensed-conf.php");
 
 	// POST or GET Variables
-    $orig_extension 									= $astDB->escape($_REQUEST['extension']);
-    $server_ip 											= $astDB->escape($_REQUEST['server_ip']);
-    $pass 												= $astDB->escape($_REQUEST['pass']);
-    $protocol 											= $astDB->escape($_REQUEST['protocol']);
-    $dialplan_number 									= $astDB->escape($_REQUEST['dialplan_number']);
-    $voicemail_id 										= $astDB->escape($_REQUEST['voicemail_id']);
-    $status 											= $astDB->escape($_REQUEST['status']);
-    $active 											= $astDB->escape($_REQUEST['active']);
-    $fullname 											= $astDB->escape($_REQUEST['fullname']);
+    $orig_extension 									= $astDB->escape(($_REQUEST['extension'] ?? ''));
+    $server_ip 											= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+    $pass 												= $astDB->escape(($_REQUEST['pass'] ?? ''));
+    $protocol 											= $astDB->escape(($_REQUEST['protocol'] ?? ''));
+    $dialplan_number 									= $astDB->escape(($_REQUEST['dialplan_number'] ?? ''));
+    $voicemail_id 										= $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
+    $status 											= $astDB->escape(($_REQUEST['status'] ?? ''));
+    $active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
+    $fullname 											= $astDB->escape(($_REQUEST['fullname'] ?? ''));
     $messages 											= isset($_REQUEST['messages']) ? $astDB->escape($_REQUEST['messages']) : 0;
     $old_messages 										= isset($_REQUEST['old_messages']) ? $astDB->escape($_REQUEST['old_messages']) : 0;
-    $user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$gmt 												= $astDB->escape($_REQUEST['gmt']);
+    $user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$gmt 												= $astDB->escape(($_REQUEST['gmt'] ?? ''));
 	$seats												= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
 	$phone_pass											= ($protocol == "EXTERNAL") ? "" : $pass;
 
@@ -62,15 +62,15 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Extension."
 		];
-	} elseif (!in_array($status,$defStatus)) {
+	} elseif (!in_array($status, (is_array($defStatus) ? $defStatus : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for status is ACTIVE, SUSPENDED, CLOSED, PENDING, ADMIN only."
 		];
-	} elseif (!in_array($active,$defActive)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($protocol,$defProtocol)) {
+	} elseif (!in_array($protocol, (is_array($defProtocol) ? $defProtocol : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2, EXTERNAL."
 		];

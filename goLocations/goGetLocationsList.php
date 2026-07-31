@@ -20,11 +20,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $limit = $goDB->escape($_REQUEST['limit']);
+    $limit = $goDB->escape(($_REQUEST['limit'] ?? ''));
     if($limit < 1){ $limit = 100; }
  
-    //$groupId = go_get_groupid($session_user);
-    $groupId = $goDB->escape($_REQUEST['user_group']);
+    //$groupId = go_get_groupid($session_user, $astDB);
+    $groupId = $goDB->escape(($_REQUEST['user_group'] ?? ''));
     
 	if(!checkIfTenant($groupId, $goDB) && $groupId !== "ADMIN") {
 		$goDB->where('user_group', $groupId);

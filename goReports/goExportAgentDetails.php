@@ -28,12 +28,12 @@
 	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// need function go_sec_convert();
-    $pageTitle 										= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
-    $request 										= $astDB->escape($_REQUEST['request']);
-    $dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    $pageTitle 										= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
+    $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
+    $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
+    $campaignID 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+    $request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
+    $dispo_stats 									= $astDB->escape(($_REQUEST['statuses'] ?? ''));
 
     if (empty($fromDate)) {
     	$fromDate 									= date("Y-m-d")." 00:00:00";
@@ -74,7 +74,7 @@
 			"code" 										=> "40001", 
 			"result" 									=> $err_msg
 		];
-	} elseif (!in_array($pageTitle, $defPage)) {
+	} elseif (!in_array($pageTitle, (is_array($defPage) ? $defPage : []))) {
 	 	$err_msg 									= error_handle("10004");
 		$apiresults 								= [
 			"code" 										=> "10004", 
@@ -189,12 +189,12 @@
 			}
 
 
-			if (count($sstatuses) > 0 && count($cstatuses) > 0) {
+			if ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) > 0) {
 				$statuses 								= "{$sstatuses}','{$cstatuses}";
 				$statusRX 								= "{$sstatusRX}{$cstatusRX}";
 			} else {
-				$statuses 								= (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
-				$statusRX 								= (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				$statuses 								= ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) < 1) ? $sstatuses : $cstatuses;
+				$statusRX 								= ((is_countable($sstatusRX) ? count($sstatusRX) : 0) > 0 && (is_countable($cstatusRX) ? count($cstatusRX) : 0) < 1) ? $sstatusRX : $cstatusRX;
 			}
 
 			$statusRX 									= trim($statusRX, "|");
@@ -234,7 +234,7 @@
 
 				$user_ct								= $astDB->getRowCount();
 
-				if (count($quserct) > 0) {
+				if ((is_countable($quserct) ? count($quserct) : 0) > 0) {
 					foreach ($quserct as $row) {
 						$ULname[] 						= $row['full_name'];
 						$ULuser[] 						= $row['user'];					
@@ -565,7 +565,7 @@
 						$user           = $row['user'];
 						$name           = $row['full_name'];
 
-						if(!in_array($user, $Suser)){
+						if(!in_array($user, (is_array($Suser) ? $Suser : []))){
 							$Suser[] = $user;
 							// array_push($nameARY, $name);
 							foreach ($agenttotalcalls as $call){
@@ -843,7 +843,7 @@
 					$m							= 0;
 
 					while ($m < $k) {
-						$sort_split 					= explode("-----",$TOPsort[$m]);
+						$sort_split 					= explode("-----", (string) ($TOPsort[$m] ?? ''));
 						$i 								= $sort_split[1];
 						$sort_order[$m] 				= "$i";
 						//if ($file_download > 0)

@@ -22,7 +22,7 @@
 
     
     ### POST or GET Variables
-    $carrier_id = $astDB->escape($_REQUEST['carrier_id']);
+    $carrier_id = $astDB->escape(($_REQUEST['carrier_id'] ?? ''));
     
     //$queryCheck = "SELECT carrier_id FROM vicidial_server_carriers WHERE carrier_id ='$carrier_id';";
     $astDB->where('carrier_id', $carrier_id);

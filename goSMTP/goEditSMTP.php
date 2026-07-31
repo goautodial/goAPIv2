@@ -26,15 +26,15 @@
 	$exist = $goDB->getRowCount();
 	
 	if($exist <= 1){
-		$debug = $goDB->escape($_REQUEST['debug']); 			// if debug on... 0 = off, 1= client messages, 2 = client and server messages, 3 = timeout
-		$timezone = $goDB->escape($_REQUEST['timezone']); 		// set date default timezone
-		$ipv6_support = $goDB->escape($_REQUEST['ipv6_support']); 	// if your network does not support SMTP over IPv6... 0 = unsupported, 1 = supported
-		$host = $goDB->escape($_REQUEST['host']); 			//Set the hostname of the mail server
-		$port = $goDB->escape($_REQUEST['port']); 			//Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
-		$smtp_security = $goDB->escape($_REQUEST['smtp_security']); 	//Set the encryption system to use - ssl (deprecated) or tls
-		$smtp_auth = $goDB->escape($_REQUEST['smtp_auth']); 		//Whether to use SMTP authentication
-		$username = $goDB->escape($_REQUEST['username']); 		//Username to use for SMTP authentication - use full email address for gmail
-		$password = $goDB->escape($_REQUEST['password']); 		//Password to use for SMTP authentication
+		$debug = $goDB->escape(($_REQUEST['debug'] ?? '')); 			// if debug on... 0 = off, 1= client messages, 2 = client and server messages, 3 = timeout
+		$timezone = $goDB->escape(($_REQUEST['timezone'] ?? '')); 		// set date default timezone
+		$ipv6_support = $goDB->escape(($_REQUEST['ipv6_support'] ?? '')); 	// if your network does not support SMTP over IPv6... 0 = unsupported, 1 = supported
+		$host = $goDB->escape(($_REQUEST['host'] ?? '')); 			//Set the hostname of the mail server
+		$port = $goDB->escape(($_REQUEST['port'] ?? '')); 			//Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
+		$smtp_security = $goDB->escape(($_REQUEST['smtp_security'] ?? '')); 	//Set the encryption system to use - ssl (deprecated) or tls
+		$smtp_auth = $goDB->escape(($_REQUEST['smtp_auth'] ?? '')); 		//Whether to use SMTP authentication
+		$username = $goDB->escape(($_REQUEST['username'] ?? '')); 		//Username to use for SMTP authentication - use full email address for gmail
+		$password = $goDB->escape(($_REQUEST['password'] ?? '')); 		//Password to use for SMTP authentication
 		
 		$password = encrypt_decrypt('encrypt', $password);
 		

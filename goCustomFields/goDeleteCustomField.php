@@ -20,9 +20,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    $list_id        = $astDB->escape($_REQUEST['list_id']);
-    $field_label    = str_replace(" ","_",trim((string) $astDB->escape($_REQUEST['field_label'])));
-    $field_id       = $astDB->escape($_REQUEST['field_id']);
+    $list_id        = $astDB->escape(($_REQUEST['list_id'] ?? ''));
+    $field_label    = str_replace(" ","_",trim((string) $astDB->escape(($_REQUEST['field_label'] ?? ''))));
+    $field_id       = $astDB->escape(($_REQUEST['field_id'] ?? ''));
     
     $selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
     $queryResult = $astDB->rawQuery($selectTable);

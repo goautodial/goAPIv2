@@ -24,8 +24,8 @@
     include_once (__DIR__ . "/goAPI.php");
 	
 	### POST or GET Variables
-	$audiofile 										= $astDB->escape($_REQUEST['audiofile']);
-	$user 											= $astDB->escape($_REQUEST['user']);
+	$audiofile 										= $astDB->escape(($_REQUEST['audiofile'] ?? ''));
+	$user 											= $astDB->escape(($_REQUEST['user'] ?? ''));
 
     // Error Checking
 	if ( empty($log_user) || is_null($log_user) ) {
@@ -139,7 +139,7 @@
 				$sf  								= 0;
 				
 				while ( $k < $i ) {
-					$file_split 					= explode( '----------', $file_sort[$k] );
+					$file_split 					= explode('----------', (string) ($file_sort[$k] ?? ''));
 					$m 								= $file_split[1];
 					$NOWsize 						= filesize( "$dirpath/$file_names[$m]" );
 					//if($file_names == $audiofile){

@@ -23,11 +23,11 @@
 
     include_once(__DIR__ . "/goAPI.php");
 	
-	$pageTitle 										= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
+	$pageTitle 										= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
-	$request 										= $astDB->escape($_REQUEST['request']);
+	$campaign_id 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+	$request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
 	$limit											= 1000;
 	$defPage 										= "agent_detail";
 
@@ -374,7 +374,7 @@
 						$user		= $row['user'];
 						$name		= $row['full_name'];
                        
-						if(!in_array($user, $userARY) && isset($name)){
+						if(!in_array($user, (is_array($userARY) ? $userARY : [])) && isset($name)){
 							$userARY[] = $user;
 							$nameARY[] = $name;
 							foreach ($agenttotalcalls as $call){
@@ -454,7 +454,7 @@
 					$TOTcustomer    = convert(array_sum($customerARY));
 					$TOTALtime      = convert(array_sum($agent_timeARY));
 					$TOTtimeTC      = convert(array_sum($TOTtimeTC));
-					$TOT_AGENTS     = 'AGENTS: '.count($userARY);
+					$TOT_AGENTS     = 'AGENTS: '.(is_countable($userARY) ? count($userARY) : 0);
 					$TOTcalls       = array_sum($callsARY);
 
 					$j = 0;

@@ -29,8 +29,8 @@
     	//error_reporting(E_ALL);
 	
 	$thefile = $_FILES['goFileMe']['tmp_name'];
-	$theList = $_REQUEST["goListId"];
-	$goDupcheck = $_REQUEST["goDupcheck"];
+	$theList = ($_REQUEST["goListId"] ?? '');
+	$goDupcheck = ($_REQUEST["goDupcheck"] ?? '');
 	$default_delimiter = ",";
 	
 	// path where your CSV file is located
@@ -41,8 +41,8 @@
 
 	// REPLACE DELIMITER to SEMI-COLON -- CUSTOMIZATION!!!!!
         if(!empty($_REQUEST["custom_delimiter"]) && isset($_REQUEST["custom_delimiter"])){
-           //$delimiters = $_REQUEST["custom_delimiter"];
-           $delimiters = explode(" ", $_REQUEST["custom_delimiter"]);
+           //$delimiters = ($_REQUEST["custom_delimiter"] ?? '');
+           $delimiters = explode(" ", ($_REQUEST["custom_delimiter"] ?? ''));
            $str = file_get_contents($csv_file);
            $str1 = str_replace($delimiters, $default_delimiter, $str);
            file_put_contents($csv_file, $str1);

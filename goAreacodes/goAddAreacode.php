@@ -22,10 +22,10 @@
     
     include_once (__DIR__ . "/goAPI.php");
 
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$areacode 										= $astDB->escape($_REQUEST['areacode']);
-	$outbound_cid 										= $astDB->escape($_REQUEST['outbound_cid']);
-	$cid_description									= $astDB->escape($_REQUEST['cid_description']);	
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$areacode 										= $astDB->escape(($_REQUEST['areacode'] ?? ''));
+	$outbound_cid 										= $astDB->escape(($_REQUEST['outbound_cid'] ?? ''));
+	$cid_description									= $astDB->escape(($_REQUEST['cid_description'] ?? ''));	
 	$active 										= 'Y';
 
 	if (empty($goUser) || is_null($goUser)) {

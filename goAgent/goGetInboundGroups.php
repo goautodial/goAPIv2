@@ -24,7 +24,7 @@ $astDB->where('campaign_id', $campaign);
 $query = $astDB->getOne('vicidial_campaigns', 'campaign_allow_inbound,closer_campaigns');
 
 if ($query['campaign_allow_inbound'] == 'Y') {
-    $inb_groups = explode(" ", $query['closer_campaigns']);
+    $inb_groups = explode(" ", (string) ($query['closer_campaigns'] ?? ''));
     foreach ($inb_groups as $inb) {
         if ($inb !== "" && $inb !== '-') {
             $astDB->where('group_id', $inb);
@@ -36,7 +36,8 @@ if ($query['campaign_allow_inbound'] == 'Y') {
     }
 }
 
-if (count($inbound_groups)) {
+if ((is_countable($inbound_groups) ? count($inbound_groups) : 0)) {
+    $inbound_groups = is_array($inbound_groups) ? $inbound_groups : [];
     ksort($inbound_groups);
     $APIResult = [ "result" => "success", "data" => ["inbound_groups" => $inbound_groups] ];
 } else {

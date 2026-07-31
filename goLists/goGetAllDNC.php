@@ -23,7 +23,7 @@
     include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
-	$search 											= $astDB->escape($_REQUEST['search']);
+	$search 											= $astDB->escape(($_REQUEST['search'] ?? ''));
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

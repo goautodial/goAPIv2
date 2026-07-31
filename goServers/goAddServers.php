@@ -24,13 +24,13 @@
     include_once (__DIR__ . "/goAPI.php");
  
     ### POST or GET Variables
-	$server_id 											= $astDB->escape($_REQUEST['server_id']);
-	$server_description 								= $astDB->escape($_REQUEST['server_description']);
-	$server_ip 											= $astDB->escape($_REQUEST['server_ip']);
-	$active 											= $astDB->escape($_REQUEST['active']);
-	$asterisk_version 									= $astDB->escape($_REQUEST['asterisk_version']);
-	$max_vicidial_trunks 								= $astDB->escape($_REQUEST['max_vicidial_trunks']);
-	$user_group 										= $astDB->escape($_REQUEST['user_group']);
+	$server_id 											= $astDB->escape(($_REQUEST['server_id'] ?? ''));
+	$server_description 								= $astDB->escape(($_REQUEST['server_description'] ?? ''));
+	$server_ip 											= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+	$active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
+	$asterisk_version 									= $astDB->escape(($_REQUEST['asterisk_version'] ?? ''));
+	$max_vicidial_trunks 								= $astDB->escape(($_REQUEST['max_vicidial_trunks'] ?? ''));
+	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
 	$local_gmt 											= "-5.00";
 	$defActive 											= ["Y","N"];
 	
@@ -55,7 +55,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Server IP"
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
 			"code" 											=> "41006", 

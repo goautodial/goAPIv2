@@ -22,7 +22,7 @@
 */
 
 ### POST or GET Variables
-$voicemail_id = $astDB->escape($_REQUEST['voicemail_id']);
+$voicemail_id = $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
 
 //$queryCheck = "SELECT voicemail_id from vicidial_voicemail where voicemail_id='".$voicemail_id."';";
 $astDB->where('voicemail_id', $voicemail_id);

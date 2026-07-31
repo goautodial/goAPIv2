@@ -26,16 +26,16 @@
     include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	$search 											= $astDB->escape($_REQUEST['search']);
-	$disposition_filter 								= $astDB->escape($_REQUEST['disposition_filter']);
-	$list_filter 										= $astDB->escape($_REQUEST['list_filter']);
-	$address_filter 									= $astDB->escape($_REQUEST['address_filter']);
-	$city_filter 										= $astDB->escape($_REQUEST['city_filter']);
-	$state_filter 										= $astDB->escape($_REQUEST['state_filter']);
-	$search_customers 									= $astDB->escape($_REQUEST['search_customers']);
-	$goVarLimit 										= $astDB->escape($_REQUEST["goVarLimit"]);
-	$start_date										= $astDB->escape($_REQUEST["start_date"]);
-	$end_date                                                                           	= $astDB->escape($_REQUEST["end_date"]);
+	$search 											= $astDB->escape(($_REQUEST['search'] ?? ''));
+	$disposition_filter 								= $astDB->escape(($_REQUEST['disposition_filter'] ?? ''));
+	$list_filter 										= $astDB->escape(($_REQUEST['list_filter'] ?? ''));
+	$address_filter 									= $astDB->escape(($_REQUEST['address_filter'] ?? ''));
+	$city_filter 										= $astDB->escape(($_REQUEST['city_filter'] ?? ''));
+	$state_filter 										= $astDB->escape(($_REQUEST['state_filter'] ?? ''));
+	$search_customers 									= $astDB->escape(($_REQUEST['search_customers'] ?? ''));
+	$goVarLimit 										= $astDB->escape(($_REQUEST["goVarLimit"] ?? ''));
+	$start_date										= $astDB->escape(($_REQUEST["start_date"] ?? ''));
+	$end_date                                                                           	= $astDB->escape(($_REQUEST["end_date"] ?? ''));
 	$limit 												= 1000;	
 	$list_ids											= [];
 
@@ -112,7 +112,7 @@
 					$list_ids[]							= $listid["list_id"];
 				}
 
-                if (!in_array(998, $list_ids) || !in_array(999, $list_ids)) {
+                if (!in_array(998, (is_array($list_ids) ? $list_ids : [])) || !in_array(999, (is_array($list_ids) ? $list_ids : []))) {
                     $list_ids[] = 998;
                     $list_ids[] = 999;
                 }
@@ -178,7 +178,7 @@
 				$limit 									= $goVarLimit;
 			}
 			
-            if (count($list_ids) < 1) {
+            if ((is_countable($list_ids) ? count($list_ids) : 0) < 1) {
                 $list_ids = ["-1"];
             }
 
@@ -229,7 +229,7 @@
 			$data 										= [];
 			
 			foreach ($fresultsv as $fresults) {
-				if (in_array($fresults['lead_id'], $lead_ids_go)) {
+				if (in_array($fresults['lead_id'], (is_array($lead_ids_go) ? $lead_ids_go : []))) {
 					$dataLeadid[] 						= $fresults['lead_id'];
 					$dataListid[] 						= $fresults['list_id'];
 					$dataFirstName[] 					= $fresults['first_name'];

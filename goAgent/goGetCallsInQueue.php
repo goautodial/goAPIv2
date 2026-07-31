@@ -217,7 +217,7 @@ if ($is_logged_in) {
 			$loop_count++;
 		}
 		//echo "</TABLE><BR> &nbsp;\n";
-        if (count($callsInQueue) > 0) {
+        if ((is_countable($callsInQueue) ? count($callsInQueue) : 0) > 0) {
             $APIResult = [ "result" => "success", "data" => $callsInQueue ];
         } else {
             $APIResult = [ "result" => "notice", "message" => "No Calls in Queue at the moment" ];

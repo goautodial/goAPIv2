@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $final = $astDB->escape($_REQUEST['final']);
+    $final = $astDB->escape(($_REQUEST['final'] ?? ''));
 
     //$list_id = $this->input->post('list_id');
     //$query = $this->db->query("SELECT campaign_id FROM vicidial_lists WHERE list_id='$list_id'");
@@ -85,9 +85,9 @@
         $pipe_count=substr_count($buffer, "|");
 
         if ($tab_count>$pipe_count) {$delimiter="\t";  $delim_name="tab";} else {$delimiter="|";  $delim_name="pipe";}
-        $field_check=explode($delimiter, $buffer);
+        $field_check=explode($delimiter, (string) ($buffer ?? ''));
 
-        if (count($field_check)>=2) {
+        if ((is_countable($field_check) ? count($field_check) : 0)>=2) {
             flush();
             $file = fopen("$lead_file", "r");
             //$data['processfile'] = "<center><font face='arial, helvetica' size=3 color='#009900'><B>Processing file...\n";

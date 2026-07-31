@@ -24,19 +24,19 @@
     
 	include_once(__DIR__ . "/goAPI.php");
 	
-	$campaigns 		= $astDB->escape($_REQUEST['campaigns']);
-	$inbounds 		= $astDB->escape($_REQUEST['inbounds']);
-	$lists 			= $astDB->escape($_REQUEST['lists']);
-	$dispo_stats            = $astDB->escape($_REQUEST['statuses']);
-	$custom_fields 	= $astDB->escape($_REQUEST['custom_fields']);
-	$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
-	$rec_location 	= $astDB->escape($_REQUEST['rec_location']);
-	$log_group 		= go_get_groupid($session_user);
-	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
-	$toDate = $astDB->escape($_REQUEST['toDate']);
+	$campaigns 		= $astDB->escape(($_REQUEST['campaigns'] ?? ''));
+	$inbounds 		= $astDB->escape(($_REQUEST['inbounds'] ?? ''));
+	$lists 			= $astDB->escape(($_REQUEST['lists'] ?? ''));
+	$dispo_stats            = $astDB->escape(($_REQUEST['statuses'] ?? ''));
+	$custom_fields 	= $astDB->escape(($_REQUEST['custom_fields'] ?? ''));
+	$per_call_notes = $astDB->escape(($_REQUEST['per_call_notes'] ?? ''));
+	$rec_location 	= $astDB->escape(($_REQUEST['rec_location'] ?? ''));
+	$log_group 		= go_get_groupid($session_user, $astDB);
+	$fromDate = $astDB->escape(($_REQUEST['fromDate'] ?? ''));        
+	$toDate = $astDB->escape(($_REQUEST['toDate'] ?? ''));
 	
-	$limit = $astDB->escape($_REQUEST['limit']);
-	$offset = $astDB->escape($_REQUEST['offset']);
+	$limit = $astDB->escape(($_REQUEST['limit'] ?? ''));
+	$offset = $astDB->escape(($_REQUEST['offset'] ?? ''));
 
 	if (empty($fromDate))
 		$fromDate = date("Y-m-d")." 00:00:00";
@@ -63,10 +63,10 @@
 	$list_SQL = "";
 	$status_SQL = "";
 
-	$campaign_ct = count($campaigns);
-	$group_ct = count($inbounds);
-	$list_ct = count($lists);
-	$status_ct = count($dispo_stats);
+	$campaign_ct = (is_countable($campaigns) ? count($campaigns) : 0);
+	$group_ct = (is_countable($inbounds) ? count($inbounds) : 0);
+	$list_ct = (is_countable($lists) ? count($lists) : 0);
+	$status_ct = (is_countable($dispo_stats) ? count($dispo_stats) : 0);
 
 	$csv_row = "";
 
@@ -107,7 +107,7 @@
 			$i++;
 		}
 		
-		if (in_array("ALL", $campaigns)) {
+		if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))) {
 			$campaign_SQL = "";
 			// $i = 0;
             if (strtoupper((string) $log_group) !== 'ADMIN') {
@@ -151,7 +151,7 @@
 	
 	if (!empty($inbounds)) {
 		$i=0;
-		if (in_array("ALL", $inbounds)) {
+		if (in_array("ALL", (is_array($inbounds) ? $inbounds : []))) {
 			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
 
             if (strtoupper((string) $log_group) !== 'ADMIN') {
@@ -231,10 +231,10 @@
 		//	$i++;
 		//}
 		
-		if (in_array("ALL", $lists)) {
+		if (in_array("ALL", (is_array($lists) ? $lists : []))) {
 			$list_SQL 							= "";
 			
-			if (in_array("ALL", $campaigns) || in_array('ALL', $inbounds)) {
+			if (in_array("ALL", (is_array($campaigns) ? $campaigns : [])) || in_array('ALL', (is_array($inbounds) ? $inbounds : []))) {
 				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 				$array_list = $SELECTQuery;
 			} else {
@@ -273,7 +273,7 @@
 			$i++;
 		}
 		
-		if ( (in_array("ALL", $dispo_stats)) ) {
+		if ( (in_array("ALL", (is_array($dispo_stats) ? $dispo_stats : []))) ) {
 			$status_SQL 						= "";
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
@@ -465,7 +465,7 @@
 		array_splice($csv_header, $ee_key, 1);
 	}
 	if ($custom_fields == "Y")	{
-	//    for ($i = 0 ; $i < count($array_list); $i++) {
+	//    for ($i = 0 ; $i < (is_countable($array_list) ? count($array_list) : 0); $i++) {
 	//		$list_id = $array_list[$i];
 		foreach ($array_list as $list) {
 			$custom_list_id = "custom_" . (empty($list['list_id']) ? $list : $list['list_id']);
@@ -488,13 +488,13 @@
 		$header_CF 									= [];
 		//$keys 										= array_keys($active_list_fields);
 		
-		//for ($i = 0; $i < count($keys); $i++) {
+		//for ($i = 0; $i < (is_countable($keys) ? count($keys) : 0); $i++) {
 		foreach ($active_list_fields as $fields) {
 			//$list_id 								= $keys[$i];
 			//for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
 			foreach ($fields as $field) {
 				//$field 								= $active_list_fields[$list_id][$x];
-				if (!in_array($field,$header_CF)) {
+				if (!in_array($field, (is_array($header_CF) ? $header_CF : []))) {
 					$header_CF[] 					= $field;
 				}
 			}
@@ -598,7 +598,7 @@
 		if ($custom_fields == "Y")	{
 			//$keys = array_keys($active_list_fields); // list of active custom lists
 				
-			//for ($i = 0 ; $i < count($keys); $i++) {
+			//for ($i = 0 ; $i < (is_countable($keys) ? count($keys) : 0); $i++) {
 			foreach ($active_list_fields as $list_id => $fields) {
 			    //$list_id = $keys[$i];
 			    //$fields = implode(",", $active_list_fields[$list_id]);
@@ -612,7 +612,7 @@
 					//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
 
 					if ($fetch_CF) {
-						//for ($x = 0;$x < count($header_CF);$x++) {
+						//for ($x = 0;$x < (is_countable($header_CF) ? count($header_CF) : 0);$x++) {
 						foreach ($header_CF as $header) {
 							//if (!empty($fetch_CF[$header_CF[$x]])) {
 							if (!empty($fetch_CF[$header])) {
@@ -627,7 +627,7 @@
 				}
 				
 
-				//for ($a=0;$a < count($fetch_row);$a++) {
+				//for ($a=0;$a < (is_countable($fetch_row) ? count($fetch_row) : 0);$a++) {
 				//	$row[$header_CF[$a]] = $fetch_row[$a];
 				//}
 				

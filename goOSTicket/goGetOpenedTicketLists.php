@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $userid = $ostDB->escape($_REQUEST['userid']);
+    $userid = $ostDB->escape(($_REQUEST['userid'] ?? ''));
 
     if($userid == null && $userid == 0) { 
             $apiresults = ["result" => "Error: Set a value for User ID"]; 
     } else {
-        $groupId = go_get_groupid($goUser);
+        $groupId = go_get_groupid($goUser, $astDB);
 
         if (!checkIfTenant($groupId, $goDB)) {
             $ul='';

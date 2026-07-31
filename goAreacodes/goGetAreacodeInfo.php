@@ -20,9 +20,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-  $campaign_id = $_REQUEST['campaign_id'];
-  $areacode = $_REQUEST['areacode'];
-  $outbound_cid = $_REQUEST['outbound_cid'];
+  $campaign_id = ($_REQUEST['campaign_id'] ?? '');
+  $areacode = ($_REQUEST['areacode'] ?? '');
+  $outbound_cid = ($_REQUEST['outbound_cid'] ?? '');
 
   $astDB->where('campaign_id', $campaign_id);
   $astDB->where('areacode', $areacode);

@@ -25,20 +25,20 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-    $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$status 											= $astDB->escape($_REQUEST['status']);	
-	$status_name 										= $astDB->escape($_REQUEST['status_name']);
-	$selectable 										= $astDB->escape($_REQUEST['selectable']);
-	$human_answered 									= $astDB->escape($_REQUEST['human_answered']);
-	$sale 												= $astDB->escape($_REQUEST['sale']);
-	$dnc												= $astDB->escape($_REQUEST['dnc']);
-	$customer_contact 									= $astDB->escape($_REQUEST['customer_contact']);
-	$not_interested 									= $astDB->escape($_REQUEST['not_interested']);
-	$unworkable 										= $astDB->escape($_REQUEST['unworkable']);
-	$scheduled_callback 								= $astDB->escape($_REQUEST['scheduled_callback']);	
-	$priority 											= $astDB->escape($_REQUEST['priority']);
-	$color 												= $astDB->escape($_REQUEST['color']);
-	$edit_type 											= $astDB->escape($_REQUEST['type']);	
+    $campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$status 											= $astDB->escape(($_REQUEST['status'] ?? ''));	
+	$status_name 										= $astDB->escape(($_REQUEST['status_name'] ?? ''));
+	$selectable 										= $astDB->escape(($_REQUEST['selectable'] ?? ''));
+	$human_answered 									= $astDB->escape(($_REQUEST['human_answered'] ?? ''));
+	$sale 												= $astDB->escape(($_REQUEST['sale'] ?? ''));
+	$dnc												= $astDB->escape(($_REQUEST['dnc'] ?? ''));
+	$customer_contact 									= $astDB->escape(($_REQUEST['customer_contact'] ?? ''));
+	$not_interested 									= $astDB->escape(($_REQUEST['not_interested'] ?? ''));
+	$unworkable 										= $astDB->escape(($_REQUEST['unworkable'] ?? ''));
+	$scheduled_callback 								= $astDB->escape(($_REQUEST['scheduled_callback'] ?? ''));	
+	$priority 											= $astDB->escape(($_REQUEST['priority'] ?? ''));
+	$color 												= $astDB->escape(($_REQUEST['color'] ?? ''));
+	$edit_type 											= $astDB->escape(($_REQUEST['type'] ?? ''));	
 	$type 												= (in_array($edit_type, ['SYSTEM', 'CUSTOM'])) ? $edit_type : 'CUSTOM';
     $defVal 											= ["Y","N"];
 
@@ -69,35 +69,35 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in status name and must not be empty"
 		];
-	} elseif (!in_array($scheduled_callback,$defVal) && $scheduled_callback != NULL) {
+	} elseif (!in_array($scheduled_callback, (is_array($defVal) ? $defVal : [])) && $scheduled_callback != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for scheduled_callback is Y or N only."
 		];
-	} elseif (!in_array($unworkable,$defVal) && $unworkable != NULL) {
+	} elseif (!in_array($unworkable, (is_array($defVal) ? $defVal : [])) && $unworkable != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for unworkable is Y or N only."
 		];
-	} elseif (!in_array($selectable,$defVal) && $selectable != NULL) {
+	} elseif (!in_array($selectable, (is_array($defVal) ? $defVal : [])) && $selectable != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for selectable is Y or N only."
 		];
-	} elseif (!in_array($human_answered,$defVal) && $human_answered != NULL) {
+	} elseif (!in_array($human_answered, (is_array($defVal) ? $defVal : [])) && $human_answered != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for human_answered is Y or N only."
 		];
-	} elseif (!in_array($sale,$defVal) && $sale != NULL) {
+	} elseif (!in_array($sale, (is_array($defVal) ? $defVal : [])) && $sale != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for sale is Y or N only."
 		];
-	} elseif (!in_array($dnc,$defVal) && $dnc != NULL) {
+	} elseif (!in_array($dnc, (is_array($defVal) ? $defVal : [])) && $dnc != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for dnc is Y or N only."
 		];
-	} elseif (!in_array($customer_contact,$defVal) && $customer_contact != NULL) {
+	} elseif (!in_array($customer_contact, (is_array($defVal) ? $defVal : [])) && $customer_contact != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for customer_contact is Y or N only."
 		];
-	} elseif (!in_array($not_interested,$defVal) && $not_interested != NULL) {
+	} elseif (!in_array($not_interested, (is_array($defVal) ? $defVal : [])) && $not_interested != NULL) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for not_interested is Y or N only."
 		];
@@ -112,7 +112,7 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {
-			if (is_array($campaigns) && in_array($campaign_id, $campaigns)) {
+			if (is_array($campaigns) && in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->where('status', $status);
 				//$astDB->getOne("vicidial_campaign_statuses", "campaign_id");

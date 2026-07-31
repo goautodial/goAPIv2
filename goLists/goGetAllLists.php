@@ -115,7 +115,7 @@
 				
 				if ($max_list >= 99999999) {
 					for($i=1;$i < $max_list;$i++){
-						if(!in_array($i, $lists['list_id'])){
+						if(!in_array($i, (is_array($lists['list_id']) ? $lists['list_id'] : []))){
 							$next_list 					= $i;
 							$i 							= $max_list;
 						}

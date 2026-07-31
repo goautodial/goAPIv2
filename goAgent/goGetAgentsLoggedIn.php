@@ -213,7 +213,7 @@ if ($is_logged_in || (strlen((string) $campaign) < 1 && $user_role < 2 && $user_
 
 		sort($AXVSuserORDER);
 		while ($j > $k) {
-			$order_split = explode("_", $AXVSuserORDER[$k]);
+			$order_split = explode("_", (string) ($AXVSuserORDER[$k] ?? ''));
 			$i = $order_split[1];
 
 			//echo "<TR BGCOLOR=\"$AXVSstatuscolor[$i]\"><TD><font style=\"font-size: $AXVSfontsize; font-family: sans-serif;\"> &nbsp; <a href=\"#\" onclick=\"AgentsXferSelect('$AXVSuser[$i]','AgentXferViewSelect');return false;\">$AXVSuser[$i] - $AXVSfull_name[$i]</a>&nbsp;</font></TD>";

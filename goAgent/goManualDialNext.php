@@ -193,7 +193,7 @@ if ($sipIsLoggedIn) {
     $astDB->where('phone_number', $phone_number);
     $astDB->where('lead_id', $lead_id);
     $query = $astDB->getOne('vicidial_list');
-    if (count($query)) {
+    if ((is_countable($query) ? count($query) : 0)) {
         $list_id = $query['list_id'];
         $phone_code = $query['phone_code'];
         $vendor_lead_code = $query['vendor_lead_code'];
@@ -451,7 +451,7 @@ if ($sipIsLoggedIn) {
                         $astDB->orderBy('modify_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_list', 'lead_id');
                         $man_leadID_ct = $astDB->getRowCount();
-                        if ( count($man_leadID_ct) > 0 && strlen((string) $phone_number) >= $manual_dial_min_digits )
+                        if ( (is_countable($man_leadID_ct) ? count($man_leadID_ct) : 0) > 0 && strlen((string) $phone_number) >= $manual_dial_min_digits )
                             {$override_phone++;}
                     } else {
                         // Added a script to fetch the tenant id and it's allowed campaigns -- Chris Lomuntad <chris@goautodial.com>
@@ -477,7 +477,7 @@ if ($sipIsLoggedIn) {
                             $i = 0;
                             foreach ($rslt as $Xrow) {
                                 $list_ids[$i] = $Xrow['list_id'];
-                                if (!in_array($Xrow['manual_dial_list_id'], $list_ids)) {
+                                if (!in_array($Xrow['manual_dial_list_id'], (is_array($list_ids) ? $list_ids : []))) {
                                     $i++;
                                     $list_ids[$i] = $Xrow['manual_dial_list_id'];
                                 }
@@ -617,8 +617,8 @@ if ($sipIsLoggedIn) {
                         $ct_srs=0;
                         $b=0;
                         if (strlen($Gct_state_call_times) > 2) {
-                            $state_rules = explode('|', $Gct_state_call_times);
-                            $ct_srs = ((count($state_rules)) - 2);
+                            $state_rules = explode('|', (string) ($Gct_state_call_times ?? ''));
+                            $ct_srs = (((is_countable($state_rules) ? count($state_rules) : 0)) - 2);
                         }
                         while($ct_srs >= $b) {
                             if (strlen($state_rules[$b])>1) {
@@ -800,8 +800,8 @@ if ($sipIsLoggedIn) {
                         $all_gmtSQL = "(gmt_offset_now IN($default_gmt) $ct_statesSQL) $ct_state_gmt_SQL";
         
                         $dial_statuses = preg_replace("/ -$/","",$dial_statuses);
-                        $Dstatuses = explode(" ", $dial_statuses);
-                        $Ds_to_print = (count($Dstatuses));
+                        $Dstatuses = explode(" ", (string) ($dial_statuses ?? ''));
+                        $Ds_to_print = ((is_countable($Dstatuses) ? count($Dstatuses) : 0));
                         $Dsql = '';
                         $o = 0;
                         while ($Ds_to_print > $o)  {
@@ -1728,7 +1728,7 @@ if ($sipIsLoggedIn) {
                     if ($cffv_ct > 0) {
                         $row = $rslt;
                         $custom_field_values = '----------';
-                        $custom_field_ct = count($custom_field);
+                        $custom_field_ct = (is_countable($custom_field) ? count($custom_field) : 0);
                         $d = 0;
                         while ($custom_field_ct > $d) {
                             $idx = $custom_field[$d];

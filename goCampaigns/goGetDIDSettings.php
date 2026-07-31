@@ -23,7 +23,7 @@
 
     include_once (__DIR__ . "/goAPI.php");
 
-    $did 												= $astDB->escape($_REQUEST['did']);
+    $did 												= $astDB->escape(($_REQUEST['did'] ?? ''));
     
     // Check campaign_id if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {

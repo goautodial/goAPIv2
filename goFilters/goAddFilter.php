@@ -22,12 +22,12 @@
 
 	include_once (__DIR__ . "/goAPI.php");	 
  	
-	$lead_filter_id 									= $astDB->escape($_REQUEST["lead_filter_id"]);
-    $lead_filter_name 									= $astDB->escape($_REQUEST["lead_filter_name"]); 
-    $lead_filter_comments 								= $astDB->escape($_REQUEST["lead_filter_comments"]);
-    $lead_filter_sql 									= $_REQUEST["lead_filter_sql"];
+	$lead_filter_id 									= $astDB->escape(($_REQUEST["lead_filter_id"] ?? ''));
+    $lead_filter_name 									= $astDB->escape(($_REQUEST["lead_filter_name"] ?? '')); 
+    $lead_filter_comments 								= $astDB->escape(($_REQUEST["lead_filter_comments"] ?? ''));
+    $lead_filter_sql 									= ($_REQUEST["lead_filter_sql"] ?? '');
     //$script_text 										= str_replace('\n','',$script_text);
-    $user_group 										= $astDB->escape($_REQUEST["user_group"]);
+    $user_group 										= $astDB->escape(($_REQUEST["user_group"] ?? ''));
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {

@@ -25,8 +25,8 @@
 
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
-	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);
-	$request 										= $astDB->escape($_REQUEST['request']);
+	$campaign_id 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+	$request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
 	$limit											= 100;
     
 	// Error Checking
@@ -373,7 +373,7 @@
 				$SID = array();
 				foreach($sid_query as $key => $data){
 					/*
-					if(!in_array($data['user'], $array_check_user)){
+					if(!in_array($data['user'], (is_array($array_check_user) ? $array_check_user : []))){
 						$array_check_user[] = $data['user'];
 					}else{
 
@@ -475,11 +475,11 @@
 					$ni_count = 0;
 					$cb_count = 0;
 					foreach($exploded_statuses as $data){
-						if(in_array($data, $am_array))
+						if(in_array($data, (is_array($am_array) ? $am_array : [])))
 							$am_count += 1;
-						if(in_array($data, $ni_array))
+						if(in_array($data, (is_array($ni_array) ? $ni_array : [])))
                                                         $ni_count += 1;
-						if(in_array($data, $cb_array))
+						if(in_array($data, (is_array($cb_array) ? $cb_array : [])))
                                                         $cb_count += 1;
 					}
 					$am[] = $am_count; // Anwering Machine

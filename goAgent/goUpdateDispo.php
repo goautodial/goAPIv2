@@ -1059,7 +1059,7 @@ if ($is_logged_in) {
 				$custom_field_names = preg_replace("/^\||\|$/", '', $FORMcustom_field_names);
 				$custom_field_names = preg_replace("/\|/", ",", $custom_field_names);
 				$custom_field_names_ARY = explode(',', $custom_field_names);
-				$custom_field_names_ct = count($custom_field_names_ARY);
+				$custom_field_names_ct = (is_countable($custom_field_names_ARY) ? count($custom_field_names_ARY) : 0);
 				$custom_field_names_SQL = $custom_field_names;
 		
 				##### BEGIN grab the data from custom table for the lead_id

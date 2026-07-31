@@ -23,7 +23,7 @@
 
 	include_once (__DIR__ . "/goAPI.php");
 	
-    $carrier_id 										= $astDB->escape($_REQUEST["carrier_id"]);
+    $carrier_id 										= $astDB->escape(($_REQUEST["carrier_id"] ?? ''));
     
     ### Check carrier ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {

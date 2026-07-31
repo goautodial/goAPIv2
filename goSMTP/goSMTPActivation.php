@@ -21,11 +21,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	$action = $goDB->escape($_REQUEST["action_smtp"]);
+	$action = $goDB->escape(($_REQUEST["action_smtp"] ?? ''));
 	
-	$ip_address = $goDB->escape($_REQUEST['hostname']);
-	$log_user = $goDB->escape($_REQUEST['log_user']);
-	$log_group = $goDB->escape($_REQUEST['log_group']);
+	$ip_address = $goDB->escape(($_REQUEST['hostname'] ?? ''));
+	$log_user = $goDB->escape(($_REQUEST['log_user'] ?? ''));
+	$log_group = $goDB->escape(($_REQUEST['log_group'] ?? ''));
 	
 	//$query = "SELECT * FROM smtp_settings LIMIT 1;";
 	$rsltv = $goDB->getOne('smtp_settings');
@@ -78,7 +78,7 @@
 	}
 	
 	$default_action = [0, 1]; // 0 = deactivate, 1 = activate
-	if(in_array($action, $default_action)){
+	if(in_array($action, (is_array($default_action) ? $default_action : []))){
 		//$action_smtp_query = "UPDATE settings SET value = '$action' WHERE setting = 'enable_smtp';";
 		$updateData = [
 			'value' => $action

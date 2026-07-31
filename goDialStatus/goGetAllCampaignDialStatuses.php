@@ -21,24 +21,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    //$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    
+	    $campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	    $dataStatus = [];
+	    $dataStatusName = [];
+
     //$query = "SELECT status,status_name
-    //        FROM vicidial_campaign_statuses 
+    //        FROM vicidial_campaign_statuses
     //        WHERE campaign_id='$campaign_id'
     //        ORDER BY status";
 	$astDB->where('campaign_id', $campaign_id);
 	$astDB->orderBy('status', 'desc');
    	$rsltv = $astDB->get('vicidial_campaign_statuses', null, 'status,status_name');
-    
+
     foreach ($rsltv as $fresults){
 		$dataStatus[] = $fresults['status'];
        	$dataStatusName[] = $fresults['status_name'];
-   		$apiresults = [
-			"result" => "success",
-			"status" => $dataStatus,
-			"status_name" => $dataStatusName,
-			"test" => $query
-		];
 	}
+
+	$apiresults = [
+		"result" => "success",
+		"status" => $dataStatus,
+		"status_name" => $dataStatusName
+	];
 ?>

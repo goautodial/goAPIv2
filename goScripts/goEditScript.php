@@ -24,13 +24,13 @@
 
 	include_once (__DIR__ . "/goAPI.php");	 
  
-	$script_id 											= $astDB->escape($_REQUEST["script_id"]); 	
-    $script_name 										= $astDB->escape($_REQUEST["script_name"]); 
-    $script_comments 									= $astDB->escape($_REQUEST['script_comments']);
-    $script_text 										= $astDB->escape($_REQUEST['script_text']);
+	$script_id 											= $astDB->escape(($_REQUEST["script_id"] ?? '')); 	
+    $script_name 										= $astDB->escape(($_REQUEST["script_name"] ?? '')); 
+    $script_comments 									= $astDB->escape(($_REQUEST['script_comments'] ?? ''));
+    $script_text 										= $astDB->escape(($_REQUEST['script_text'] ?? ''));
     $script_text 										= str_replace('\n','',$script_text);
-    $user_group 										= $astDB->escape($_REQUEST['user_group']);
-    $active 											= $astDB->escape($_REQUEST['active']);
+    $user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+    $active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
     
     ### Default values
     $defActive 											= ["Y","N"];    
@@ -56,7 +56,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in script name"
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];

@@ -56,7 +56,7 @@ $dataCampaign = [];
 $dataCampaignName = [];
 $dataCampaignAgent = [];
 $dataRole = [];
-if (count($rsltv) > 0) {
+if ((is_countable($rsltv) ? count($rsltv) : 0) > 0) {
 	foreach ($rsltv as $row) {
 		$dataUserID[] = $row['user_id'];
 		$dataName[] = $row['user'];

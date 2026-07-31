@@ -22,7 +22,7 @@ declare(strict_types=1);
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-if ($_GET['dev'] == 'test') {
+if (($_GET['dev'] ?? '') == 'test') {
     //$lead_id = "12313";
     //$lead_id = preg_replace("/[^0-9]/","",$lead_id);
     //var_dump($lead_id);

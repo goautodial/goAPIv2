@@ -21,15 +21,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $goUser     = $ostDB->escape($_REQUEST['goUser']);
-    $ip_address = $ostDB->escape($_REQUEST['hostname']);
-    $ticketID   = $ostDB->escape($_REQUEST['ticket_id']);
-    $threadID   = $ostDB->escape($_REQUEST['thread_id']);
-    $userID     = $ostDB->escape($_REQUEST['user_id']);
-    $fullname   = $ostDB->escape($_REQUEST['full_name']);
-    $title      = $ostDB->escape($_REQUEST['title']);
-    $body       = $ostDB->escape($_REQUEST['body']);
-    $status     = $ostDB->escape($_REQUEST['status']);
+    $goUser     = $ostDB->escape(($_REQUEST['goUser'] ?? ''));
+    $ip_address = $ostDB->escape(($_REQUEST['hostname'] ?? ''));
+    $ticketID   = $ostDB->escape(($_REQUEST['ticket_id'] ?? ''));
+    $threadID   = $ostDB->escape(($_REQUEST['thread_id'] ?? ''));
+    $userID     = $ostDB->escape(($_REQUEST['user_id'] ?? ''));
+    $fullname   = $ostDB->escape(($_REQUEST['full_name'] ?? ''));
+    $title      = $ostDB->escape(($_REQUEST['title'] ?? ''));
+    $body       = $ostDB->escape(($_REQUEST['body'] ?? ''));
+    $status     = $ostDB->escape(($_REQUEST['status'] ?? ''));
     $date       = date('Y-m-d H:i:s');
     $resultsArray = [];
     
@@ -80,7 +80,7 @@
         $resultsArray[] = "error";
     }
     
-    if(in_array("error", $resultsArray)){
+    if(in_array("error", (is_array($resultsArray) ? $resultsArray : []))){
         $apiresults = ["result" => "Error: Something went wrong."];
     }else{
         $apiresults = ["result" => "success"];

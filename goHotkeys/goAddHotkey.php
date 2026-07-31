@@ -24,10 +24,10 @@
     include_once (__DIR__ . "/goAPI.php");
  	
 	### POST or GET Variables
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
-    $hotkey         									= $astDB->escape($_REQUEST['hotkey']);
-    $status         									= $astDB->escape($_REQUEST['status']);
-    $status_name    									= $astDB->escape($_REQUEST['status_name']);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));	
+    $hotkey         									= $astDB->escape(($_REQUEST['hotkey'] ?? ''));
+    $status         									= $astDB->escape(($_REQUEST['status'] ?? ''));
+    $status_name    									= $astDB->escape(($_REQUEST['status_name'] ?? ''));
 
     
 	// ERROR CHECKING 
@@ -83,7 +83,7 @@
 			//$astDB->orwhere('status', $status);
 			$hotkeys 									= $astDB->get('vicidial_campaign_hotkeys');
 			
-			if (count($hotkeys) > 0) {
+			if ((is_countable($hotkeys) ? count($hotkeys) : 0) > 0) {
 				$apiresults 							= [
 					"result" 								=> "Duplicate Hotkey!"];
 			} else {

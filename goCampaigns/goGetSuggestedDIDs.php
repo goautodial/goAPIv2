@@ -24,7 +24,7 @@
 
     include_once (__DIR__ . "/goAPI.php");
 
-    $keyword 											= $astDB->escape($_REQUEST['keyword']);
+    $keyword 											= $astDB->escape(($_REQUEST['keyword'] ?? ''));
     
     // Check campaign_id if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {

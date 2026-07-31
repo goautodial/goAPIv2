@@ -25,9 +25,9 @@
 //error_reporting(E_ALL);
     include_once(__DIR__ . "/goAPI.php");
 	
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
+    $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
+    $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
+    $campaignID 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
 	
     if (empty($fromDate)) {
     	$fromDate 									= date("Y-m-d")." 00:00:00";
@@ -137,7 +137,7 @@
 		}
 		//}
         if ($tenant) {
-            $list = (count($list_ids) > 0) ? "'".implode("','",$list_ids)."'" : "'-1'";
+            $list = ((is_countable($list_ids) ? count($list_ids) : 0) > 0) ? "'".implode("','",$list_ids)."'" : "'-1'";
         } else {
             $list = "'".implode("','",$list_ids)."'";
         }
@@ -255,8 +255,8 @@
 			";
 
 		$sts						= 0;
-		$statuses_called_to_print 			= count($status);
-		$statuses_count_called_to_print			= count($count_count);
+		$statuses_called_to_print 			= (is_countable($status) ? count($status) : 0);
+		$statuses_count_called_to_print			= (is_countable($count_count) ? count($count_count) : 0);
 
 		while ($statuses_called_to_print > $sts) {
 			$Pstatus = $status[$sts];					

@@ -22,10 +22,10 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-    $location = $goDB->escape($_REQUEST['location']);
-    $description = $goDB->escape($_REQUEST['description']);
-    $user_group = $goDB->escape($_REQUEST['user_group']);
-    $active = $goDB->escape($_REQUEST['active']);
+    $location = $goDB->escape(($_REQUEST['location'] ?? ''));
+    $description = $goDB->escape(($_REQUEST['description'] ?? ''));
+    $user_group = $goDB->escape(($_REQUEST['user_group'] ?? ''));
+    $active = $goDB->escape(($_REQUEST['active'] ?? ''));
 		
 ########################
 	if($location == null) {
@@ -40,7 +40,7 @@
 				if($active < 0 && $active != null || $active > 1 && $active != null) {
 					$APIResult = ["result" => "Error: Active Value should be in between 0 and 1"];
 				} else {
-					$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($goUser, $astDB);
 		
 					$goDB->where('name', $location);
 					if (checkIfTenant($groupId, $goDB)) {

@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-  $campaign_id = $_REQUEST['campaign_id'];
+  $campaign_id = ($_REQUEST['campaign_id'] ?? '');
 
   $astDB->where('campaign_id', $campaign_id);
   $astDB->orderBy('hotkey');

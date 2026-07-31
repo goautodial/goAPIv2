@@ -27,13 +27,13 @@
 
     include_once(__DIR__ . "/goAPI.php");
 
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
+    $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
+    $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
+    $campaignID 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
     
     $dispo_stats = "";
     if(isset($_REQUEST['statuses']))
-    $dispo_stats = $astDB->escape($_REQUEST['statuses']);
+    $dispo_stats = $astDB->escape(($_REQUEST['statuses'] ?? ''));
     
     if (empty($fromDate)) {
         $fromDate 									= date("Y-m-d")." 00:00:00";

@@ -21,16 +21,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $goUser         = $ostDB->escape($_REQUEST['goUser']);
-    $ip_address     = $ostDB->escape($_REQUEST['hostname']);
-    $email          = $ostDB->escape($_REQUEST['email']);
-    $fullname       = $ostDB->escape($_REQUEST['full_name']);
-    $phoneNumber    = $ostDB->escape($_REQUEST['phone_number']);
-    $company        = $ostDB->escape($_REQUEST['company']);
-    $notes          = $ostDB->escape($_REQUEST['notes']);
-    $topicID        = $ostDB->escape($_REQUEST['topic_id']);
-    $title          = $ostDB->escape($_REQUEST['title']);
-    $body           = $ostDB->escape($_REQUEST['body']);
+    $goUser         = $ostDB->escape(($_REQUEST['goUser'] ?? ''));
+    $ip_address     = $ostDB->escape(($_REQUEST['hostname'] ?? ''));
+    $email          = $ostDB->escape(($_REQUEST['email'] ?? ''));
+    $fullname       = $ostDB->escape(($_REQUEST['full_name'] ?? ''));
+    $phoneNumber    = $ostDB->escape(($_REQUEST['phone_number'] ?? ''));
+    $company        = $ostDB->escape(($_REQUEST['company'] ?? ''));
+    $notes          = $ostDB->escape(($_REQUEST['notes'] ?? ''));
+    $topicID        = $ostDB->escape(($_REQUEST['topic_id'] ?? ''));
+    $title          = $ostDB->escape(($_REQUEST['title'] ?? ''));
+    $body           = $ostDB->escape(($_REQUEST['body'] ?? ''));
     
     $date = date('Y-m-d H:i:s');
     
@@ -147,7 +147,7 @@
         $resultsArray[] = "error";
     }
     
-    if(in_array("error", $resultsArray)){
+    if(in_array("error", (is_array($resultsArray) ? $resultsArray : []))){
         $apiresults = ["result" => "Error: Something went wrong."];
     }else{
         $apiresults = ["result" => "success"];

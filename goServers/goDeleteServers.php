@@ -24,7 +24,7 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$server_id 											= $astDB->escape($_REQUEST['server_id']);
+	$server_id 											= $astDB->escape(($_REQUEST['server_id'] ?? ''));
 	
     ### Check Server ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {

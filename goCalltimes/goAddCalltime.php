@@ -22,38 +22,38 @@
 **/
 	include_once (__DIR__ . "/goAPI.php");
 	
-	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
-	$call_time_name 									= $astDB->escape($_REQUEST['call_time_name']);
-	$call_time_comments 								= $astDB->escape($_REQUEST['call_time_comments']);
-	$ct_default_start 									= $astDB->escape($_REQUEST['ct_default_start']);
-	$ct_default_stop 									= $astDB->escape($_REQUEST['ct_default_stop']);
-	$ct_sunday_start 									= $astDB->escape($_REQUEST['ct_sunday_start']);
-	$ct_sunday_stop 									= $astDB->escape($_REQUEST['ct_sunday_stop']);
-	$ct_monday_start									= $astDB->escape($_REQUEST['ct_monday_start']);
-	$ct_monday_stop										= $astDB->escape($_REQUEST['ct_monday_stop']);
-	$ct_tuesday_start 									= $astDB->escape($_REQUEST['ct_tuesday_start']);
-	$ct_tuesday_stop 									= $astDB->escape($_REQUEST['ct_tuesday_stop']);
-	$ct_wednesday_start 								= $astDB->escape($_REQUEST['ct_wednesday_start']);
-	$ct_wednesday_stop 									= $astDB->escape($_REQUEST['ct_wednesday_stop']);
-	$ct_thursday_start 									= $astDB->escape($_REQUEST['ct_thursday_start']);
-	$ct_thursday_stop 									= $astDB->escape($_REQUEST['ct_thursday_stop']);
-	$ct_friday_start 									= $astDB->escape($_REQUEST['ct_friday_start']);
-	$ct_friday_stop 									= $astDB->escape($_REQUEST['ct_friday_stop']);
-	$ct_saturday_start 									= $astDB->escape($_REQUEST['ct_saturday_start']);
-	$ct_saturday_stop 									= $astDB->escape($_REQUEST['ct_saturday_stop']);
-	$default_audio 										= $astDB->escape($_REQUEST['default_audio']);
-	$sunday_audio 										= $astDB->escape($_REQUEST['sunday_audio']);
-	$monday_audio 										= $astDB->escape($_REQUEST['monday_audio']);
-	$tuesday_audio 										= $astDB->escape($_REQUEST['tuesday_audio']);
-	$wednesday_audio 									= $astDB->escape($_REQUEST['wednesday_audio']);
-	$thursday_audio 									= $astDB->escape($_REQUEST['thursday_audio']);
-	$friday_audio 										= $astDB->escape($_REQUEST['friday_audio']);
-	$saturday_audio 									= $astDB->escape($_REQUEST['saturday_audio']);
+	$call_time_id 										= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
+	$call_time_name 									= $astDB->escape(($_REQUEST['call_time_name'] ?? ''));
+	$call_time_comments 								= $astDB->escape(($_REQUEST['call_time_comments'] ?? ''));
+	$ct_default_start 									= $astDB->escape(($_REQUEST['ct_default_start'] ?? ''));
+	$ct_default_stop 									= $astDB->escape(($_REQUEST['ct_default_stop'] ?? ''));
+	$ct_sunday_start 									= $astDB->escape(($_REQUEST['ct_sunday_start'] ?? ''));
+	$ct_sunday_stop 									= $astDB->escape(($_REQUEST['ct_sunday_stop'] ?? ''));
+	$ct_monday_start									= $astDB->escape(($_REQUEST['ct_monday_start'] ?? ''));
+	$ct_monday_stop										= $astDB->escape(($_REQUEST['ct_monday_stop'] ?? ''));
+	$ct_tuesday_start 									= $astDB->escape(($_REQUEST['ct_tuesday_start'] ?? ''));
+	$ct_tuesday_stop 									= $astDB->escape(($_REQUEST['ct_tuesday_stop'] ?? ''));
+	$ct_wednesday_start 								= $astDB->escape(($_REQUEST['ct_wednesday_start'] ?? ''));
+	$ct_wednesday_stop 									= $astDB->escape(($_REQUEST['ct_wednesday_stop'] ?? ''));
+	$ct_thursday_start 									= $astDB->escape(($_REQUEST['ct_thursday_start'] ?? ''));
+	$ct_thursday_stop 									= $astDB->escape(($_REQUEST['ct_thursday_stop'] ?? ''));
+	$ct_friday_start 									= $astDB->escape(($_REQUEST['ct_friday_start'] ?? ''));
+	$ct_friday_stop 									= $astDB->escape(($_REQUEST['ct_friday_stop'] ?? ''));
+	$ct_saturday_start 									= $astDB->escape(($_REQUEST['ct_saturday_start'] ?? ''));
+	$ct_saturday_stop 									= $astDB->escape(($_REQUEST['ct_saturday_stop'] ?? ''));
+	$default_audio 										= $astDB->escape(($_REQUEST['default_audio'] ?? ''));
+	$sunday_audio 										= $astDB->escape(($_REQUEST['sunday_audio'] ?? ''));
+	$monday_audio 										= $astDB->escape(($_REQUEST['monday_audio'] ?? ''));
+	$tuesday_audio 										= $astDB->escape(($_REQUEST['tuesday_audio'] ?? ''));
+	$wednesday_audio 									= $astDB->escape(($_REQUEST['wednesday_audio'] ?? ''));
+	$thursday_audio 									= $astDB->escape(($_REQUEST['thursday_audio'] ?? ''));
+	$friday_audio 										= $astDB->escape(($_REQUEST['friday_audio'] ?? ''));
+	$saturday_audio 									= $astDB->escape(($_REQUEST['saturday_audio'] ?? ''));
 		
-	if ($astDB->escape($_REQUEST['user_group']) == "ALL") {
+	if ($astDB->escape(($_REQUEST['user_group'] ?? '')) == "ALL") {
 		$user_group 									= "---ALL---";
 	} else {
-		$user_group 									= $astDB->escape($_REQUEST['user_group']);
+		$user_group 									= $astDB->escape(($_REQUEST['user_group'] ?? ''));
 	}
 		
     // ERROR CHECKING 

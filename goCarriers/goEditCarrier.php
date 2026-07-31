@@ -24,17 +24,17 @@
 
 	include_once (__DIR__ . "/goAPI.php");
 	
-    $carrier_id 										= $astDB->escape($_REQUEST['carrier_id']);
-    $carrier_name 										= $astDB->escape($_REQUEST['carrier_name']);
-    $carrier_description 								= $astDB->escape($_REQUEST['carrier_description']);
-    $protocol 											= $astDB->escape($_REQUEST['protocol']);
-    $server_ip 											= $astDB->escape($_REQUEST['server_ip']);
-    $registration_string 								= $astDB->escape($_REQUEST['registration_string']);
-    $account_entry 										= $_REQUEST['account_entry'];
-	$dialplan_entry 									= $_REQUEST['dialplan_entry'];
-    $globals_string										= $astDB->escape($_REQUEST['globals_string']);
-    $active 											= $astDB->escape(strtoupper($_REQUEST['active']));
-    //$values 											= $_REQUEST['item'];
+    $carrier_id 										= $astDB->escape(($_REQUEST['carrier_id'] ?? ''));
+    $carrier_name 										= $astDB->escape(($_REQUEST['carrier_name'] ?? ''));
+    $carrier_description 								= $astDB->escape(($_REQUEST['carrier_description'] ?? ''));
+    $protocol 											= $astDB->escape(($_REQUEST['protocol'] ?? ''));
+    $server_ip 											= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+    $registration_string 								= $astDB->escape(($_REQUEST['registration_string'] ?? ''));
+    $account_entry 										= ($_REQUEST['account_entry'] ?? '');
+	$dialplan_entry 									= ($_REQUEST['dialplan_entry'] ?? '');
+    $globals_string										= $astDB->escape(($_REQUEST['globals_string'] ?? ''));
+    $active 											= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
+    //$values 											= ($_REQUEST['item'] ?? '');
    
     ### Default values 
 	$defProtocol 										= [ "SIP", "Zap", "IAX2", "EXTERNAL" ];	
@@ -57,11 +57,11 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Server ID not less than 3 characters."
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($protocol,$defProtocol) && $protocol != null) {
+	} elseif (!in_array($protocol, (is_array($defProtocol) ? $defProtocol : [])) && $protocol != null) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2 or EXTERNAL only."
 		];

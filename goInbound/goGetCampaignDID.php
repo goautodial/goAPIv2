@@ -23,7 +23,7 @@
 
     include_once(__DIR__ . "/goAPI.php");
     
-    $campaign_id = $_REQUEST['campaign_id'];
+    $campaign_id = ($_REQUEST['campaign_id'] ?? '');
     
     if(empty($campaign_id)){
         $apiresults = ["result" => "Error: Set a value for campaign_id."];

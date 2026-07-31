@@ -24,21 +24,21 @@
     include_once (__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
-    $did_id = $astDB->escape($_REQUEST['did_id']);
-    $ip_address = $_REQUEST['hostname'];
+    $did_id = $astDB->escape(($_REQUEST['did_id'] ?? ''));
+    $ip_address = ($_REQUEST['hostname'] ?? '');
     
 	if($did_id == null) { 
 		$apiresults = ["result" => "Error: Set a value for DID ID."]; 
 	} else {
 
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
 		$log_user = $goUser;
 		$log_group = $groupId;
 
 		if(!empty($did_id)){
 			$exploded = explode(",", (string) $did_id);
 		}
-        $counter = count($exploded);
+        $counter = (is_countable($exploded) ? count($exploded) : 0);
 		for($i=0;$i < $counter;$i++){
 			$id = $exploded[$i];
 

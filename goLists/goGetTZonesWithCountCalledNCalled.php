@@ -24,7 +24,7 @@
     
     include_once (__DIR__ . "/goAPI.php");
 
-    $list_id 											= $astDB->escape($_REQUEST['list_id']);
+    $list_id 											= $astDB->escape(($_REQUEST['list_id'] ?? ''));
     
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

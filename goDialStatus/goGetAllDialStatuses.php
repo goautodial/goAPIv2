@@ -5,7 +5,7 @@
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author     	Noel Umandap
- * @author     	Chris Lomuntad 
+ * @author     	Chris Lomuntad
  * @author     	Alexander Jim Abenoja
  *
  * @par <b>License</b>:
@@ -25,12 +25,12 @@
 
     include_once (__DIR__ . "/goAPI.php");
 
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
-	$is_selectable 										= $astDB->escape($_REQUEST['is_selectable']);
-	$add_hotkey											= $astDB->escape($_REQUEST['add_hotkey']);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	
-	// ERROR CHECKING 
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$is_selectable 										= $astDB->escape(($_REQUEST['is_selectable'] ?? ''));
+	$add_hotkey											= $astDB->escape(($_REQUEST['add_hotkey'] ?? ''));
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -49,12 +49,17 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
-			//if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", $campaign_id)) {
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			$systemStatuses = [];
+			$campStatuses = [];
+			$dataStatus = ["system" => [], "campaign" => []];
+			$dataStatusName = ["system" => [], "campaign" => []];
+
+			//if ((is_array($campaigns) && in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) || preg_match("/ALL/", $campaign_id)) {
                 $cols                                   = [
                     "status",
                     "status_name"
@@ -74,15 +79,17 @@
                     }
                 }
 
+                $systemStatuses = is_array($systemStatuses) ? $systemStatuses : [];
+
                 ksort($systemStatuses);
                 foreach ($systemStatuses as $key => $status) {
                     $dataStatus['system'][]             = $key;
                     $dataStatusName['system'][]         = $status;
                 }
 
-				if ((is_array($campaigns) && in_array($campaign_id, $campaigns)) || preg_match("/ALL/", (string) $campaign_id)) {
+				if ((is_array($campaigns) && in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) || preg_match("/ALL/", (string) $campaign_id)) {
 					$cols 								= [
-						"status", 
+						"status",
 						"status_name"
 					];
 
@@ -94,17 +101,19 @@
 						$astDB->where("campaign_id", $campaign_id);
 					}
 
-					$astDB->orderBy("status", "desc");			
-					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);			
+					$astDB->orderBy("status", "desc");
+					$rsltv 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
 
 					if ($astDB->count > 0) {
 						foreach ($rsltv as $fresults){
                             $thisStatus                 = $fresults['status'];
 							//$dataStatusName[] 			= $fresults['status_name'];
                             $campStatuses[$thisStatus]  = $fresults['status_name'];
-						}		
-					}			
+						}
+					}
 				}
+
+                $campStatuses = is_array($campStatuses) ? $campStatuses : [];
 
                 ksort($campStatuses);
                 foreach ($campStatuses as $key => $status) {
@@ -120,16 +129,16 @@
 			//} else {
 			//	$err_msg 								= error_handle("10108", "status. No campaigns available");
 			//	$apiresults								= array(
-			//		"code" 									=> "10108", 
+			//		"code" 									=> "10108",
 			//		"result" 								=> $err_msg
 			//	);
 			//}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 ?>

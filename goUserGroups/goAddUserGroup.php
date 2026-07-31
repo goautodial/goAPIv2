@@ -24,9 +24,9 @@
     include_once (__DIR__ . "/goAPI.php");
  	
     // POST or GET Variables
-	$user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$group_name 										= $astDB->escape($_REQUEST['group_name']);
-	$group_level 										= $astDB->escape($_REQUEST['group_level']);	
+	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$group_name 										= $astDB->escape(($_REQUEST['group_name'] ?? ''));
+	$group_level 										= $astDB->escape(($_REQUEST['group_level'] ?? ''));	
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

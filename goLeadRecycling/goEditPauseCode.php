@@ -23,11 +23,11 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
-	$camp = $astDB->escape($_REQUEST['campaign_id']);
-	$status = $astDB->escape($_REQUEST['status']);
-	$attempt_delay = $astDB->escape($_REQUEST['attempt_delay']);
-	$attempt_maximum = $astDB->escape($_REQUEST['attempt_maximum']);
-	$active = strtoupper((string) $astDB->escape($_REQUEST['active']));
+	$camp = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$status = $astDB->escape(($_REQUEST['status'] ?? ''));
+	$attempt_delay = $astDB->escape(($_REQUEST['attempt_delay'] ?? ''));
+	$attempt_maximum = $astDB->escape(($_REQUEST['attempt_maximum'] ?? ''));
+	$active = strtoupper((string) $astDB->escape(($_REQUEST['active'] ?? '')));
 		
     ### Default values 
     $defActive = ['N','Y'];
@@ -45,10 +45,10 @@
 				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $attempt_maximum)){
 					$apiresults = ["result" => "Error: Special characters found in pause code name and must not be empty"];
 				} else {
-					if(!in_array($active,$defActive) && $active != null) {
+					if(!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 						$apiresults = ["result" => "Error: Default value for billable is No, Yes or half only."];
 					} else {
-						$groupId = go_get_groupid($goUser);
+						$groupId = go_get_groupid($goUser, $astDB);
 		
 						if (!checkIfTenant($groupId, $goDB)) {
 							//$ul = "";

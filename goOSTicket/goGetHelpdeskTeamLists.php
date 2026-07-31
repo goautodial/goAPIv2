@@ -9,7 +9,7 @@
     #######################################################
     include_once(__DIR__ . "/../goFunctions.php");
      
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($goUser, $astDB);
 
     if (!checkIfTenant($groupId, $goDB)) {
             $ul='';

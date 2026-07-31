@@ -25,15 +25,15 @@
     include_once(__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-    $extension 											= $astDB->escape($_REQUEST['extension']);
-    $server_ip 											= $astDB->escape($_REQUEST['server_ip']);
-    $pass 												= $astDB->escape($_REQUEST['pass']);
-    $protocol 											= $astDB->escape($_REQUEST['protocol']);
-    $dialplan_number 									= $astDB->escape($_REQUEST['dialplan_number']);
-    $voicemail_id 										= $astDB->escape($_REQUEST['voicemail_id']);
-    $status 											= $astDB->escape($_REQUEST['status']);
-    $active 											= $astDB->escape($_REQUEST['active']);
-    $fullname 											= $astDB->escape($_REQUEST['fullname']);
+    $extension 											= $astDB->escape(($_REQUEST['extension'] ?? ''));
+    $server_ip 											= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+    $pass 												= $astDB->escape(($_REQUEST['pass'] ?? ''));
+    $protocol 											= $astDB->escape(($_REQUEST['protocol'] ?? ''));
+    $dialplan_number 									= $astDB->escape(($_REQUEST['dialplan_number'] ?? ''));
+    $voicemail_id 										= $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
+    $status 											= $astDB->escape(($_REQUEST['status'] ?? ''));
+    $active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
+    $fullname 											= $astDB->escape(($_REQUEST['fullname'] ?? ''));
     $messages 											= isset($_REQUEST['messages']) ? $astDB->escape($_REQUEST['messages']) : 0;
     $old_messages 										= isset($_REQUEST['old_messages']) ? $astDB->escape($_REQUEST['old_messages']) : 0;
     $user_group 										= isset($_REQUEST['user_group']) ? $astDB->escape($_REQUEST['user_group']) : null;
@@ -62,15 +62,15 @@
 		$apiresults										= [
 			"result" 										=> "Error: Phone Extension Not Defined."
 		];
-	} elseif (!in_array($status,$defStatus)) {
+	} elseif (!in_array($status, (is_array($defStatus) ? $defStatus : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for status is ACTIVE, SUSPENDED, CLOSED, PENDING, ADMIN only."
 		];
-	} elseif (!in_array($active,$defActive)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($protocol,$defProtocol)) {
+	} elseif (!in_array($protocol, (is_array($defProtocol) ? $defProtocol : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for protocol is SIP, Zap, IAX2, EXTERNAL."
 		];

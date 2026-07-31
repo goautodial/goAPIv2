@@ -22,35 +22,35 @@
 
     include_once(__DIR__ . "/goAPI.php");
 	// POST or GET Variables
-        $did_pattern = $_REQUEST['did_pattern'];
-        $did_description = $_REQUEST['did_description'];
-        $active = strtoupper($_REQUEST['did_active']);
-        //$did_route = strtoupper($_REQUEST['did_route']);
-        $user_group = $_REQUEST['user_group'];
-        $goUser = $_REQUEST['goUser'];
-        $ip_address = $_REQUEST['hostname'];
-        $record_call = "N"; //$_REQUEST['record_call'];
+        $did_pattern = ($_REQUEST['did_pattern'] ?? '');
+        $did_description = ($_REQUEST['did_description'] ?? '');
+        $active = strtoupper(($_REQUEST['did_active'] ?? ''));
+        //$did_route = strtoupper(($_REQUEST['did_route'] ?? ''));
+        $user_group = ($_REQUEST['user_group'] ?? '');
+        $goUser = ($_REQUEST['goUser'] ?? '');
+        $ip_address = ($_REQUEST['hostname'] ?? '');
+        $record_call = "N"; //($_REQUEST['record_call'] ?? '');
 /*
 	// Agent
-		$user = $_REQUEST['user'];
-        $user_unavailable_action = strtoupper($_REQUEST['user_unavailable_action']);
+		$user = ($_REQUEST['user'] ?? '');
+        $user_unavailable_action = strtoupper(($_REQUEST['user_unavailable_action'] ?? ''));
 
 	// Ingroup
-		$group_id = $_REQUEST['group_id'];
+		$group_id = ($_REQUEST['group_id'] ?? '');
 
 	// Phone
-		$phone = $_REQUEST['phone'];
-		$server_ip = $_REQUEST['server_ip'];
+		$phone = ($_REQUEST['phone'] ?? '');
+		$server_ip = ($_REQUEST['server_ip'] ?? '');
 
 	// IVR
-		$menu_id = $_REQUEST['menu_id'];
+		$menu_id = ($_REQUEST['menu_id'] ?? '');
 
 	// Voicemail
-		$voicemail_ext = $_REQUEST['voicemail_ext'];
+		$voicemail_ext = ($_REQUEST['voicemail_ext'] ?? '');
 
 	// Custon Extension
-		$extension = $_REQUEST['extension'];
-		$exten_context = $_REQUEST['exten_context'];
+		$extension = ($_REQUEST['extension'] ?? '');
+		$exten_context = ($_REQUEST['exten_context'] ?? '');
 */
     // Default values 
 //    $defUUA = array('IN_GROUP','EXTEN','VOICEMAIL','PHONE','VMAIL_NO_INST');
@@ -66,15 +66,15 @@
 		$apiresults = ["result" => "Error: Special characters found in did_pattern"];
 	}else if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $did_description)){
 		$apiresults = ["result" => "Error: Special characters found in did_description"];
-/*     }else if(!in_array($user_unavailable_action,$defUUA) && $user_unavailable_action != null) {
+/*     }else if(!in_array($user_unavailable_action, (is_array($defUUA) ? $defUUA : [])) && $user_unavailable_action != null) {
 		$apiresults = array("result" => "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'.");*/
-	}else if(!in_array($active,$defActive) && $active != null) {
+	}else if(!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults = ["result" => "Error: Default value for active is Y or N only."];
-/*	}else if(!in_array($did_route,$defRoute) && $did_route != null) {
+/*	}else if(!in_array($did_route, (is_array($defRoute) ? $defRoute : [])) && $did_route != null) {
 		$apiresults = array("result" => "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only.");*/
 	}else{
 
-		$groupId = go_get_groupid($session_user);
+		$groupId = go_get_groupid($session_user, $astDB);
 		$log_user = $session_user;
 		$log_group = $groupId;
 	/*

@@ -24,9 +24,9 @@
 	ini_set('memory_limit', '2048M');
 	include_once (__DIR__ . "/goAPI.php");
 	
-	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
-	$limit 												= $astDB->escape($_REQUEST['limit']);
-	$offset 											= $astDB->escape($_REQUEST['offset']);
+	$list_id 											= $astDB->escape(($_REQUEST["list_id"] ?? ''));
+	$limit 												= $astDB->escape(($_REQUEST['limit'] ?? ''));
+	$offset 											= $astDB->escape(($_REQUEST['offset'] ?? ''));
 
 	if($limit != NULL && $offset != NULL){
 		$limit_SQL = "LIMIT $offset, $limit";
@@ -105,7 +105,7 @@
 
 			$u											= 0;
 			$x											= 0;
-			$count_header 								= count($header);
+			$count_header 								= (is_countable($header) ? count($header) : 0);
 			
 			foreach ($dllist as $fetch_row) {
 				$array_fetch 							= $fetch_row[$header[0]];

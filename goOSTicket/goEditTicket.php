@@ -21,11 +21,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $goUser     = $ostDB->escape($_REQUEST['goUser']);
-    $ip_address = $ostDB->escape($_REQUEST['hostname']);
-    $threadID   = $ostDB->escape($_REQUEST['thread_id']);
-    $title      = $ostDB->escape($_REQUEST['title']);
-    $body       = $ostDB->escape($_REQUEST['body']);
+    $goUser     = $ostDB->escape(($_REQUEST['goUser'] ?? ''));
+    $ip_address = $ostDB->escape(($_REQUEST['hostname'] ?? ''));
+    $threadID   = $ostDB->escape(($_REQUEST['thread_id'] ?? ''));
+    $title      = $ostDB->escape(($_REQUEST['title'] ?? ''));
+    $body       = $ostDB->escape(($_REQUEST['body'] ?? ''));
     $date       = date('Y-m-d H:i:s');
     
     //update thread entry

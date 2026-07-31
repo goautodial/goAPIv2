@@ -23,7 +23,7 @@
     include_once (__DIR__ . "/goAPI.php");
 
     // POST or GET Variables
-    $extension 											= $astDB->escape($_REQUEST['extension']);
+    $extension 											= $astDB->escape(($_REQUEST['extension'] ?? ''));
 
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {

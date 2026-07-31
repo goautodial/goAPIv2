@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($goUser, $astDB);
 
     if (!checkIfTenant($groupId, $goDB)) {
         $ul = "";

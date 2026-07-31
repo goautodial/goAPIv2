@@ -26,11 +26,11 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
 	// POST or GET Variables
-	$recycle_id 										= $astDB->escape($_REQUEST['recycle_id']);
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$attempt_delay 										= $astDB->escape($_REQUEST['attempt_delay']);
-	$attempt_maximum 									= $astDB->escape($_REQUEST['attempt_maximum']);
-	$active 											= $astDB->escape(strtoupper($_REQUEST['active']));
+	$recycle_id 										= $astDB->escape(($_REQUEST['recycle_id'] ?? ''));
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$attempt_delay 										= $astDB->escape(($_REQUEST['attempt_delay'] ?? ''));
+	$attempt_maximum 									= $astDB->escape(($_REQUEST['attempt_maximum'] ?? ''));
+	$active 											= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
 	$defActive 											= ['N', 'Y'];
 
     ### ERROR CHECKING
@@ -60,7 +60,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in Attempt Maximum and must not be empty"
 		];
-	} elseif (!in_array($active, $defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is N for No and Y for Yes only."
 		];
@@ -75,7 +75,7 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {		
-			if (in_array($campaign_id, $campaigns)) {
+			if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->where('recycle_id', $recycle_id);
 				//$astDB->getOne("vicidial_lead_recycle", "campaign_id");

@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $ticketid = $ostDB->escape($_REQUEST['ticket_id']);
+    $ticketid = $ostDB->escape(($_REQUEST['ticket_id'] ?? ''));
     
     if(!empty($ticketid)) {
         //delete from ticket table

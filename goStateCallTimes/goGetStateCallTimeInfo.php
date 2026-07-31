@@ -21,12 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $state_call_time_id = $astDB->escape($_REQUEST["state_call_time_id"]);
+    $state_call_time_id = $astDB->escape(($_REQUEST["state_call_time_id"] ?? ''));
 
 	if($state_call_time_id == null) {
 		$apiresults = ["result" => "Error: Set a value for State Call Time ID."];
 	} else {
-		$groupId = go_get_groupid($goUser);
+		$groupId = go_get_groupid($goUser, $astDB);
 
 		if (!checkIfTenant($groupId, $goDB)) {
 			$ul = "";

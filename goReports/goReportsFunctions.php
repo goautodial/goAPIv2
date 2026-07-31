@@ -128,7 +128,7 @@
 		$query = mysqli_query($link, $query_text);
 		$resultsu = mysqli_fetch_array($query);
 		
-		if(count($resultsu) > 0){
+		if((is_countable($resultsu) ? count($resultsu) : 0) > 0){
 			$fresults = $resultsu['qresult'];
 			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$fresults)))));
 			$allCloserCampaigns = implode("','",$closerCampaigns);

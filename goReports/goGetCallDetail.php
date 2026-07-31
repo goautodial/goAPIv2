@@ -24,23 +24,23 @@
 	$def_end_date .= $default_date." 23:59:59";
 
     // POST or GET Variables
-    $user = mysqli_real_escape_string($link, $_REQUEST['user']);
-    $start_date = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
+    $user = mysqli_real_escape_string($link, ($_REQUEST['user'] ?? ''));
+    $start_date = mysqli_real_escape_string($link, ($_REQUEST['fromDate'] ?? ''));
     // if(empty($start_date))
     // 	$start_date = $def_start_date;
-	$end_date = mysqli_real_escape_string($link, $_REQUEST['toDate']);
+	$end_date = mysqli_real_escape_string($link, ($_REQUEST['toDate'] ?? ''));
 	// if(empty($end_date))
 	// 	$end_date = $def_end_date;
-	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$list_id = mysqli_real_escape_string($link, $_REQUEST['list_id']);
-	$groupId = go_get_groupid($session_user);
-	//$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-	$id = mysqli_real_escape_string($link, $_REQUEST['id']);
-	$export = mysqli_real_escape_string($link, $_REQUEST['export']);
+	$campaign_id = mysqli_real_escape_string($link, ($_REQUEST['campaign_id'] ?? ''));
+	$list_id = mysqli_real_escape_string($link, ($_REQUEST['list_id'] ?? ''));
+	$groupId = go_get_groupid($session_user, $astDB);
+	//$ip_address = mysqli_real_escape_string($link, ($_REQUEST['log_ip'] ?? ''));
+	$id = mysqli_real_escape_string($link, ($_REQUEST['id'] ?? ''));
+	$export = mysqli_real_escape_string($link, ($_REQUEST['export'] ?? ''));
 
-	$limit = mysqli_real_escape_string($link, $_REQUEST['limit']);
-	$sortOrder = mysqli_real_escape_string($link, $_REQUEST['sortOrder']);
-	$sortBy = mysqli_real_escape_string($link, $_REQUEST['sortBy']);
+	$limit = mysqli_real_escape_string($link, ($_REQUEST['limit'] ?? ''));
+	$sortOrder = mysqli_real_escape_string($link, ($_REQUEST['sortOrder'] ?? ''));
+	$sortBy = mysqli_real_escape_string($link, ($_REQUEST['sortBy'] ?? ''));
 	
 
 	if($limit === '' || $limit === '0')
@@ -158,14 +158,14 @@
 		$list_SQL = "";
 		$status_SQL = "";
 		
-		$id_ct = count($id);
-		$user_ct = count($user);
-		$campaign_ct = count($campaigns);
-		$list_ct = count($lists);
-		$status_ct = count($dispo_stats);
+		$id_ct = (is_countable($id) ? count($id) : 0);
+		$user_ct = (is_countable($user) ? count($user) : 0);
+		$campaign_ct = (is_countable($campaigns) ? count($campaigns) : 0);
+		$list_ct = (is_countable($lists) ? count($lists) : 0);
+		$status_ct = (is_countable($dispo_stats) ? count($dispo_stats) : 0);
 		
 		if($user != ""){
-			if (in_array("ALL", $user)){
+			if (in_array("ALL", (is_array($user) ? $user : []))){
 				$user_SQL = "";
 			}else{
 				$i=0;
@@ -181,7 +181,7 @@
 		}
 
 		if($id !== ""){
-			// if (in_array("ALL", $id)){
+			// if (in_array("ALL", (is_array($id) ? $id : []))){
 			// 	$id_SQL = "";
 			// }else{
 				// $i=0;
@@ -232,7 +232,7 @@
 		}
 
 		if($campaigns != ""){
-			if (in_array("ALL", $campaigns)){
+			if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))){
 				$campaign_SQL = "";
 				
 				$query_campaign = mysqli_query($link,"SELECT campaign_id FROM vicidial_campaigns;");
@@ -266,12 +266,12 @@
 				$list_SQL .= "'$lists[$i]',";
 				$i++;
 			}
-			if (in_array("ALL", $lists)){
+			if (in_array("ALL", (is_array($lists) ? $lists : []))){
 				$list_SQL = "";
 				
 				if(isset($array_campaign) && !empty($array_campaign)){
 					$i=0;
-					while($i < count($array_campaign)){
+					while($i < (is_countable($array_campaign) ? count($array_campaign) : 0)){
 						$camp_id = $array_campaign[$i];
 						$query_list = mysqli_query($link,"SELECT list_id FROM vicidial_lists WHERE active='Y' AND campaign_id = '$camp_id';");
 						while($fetch_list = mysqli_fetch_array($query_list)){
@@ -308,7 +308,7 @@
 				$status_SQL .= "'$dispo_stats[$i]',";
 				$i++;
 			}
-			if ( in_array("ALL", $dispo_stats) || $status_ct < 1 ){
+			if ( in_array("ALL", (is_array($dispo_stats) ? $dispo_stats : [])) || $status_ct < 1 ){
 				$status_SQL = "";
 			}
 			else{
@@ -363,7 +363,7 @@
 			$csv_header[] = $fieldinfo->name;
 		}
         $csv_header[] = "call_notes";
-        $counter = count($array_list);
+        $counter = (is_countable($array_list) ? count($array_list) : 0);
         //OUTPUT CUSTOM FIELDS IN HEADER
         for($i = 0 ; $i < $counter; $i++){
 				$list_id = $array_list[$i];
@@ -382,12 +382,12 @@
 			}
         $header_CF = [];
         $keys = array_keys($active_list_fields);
-        $counter = count($keys);
+        $counter = (is_countable($keys) ? count($keys) : 0);
         for($i = 0 ; $i < $counter; $i++){
 				$list_id = $keys[$i];
 				for($x=0;$x < count($active_list_fields[$list_id]);$x++){
 					$field = $active_list_fields[$list_id][$x];
-					if(!in_array($field,$header_CF)){
+					if(!in_array($field, (is_array($header_CF) ? $header_CF : []))){
 						$header_CF[] = $field;
 					}
 				}
@@ -424,7 +424,7 @@
             $row[] = $notes_data;
             //OUTPUT CUSTOM FIELDS IN ROW
             $keys = array_keys($active_list_fields);
-            $counter = count($keys);
+            $counter = (is_countable($keys) ? count($keys) : 0);
             // list of active custom lists
             //var_dump($active_list_fields["custom_104"][0]);
             // var_dump($header_CF);
@@ -444,7 +444,7 @@
 							
 							if($fetch_CF !== NULL){
 								//var_dump($fetch_CF);
-								for($x=0;$x < count($header_CF);$x++){
+								for($x=0;$x < (is_countable($header_CF) ? count($header_CF) : 0);$x++){
 									if(!empty($fetch_CF[$header_CF[$x]])){
 										$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
 									}else{
@@ -458,7 +458,7 @@
 					}
 					
 
-					for($a=0;$a < count($fetch_row);$a++){
+					for($a=0;$a < (is_countable($fetch_row) ? count($fetch_row) : 0);$a++){
 						$row[] = $fetch_row[$a];
 					}
 					$queries[] = $row;
@@ -470,11 +470,11 @@
 		}
 		//var_dump($queries);
 		$main_row = [];
-        $counter = count($csv_row);
+        $counter = (is_countable($csv_row) ? count($csv_row) : 0);
 		//put keys in each row
 		for($i=0; $i < $counter; $i++){
 			//unset($re_head);
-			for($a=0;$a<count($csv_header);$a++){
+			for($a=0;$a<(is_countable($csv_header) ? count($csv_header) : 0);$a++){
 				//$re_head[] = $csv_header[$a];
 				if($csv_header[$a] !== "AfterDispo")
 				$re_row[$csv_header[$a]] = str_replace("\\", "", $csv_row[$i][$a]);
@@ -498,11 +498,11 @@
 	        	echo implode(",",$csv_header)."\n";
 
 	        	$count = 0;
-                $counter = count($csv_row);
+                $counter = (is_countable($csv_row) ? count($csv_row) : 0);
 		        for($i=0; $i <= $counter; $i++){
 		            $count_row = $csv_row[$i];
-		            for($x=0; $x <= count($count_row); $x++){
-		                if($x === count($count_row)){
+		            for($x=0; $x <= (is_countable($count_row) ? count($count_row) : 0); $x++){
+		                if($x === (is_countable($count_row) ? count($count_row) : 0)){
 		                    echo $count_row[$x]."\n";
 		                }else{
 		                    echo $count_row[$x].",";

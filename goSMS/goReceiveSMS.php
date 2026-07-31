@@ -14,7 +14,7 @@
 
 	try
     {
-        $message_type = $_POST["message_type"];
+        $message_type = ($_POST["message_type"] ?? '');
     }
     catch (Exception)
     {
@@ -25,11 +25,11 @@
     if (strtoupper((string) $message_type) === "INCOMING"){
         try
         {
-            $message = $_POST["message"];
-            $mobile_number = $_POST["mobile_number"];
-            $shortcode = $_POST["shortcode"];
-            $timestamp = $_POST["timestamp"];
-            $request_id = $_POST["request_id"];
+            $message = ($_POST["message"] ?? '');
+            $mobile_number = ($_POST["mobile_number"] ?? '');
+            $shortcode = ($_POST["shortcode"] ?? '');
+            $timestamp = ($_POST["timestamp"] ?? '');
+            $request_id = ($_POST["request_id"] ?? '');
 
             // echo "Accepted";
             // send reply
@@ -55,7 +55,7 @@
 
 		    $ch = curl_init();
 		    curl_setopt($ch, CURLOPT_URL, $URL);
-		    curl_setopt($ch, CURLOPT_POST, count($arr_post_body));
+		    curl_setopt($ch, CURLOPT_POST, (is_countable($arr_post_body) ? count($arr_post_body) : 0));
 		    curl_setopt($ch, CURLOPT_POSTFIELDS, $query_string);
 		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		    $response = curl_exec($ch);

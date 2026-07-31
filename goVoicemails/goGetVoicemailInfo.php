@@ -25,8 +25,8 @@
 	include_once (__DIR__ . "/goAPI.php");
 		
 	### POST or GET Variables
-	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
-	$active								= $astDB->escape($_REQUEST['active']);
+	$voicemail_id 						= $astDB->escape(($_REQUEST["voicemail_id"] ?? ''));
+	$active								= $astDB->escape(($_REQUEST['active'] ?? ''));
    
 	### Default values
     $defActive 							= [
@@ -42,7 +42,7 @@
 		$apiresults 					= [
 			"result" 						=> "Error: Set a value for Voicemail ID."
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 					= [
 			"result" 						=> "Error: Default value for active is Y or N only."
 		];

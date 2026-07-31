@@ -21,36 +21,38 @@
 */
 
 	include_once (__DIR__ . "/goAPI.php");
- 
-	### POST or GET Variables
-	$allow_voicemail_greeting					= $astDB->escape($_REQUEST["allow_voicemail_greeting"]); 
 
-	### ERROR CHECKING 					
+	### POST or GET Variables
+	$allow_voicemail_greeting					= $astDB->escape(($_REQUEST["allow_voicemail_greeting"] ?? ''));
+
+	### ERROR CHECKING
 	if (!isset($session_user) || is_null($session_user)){
 		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
 		];
 	} else {
-		
+
 		$resultGet = $astDB->getOne("system_settings", "allow_voicemail_greeting");
 
-		if ( $resultGet["allow_voicemail_greeting"] !== $allow_voicemail_greeting ){
-			$result = $resultGet["allow_voicemail_greeting"];
+		$current_allow_voicemail_greeting = $resultGet["allow_voicemail_greeting"] ?? '';
+
+		if ( $current_allow_voicemail_greeting !== $allow_voicemail_greeting ){
+			$result = $current_allow_voicemail_greeting;
 			$data 						= [
 				"allow_voicemail_greeting"				=> $allow_voicemail_greeting
 			];
-			
+
 			$update					= $astDB->update("system_settings", $data);
-		
+
 			if ($update) {
 				$apiresults 			= [
 					"result" 				=> "success",
 					"data" 					=> $data
 				];
 
-				if ( $allow_voicemail_greeting ) { 
-					$act = "Enabled"; 
-				} else { 
+				if ( $allow_voicemail_greeting ) {
+					$act = "Enabled";
+				} else {
 					$act = "Disabled";
 				}
 
@@ -71,6 +73,6 @@
 		$apiresults = [
 			"result"                                => "success",
 			"message"				=> "Allow Voicemail Geeting Unchanged"
-                ]; 
+                ];
 	}
 ?>

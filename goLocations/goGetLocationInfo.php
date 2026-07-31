@@ -22,12 +22,12 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-    $location = $astDB->escape($_REQUEST['location']);
+    $location = $astDB->escape(($_REQUEST['location'] ?? ''));
     
 	if($location == null) { 
 		$APIResult = ["code" => "41004", "result" => "Error: Set a value for Location."]; 
 	} else {
-    	$groupId = go_get_groupid($goUser);
+    	$groupId = go_get_groupid($goUser, $astDB);
     
 		$goDB->where('name', $location);
 		if (checkIfTenant($groupId, $goDB)) {

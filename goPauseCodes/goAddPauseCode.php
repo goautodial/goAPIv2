@@ -25,10 +25,10 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$campaign_id		 								= $astDB->escape($_REQUEST['pauseCampID']);
-	$pause_code 										= $astDB->escape($_REQUEST['pause_code']);
-	$pause_code_name 									= $astDB->escape($_REQUEST['pause_code_name']);
-	$billable 											= $astDB->escape(strtoupper($_REQUEST['billable']));
+	$campaign_id		 								= $astDB->escape(($_REQUEST['pauseCampID'] ?? ''));
+	$pause_code 										= $astDB->escape(($_REQUEST['pause_code'] ?? ''));
+	$pause_code_name 									= $astDB->escape(($_REQUEST['pause_code_name'] ?? ''));
+	$billable 											= $astDB->escape(strtoupper(($_REQUEST['billable'] ?? '')));
 
 	### Default values 
 	$defBill 											= [ 'NO', 'YES', 'HALF' ];
@@ -58,7 +58,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in pause code name"
 		];
-	} elseif (!in_array($billable, $defBill)) {
+	} elseif (!in_array($billable, (is_array($defBill) ? $defBill : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for billable is No, Yes or half only."
 		];

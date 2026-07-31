@@ -24,11 +24,11 @@
 
 	$allowed_campaigns 									= allowed_campaigns($log_group, $goDB, $astDB);
 	
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$phone_numbers										= rawurldecode($_REQUEST['phone_numbers']);
-	$phone_numbers										= explode("\r\n", $phone_numbers);
-	//$phone_numbers 									= str_replace(" ", "\n", rawurldecode($astDB->escape($_REQUEST['phone_numbers'])));
-	$stage 												= $astDB->escape($_REQUEST['stage']);	
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$phone_numbers										= rawurldecode(($_REQUEST['phone_numbers'] ?? ''));
+	$phone_numbers										= explode("\r\n", (string) ($phone_numbers ?? ''));
+	//$phone_numbers 									= str_replace(" ", "\n", rawurldecode($astDB->escape(($_REQUEST['phone_numbers'] ?? ''))));
+	$stage 												= $astDB->escape(($_REQUEST['stage'] ?? ''));	
 	//$cnt 												= 0;
 	
 	// Error Checking

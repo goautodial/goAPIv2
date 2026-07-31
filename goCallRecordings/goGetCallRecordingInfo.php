@@ -23,7 +23,7 @@
 	include_once (__DIR__ . "/goAPI.php");	
 
 	### POST or GET Variables
-    $recording_id 						= $astDB->escape($_REQUEST['recording_id']);
+    $recording_id 						= $astDB->escape(($_REQUEST['recording_id'] ?? ''));
 
 	if (!isset($session_user) || is_null($session_user)){
 		$apiresults 					= [

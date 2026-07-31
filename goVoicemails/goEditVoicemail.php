@@ -25,13 +25,13 @@
 	include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$voicemail_id 						= $astDB->escape($_REQUEST["voicemail_id"]);
-	$pass 							= $astDB->escape($_REQUEST["pass"]);
-	$fullname 						= $astDB->escape($_REQUEST["fullname"]);
-	$email 							= $astDB->escape($_REQUEST["email"]);
-	$active 						= $astDB->escape(strtoupper($_REQUEST["active"]));
-	$delete_vm_after_email 					= $astDB->escape($_REQUEST["delete_vm_after_email"]);
-	$voicemail_greeting					= $astDB->escape($_REQUEST["voicemail_greeting"]); 
+	$voicemail_id 						= $astDB->escape(($_REQUEST["voicemail_id"] ?? ''));
+	$pass 							= $astDB->escape(($_REQUEST["pass"] ?? ''));
+	$fullname 						= $astDB->escape(($_REQUEST["fullname"] ?? ''));
+	$email 							= $astDB->escape(($_REQUEST["email"] ?? ''));
+	$active 						= $astDB->escape(strtoupper(($_REQUEST["active"] ?? '')));
+	$delete_vm_after_email 					= $astDB->escape(($_REQUEST["delete_vm_after_email"] ?? ''));
+	$voicemail_greeting					= $astDB->escape(($_REQUEST["voicemail_greeting"] ?? '')); 
 
 	### Default values
     $defActive 							= [
@@ -57,7 +57,7 @@
 		$apiresults 					= [
 			"result" 						=> "Error: Special characters found in fullname and must not be empty"
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 					= [
 			"result" 						=> "Error: Default value for active is Y or N only."
 		];
@@ -65,7 +65,7 @@
 		$apiresults 					= [
 			"result" 						=> "Error: Invalid email format."
 		];
-	} elseif (!in_array($delete_vm_after_email,$defDelVM) && $delete_vm_after_email != null) {
+	} elseif (!in_array($delete_vm_after_email, (is_array($defDelVM) ? $defDelVM : [])) && $delete_vm_after_email != null) {
 		$apiresults 					= [
 			"result" 						=> "Error: Default value for delete_vm_after_email is Y or N only."
 		];

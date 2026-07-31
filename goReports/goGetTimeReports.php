@@ -24,20 +24,20 @@
 	$def_end_date .= $default_date." 23:59:59";
 
     // POST or GET Variables
-    $user = mysqli_real_escape_string($link, $_REQUEST['user']);
-    $user_id = mysqli_real_escape_string($link, $_REQUEST['user_id']);
-    $start_date = mysqli_real_escape_string($link, $_REQUEST['fromDate']);
+    $user = mysqli_real_escape_string($link, ($_REQUEST['user'] ?? ''));
+    $user_id = mysqli_real_escape_string($link, ($_REQUEST['user_id'] ?? ''));
+    $start_date = mysqli_real_escape_string($link, ($_REQUEST['fromDate'] ?? ''));
     if($start_date === '' || $start_date === '0')
     	$start_date = $def_start_date;
-	$end_date = mysqli_real_escape_string($link, $_REQUEST['toDate']);
+	$end_date = mysqli_real_escape_string($link, ($_REQUEST['toDate'] ?? ''));
 	if($end_date === '' || $end_date === '0')
 		$end_date = $def_end_date;
-	$campaign_id = mysqli_real_escape_string($link, $_REQUEST['campaign_id']);
-	$groupId = go_get_groupid($session_user);
-	$ip_address = mysqli_real_escape_string($link, $_REQUEST['log_ip']);
-	$id = mysqli_real_escape_string($link, $_REQUEST['id']);
-	$export = mysqli_real_escape_string($link, $_REQUEST['export']);
-	$duration_cmd = mysqli_real_escape_string($link, $_REQUEST['duration_cmd']); //duration if 1, enabled
+	$campaign_id = mysqli_real_escape_string($link, ($_REQUEST['campaign_id'] ?? ''));
+	$groupId = go_get_groupid($session_user, $astDB);
+	$ip_address = mysqli_real_escape_string($link, ($_REQUEST['log_ip'] ?? ''));
+	$id = mysqli_real_escape_string($link, ($_REQUEST['id'] ?? ''));
+	$export = mysqli_real_escape_string($link, ($_REQUEST['export'] ?? ''));
+	$duration_cmd = mysqli_real_escape_string($link, ($_REQUEST['duration_cmd'] ?? '')); //duration if 1, enabled
 
 	if($duration_cmd === '' || $duration_cmd === '0')
 		$duration_cmd = 0;
@@ -248,7 +248,7 @@
 	        	echo $header = "ID,USER,ACTION,EVENT TIME,CAMPAIGN,USERGROUP\n";
 
 	        	$count = 0;
-		        for($i=0; $i <= count($userlog); $i++){
+		        for($i=0; $i <= (is_countable($userlog) ? count($userlog) : 0); $i++){
 		            $count_row = $userlog[$i];
 		            echo $count_row["id"].",";
 		            echo $count_row["user"].",";

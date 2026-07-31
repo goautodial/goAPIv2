@@ -374,7 +374,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
 
 		$in_groups_pre = preg_replace("/^ | -$/", '', (string) $closer_choice);
 		$in_groups = explode(" ", trim($in_groups_pre));
-		$in_groups_ct = count($in_groups);
+		$in_groups_ct = (is_countable($in_groups) ? count($in_groups) : 0);
 		$k = 0;
 		while ($k < $in_groups_ct) {
 			if (strlen($in_groups[$k]) > 1) {
@@ -470,8 +470,11 @@ if ($sipIsLoggedIn || $use_webrtc) {
         if ($scheduled_callback == 'Y')
             {$VARCBstatusesLIST .= " {$status}";}
     }
+    $statuses = is_array($statuses) ? $statuses : [];
     ksort($statuses);
+    $statuses_priority = is_array($statuses_priority) ? $statuses_priority : [];
     ksort($statuses_priority);
+    $statuses_colors = is_array($statuses_colors) ? $statuses_colors : [];
     ksort($statuses_colors);
     $statuses_ct += $statuses_camp_ct;
     $VARCBstatusesLIST .= " ";
@@ -489,6 +492,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         //if ($billable == 'Y')
         //    {$VARCBstatusesLIST .= " {$status}";}
     }
+    $pause_codes = is_array($pause_codes) ? $pause_codes : [];
     ksort($pause_codes);
     
     $VARingroups = "''";
@@ -498,7 +502,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
     $PHONEgrpCT = 0;
     if ( ($campaign_settings->campaign_allow_inbound == 'Y') && ($campaign_settings->dial_method != 'MANUAL') ) {
         $closer_campaigns = preg_replace("/^ | -$/", "", (string) $campaign_settings->closer_campaigns);
-        $closer_campaigns = explode(" ", $closer_campaigns);
+        $closer_campaigns = explode(" ", (string) ($closer_campaigns ?? ''));
         
         //$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
         $astDB->where('active', 'Y');
@@ -523,7 +527,9 @@ if ($sipIsLoggedIn || $use_webrtc) {
                 $VARphonegroups[$row['group_id']] = $row['group_handling'];
                 $PHONEgrpCT++;
             }
+            $VARemailgroups = is_array($VARemailgroups) ? $VARemailgroups : [];
             ksort($VARemailgroups);
+            $VARphonegroups = is_array($VARphonegroups) ? $VARphonegroups : [];
             ksort($VARphonegroups);
             $INgrpCT++;
         }
@@ -532,7 +538,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
     }
     
     $xfer_groups = preg_replace("/^ | -$/", "", (string) $campaign_settings->xfer_groups);
-    $xfer_groups = explode(" ", $xfer_groups);
+    $xfer_groups = explode(" ", (string) ($xfer_groups ?? ''));
     ////$xfer_groups = preg_replace("/ /", "','", $xfer_groups);
     ////$xfer_groups = "'$xfer_groups'";
     $XFgrpCT = 0;

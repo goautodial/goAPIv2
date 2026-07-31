@@ -9,7 +9,7 @@
     ####################################################
 
     ##### get usergroup #########
-    function go_get_groupid($goUser){
+    function go_get_groupid($goUser, $astDB){
         include_once(__DIR__ . "/goDBasterisk.php");
         $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
         $rsltv = mysqli_query($link, $query_userv);
@@ -97,7 +97,7 @@
             $query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
             $resultsu = mysqli_query($link,$query);
 
-            if(count($resultsu) > 0){
+            if((is_countable($resultsu) ? count($resultsu) : 0) > 0){
                 $fresults = $resultsu['qresult'];
                 $allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
 
@@ -124,7 +124,7 @@
     				echo "<{$lastk}>\n";
     			}
     			else {
-    				if (( !is_numeric( key( $v ) ) && count( $v ) )) {
+    				if (( !is_numeric( key( $v ) ) && (is_countable($v) ? count($v) : 0) )) {
     					echo "<{$k}>\n";
     				}
     			}
@@ -137,7 +137,7 @@
     			}
 
 
-    			if (( !is_numeric( key( $v ) ) && count( $v ) )) {
+    			if (( !is_numeric( key( $v ) ) && (is_countable($v) ? count($v) : 0) )) {
     				echo "</{$k}>\n";
     				continue;
     			}
@@ -230,7 +230,7 @@
                 $lastLine = exec('/usr/share/goautodial/goautodialc.pl "sudo /usr/sbin/asterisk -rx \"sip show peer '.$exten.'\""', $asteriskVars);
                 if (strlen($asteriskVars[1]) < 1) {
                     foreach ($asteriskVars as $vars) {
-                        $list = explode(':', $vars);
+                        $list = explode(':', (string) ($vars ?? ''));
                         if (trim($list[0]) === "Status" && preg_match('/^OK/', trim($list[1]))) {
                             return true;
                         }

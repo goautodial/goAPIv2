@@ -24,33 +24,33 @@
 
     include_once (__DIR__ . "/goAPI.php");
 
-	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
-	$lead_id 											= $astDB->escape($_REQUEST["lead_id"]);
-	$first_name 										= $astDB->escape($_REQUEST["first_name"]);
-	$middle_initial 									= $astDB->escape($_REQUEST["middle_initial"]);
-	$last_name 											= $astDB->escape($_REQUEST["last_name"]);
-	$gender 											= $astDB->escape($_REQUEST["gender"]);
-	$email 												= $astDB->escape($_REQUEST["email"]);
-	$phone_number 										= $astDB->escape($_REQUEST["phone_number"]);
-	$alt_phone 											= $astDB->escape($_REQUEST["alt_phone"]);
-	$address1 											= $astDB->escape($_REQUEST["address1"]);
-	$address2 											= $astDB->escape($_REQUEST["address2"]);
-	$address3 											= $astDB->escape($_REQUEST["address3"]);
-	$city 												= $astDB->escape($_REQUEST["city"]);
-	$state 												= $astDB->escape($_REQUEST["state"]);
-	$province 											= $astDB->escape($_REQUEST["province"]);
-	$postal_code 										= $astDB->escape($_REQUEST["postal_code"]);
-	$country_code 										= $astDB->escape($_REQUEST["country_code"]);
-	$date_of_birth 										= $astDB->escape($_REQUEST["date_of_birth"]);
-	$title 												= $astDB->escape($_REQUEST["title"]);
-	$status 											= $astDB->escape($_REQUEST["status"]);
-	$comments											= $astDB->escape($_REQUEST["comments"]);
-	$is_customer 										= $astDB->escape($_REQUEST["is_customer"]);
-	$user_id 											= $astDB->escape($_REQUEST["user_id"]);
-	$user 												= $astDB->escape($_REQUEST["user"]);
-	$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
+	$list_id 											= $astDB->escape(($_REQUEST["list_id"] ?? ''));
+	$lead_id 											= $astDB->escape(($_REQUEST["lead_id"] ?? ''));
+	$first_name 										= $astDB->escape(($_REQUEST["first_name"] ?? ''));
+	$middle_initial 									= $astDB->escape(($_REQUEST["middle_initial"] ?? ''));
+	$last_name 											= $astDB->escape(($_REQUEST["last_name"] ?? ''));
+	$gender 											= $astDB->escape(($_REQUEST["gender"] ?? ''));
+	$email 												= $astDB->escape(($_REQUEST["email"] ?? ''));
+	$phone_number 										= $astDB->escape(($_REQUEST["phone_number"] ?? ''));
+	$alt_phone 											= $astDB->escape(($_REQUEST["alt_phone"] ?? ''));
+	$address1 											= $astDB->escape(($_REQUEST["address1"] ?? ''));
+	$address2 											= $astDB->escape(($_REQUEST["address2"] ?? ''));
+	$address3 											= $astDB->escape(($_REQUEST["address3"] ?? ''));
+	$city 												= $astDB->escape(($_REQUEST["city"] ?? ''));
+	$state 												= $astDB->escape(($_REQUEST["state"] ?? ''));
+	$province 											= $astDB->escape(($_REQUEST["province"] ?? ''));
+	$postal_code 										= $astDB->escape(($_REQUEST["postal_code"] ?? ''));
+	$country_code 										= $astDB->escape(($_REQUEST["country_code"] ?? ''));
+	$date_of_birth 										= $astDB->escape(($_REQUEST["date_of_birth"] ?? ''));
+	$title 												= $astDB->escape(($_REQUEST["title"] ?? ''));
+	$status 											= $astDB->escape(($_REQUEST["status"] ?? ''));
+	$comments											= $astDB->escape(($_REQUEST["comments"] ?? ''));
+	$is_customer 										= $astDB->escape(($_REQUEST["is_customer"] ?? ''));
+	$user_id 											= $astDB->escape(($_REQUEST["user_id"] ?? ''));
+	$user 												= $astDB->escape(($_REQUEST["user"] ?? ''));
+	$avatar 											= $astDB->escape(($_REQUEST["avatar"] ?? '')); //base64 encoded	
 	$defGender 											= ["M", "F", "U"];
-    $custom_fields                                      = $_REQUEST["custom_fields"];
+    $custom_fields                                      = ($_REQUEST["custom_fields"] ?? '');
 	
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -95,7 +95,7 @@
 			"code" 											=> "41004", 
 			"result" 										=> $err_msg
 		];
-	} elseif (!in_array($gender,$defGender) && $gender != null) {
+	} elseif (!in_array($gender, (is_array($defGender) ? $defGender : [])) && $gender != null) {
 		$err_msg 										= error_handle("41006", "gender");
 		$apiresults 									= [
 			"code" 											=> "41006", 

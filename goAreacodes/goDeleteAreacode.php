@@ -23,9 +23,9 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
-    	$areacode 										= $astDB->escape($_REQUEST["areacode"]);
-    	$outbound_cid                                   = $astDB->escape($_REQUEST["outbound_cid"]);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));	
+    	$areacode 										= $astDB->escape(($_REQUEST["areacode"] ?? ''));
+    	$outbound_cid                                   = $astDB->escape(($_REQUEST["outbound_cid"] ?? ''));
     
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {

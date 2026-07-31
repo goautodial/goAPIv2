@@ -22,10 +22,10 @@
 */
     include_once (__DIR__ . "/goAPI.php");
     
-    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    $status = $astDB->escape($_REQUEST['status']);
+    $campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+    $status = $astDB->escape(($_REQUEST['status'] ?? ''));
 
-    $groupId = go_get_groupid($session_user);
+    $groupId = go_get_groupid($session_user, $astDB);
     $check_usergroup = go_check_usergroup_campaign($astDB, $groupId, $campaign_id);
 
     if(empty($campaign_id) || empty($status) || empty($session_user)) {

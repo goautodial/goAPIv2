@@ -23,10 +23,10 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
     ### POST or GET Variables
-	$camp = $astDB->escape($_REQUEST['pauseCampID']);
-	$pause_code = $astDB->escape($_REQUEST['pause_code']);
-	$pause_code_name = $astDB->escape($_REQUEST['pause_code_name']);
-	$billable = strtoupper((string) $astDB->escape($_REQUEST['billable']));
+	$camp = $astDB->escape(($_REQUEST['pauseCampID'] ?? ''));
+	$pause_code = $astDB->escape(($_REQUEST['pause_code'] ?? ''));
+	$pause_code_name = $astDB->escape(($_REQUEST['pause_code_name'] ?? ''));
+	$billable = strtoupper((string) $astDB->escape(($_REQUEST['billable'] ?? '')));
 		
     ### Default values 
     $defBill = ['NO','YES','HALF'];
@@ -41,10 +41,10 @@
 			if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $pause_code_name)){
                 $apiresults = ["result" => "Error: Special characters found in pause code name"];
 			} else {
-                if(!in_array($billable,$defBill)) {
+                if(!in_array($billable, (is_array($defBill) ? $defBill : []))) {
                     $apiresults = ["result" => "Error: Default value for billable is No, Yes or half only."];
                 } else {
-					$groupId = go_get_groupid($goUser);
+					$groupId = go_get_groupid($goUser, $astDB);
 	
 					if (!checkIfTenant($groupId, $goDB)) {
 						//$ul = "";

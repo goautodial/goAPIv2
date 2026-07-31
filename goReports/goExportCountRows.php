@@ -23,19 +23,19 @@
     
 	include_once(__DIR__ . "/goAPI.php");
 	
-	$campaigns 		= $astDB->escape($_REQUEST['campaigns']);
-	$inbounds 		= $astDB->escape($_REQUEST['inbounds']);
-	$lists 			= $astDB->escape($_REQUEST['lists']);
-	$dispo_stats            = $astDB->escape($_REQUEST['statuses']);
-	$custom_fields 	= $astDB->escape($_REQUEST['custom_fields']);
-	$per_call_notes = $astDB->escape($_REQUEST['per_call_notes']);
-	$rec_location 	= $astDB->escape($_REQUEST['rec_location']);
-	$log_group 		= go_get_groupid($session_user);
-	$fromDate = $astDB->escape($_REQUEST['fromDate']);        
-	$toDate = $astDB->escape($_REQUEST['toDate']);
+	$campaigns 		= $astDB->escape(($_REQUEST['campaigns'] ?? ''));
+	$inbounds 		= $astDB->escape(($_REQUEST['inbounds'] ?? ''));
+	$lists 			= $astDB->escape(($_REQUEST['lists'] ?? ''));
+	$dispo_stats            = $astDB->escape(($_REQUEST['statuses'] ?? ''));
+	$custom_fields 	= $astDB->escape(($_REQUEST['custom_fields'] ?? ''));
+	$per_call_notes = $astDB->escape(($_REQUEST['per_call_notes'] ?? ''));
+	$rec_location 	= $astDB->escape(($_REQUEST['rec_location'] ?? ''));
+	$log_group 		= go_get_groupid($session_user, $astDB);
+	$fromDate = $astDB->escape(($_REQUEST['fromDate'] ?? ''));        
+	$toDate = $astDB->escape(($_REQUEST['toDate'] ?? ''));
 	
-	$limit = $astDB->escape($_REQUEST['limit']);
-	$offset = $astDB->escape($_REQUEST['offset']);
+	$limit = $astDB->escape(($_REQUEST['limit'] ?? ''));
+	$offset = $astDB->escape(($_REQUEST['offset'] ?? ''));
 
 	if (empty($fromDate))
 		$fromDate = date("Y-m-d")." 00:00:00";
@@ -56,10 +56,10 @@
 	$list_SQL = "";
 	$status_SQL = "";
 
-	$campaign_ct = count($campaigns);
-	$group_ct = count($inbounds);
-	$list_ct = count($lists);
-	$status_ct = count($dispo_stats);
+	$campaign_ct = (is_countable($campaigns) ? count($campaigns) : 0);
+	$group_ct = (is_countable($inbounds) ? count($inbounds) : 0);
+	$list_ct = (is_countable($lists) ? count($lists) : 0);
+	$status_ct = (is_countable($dispo_stats) ? count($dispo_stats) : 0);
 
 	if (!empty($campaigns)) {
 		$fresults = $astDB
@@ -80,7 +80,7 @@
 			$i++;
 		}
 		
-		if (in_array("ALL", $campaigns)) {
+		if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))) {
 			$campaign_SQL = "";
 			// $i = 0;
             if (strtoupper((string) $log_group) !== 'ADMIN') {
@@ -120,7 +120,7 @@
 	
 	if (!empty($inbounds)) {
 		$i=0;
-		if (in_array("ALL", $inbounds)) {
+		if (in_array("ALL", (is_array($inbounds) ? $inbounds : []))) {
 			// $group_SQL = go_getall_closer_campaigns("ALL", $astDB);
 
             if (strtoupper((string) $log_group) !== 'ADMIN') {
@@ -198,10 +198,10 @@
 		//	$i++;
 		//}
 		
-		if (in_array("ALL", $lists)) {
+		if (in_array("ALL", (is_array($lists) ? $lists : []))) {
 			$list_SQL 							= "";
 			
-			if (in_array("ALL", $campaigns)) {
+			if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))) {
 				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 				$array_list = $SELECTQuery;
 			} else {
@@ -241,7 +241,7 @@
 			$i++;
 		}
 		
-		if ( (in_array("ALL", $dispo_stats)) ) {
+		if ( (in_array("ALL", (is_array($dispo_stats) ? $dispo_stats : []))) ) {
 			$status_SQL 						= "";
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);

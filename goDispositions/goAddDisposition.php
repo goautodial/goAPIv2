@@ -25,19 +25,19 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-    $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$category 											= "UNDEFINED"; //$_REQUEST['category'];
-	$userid 											= $astDB->escape($_REQUEST['userid']);
-	$status 											= $astDB->escape($_REQUEST['status']);	
-	$status_name 										= $astDB->escape($_REQUEST['status_name']);
-	$selectable 										= $astDB->escape($_REQUEST['selectable']);
-	$human_answered 									= $astDB->escape($_REQUEST['human_answered']);
-	$sale												= $astDB->escape($_REQUEST['sale']);
-	$dnc 												= $astDB->escape($_REQUEST['dnc']);
-	$customer_contact 									= $astDB->escape($_REQUEST['customer_contact']);
-	$not_interested 									= $astDB->escape($_REQUEST['not_interested']);
-	$unworkable 										= $astDB->escape($_REQUEST['unworkable']);
-	$scheduled_callback 								= $astDB->escape($_REQUEST['scheduled_callback']);	
+    $campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$category 											= "UNDEFINED"; //($_REQUEST['category'] ?? '');
+	$userid 											= $astDB->escape(($_REQUEST['userid'] ?? ''));
+	$status 											= $astDB->escape(($_REQUEST['status'] ?? ''));	
+	$status_name 										= $astDB->escape(($_REQUEST['status_name'] ?? ''));
+	$selectable 										= $astDB->escape(($_REQUEST['selectable'] ?? ''));
+	$human_answered 									= $astDB->escape(($_REQUEST['human_answered'] ?? ''));
+	$sale												= $astDB->escape(($_REQUEST['sale'] ?? ''));
+	$dnc 												= $astDB->escape(($_REQUEST['dnc'] ?? ''));
+	$customer_contact 									= $astDB->escape(($_REQUEST['customer_contact'] ?? ''));
+	$not_interested 									= $astDB->escape(($_REQUEST['not_interested'] ?? ''));
+	$unworkable 										= $astDB->escape(($_REQUEST['unworkable'] ?? ''));
+	$scheduled_callback 								= $astDB->escape(($_REQUEST['scheduled_callback'] ?? ''));	
 	$color 												= (isset($_REQUEST['color'])) ? $astDB->escape($_REQUEST['color']) : '#b5b5b5';
 	$priority 											= (isset($_REQUEST['priority'])) ? $astDB->escape($_REQUEST['priority']) : 1;
 	$type 												= (isset($_REQUEST['type'])) ? $astDB->escape($_REQUEST['type']) : 'CUSTOM';
@@ -73,56 +73,56 @@
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Special characters found in status name and must not be empty");
-	} elseif (!in_array($scheduled_callback,$defVal)) {
+	} elseif (!in_array($scheduled_callback, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "scheduled_callback");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for scheduled_callback is Y or N only.");
-	} elseif (!in_array($unworkable,$defVal)) {
+	} elseif (!in_array($unworkable, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "unworkable");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for unworkable is Y or N only.");
-	} elseif (!in_array($selectable,$defVal)) {
+	} elseif (!in_array($selectable, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "selectable");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for selectable is Y or N only.");
-	} elseif (!in_array($human_answered,$defVal)) {
+	} elseif (!in_array($human_answered, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "human_answered");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for human_answered is Y or N only.");
-	} elseif (!in_array($sale,$defVal)) {
+	} elseif (!in_array($sale, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "sale");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for sale is Y or N only.");
-	} elseif (!in_array($dnc,$defVal)) {
+	} elseif (!in_array($dnc, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "dnc");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for dnc is Y or N only.");
-	} elseif (!in_array($customer_contact,$defVal)) {
+	} elseif (!in_array($customer_contact, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "customer_contact");
 		$apiresults 									= [
 			"code" 											=> "10003", 
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" 			=> "Error: Default value for customer_contact is Y or N only.");
-	} elseif (!in_array($not_interested,$defVal)) {
+	} elseif (!in_array($not_interested, (is_array($defVal) ? $defVal : []))) {
 		$err_msg 										= error_handle("10003", "not_interested");
 		$apiresults 									= [
 			"code" 											=> "10003", 
@@ -140,7 +140,7 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if (in_array($campaign_id, $campaigns) || $campaign_id == 'ALL') {			
+			if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : [])) || $campaign_id == 'ALL') {			
 				$astDB->where('status', $status);
 				$astDB->get('vicidial_statuses', null, 'status');
 				
@@ -149,7 +149,7 @@
 						$astDB->where("status", $status);
 						$astDB->get("vicidial_campaign_statuses", NULL, "status");
 						
-						if($astDB->count < count($campaigns)) {
+						if($astDB->count < (is_countable($campaigns) ? count($campaigns) : 0)) {
 							foreach ($campaigns as $campaignid) {
                                 $astDB->where("campaign_id", $campaignid);
                                 $astDB->where("status", $status);

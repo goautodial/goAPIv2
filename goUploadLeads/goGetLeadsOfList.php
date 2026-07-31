@@ -22,7 +22,7 @@
 */
 
     //$thefile = $_FILES['goFileMe']['tmp_name'];
-    $theList = $astDB->escape($_REQUEST["goListId"]);
+    $theList = $astDB->escape(($_REQUEST["goListId"] ?? ''));
 
 	//$query = "SELECT phone_number FROM vicidial_list WHERE list_id='$theList';";
 	$astDB->where('list_id', $theList);
@@ -48,7 +48,7 @@
             }
 
 			$data = array_merge($dataPhoneNumbers);
-			//echo count($data);
+			//echo (is_countable($data) ? count($data) : 0);
             $apiresults = ["result" => "success", "data" => $data];
     }
 
@@ -65,7 +65,7 @@
 if (($handle = fopen($csv_file, "r")) !== FALSE) {
    fgetcsv($handle);   
    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-        $num = count($data);
+        $num = (is_countable($data) ? count($data) : 0);
         for ($c=0; $c < $num; $c++) {
           $col[$c] = $data[$c];
         }

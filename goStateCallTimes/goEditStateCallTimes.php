@@ -23,27 +23,27 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-	$state_call_time_id = $astDB->escape($_REQUEST['state_call_time_id']);
-	$state_call_time_state = $astDB->escape($_REQUEST['state_call_time_state']);
-	$state_call_time_name = $astDB->escape($_REQUEST['state_call_time_name']);
-	$state_call_time_comments = $astDB->escape($_REQUEST['state_call_time_comments']);
-	$sct_default_start = $astDB->escape($_REQUEST['sct_default_start']);
-	$sct_default_stop = $astDB->escape($_REQUEST['sct_default_stop']);
-	$sct_sunday_start = $astDB->escape($_REQUEST['sct_sunday_start']);
-	$sct_sunday_stop = $astDB->escape($_REQUEST['sct_sunday_stop']);
-	$sct_monday_start= $astDB->escape($_REQUEST['sct_monday_start']);
-	$sct_monday_stop= $astDB->escape($_REQUEST['sct_monday_stop']);
-	$sct_tuesday_start = $astDB->escape($_REQUEST['sct_tuesday_start']);
-	$sct_tuesday_stop = $astDB->escape($_REQUEST['sct_tuesday_stop']);
-	$sct_wednesday_start = $astDB->escape($_REQUEST['sct_wednesday_start']);
-	$sct_wednesday_stop = $astDB->escape($_REQUEST['sct_wednesday_stop']);
-	$sct_thursday_start = $astDB->escape($_REQUEST['sct_thursday_start']);
-	$sct_thursday_stop = $astDB->escape($_REQUEST['sct_thursday_stop']);
-	$sct_friday_start = $astDB->escape($_REQUEST['sct_friday_start']);
-	$sct_friday_stop = $astDB->escape($_REQUEST['sct_friday_stop']);
-	$sct_saturday_start = $astDB->escape($_REQUEST['sct_saturday_start']);
-	$sct_saturday_stop = $astDB->escape($_REQUEST['sct_saturday_stop']);
-	$user_group = $astDB->escape($_REQUEST['user_group']);
+	$state_call_time_id = $astDB->escape(($_REQUEST['state_call_time_id'] ?? ''));
+	$state_call_time_state = $astDB->escape(($_REQUEST['state_call_time_state'] ?? ''));
+	$state_call_time_name = $astDB->escape(($_REQUEST['state_call_time_name'] ?? ''));
+	$state_call_time_comments = $astDB->escape(($_REQUEST['state_call_time_comments'] ?? ''));
+	$sct_default_start = $astDB->escape(($_REQUEST['sct_default_start'] ?? ''));
+	$sct_default_stop = $astDB->escape(($_REQUEST['sct_default_stop'] ?? ''));
+	$sct_sunday_start = $astDB->escape(($_REQUEST['sct_sunday_start'] ?? ''));
+	$sct_sunday_stop = $astDB->escape(($_REQUEST['sct_sunday_stop'] ?? ''));
+	$sct_monday_start= $astDB->escape(($_REQUEST['sct_monday_start'] ?? ''));
+	$sct_monday_stop= $astDB->escape(($_REQUEST['sct_monday_stop'] ?? ''));
+	$sct_tuesday_start = $astDB->escape(($_REQUEST['sct_tuesday_start'] ?? ''));
+	$sct_tuesday_stop = $astDB->escape(($_REQUEST['sct_tuesday_stop'] ?? ''));
+	$sct_wednesday_start = $astDB->escape(($_REQUEST['sct_wednesday_start'] ?? ''));
+	$sct_wednesday_stop = $astDB->escape(($_REQUEST['sct_wednesday_stop'] ?? ''));
+	$sct_thursday_start = $astDB->escape(($_REQUEST['sct_thursday_start'] ?? ''));
+	$sct_thursday_stop = $astDB->escape(($_REQUEST['sct_thursday_stop'] ?? ''));
+	$sct_friday_start = $astDB->escape(($_REQUEST['sct_friday_start'] ?? ''));
+	$sct_friday_stop = $astDB->escape(($_REQUEST['sct_friday_stop'] ?? ''));
+	$sct_saturday_start = $astDB->escape(($_REQUEST['sct_saturday_start'] ?? ''));
+	$sct_saturday_stop = $astDB->escape(($_REQUEST['sct_saturday_stop'] ?? ''));
+	$user_group = $astDB->escape(($_REQUEST['user_group'] ?? ''));
 
     ### ERROR CHECKING ...
 	if($state_call_time_id == null || strlen((string) $state_call_time_id) < 3) {
@@ -112,7 +112,7 @@
 																						if(!is_numeric($sct_saturday_stop) && $sct_saturday_stop != null){
 																							$apiresults = ["result" => "Error: sct_saturday_stop must be a number or combination of number"];
 																						} else {
-																							$groupId = go_get_groupid($goUser);
+																							$groupId = go_get_groupid($goUser, $astDB);
 																							
 																							if (!checkIfTenant($groupId, $goDB)) {
 																								//$ul = "";

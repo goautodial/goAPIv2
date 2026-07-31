@@ -210,8 +210,8 @@ if ($is_logged_in) {
     
                             ##### BEGIN log visit to the vicidial_report_log table #####
                             $endMS = microtime();
-                            $startMSary = explode(" ", $startMS);
-                            $endMSary = explode(" ", $endMS);
+                            $startMSary = explode(" ", (string) ($startMS ?? ''));
+                            $endMSary = explode(" ", (string) ($endMS ?? ''));
                             $runS = ($endMSary[0] - $startMSary[0]);
                             $runM = ($endMSary[1] - $startMSary[1]);
                             $TOTALrun = ($runS + $runM);

@@ -23,7 +23,7 @@
 	@include_once (__DIR__ . "/goAPI.php");
 
 	// POST or GET Variables
-	$extension = $_REQUEST['extension'];
+	$extension = ($_REQUEST['extension'] ?? '');
 
 	if(!empty($extension) && !empty($session_user)){
 		$astDB->where("extension", $extension);

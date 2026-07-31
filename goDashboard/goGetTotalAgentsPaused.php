@@ -67,7 +67,7 @@
                 }   
             } else {
                 $trimCamps  = trim($camps, " -");
-                $campaigns = explode(" ", $trimCamps);
+                $campaigns = explode(" ", (string) ($trimCamps ?? ''));
             }
 
 			if (is_array($campaigns)) {

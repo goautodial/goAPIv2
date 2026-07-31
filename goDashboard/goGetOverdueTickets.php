@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $userid = $_REQUEST['userid'];
-    $groupId = go_get_groupid($goUser);
+    $userid = ($_REQUEST['userid'] ?? '');
+    $groupId = go_get_groupid($goUser, $astDB);
     
     if($userid == null && $userid == 0) { 
             $apiresults = ["result" => "Error: Set a value for User ID"]; 

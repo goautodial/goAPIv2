@@ -24,24 +24,24 @@
     include_once (__DIR__ . "/goAPI.php");
  
     ### POST or GET Variables
-	$server_id 											= $astDB->escape($_REQUEST['server_id']);
-	$server_description 								= $astDB->escape($_REQUEST['server_description']);
-	$server_ip 											= $astDB->escape($_REQUEST['server_ip']);
-	$active 											= $astDB->escape($_REQUEST['active']);
-	$asterisk_version 									= $astDB->escape($_REQUEST['asterisk_version']);
-	$max_vicidial_trunks 								= $astDB->escape($_REQUEST['max_vicidial_trunks']);
-	$user_group 										= $astDB->escape($_REQUEST['user_group']);	
-	$outbound_calls_per_second 							= $astDB->escape($_REQUEST['outbound_calls_per_second']);
-	$vicidial_balance_active 							= $astDB->escape($_REQUEST['vicidial_balance_active']);
-	$vicidial_balance_rank 								= $astDB->escape($_REQUEST['vicidial_balance_rank']);
-	$local_gmt 											= $astDB->escape($_REQUEST['local_gmt']);
-	$generate_vicidial_conf 							= $astDB->escape($_REQUEST['generate_vicidial_conf']);
-	$rebuild_conf_files 								= $astDB->escape($_REQUEST['rebuild_conf_files']);
-	$rebuild_music_on_hold 								= $astDB->escape($_REQUEST['rebuild_music_on_hold']);
-	$recording_web_link 								= $astDB->escape($_REQUEST['recording_web_link']);
-	$alt_server_ip 										= $astDB->escape($_REQUEST['alt_server_ip']);
-	$external_server_ip 								= $astDB->escape($_REQUEST['external_server_ip']);
-	$conf_engine 										= $astDB->escape($_REQUEST['conf_engine']);
+	$server_id 											= $astDB->escape(($_REQUEST['server_id'] ?? ''));
+	$server_description 								= $astDB->escape(($_REQUEST['server_description'] ?? ''));
+	$server_ip 											= $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+	$active 											= $astDB->escape(($_REQUEST['active'] ?? ''));
+	$asterisk_version 									= $astDB->escape(($_REQUEST['asterisk_version'] ?? ''));
+	$max_vicidial_trunks 								= $astDB->escape(($_REQUEST['max_vicidial_trunks'] ?? ''));
+	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));	
+	$outbound_calls_per_second 							= $astDB->escape(($_REQUEST['outbound_calls_per_second'] ?? ''));
+	$vicidial_balance_active 							= $astDB->escape(($_REQUEST['vicidial_balance_active'] ?? ''));
+	$vicidial_balance_rank 								= $astDB->escape(($_REQUEST['vicidial_balance_rank'] ?? ''));
+	$local_gmt 											= $astDB->escape(($_REQUEST['local_gmt'] ?? ''));
+	$generate_vicidial_conf 							= $astDB->escape(($_REQUEST['generate_vicidial_conf'] ?? ''));
+	$rebuild_conf_files 								= $astDB->escape(($_REQUEST['rebuild_conf_files'] ?? ''));
+	$rebuild_music_on_hold 								= $astDB->escape(($_REQUEST['rebuild_music_on_hold'] ?? ''));
+	$recording_web_link 								= $astDB->escape(($_REQUEST['recording_web_link'] ?? ''));
+	$alt_server_ip 										= $astDB->escape(($_REQUEST['alt_server_ip'] ?? ''));
+	$external_server_ip 								= $astDB->escape(($_REQUEST['external_server_ip'] ?? ''));
+	$conf_engine 										= $astDB->escape(($_REQUEST['conf_engine'] ?? ''));
 	$defActive 											= ["Y","N"];
 	
     ### Check Server ID if its null or empty
@@ -65,7 +65,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Server IP"
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
 			"code" 											=> "41006", 

@@ -26,7 +26,7 @@
 	$limit 											= 50; 
 	
 	if (isset($_REQUEST['limit'])) {
-		$limit 										= $astDB->escape($_REQUEST['limit']);
+		$limit 										= $astDB->escape(($_REQUEST['limit'] ?? ''));
 	}
 	
     // Error Checking

@@ -27,8 +27,8 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);	
 	
 	// POST or GET Variables
-	$campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-	$status 											= $astDB->escape($_REQUEST['status']);	
+	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$status 											= $astDB->escape(($_REQUEST['status'] ?? ''));	
 	$attempt_delay										= (empty($_REQUEST['attempt_delay'])) ? 1800 : $astDB->escape($_REQUEST['attempt_delay']);
 	$attempt_maximum									= (empty($_REQUEST['attempt_maximum'])) ? 2 : $astDB->escape($_REQUEST['attempt_maximum']);
 	$active												= (empty($_REQUEST['active'])) ? "Y" : $astDB->escape(strtoupper($_REQUEST['active']));
@@ -65,7 +65,7 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Attempt Maximum is 3 digits. No special characters allowed."
 		];
-	} elseif (!in_array($active,$defActive) && !empty($active)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && !empty($active)) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for Active is Y or N only."
 		];

@@ -25,7 +25,7 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	$ingroup 										    = $astDB->escape( $_REQUEST['ingroup'] );
+	$ingroup 										    = $astDB->escape( ($_REQUEST['ingroup'] ?? '') );
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -138,7 +138,7 @@
                         
                         if (!empty($agent['vla_closer_campaigns'])) {
                             $closer_campaigns           = trim(substr($agent['vla_closer_campaigns'], 0, -1));
-                            $closer_campaigns           = explode(" ", $closer_campaigns);
+                            $closer_campaigns           = explode(" ", (string) ($closer_campaigns ?? ''));
                             $astDB->where("campaign_id", $closer_campaigns, "IN");
                         }
                         $cData							= $astDB

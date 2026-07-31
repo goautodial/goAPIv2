@@ -23,7 +23,7 @@
     include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns											= allowed_campaigns($log_group, $goDB, $astDB);
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));
 		
     // Check campaign_id if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
@@ -44,7 +44,7 @@
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
 		];
-    } elseif (in_array($campaign_id, $campaigns)) {
+    } elseif (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)

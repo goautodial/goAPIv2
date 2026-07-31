@@ -26,8 +26,8 @@
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
     ### POST or GET Variables
-	$campaign_id 										= $astDB->escape($_REQUEST["campaign_id"]);	
-	$recycle_id 										= $astDB->escape($_REQUEST["recycle_id"]);
+	$campaign_id 										= $astDB->escape(($_REQUEST["campaign_id"] ?? ''));	
+	$recycle_id 										= $astDB->escape(($_REQUEST["recycle_id"] ?? ''));
     
     ### Check Campaign ID if its null or empty
 	if (empty($goUser) || is_null($goUser)) {
@@ -59,7 +59,7 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if (in_array($campaign_id, $campaigns)) {
+			if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->get("vicidial_lead_recycle");
 				

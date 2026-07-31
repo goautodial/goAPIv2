@@ -20,7 +20,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$hasLocation = $astDB->escape($_REQUEST['has_location']);
+$hasLocation = $astDB->escape(($_REQUEST['has_location'] ?? ''));
 
 $agent = get_settings('user', $astDB, $goUser);
 $camp_list = [];
@@ -60,7 +60,8 @@ if ($phoneExist > 0) {
         $camp_list[$camp['campaign_id']] = $camp['campaign_name'];
     }
     
-    if (count($camp_list)) {
+    if ((is_countable($camp_list) ? count($camp_list) : 0)) {
+        $camp_list = is_array($camp_list) ? $camp_list : [];
         ksort($camp_list);
         $APIResult = [ "result" => "success", "data" => ["allowed_campaigns" => $camp_list] ];
     } else {

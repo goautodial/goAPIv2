@@ -26,13 +26,13 @@
 	
     // POST or GET Variables
 	$orig_user 	= (isset($_REQUEST['user']) ? $astDB->escape($_REQUEST['user']) : "agent001");
-	$pass 		= $astDB->escape($_REQUEST['pass']);
+	$pass 		= $astDB->escape(($_REQUEST['pass'] ?? ''));
 	$orig_full_name = (isset($_REQUEST['full_name']) ? $astDB->escape($_REQUEST['full_name']) : "Agent 001");
-	$phone_login 	= $astDB->escape($_REQUEST['phone_login']);
+	$phone_login 	= $astDB->escape(($_REQUEST['phone_login'] ?? ''));
 	$phone_pass 	= $pass;
-	$user_group 	= $astDB->escape($_REQUEST['user_group']);
-	$active 	= $astDB->escape(strtoupper($_REQUEST['active']));		
-	$email 		= $astDB->escape($_REQUEST['email']);
+	$user_group 	= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$active 	= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));		
+	$email 		= $astDB->escape(($_REQUEST['email'] ?? ''));
 	$avatar 	= (isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : NULL);
 	$seats 		= (isset($_REQUEST['seats']) ? $astDB->escape($_REQUEST['seats']) : 1);
 	$server_ip 	= (isset($_REQUEST['server_ip']) ? $astDB->escape($_REQUEST['server_ip']) : NULL);
@@ -93,7 +93,7 @@
 			"code" 											=> "40001", 
 			"result" 										=> $err_msg
 		];
-    } elseif (!in_array($active,$defActive) && $active != null) {
+    } elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
 			"code" 											=> "41006", 

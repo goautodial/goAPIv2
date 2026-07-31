@@ -22,7 +22,7 @@
 
 	include_once (__DIR__ . "/goAPI.php");	 
  
-	$filter_id 											= $astDB->escape($_REQUEST["filter_id"]); 
+	$filter_id 											= $astDB->escape(($_REQUEST["filter_id"] ?? '')); 
 	
     // Error Checking
 	if (empty($goUser) || is_null($goUser)) {

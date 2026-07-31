@@ -24,8 +24,8 @@
     include_once (__DIR__ . "/goAPI.php");
         
     // POST or GET Variables
-    $list_ids 											= $_REQUEST['list_id'];
-	//$action 											= strtolower($astDB->escape($_REQUEST['action']));
+    $list_ids 											= ($_REQUEST['list_id'] ?? '');
+	//$action 											= strtolower($astDB->escape(($_REQUEST['action'] ?? '')));
 	$action												= "delete_selected";
     
 	// Error Checking

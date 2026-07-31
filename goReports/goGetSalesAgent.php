@@ -24,12 +24,12 @@
     include_once(__DIR__ . "/goAPI.php");
 
     // need function go_sec_convert();
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaignID										= $astDB->escape($_REQUEST['campaignID']);
-    $request 										= $astDB->escape($_REQUEST['request']);
-    $statewide_sales_report							= $astDB->escape($_REQUEST['statewide_sales_report']);
-    //dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
+    $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
+    $campaignID										= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+    $request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
+    $statewide_sales_report							= $astDB->escape(($_REQUEST['statewide_sales_report'] ?? ''));
+    //dispo_stats 									= $astDB->escape(($_REQUEST['statuses'] ?? ''));
 	
     if (empty($fromDate)) {
     	$fromDate									= date("Y-m-d")." 00:00:00";
@@ -193,12 +193,12 @@
 			$cstatuses = implode("','",$cstatuses);
 		//}
 			
-		if (count($sstatuses) > 0 && count($cstatuses) > 0) {
+		if ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) > 0) {
 			$statuses = "{$sstatuses}','{$cstatuses}";
 			$statusRX = "{$sstatusRX}{$cstatusRX}";
 		} else {
-			$statuses = (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
-			$statusRX = (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+			$statuses = ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) < 1) ? $sstatuses : $cstatuses;
+			$statusRX = ((is_countable($sstatusRX) ? count($sstatusRX) : 0) > 0 && (is_countable($cstatusRX) ? count($cstatusRX) : 0) < 1) ? $sstatusRX : $cstatusRX;
 		}
 			
 		$statusRX = trim($statusRX, "|");

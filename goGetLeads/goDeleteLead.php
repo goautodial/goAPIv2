@@ -25,7 +25,7 @@
     include_once (__DIR__ . "/goAPI.php");
  
     // POST or GET Variables
-    $lead_id 											= $astDB->escape($_REQUEST['lead_id']);
+    $lead_id 											= $astDB->escape(($_REQUEST['lead_id'] ?? ''));
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {

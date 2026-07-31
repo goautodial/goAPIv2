@@ -27,12 +27,12 @@
 	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// need function go_sec_convert();
-    $pageTitle 										= strtolower((string) $astDB->escape($_REQUEST['pageTitle']));
-    $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
-    $toDate 										= $astDB->escape($_REQUEST['toDate']);
-    $campaignID 									= $astDB->escape($_REQUEST['campaignID']);
-    $request 										= $astDB->escape($_REQUEST['request']);
-    $dispo_stats 									= $astDB->escape($_REQUEST['statuses']);
+    $pageTitle 										= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
+    $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
+    $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
+    $campaignID 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
+    $request 										= $astDB->escape(($_REQUEST['request'] ?? ''));
+    $dispo_stats 									= $astDB->escape(($_REQUEST['statuses'] ?? ''));
 	
     if (empty($fromDate)) {
     	$fromDate 									= date("Y-m-d")." 00:00:00";
@@ -73,19 +73,19 @@
 			"code" 										=> "40001", 
 			"result" 									=> $err_msg
 		];
-	} elseif (!in_array($pageTitle, $defPage)) {
+	} elseif (!in_array($pageTitle, (is_array($defPage) ? $defPage : []))) {
 	 	$err_msg 									= error_handle("10004");
 		$apiresults 								= [
 			"code" 										=> "10004", 
 			"result" 									=> $err_msg
 		];
 	} elseif ($pageTitle === "call_export_report") {
-		$campaigns 									= $astDB->escape($_REQUEST['campaigns']);
-		$inbounds 									= $astDB->escape($_REQUEST['inbounds']);
-		$lists 										= $astDB->escape($_REQUEST['lists']);
-		$custom_fields 									= $astDB->escape($_REQUEST['custom_fields']);
-		$per_call_notes 								= $astDB->escape($_REQUEST['per_call_notes']);
-		$rec_location 									= $astDB->escape($_REQUEST['rec_location']);
+		$campaigns 									= $astDB->escape(($_REQUEST['campaigns'] ?? ''));
+		$inbounds 									= $astDB->escape(($_REQUEST['inbounds'] ?? ''));
+		$lists 										= $astDB->escape(($_REQUEST['lists'] ?? ''));
+		$custom_fields 									= $astDB->escape(($_REQUEST['custom_fields'] ?? ''));
+		$per_call_notes 								= $astDB->escape(($_REQUEST['per_call_notes'] ?? ''));
+		$rec_location 									= $astDB->escape(($_REQUEST['rec_location'] ?? ''));
 		
 		$goReportsReturn 							= go_export_reports($fromDate, $toDate, $campaigns, $inbounds, $lists, $dispo_stats, $custom_fields, $per_call_notes, $rec_location, $log_group, $astDB);		
 		$apiresults 								= [
@@ -116,10 +116,10 @@
 		$list_SQL 								= "";
 		$status_SQL 								= "";
 		
-		$campaign_ct 								= count($campaigns);
-		$group_ct 								= count($inbounds);
-		$list_ct 								= count($lists);
-		$status_ct 								= count($dispo_stats);
+		$campaign_ct 								= (is_countable($campaigns) ? count($campaigns) : 0);
+		$group_ct 								= (is_countable($inbounds) ? count($inbounds) : 0);
+		$list_ct 								= (is_countable($lists) ? count($lists) : 0);
+		$status_ct 								= (is_countable($dispo_stats) ? count($dispo_stats) : 0);
 
 		if ($campaigns != "") {
 			$i								= 0;
@@ -174,7 +174,7 @@
 				$array_list[] = $lists[$i];
 				$i++;
 			}
-			if (in_array("ALL", $lists)) {
+			if (in_array("ALL", (is_array($lists) ? $lists : []))) {
 				$list_SQL 							= "";
 				$i								= 0;
 				while ($i < $campaign_ct) {
@@ -213,7 +213,7 @@
 				$i++;
 			}
 			
-			if ( in_array("ALL", $dispo_stats) || $status_ct < 1 ) {
+			if ( in_array("ALL", (is_array($dispo_stats) ? $dispo_stats : [])) || $status_ct < 1 ) {
 				$status_SQL 						= "";
 			} else {
 				$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
@@ -400,7 +400,7 @@
 			$csv_header[] = "recording_location";
 		}
 		if ($custom_fields == "Y")	{
-		    $counter = count($array_list);
+		    $counter = (is_countable($array_list) ? count($array_list) : 0);
             for ($i = 0 ; $i < $counter; $i++) {
 				$list_id 								= $array_list[$i];
 				//$query_CF_list = "DESC custom_$list_id;");
@@ -422,13 +422,13 @@
 
 			$header_CF 									= [];
 			$keys 										= array_keys($active_list_fields);
-            $counter = count($keys);
+            $counter = (is_countable($keys) ? count($keys) : 0);
 			
 			for ($i = 0; $i < $counter; $i++) {
 				$list_id 								= $keys[$i];
 				for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
 					$field 								= $active_list_fields[$list_id][$x];
-					if (!in_array($field,$header_CF)) {
+					if (!in_array($field, (is_array($header_CF) ? $header_CF : []))) {
 						$header_CF[] 					= $field;
 					}
 				}
@@ -500,7 +500,7 @@
 
 			if ($custom_fields == "Y")	{
 				$keys 									= array_keys($active_list_fields);
-                $counter = count($keys); // list of active custom lists
+                $counter = (is_countable($keys) ? count($keys) : 0); // list of active custom lists
 				
 				for ($i = 0 ; $i < $counter; $i++) {
 				    $list_id 							= $keys[$i];
@@ -512,7 +512,7 @@
 						//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
 
 						if ($fetch_CF !== NULL) {
-							for ($x = 0;$x < count($header_CF);$x++) {
+							for ($x = 0;$x < (is_countable($header_CF) ? count($header_CF) : 0);$x++) {
 								if (!empty($fetch_CF[$header_CF[$x]])) {
 									$fetch_row[] 		=  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
 								} else {
@@ -523,7 +523,7 @@
 					}
 					
 
-					for ($a=0;$a < count($fetch_row);$a++) {
+					for ($a=0;$a < (is_countable($fetch_row) ? count($fetch_row) : 0);$a++) {
 						$row[] = $fetch_row[$a];
 					}
 					
@@ -649,12 +649,12 @@
 			}
 			
 			
-			if (count($sstatuses) > 0 && count($cstatuses) > 0) {
+			if ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) > 0) {
 				$statuses 								= "{$sstatuses}','{$cstatuses}";
 				$statusRX 								= "{$sstatusRX}{$cstatusRX}";
 			} else {
-				$statuses 								= (count($sstatuses) > 0 && count($cstatuses) < 1) ? $sstatuses : $cstatuses;
-				$statusRX 								= (count($sstatusRX) > 0 && count($cstatusRX) < 1) ? $sstatusRX : $cstatusRX;
+				$statuses 								= ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) < 1) ? $sstatuses : $cstatuses;
+				$statusRX 								= ((is_countable($sstatusRX) ? count($sstatusRX) : 0) > 0 && (is_countable($cstatusRX) ? count($cstatusRX) : 0) < 1) ? $sstatusRX : $cstatusRX;
 			}
 			
 			$statusRX 									= trim($statusRX, "|");
@@ -683,7 +683,7 @@
 					// Total Calls Made					
 					$qtotalcallsmade 					= $astDB->rawQuery("select phone_number from vicidial_log vl where length_in_sec>'0' and campaign_id = '$campaignID' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $TunionSQL");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$cdate[] 					= $row['cdate'];
 							$hour0[] 					= $row['Hour0'];
@@ -771,7 +771,7 @@
 					
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -789,7 +789,7 @@
 					$total_status						= $astDB->getRowCount();
 					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id = '$campaignID' group by status $DunionSQL) t group by status;");
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
@@ -834,7 +834,7 @@
 					// Total Calls Made
 					$qtotalcallsmade 					= $astDB->rawQuery("select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by weekno $MunionSQL) t group by weekno;");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$weekno[] 					= "Week ".$row['weekno'];
 							$day0[] 					= $row['Day0'];
@@ -888,7 +888,7 @@
 					
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -904,7 +904,7 @@
 					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
@@ -948,7 +948,7 @@
 					// Total Calls Made		
 					$qtotalcallsmade					= $astDB->rawQuery("select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by monthname $MunionSQL) t group by monthname;");
 					
-					if (count($qtotalcallsmade) > 0) {
+					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$monthname[] 				= $row['monthname'];
 							$month0[] 					= $row['Month1'];
@@ -1012,7 +1012,7 @@
 						
 					$total_agents						= $astDB->getRowCount();
 					
-					if (count($qtotalagents) > 0) {
+					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
 							$cuser[] 					= $row['cuser'];						
@@ -1028,7 +1028,7 @@
 					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where length_in_sec>'0' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul group by status $DunionSQL) t group by status;");
 					$total_status						= $astDB->getRowCount();
 					
-					if (count($qtotalstatus) > 0) {
+					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
@@ -1103,7 +1103,7 @@
 					
 				$user_ct								= $astDB->getRowCount();
 					
-				if (count($quserct) > 0) {
+				if ((is_countable($quserct) ? count($quserct) : 0) > 0) {
 					foreach ($quserct as $row) {
 						$ULname[] 						= $row['full_name'];
 						$ULuser[] 						= $row['user'];					
@@ -1621,7 +1621,7 @@
 					$m							= 0;
 					
 					while ($m < $k) {
-						$sort_split 					= explode("-----",$TOPsort[$m]);
+						$sort_split 					= explode("-----", (string) ($TOPsort[$m] ?? ''));
 						$i 								= $sort_split[1];
 						$sort_order[$m] 				= "$i";
 						//if ($file_download > 0)
@@ -1988,7 +1988,7 @@
 					$m									= 0;
 					
 					while ($m < $k) {
-						$sort_split 					= explode("-----",$TOPsort[$m]);
+						$sort_split 					= explode("-----", (string) ($TOPsort[$m] ?? ''));
 						$i 								= $sort_split[1];
 						$sort_order[$m] 				= "$i";
 						
@@ -2146,7 +2146,7 @@
 				
 				// BEGIN loop through each user //
 				$m										= 0;
-				$Suser_ct 								= count($usersARY);
+				$Suser_ct 								= (is_countable($usersARY) ? count($usersARY) : 0);
 				$TOTtotNONPAUSE 						= 0;
 				$TOTtotTOTAL 							= 0;
 				
@@ -2542,7 +2542,7 @@
 					";
 		
 				$sts								= 0;
-				$statuses_called_to_print 			= count($status);
+				$statuses_called_to_print 			= (is_countable($status) ? count($status) : 0);
 				
 				while ($statuses_called_to_print > $sts) {
 					$Pstatus 						= $status[$sts];					
@@ -2715,8 +2715,8 @@
 					
 					$query 							= $inbound_query;
 					$row 							= $astDB->rawQuery($query);
-					$closer_camp_array				= explode(" ",$row['closer_campaigns']);
-					$num 							= count($closer_camp_array);				
+					$closer_camp_array				= explode(" ", (string) ($row['closer_campaigns'] ?? ''));
+					$num 							= (is_countable($closer_camp_array) ? count($closer_camp_array) : 0);				
 					$x								= 0;
 					
 					while ($x<$num) {
@@ -2831,8 +2831,8 @@
 					";
 					
 					$row 							= $astDB->rawQuery($query);
-					$closer_camp_array 				= explode(" ",$row['closer_campaigns']);
-					$num 							= count($closer_camp_array);				
+					$closer_camp_array 				= explode(" ", (string) ($row['closer_campaigns'] ?? ''));
+					$num 							= (is_countable($closer_camp_array) ? count($closer_camp_array) : 0);				
 					$x								= 0;
 					
 					while ($x<$num) {

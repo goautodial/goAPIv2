@@ -25,12 +25,12 @@
 	include_once (__DIR__ . "/goAPI.php");
 	
 	### POST or GET Variables
-	$voicemail_id 						= $astDB->escape($_REQUEST['voicemail_id']);
-	$pass 								= $astDB->escape($_REQUEST['pass']);
-	$fullname 							= $astDB->escape($_REQUEST['fullname']);
-	$email 								= $astDB->escape($_REQUEST['email']);
-	$user_group 						= $astDB->escape($_REQUEST['user_group']);
-	$active 							= $astDB->escape(strtoupper($_REQUEST['active']));
+	$voicemail_id 						= $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
+	$pass 								= $astDB->escape(($_REQUEST['pass'] ?? ''));
+	$fullname 							= $astDB->escape(($_REQUEST['fullname'] ?? ''));
+	$email 								= $astDB->escape(($_REQUEST['email'] ?? ''));
+	$user_group 						= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$active 							= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
 
 	### Default values
     $defActive 							= [
@@ -56,7 +56,7 @@
 		$apiresults 					= [
 			"result" 						=> "Error: Special characters found in fullname and must not be empty"
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$apiresults 					= [
 			"result" 						=> "Error: Default value for active is Y or N only."
 		];

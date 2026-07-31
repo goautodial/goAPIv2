@@ -21,9 +21,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	include_once (__DIR__ . "/goAPI.php");
-	
-	$groupId = go_get_groupid($goUser);
-	
+
+	$groupId = go_get_groupid($goUser, $astDB);
+
 	// if (!checkIfTenant($groupId, $goDB)) {
 	// 	//$ul = "";
 	// } else {
@@ -45,7 +45,7 @@
                 $astDB->where("user_group", $groupId);
                 $astDB->orWhere("lead_filter_id", "FILTEMP");
             }
-        }					
+        }
     }
 
    	//$query = "SELECT lead_filter_id,lead_filter_name FROM vicidial_lead_filters $ul $addedSQL ORDER BY lead_filter_id;";

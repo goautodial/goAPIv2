@@ -23,23 +23,23 @@
 	include_once (__DIR__ . "/goAPI.php");
 
     ### POST or GET Variables
-	$list_id = $astDB->escape($_REQUEST['list_id']);
-	$list_name = $astDB->escape($_REQUEST['list_name']);
-	$list_description = $astDB->escape($_REQUEST['list_description']);
-	$campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-	$active = $astDB->escape(strtoupper($_REQUEST['active']));
-	$reset_time = $astDB->escape($_REQUEST['reset_time']);
-	$xferconf_a_number = $astDB->escape($_REQUEST['xferconf_a_number']);
-	$xferconf_b_number = $astDB->escape($_REQUEST['xferconf_b_number']);
-	$xferconf_c_number = $astDB->escape($_REQUEST['xferconf_c_number']);
-	$xferconf_d_number = $astDB->escape($_REQUEST['xferconf_d_number']);
-	$xferconf_e_number = $astDB->escape($_REQUEST['xferconf_e_number']);
-	$agent_script_override = $astDB->escape($_REQUEST['agent_script_override']);
-	$drop_inbound_group_override = $astDB->escape($_REQUEST['drop_inbound_group_override']);
-	$campaign_cid_override = $astDB->escape($_REQUEST['campaign_cid_override']);
-	$web_form_address = $astDB->escape($_REQUEST['web_form_address']);
-	$reset_list = $astDB->escape(strtoupper($_REQUEST['reset_list']));
-	// $values = $_REQUEST['items'];
+	$list_id = $astDB->escape(($_REQUEST['list_id'] ?? ''));
+	$list_name = $astDB->escape(($_REQUEST['list_name'] ?? ''));
+	$list_description = $astDB->escape(($_REQUEST['list_description'] ?? ''));
+	$campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$active = $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
+	$reset_time = $astDB->escape(($_REQUEST['reset_time'] ?? ''));
+	$xferconf_a_number = $astDB->escape(($_REQUEST['xferconf_a_number'] ?? ''));
+	$xferconf_b_number = $astDB->escape(($_REQUEST['xferconf_b_number'] ?? ''));
+	$xferconf_c_number = $astDB->escape(($_REQUEST['xferconf_c_number'] ?? ''));
+	$xferconf_d_number = $astDB->escape(($_REQUEST['xferconf_d_number'] ?? ''));
+	$xferconf_e_number = $astDB->escape(($_REQUEST['xferconf_e_number'] ?? ''));
+	$agent_script_override = $astDB->escape(($_REQUEST['agent_script_override'] ?? ''));
+	$drop_inbound_group_override = $astDB->escape(($_REQUEST['drop_inbound_group_override'] ?? ''));
+	$campaign_cid_override = $astDB->escape(($_REQUEST['campaign_cid_override'] ?? ''));
+	$web_form_address = $astDB->escape(($_REQUEST['web_form_address'] ?? ''));
+	$reset_list = $astDB->escape(strtoupper(($_REQUEST['reset_list'] ?? '')));
+	// $values = ($_REQUEST['items'] ?? '');
    
     ### Default values 
     $defActive = ["Y","N"];
@@ -48,10 +48,10 @@
 	if($list_id == null) {
 		$apiresults = ["result" => "Error: Set a value for List ID."];
 	} else {
-        if(!in_array($active,$defActive) && $active != null) {
+        if(!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
             $apiresults = ["result" => "Error: Default value for active is Y or N only."];
         } else {
-			if(!in_array($reset_list,$defActive) && $reset_list != null) {
+			if(!in_array($reset_list, (is_array($defActive) ? $defActive : [])) && $reset_list != null) {
 				$apiresults = ["result" => "Error: Default value for reset_list is Y or N only."];
 			} else {
 				if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', (string) $list_name)){
@@ -90,7 +90,7 @@
 															if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $web_form_address)){
 																$apiresults = ["result" => "Error: Special characters found in web_form_address"];
 															} else {
-																$groupId = go_get_groupid($goUser);
+																$groupId = go_get_groupid($goUser, $astDB);
 																if (!checkIfTenant($groupId, $goDB)) {
 																	//$ul = "WHERE campaign_id='$campaign_id'";
 																	$ulList = "WHERE list_id='$list_id'";

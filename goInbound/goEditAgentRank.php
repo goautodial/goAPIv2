@@ -24,8 +24,8 @@
 	
     include_once (__DIR__ . "/goAPI.php");
 
-	$goItemRank											= $astDB->escape($_REQUEST['itemrank']);
-	$goIDgroup 											= $astDB->escape($_REQUEST['idgroup']);
+	$goItemRank											= $astDB->escape(($_REQUEST['itemrank'] ?? ''));
+	$goIDgroup 											= $astDB->escape(($_REQUEST['idgroup'] ?? ''));
 	
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -57,11 +57,11 @@
 		if ($goapiaccess > 0 && $userlevel > 7) {			
 			$itemsumitexplode 							= explode('&', (string) $goItemRank);
 			$group_id 									= $goIDgroup;
-            $counter = count( $itemsumitexplode );
+            $counter = (is_countable($itemsumitexplode) ? count($itemsumitexplode) : 0);
 
 			for( $i = 0; $i < $counter; $i++ ) {
 
-				$itemsumitsplit 						= explode('=', $itemsumitexplode[$i]);
+				$itemsumitsplit 						= explode('=', (string) ($itemsumitexplode[$i] ?? ''));
 				$showval 								= htmlspecialchars(urldecode($itemsumitsplit[0]));
 				$datavals 								= htmlspecialchars(urldecode($itemsumitsplit[1]));
 				$finalvalues 							= $showval."||".$datavals.""; 
@@ -105,9 +105,9 @@
 				}
 				
 				if (preg_match("/RANK/i", "$itemsumitexplode[$i]")) {
-					$itemsumitsplit1 					= explode('=', $itemsumitexplode[$i]);
+					$itemsumitsplit1 					= explode('=', (string) ($itemsumitexplode[$i] ?? ''));
 					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
-					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
+					$itemsexplode 						= explode("_", (string) ($itemsumitsplit1[0] ?? ''));
 					
 					$data 								= [
 						"group_rank" 						=> $datavals1, 
@@ -124,9 +124,9 @@
 				}
 				
 				if (preg_match("/GRADE/i", "$itemsumitexplode[$i]")) {
-					$itemsumitsplit1 					= explode('=', $itemsumitexplode[$i]);
+					$itemsumitsplit1 					= explode('=', (string) ($itemsumitexplode[$i] ?? ''));
 					$datavals1 							= htmlspecialchars(urldecode($itemsumitsplit1[1]));					
-					$itemsexplode 						= explode("_",$itemsumitsplit1[0]);
+					$itemsexplode 						= explode("_", (string) ($itemsumitsplit1[0] ?? ''));
 					
 					$datum 								= [
 						"group_grade" 						=> $datavals1

@@ -25,29 +25,29 @@
     include_once (__DIR__ . "/../licensed-conf.php");
 
     // POST or GET Variables
-    $userid 											= $astDB->escape($_REQUEST['user_id']);
-    $user 												= $astDB->escape($_REQUEST['user']);
-    $pass 												= $astDB->escape($_REQUEST['pass']);
-    $full_name 											= $astDB->escape($_REQUEST['full_name']);
-    $phone_login 										= $astDB->escape($_REQUEST['phone_login']);
+    $userid 											= $astDB->escape(($_REQUEST['user_id'] ?? ''));
+    $user 												= $astDB->escape(($_REQUEST['user'] ?? ''));
+    $pass 												= $astDB->escape(($_REQUEST['pass'] ?? ''));
+    $full_name 											= $astDB->escape(($_REQUEST['full_name'] ?? ''));
+    $phone_login 										= $astDB->escape(($_REQUEST['phone_login'] ?? ''));
     $phone_pass 										= $pass;
-    $user_group 										= $astDB->escape($_REQUEST['user_group']);
-    $email 												= $astDB->escape($_REQUEST['email']);
+    $user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+    $email 												= $astDB->escape(($_REQUEST['email'] ?? ''));
     $active 											= $astDB->escape(strtoupper((string) ($_REQUEST['active'] ?? '')));
-    $hotkeys_active 									= $astDB->escape($_REQUEST['hotkeys_active']);
-    $user_level 										= $astDB->escape($_REQUEST['user_level']);
+    $hotkeys_active 									= $astDB->escape(($_REQUEST['hotkeys_active'] ?? ''));
+    $user_level 										= $astDB->escape(($_REQUEST['user_level'] ?? ''));
     $modify_same_user_level 							= isset($_REQUEST['modify_same_user_level']) ? $astDB->escape(strtoupper((string) $_REQUEST['modify_same_user_level'])) : null;
-    $goUser 											= $astDB->escape($_REQUEST['goUser']);
-    $voicemail 											= $astDB->escape($_REQUEST['voicemail_id']);
-    $vdc_agent_api_access 								= $astDB->escape($_REQUEST['vdc_agent_api_access']);
-    $agent_choose_ingroups 								= $astDB->escape($_REQUEST['agent_choose_ingroups']);
-    $vicidial_recording_override 						= $astDB->escape($_REQUEST['vicidial_recording_override']);
-    $vicidial_transfers 								= $astDB->escape($_REQUEST['vicidial_transfers']);
-    $closer_default_blended 							= $astDB->escape($_REQUEST['closer_default_blended']);
-    $agentcall_manual 									= $astDB->escape($_REQUEST['agentcall_manual']);
-    $scheduled_callbacks 								= $astDB->escape($_REQUEST['scheduled_callbacks']);
-    $agentonly_callbacks 								= $astDB->escape($_REQUEST['agentonly_callbacks']);
-    $agent_lead_search_override 						= $astDB->escape($_REQUEST['agent_lead_search_override']);
+    $goUser 											= $astDB->escape(($_REQUEST['goUser'] ?? ''));
+    $voicemail 											= $astDB->escape(($_REQUEST['voicemail_id'] ?? ''));
+    $vdc_agent_api_access 								= $astDB->escape(($_REQUEST['vdc_agent_api_access'] ?? ''));
+    $agent_choose_ingroups 								= $astDB->escape(($_REQUEST['agent_choose_ingroups'] ?? ''));
+    $vicidial_recording_override 						= $astDB->escape(($_REQUEST['vicidial_recording_override'] ?? ''));
+    $vicidial_transfers 								= $astDB->escape(($_REQUEST['vicidial_transfers'] ?? ''));
+    $closer_default_blended 							= $astDB->escape(($_REQUEST['closer_default_blended'] ?? ''));
+    $agentcall_manual 									= $astDB->escape(($_REQUEST['agentcall_manual'] ?? ''));
+    $scheduled_callbacks 								= $astDB->escape(($_REQUEST['scheduled_callbacks'] ?? ''));
+    $agentonly_callbacks 								= $astDB->escape(($_REQUEST['agentonly_callbacks'] ?? ''));
+    $agent_lead_search_override 						= $astDB->escape(($_REQUEST['agent_lead_search_override'] ?? ''));
     $avatar 											= isset($_REQUEST['avatar']) ? $astDB->escape($_REQUEST['avatar']) : null;
     $enable_webrtc 										= isset($_REQUEST['enable_webrtc']) ? $astDB->escape($_REQUEST['enable_webrtc']) : null;
     $location 											= isset($_REQUEST['location_id']) ? $astDB->escape($_REQUEST['location_id']) : null;
@@ -107,13 +107,13 @@
 			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
-	} elseif (!in_array($active,$defActive) && $active != null) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults										= [
 			"code" 											=> "41006",
 			"result" 										=> $err_msg
 		];
-	} elseif (!in_array($modify_same_user_level,$defmodify_same_user_level) && $modify_same_user_level != null) {
+	} elseif (!in_array($modify_same_user_level, (is_array($defmodify_same_user_level) ? $defmodify_same_user_level : [])) && $modify_same_user_level != null) {
 		$err_msg 										= error_handle("41006", "modify_same_user_level");
 		$apiresults 									= [
 			"code" 											=> "41006",

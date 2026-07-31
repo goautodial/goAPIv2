@@ -21,13 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-  $campaign_id = $_REQUEST['campaign_id'];
-  $areacode = $_REQUEST['areacode'];
+  $campaign_id = ($_REQUEST['campaign_id'] ?? '');
+  $areacode = ($_REQUEST['areacode'] ?? '');
 
-  $outbound_cid = $astDB->escape($_REQUEST['outbound_cid']);
-  $outbound_cid_old = $astDB->escape($_REQUEST['outbound_cid_old']);
-  $active = $_REQUEST['active'];
-  $cid_description = $astDB->escape($_REQUEST['cid_description']);
+  $outbound_cid = $astDB->escape(($_REQUEST['outbound_cid'] ?? ''));
+  $outbound_cid_old = $astDB->escape(($_REQUEST['outbound_cid_old'] ?? ''));
+  $active = ($_REQUEST['active'] ?? '');
+  $cid_description = $astDB->escape(($_REQUEST['cid_description'] ?? ''));
 
 	if (empty($goUser) || is_null($goUser)) {
                 $apiresults                                                                     = [

@@ -23,7 +23,7 @@
     
 	include_once (__DIR__ . "/goAPI.php");
 	
-	$call_time_id 										= $astDB->escape($_REQUEST['call_time_id']);
+	$call_time_id 										= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
 
     // ERROR CHECKING 
 	if (empty ($goUser) || is_null ($goUser)) {

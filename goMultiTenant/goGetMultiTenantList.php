@@ -22,10 +22,10 @@
 */
 	include_once (__DIR__ . "/goAPI.php");
 	
-    $limit = $astDB->escape($_REQUEST['limit']);
+    $limit = $astDB->escape(($_REQUEST['limit'] ?? ''));
     if($limit < 1){ $limit = 20; }
  
-    $groupId = go_get_groupid($goUser);
+    $groupId = go_get_groupid($goUser, $astDB);
     
 	if (!checkIfTenant($groupId, $goDB)) {
 		//$ul='';

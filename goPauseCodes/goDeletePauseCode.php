@@ -25,8 +25,8 @@
     include_once (__DIR__ . "/goAPI.php");
  
 	### POST or GET Variables
-	$campaign_id		 								= $astDB->escape($_REQUEST['pauseCampID']);
-	$pause_code 										= $astDB->escape($_REQUEST['pause_code']);
+	$campaign_id		 								= $astDB->escape(($_REQUEST['pauseCampID'] ?? ''));
+	$pause_code 										= $astDB->escape(($_REQUEST['pause_code'] ?? ''));
     
     ### Check Campaign ID if its null or empty
 	if (empty($goUser) || is_null($goUser)) {

@@ -23,14 +23,14 @@
     
     include_once (__DIR__ . "/../goFunctions.php");
     
-    $list_to   = $astDB->escape($_REQUEST['list_to']);
-    $list_from = $astDB->escape($_REQUEST['list_from']);
-    $copy_option = $astDB->escape($_REQUEST['copy_option']);
+    $list_to   = $astDB->escape(($_REQUEST['list_to'] ?? ''));
+    $list_from = $astDB->escape(($_REQUEST['list_from'] ?? ''));
+    $copy_option = $astDB->escape(($_REQUEST['copy_option'] ?? ''));
     
-    $goUser = $astDB->escape($_REQUEST['goUser']);
-    $ip_address = $astDB->escape($_REQUEST['hostname']);
-    $log_user = $astDB->escape($_REQUEST['log_user']);
-    $log_group = $astDB->escape($_REQUEST['log_group']);
+    $goUser = $astDB->escape(($_REQUEST['goUser'] ?? ''));
+    $ip_address = $astDB->escape(($_REQUEST['hostname'] ?? ''));
+    $log_user = $astDB->escape(($_REQUEST['log_user'] ?? ''));
+    $log_group = $astDB->escape(($_REQUEST['log_group'] ?? ''));
     
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
     
@@ -66,8 +66,8 @@
                 $queryCheckTable = $astDB->rawQuery($checkTable);
                 
                 if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
-                    $field_options_array = explode("\n",$field_options);
-                    $field_options_count = count($field_options_array);
+                    $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                    $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                     $te=0;
                     while ($te < $field_options_count)
                         {
@@ -88,8 +88,8 @@
                  
                 
                 if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
-                    $field_options_array = explode("\n",$field_options);
-                    $field_options_count = count($field_options_array);
+                    $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                    $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                     $te=0;
                     while ($te < $field_options_count)
                         {
@@ -174,7 +174,7 @@
             }
         }
         
-        if(in_array("error", $output)){
+        if(in_array("error", (is_array($output) ? $output : []))){
             $apiresults = ["result" => "success", "data" => "some fields are detected as duplicate and skipped"];
         }else{
             $apiresults = ["result" => "success", "query" => $field_sql];
@@ -221,8 +221,8 @@
 
                
                 if ( $field_type == strtoupper('select') || $field_type == 'RADIO' ) {
-                    $field_options_array = explode("\n",$field_options);
-                    $field_options_count = count($field_options_array);
+                    $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                    $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                     $te=0;
                     $field_options_ENUM='';
                     while ($te < $field_options_count)
@@ -244,8 +244,8 @@
                  
                 
                 if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
-                    $field_options_array = explode("\n",$field_options);
-                    $field_options_count = count($field_options_array);
+                    $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                    $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                     $te=0;
                     while ($te < $field_options_count)
                         {
@@ -340,7 +340,7 @@
             }
         }
         $apiresults = ["result" => "success", "query" => $output, "query1" => $output1];
-        // if(in_array("error", $output)){
+        // if(in_array("error", (is_array($output) ? $output : []))){
         //     $apiresults = array("result" => "success", "data" => "some fields are detected as duplicate and skipped");
         // }else{
         //     $apiresults = array("result" => "success", "query" => $field_sql);
@@ -397,8 +397,8 @@
                         
                        
                         if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
-                            $field_options_array = explode("\n",$field_options);
-                            $field_options_count = count($field_options_array);
+                            $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                            $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                             $te=0;
                             while ($te < $field_options_count)
                                 {
@@ -419,8 +419,8 @@
                          
                         
                         if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
-                            $field_options_array = explode("\n",$field_options);
-                            $field_options_count = count($field_options_array);
+                            $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                            $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                             $te=0;
                             while ($te < $field_options_count)
                                 {
@@ -506,7 +506,7 @@
                     }
                 }
                 
-                if(in_array("error", $output)){
+                if(in_array("error", (is_array($output) ? $output : []))){
                     $apiresults = ["result" => "success", "data" => "some fields are detected as duplicate and skipped"];
                 }else{
                     $apiresults = ["result" => "success"];

@@ -64,7 +64,7 @@ foreach ($rslt as $val) {
     $list_ids[] = $val['list_id'];
 }
 
-if (count($list_ids) > 0 ) {
+if ((is_countable($list_ids) ? count($list_ids) : 0) > 0 ) {
     $astDB->where('vl.list_id', $list_ids, 'in');
     $astDB->where('vl.status', ['DNC', 'DNCL'], 'not in');
     if (strlen((string) $search_string) >= 3) {

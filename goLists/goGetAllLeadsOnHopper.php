@@ -21,13 +21,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-  
+
     include_once (__DIR__ . "/goAPI.php");
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-    $campaign_id 										= $astDB->escape($_REQUEST['campaign_id']);
-//	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
-    
+	    $campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+		$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 100);
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -53,12 +53,25 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if (in_array($campaign_id, $campaigns)) {
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			$dataLeadID = [];
+			$dataPhoneNO = [];
+			$dataState = [];
+			$dataStatus = [];
+			$dataCalledCount = [];
+			$dataGMT = [];
+			$dataHopperID = [];
+			$dataAltDial = [];
+			$dataListID = [];
+			$dataPriority = [];
+			$dataSource = [];
+			$dataDialStatuses = [];
+
+			if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 				$query 									= "
 					SELECT
 						vicidial_hopper.lead_id,
@@ -72,25 +85,25 @@
 						vicidial_hopper.list_id,
 						vicidial_hopper.priority,
 						vicidial_hopper.source
-					FROM 
+					FROM
 						vicidial_hopper,vicidial_list
-					WHERE 
+					WHERE
 						vicidial_hopper.lead_id = vicidial_list.lead_id
-					AND 
+					AND
 						vicidial_hopper.campaign_id = '$campaign_id'
-					ORDER BY 
+					ORDER BY
 						vicidial_hopper.hopper_id
 					#LIMIT $limit;
 				";
-				
+
 				$rsltv 									= $astDB->rawQuery($query);
-				
-				if($astDB->count > 0) {  
+
+				if($astDB->count > 0) {
 					//$queryGetDialStatus = "SELECT dial_statuses FROM vicidial_campaigns WHERE campaign_id = '$campaign_id';";
 					$astDB->where('campaign_id', $campaign_id);
 					$resultQuery 						= $astDB->getOne('vicidial_campaigns', 'dial_statuses');
 					$dataDialStatuses[] 				= $resultQuery['dial_statuses'];
-				
+
 					foreach ($rsltv as $fresults){
 						$dataLeadID[]       			= $fresults['lead_id'];
 						$dataPhoneNO[]      			= $fresults['phone_number'];
@@ -104,7 +117,7 @@
 						$dataPriority[]     			= $fresults['priority'];
 						$dataSource[]       			= $fresults['source'];
 					}
-					
+
 					$apiresults 						= [
 						"result"            				=> "success",
 						"lead_id"           				=> escapeJsonString($dataLeadID),
@@ -121,24 +134,40 @@
 						"camp_dial_status"  				=> escapeJsonString($dataDialStatuses)
 					];
 				} else {
+					$astDB->where('campaign_id', $campaign_id);
+					$resultQuery 						= $astDB->getOne('vicidial_campaigns', 'dial_statuses');
+					$dataDialStatuses[] 				= $resultQuery['dial_statuses'] ?? '';
+
 					$apiresults 						= [
-						"result" 							=> "Error: No records found."
+						"result"             				=> "success",
+						"lead_id"            				=> [],
+						"phone_number"       				=> [],
+						"state"              				=> [],
+						"status"             				=> [],
+						"called_count"       				=> [],
+						"gmt_offset_now"    				=> [],
+						"hopper_id"          				=> [],
+						"alt_dial"           				=> [],
+						"list_id"            				=> [],
+						"priority"           				=> [],
+						"source"             				=> [],
+						"camp_dial_status"  				=> escapeJsonString($dataDialStatuses)
 					];
 				}
 			} else {
 				$err_msg 								= error_handle("10001");
 				$apiresults 							= [
-					"code" 									=> "10001", 
+					"code" 									=> "10001",
 					"result" 								=> $err_msg
-				];		
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

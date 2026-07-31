@@ -26,8 +26,8 @@
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');
 	
-	$goDupcheck = $astDB->escape($_REQUEST["goDupcheck"]);
-	$jsonDataRequest = json_decode($_REQUEST['jsonData'], true);
+	$goDupcheck = $astDB->escape(($_REQUEST["goDupcheck"] ?? ''));
+	$jsonDataRequest = json_decode(($_REQUEST['jsonData'] ?? ''), true);
 	$jsonDataPost = (array) json_decode(file_get_contents('php://input'), TRUE);
 
 	if(!empty($jsonDataRequest)){
@@ -61,7 +61,7 @@
 		$state = '';
 		$postal_code = '';
 		foreach($leadsFields as $fields){
-			if(in_array($fields['FieldName'], $baseFields) && $fields['FieldType'] != "custom"){
+			if(in_array($fields['FieldName'], (is_array($baseFields) ? $baseFields : [])) && $fields['FieldType'] != "custom"){
 				$insertFields[] = $fields['FieldName'];
 				if($fields['FieldName'] == "phone_code"){
 					if(!empty($fields['FieldValue'])){
@@ -99,7 +99,7 @@
 					}
 				}
 			}else{
-				if(in_array($fields['FieldName'], $customFields)){
+				if(in_array($fields['FieldName'], (is_array($customFields) ? $customFields : []))){
 					$insertCustomFields[] = $fields['FieldName'];
 					$insertCustomValues[] = $fields['FieldValue'];
 				}
@@ -142,7 +142,7 @@
     	$resultInsertList = $astDB->rawQuery($insertListQuery) or die($astDB->getLastQuery());
 	*/
 	$fixData = [];
-    $counter = count($insertFields);
+    $counter = (is_countable($insertFields) ? count($insertFields) : 0);
 	for($i = 0; $i < $counter; $i++){
 		$fixData[$insertFields[$i]] = $insertValues[$i];
 	}
@@ -181,7 +181,7 @@
 
 	}
 	// print_r($resultOfInserts);die;
-	if(in_array("error", $resultOfInserts)){
+	if(in_array("error", (is_array($resultOfInserts) ? $resultOfInserts : []))){
 		$apiresults = ["result" => "error", "message" => "Uploading Leads interrupted due too some errors. Please contact administrator.", "LeadNotSaved" => $leadsNotSaved];
 		$log_id = log_action($goDB, 'UPLOAD', $log_user, $log_ip, "Error in uploading leads on List ID $list_id", $log_group);
 	}else{

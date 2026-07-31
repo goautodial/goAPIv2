@@ -21,9 +21,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    $campaign_id = $astDB->escape($_REQUEST['campaign_id']);
-    $location = $astDB->escape($_REQUEST['location']);
-    $user_id = $astDB->escape($_REQUEST['user_id']);
+    $campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+    $location = $astDB->escape(($_REQUEST['location'] ?? ''));
+    $user_id = $astDB->escape(($_REQUEST['user_id'] ?? ''));
 
     $date = date("Y-m-d");
     $queryDate = "event_time BETWEEN '$date 00:00:00' AND '$date 23:59:59'";

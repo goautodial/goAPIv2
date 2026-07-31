@@ -24,8 +24,8 @@
     include_once(__DIR__ . "/goAPI.php");
     
     // POST or GET Variables
-    $user_ids 											= $_REQUEST['user_id'];
-    $action 											= $astDB->escape($_REQUEST['action']);	
+    $user_ids 											= ($_REQUEST['user_id'] ?? '');
+    $action 											= $astDB->escape(($_REQUEST['action'] ?? ''));	
 	
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [

@@ -24,13 +24,13 @@
 
 	include_once (__DIR__ . "/goAPI.php");
 	
-	$moh_id 											= $astDB->escape($_REQUEST['moh_id']);
-	$moh_name 											= $astDB->escape($_REQUEST['moh_name']);
-	$user_group 										= $astDB->escape($_REQUEST['user_group']);
-	$active 											= strtoupper((string) $astDB->escape($_REQUEST['active']));
-	$random 											= strtoupper((string) $astDB->escape($_REQUEST['random']));
-	$values 											= $astDB->escape($_REQUEST['item']);
-    $filename                                           = $astDB->escape($_REQUEST['filename']);
+	$moh_id 											= $astDB->escape(($_REQUEST['moh_id'] ?? ''));
+	$moh_name 											= $astDB->escape(($_REQUEST['moh_name'] ?? ''));
+	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$active 											= strtoupper((string) $astDB->escape(($_REQUEST['active'] ?? '')));
+	$random 											= strtoupper((string) $astDB->escape(($_REQUEST['random'] ?? '')));
+	$values 											= $astDB->escape(($_REQUEST['item'] ?? ''));
+    $filename                                           = $astDB->escape(($_REQUEST['filename'] ?? ''));
 
 	
     ### Default values 
@@ -62,11 +62,11 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Special characters found in moh_id"
 		];
-	} elseif (!in_array($active,$defActive)) {
+	} elseif (!in_array($active, (is_array($defActive) ? $defActive : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for active is Y or N only."
 		];
-	} elseif (!in_array($random,$defRandom)) {
+	} elseif (!in_array($random, (is_array($defRandom) ? $defRandom : []))) {
 		$apiresults 									= [
 			"result" 										=> "Error: Default value for random is Y or N only."
 		];

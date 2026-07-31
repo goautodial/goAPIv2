@@ -29,15 +29,15 @@
 		$apiresults = ["result" => "SMTP Setting already exists. Only one SMTP Setting is allowed. You can either delete and recreate or update the current SMTP Settings."];
 	} else {
 		
-		$debug = $astDB->escape($_REQUEST['debug']); 	// if debug on... 0 = off, 1= client messages, 2 = client and server messages, 3 = timeout
-		$timezone = $astDB->escape($_REQUEST['timezone']); 	// set date default timezone
-		$ipv6_support = $astDB->escape($_REQUEST['ipv6_support']); 	// if your network does not support SMTP over IPv6... 0 = unsupported, 1 = supported
-		$host = $astDB->escape($_REQUEST['host']); 	//Set the hostname of the mail server
-		$port = $astDB->escape($_REQUEST['port']); 	//Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
-		$smtp_security = $astDB->escape($_REQUEST['smtp_security']); 	//Set the encryption system to use - ssl (deprecated) or tls
-		$smtp_auth = $astDB->escape($_REQUEST['smtp_auth']); 	//Whether to use SMTP authentication
-		$username = $astDB->escape($_REQUEST['username']); 	//Username to use for SMTP authentication - use full email address for gmail
-		$password = $astDB->escape($_REQUEST['password']); 	//Password to use for SMTP authentication
+		$debug = $astDB->escape(($_REQUEST['debug'] ?? '')); 	// if debug on... 0 = off, 1= client messages, 2 = client and server messages, 3 = timeout
+		$timezone = $astDB->escape(($_REQUEST['timezone'] ?? '')); 	// set date default timezone
+		$ipv6_support = $astDB->escape(($_REQUEST['ipv6_support'] ?? '')); 	// if your network does not support SMTP over IPv6... 0 = unsupported, 1 = supported
+		$host = $astDB->escape(($_REQUEST['host'] ?? '')); 	//Set the hostname of the mail server
+		$port = $astDB->escape(($_REQUEST['port'] ?? '')); 	//Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
+		$smtp_security = $astDB->escape(($_REQUEST['smtp_security'] ?? '')); 	//Set the encryption system to use - ssl (deprecated) or tls
+		$smtp_auth = $astDB->escape(($_REQUEST['smtp_auth'] ?? '')); 	//Whether to use SMTP authentication
+		$username = $astDB->escape(($_REQUEST['username'] ?? '')); 	//Username to use for SMTP authentication - use full email address for gmail
+		$password = $astDB->escape(($_REQUEST['password'] ?? '')); 	//Password to use for SMTP authentication
 		
 		$password = encrypt_decrypt('encrypt', $password);
 

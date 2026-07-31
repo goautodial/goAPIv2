@@ -22,11 +22,11 @@
 
 
 ### POST or GET Variables
-$goUserID = $astDB->escape($_REQUEST['user_id']);
-$goConfExten = $astDB->escape($_REQUEST['conf_exten']);
-$goServerIP = $astDB->escape($_REQUEST['server_ip']);
-$goPhone = $astDB->escape($_REQUEST['phone']);
-$type = $astDB->escape($_REQUEST['type']);
+$goUserID = $astDB->escape(($_REQUEST['user_id'] ?? ''));
+$goConfExten = $astDB->escape(($_REQUEST['conf_exten'] ?? ''));
+$goServerIP = $astDB->escape(($_REQUEST['server_ip'] ?? ''));
+$goPhone = $astDB->escape(($_REQUEST['phone'] ?? ''));
+$type = $astDB->escape(($_REQUEST['type'] ?? ''));
 
 if($goUserID == "") {  ["result" => "Error: No UserID"]; }
 if($goConfExten == "") {  ["result" => "Error: No Conference Room"]; }

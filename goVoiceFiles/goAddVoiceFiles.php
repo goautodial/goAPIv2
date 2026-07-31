@@ -24,8 +24,8 @@
     include_once(__DIR__ . "/goAPI.php");
 
 	// POST or GET Variables
-	/*$audiofiles = $_REQUEST['files']*/;
-	$stage 										= $astDB->escape($_REQUEST['stage']);
+	/*$audiofiles = ($_REQUEST['files'] ?? '')*/;
+	$stage 										= $astDB->escape(($_REQUEST['stage'] ?? ''));
 
 	### Default values 
 	$audiofile_name								= $_FILES['files']['name'];

@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-  $list_id = $astDB->escape($_REQUEST['list_id']);
+  $list_id = $astDB->escape(($_REQUEST['list_id'] ?? ''));
   
   #$selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
   $goTableName = "custom_".$list_id;
