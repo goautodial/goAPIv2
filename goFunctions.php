@@ -127,7 +127,9 @@
 
     function go_getall_allowed_users($groupId) {
         include(__DIR__ . "/goDBasterisk.php");
+        /** @var MySQLiDB $astDB */
 		$allowed_users = "";
+		$users = [];
 
         if ($groupId=='ADMIN' || $groupId=='admin') {
                    $query = "select user as userg from vicidial_users";
@@ -161,22 +163,18 @@
 
     function go_total_agents_callv($groupId) {
         include(__DIR__ . "/goDBasterisk.php");
-        if (!checkIfTenant($groupId, $goDB)) {
-           $query = "select count(*) as qresult from vicidial_users";
-           $rsltv = mysqli_query($link,$query);
-        } else {
-           $query = "select count(*) as qresult from vicidial_users where user_group='$groupId'";
-           $rsltv = mysqli_query($link,$query);
+        include(__DIR__ . "/goDBgoautodial.php");
+        /** @var MySQLiDB $astDB */
+        /** @var MySQLiDB $goDB */
+
+        if (checkIfTenant($groupId, $goDB)) {
+            $astDB->where('user_group', $groupId);
         }
 
-        $fresults = mysqli_fetch_assoc($rsltv);
-        $fresults = $fresults['qresult'];
+        $row = $astDB->getOne('vicidial_users', 'COUNT(*) AS qresult');
+        $fresults = is_array($row) ? ($row['qresult'] ?? 0) : 0;
 
-        if ($fresults == NULL) {
-            $fresults = 0;
-        }
-
-        return $fresults;
+        return $fresults ?: 0;
     }
 
     function go_getall_allowed_campaigns($groupId, $dbase)
@@ -255,48 +253,56 @@
     }
 
 	function go_getall_closer_campaigns($campaign_id, $astDB){
+		$allCloserCampaigns = '';
+		$closer_camp = [];
+
 		if(strtoupper((string) $campaign_id) === "ALL"){
 			//ALL CAMPAIGNS
-                        $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+			$array_camp = [];
 
-                        foreach($SELECTQuery as $camp_val){
-                                $array_camp[] = $camp_val["campaign_id"];
-                        }
-                        $imploded_camp = "'".implode("','", $array_camp)."'";
+			foreach((is_array($SELECTQuery) ? $SELECTQuery : []) as $camp_val){
+				if (!empty($camp_val["campaign_id"])) {
+					$array_camp[] = $camp_val["campaign_id"];
+				}
+			}
 
-			// Inbound Sales //
-                        $inbound_query = "
-                                SELECT closer_campaigns FROM vicidial_campaigns
-                                WHERE campaign_id IN ($imploded_camp)
-                                ORDER BY campaign_id
-                        ";
-                        $row1 = $astDB->rawQuery($inbound_query);
+			if (!empty($array_camp)) {
+				$imploded_camp = "'".implode("','", $array_camp)."'";
 
-                        foreach($row1 as $data){
-                                if(!empty($data['closer_campaigns'])){
-                                $trimmed_cc = rtrim($data['closer_campaigns'], " - ");
-                                $closer_camp[] = $trimmed_cc;
-                                }//not null
-                        }
+				// Inbound Sales //
+				$inbound_query = "
+					SELECT closer_campaigns FROM vicidial_campaigns
+					WHERE campaign_id IN ($imploded_camp)
+					ORDER BY campaign_id
+				";
+				$row1 = $astDB->rawQuery($inbound_query);
 
-                        //iterate thru array closer_camp to separate merged closer campaignsi
-                        $imploded = implode(" ", $closer_camp);
-                        $exploded = explode(" ", (string) ($imploded ?? ''));
-			$allCloserCampaigns = "'".implode("','",$exploded)."'";
+				foreach((is_array($row1) ? $row1 : []) as $data){
+					if(!empty($data['closer_campaigns'])){
+						$trimmed_cc = trim(str_replace('-', ' ', (string) $data['closer_campaigns']));
+						$closer_camp = array_merge($closer_camp, preg_split('/\s+/', $trimmed_cc, -1, PREG_SPLIT_NO_EMPTY));
+					}//not null
+				}
+			}
 		}else{
 			$resultsu = $astDB
 				->where("campaign_id", $campaign_id)
 				->orderBy("campaign_id")
 				->getValue("vicidial_campaigns", "trim(closer_campaigns)");
 
-			if ((is_countable($resultsu) ? count($resultsu) : 0) > 0) {
+			if (is_string($resultsu) && trim($resultsu) !== '') {
 			//$fresults = $resultsu['qresult'];
-				$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$resultsu)))));
-				$allCloserCampaigns = "'".implode("','",$closerCampaigns)."'";
-			} else {
-				$allCloserCampaigns = '';
+				$closerCampaigns = preg_split('/[\s,]+/', str_replace('-', ' ', trim($resultsu)), -1, PREG_SPLIT_NO_EMPTY);
+				$closer_camp = is_array($closerCampaigns) ? $closerCampaigns : [];
 			}
 		}// if campaign_id is equal to ALL
+
+		$closer_camp = array_values(array_unique(array_filter($closer_camp, static fn($camp) => (string) $camp !== '')));
+		if (!empty($closer_camp)) {
+			$allCloserCampaigns = "'".implode("','", $closer_camp)."'";
+		}
+
 		return $allCloserCampaigns;
 	}
 
@@ -491,6 +497,9 @@
 
     function lookup_gmt($aDB, $phone_code, $USarea, $state, $LOCAL_GMT_OFF_STD, $Shour, $Smin, $Ssec, $Smon, $Smday, $Syear, $postalgmt, $postal_code) {
         $postalgmt_found = 0;
+        $PC_processed = 0;
+        $post = 0;
+        $timezone = 0;
         if ( (preg_match("/POSTAL/i", (string) $postalgmt)) && (strlen((string) $postal_code) > 4) ) {
             if (preg_match('/^1$/', (string) $phone_code)) {
                 //$stmt="select postal_code,state,GMT_offset,DST,DST_range,country,country_code from vicidial_postal_codes where country_code='$phone_code' and postal_code LIKE \"$postal_code%\";";
@@ -500,7 +509,7 @@
                 $pc_recs = $aDB->getRowCount();
                 if ($pc_recs > 0) {
                     $row = $rslt[0];
-                    $gmt_offset =	$rslt['GMT_offset'];
+                    $gmt_offset =	$row['GMT_offset'];
                     $gmt_offset =   preg_replace("/\+/i", "", (string) $gmt_offset);
                     $dst =			$row['DST'];
                     $dst_range =	$row['DST_range'];
@@ -1237,7 +1246,7 @@
         $pmin = (gmdate("i", time() + $pzone));
         $phour = ( (gmdate("G", time() + $pzone)) * 100);
         $pday = gmdate("w", time() + $pzone);
-        $tz = sprintf("%.2f", $p);
+        $tz = sprintf("%.2f", $gmt_offset);
         $GMT_day = "$pday";
         $GMT_hour = ($phour + $pmin);
 
@@ -1886,6 +1895,7 @@
     function go_check_location($id, $usergroup){
         $result = 0; // if result is returned 1, then the usergroup exists within the location
         include(__DIR__ . "/goDBgoautodial.php");
+        /** @var MySQLiDB $goDB */
 
         $rowc = $goDB
             ->where('id', $id)
@@ -1909,6 +1919,7 @@
     function go_check_user_location($user, $id){
         $result = 0; // if result is returned 1, then the location feature exists
         include(__DIR__ . "/goDBgoautodial.php");
+        /** @var MySQLiDB $goDB */
 
         $goDB->rawQuery("SHOW COLUMNS FROM `users` LIKE 'location_id'");
         if ($goDB->count < 1) {
