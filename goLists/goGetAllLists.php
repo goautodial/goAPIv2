@@ -24,6 +24,20 @@
 
     include_once (__DIR__ . "/goAPI.php");
 
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	
 	// Error Checking
@@ -110,7 +124,7 @@
 					$lists[] 							=  $fetch_lists['list_id'];
 				}
 				
-				$max_list 								= max($lists);
+				$max_list 								= (!empty($lists) ? max($lists) : 0);
 				$min_list 								= min($lists);
 				
 				if ($max_list >= 99999999) {

@@ -301,6 +301,7 @@
 	}
 
 	function go_get_calltimes($campaign_id, $astDB){
+		$result = '';
 		/*$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$campaign_id'";
 		$query_result = mysqli_query($link, $query);
 		$fetch_result = mysqli_fetch_array($query_result);
@@ -320,7 +321,9 @@
 				->where("call_time_id", $call_time)
 				->getOne("vicidial_call_times", "ct_default_start, ct_default_stop");
 
-			$result = $fetch_result['ct_default_start']. "-" . $fetch_result['ct_default_stop'];
+			if (is_array($fetch_result)) {
+				$result = ($fetch_result['ct_default_start'] ?? '') . "-" . ($fetch_result['ct_default_stop'] ?? '');
+			}
 
 		}
 

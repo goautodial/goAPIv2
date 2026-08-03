@@ -21,6 +21,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
     include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
     
     $campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
     $status = $astDB->escape(($_REQUEST['status'] ?? ''));
@@ -42,13 +56,14 @@
         $exist = $astDB->getRowCount();
 
         if($exist >= 1) {
-            foreach ($rsltv as $fresults){
+            if (is_array($rsltv)) {
+            	$fresults = $rsltv;
                 $dataCampID[] = $fresults['campaign_id'];
                 $dataStatus[] = $fresults['status'];
                 $dataAttemptDelay[] = $fresults['attempt_delay'];
                 $dataAttemptMax[] = $fresults['attempt_maximum'];
                 $dataActive[] = $fresults['active'];
-            }
+                        }
             $apiresults = ["result" => "success", "campaign_id" => $dataCampID, "status" => $dataStatus, "attempt_delay" => $dataAttemptDelay, "attempt_maximum" => $dataAttemptMax, "active" => $dataActive];
         } else {
             $apiresults = ["result" => "Error: Lead Filter does not exist."];

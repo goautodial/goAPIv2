@@ -20,7 +20,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	include_once (__DIR__ . "/goAPI.php");	 
+	include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+	 
  
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
@@ -78,7 +92,7 @@
 				}
 
 				// return data
-				$filter_num 							= max($last_pl);
+				$filter_num 							= (!empty($last_pl) ? max($last_pl) : 0);
 				$filter_num += 1;
 				
 				if ($filter_num < 100) {

@@ -21,6 +21,20 @@
 */
 	include_once (__DIR__ . "/goAPI.php");
 
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');

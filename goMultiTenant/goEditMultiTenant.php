@@ -22,6 +22,20 @@
 */
 	include_once (__DIR__ . "/goAPI.php");
 
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+
     ### POST or GET Variables
     $tenant_id = $astDB->escape(($_REQUEST['tenant_id'] ?? ''));
     $tenant_name = $astDB->escape(($_REQUEST['tenant_name'] ?? ''));
@@ -83,12 +97,13 @@
 										//$query = "SELECT tenant_id,tenant_name,active FROM go_multi_tenant $ul ORDER BY tenant_id LIMIT 1;";
 										$goDB->orderBy('tenant_id', 'desc');
 										$rsltv = $goDB->getOne('go_multi_tenant', 'tenant_id,tenant_name,active');
-										foreach ($rsltv as $fresults){
+										if (is_array($rsltv)) {
+											$fresults = $rsltv;
 											$datatenant_id = $fresults['tenant_id'];
 											$datatenant_name = $fresults['tenant_name'];
 											$dataadmin = $fresults['admin'];
 											$dataactive = $fresults['active'];
-										}
+																				}
 										$countResult = $goDB->getRowCount();
 						
 										if($countResult > 0) {

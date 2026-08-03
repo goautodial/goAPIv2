@@ -23,7 +23,21 @@
 */
 
 	include_once (__DIR__ . "/goAPI.php");
- 
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+
 	### POST or GET Variables
 	$voicemail_id 						= $astDB->escape(($_REQUEST["voicemail_id"] ?? ''));
 	$pass 							= $astDB->escape(($_REQUEST["pass"] ?? ''));
@@ -31,20 +45,20 @@
 	$email 							= $astDB->escape(($_REQUEST["email"] ?? ''));
 	$active 						= $astDB->escape(strtoupper(($_REQUEST["active"] ?? '')));
 	$delete_vm_after_email 					= $astDB->escape(($_REQUEST["delete_vm_after_email"] ?? ''));
-	$voicemail_greeting					= $astDB->escape(($_REQUEST["voicemail_greeting"] ?? '')); 
+	$voicemail_greeting					= $astDB->escape(($_REQUEST["voicemail_greeting"] ?? ''));
 
 	### Default values
     $defActive 							= [
 		"Y",
 		"N"
-	]; 
+	];
 
 	$defDelVM 							= [
 		"N",
 		"Y"
 	];
-	
-	### ERROR CHECKING 					
+
+	### ERROR CHECKING
 	if (!isset($session_user) || is_null($session_user)){
 		$apiresults 					= [
 			"result" 						=> "Error: Session User Not Defined."
@@ -73,23 +87,20 @@
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where("user_group", $log_group);
 			$astDB->orWhere("user_group", "---ALL---");
-		}	
-		
+		}
+
 		$astDB->where("voicemail_id", $voicemail_id);
 		$query 							= $astDB->getOne("vicidial_voicemail");
-		
-		if ($astDB->count > 0) {				
-			foreach ($query as $fresults) {
-				$dataVM_id			= $fresults["voicemail_id"];
-				$dataVM_pass 			= $fresults["pass"];
-				$dataactive 			= $fresults["active"];
-				$datafullname 			= $fresults["fullname"];
-				$dataemail 			= $fresults["email"];
-				$datadeleteVMemail 		= $fresults["delete_vm_after_email"];
-				$dataVM_greeting		= $fresults["voicemail_greeting"];
-			}
-			
-			if ($pass == null) { 
+
+		if ($astDB->count > 0 && is_array($query)) {
+			$dataVM_pass 			= $query["pass"] ?? '';
+			$dataactive 			= $query["active"] ?? 'Y';
+			$datafullname 			= $query["fullname"] ?? '';
+			$dataemail 			= $query["email"] ?? '';
+			$datadeleteVMemail 		= $query["delete_vm_after_email"] ?? 'N';
+			$dataVM_greeting		= $query["voicemail_greeting"] ?? '';
+
+			if ($pass == null) {
 				$pass 					= $dataVM_pass;
 			}
 			if ($active == null) {
@@ -116,12 +127,12 @@
 				"delete_vm_after_email" 			=> $delete_vm_after_email,
 				"voicemail_greeting"				=> $voicemail_greeting
 			];
-			
+
 			$astDB->where("voicemail_id", $voicemail_id);
 			$q_update					= $astDB->update("vicidial_voicemail", $data);
 			$log_id 					= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Voicemail ID: $voicemail_id", $log_group, $astDB->getLastQuery());
-			
-			if ($query) {
+
+			if ($q_update) {
 				$apiresults 			= [
 					"result" 				=> "success",
 					"data" 					=> $q_update
@@ -130,8 +141,8 @@
 				$apiresults				= [
 					"result" 				=> "Error: Add failed, check your details"
 				];
-			} 
-			
+			}
+
 		} else {
 			$apiresults 				= [
 				"result" 					=> "Error: Voicemail doesn't exist"

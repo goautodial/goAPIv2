@@ -20,6 +20,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+$limit = 10000;
+$agent_lead_search_method = '';
+$is_logged_in = false;
+$search_string = '';
+$campaign = $astDB->escape($_REQUEST['goCampaign'] ?? $_REQUEST['campaign'] ?? '');
+
 $agent = get_settings('user', $astDB, $goUser);
 
 if (isset($_GET['goLimit'])) { $limit = $astDB->escape($_GET['goLimit']); }
@@ -38,9 +59,9 @@ if (!isset($limit) || !is_numeric($limit)) {
     $limit = 10000;
 }
 
-$astDB->where('user_group', $agent->user_group);
+$astDB->where('user_group', $agent->user_group ?? '');
 $rslt = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-$allowed_campaigns = trim(preg_replace("/\ -$/", "", $rslt['allowed_campaigns']));
+$allowed_campaigns = trim(preg_replace("/\ -$/", "", is_array($rslt) ? ($rslt['allowed_campaigns'] ?? '') : ''));
 
 if (!$is_logged_in) {
     if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {

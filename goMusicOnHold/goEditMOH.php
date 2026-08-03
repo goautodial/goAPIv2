@@ -23,6 +23,20 @@
 */
 
 	include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
 	
     ### POST or GET Variables
 	$moh_id 											= $astDB->escape(($_REQUEST['moh_id'] ?? ''));
@@ -102,13 +116,14 @@
 			$rsltvMoh 									= $astDB->getOne('vicidial_music_on_hold');
 			
 			if ($rsltvMoh) {
-				foreach ($rsltvMoh as $fresults) {
+				if (is_array($rsltvMoh)) {
+					$fresults = $rsltvMoh;
 					$datamoh_id 						= $fresults['moh_id'];
 					$datamoh_name 						= $fresults['moh_name'];
 					$dataactive 						= $fresults['active'];
 					$datarandom 						= $fresults['random'];
 					$datauser_group						= $fresults['user_group'];
-				}			
+								}			
 
 				if ($filename != null) {
 					$insertData 						= [

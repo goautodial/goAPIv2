@@ -907,9 +907,10 @@ if ($is_logged_in) {
             $cffv_ct = $astDB->getRowCount();
             if ($cffv_ct > 0) {
                 $custom_field_values = '----------'; 
-                foreach ($rslt as $row) {
+                if (is_array($rslt)) {
+                	$row = $rslt;
                     $custom_field_values .=	"{$row}----------";
-                }
+                                }
                 $custom_field_values = preg_replace("/\n/", " ", $custom_field_values);
                 $custom_field_values = preg_replace("/\r/", "", (string) $custom_field_values);
             }

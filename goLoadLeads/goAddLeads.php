@@ -21,7 +21,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
     $final = $astDB->escape(($_REQUEST['final'] ?? ''));
+    $config = [];
+    $data = [];
+    $A_field_label = [];
+    $A_field_type = [];
+    $A_field_value = [];
+    $record = 0;
+    $US = '-----';
+    $LOCAL_GMT_OFF_STD = 0;
+    $Shour = 0;
+    $Smin = 0;
+    $Ssec = 0;
+    $Smon = 0;
+    $Smday = 0;
+    $Syear = 0;
+    $postalgmt = '';
+    $vicidial_list_fields = '|vendor_lead_code|source_id|list_id|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|rank|owner|';
 
     //$list_id = $this->input->post('list_id');
     //$query = $this->db->query("SELECT campaign_id FROM vicidial_lists WHERE list_id='$list_id'");
@@ -32,46 +63,70 @@
         $config['upload_path'] = '/tmp/';
         $config['allowed_types'] = 'xls|xlsx|csv';
         $config['overwrite'] = true;
-        $this->load->library('upload', $config);
-        $this->upload->initialize($config);
-        //
-        //$data['file_exten'] = $file_exten;
-        //$data['column_name'] = $result['column_name'];
-        //$this->load->view('go_campaign/go_campaign_wizard_fields',$data);
-        $LF_name = $_FILES['leadFile']['name'];
+        $LF_name = $_FILES['leadFile']['name'] ?? '';
         if (preg_match("/\.csv$/i", (string) $LF_name)) {
             $_FILES['leadFile']['type'] = "text/x-comma-separated-values";
         }
 
-        if ( ! $this->upload->do_upload("leadFile")) {
-            $error = ['error' => $this->upload->display_errors()];
-            $this->load->view('go_campaign/go_campaign_wizard_output', $error);
-        } else {
-            //$data = array('upload_data' => $this->upload->data());
-            $result = $this->go_campaign->go_upload_leads();
-
-            $data['delim_name'] = $result['delim_name'];
-            $data['columns'] = $result['column_name'];
-            $data['list_id'] = $result['list_id'];
-            $data['phone_code'] = $result['phone_code'];
-            $data['file_name'] = $result['file_name'];
-            $data['file_ext'] = $result['file_ext'];
-            $this->load->view('go_campaign/go_campaign_wizard_fields', $data);
-        }
+        $apiresults = ["result" => "Error: Lead upload preview must be handled by the CRM upload controller."];
     } else {
-        $dupcheck = $this->uri->segment(4);
-        $list_id_override = $this->uri->segment(5);
-        $phone_code_override = $this->uri->segment(6);
-        $args = $this->uri->segment(7);
-        $file_name = $this->uri->segment(8);
-        $file_ext = $this->uri->segment(9);
+        $dupcheck = $astDB->escape($_REQUEST['dupcheck'] ?? '');
+        $list_id_override = $astDB->escape($_REQUEST['list_id_override'] ?? '');
+        $phone_code_override = $astDB->escape($_REQUEST['phone_code_override'] ?? '');
+        $args = $_REQUEST['args'] ?? '';
+        $file_name = basename((string) ($_REQUEST['file_name'] ?? ''));
+        $file_ext = preg_replace('/[^A-Za-z0-9]/', '', (string) ($_REQUEST['file_ext'] ?? ''));
         $lead_file = "/tmp/{$file_name}.{$file_ext}";
         $resultHTML = '';
 
-        $fields = $this->go_campaign->go_unserialize($args);
+        $fields = is_string($args) ? @unserialize($args) : [];
+        if (!is_array($fields)) {
+            $decodedFields = json_decode((string) $args, true);
+            $fields = is_array($decodedFields) ? $decodedFields : [];
+        }
 
         foreach ($fields as $field => $value) {
             ${$field} = $value;
+        }
+
+        $fieldDefaults = [
+            'vendor_lead_code_field', 'source_id_field', 'list_id_field', 'phone_code_field',
+            'phone_number_field', 'title_field', 'first_name_field', 'middle_initial_field',
+            'last_name_field', 'address1_field', 'address2_field', 'address3_field', 'city_field',
+            'state_field', 'province_field', 'postal_code_field', 'country_code_field', 'gender_field',
+            'date_of_birth_field', 'alt_phone_field', 'email_field', 'security_phrase_field',
+            'comments_field', 'rank_field', 'owner_field'
+        ];
+        $vendor_lead_code_field = $vendor_lead_code_field ?? null;
+        $source_id_field = $source_id_field ?? null;
+        $list_id_field = $list_id_field ?? null;
+        $phone_code_field = $phone_code_field ?? null;
+        $phone_number_field = $phone_number_field ?? null;
+        $title_field = $title_field ?? null;
+        $first_name_field = $first_name_field ?? null;
+        $middle_initial_field = $middle_initial_field ?? null;
+        $last_name_field = $last_name_field ?? null;
+        $address1_field = $address1_field ?? null;
+        $address2_field = $address2_field ?? null;
+        $address3_field = $address3_field ?? null;
+        $city_field = $city_field ?? null;
+        $state_field = $state_field ?? null;
+        $province_field = $province_field ?? null;
+        $postal_code_field = $postal_code_field ?? null;
+        $country_code_field = $country_code_field ?? null;
+        $gender_field = $gender_field ?? null;
+        $date_of_birth_field = $date_of_birth_field ?? null;
+        $alt_phone_field = $alt_phone_field ?? null;
+        $email_field = $email_field ?? null;
+        $security_phrase_field = $security_phrase_field ?? null;
+        $comments_field = $comments_field ?? null;
+        $rank_field = $rank_field ?? null;
+        $owner_field = $owner_field ?? null;
+
+        foreach ($fieldDefaults as $fieldName) {
+            if (!is_numeric(${$fieldName})) {
+                ${$fieldName} = null;
+            }
         }
         $dupcheck = str_replace("CHECK","DUP",$dupcheck);
 
@@ -100,12 +155,10 @@
                 //print "<BR><BR>PHONE CODE OVERRIDE FOR THIS FILE: $phone_code_override<BR><BR>";
             }
 
-            $systemlookup = $this->golist->systemsettingslookup();
-            foreach($systemlookup as $sysinfo){
-                $use_non_latin = $sysinfo->use_non_latin;
-                $admin_web_directory = $sysinfo->admin_web_directory;
-                $custom_fields_enabled = $sysinfo->custom_fields_enabled;
-            }
+            $system_settings = get_settings('system', $astDB);
+            $use_non_latin = $system_settings->use_non_latin ?? 0;
+            $admin_web_directory = $system_settings->admin_web_directory ?? '';
+            $custom_fields_enabled = $system_settings->custom_fields_enabled ?? 0;
 
             if ($custom_fields_enabled > 0) {
                 $tablecount_to_print=0;
@@ -245,7 +298,8 @@
                                             if (isset($_GET["$field_name_id"])) {$form_field_value=$_GET["$field_name_id"];}
                                             elseif (isset($_POST["$field_name_id"])) {$form_field_value=$_POST["$field_name_id"];}
 
-                                            if ($form_field_value >= 0) {
+                                            $form_field_value = $form_field_value ?? null;
+                                            if ($form_field_value !== null && $form_field_value >= 0) {
                                                 $A_field_value[$o] =    $row[$form_field_value];
                                                 # replace ' " ` \ ; with nothing
                                                 $A_field_value[$o] =    preg_replace($field_regx, "", $A_field_value[$o]);
@@ -470,7 +524,7 @@
         $data['dup'] = $dup;
         $data['post'] = $post;
         $data['resultHTML'] = $resultHTML;
-        $this->load->view('go_campaign/go_campaign_wizard_fields', $data);
+        $apiresults = ["result" => "success", "data" => $data];
     }
 
 
@@ -482,7 +536,7 @@
 
     $apiresults = ["result" => "success"];
     $stmtUpdate = "UPDATE servers SET sounds_update='Y';";
-    $rsltUpdate = mysqli_query($link, $stmtUpdate);
+    $rsltUpdate = $astDB->rawQuery($stmtUpdate);
 
 
 

@@ -21,6 +21,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 	include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
 	
     $lead_filter_id = $astDB->escape(($_REQUEST["lead_filter_id"] ?? ''));
 
@@ -44,11 +58,12 @@
 		$rsltv = $astDB->getOne('vicidial_lead_filters', 'lead_filter_id,lead_filter_name');
 		$exist = $astDB->getRowCount();
 		if($exist >= 1){
-			foreach ($rsltv as $fresults){
+			if (is_array($rsltv)) {
+				$fresults = $rsltv;
 				$dataLeadFilterID[] = $fresults['lead_filter_id'];
 				$dataLeadFilterName[] = $fresults['lead_filter_name'];
 				$apiresults = ["result" => "success", "lead_filter_id" => $dataLeadFilterID, "lead_filter_name" => $dataLeadFilterName];
-			}
+						}
 		} else {
 			$apiresults = ["result" => "Error: Lead Filter does not exist."];
 		}

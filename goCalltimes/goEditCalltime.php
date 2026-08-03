@@ -22,6 +22,20 @@
 **/
 
 	include_once (__DIR__ . "/goAPI.php");
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
 	
 	$call_time_id 										= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
 	$call_time_name 									= $astDB->escape(($_REQUEST['call_time_name'] ?? ''));

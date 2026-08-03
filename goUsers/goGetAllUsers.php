@@ -1,9 +1,9 @@
 <?php
 /**
  * @file 		goGetAllUsers.php
- * @brief 		API to get all User Lists 
+ * @brief 		API to get all User Lists
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author      Demian Lizandro A. Biscocho 
+ * @author      Demian Lizandro A. Biscocho
  * @author     	Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
@@ -22,7 +22,16 @@
 **/
     include_once (__DIR__ . "/goAPI.php");
     include_once (__DIR__ . "/../licensed-conf.php");
-	
+
+    /** @var MySQLiDB $astDB */
+    /** @var MySQLiDB $goDB */
+    /** @var string $goUser */
+    /** @var string $goPass */
+    /** @var string $log_user */
+    /** @var array<string, mixed> $config */
+
+    $config = isset($config) && is_array($config) ? $config : [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -44,14 +53,25 @@
 			->getOne("vicidial_users", "user,user_level,user_group");
 
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		$log_group										= $fresults["user_group"];
+		$userlevel										= $fresults["user_level"] ?? 0;
+		$log_group										= $fresults["user_group"] ?? '';
 
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			$dataUserID = [];
+			$dataUser = [];
+			$dataFullName = [];
+			$dataUserLevel = [];
+			$dataUserGroup = [];
+			$dataPhone = [];
+			$dataActive = [];
+			$dataUserIDgo = [];
+			$dataAvatar = [];
+			$last_num = [];
+
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -61,9 +81,9 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					//}
-				}					
+				}
 			}
-			
+
 			// get users list
 			$cols 										= [
 				"user_id",
@@ -74,14 +94,14 @@
 				"phone_login",
 				"active"
 			];
-			
+
 			$query 										= $astDB
 				->where("user", DEFAULT_USERS, "NOT IN")
 				->where("user_level", 4, "!=")
 				->orderBy("user", "asc")
 				->get("vicidial_users", NULL, $cols);
 
-			if ($astDB->count > 0) {			
+			if ($astDB->count > 0) {
 				foreach ($query as $fresults) {
 					$dataUserID[] 						= $fresults['user_id'];
 					$dataUser[] 						= $fresults['user'];
@@ -89,62 +109,62 @@
 					$dataUserLevel[] 					= $fresults['user_level'];
 					$dataUserGroup[] 					= $fresults['user_group'];
 					$dataPhone[] 						= $fresults['phone_login'];
-					$dataActive[]						= $fresults['active'];			
-				
+					$dataActive[]						= $fresults['active'];
+
 					$cols 								= [
-						"userid", 
+						"userid",
 						"avatar"
 					];
-					
+
 					$querygo 							= $goDB
 						->where("userid", $fresults["user_id"])
 						->orderBy("userid", "desc")
 						->get("users", NULL, $cols);
-					
+
 					if ($goDB->count > 0) {
 						foreach ($querygo as $fresultsgo) {
 							$dataUserIDgo[] 			= $fresultsgo['userid'];
-							$dataAvatar[] 				= $fresultsgo['avatar'];		
+							$dataAvatar[] 				= $fresultsgo['avatar'];
 						}
-					}												
-					
+					}
+
 					if (preg_match("/^agent/i", $fresults['user'])) {
 						$get_last 						= preg_replace("/[^0-9]/","", $fresults['user']);
-						$last_num[] 					= intval($get_last);									
-					}															
+						$last_num[] 					= intval($get_last);
+					}
 				}
-					
+
 				// return data
-				$get_last 								= max($last_num);
+				$get_last 								= !empty($last_num) ? max($last_num) : 0;
 				$agent_num 								= $get_last + 1;
-				
+
 				$apiresults 							= [
-					"result" 								=> "success", 
+					"result" 								=> "success",
 					"user_id" 								=> $dataUserID,
-					"user_group" 							=> $dataUserGroup, 
-					"user" 									=> $dataUser, 
-					"full_name" 							=> $dataFullName, 
-					"user_level" 							=> $dataUserLevel, 
-					"phone_login" 							=> $dataPhone, 
-					"active" 								=> $dataActive, 
-					"avatar" 								=> $dataAvatar, 
-					"useridgo" 								=> $dataUserIDgo, 
-					"licensedSeats" 						=> $config["licensedSeats"], 
+					"user_group" 							=> $dataUserGroup,
+					"user" 									=> $dataUser,
+					"full_name" 							=> $dataFullName,
+					"user_level" 							=> $dataUserLevel,
+					"phone_login" 							=> $dataPhone,
+					"active" 								=> $dataActive,
+					"avatar" 								=> $dataAvatar,
+					"useridgo" 								=> $dataUserIDgo,
+					"licensedSeats" 						=> $config["licensedSeats"] ?? 0,
 					"last_count" 							=> $agent_num
-				];					
+				];
 			} else {
 				$err_msg 								= error_handle("10010");
 				$apiresults 							= [
-					"code" 									=> "10010", 
+					"code" 									=> "10010",
 					"result" 								=> $err_msg
-				]; 
-			}		
+				];
+			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

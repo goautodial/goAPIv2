@@ -22,12 +22,27 @@
 */
 
     include_once (__DIR__ . "/goAPI.php");
- 
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	
+
 	// POST or GET Variables
 	$recycle_id 										= $astDB->escape(($_REQUEST['recycle_id'] ?? ''));
 	$campaign_id 										= $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
+	$status 											= $astDB->escape(($_REQUEST['status'] ?? ''));
 	$attempt_delay 										= $astDB->escape(($_REQUEST['attempt_delay'] ?? ''));
 	$attempt_maximum 									= $astDB->escape(($_REQUEST['attempt_maximum'] ?? ''));
 	$active 											= $astDB->escape(strtoupper(($_REQUEST['active'] ?? '')));
@@ -70,41 +85,42 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (in_array($campaign_id, (is_array($campaigns) ? $campaigns : []))) {
 				$astDB->where("campaign_id", $campaign_id);
 				$astDB->where('recycle_id', $recycle_id);
 				//$astDB->getOne("vicidial_lead_recycle", "campaign_id");
 				$sqlCheck 								= $astDB->get('vicidial_lead_recycle');
-		
+
 				if ($astDB->count > 0) {
 					foreach ($sqlCheck as $fresults){
+						$dataStatus 					= $fresults['status'] ?? '';
 						$dataAttemptDelay 				= $fresults['attempt_delay'];
 						$dataAttemptMaximum 			= $fresults['attempt_maximum'];
 						$dataCampID 					= $fresults['campaign_id'];
-						$dataActive 					= $fresults['active'];			
+						$dataActive 					= $fresults['active'];
 					}
 
 					if (empty($status)) {
 						$status 						= $dataStatus;
 					}
-					
+
 					if (empty($attempt_delay)) {
 						$attempt_delay 					= $dataAttemptDelay;
 					}
-					
+
 					if (empty($attempt_maximum)) {
 						$attempt_maximum 				= $dataAttemptMaximum;
 					}
-					
+
 					if (empty($campaign_id)) {
 						$campaign_id 					= $dataCampID;
 					}
-					
+
 					if (empty($active)) {
 						$active 						= $dataActive;
 					}
@@ -114,13 +130,13 @@
 						'attempt_maximum' 					=> $attempt_maximum,
 						'active' 							=> $active
 					];
-						
+
 					$astDB->where('recycle_id', $recycle_id);
 					$astDB->where('campaign_id', $campaign_id);
-					
+
 					$rsltv1 							= $astDB->update('vicidial_lead_recycle', $updateData);
-					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());					
-					
+					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Lead Recycling: $status", $log_group, $astDB->getLastQuery());
+
 					if ($rsltv1) {
 						$apiresults 					= [
 							"result" 						=> "success"
@@ -128,7 +144,7 @@
 					} else {
 						$apiresults 					= [
 							"result" 						=> "Error: Try updating Lead Recycling again"
-						];				
+						];
 					}
 				} else {
 					$apiresults 						= [
@@ -138,17 +154,17 @@
 			} else {
 				$err_msg 								= error_handle("10001", "Insufficient permision");
 				$apiresults 							= [
-					"code" 									=> "10001", 
+					"code" 									=> "10001",
 					"result" 								=> $err_msg
-				];			
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-		
+
 ?>

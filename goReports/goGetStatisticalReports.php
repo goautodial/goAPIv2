@@ -4,7 +4,7 @@
  * @brief       API for Campaign Statistics
  * @copyright   Copyright (c) 2020 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author      Alexander Jim Abenoja 
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
@@ -22,16 +22,47 @@
 */
 
     include_once(__DIR__ . "/goAPI.php");
-	
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+/** @var string $VARDB_user */
+/** @var string $VARDB_pass */
+/** @var string $VARDB_database */
+
+
 	// need function go_sec_convert();
-    $pageTitle 											= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
-    $fromDate 											= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
+    		$pageTitle 											= strtolower((string) $astDB->escape(($_REQUEST['pageTitle'] ?? '')));
+	    $fromDate 											= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
     $toDate 											= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
     $campaign_id 										= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
     $request 											= $astDB->escape(($_REQUEST['request'] ?? ''));
-	$defPage 											= "stats";	
+	$defPage 											= "stats";
+		$array_camp = [];
+		$MunionSQL = '';
+		$TunionSQL = '';
+		$DunionSQL = '';
+		$ul = '';
+		$call_time = '';
+		$data_calls = [];
+		$data_agents = ["cdate" => [], "cuser" => []];
+		$data_status = ["status" => [], "status_name" => [], "ccount" => []];
+		$total_calls = 0;
+		$total_leads = 0;
+		$total_new = 0;
+		$total_status = 0;
+		$total_agents = 0;
 
-    // Error Checking
+	    // Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -50,23 +81,23 @@
 			"code" 											=> "40001",
 			"result" 										=> $err_msg
 		];
-	} else {            
+	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
 		// check if MariaDB slave server available
 		$rslt											= $goDB
 			->where('setting', 'slave_db_ip')
 			->where('context', 'creamy')
 			->getOne('settings', 'value');
-		$slaveDBip 										= $rslt['value'];
-		
+		$slaveDBip 										= is_array($rslt) ? ($rslt['value'] ?? '') : '';
+
 		if (!empty($slaveDBip)) {
 			$astDB = new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
 
@@ -75,11 +106,11 @@
 				echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
 				exit;
 				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
-			}			
+			}
 		}
-        
+
 		$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
-		
+
 		//ALL CAMPAIGNS
 		if ("ALL" === strtoupper((string) $campaign_id)) {
             if ($tenant) {
@@ -88,43 +119,94 @@
 			$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
 			foreach($SELECTQuery as $camp_val){
-					$array_camp[] = $camp_val["campaign_id"];
+			$array_camp[] = $camp_val["campaign_id"];
 			}
 		} else {
-			$array_camp[] = $campaign_id;
+	$array_camp[] = $campaign_id;
 		}
-		
+
 		$imploded_camp = "'".implode("','", $array_camp)."'";
-	
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// Agent Statistics
-			if ($pageTitle === 'stats') {			
+			if ($pageTitle === 'stats') {
+				$cdate = [];
+				$cuser = [];
+				$status = [];
+				$status_name = [];
+				$ccount = [];
+				$hour0 = [];
+				$hour1 = [];
+				$hour2 = [];
+				$hour3 = [];
+				$hour4 = [];
+				$hour5 = [];
+				$hour6 = [];
+				$hour7 = [];
+				$hour8 = [];
+				$hour9 = [];
+				$hour10 = [];
+				$hour11 = [];
+				$hour12 = [];
+				$hour13 = [];
+				$hour14 = [];
+				$hour15 = [];
+				$hour16 = [];
+				$hour17 = [];
+				$hour18 = [];
+				$hour19 = [];
+				$hour20 = [];
+				$hour21 = [];
+				$hour22 = [];
+				$hour23 = [];
+				$weekno = [];
+				$day0 = [];
+				$day1 = [];
+				$day2 = [];
+				$day3 = [];
+				$day4 = [];
+				$day5 = [];
+				$day6 = [];
+				$monthname = [];
+				$month0 = [];
+				$month1 = [];
+				$month2 = [];
+				$month3 = [];
+				$month4 = [];
+				$month5 = [];
+				$month6 = [];
+				$month7 = [];
+				$month8 = [];
+				$month9 = [];
+				$month10 = [];
+				$month11 = [];
+
 				if ($log_group !== "ADMIN") {
 					if($log_group !== "GOADMIN")
-						$ul = "AND user_group = '$log_group'";
+				$ul = "AND user_group = '$log_group'";
 				} else {
-					$ul = "";
+			$ul = "";
 				}
-	
+
 				if ($request == 'daily') {
 					$stringv = go_getall_closer_campaigns($campaign_id, $astDB);
 					$closerCampaigns = " AND campaign_id IN ($stringv) ";
 					$vcloserCampaigns = " AND vclog.campaign_id IN ($stringv) ";
-					$call_time = go_get_calltimes($campaign_id, $astDB);
-					
+			$call_time = go_get_calltimes($campaign_id, $astDB);
+
 					if ((string) $stringv !== '' && $stringv != '') {
-						$MunionSQL = "UNION select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_closer_log where 
+				$MunionSQL = "UNION select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_closer_log where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul $closerCampaigns group by cdate";
-						$TunionSQL = "UNION ALL select count(phone_number) as total_calls from vicidial_closer_log vcl where  
+				$TunionSQL = "UNION ALL select count(phone_number) as total_calls from vicidial_closer_log vcl where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul";
-						$DunionSQL = "UNION select status,count(lead_id) as ccount from vicidial_closer_log where 
+				$DunionSQL = "UNION select status,count(lead_id) as ccount from vicidial_closer_log where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul group by status";
 					}
-					
-					// Total Calls Made					
-					$qtotalcallsmade = $astDB->rawQuery("select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where  
+
+					// Total Calls Made
+					$qtotalcallsmade = $astDB->rawQuery("select cdate, sum(Hour0) as 'Hour0', sum(Hour1) as 'Hour1', sum(Hour2) as 'Hour2', sum(Hour3) as 'Hour3', sum(Hour4) as 'Hour4', sum(Hour5) as 'Hour5', sum(Hour6) as 'Hour6', sum(Hour7) as 'Hour7', sum(Hour8) as 'Hour8', sum(Hour9) as 'Hour9', sum(Hour10) as 'Hour10', sum(Hour11) as 'Hour11', sum(Hour12) as 'Hour12', sum(Hour13) as 'Hour13', sum(Hour14) as 'Hour14', sum(Hour15) as 'Hour15', sum(Hour16) as 'Hour16', sum(Hour17) as 'Hour17', sum(Hour18) as 'Hour18', sum(Hour19) as 'Hour19', sum(Hour20) as 'Hour20', sum(Hour21) as 'Hour21', sum(Hour22) as 'Hour22', sum(Hour23) as 'Hour23' from (select date_format(call_date, '%Y-%m-%d') as cdate,sum(if(date_format(call_date,'%H') = 00, 1, 0)) as 'Hour0',sum(if(date_format(call_date,'%H') = 01, 1, 0)) as 'Hour1',sum(if(date_format(call_date,'%H') = 02, 1, 0)) as 'Hour2',sum(if(date_format(call_date,'%H') = 03, 1, 0)) as 'Hour3',sum(if(date_format(call_date,'%H') = 04, 1, 0)) as 'Hour4',sum(if(date_format(call_date,'%H') = 05, 1, 0)) as 'Hour5',sum(if(date_format(call_date,'%H') = 06, 1, 0)) as 'Hour6',sum(if(date_format(call_date,'%H') = 07, 1, 0)) as 'Hour7',sum(if(date_format(call_date,'%H') = 08, 1, 0)) as 'Hour8',sum(if(date_format(call_date,'%H') = 09, 1, 0)) as 'Hour9',sum(if(date_format(call_date,'%H') = 10, 1, 0)) as 'Hour10',sum(if(date_format(call_date,'%H') = 11, 1, 0)) as 'Hour11',sum(if(date_format(call_date,'%H') = 12, 1, 0)) as 'Hour12',sum(if(date_format(call_date,'%H') = 13, 1, 0)) as 'Hour13',sum(if(date_format(call_date,'%H') = 14, 1, 0)) as 'Hour14',sum(if(date_format(call_date,'%H') = 15, 1, 0)) as 'Hour15',sum(if(date_format(call_date,'%H') = 16, 1, 0)) as 'Hour16',sum(if(date_format(call_date,'%H') = 17, 1, 0)) as 'Hour17',sum(if(date_format(call_date,'%H') = 18, 1, 0)) as 'Hour18',sum(if(date_format(call_date,'%H') = 19, 1, 0)) as 'Hour19',sum(if(date_format(call_date,'%H') = 20, 1, 0)) as 'Hour20',sum(if(date_format(call_date,'%H') = 21, 1, 0)) as 'Hour21',sum(if(date_format(call_date,'%H') = 22, 1, 0)) as 'Hour22',sum(if(date_format(call_date,'%H') = 23, 1, 0)) as 'Hour23' from vicidial_log where
                     campaign_id IN ($imploded_camp) and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' group by cdate $MunionSQL) t group by cdate;");
-					
+
 					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$cdate[] 					= $row['cdate'];
@@ -151,70 +233,70 @@
 							$hour20[] 					= $row['Hour20'];
 							$hour21[] 					= $row['Hour21'];
 							$hour22[] 					= $row['Hour22'];
-							$hour23[] 					= $row['Hour23'];							
-						}						
-					}	
-					
-					$data_calls 						= [
-						"cdate" 							=> $cdate, 
-						"hour0" 							=> $hour0, 
-						"hour1" 							=> $hour1, 
-						"hour2" 							=> $hour2, 	
-						"hour3" 							=> $hour3, 
-						"hour4" 							=> $hour4, 
-						"hour5" 							=> $hour5, 
-						"hour6" 							=> $hour6, 
-						"hour7" 							=> $hour7, 
-						"hour8"	 							=> $hour8, 
-						"hour9" 							=> $hour9, 
-						"hour10" 							=> $hour10, 
+							$hour23[] 					= $row['Hour23'];
+						}
+					}
+
+			$data_calls 						= [
+						"cdate" 							=> $cdate,
+						"hour0" 							=> $hour0,
+						"hour1" 							=> $hour1,
+						"hour2" 							=> $hour2,
+						"hour3" 							=> $hour3,
+						"hour4" 							=> $hour4,
+						"hour5" 							=> $hour5,
+						"hour6" 							=> $hour6,
+						"hour7" 							=> $hour7,
+						"hour8"	 							=> $hour8,
+						"hour9" 							=> $hour9,
+						"hour10" 							=> $hour10,
 						"hour11" 							=> $hour11,
-						"hour12"	 						=> $hour12, 
-						"hour13" 							=> $hour13, 
-						"hour14" 							=> $hour14, 
-						"hour15" 							=> $hour15, 
-						"hour16" 							=> $hour16, 
-						"hour17"	 						=> $hour17, 
-						"hour18" 							=> $hour18, 
-						"hour19" 							=> $hour19, 
-						"hour20" 							=> $hour20, 
-						"hour21" 							=> $hour21, 
-						"hour22" 							=> $hour22, 
+						"hour12"	 						=> $hour12,
+						"hour13" 							=> $hour13,
+						"hour14" 							=> $hour14,
+						"hour15" 							=> $hour15,
+						"hour16" 							=> $hour16,
+						"hour17"	 						=> $hour17,
+						"hour18" 							=> $hour18,
+						"hour19" 							=> $hour19,
+						"hour20" 							=> $hour20,
+						"hour21" 							=> $hour21,
+						"hour22" 							=> $hour22,
 						"hour23" 							=> $hour23
-					];					
-					
-					$tc_results = $astDB->rawQuery("SELECT sum(t.total_calls) AS total_calls FROM (select count(phone_number) as total_calls from vicidial_log vl where  
+					];
+
+					$tc_results = $astDB->rawQuery("SELECT sum(t.total_calls) AS total_calls FROM (select count(phone_number) as total_calls from vicidial_log vl where
                     campaign_id IN ($imploded_camp) and date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $TunionSQL) t LIMIT 1");
-                    
+
 					foreach($tc_results as $result){
-						$total_calls = $result['total_calls'];
+				$total_calls = $result['total_calls'] ?? 0;
 					}
 					//$total_calls = $astDB->getRowCount();
-					
+
 					// Total Number of Leads
 					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
-						
-					$total_leads						= $astDB->getRowCount();*/
+
+			$total_leads						= $astDB->getRowCount();*/
 
 					$tl_results = $astDB->rawQuery("SELECT count(vl.list_id) as total_leads FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE vlo.campaign_id IN ($imploded_camp) LIMIT 1");
 
 					foreach($tl_results as $result){
-						$total_leads = $result['total_leads'];
+				$total_leads = $result['total_leads'] ?? 0;
 					}
 					//$total_leads = $astDB->getRowCount();
-					
+
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
 						->where("vlo.campaign_id", $array_camp, "IN")
 						->where("vl.list_id = vlo.list_id")
 						->where("vl.status = 'NEW'")
 						->getOne("vicidial_list as vl, vicidial_lists as vlo", "count(vl.list_id) as total_new");
-					
-					$total_new							= $qtotalnew['total_new'];
-						
+
+			$total_new = is_array($qtotalnew) ? ($qtotalnew['total_new'] ?? 0) : 0;
+
 					// Total Agents Logged In
 					$qtotalagents						= $astDB
 						->where("campaign_id", $array_camp, "IN")
@@ -222,70 +304,70 @@
 						->groupBy("cuser")
 						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);
 
-					$total_agents						= $astDB->getRowCount();
-					
+			$total_agents						= $astDB->getRowCount();
+
 					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
-							$cuser[] 					= $row['cuser'];						
-						}											
+							$cuser[] 					= $row['cuser'];
+						}
 					}
-					
-					$data_agents 						= [
-						"cdate" 							=> $cdate, 
+
+			$data_agents 						= [
+						"cdate" 							=> $cdate,
 						"cuser" 							=> $cuser
 					];
-					
+
 					// Disposition of Calls
-					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(vl.lead_id) as ccount from vicidial_log vl where 
+					$qtotalstatus 						= $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(vl.lead_id) as ccount from vicidial_log vl where
                     date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
-					$total_status                                           = $astDB->getRowCount();
-					
+			$total_status                                           = $astDB->getRowCount();
+
 					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
-							
+
 							#getting status name
 							$var_status 				= $row['status'];
-							
+
 							$fetch_statusname			= $astDB
 								->where("status", $var_status)
-								->getOne("vicidial_statuses", "status_name");							
-							
+								->getOne("vicidial_statuses", "status_name");
+
 							if (empty($fetch_statusname) || is_null($fetch_statusname)) {
 								# in custom statuses
 								$fetch_statusname		= $astDB
 									->where("status", $var_status)
 									->getOne("vicidial_campaign_statuses", "status_name");
 							}
-							
-							$status_name[] 				= $fetch_statusname['status_name'];							
+
+							$status_name[] 				= is_array($fetch_statusname) ? ($fetch_statusname['status_name'] ?? $var_status) : $var_status;
 						}
 					}
-					
-					$data_status 						= [
-						"status" 							=> $status, 
-						"status_name" 						=> $status_name, 
-						"ccount" 							=> $ccount, 
+
+			$data_status 						= [
+						"status" 							=> $status,
+						"status_name" 						=> $status_name,
+						"ccount" 							=> $ccount,
 						"query" 							=> $qtotalcallsmade
 					];
 				}
-				
+
 				if ($request == 'weekly') {
 					$stringv	= go_getall_closer_campaigns($campaign_id, $astDB);
 					$closerCampaigns 	= " AND campaign_id IN ($stringv) ";
 					$vcloserCampaigns 	= " AND vclog.campaign_id IN ($stringv) ";
-					$call_time              = go_get_calltimes($campaign_id, $astDB);
+			$call_time              = go_get_calltimes($campaign_id, $astDB);
 
 					if ((string) $stringv !== '' && $stringv != '') {
-						$MunionSQL 						= "UNION select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_closer_log where 
+				$MunionSQL 						= "UNION select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_closer_log where
                         week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns group by weekno";
-						/*$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where 
-                        #length_in_sec>'0' and 
+						/*$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where
+                        #length_in_sec>'0' and
                         week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns";
-						$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where 
-                        #length_in_sec>'0' and 
+				$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where
+                        #length_in_sec>'0' and
                         week(DATE_FORMAT( call_date, '%Y-%m-%d' )) between week('$fromDate') and week('$toDate') $closerCampaigns group by status";*/
 
                         $TunionSQL                                              = "UNION ALL select count(phone_number) as total_calls from vicidial_closer_log vcl where
@@ -293,11 +375,11 @@
                                                 $DunionSQL                                              = "UNION select status,count(lead_id) as ccount from vicidial_closer_log where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul group by status";
 					}
-					
+
 					// Total Calls Made
-					$qtotalcallsmade 					= $astDB->rawQuery("select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where 
+					$qtotalcallsmade 					= $astDB->rawQuery("select weekno, sum(Day0) as 'Day0', sum(Day1) as 'Day1', sum(Day2) as 'Day2', sum(Day3) as 'Day3', sum(Day4) as 'Day4', sum(Day5) as 'Day5', sum(Day6) as 'Day6' from (select week(DATE_FORMAT( call_date, '%Y-%m-%d' )) as weekno, sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 0, 1, 0))  as 'Day0', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0))  as 'Day1', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0))  as 'Day2', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0))  as 'Day3', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0))  as 'Day4', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0))  as 'Day5', sum(if(weekday(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0))  as 'Day6' from vicidial_log where
                     campaign_id IN ($imploded_camp) and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') group by weekno $MunionSQL) t group by weekno;");
-					
+
 					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$weekno[] 					= "Week ".$row['weekno'];
@@ -307,141 +389,141 @@
 							$day3[] 					= $row['Day3'];
 							$day4[] 					= $row['Day4'];
 							$day5[] 					= $row['Day5'];
-							$day6[] 					= $row['Day6'];						
+							$day6[] 					= $row['Day6'];
 						}
 					}
-					
-					$data_calls 						= [
-						"weekno" 							=> $weekno, 
-						"Day0" 								=> $day0, 
-						"Day1" 								=> $day1, 
-						"Day2" 								=> $day2, 
-						"Day3" 								=> $day3, 
-						"Day4" 								=> $day4, 
-						"Day5" 								=> $day5, 
+
+			$data_calls 						= [
+						"weekno" 							=> $weekno,
+						"Day0" 								=> $day0,
+						"Day1" 								=> $day1,
+						"Day2" 								=> $day2,
+						"Day3" 								=> $day3,
+						"Day4" 								=> $day4,
+						"Day5" 								=> $day5,
 						"Day6" 								=> $day6
 					];
-					
-					/*$astDB->rawQuery("select phone_number from vicidial_log vl where 
-                    #length_in_sec>'0' and 
+
+					/*$astDB->rawQuery("select phone_number from vicidial_log vl where
+                    #length_in_sec>'0' and
                     campaign_id = '$campaign_id' and week(DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' )) between week('$fromDate') and week('$toDate') $ul $TunionSQL");*/
 
 					$tc_results = $astDB->rawQuery("SELECT sum(t.total_calls) as total_calls FROM(select count(phone_number) as total_calls from vicidial_log vl where
                     campaign_id IN ($imploded_camp) and DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' ) between '$fromDate' and '$toDate' $TunionSQL) t LIMIT 1");
-					
+
 					//$total_calls						= $astDB->getRowCount();
 
 					foreach($tc_results as $result){
-						$total_calls = $result['total_calls'];
+				$total_calls = $result['total_calls'] ?? 0;
 					}
-					
+
 					// Total Number of Leads
 					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
-						
-					$total_leads						= $astDB->getRowCount();*/
+
+			$total_leads						= $astDB->getRowCount();*/
 
 					$tl_results = $astDB->rawQuery("SELECT count(vl.list_id) as total_leads FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE vlo.campaign_id IN ($imploded_camp) LIMIT 1");
 
 					//$total_leads                                            = $astDB->getRowCount();
 
 					foreach($tl_results as $result){
-						$total_leads = $result['total_leads'];
+				$total_leads = $result['total_leads'] ?? 0;
 					}
-					
+
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
 						->where("vlo.campaign_id", $array_camp, "IN")
 						->where("vl.list_id = vlo.list_id")
 						->where("vl.status = 'NEW'")
 						->getOne("vicidial_list as vl, vicidial_lists as vlo", "count(vl.list_id) as total_new");
-					
-					$total_new							= $qtotalnew['total_new'];
-					
+
+			$total_new = is_array($qtotalnew) ? ($qtotalnew['total_new'] ?? 0) : 0;
+
 					// Total Agents Logged In
 					$qtotalagents						= $astDB
 						->where("campaign_id", $array_camp, "IN")
 						->where("date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate'")
 						->groupBy("cuser")
 						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);
-					
-					$total_agents						= $astDB->getRowCount();
-					
+
+			$total_agents						= $astDB->getRowCount();
+
 					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
-							$cuser[] 					= $row['cuser'];						
+							$cuser[] 					= $row['cuser'];
 						}
 					}
-					
-					$data_agents 						= [
-						"cdate" 							=> $cdate, 
+
+			$data_agents 						= [
+						"cdate" 							=> $cdate,
 						"cuser" 							=> $cuser
 					];
-					
+
 					// Disposition of Calls
 					$qtotalstatus                                                 = $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(*) as ccount from vicidial_log vl where
                     DATE_FORMAT( call_date, '%Y-%m-%d %H:%i:%s' ) between '$fromDate' and '$toDate' $ul and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
-					$total_status						= $astDB->getRowCount();
-					
+			$total_status						= $astDB->getRowCount();
+
 					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
-							
+
 							#getting status name
 							$var_status 				= $row['status'];
-							
+
 							$fetch_statusname			= $astDB
 								->where("status", $var_status)
-								->getOne("vicidial_statuses", "status_name");							
-							
+								->getOne("vicidial_statuses", "status_name");
+
 							if (empty($fetch_statusname) || is_null($fetch_statusname)) {
 								# in custom statuses
 								$fetch_statusname		= $astDB
 									->where("status", $var_status)
 									->getOne("vicidial_campaign_statuses", "status_name");
 							}
-							
-							$status_name[] 				= $fetch_statusname['status_name'];							
+
+							$status_name[] 				= is_array($fetch_statusname) ? ($fetch_statusname['status_name'] ?? $var_status) : $var_status;
 						}
 					}
-					
-					$data_status 						= [
-						"status" 						=> $status, 
-						"status_name" 					=> $status_name, 
+
+			$data_status 						= [
+						"status" 						=> $status,
+						"status_name" 					=> $status_name,
 						"ccount" 						=> $ccount
 					];
 				}
-				
+
 				if ($request == 'monthly') {
 					$stringv= go_getall_closer_campaigns($campaign_id, $astDB);
 					$closerCampaigns= " AND campaign_id IN ($stringv) ";
 					$vcloserCampaigns= " AND vclog.campaign_id IN ($stringv) ";
-					$call_time  = go_get_calltimes($campaign_id, $astDB);
+			$call_time  = go_get_calltimes($campaign_id, $astDB);
 
 					if ((string) $stringv !== '' && $stringv != '') {
-						$MunionSQL 						= "UNION select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_closer_log where 
-                        MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by monthname";							
-						/*$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where 
-                        #length_in_sec>'0' and 
+				$MunionSQL 						= "UNION select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_closer_log where
+                        MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by monthname";
+						/*$TunionSQL 						= "UNION ALL select phone_number from vicidial_closer_log vcl where
+                        #length_in_sec>'0' and
                         MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns";
-						$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where 
-                        #length_in_sec>'0' and 
+				$DunionSQL 						= "UNION select status,count(*) as ccount from vicidial_closer_log vcl where
+                        #length_in_sec>'0' and
                         MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $closerCampaigns group by status";*/
 
-						$TunionSQL                                              = "UNION ALL select count(phone_number) as total_calls from vicidial_closer_log vcl where
+				$TunionSQL                                              = "UNION ALL select count(phone_number) as total_calls from vicidial_closer_log vcl where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul";
                                                 $DunionSQL                                              = "UNION select status,count(lead_id) as ccount from vicidial_closer_log where
                         date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $closerCampaigns $ul group by status";
 					}
 
-					// Total Calls Made		
-					$qtotalcallsmade					= $astDB->rawQuery("select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where  
+					// Total Calls Made
+					$qtotalcallsmade					= $astDB->rawQuery("select monthname, sum(Month1) as 'Month1', sum(Month2) as 'Month2', sum(Month3) as 'Month3', sum(Month4) as 'Month4', sum(Month5) as 'Month5', sum(Month6) as 'Month6', sum(Month7) as 'Month7', sum(Month8) as 'Month8', sum(Month9) as 'Month9', sum(Month10) as 'Month10', sum(Month11) as 'Month11', sum(Month12) as 'Month12' from (select MONTHNAME(DATE_FORMAT( call_date, '%Y-%m-%d' )) as monthname, sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 1, 1, 0)) as 'Month1', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 2, 1, 0)) as 'Month2', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 3, 1, 0)) as 'Month3', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 4, 1, 0)) as 'Month4', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 5, 1, 0)) as 'Month5', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 6, 1, 0)) as 'Month6', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 7, 1, 0)) as 'Month7', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 8, 1, 0)) as 'Month8', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 9, 1, 0)) as 'Month9', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 10, 1, 0)) as 'Month10', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 11, 1, 0)) as 'Month11', sum(if(MONTH(DATE_FORMAT( call_date, '%Y-%m-%d' )) = 12, 1, 0)) as 'Month12' from vicidial_log where
                     campaign_id IN ($imploded_camp) and  MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') group by monthname $MunionSQL) t group by monthname;");
-					
+
 					if ((is_countable($qtotalcallsmade) ? count($qtotalcallsmade) : 0) > 0) {
 						foreach ($qtotalcallsmade as $row) {
 							$monthname[] 				= $row['monthname'];
@@ -456,65 +538,65 @@
 							$month8[] 					= $row['Month9'];
 							$month9[] 					= $row['Month10'];
 							$month10[] 					= $row['Month11'];
-							$month11[] 					= $row['Month12'];						
-						}											
+							$month11[] 					= $row['Month12'];
+						}
 					}
-					
-					$data_calls 						= [
-						"monthname" 						=> $monthname, 
-						"Month1" 							=> $month0, 
-						"Month2" 							=> $month1, 
-						"Month3" 							=> $month2, 
-						"Month4" 							=> $month3, 
-						"Month5" 							=> $month4, 
-						"Month6" 							=> $month5, 
-						"Month7" 							=> $month6, 
-						"Month8" 							=> $month7, 
-						"Month9" 							=> $month8, 
-						"Month10" 							=> $month9, 
-						"Month11" 							=> $month10, 
+
+			$data_calls 						= [
+						"monthname" 						=> $monthname,
+						"Month1" 							=> $month0,
+						"Month2" 							=> $month1,
+						"Month3" 							=> $month2,
+						"Month4" 							=> $month3,
+						"Month5" 							=> $month4,
+						"Month6" 							=> $month5,
+						"Month7" 							=> $month6,
+						"Month8" 							=> $month7,
+						"Month9" 							=> $month8,
+						"Month10" 							=> $month9,
+						"Month11" 							=> $month10,
 						"Month12" 							=> $month11
 					];
-					
-					/*$astDB->rawQuery("select phone_number from vicidial_log vl where 
-                    #length_in_sec>'0' and 
+
+					/*$astDB->rawQuery("select phone_number from vicidial_log vl where
+                    #length_in_sec>'0' and
                     campaign_id = '$campaign_id' and MONTH(call_date) between MONTH('$fromDate') and MONTH('$toDate') $ul $TunionSQL");*/
 
                     $tc_results = $astDB->rawQuery("SELECT sum(t.total_calls) as total_calls FROM (select count(phone_number) as total_calls from vicidial_log vl where
                     campaign_id IN ($imploded_camp) and call_date between '$fromDate' and '$toDate' $TunionSQL) t LIMIT 1");
-					
+
 					//$total_calls						= $astDB->getRowCount();
 
 					foreach($tc_results as $result){
-						$total_calls = $result['total_calls'];
+				$total_calls = $result['total_calls'] ?? 0;
 					}
-					
+
 					// Total Number of Leads
 					/*$qtotalleads 						= $astDB
 						->where("vlo.campaign_id", $campaign_id)
 						->where("vl.list_id = vlo.list_id")
 						->get("vicidial_list as vl, vicidial_lists as vlo");
-						
-					$total_leads						= $astDB->getRowCount();*/
+
+			$total_leads						= $astDB->getRowCount();*/
 
 					$tl_results = $astDB->rawQuery("SELECT count(vl.list_id) as total_leads FROM  vicidial_list as vl INNER JOIN vicidial_lists as vlo ON vl.list_id = vlo.list_id WHERE
                     vlo.campaign_id IN ($imploded_camp) LIMIT 1");
 
 					foreach($tl_results as $result){
-						$total_leads = $result['total_leads'];
+				$total_leads = $result['total_leads'] ?? 0;
 					}
 
                                         //$total_leads                                            = $astDB->getRowCount();
-					
+
 					// Total Number of New Leads
 					$qtotalnew							= $astDB
 						->where("vlo.campaign_id", $array_camp, "IN")
 						->where("vl.list_id = vlo.list_id")
 						->where("vl.status = 'NEW'")
 						->getOne("vicidial_list as vl, vicidial_lists as vlo", "count(vl.list_id) as total_new");
-					
-					$total_new							= $qtotalnew['total_new'];
-					
+
+			$total_new = is_array($qtotalnew) ? ($qtotalnew['total_new'] ?? 0) : 0;
+
 					// Total Agents Logged In
 					$qtotalagents						= $astDB
 						->where("campaign_id", $array_camp, "IN")
@@ -522,74 +604,74 @@
 						->where("date_format(event_time, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate'")
 						->groupBy("cuser")
 						->get("vicidial_agent_log", NULL, ["date_format(event_time, '%Y-%m-%d') as cdate", "user as cuser"]);
-						
-					$total_agents						= $astDB->getRowCount();
-					
+
+			$total_agents						= $astDB->getRowCount();
+
 					if ((is_countable($qtotalagents) ? count($qtotalagents) : 0) > 0) {
 						foreach ($qtotalagents as $row) {
 							$cdate[] 					= $row['cdate'];
-							$cuser[] 					= $row['cuser'];						
-						}											
+							$cuser[] 					= $row['cuser'];
+						}
 					}
-					
-					$data_agents 						= [
-						"cdate" 							=> $cdate, 
+
+			$data_agents 						= [
+						"cdate" 							=> $cdate,
 						"cuser" 							=> $cuser
-					];					
-					
-					// Disposition of Calls			
+					];
+
+					// Disposition of Calls
 					$qtotalstatus                                           = $astDB->rawQuery("select status, sum(ccount) as ccount from (select status,count(lead_id) as ccount from vicidial_log vl where
                     call_date between '$fromDate' and '$toDate' and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
-					$total_status						= $astDB->getRowCount();
-					
+			$total_status						= $astDB->getRowCount();
+
 					if ((is_countable($qtotalstatus) ? count($qtotalstatus) : 0) > 0) {
 						foreach ($qtotalstatus as $row) {
 							$status[] 					= $row['status'];
 							$ccount[] 					= $row['ccount'];
-							
+
 							#getting status name
 							$var_status 				= $row['status'];
-							
+
 							$fetch_statusname			= $astDB
 								->where("status", $var_status)
-								->getOne("vicidial_statuses", "status_name");							
-							
+								->getOne("vicidial_statuses", "status_name");
+
 							if (empty($fetch_statusname) || is_null($fetch_statusname)) {
 								# in custom statuses
 								$fetch_statusname		= $astDB
 									->where("status", $var_status)
 									->getOne("vicidial_campaign_statuses", "status_name");
 							}
-							
-							$status_name[] 				= $fetch_statusname['status_name'];							
+
+							$status_name[] 				= is_array($fetch_statusname) ? ($fetch_statusname['status_name'] ?? $var_status) : $var_status;
 						}
 					}
-					
-					$data_status 						= [
-						"status" 							=> $status, 
-						"status_name" 						=> $status_name, 
+
+			$data_status 						= [
+						"status" 							=> $status,
+						"status_name" 						=> $status_name,
 						"ccount" 							=> $ccount
 					];
 				}
-				
-				return [
+
+				$apiresults = [
 					"result"								=> "success",
-					"call_time" 							=> $call_time, 
-					"data_calls" 							=> $data_calls, 
-					"data_status" 							=> $data_status, 
-					"data_agents" 							=> $data_agents, 
-					"total_calls" 							=> $total_calls, 
-					"total_leads" 							=> $total_leads, 
-					"total_new" 							=> $total_new, 
+					"call_time" 							=> $call_time,
+					"data_calls" 							=> $data_calls,
+					"data_status" 							=> $data_status,
+					"data_agents" 							=> $data_agents,
+					"total_calls" 							=> $total_calls,
+					"total_leads" 							=> $total_leads,
+					"total_new" 							=> $total_new,
 					"total_status" 							=> $total_status
 				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

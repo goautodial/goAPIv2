@@ -5,7 +5,7 @@
  * @copyright 	Copyright (c) 2019 GOautodial Inc.
  * @author     	Jeremiah Sebastian Samatra
  * @author     	Alexander Jim Abenoja
- * @author		Demian Lizandro A. Biscocho  
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,26 @@
 */
 
 	include_once (__DIR__ . "/goAPI.php");
-	  
+
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $goPass */
+/** @var string $goAction */
+/** @var string $goURL */
+/** @var string $userResponseType */
+/** @var string $session_user */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
+	$dataCampID = [];
+	$dataCampName = [];
+	$dataDialMethod = [];
+	$dataActive = [];
+	$dataUseCID = [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -45,18 +64,18 @@
 			->getOne("vicidial_users", "user,user_level,user_group");
 
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		$log_group										= $fresults["user_group"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+		$log_group										= is_array($fresults) ? ($fresults["user_group"] ?? '') : '';
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 			$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
-			
+
 			$astDB->where('user_group', $log_group);
-			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-			
+			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns') ?: [];
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				//$astDB->orWhere("user_group", "---ALL---");
@@ -66,15 +85,15 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					} else {
-						$allowed_campaigns = $allowed_camps['allowed_campaigns'];
+						$allowed_campaigns = is_array($allowed_camps) ? ($allowed_camps['allowed_campaigns'] ?? '') : '';
 						if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
 							$allowed_campaigns = explode(" ", trim($allowed_campaigns));
 							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
 						}
 					}
-				}					
+				}
 			}
-				
+
 			$cols 										= [
 				"campaign_id",
 				"campaign_name",
@@ -82,10 +101,10 @@
 				"active",
 				"use_custom_cid"
 			];
-			
+
 			$astDB->orderBy('campaign_id', 'desc');
-			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);		
-			
+			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);
+
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
 					$dataCampID[] 						= $fresults['campaign_id'];
@@ -93,13 +112,13 @@
 					$dataDialMethod[] 					= $fresults['dial_method'];
 					$dataActive[] 						= $fresults['active'];
 					$dataUseCID[]						= $fresults['use_custom_cid'];
-				}				
-			
+				}
+
 				$apiresults 								= [
-					"result" 									=> "success", 
+					"result" 									=> "success",
 					"campaign_id" 								=> $dataCampID,
-					"campaign_name" 							=> $dataCampName, 
-					"dial_method" 								=> $dataDialMethod, 
+					"campaign_name" 							=> $dataCampName,
+					"dial_method" 								=> $dataDialMethod,
 					"active" 									=> $dataActive,
 					"use_custom_cid"							=> $dataUseCID
 				];
@@ -108,14 +127,14 @@
 					"result"								=> "No Available Data"
 				];
 			}
-			
+
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

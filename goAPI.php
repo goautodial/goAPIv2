@@ -26,24 +26,34 @@
     require_once (__DIR__ . "/goDBkamailio.php");
     require_once (__DIR__ . "/goFunctions.php");
 
+    /** @var MySQLiDB $astDB */
+    /** @var MySQLiDB $goDB */
+    /** @var MySQLiDB $kamDB */
+
     /* Check if DB variables are not set */
-	$VARDB_server ??= "localhost";
-	$VARDB_user ??= "asterisku";
-	$VARDB_pass ??= "asterisku1234";
-	$VARDB_database ??= "asterisk";
+	if (!isset($VARDB_server)) { $VARDB_server = "localhost"; }
+	if (!isset($VARDB_user)) { $VARDB_user = "asterisku"; }
+	if (!isset($VARDB_pass)) { $VARDB_pass = "asterisku1234"; }
+	if (!isset($VARDB_database)) { $VARDB_database = "asterisk"; }
 
-	$VARDBgo_server ??= "localhost";
-	$VARDBgo_user ??= "goautodialu";
-	$VARDBgo_pass ??= "goautodialu1234";
-	$VARDBgo_database ??= "goautodial";
+	if (!isset($VARDBgo_server)) { $VARDBgo_server = "localhost"; }
+	if (!isset($VARDBgo_user)) { $VARDBgo_user = "goautodialu"; }
+	if (!isset($VARDBgo_pass)) { $VARDBgo_pass = "goautodialu1234"; }
+	if (!isset($VARDBgo_database)) { $VARDBgo_database = "goautodial"; }
 
-	$VARDBgokam_server ??= "localhost";
-	$VARDBgokam_user ??= "kamailiou";
-	$VARDBgokam_pass ??= "kamailiou1234";
-	$VARDBgokam_database ??= "kamailio";
+	if (!isset($VARDBgokam_server)) { $VARDBgokam_server = "localhost"; }
+	if (!isset($VARDBgokam_user)) { $VARDBgokam_user = "kamailiou"; }
+	if (!isset($VARDBgokam_pass)) { $VARDBgokam_pass = "kamailiou1234"; }
+	if (!isset($VARDBgokam_database)) { $VARDBgokam_database = "kamailio"; }
     /* End of DB variables */
 
     /* Variables */
+    $goAction = '';
+    $goUser = '';
+    $goPass = '';
+    $goURL = '';
+    $userResponseType = '';
+
     if (isset($_GET["goAction"])) { $goAction = $astDB->escape($_GET["goAction"]); }
 		elseif (isset($_POST["goAction"])) { $goAction = $astDB->escape($_POST["goAction"]); }
 
@@ -61,11 +71,12 @@
 
 	/* Standard goAPI variables */
 
-    $log_user     = $session_user ?? '';
-    $log_group    = go_get_groupid($session_user ?? '', $astDB);
+    $session_user = $session_user ?? '';
+    $log_user     = $session_user;
+    $log_group    = go_get_groupid($session_user, $astDB);
     $log_ip       = $astDB->escape($_REQUEST['log_ip'] ?? '');
     $goUser       = $astDB->escape(($_REQUEST['goUser'] ?? ''));
-    $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass']));
+    $goPass       = (isset($_REQUEST['log_pass']) ? $astDB->escape($_REQUEST['log_pass']) : $astDB->escape($_REQUEST['goPass'] ?? ''));
 
     define('DEFAULT_USERS', ['VDAD','VDCL', 'goAPI']);
 

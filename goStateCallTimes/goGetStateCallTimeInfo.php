@@ -42,7 +42,8 @@
 		$rsltv = $astDB->getOne('vicidial_state_call_times', 'state_call_time_id, state_call_time_state, state_call_time_name, sct_default_start, sct_default_stop, user_group');
 		$exist = $astDB->getRowCount();
 		if($exist > 0){
-			foreach ($rsltv as $fresults){
+			if (is_array($rsltv)) {
+				$fresults = $rsltv;
 				$dataStateID[] = $fresults['state_call_time_id'];
 				$dataStateState[] = $fresults['state_call_time_state'];
 				$dataStateName[] = $fresults['state_call_time_name'];
@@ -50,7 +51,7 @@
 				$dataDefStop[] = $fresults['sct_default_stop'];
 				$dataUserGroup[] = $fresults['user_group'];
 				$apiresults = ["result" => "success", "state_call_time_id" => $dataStateID, "state_call_time_state" => $dataStateState, "state_call_time_name" => $dataStateName, "sct_default_start" => $dataDefStart, "sct_default_stop" => $dataDefStop, "user_group" => $dataUserGroup];
-			}
+						}
 		} else {
 			$apiresults = ["result" => "Error: Lead Filter does not exist."];
 		}
