@@ -68,7 +68,7 @@ if ($is_logged_in) {
     $astDB->where('status', 'QUEUE');
     $rslt = $astDB->get('vicidial_live_agents', null, 'lead_id,uniqueid,callerid,channel,call_server_ip,comments');
     $queue_leadID_ct = $astDB->getRowCount();
-    
+
     if ($queue_leadID_ct > 0) {
         $row = $rslt[0];
         $lead_id        = $row['lead_id'];
@@ -138,7 +138,7 @@ if ($is_logged_in) {
         $astDB->where('lead_id', $lead_id);
         $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id');
         $list_lead_ct = $astDB->getRowCount();
-        
+
         if ($list_lead_ct > 0) {
             $row = $rslt;
         #	$lead_id		= trim("{$row['lead_id']}");
@@ -223,7 +223,7 @@ if ($is_logged_in) {
                 $CBuser =			trim("{$row['user']}");
                 $CBcomments =		trim("{$row['comments']}");
             }
-            
+
             $astDB->where('lead_id', $lead_id);
             $astDB->orderBy('entry_time', 'asc');
             $rslt = $astDB->get('vicidial_callbacks', null, 'entry_time,comments,user');
@@ -248,7 +248,7 @@ if ($is_logged_in) {
             $row = $rslt;
             $owner_populate = $row['owner_populate'];
         }
-        
+
         $ownerSQL = '';
         if ( $owner_populate == 'ENABLED' && (strlen((string) $owner) < 1 || $owner == 'NULL') ) {
             $ownerArray = [ 'owner' => $user ];
@@ -465,7 +465,7 @@ if ($is_logged_in) {
                 'xfercallid' => '',
                 'fronter_full_name' => ''
             ];
-            
+
             if (preg_match('/X/', (string) $dialed_label)) {
                 if (preg_match('/LAST/', (string) $dialed_label)) {
                     //$stmt = "SELECT phone_code,phone_number,alt_phone_note,active,alt_phone_count FROM vicidial_list_alt_phones where lead_id='$lead_id' order by alt_phone_count desc limit 1;";
@@ -906,7 +906,7 @@ if ($is_logged_in) {
             $rslt = $astDB->getOne("custom_{$entry_list_id}", "$custom_field_names_SQL");
             $cffv_ct = $astDB->getRowCount();
             if ($cffv_ct > 0) {
-                $custom_field_values = '----------'; 
+                $custom_field_values = '----------';
                 if (is_array($rslt)) {
                 	$row = $rslt;
                     $custom_field_values .=	"{$row}----------";
@@ -936,13 +936,13 @@ if ($is_logged_in) {
             $row = $rslt;
             $converted_dial_code = trim("{$row['country']}");
         }
-        
+
         $astDB->where('list_id', $list_id);
         $rslt = $astDB->getOne('vicidial_lists', 'web_form_address,web_form_address_two');
         $row = $rslt;
         $LISTweb_form_address = $row['web_form_address'];
         $LISTweb_form_address_two = $row['web_form_address_two'];
-        
+
         $astDB->where('lead_id', $lead_id);
         $astDB->orderBy('notesid', 'desc');
         $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
@@ -1163,10 +1163,19 @@ if ($is_logged_in) {
 
                 ##### BEGIN grab the data from custom table for the lead_id
                 //$stmt="SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' LIMIT 1;";
-                $astDB->where('lead_id', $lead_id);
-                $rslt = $astDB->getOne("custom_{$entry_list_id}", "{$custom_field_names_SQL}");
-                $list_lead_ct = $astDB->getRowCount();
-                if ($list_lead_ct > 0) {
+                $custom_entry_list_id = preg_replace('/[^0-9]/', '', (string) $entry_list_id);
+                $custom_table = "custom_{$custom_entry_list_id}";
+                $list_lead_ct = 0;
+                $rslt = [];
+                if ($custom_entry_list_id !== '') {
+                    $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_table}'");
+                    if (is_array($tableCheck) && count($tableCheck) > 0) {
+                        $astDB->where('lead_id', $lead_id);
+                        $rslt = $astDB->getOne($custom_table, "{$custom_field_names_SQL}");
+                        $list_lead_ct = $astDB->getRowCount();
+                    }
+                }
+                if ($list_lead_ct > 0 && is_array($rslt)) {
                     foreach ($rslt as $idx => $row) {
                         $form_field_value =		urlencode(trim("{$row}"));
                         $field_name_id =		$idx;
@@ -1219,7 +1228,7 @@ if ($is_logged_in) {
             }
             if ( $enable_vtiger_integration > 0 && preg_match('/callxfer/', $VDCL_start_call_url) && preg_match('/contactwsid/', $VDCL_start_call_url) || preg_match("/minuteswarning/", $VDCL_start_call_url) ) {
                 $SCUoutput = '';
-                foreach ($SCUfile as $SCUline) 
+                foreach ($SCUfile as $SCUline)
                     {$SCUoutput .= "$SCUline";}
                 # {"result":true,"durationLimit":3071}
                 if ( strlen($SCUoutput) > 4 || preg_match("/minuteswarning/", $VDCL_start_call_url) ) {
@@ -1284,7 +1293,7 @@ if ($is_logged_in) {
             }
             ##### END special filtering and response for Vtiger account balance function #####
         }
-        
+
         $outputData = array_merge($dataOutput1, $dataOutput2, $dataOutput3, $dataOutput4, $LeaD_InfO);
         $APIResult = [ "result" => "success", "data" => $outputData ];
     } else {

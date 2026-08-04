@@ -1,11 +1,11 @@
 <?php
 /**
  * @file        goEditDID.php
- * @brief       API to edit DID Details 
+ * @brief       API to edit DID Details
  * @copyright   Copyright (c) 2018 GOautodial Inc.
  * @author      Jerico James F. Milo
  * @author      Alexander Jim Abenoja
- * @author		Demian Lizandro A. Biscocho 
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -37,13 +37,14 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
- 
+
     // POST or GET Variables
     $did_id 										= $astDB->escape(($_REQUEST['did_id'] ?? ''));
 	$did_pattern 									= $astDB->escape(($_REQUEST['did_pattern'] ?? ''));
 	$did_description 								= $astDB->escape(($_REQUEST['did_description'] ?? ''));
 	$did_active 									= $astDB->escape(strtoupper(($_REQUEST['did_active'] ?? '')));
-	$did_route 										= $astDB->escape(strtoupper(($_REQUEST['did_route'] ?? '')));
+	$active 										= $did_active;
+	$did_route 									= $astDB->escape(strtoupper(($_REQUEST['did_route'] ?? '')));
 	$filter_clean_cid_number 						= $astDB->escape(($_REQUEST['filter_clean_cid_number'] ?? ''));
 	$user 											= $astDB->escape(($_REQUEST['user'] ?? ''));
 	$user_unavailable_action 						= $astDB->escape(strtoupper(($_REQUEST['user_unavailable_action'] ?? '')));
@@ -57,9 +58,10 @@
 	$exten_context 									= $astDB->escape(($_REQUEST['exten_context'] ?? ''));
 	$list_id     									= $astDB->escape(($_REQUEST['list_id'] ?? ''));
 	$call_handle_method 							= $astDB->escape(($_REQUEST['call_handle_method'] ?? ''));
-	$agent_search_method     						= $astDB->escape(($_REQUEST['agent_search_method'] ?? ''));
-   
-    // Default values 
+	$agent_search_method     					= $astDB->escape(($_REQUEST['agent_search_method'] ?? ''));
+	$record_call 								= $astDB->escape(strtoupper(($_REQUEST['record_call'] ?? '')));
+
+    // Default values
     $defUUA 										= [
 		'IN_GROUP',
 		'EXTEN',
@@ -67,7 +69,7 @@
 		'PHONE',
 		'VMAIL_NO_INST'
 	];
-	
+
     $defRoute 										= [
 		'EXTEN',
 		'VOICEMAIL',
@@ -77,13 +79,13 @@
 		'CALLMENU',
 		'VMAIL_NO_INST'
 	];
-	
+
     $defRecordCall 									= [
 		'Y',
 		'N',
 		'Y_QUEUESTOP'
 	];
-	
+
     $defActive 										= [
 		"Y",
 		"N"
@@ -109,7 +111,7 @@
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for user_unavailable_action is IN_GROUP','EXTEN','VOICEMAIL','PHONE', or 'VMAIL_NO_INST'."
 		];
-	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && !is_null($active)) {
+	} elseif (!in_array($did_active, (is_array($defActive) ? $defActive : [])) && $did_active !== '') {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for active is Y or N only."
 		];
@@ -117,7 +119,7 @@
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for did_route are EXTEN, VOICEMAIL, AGENT, PHONE, IN_GROUP, or CALLMENU  only."
 		];
-	} elseif (!in_array($record_call, (is_array($defRecordCall) ? $defRecordCall : [])) && !is_null($record_call)) {
+	} elseif (!in_array($record_call, (is_array($defRecordCall) ? $defRecordCall : [])) && $record_call !== '') {
 		$apiresults 								= [
 			"result" 									=> "Error: Default value for Record Call are Y, N and Y_QUEUESTOP  only."
 		];
@@ -154,115 +156,115 @@
             $astDB->where("user_group", $log_group);
             $astDB->orWhere("user_group", "---ALL---");
 		}
-		
+
         $astDB->where("did_id", $did_id);
         $rsltv_check 								= $astDB->get("vicidial_inbound_dids");
-		
-        if ($astDB->count > 0) {
-			foreach ($rsltv_check as $fresults) {
-				$datadid_pattern 					= $fresults['did_pattern'];
-				$datadid_description				= $fresults['did_description'];
-				$datadid_active 					= $fresults['did_active'];
-				$datadid_route 						= $fresults['did_route'];
-				$datafilter_clean_cid_number		= $fresults['filter_clean_cid_number'];
-				$datauser							= $fresults['user'];
-				$datauser_unavailable_action 		= $fresults['user_unavailable_action'];
-				$datauser_route_settings_ingroup	= $fresults['user_route_settings_ingroup'];
-				$datagroup_id 						= $fresults['group_id'];
-				$dataphone	 						= $fresults['phone'];
-				$dataserver_ip 						= $fresults['server_ip'];
-				$datamenu_id 						= $fresults['menu_id'];
-				$datavoicemail_ext	 				= $fresults['voicemail_ext'];
-				$dataextension	 					= $fresults['extension'];
-				$dataexten_context	 				= $fresults['exten_context'];
-                $datalist_id                        = $fresults['list_id'];
-				$datacall_handle_method	 			= $fresults['call_handle_method'];
-                $dataagent_search_method            = $fresults['agent_search_method'];
-			}
 
-			if (empty($did_pattern)) { 
+	        if ($astDB->count > 0) {
+				foreach ((is_array($rsltv_check) ? $rsltv_check : []) as $fresults) {
+					$datadid_pattern 					= $fresults['did_pattern'] ?? '';
+					$datadid_description				= $fresults['did_description'] ?? '';
+					$datadid_active 					= $fresults['did_active'] ?? '';
+					$datadid_route 						= $fresults['did_route'] ?? '';
+					$datafilter_clean_cid_number		= $fresults['filter_clean_cid_number'] ?? '';
+					$datauser							= $fresults['user'] ?? '';
+					$datauser_unavailable_action 		= $fresults['user_unavailable_action'] ?? '';
+					$datauser_route_settings_ingroup	= $fresults['user_route_settings_ingroup'] ?? '';
+					$datagroup_id 						= $fresults['group_id'] ?? '';
+					$dataphone	 						= $fresults['phone'] ?? '';
+					$dataserver_ip 						= $fresults['server_ip'] ?? '';
+					$datamenu_id 						= $fresults['menu_id'] ?? '';
+					$datavoicemail_ext	 				= $fresults['voicemail_ext'] ?? '';
+					$dataextension	 					= $fresults['extension'] ?? '';
+					$dataexten_context	 				= $fresults['exten_context'] ?? '';
+	                $datalist_id                        = $fresults['list_id'] ?? '';
+					$datacall_handle_method	 			= $fresults['call_handle_method'] ?? '';
+	                $dataagent_search_method            = $fresults['agent_search_method'] ?? '';
+				}
+
+			if (empty($did_pattern)) {
 				$did_pattern 						= $datadid_pattern;
 			}
-			
-			if (empty($did_description)) { 
+
+			if (empty($did_description)) {
 				$did_description 					= $datadid_description;
 			}
-			
+
 			if (empty($did_active)) {
 				$did_active 						= $datadid_active;
 			}
-			
+
 			if (empty($did_route)) {
 				$did_route 							= $datadid_route;
-			}        
+			}
 
 			if (empty($filter_clean_cid_number)) {
 				$filter_clean_cid_number 			= $datafilter_clean_cid_number;
 			}
-			
-			if (empty($user)) { 
+
+			if (empty($user)) {
 				$user 								= $datauser;
 			}
-			
-			if (empty($user_unavailable_action)) { 
+
+			if (empty($user_unavailable_action)) {
 				$user_unavailable_action 			= $datauser_unavailable_action;
 			}
-			
+
 			if (empty($user_route_settings_ingroup)) {
 				$user_route_settings_ingroup 		= $datauser_route_settings_ingroup;
 			}
-			
+
 			if (empty($group_id)) {
 				$group_id 							= $datagroup_id;
-			} 		
+			}
 
 			if (empty($phone)) {
 				$phone 								= $dataphone;
 			}
-			
+
 			if (empty($server_ip)) {
 				$server_ip 							= $dataserver_ip;
-			}        
+			}
 
-			if (empty($menu_id)) { 
+			if (empty($menu_id)) {
 				$menu_id							= $datamenu_id;
 			}
-			
-			if (empty($voicemail_ext)) { 
+
+			if (empty($voicemail_ext)) {
 				$voicemail_ext			 			= $datavoicemail_ext;
 			}
-			
+
 			if (empty($extension)) {
 				$extension 							= $dataextension;
 			}
-			
+
 			if (empty($exten_context)) {
 				$exten_context 						= $dataexten_context;
 			}
 
-			if (empty($list_id)) { 
+			if (empty($list_id)) {
 				$list_id 						    = $datalist_id;
 			}
-			
+
 			if (empty($call_handle_method)) {
 				$call_handle_method 				= $datacall_handle_method;
 			}
 
-			if (empty($agent_search_method)) { 
+			if (empty($agent_search_method)) {
 				$agent_search_method 				= $dataagent_search_method;
 			}
-			
+
             $astDB->where("did_pattern", $did_pattern);
             $astDB->where("did_id", $did_id, "!=");
             $astDB->getOne("vicidial_inbound_dids", "did_pattern");
 
-            if ($astDB->count < 1) {				
+            if ($astDB->count < 1) {
                 $data 								= [
 					"did_pattern"						=> $did_pattern,
 					"did_description" 					=> $did_description,
 					"did_active" 						=> $did_active,
 					"did_route" 						=> $did_route,
-					"filter_clean_cid_number"			=> $filter_clean_cid_number,				
+					"filter_clean_cid_number"			=> $filter_clean_cid_number,
 					'user' 								=> $user,
 					'user_unavailable_action' 			=> $user_unavailable_action,
 					'user_route_settings_ingroup' 		=> $user_route_settings_ingroup,
@@ -277,15 +279,15 @@
                     'call_handle_method'                => $call_handle_method,
                     'agent_search_method'               => $agent_search_method
 				];
-				
+
 				$astDB->where("did_id", $did_id);
 				$astDB->update("vicidial_inbound_dids", $data);
-									
+
 				$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified DID ID $did_id", $log_group, $astDB->getLastQuery());
-             
+
 				$apiresults 						= [
 					"result" 							=> "success"
-				];             
+				];
             } else {
                 $apiresults 						= [
 					"result" 							=> "Duplicate did_pattern, It must be unique!\n"
@@ -294,9 +296,8 @@
         } else {
 			$apiresults 							= [
 				"result" 								=> "Error: DID doesn't exist."
-			];        
+			];
         }
     }
-    
-?>
 
+?>

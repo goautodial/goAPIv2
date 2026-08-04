@@ -38,15 +38,24 @@
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');
-	
+
 	//ini_set('display_errors', 'on');
     	//error_reporting(E_ALL);
-	
+
+	if (empty($_FILES['goFileMe']['tmp_name']) || !is_uploaded_file($_FILES['goFileMe']['tmp_name'])) {
+		$apiresults = [
+			'result' => 'error',
+			'message' => 'No upload file was provided.'
+		];
+		return;
+	}
+
 	$thefile = $_FILES['goFileMe']['tmp_name'];
 	$theList = ($_REQUEST["goListId"] ?? '');
 	$goDupcheck = ($_REQUEST["goDupcheck"] ?? '');
 	$default_delimiter = ",";
-	
+	$delimiters = [];
+
 	// path where your CSV file is located
 	define('CSV_PATH','/tmp/');
 
@@ -58,23 +67,26 @@
            //$delimiters = ($_REQUEST["custom_delimiter"] ?? '');
            $delimiters = explode(" ", ($_REQUEST["custom_delimiter"] ?? ''));
            $str = file_get_contents($csv_file);
-           $str1 = str_replace($delimiters, $default_delimiter, $str);
-           file_put_contents($csv_file, $str1);
+           if ($str !== false) {
+               $str1 = str_replace($delimiters, $default_delimiter, $str);
+               file_put_contents($csv_file, $str1);
+           }
         }
-    	// REGEX to prevent weird characters from ending up in the fields
+	// REGEX to prevent weird characters from ending up in the fields
 	$field_regx = "/['\"`\\;]/";
-	$field_regx = str_replace($delimiters, "", $field_regx);	
-	
+	$getCF = [];
+	$field_regx = str_replace((array) $delimiters, "", $field_regx);
+
 	// STANDARD FIELDS
 	$getSF = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
-	
+
 	// GET CUSTOM FIELDS OF LIST
 	$astDB->where('list_id', $theList);
         $rsltv = $astDB->get('vicidial_lists_fields', null, 'field_label, field_name');
-	
+
 	if(!empty($rsltv)){
 
-	foreach($rsltv as $fresults){
+	foreach((is_array($rsltv) ? $rsltv : []) as $fresults){
 		$getCF[] = $fresults['field_label'];
 	}
 

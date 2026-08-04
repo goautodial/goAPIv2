@@ -22,16 +22,16 @@
 */
 
     function go_getUsergroup($goUser ,$link){
-        
+
         $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
         $rsltv = mysqli_query($link, $query_userv);
         $check_resultv = mysqli_num_rows($rsltv);
-        
+
         if ($check_resultv > 0) {
             $rowc=mysqli_fetch_array($rsltv, MYSQLI_ASSOC);
             return $rowc["user_group"];
         }
-       
+
     }
 
     // moved to goFunctions.php
@@ -42,11 +42,12 @@
     function _remove_empty_internal($value) {
         return !empty($value) || $value === 0;
     }*/
-    
+
     function go_get_dates($d1, $d2)
     {
+            $dateARY = [];
             $diff = explode("|", (string) go_get_date_diff($d1, $d2));
-            $days = $diff[2];
+            $days = $diff[2] ?? 0;
 
             for ($i=0;$i<=$days;$i++)
             {
@@ -56,7 +57,7 @@
             return $dateARY;
     }
 
-   
+
     function go_get_date_diff($d1, $d2)
     {
             $diff = abs(strtotime((string) $d2) - strtotime((string) $d1));
@@ -108,12 +109,12 @@
 			return "$Ftime";
 		}
 	}
-				
+
 	function inner_checkIfTenant($groupId, $linkgo){
         $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
         $rslt_tenant = mysqli_query($linkgo,$query_tenant);
         $check_result_tenant = mysqli_num_rows($rslt_tenant);
-        
+
 
         if ($check_result_tenant > 0) {
             return true;
@@ -121,13 +122,13 @@
             return false;
         }
     }*/
-    
+
 	/*function go_getall_closer_campaigns($campaignID, $link){
 		$query_date =  date('Y-m-d');
 		$query_text = "select trim(closer_campaigns) as qresult from vicidial_campaigns where campaign_id='$campaignID' order by campaign_id";
 		$query = mysqli_query($link, $query_text);
 		$resultsu = mysqli_fetch_array($query);
-		
+
 		if((is_countable($resultsu) ? count($resultsu) : 0) > 0){
 			$fresults = $resultsu['qresult'];
 			$closerCampaigns = explode(",",str_replace(" ",',',rtrim(ltrim(str_replace('-','',$fresults)))));
@@ -135,12 +136,12 @@
 		}else{
 			  $allCloserCampaigns = '';
 		}
-		  
+
 		return $allCloserCampaigns;
 	}*/
-	
+
 	/*function go_get_calltimes($camp, $link){
-		
+
 		$query = "SELECT local_call_time AS call_time FROM vicidial_campaigns WHERE campaign_id='$camp'";
 		$query_result = mysqli_query($link, $query);
 		$fetch_result = mysqli_fetch_array($query_result);
@@ -155,13 +156,24 @@
 
 		return $result;
 	}*/
-	
+
 	function go_get_statuses($camp, $link){
 	# grab names of global statuses and statuses in the selected campaign
-	
+		$statuses = [];
+		$statuses_name = [];
+		$system_statuses = [];
+		$campaign_statuses = [];
+		$statuses_code = [];
+
+		if (!($link instanceof mysqli)) {
+			return [$statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code];
+		}
+
 		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_statuses order by status");
-		mysqli_num_rows($query);
-	
+		if (!$query) {
+			return [$statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code];
+		}
+
 		$ns = 0;
 		while($row = mysqli_fetch_array($query)){
 			if ($row['status'] != 'NEW') {
@@ -170,51 +182,62 @@
 				} else {
 							$statuses_code[$ns] = $row['status'];
 				}
-				
+
 				$statuses_name[$row['status']] = $row['status_name'];
 			}
-				
+
 				$statuses[$ns]=$row['status'];
 				$ns++;
 		}
 
-		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_campaign_statuses where campaign_id='$camp' and selectable='Y' and human_answered='Y' order by status");
-		
-		mysqli_num_rows($query);
-	
+		$safeCamp = mysqli_real_escape_string($link, (string) $camp);
+		$query = mysqli_query($link, "SELECT status,status_name,selectable,human_answered from vicidial_campaign_statuses where campaign_id='$safeCamp' and selectable='Y' and human_answered='Y' order by status");
+		if (!$query) {
+			return [$statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code];
+		}
+
 		$o = 0;
 		while($row = mysqli_fetch_array($query)) {
 			if ($row['status'] != 'NEW') {
-				
+
 				if (($row['selectable'] =='Y' && $row['human_answered'] =='Y') || ($row['status'] =='INCALL' || $row['status'] == 'CBHOLD')) {
 					$campaign_statuses[$o] = $row['status'];
 				} else {
 					$statuses_code[$o] = $row['status'];
 				}
-				
+
 				$statuses_name[$row['status']] = $row['status_name'];
 			}
-			
+
 			$statuses[$o]=$row['status'];
 			$o++;
 		}
-	
+
 		return [$statuses, $statuses_name, $system_statuses, $campaign_statuses, $statuses_code];
 	}
-	
+
 	function get_inbound_groups($userID, $link, $groupId) {
-		if($groupId != NULL)
-		$groupSQL = "where user_group='$groupId'";
-		
-		else
-		$groupSQL = "";
-		
+		if (!($link instanceof mysqli)) {
+			return [];
+		}
+
+		if($groupId != NULL) {
+			$safeGroupId = mysqli_real_escape_string($link, (string) $groupId);
+			$groupSQL = "where user_group='$safeGroupId'";
+		} else {
+			$groupSQL = "";
+		}
+
 		$stmt ="select group_id,group_name from vicidial_inbound_groups $groupSQL;";
-		
+
 		$query = mysqli_query($link, $stmt);
-		
-		return mysqli_fetch_array($query);
+		if (!$query) {
+			return [];
+		}
+
+		$row = mysqli_fetch_array($query);
+		return is_array($row) ? $row : [];
 	}
 
- 
+
 ?>

@@ -21,7 +21,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -41,7 +41,20 @@
     $limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
     $ingroup_id 										= $astDB->escape(($_REQUEST['group_id'] ?? ''));
     $find_user 											= $astDB->escape(($_REQUEST['findUser'] ?? ''));
-    
+    $checkbox_list = '';
+    $dataUser = [];
+    $dataFullName = [];
+    $dataUserGroup = [];
+    $dataCheckboxField = [];
+    $dataIsChecked = [];
+    $dataRankFields = [];
+    $dataArigRank = [];
+    $dataRankArray = [];
+    $dataGradeField = [];
+    $dataArigGrade = [];
+    $dataGradeArray = [];
+    $dataArigCalls = [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -65,15 +78,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -83,56 +96,56 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
+				}
 			}
-		
+
 			if (!is_null($find_user)) {
 				$astDB->where("user", $find_user, "RLIKE");
 				//$findSQL = "AND user RLIKE '$find_user'";
 			}
-		
+
 			$cols 										= [
-				"user", 
-				"full_name", 
-				"closer_campaigns", 
+				"user",
+				"full_name",
+				"closer_campaigns",
 				"user_group"
 			];
-			
+
 			$astDB->where("user", DEFAULT_USERS, "NOT IN");
 			$astDB->where("user_level", 4, "!=");
 			$query_vu 									= $astDB->get("vicidial_users", $limit, $cols);
 			//$query = "SELECT user,full_name,closer_campaigns,user_group from vicidial_users where user NOT IN ('VDAD','VDCL') and user_level != '4' $addedSQL $findSQL order by user $goVarLimit";
-			
+
 			if ($astDB->count > 0) {
-				foreach ($query_vu as $fresults) {
+				foreach ((is_array($query_vu) ? $query_vu : []) as $fresults) {
 					$isChecked 							= '';
-					$username							= $fresults['user'];
-					$closer_campaigns					= $fresults['closer_campaigns'];
-					
-					if (preg_match("/ $ingroup_id /", $closer_campaigns)) {
+					$username							= $fresults['user'] ?? '';
+					$closer_campaigns					= $fresults['closer_campaigns'] ?? '';
+
+					if (preg_match("/ $ingroup_id /", (string) $closer_campaigns)) {
 						$isChecked 						= ' CHECKED';
 					}
-					
+
 					$cols2 								= [
-						"group_rank", 
-						"group_grade", 
+						"group_rank",
+						"group_grade",
 						"calls_today"
 					];
-					
+
 					$query_viga 						= $astDB
 						->where("group_id", $ingroup_id)
 						->where("user", $username)
 						->get("vicidial_inbound_group_agents", null, $cols2);
 						//$stmtx="SELECT group_rank,group_grade,calls_today from vicidial_inbound_group_agents where group_id='$ingroup_id' and user='{$fresults['user']}';";
-					
+
 					if ($astDB->count > 0) {
-						foreach ($query_viga as $fresults_viga) {
-							$group_rank  				= $fresults_viga['group_rank'];
-							$group_grade 				= $fresults_viga['group_grade'];
-							$calls_today 				= $fresults_viga['calls_today'];
-							
+						foreach ((is_array($query_viga) ? $query_viga : []) as $fresults_viga) {
+							$group_rank  				= $fresults_viga['group_rank'] ?? 0;
+							$group_grade 				= $fresults_viga['group_grade'] ?? 0;
+							$calls_today 				= $fresults_viga['calls_today'] ?? 0;
+
 							if ($calls_today == null) {
-								$calls_today				= 0;	
+								$calls_today				= 0;
 							}
 						}
 					} else {
@@ -143,7 +156,7 @@
 							"user" 							=> $username,
 							"group_id" 						=> $ingroup_id
 						];
-						
+
 						$astDB->insert("vicidial_inbound_group_agents", $insertData);
 						//$stmtD="INSERT INTO vicidial_inbound_group_agents set calls_today='0',group_rank='0',group_weight='0',user='{$fresults['user']}',group_id='$ingroup_id';";
 						//$rsltxy = mysqli_query($link, $stmtD);
@@ -151,22 +164,22 @@
 						$group_grade 					= 0;
 						$calls_today 					= 0;
 					}
-		
+
 					$checkbox_field 					= "CHECK_$username";
 					$rank_field     					= "RANK_$username";
 					$grade_field    					= "GRADE_$username";
 					$checkbox_list 						.= "|$checkbox_field";
-			
-					// start return data 
-					$dataUser[]      					= $fresults['user'];
-					$dataFullName[]  					= $fresults['full_name'];
-					$dataUserGroup[] 					= $fresults['user_group'];
-			
+
+					// start return data
+					$dataUser[]      					= $fresults['user'] ?? '';
+					$dataFullName[]  					= $fresults['full_name'] ?? '';
+					$dataUserGroup[] 					= $fresults['user_group'] ?? '';
+
 					//checkbox values and names & id
 					//$users_output .= "<input type=checkbox name=\"$checkbox_field\" id=\"$checkbox_field\" value=\"YES\"$isChecked>";
 					$dataCheckboxField[]				= $checkbox_field;
 					$dataIsChecked[]    				= $isChecked;
-			
+
 					//rank dropdown name or id,def value,values from db ::
 					//-> CI $users_output .= form_dropdown("$rank_field",$rankArray,$group_rank,"style='font-size:10px;'");
 					// <select name="$rank_field" id=rank_field"> <option value="$group_rank" selected>$group_rank</option> <option value="$rankArray">$rankArray</option>"
@@ -191,11 +204,11 @@
 						'-8'								=> '-8',
 						'-9'								=> '-9'
 					];
-					
+
 					$dataRankFields[] 					= $rank_field;
 					$dataArigRank[]   					= $group_rank;
 					$dataRankArray   					= $rankArray;
-					//grade dropdown name or id, def value, values from db :: 
+					//grade dropdown name or id, def value, values from db ::
 					//-> CI $users_output .= form_dropdown("$grade_field",$gradeArray,$group_grade,"style='font-size:10px;'");
 					// <select name="$grade_field" id="$grade_field"> <option value="$group_grade" selected>$group_grade</option> <option value="$gradeArray">$gradeArray</option>"
 					$gradeArray 						= [
@@ -211,19 +224,19 @@
 						'1'									=> '1',
 						'0'									=> '0'
 					];
-					
+
 					$dataGradeField[] 					= $grade_field;
 					$dataArigGrade[]  					= $group_grade;
 					$dataArigCalls[] 					= $calls_today;
-					$dataGradeArray[]  					= $gradeArray;				
-				}	
-				
+					$dataGradeArray[]  					= $gradeArray;
+				}
+
 				$apiresults 							= [
-					"result" 								=> "success", 
-					"user" 									=> $dataUser, 
-					"full_name" 							=> $dataFullName, 
-					"user_group"							=> $dataUserGroup, 
-					"checkbox_fields" 						=> $dataCheckboxField, 
+					"result" 								=> "success",
+					"user" 									=> $dataUser,
+					"full_name" 							=> $dataFullName,
+					"user_group"							=> $dataUserGroup,
+					"checkbox_fields" 						=> $dataCheckboxField,
 					"checkbox_ischecked" 					=> $dataIsChecked,
 					"rank_fields" 							=> $dataRankFields,
 					"values_rank" 							=> $dataArigRank,
@@ -232,7 +245,7 @@
 					"values_grade" 							=> $dataArigGrade,
 					"dropdown_gradedefvalues" 				=> $dataGradeArray,
 					"call_today" 							=> $dataArigCalls
-				];			
+				];
 			}  else {
 				$apiresults 							= [
 					"result" 								=> "Error: No data to show."
@@ -241,10 +254,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-   
+
 ?>

@@ -58,13 +58,13 @@
 	}
 
 	$defPage 										= [
-		"stats", 
-		"agent_detail", 
-		"agent_pdetail", 
-		"dispo", 
-		"call_export_report", 
-		"sales_agent", 
-		"sales_tracker", 
+		"stats",
+		"agent_detail",
+		"agent_pdetail",
+		"dispo",
+		"call_export_report",
+		"sales_agent",
+		"sales_tracker",
 		"inbound_report"
 	];
 
@@ -79,38 +79,77 @@
 	} elseif ($pageTitle === "sales_tracker" && empty($request)) {
 		$err_msg 									= error_handle("40001");
 		$apiresults 								= [
-			"code" 										=> "40001", 
+			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		];
 	} elseif ($pageTitle === "sales_agent" && empty($request)) {
 		$err_msg 									= error_handle("40001");
 		$apiresults 								= [
-			"code" 										=> "40001", 
+			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		];
 	} elseif (!in_array($pageTitle, (is_array($defPage) ? $defPage : []))) {
 	 	$err_msg 									= error_handle("10004");
 		$apiresults 								= [
-			"code" 										=> "10004", 
+			"code" 										=> "10004",
 			"result" 									=> $err_msg
 		];
 	} else {
 		$goReportsReturn 							= go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group,$astDB, $dispo_stats, $goDB);
 		$apiresults 								= [
-			"result" 									=> "success", 
+			"result" 									=> "success",
 			"getReports" 								=> $goReportsReturn
 		];
 	}
-	return $apiresults;	
+	return $apiresults;
 
 	function go_get_reports($pageTitle, $fromDate, $toDate, $campaignID, $request, $log_user, $log_group, $astDB, $dispo_stats, $goDB) {
+		$user_level = 0;
+		$return = [];
+		$MT = [];
+		$ULname = [];
+		$ULuser = [];
+		$TCuser = [];
+		$TCtime = [];
+		$PCuser = [];
+		$PCpause_sec = [];
+		$sub_status = [];
+		$array_camp = [];
+		$limit = 10000000;
+		$user_found = 0;
+		$punches_to_print = 0;
+		$Sstatuses = [];
+		$Sname = [];
+		$Stime = [];
+		$StimeTC = [];
+		$TOPsorted_output = [];
+		$BOTsorted_output = [];
+		$TOPsorted_outputFILE = [];
+		$stage = '';
+		$file_output = '';
+		$fileToutput = '';
+		$TOPsort = [];
+		$sort_order = [];
+		$TOPsortMAX = 0;
+		$TOPsortTALLY = [];
+		$SUMstatuses = [];
+		$TOTcalls = 0;
+		$TOTwait = 0;
+		$TOTtalk = 0;
+		$TOTdispo = 0;
+		$TOTpause = 0;
+		$TOTdead = 0;
+		$TOTcustomer = 0;
+		$TOTALtime = 0;
+		$TOTtimeTC = 0;
+
 		if (!empty($campaignID) || $pageTitle == 'call_export_report') {
 			$date1 										= new DateTime($fromDate);
 			$date2 										= new DateTime($toDate);
 			$interval 									= date_diff($date1,$date2);
 			$date_diff 									= $interval->format('%d');
             		$date_array 								= implode("','",go_get_dates($fromDate, $toDate));
-			$file_download 								= 1;            
+			$file_download 								= 1;
             		$tenant 									= 0;
 
             // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
@@ -127,9 +166,9 @@
 						$astDB->where("user_group", $log_group);
 					}
 				}
-            }	
+            }
 
-            //Initialise Values                        
+            //Initialise Values
 			if ($pageTitle != 'inbound_report') {
 				$resultu 								= $astDB
 					->where("campaign_id", $campaignID)
@@ -143,13 +182,13 @@
 			if ($astDB->count < 1) {
 				$err_msg 								= error_handle("41004", "campaignID. Doesn't exist");
 				$apiresults 							= [
-					"code" 									=> "41006", 
+					"code" 									=> "41006",
 					"result" 								=> $err_msg
-				]; 
+				];
 			} else {
 				//foreach ($resultu as $campaign_name) {
 					//$return['campaign_name'] 			= $resultu['campaign_name'];
-				$return['campaign_name'] 				= $resultu;				
+				$return['campaign_name'] 				= $resultu;
 				//}
 			}
 
@@ -164,7 +203,7 @@
 				->getOne("vicidial_statuses", "status");
 
 			$sstatusRX 									= "";
-			$sstatuses 									= [];			
+			$sstatuses 									= [];
 			$a 											= 0;
 
 			if ($Qstatus) {
@@ -173,7 +212,7 @@
 				$sstatuses[$a] 							= $Qstatus['status'];
 				$sstatusRX							.= "{$goTempStatVal}|";
 					//$a++;
-				//}			
+				//}
 			}
 
 			if ($sstatuses !== []) {
@@ -186,7 +225,7 @@
 				->getOne("vicidial_campaign_statuses", "status");
 
 			$cstatusRX 									= "";
-			$cstatuses 									= [];			
+			$cstatuses 									= [];
 			$b 										= 0;
 
 			if ($Qstatus) {
@@ -195,7 +234,7 @@
 				$cstatuses[$b] 							= $Qstatus['status'];
 				$cstatusRX							.= "{$goTempStatVal}|";
 					//$b++;
-				//}			
+				//}
 			}
 
 			if ($cstatuses !== []) {
@@ -203,17 +242,17 @@
 			}
 
 
-			if ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) > 0) {
+			if ((string) $sstatuses !== '' && (string) $cstatuses !== '') {
 				$statuses 								= "{$sstatuses}','{$cstatuses}";
 				$statusRX 								= "{$sstatusRX}{$cstatusRX}";
 			} else {
-				$statuses 								= ((is_countable($sstatuses) ? count($sstatuses) : 0) > 0 && (is_countable($cstatuses) ? count($cstatuses) : 0) < 1) ? $sstatuses : $cstatuses;
-				$statusRX 								= ((is_countable($sstatusRX) ? count($sstatusRX) : 0) > 0 && (is_countable($cstatusRX) ? count($cstatusRX) : 0) < 1) ? $sstatusRX : $cstatusRX;
+				$statuses 								= ((string) $sstatuses !== '') ? $sstatuses : $cstatuses;
+				$statusRX 								= ((string) $sstatusRX !== '') ? $sstatusRX : $cstatusRX;
 			}
 
 			$statusRX 									= trim($statusRX, "|");
-			//End initialize		
-			//Start Report		
+			//End initialize
+			//Start Report
 
 			// Agent Time Detail
 			if ($pageTitle == "agent_detail") {
@@ -225,8 +264,8 @@
 
 				// BEGIN gather user IDs AND names for matching up later
 				/*$query 									= "
-					SELECT full_name,user FROM vicidial_users 
-					ORDER BY user 
+					SELECT full_name,user FROM vicidial_users
+					ORDER BY user
 					LIMIT 100000
 				";
 
@@ -239,8 +278,8 @@
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
-					}					
-				}				
+					}
+				}
 
 				$quserct 								= $astDB
 					->orderBy("user")
@@ -251,7 +290,7 @@
 				if ((is_countable($quserct) ? count($quserct) : 0) > 0) {
 					foreach ($quserct as $row) {
 						$ULname[] 						= $row['full_name'];
-						$ULuser[] 						= $row['user'];					
+						$ULuser[] 						= $row['user'];
 					}
 				}
 
@@ -264,9 +303,9 @@
 
 				// BEGIN gather timeclock records per agent
 				/*$query 									= "
-					SELECT user,SUM(login_sec) AS login_sec FROM vicidial_timeclock_log 
-					WHERE event IN('LOGIN','START') AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate' 
-					GROUP BY user 
+					SELECT user,SUM(login_sec) AS login_sec FROM vicidial_timeclock_log
+					WHERE event IN('LOGIN','START') AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
+					GROUP BY user
 					LIMIT 10000000
 				";
 
@@ -278,7 +317,7 @@
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
-					}					
+					}
 				}
 
 				$timeclock_ct 							= $astDB
@@ -289,7 +328,7 @@
 				if ($astDB->count > 0) {
 					foreach ($timeclock_ct as $row) {
 						$TCuser[] 						= $row['user'];
-						$TCtime[] 						= $row['login_sec'];					
+						$TCtime[] 						= $row['login_sec'];
 					}
 				}
 
@@ -298,7 +337,7 @@
 					$TCtime[] 							= $row['login_sec'];
 				}*/
 
-				// END gather timeclock records per agent				
+				// END gather timeclock records per agent
 				// BEGIN gather pause code information by user IDs
 				$sub_statuses 							= '-';
 				$sub_statusesTXT 						= '';
@@ -324,7 +363,7 @@
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
-					}					
+					}
 				}
 
 				$pause_sec_ct 							= $astDB
@@ -337,23 +376,27 @@
 					->get("vicidial_agent_log", 1000, "user, SUM(pause_sec) as pause_sec, sub_status");
 
 				if ($astDB->count > 0) {
-					foreach ($pause_sec_ct as $row) {
-						$PCuser[] 						= $row['user'];
-						$PCpause_sec[] 					= $row['pause_sec'];
-						$sub_status[] 					= $row['sub_status'];
+					foreach ((is_array($pause_sec_ct) ? $pause_sec_ct : []) as $row) {
+						$currentPCUser = $row['user'] ?? '';
+						$currentPauseSec = $row['pause_sec'] ?? 0;
+						$currentSubStatus = $row['sub_status'] ?? '';
+						$PCuser[] 						= $currentPCUser;
+						$PCpause_sec[] 					= $currentPauseSec;
+						$sub_status[] 					= $currentSubStatus;
 
-						if (!preg_match("/-$sub_status-/", $sub_statuses)) {
-							$sub_statusesFILE 			.= ",$sub_status";
-							$sub_statuses 				.= "$sub_status-";
-							$sub_statusesARY[$sub_status_count] = $sub_status;
-							$sub_statusesTOP[] 			= $sub_status;
-							//$sub_status_count++;
+						if ((string) $currentSubStatus !== '' && !preg_match("/-" . preg_quote((string) $currentSubStatus, '/') . "-/", $sub_statuses)) {
+							$sub_statusesFILE 			.= ",$currentSubStatus";
+							$sub_statuses 				.= "$currentSubStatus-";
+							$sub_statusesARY[$sub_status_count] = $currentSubStatus;
+							$sub_statusesTOP[] 			= $currentSubStatus;
+							$sub_status_count++;
 						}
 
-						if (!preg_match("/-$PCuser-/", $PCusers)) {
-							$PCusersARY[$user_count] 	= $PCuser;
-							//$user_count++;
-						}						
+						if ((string) $currentPCUser !== '' && !preg_match("/-" . preg_quote((string) $currentPCUser, '/') . "-/", $PCusers)) {
+							$PCusers .= "$currentPCUser-";
+							$PCusersARY[$user_count] 	= $currentPCUser;
+							$user_count++;
+						}
 					}
 				}
 
@@ -368,7 +411,7 @@
 						if ($user_level < 9) {
 							$astDB->where("user_group", $log_group);
 						}
-					}					
+					}
 				}
 
 				if ("ALL" === strtoupper((string) $campaignID)) {
@@ -560,7 +603,7 @@
 							//}
 
 							$uc++;
-						}						
+						}
 					}*/
 
 					$Suser    	= [];
@@ -671,13 +714,13 @@
 					$RAWcalls 							= $Scalls[$m];
 					$RAWtimeSEC 						= $Stime[$m];
 
-					$Swait[$m] 						= convert($Swait[$m]); 
-					$Stalk[$m] 						= convert($Stalk[$m]); 
-					$Sdispo[$m] 					= convert($Sdispo[$m]); 
-					$Spause[$m] 					= convert($Spause[$m]); 
-					$Sdead[$m] 						= convert($Sdead[$m]); 
-					$Scustomer[$m] 					= convert($Scustomer[$m]); 
-					$Stime[$m] 						= convert($Stime[$m]); 
+					$Swait[$m] 						= convert($Swait[$m]);
+					$Stalk[$m] 						= convert($Stalk[$m]);
+					$Sdispo[$m] 					= convert($Sdispo[$m]);
+					$Spause[$m] 					= convert($Spause[$m]);
+					$Sdead[$m] 						= convert($Sdead[$m]);
+					$Scustomer[$m] 					= convert($Scustomer[$m]);
+					$Stime[$m] 						= convert($Stime[$m]);
 
 					$RAWtime 						= $Stime[$m];
 					$RAWwait 						= $Swait[$m];
@@ -713,7 +756,7 @@
 							$punches_found++;
 							$RAWtimeTCsec					= $TCtime[$n];
 							$TOTtimeTC += $TCtime[$n];
-							$StimeTC[$m] 					= convert($TCtime[$n]); 
+							$StimeTC[$m] 					= convert($TCtime[$n]);
 							$RAWtimeTC 					= $StimeTC[$m];
 							$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
 						}
@@ -723,7 +766,7 @@
 
 					if ($punches_found < 1) {
 						$RAWtimeTCsec 					= "0";
-						$StimeTC[$m] 					= "0:00"; 
+						$StimeTC[$m] 					= "0:00";
 						$RAWtimeTC 					= $StimeTC[$m];
 						$StimeTC[$m] 					= sprintf("%10s", $StimeTC[$m]);
 					}
@@ -731,14 +774,14 @@
 					// Check if the user had an AUTOLOGOUT timeclock event during the time period
 					$TCuserAUTOLOGOUT 					= ' ';
 					/*$query 								= "
-						SELECT COUNT(*) as cnt FROM vicidial_timeclock_log 
-						WHERE event='AUTOLOGOUT' AND user = '$Suser[$m]' 
+						SELECT COUNT(*) as cnt FROM vicidial_timeclock_log
+						WHERE event='AUTOLOGOUT' AND user = '$Suser[$m]'
 						AND date_format(event_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate'
 					";
 
 					$timeclock_ct 						= $astDB->rawQuery($query);*/
 
-					$timeclock_ct						= $astDB						
+					$timeclock_ct						= $astDB
 						->where("event", "AUTOLOGOUT")
 						->where("user", $user[$m])
 						->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
@@ -792,29 +835,29 @@
 						}
 					}
 
-					// END loop through each status //					
+					// END loop through each status //
 					//if (is_null($Scalls[$m])) {
 					//	$Scalls[$m] 					= 0;
 					//}
 
 					$Toutput 						= [
-						"name" 							=> $Sname[$m], 
-						"user" 							=> $Suser[$m], 
-						"number_of_calls" 					=> $Scalls[$m], 
-						"agent_time" 						=> $Stime[$m], 
-						"wait_time" 						=> $Swait[$m], 
-						"talk_time" 						=> $Stalk[$m], 
-						"dispo_time" 						=> $Sdispo[$m], 
-						"pause_time" 						=> $Spause[$m], 
-						"wrap_up" 						=> $Sdead[$m], 
+						"name" 							=> $Sname[$m],
+						"user" 							=> $Suser[$m],
+						"number_of_calls" 					=> $Scalls[$m],
+						"agent_time" 						=> $Stime[$m],
+						"wait_time" 						=> $Swait[$m],
+						"talk_time" 						=> $Stalk[$m],
+						"dispo_time" 						=> $Sdispo[$m],
+						"pause_time" 						=> $Spause[$m],
+						"wrap_up" 						=> $Sdead[$m],
 						"customer_time" 					=> $Scustomer[$m]
 					];
 
 					$Sstatuses[$m] 						= rtrim( $Sstatuses[$m], ",");
 
 					$Boutput 						= [
-						"rowID" 						=> $rowId, 
-						"name" 							=> $Sname[$m], 
+						"rowID" 						=> $rowId,
+						"name" 							=> $Sname[$m],
 						"statuses" 						=> $Sstatuses[$m]
 					];
 
@@ -884,7 +927,7 @@
 					$Sstatus=$sub_statusesARY[$n];
 					$SUMstatusTXT							= "";
 					// BEGIN loop through each stat line //
-					$i										= 0; 
+					$i										= 0;
 					$status_found							= 0;
 
 					while ($i < $pause_sec_ct) {
@@ -902,7 +945,7 @@
 						$TOTtotPAUSE += $Scalls;
 
 						//$USERsumstatPAUSE_MS 			= gmdate('H:i:s', $Scalls);
-						$USERsumstatPAUSE_MS			= convert($Scalls); 
+						$USERsumstatPAUSE_MS			= convert($Scalls);
 						$pfUSERsumstatPAUSE_MS 			= sprintf("%11s", $USERsumstatPAUSE_MS);
 
 						//$SUMstatusesFILE .= ",$USERsumstatPAUSE_MS";
@@ -924,26 +967,26 @@
 				$TOTALtime                                                              = convert($TOTALtime);
 				$TOTtimeTC                                                              = convert($TOTtimeTC);
 
-				return [
-					"result" 								=> "success", 
-					"TOPsorted_output" 						=> $TOPsorted_output, 
-					"sub_statusesTOP" 						=> $sub_statusesTOP, 
-					"BOTsorted_output" 						=> $BOTsorted_output, 
-					"SUMstatuses" 							=> $SUMstatuses, 
-					"TOTwait" 								=> $TOTwait, 
-					"TOTtalk" 								=> $TOTtalk, 
-					"TOTdispo" 								=> $TOTdispo, 
-					"TOTpause" 								=> $TOTpause, 
-					"TOTdead" 								=> $TOTdead, 
-					"TOTcustomer" 							=> $TOTcustomer, 
-					"TOTALtime" 							=> $TOTALtime, 
-					"TOTtimeTC" 							=> $TOTtimeTC, 
-					"TOT_AGENTS" 							=> $TOT_AGENTS, 
-					"TOTcalls" 								=> $TOTcalls, 
+				$apiresults = [
+					"result" 								=> "success",
+					"TOPsorted_output" 						=> $TOPsorted_output,
+					"sub_statusesTOP" 						=> $sub_statusesTOP,
+					"BOTsorted_output" 						=> $BOTsorted_output,
+					"SUMstatuses" 							=> $SUMstatuses,
+					"TOTwait" 								=> $TOTwait,
+					"TOTtalk" 								=> $TOTtalk,
+					"TOTdispo" 								=> $TOTdispo,
+					"TOTpause" 								=> $TOTpause,
+					"TOTdead" 								=> $TOTdead,
+					"TOTcustomer" 							=> $TOTcustomer,
+					"TOTALtime" 							=> $TOTALtime,
+					"TOTtimeTC" 							=> $TOTtimeTC,
+					"TOT_AGENTS" 							=> $TOT_AGENTS,
+					"TOTcalls" 								=> $TOTcalls,
 					"FileExport" 							=> $TOPsorted_outputFILE,
 					"query" => $astDB->getLastQuery()
-				];				
-			}	
+				];
+			}
 			return $apiresults;
 		}
         return null;

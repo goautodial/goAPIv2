@@ -3,7 +3,7 @@
  * @file 		goEditMOH.php
  * @brief 		API for Modifying Music On Hold
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author		Demian Lizandro A. Biscocho 
+ * @author		Demian Lizandro A. Biscocho
  * @author		Jeremiah Sebastian Samatra
  * @author     	Chris Lomuntad
  *
@@ -37,7 +37,7 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
+
     ### POST or GET Variables
 	$moh_id 											= $astDB->escape(($_REQUEST['moh_id'] ?? ''));
 	$moh_name 											= $astDB->escape(($_REQUEST['moh_name'] ?? ''));
@@ -47,8 +47,9 @@
 	$values 											= $astDB->escape(($_REQUEST['item'] ?? ''));
 	$filename 											= $astDB->escape(($_REQUEST['filename'] ?? ''));
 	$ranks 												= $astDB->escape(($_REQUEST['rank'] ?? ''));
-	
-    ### Default values 
+		$affected_rows = 0;
+
+	    ### Default values
     $defActive 											= ["Y","N"];
     $defRandom 											= ["N","Y"];
 
@@ -91,15 +92,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -109,21 +110,21 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
-			}	
-	
+				}
+			}
+
 			$astDB->where('moh_id', $moh_id);
 			$rsltvMoh 									= $astDB->getOne('vicidial_music_on_hold');
-			
+
 			if ($rsltvMoh) {
 				if (is_array($rsltvMoh)) {
 					$fresults = $rsltvMoh;
-					$datamoh_id 						= $fresults['moh_id'];
-					$datamoh_name 						= $fresults['moh_name'];
-					$dataactive 						= $fresults['active'];
-					$datarandom 						= $fresults['random'];
-					$datauser_group						= $fresults['user_group'];
-								}			
+					$datamoh_id 						= $fresults['moh_id'] ?? '';
+					$datamoh_name 						= $fresults['moh_name'] ?? '';
+					$dataactive 						= $fresults['active'] ?? '';
+					$datarandom 						= $fresults['random'] ?? '';
+					$datauser_group						= $fresults['user_group'] ?? '';
+								}
 
 				if ($filename != null) {
 					$insertData 						= [
@@ -136,7 +137,7 @@
 					$astDB->update('vicidial_music_on_hold_files', $insertData);
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
 				}
-				
+
 				if ($moh_name == null) {$moh_name 		= $datamoh_name;}
 				if ($active == null) {$active 			= $dataactive;}
 				if ($user_group == null) {$user_group 	= $datauser_group;}
@@ -148,7 +149,7 @@
 					'user_group' 							=> $user_group,
 					'random' 								=> $random
 				];
-				
+
 				$astDB->where('moh_id', $moh_id);
 				$rsltv1 								= $astDB->update('vicidial_music_on_hold', $updateData);
 				/*$log_id 								= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, astDB->getLastQuery());
@@ -158,28 +159,28 @@
 					'rebuild_music_on_hold' 				=> 'Y',
 					'sounds_update' 						=> 'Y'
 				);
-				
+
 				$astDB->where('generate_vicidial_conf', 'Y');
 				$astDB->where('active_asterisk_server', 'Y');
 				$astDB->update('servers', $updateData);
-					
+
 				$apiresults 							= array(
 					"result" 								=> "success"
 				);*/
-				
+
 				if (!$rsltv1) {
 					$apiresults 						= [
 						"result" 							=> "Error: Try updating Moh Again"
 					];
 				} else {
 					$log_id 							= log_action($goDB, 'MODIFY', $log_user, $log_ip, "Modified Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
-					
+
 					$apiresults 						= [
 						"result" 							=> "success"
 					];
-					
-					$affected_rows++;
-					
+
+					$affected_rows = $rsltv1 ? 1 : 0;
+
 					if ($affected_rows) {
 						//$newQuery2 = "UPDATE servers SET rebuild_conf_files='Y',rebuild_music_on_hold='Y',sounds_update='Y' where generate_vicidial_conf='Y' and active_asterisk_server='Y';";
 						$updateData 					= [
@@ -207,9 +208,9 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

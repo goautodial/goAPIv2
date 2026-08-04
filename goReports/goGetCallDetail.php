@@ -19,9 +19,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+/** @var mysqli $link */
+/** @var mysqli $linkgo */
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var string $session_user */
+
     $default_date = date("Y-m-d");
-	$def_start_date .= $default_date." 00:00:00";
-	$def_end_date .= $default_date." 23:59:59";
+	$def_start_date = $default_date." 00:00:00";
+	$def_end_date = $default_date." 23:59:59";
+	$array_campaign = [];
+	$array_list = [];
+	$active_list_fields = [];
+	$csv_header = [];
+	$csv_row = [];
+	$queries = [];
 
     // POST or GET Variables
     $user = mysqli_real_escape_string($link, ($_REQUEST['user'] ?? ''));
@@ -41,7 +53,7 @@
 	$limit = mysqli_real_escape_string($link, ($_REQUEST['limit'] ?? ''));
 	$sortOrder = mysqli_real_escape_string($link, ($_REQUEST['sortOrder'] ?? ''));
 	$sortBy = mysqli_real_escape_string($link, ($_REQUEST['sortBy'] ?? ''));
-	
+
 
 	if($limit === '' || $limit === '0')
     	$limit = 1000;
@@ -96,7 +108,7 @@
 	if($sortOrder === '' || $sortOrder === '0'){
 		$sortOrder = "";
 	}
-	
+
 	$custom_fields = "Y";
 	$rec_location = "N";
 	$per_call_notes = "Y";
@@ -105,9 +117,9 @@
 	$datetime2 = date_create($end_date);
 	$date_difference = date_diff($datetime1, $datetime2);
 	$difference = $date_difference->format("%m");
-    
+
     // Check user_id if its null or empty
-    if(empty($session_user) || (($start_date === '' || $start_date === '0') && ($id === '' || $id === '0'))) { 
+    if(empty($session_user) || (($start_date === '' || $start_date === '0') && ($id === '' || $id === '0'))) {
         $err_msg = error_handle("40001");
 		$apiresults = ["code" => "40001", "result" => $err_msg];
     }elseif($difference > 3){
@@ -137,18 +149,18 @@
         	$user = explode(",",$user);
 		else
 			$user = ["ALL"];
-		
+
 		if($campaigns != "")
 			$campaigns = explode(",",$campaign_id);
 		else
 			$campaigns = ["ALL"];
 
-		if($lists != "")	
+		if($lists != "")
 		    $lists = explode(",",$list_id);
 		else
 			$lists = ["ALL"];
-		
-		if($dispo_stats != "")	
+
+		if($dispo_stats != "")
 		    $dispo_stats = explode(",",$dispo_stats);
 		else
 			$dispo_stats = ["ALL"];
@@ -157,13 +169,13 @@
 		$campaign_SQL = "";
 		$list_SQL = "";
 		$status_SQL = "";
-		
+
 		$id_ct = (is_countable($id) ? count($id) : 0);
 		$user_ct = (is_countable($user) ? count($user) : 0);
 		$campaign_ct = (is_countable($campaigns) ? count($campaigns) : 0);
 		$list_ct = (is_countable($lists) ? count($lists) : 0);
 		$status_ct = (is_countable($dispo_stats) ? count($dispo_stats) : 0);
-		
+
 		if($user != ""){
 			if (in_array("ALL", (is_array($user) ? $user : []))){
 				$user_SQL = "";
@@ -173,7 +185,7 @@
 					$user_SQL .= "'$user[$i]',";
 					$i++;
 				}
-				
+
 				$user_SQL = preg_replace("/,$/i",'',$user_SQL);
 				$user_SQL = "and vu.user IN($user_SQL)";
 				$RUNcampaign=$i;
@@ -189,7 +201,7 @@
 				// 	$id_SQL .= "'$id[$i]',";
 				// 	$i++;
 				// }
-				
+
 				//$id_SQL = preg_replace("/,$/i",'',$id_SQL);
 
 				$get_end = "SELECT vl.end_epoch, (val.dispo_sec + val.dispo_epoch) AS time_end FROM vicidial_log vl, vicidial_agent_log val WHERE vl.uniqueid = val.uniqueid AND vl.uniqueid = '$id';";
@@ -218,8 +230,8 @@
 	                    $id_SQL = "(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date')";
 					}
 				}
-					
-					
+
+
 				$RUNcampaign=1;
 			//}
 		}else{
@@ -234,7 +246,7 @@
 		if($campaigns != ""){
 			if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))){
 				$campaign_SQL = "";
-				
+
 				$query_campaign = mysqli_query($link,"SELECT campaign_id FROM vicidial_campaigns;");
 				while($fetch_campaign = mysqli_fetch_array($query_campaign)){
 					$array_campaign[] = $fetch_campaign["campaign_id"];
@@ -249,7 +261,7 @@
 					$campaign_SQL .= "'$campaigns[$i]',";
 					$i++;
 				}
-				
+
 				$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 				$campaign_SQL = "and vl.campaign_id IN($campaign_SQL)";
 				$RUNcampaign=$i;
@@ -257,10 +269,10 @@
 		}else{
 			$RUNcampaign=0;
 		}
-		
+
 		if($lists != ""){
 			$list_SQL = "";
-			
+
 			$i=0;
 			while($i < $list_ct){
 				$list_SQL .= "'$lists[$i]',";
@@ -268,7 +280,7 @@
 			}
 			if (in_array("ALL", (is_array($lists) ? $lists : []))){
 				$list_SQL = "";
-				
+
 				if(isset($array_campaign) && !empty($array_campaign)){
 					$i=0;
 					while($i < (is_countable($array_campaign) ? count($array_campaign) : 0)){
@@ -301,7 +313,7 @@
 				}
 			}
 		}
-		
+
 		if($dispo_stats != ""){
 			$i=0;
 			while($i < $status_ct){
@@ -316,7 +328,7 @@
 				$status_SQL = "and vl.status IN ($status_SQL)";
 			}
 		}
-		
+
 		if($rec_location === "Y"){
 			$rec_location_fields = ", asteriskV4.re.location as recording_location";
 			$rec_location_from = ", recording_log re";
@@ -326,7 +338,7 @@
 			$rec_location_from = "";
 			$rec_location_where = "";
 		}
-		
+
 		//$user_group_SQL = "AND (CASE WHEN vl.user!='VDAD' THEN vl.user_group = '$userGroup' ELSE 1=1 END)";
 		if($groupId !== "ADMIN"){
 			$stringv = go_getall_allowed_users($groupId);
@@ -334,9 +346,9 @@
 		}else{
 			$user_group_SQL = "";
 		}
-		
+
 		$export_fields_SQL = "";
-		
+
 		if ($RUNcampaign > 0){
 			//$query = "SELECT vl.call_date,vl.phone_number,vl.status,vl.user,vu.full_name,vl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.length_in_sec,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id $export_fields_SQL $rec_location_fields FROM vicidial_users vu, vicidial_log vl,vicidial_list vi $rec_location_from WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$start_date' AND '$end_date') and vu.user=vl.user and vi.lead_id=vl.lead_id $rec_location_where $list_SQL $campaign_SQL $user_group_SQL $status_SQL group by vl.call_date order by vl.call_date ";
 
@@ -354,7 +366,7 @@
 			$err_msg = error_handle("40001");
 			$apiresults = ["code" => "40001", "result" => $err_msg];
 		}
-		
+
 		$result = mysqli_query($linkgo, $query) or die(mysqli_error($linkgo));
 
 		//OUTPUT DATA HEADER//
@@ -364,17 +376,27 @@
 		}
         $csv_header[] = "call_notes";
         $counter = (is_countable($array_list) ? count($array_list) : 0);
+        $active_list_fields = [];
         //OUTPUT CUSTOM FIELDS IN HEADER
         for($i = 0 ; $i < $counter; $i++){
-				$list_id = $array_list[$i];
-				$query_CF_list = mysqli_query($link, "DESC custom_$list_id;");
-				if($query_CF_list){
+					$list_id = preg_replace('/[^0-9]/', '', (string) $array_list[$i]);
+					if ($list_id === '') {
+						continue;
+					}
+					$custom_table = "custom_$list_id";
+					$safe_custom_table = mysqli_real_escape_string($link, $custom_table);
+					$table_exists = mysqli_query($link, "SHOW TABLES LIKE '$safe_custom_table';");
+					if (!$table_exists || mysqli_num_rows($table_exists) < 1) {
+						continue;
+					}
+					$query_CF_list = mysqli_query($link, "DESC $safe_custom_table;");
+					if($query_CF_list){
 					$n=0;
 					while ($field_list=mysqli_fetch_array($query_CF_list)){
 						$exec_query_CF_list = $field_list["Field"];
 
 						if($exec_query_CF_list != "lead_id"){
-							$active_list_fields["custom_$list_id"][$n] = $exec_query_CF_list;
+							$active_list_fields[$custom_table][$n] = $exec_query_CF_list;
 							$n++;
 						}
 					}
@@ -391,12 +413,12 @@
 						$header_CF[] = $field;
 					}
 				}
-				
+
 			}
         $csv_header = array_merge($csv_header,$header_CF);
         //$active_list_fields = array_unique($active_list_fields, SORT_REGULAR);
         //$active_list_fields2 = array_values($active_list_fields);
-        
+
 
 		//OUTPUT DATA ROW//
 		$count_row = 1;
@@ -434,29 +456,36 @@
 				    $list_id = $keys[$i];
 					//var_dump($active_list_fields[$list_id]);
 					$fields = implode(",", $active_list_fields[$list_id]);
-					
+
 					if("custom_".$list_id_spec === $list_id){
-						$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";
-						$query_CF = mysqli_query($link, $query_row_sql);
-						
+						$safeCustomRowTable = mysqli_real_escape_string($link, (string) $list_id);
+						$safeLeadId = mysqli_real_escape_string($link, (string) $lead_id);
+						$table_exists = mysqli_query($link, "SHOW TABLES LIKE '$safeCustomRowTable';");
+						$query_CF = false;
+						if ($table_exists && mysqli_num_rows($table_exists) > 0) {
+							$query_row_sql = "SELECT $fields FROM $safeCustomRowTable WHERE lead_id ='$safeLeadId';";
+							$query_CF = mysqli_query($link, $query_row_sql);
+						}
+
 						//if($query_CF){
-							$fetch_CF = mysqli_fetch_array($query_CF);
-							
-							if($fetch_CF !== NULL){
+							$fetch_CF = $query_CF ? mysqli_fetch_array($query_CF) : null;
+
+							if($fetch_CF !== NULL && $fetch_CF !== false){
+								$fetch_row = [];
 								//var_dump($fetch_CF);
 								for($x=0;$x < (is_countable($header_CF) ? count($header_CF) : 0);$x++){
 									if(!empty($fetch_CF[$header_CF[$x]])){
-										$fetch_row[] =  str_replace(",", " | ", $fetch_CF[$header_CF[$x]]);
+										$fetch_row[] =  str_replace(",", " | ", (string) $fetch_CF[$header_CF[$x]]);
 									}else{
 										$fetch_row[] =  "";
 									}
 								}
 							}
-							
+
 							//die();
 						//}
 					}
-					
+
 
 					for($a=0;$a < (is_countable($fetch_row) ? count($fetch_row) : 0);$a++){
 						$row[] = $fetch_row[$a];
@@ -474,19 +503,20 @@
 		//put keys in each row
 		for($i=0; $i < $counter; $i++){
 			//unset($re_head);
+			$re_row = [];
 			for($a=0;$a<(is_countable($csv_header) ? count($csv_header) : 0);$a++){
 				//$re_head[] = $csv_header[$a];
 				if($csv_header[$a] !== "AfterDispo")
-				$re_row[$csv_header[$a]] = str_replace("\\", "", $csv_row[$i][$a]);
+				$re_row[$csv_header[$a]] = str_replace("\\", "", (string) ($csv_row[$i][$a] ?? ''));
 			}
-			
+
 			$main_row[] = $re_row;
 		}
 		//var_dump($main_row);
 		//var_dump($query_fields);
-		//"query" => $query, "header" => $csv_header, 
-		$paging = ["totalElements" => $count_row, "limit" => $limit]; 
-		
+		//"query" => $query, "header" => $csv_header,
+		$paging = ["totalElements" => $count_row, "limit" => $limit];
+
 
 		//var_dump($return);
 		if(is_numeric($export) && ($export !== '' && $export !== '0') && $export == 1){
@@ -514,20 +544,20 @@
 		        //echo $row;
 			}else{
 				$err_msg = error_handle("40001");
-				//"query" => $userlog_query, 
+				//"query" => $userlog_query,
 				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}
         }else{
 			if($count_row < 1){
 				$err_msg = error_handle("40001");
-				//"query" => $userlog_query, 
+				//"query" => $userlog_query,
 				$apiresults = ["result" => "No records retrieved from: ".$start_date." - ".$end_date];
 			}else{
 				$apiresults = ["paging" => $paging, "rows" => $main_row];
 			}
 		}
-		
-		
+
+
 		//$log_id = log_action($linkgo, 'VIEW', $user, $ip_address, "Viewed the agent log of Agent: $user", $groupId);
 	}
 ?>

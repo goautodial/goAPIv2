@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -55,12 +55,14 @@
     // $uniqueid_status_prefix 							= "";
     // $call_time_id 							= "";
     $user_group 								= ($_REQUEST['user_group'] ?? '');
+    $accounts = '';
+    $stmtInsert = '';
 
 
-    // Default values 
+    // Default values
     $defActive 									= ["Y","N"];
     $deffronter_display 						= ["Y","N"];
-    
+
     $defget_call_launch 						= [
 		'NONE',
 		'SCRIPT',
@@ -69,7 +71,7 @@
 		'FORM',
 		'EMAIL'
 	];
-	
+
     $defnext_agent_call 						= [
 		'fewest_calls_campaign',
 		'longest_wait_time',
@@ -123,19 +125,19 @@
 		if (checkIfTenant($log_group, $goDB)) {
 			$astDB->where ("user_group", $log_group);
 		}
-		
+
 		$astDB->getOne("vicidial_user_groups");
 
 		if ($astDB->count > 0) {
 			$astDB->where("id_table", "vicidial_inbound_groups");
 			$astDB->where("active", 1);
 			$voi_ct 							= $astDB->getValue("vicidial_override_ids", "count(*)");
-			
+
 			if ($voi_ct > 0) {
 				$datum 							= [
 					"value" 						=> $group_id
 				];
-				
+
 				$astDB->where("id_table", "vicidial_inbound_groups");
 				$astDB->where("active", 1);
 				$astDB->update("vicidial_override_ids", $datum);
@@ -143,7 +145,7 @@
 
 			$astDB->where("group_id", $group_id);
 			$row 								= $astDB->getValue("vicidial_inbound_groups", "count(*)");
-			
+
 			if ($row > 0) {
 				$apiresults 					= [
 					"result" 						=> "GROUP NOT ADDED - there is already a Inbound in the system with this ID\n"
@@ -151,7 +153,7 @@
 			} else {
 				$astDB->where("campaign_id", $group_id);
 				$count 							= $astDB->getValue("vicidial_campaigns", "count(*)");
-				
+
 				if ($count > 0) {
 					$apiresults 				= [
 						"result" 					=> "<br>GROUP NOT ADDED - there is already a campaign in the system with this ID\n"
@@ -182,24 +184,25 @@
 							"user_group" 			=> $user_group
 						];
 						$astDB->insert("vicidial_inbound_groups", $col);
+						$stmtInsert = $astDB->getLastQuery();
 						//$stmtInsert 			= "INSERT INTO vicidial_inbound_groups (group_id,group_name,group_color,active,web_form_address,voicemail_ext,next_agent_call,fronter_display,ingroup_script,get_call_launch,web_form_address_two,start_call_url,dispo_call_url,add_lead_url,uniqueid_status_prefix,call_time_id,user_group) values('$group_id','$group_name','$group_color','$active','$web_form_address','$voicemail_ext','$next_agent_call','$fronter_display','$script_id','$get_call_launch','','','','','$accounts','24hours','$user_group');";
 						//$query 							= mysqli_query($link, $stmtInsert);
 
 						$astDB->where("group_id", $group_id);
 						$countAdd 				= $astDB->getValue("vicidial_inbound_groups", "count(*)");
 						//$resultQueryAddCheck 							= "SELECT group_id from vicidial_inbound_groups where group_id='$group_id';";
-						
+
 						$datum 					= [
 							"campaign_id" 			=> $group_id
 						];
-						
+
 						$astDB->insert("vicidial_campaign_stats", $datum);
 						//$stmtA="INSERT INTO vicidial_campaign_stats (campaign_id) values('$group_id');";
-						
+
 						$astDB->where("campaign_id", $group_id);
 						$countAdd1 				= $astDB->getValue("vicidial_campaign_stats", "count(*)");
 						//$resultQueryAddCheck1 							= "SELECT campaign_id from vicidial_campaign_stats where campaign_id='$group_id';";
-						
+
 						if ($countAdd1 > 0 && $countAdd > 0) {
 							$log_id 			= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Group $group_id", $log_group, $stmtInsert);
 							$apiresults 		= [
@@ -220,5 +223,5 @@
 			];
 		}
 	}
-	
+
 ?>

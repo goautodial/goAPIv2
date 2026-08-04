@@ -4,7 +4,7 @@
  * @brief       API to add new IVR
  * @copyright   Copyright (c) 2018 GOautodial Inc.
  * @author      Alexander Jim Abenoja
- * @author		Demian Lizandro A. Biscocho 
+ * @author		Demian Lizandro A. Biscocho
  * @author      Jerico James Milo
  *
  * @par <b>License</b>:
@@ -21,7 +21,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -36,7 +36,7 @@
 /** @var string $log_user */
 /** @var string|false $log_group */
 /** @var string $log_ip */
-    
+
 
     // POST or GET Variables
     $menu_id 									= $astDB->escape(($_REQUEST['menu_id'] ?? ''));
@@ -51,10 +51,11 @@
     $call_time_id 								= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
     $track_in_vdac 								= $astDB->escape(($_REQUEST['track_in_vdac'] ?? ''));
     $custom_dialplan_entry 						= $astDB->escape(($_REQUEST['custom_dialplan_entry'] ?? ''));
-    $tracking_group 							= $astDB->escape(($_REQUEST['tracking_group'] ?? ''));	
-    $items 										= ($_REQUEST['items'] ?? '');
-	
-    // Default values 
+    $tracking_group 							= $astDB->escape(($_REQUEST['tracking_group'] ?? ''));
+	    $items 										= ($_REQUEST['items'] ?? '');
+		$query2 = '';
+
+	    // Default values
 	$defmenu_time_check 						= ['0','1'];
 	$deftrack_in_vdac 							= ['0','1'];
 
@@ -116,7 +117,7 @@
 		}
 
         $astDB->getOne("vicidial_user_groups", "user_group");
-		
+
         if ($astDB->count > 0 || $user_group == "---ALL---") {
             $astDB->where("id_table", "vicidial_call_menu");
             $astDB->where("active", 1);
@@ -126,15 +127,15 @@
                 $datum 							= [
 					"value" 						=> $menu_id
 				];
-				
+
 				$astDB->where("id_table", "vicidial_call_menu");
                 $astDB->where("active", 1);
                 $astDB->update("vicidial_override_ids", $datum);
 			}
-			
+
             $astDB->where("menu_id", $menu_id);
 			$astDB->getOne("vicidial_call_menu", "menu_id");
-			      
+
 			if ($astDB->count > 0) {
 				$apiresults 					= [
 					"result" 						=> "Error: Call menu ID already exists."
@@ -154,38 +155,38 @@
 					"track_in_vdac" 				=> $track_in_vdac,
 					"custom_dialplan_entry" 		=> $custom_dialplan_entry,
 					"tracking_group" 				=> $tracking_group
-				];				
-				
+				];
+
 				$astDB->insert("vicidial_call_menu", $data);
 				$query							= $astDB->getLastQuery();
 
 				if (!empty($items)) {
 					$exploded_items 			= explode("|", (string) ($items ?? ''));
-					$filtered_items 			= array_filter($exploded_items);
+					$filtered_items 			= array_values(array_filter($exploded_items));
                     $counter = (is_countable($filtered_items) ? count($filtered_items) : 0);
-					
+
 					//query for call menu options
 					for ($i=0; $i < $counter; $i++) {
 						$options 				= explode("+", (string) ($filtered_items[$i] ?? ''));
-						
+
 						if (isset($options[2]) && ($options[2] !== '' && $options[2] !== '0')) {
 							$data2 					= [
 								"menu_id" 				=> $menu_id,
-								"option_value" 			=> $options[0],
-								"option_description"	=> $options[1],
-								"option_route"		 	=> $options[2],
-								"option_route_value" 	=> $options[3],
-								"option_route_value_context" => $options[4]
+								"option_value" 			=> $options[0] ?? '',
+								"option_description"	=> $options[1] ?? '',
+								"option_route"		 	=> $options[2] ?? '',
+								"option_route_value" 	=> $options[3] ?? '',
+								"option_route_value_context" => $options[4] ?? ''
 							];
-							
+
 							$astDB->insert("vicidial_call_menu_options", $data2);
 							$query2				= $astDB->getLastQuery();
-							
+
 						}
-					}					
+					}
 				}
-		
-				// set default entry in vicidial_callmenu_options by Franco Hora 
+
+				// set default entry in vicidial_callmenu_options by Franco Hora
 				$data3 							= [
 					"menu_id" 						=> $menu_id,
 					"option_value" 					=> "TIMEOUT",
@@ -193,13 +194,13 @@
 					"option_route" 					=> "HANGUP",
 					"option_route_value" 			=> "vm-goodbye"
 				];
-				
+
                 $astDB->insert("vicidial_call_menu_options", $data3);
-                
+
                 $query3							= $astDB->getLastQuery();
-                
+
                 $log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added New IVR $menu_id", $log_group, $query . $query2 . $query3);
-                
+
                 // $server_ip = $astDB->getOne('servers', 'server_ip');
                 rebuildconfQuery($astDB);
 

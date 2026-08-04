@@ -21,7 +21,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -39,7 +39,10 @@
 
 
     $list_id 											= $astDB->escape(($_REQUEST['list_id'] ?? ''));
-    
+    $dataGMT = [];
+    $dataCalledSinceLastReset = [];
+    $dataCountTLists = [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -65,21 +68,21 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// GROUP BY gmt_offset_now,called_since_last_reset
-			$query 										= "SELECT gmt_offset_now, called_since_last_reset, count(*) as counttlist FROM vicidial_list WHERE list_id='$list_id' GROUP BY gmt_offset_now ORDER BY gmt_offset_now,called_since_last_reset;";				
+			$query 										= "SELECT gmt_offset_now, called_since_last_reset, count(*) as counttlist FROM vicidial_list WHERE list_id='$list_id' GROUP BY gmt_offset_now ORDER BY gmt_offset_now,called_since_last_reset;";
 			$rsltv 										= $astDB->rawQuery($query);
-			
-			foreach ($rsltv as $fresults) {
-				$dataGMT[]                				=  $fresults['gmt_offset_now'];
-				$dataCalledSinceLastReset[] 			=  $fresults['called_since_last_reset'];
-				$dataCountTLists[]          			=  $fresults['counttlist'];
+
+			foreach ((is_array($rsltv) ? $rsltv : []) as $fresults) {
+				$dataGMT[]                				=  $fresults['gmt_offset_now'] ?? '';
+				$dataCalledSinceLastReset[] 			=  $fresults['called_since_last_reset'] ?? '';
+				$dataCountTLists[]          			=  $fresults['counttlist'] ?? 0;
 			}
-			
+
 			$apiresults 								= [
 				"result"                    				=> "success",
 				"gmt_offset_now"           				 	=> $dataGMT,
@@ -89,9 +92,9 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
-	}			
+	}
 ?>

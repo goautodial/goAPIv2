@@ -500,6 +500,9 @@
         $PC_processed = 0;
         $post = 0;
         $timezone = 0;
+        $gmt_offset = 0;
+        $dst = '';
+        $dst_range = '';
         if ( (preg_match("/POSTAL/i", (string) $postalgmt)) && (strlen((string) $postal_code) > 4) ) {
             if (preg_match('/^1$/', (string) $phone_code)) {
                 //$stmt="select postal_code,state,GMT_offset,DST,DST_range,country,country_code from vicidial_postal_codes where country_code='$phone_code' and postal_code LIKE \"$postal_code%\";";

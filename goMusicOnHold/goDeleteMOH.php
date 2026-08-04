@@ -3,7 +3,7 @@
  * @file 		goDeleteMOH.php
  * @brief 		API for Deleting Music On Hold
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author		Demian Lizandro A. Biscocho 
+ * @author		Demian Lizandro A. Biscocho
  * @author		Jeremiah Sebastian Samatra
  * @author     	Chris Lomuntad
  *
@@ -37,10 +37,10 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	  
+
     ### POST or GET Variables
     $moh_id 											= $astDB->escape(($_REQUEST['moh_id'] ?? ''));
-    
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -64,15 +64,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {		
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -82,7 +82,7 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
+				}
 			}
 
 			$astDB->where('moh_id', $moh_id);
@@ -91,12 +91,12 @@
 			if ($astDB->count > 0) {
 				$astDB->where('moh_id', $moh_id);
 				$astDB->delete('vicidial_music_on_hold');
-				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
-				
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+
 				$astDB->where('moh_id', $moh_id);
 				$astDB->delete('vicidial_music_on_hold_files');
-				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
-				
+				$log_id 								= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted Music On-Hold: $moh_id", $log_group, $astDB->getLastQuery());
+
 				$apiresults 							= [
 					"result" 								=> "success"
 				];
@@ -108,9 +108,9 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 ?>

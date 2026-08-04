@@ -491,7 +491,16 @@
 	//    for ($i = 0 ; $i < (is_countable($array_list) ? count($array_list) : 0); $i++) {
 	//		$list_id = $array_list[$i];
 		foreach ($array_list as $list) {
-			$custom_list_id = "custom_" . (empty($list['list_id']) ? $list : $list['list_id']);
+			$list_id = is_array($list) ? ($list['list_id'] ?? '') : $list;
+			$list_id = preg_replace('/[^0-9]/', '', (string) $list_id);
+			if ($list_id === '') {
+				continue;
+			}
+			$custom_list_id = "custom_" . $list_id;
+			$tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_list_id}'");
+			if (!is_array($tableCheck) || count($tableCheck) < 1) {
+				continue;
+			}
 			//$query_CF_list = "DESC custom_$list_id;");
 			$query_CF_list = $astDB->rawQuery("DESC {$custom_list_id};");
 			if ($query_CF_list) {

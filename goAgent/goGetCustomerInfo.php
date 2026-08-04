@@ -52,14 +52,15 @@ if (isset($lead_id) && $lead_id !== '') {
         $astDB->where('lead_id', $lead_id);
         $rslt = $astDB->getOne('vicidial_list', 'list_id');
         $list_id = is_array($rslt) ? ($rslt['list_id'] ?? '') : '';
+        $list_id = preg_replace('/[^0-9]/', '', (string) $list_id);
         $custom_listid = "custom_{$list_id}";
 
-        $astDB->has($custom_listid);
-        $lastError = $astDB->getLastError();
-        if (strlen((string) $lastError) < 1) {
+        if ($list_id !== '') {
+            $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_listid}'");
+            if (is_array($tableCheck) && count($tableCheck) > 0) {
             $CFields = [];
             $rslt = $astDB->rawQuery("SHOW COLUMNS FROM $custom_listid;");
-            foreach ($rslt as $field) {
+            foreach ((is_array($rslt) ? $rslt : []) as $field) {
                 if ($field['Field'] == 'lead_id') continue;
                 $CFields[] = $field['Field'];
             }
@@ -68,6 +69,7 @@ if (isset($lead_id) && $lead_id !== '') {
             if ($CFields !== '') {
                 $astDB->where('lead_id', $lead_id);
                 $custom_info = $astDB->getOne($custom_listid, $CFields) ?: [];
+            }
             }
         }
     }

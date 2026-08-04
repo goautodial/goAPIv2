@@ -11,12 +11,12 @@
     ##### get usergroup #########
     function go_get_groupid($goUser, $astDB){
         include_once(__DIR__ . "/goDBasterisk.php");
-        $query_userv = "SELECT user_group FROM vicidial_users WHERE user='$goUser'";
-        $rsltv = mysqli_query($link, $query_userv);
-	$check_resultv = mysqli_num_rows($rsltv);
+        /** @var MySQLiDB $astDB */
+        $rowc = $astDB
+            ->where('user', $goUser)
+            ->getOne('vicidial_users', 'user_group');
 
-        if ($check_resultv > 0) {
-            $rowc=mysqli_fetch_assoc($rsltv);
+        if (is_array($rowc) && isset($rowc['user_group'])) {
             return $rowc["user_group"];
         }
         return null;
@@ -26,42 +26,31 @@
     ##### checkiftenant ######
     function checkIfTenant($groupId){
         include_once(__DIR__ . "/goDBgoautodial.php");
-        $query_tenant = "SELECT * FROM go_multi_tenant WHERE tenant_id='$groupId'";
-        $rslt_tenant = mysqli_query($linkgo,$query_tenant);
-	$check_result_tenant = mysqli_num_rows($rslt_tenant);
-
-        if ($check_result_tenant > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        /** @var MySQLiDB $goDB */
+        $goDB->where('tenant_id', $groupId);
+        return $goDB->has('go_multi_tenant');
     }
 
 
     function go_getall_allowed_users($groupId) {
         include_once(__DIR__ . "/goDBasterisk.php");
-        if ($groupId=='ADMIN' || $groupId=='admin') {
-                   $query = "select user as userg from vicidial_users";
-                   $rsltv = mysqli_query($link,$query);
-        } else {
-                   $query = "select user as userg from vicidial_users where user_group='$groupId'";
-                   $rsltv = mysqli_query($link,$query);
+        /** @var MySQLiDB $astDB */
+        $allowed_users = '';
+
+        if ($groupId !== 'ADMIN' && $groupId !== 'admin') {
+            $astDB->where('user_group', $groupId);
         }
 
-        $fresults=mysqli_fetch_array($rsltv);
-        $callfunc = go_total_agents_callv($groupId);
-        $v = $callfunc - 1;
-        $allowed_users='';
-        $i=0;
+        $rows = $astDB->get('vicidial_users', null, 'user AS userg');
+        $users = [];
+        foreach ((is_array($rows) ? $rows : []) as $info) {
+            if (($info['userg'] ?? '') !== '') {
+                $users[] = $info['userg'];
+            }
+        }
 
-        while($info = mysqli_fetch_array( $rsltv )) {
-            $users = $info['userg'];
-                if ($i==$v) {
-                      $allowed_users .= "'" . $users. "'";
-                } else {
-                      $allowed_users .= "'" . $users. "'" . ',';
-                }
-            $i++;
+        if ($users !== []) {
+            $allowed_users = "'" . implode("','", $users) . "'";
         }
 
         return $allowed_users;
@@ -70,39 +59,28 @@
 
     function go_total_agents_callv($groupId) {
         include_once(__DIR__ . "/goDBasterisk.php");
-        if (!checkIfTenant($groupId)) {
-                   $query = "select count(*) as qresult from vicidial_users";
-                   $rsltv = mysqli_query($link,$query);
-        } else {
-                   $query = "select count(*) as qresult from vicidial_users where user_group='$groupId'";
-                   $rsltv = mysqli_query($link,$query);
+        /** @var MySQLiDB $astDB */
+        if (checkIfTenant($groupId)) {
+            $astDB->where('user_group', $groupId);
         }
 
-        $fresults = mysqli_fetch_assoc($rsltv);
-        $fresults = $fresults['qresult'];
+        $row = $astDB->getOne('vicidial_users', 'COUNT(*) AS qresult');
+        $fresults = is_array($row) ? ($row['qresult'] ?? 0) : 0;
 
-        if ($fresults == NULL) {
-            $fresults = 0;
-        }
-
-        return $fresults;
+        return $fresults ?: 0;
     }
       function go_getall_allowed_campaigns($groupId)
       {
-            /*$groupId = $this->go_get_groupid();
-                if (!is_null($tenant)) {
-                        $groupId = $tenant;
-                }*/
-            date('Y-m-d');
-            $query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
-            $resultsu = mysqli_query($link,$query);
+            include_once(__DIR__ . "/goDBasterisk.php");
+            /** @var MySQLiDB $astDB */
+            $row = $astDB
+                ->where('user_group', $groupId)
+                ->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS qresult');
 
-            if((is_countable($resultsu) ? count($resultsu) : 0) > 0){
-                $fresults = $resultsu['qresult'];
-                $allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-
-                $allAllowedCampaigns = implode("','",$allowedCampaigns);
-
+            if(is_array($row) && isset($row['qresult'])){
+                $fresults = $row['qresult'];
+                $allowedCampaigns = preg_split('/[\s,]+/', str_replace('-', ' ', trim((string) $fresults)), -1, PREG_SPLIT_NO_EMPTY);
+                $allAllowedCampaigns = is_array($allowedCampaigns) ? implode("','", $allowedCampaigns) : '';
             }else{
                 $allAllowedCampaigns = '';
             }
@@ -255,6 +233,9 @@
 
     function lookup_gmt($aDB, $phone_code, $USarea, $state, $LOCAL_GMT_OFF_STD, $Shour, $Smin, $Ssec, $Smon, $Smday, $Syear, $postalgmt, $postal_code) {
         $postalgmt_found = 0;
+        $PC_processed = 0;
+        $post = 0;
+        $timezone = 0;
         if ( (preg_match("/POSTAL/i", (string) $postalgmt)) && (strlen((string) $postal_code) > 4) ) {
             if (preg_match('/^1$/', (string) $phone_code)) {
                 //$stmt="select postal_code,state,GMT_offset,DST,DST_range,country,country_code from vicidial_postal_codes where country_code='$phone_code' and postal_code LIKE \"$postal_code%\";";
@@ -264,7 +245,7 @@
                 $pc_recs = $aDB->getRowCount();
                 if ($pc_recs > 0) {
                     $row = $rslt[0];
-                    $gmt_offset =	$rslt['GMT_offset'];
+                    $gmt_offset =	$row['GMT_offset'];
                     $gmt_offset =   preg_replace("/\+/i", "", (string) $gmt_offset);
                     $dst =			$row['DST'];
                     $dst_range =	$row['DST_range'];
@@ -1001,7 +982,7 @@
         $pmin = (gmdate("i", time() + $pzone));
         $phour = ( (gmdate("G", time() + $pzone)) * 100);
         $pday = gmdate("w", time() + $pzone);
-        $tz = sprintf("%.2f", $p);
+        $tz = sprintf("%.2f", $gmt_offset);
         $GMT_day = "$pday";
         $GMT_hour = ($phour + $pmin);
 

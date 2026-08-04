@@ -21,6 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+    global $astDB;
+
+    $dataNewLeads = ['newLeadsCount' => 0];
+    $dataOldLeads = ['oldLeadsCount' => 0];
+    $dataStatsToday = [];
+    $dataStatsCampaign = [];
+
     $campaign_id = $astDB->escape(($_REQUEST['campaign_id'] ?? ''));
     $location = $astDB->escape(($_REQUEST['location'] ?? ''));
     $user_id = $astDB->escape(($_REQUEST['user_id'] ?? ''));
@@ -52,20 +59,22 @@
     // Getting New Leads Counter
     $queryNewLeadsCount = "SELECT count(1) as cnt FROM vicidial_list WHERE status = 'NEW' {$campaignNewLeads};";
     $resultNewLeadsCount = $astDB->rawQuery($queryNewLeadsCount);
-    foreach ($resultNewLeadsCount as $fresultsNewLeadsCount){
-        $dataNewLeads['newLeadsCount'] = $fresultsNewLeadsCount['cnt'];
+    foreach ((is_array($resultNewLeadsCount) ? $resultNewLeadsCount : []) as $fresultsNewLeadsCount){
+        $dataNewLeads['newLeadsCount'] = (int) ($fresultsNewLeadsCount['cnt'] ?? 0);
     }
 
     $queryNewLeadsTZMap = "SELECT count(1) as cnt, gmt_offset_now as gmt FROM vicidial_list WHERE status = 'NEW' {$campaignNewLeads} group by gmt_offset_now;";
     $resultNewLeadsTZMap = $astDB->rawQuery($queryNewLeadsTZMap);
-    foreach ($resultNewLeadsTZMap as $fresultsNewLeadsTZMap){
-        $indexOfNewTZMap = getTimezoneNameByOffset($fresultsNewLeadsTZMap['gmt']);
-        $dataNewLeads[$indexOfNewTZMap] = $fresultsNewLeadsTZMap['cnt'];
+    foreach ((is_array($resultNewLeadsTZMap) ? $resultNewLeadsTZMap : []) as $fresultsNewLeadsTZMap){
+        $indexOfNewTZMap = getTimezoneNameByOffset($fresultsNewLeadsTZMap['gmt'] ?? null);
+        if ($indexOfNewTZMap !== null) {
+            $dataNewLeads[$indexOfNewTZMap] = (int) ($fresultsNewLeadsTZMap['cnt'] ?? 0);
+        }
     }
     // End of New Leads Counter
 
     // Getting Old Leads Counter
-    $queryOldLeadsCount = "SELECT count(*) as cnt 
+    $queryOldLeadsCount = "SELECT count(*) as cnt
                     FROM vicidial_list l,
                         vicidial_lists ll,
                         vicidial_campaigns vc
@@ -73,8 +82,8 @@
                     AND ll.campaign_id = vc.campaign_id
                     AND l.status != 'NEW' {$campaignOldLeads};";
     $resultOldLeadsCount = $astDB->rawQuery($queryOldLeadsCount);
-    foreach ($resultOldLeadsCount as $fresultsOldLeadsCount){
-        $dataOldLeads['oldLeadsCount'] = $fresultsOldLeadsCount['cnt'];
+    foreach ((is_array($resultOldLeadsCount) ? $resultOldLeadsCount : []) as $fresultsOldLeadsCount){
+        $dataOldLeads['oldLeadsCount'] = (int) ($fresultsOldLeadsCount['cnt'] ?? 0);
     }
 
     $queryOldLeadsTZMap = "SELECT count(*) as cnt, l.gmt_offset_now as gmt
@@ -85,9 +94,11 @@
                     AND ll.campaign_id = vc.campaign_id
                     AND l.status != 'NEW' {$campaignOldLeads} GROUP BY l.gmt_offset_now;";
     $resultOldLeadsTZMap = $astDB->rawQuery($queryOldLeadsTZMap);
-    foreach ($resultOldLeadsTZMap as $fresultsOldLeadsTZMap){
-        $indexOfOldTZMap = getTimezoneNameByOffset($fresultsOldLeadsTZMap['gmt']);
-        $dataOLdLeads[$indexOfOldTZMap] = $fresultsOldLeadsTZMap['cnt'];
+    foreach ((is_array($resultOldLeadsTZMap) ? $resultOldLeadsTZMap : []) as $fresultsOldLeadsTZMap){
+        $indexOfOldTZMap = getTimezoneNameByOffset($fresultsOldLeadsTZMap['gmt'] ?? null);
+        if ($indexOfOldTZMap !== null) {
+            $dataOldLeads[$indexOfOldTZMap] = (int) ($fresultsOldLeadsTZMap['cnt'] ?? 0);
+        }
     }
     // End of Old Leads Counter
 
@@ -105,8 +116,9 @@
     // Calls
     $queryStatsTodayCalls = "SELECT COUNT(DISTINCT val.agent_log_id) as count, val.user FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.lead_id IS NOT NULL;";
     $resultStatsTodayCalls = $astDB->rawQuery($queryStatsTodayCalls);
-    foreach ($resultStatsTodayCalls as $fresultsStatsTodayCalls){
-        $StatsTodayCalls = $fresultsStatsTodayCalls['count'];
+    $StatsTodayCalls = 0;
+    foreach ((is_array($resultStatsTodayCalls) ? $resultStatsTodayCalls : []) as $fresultsStatsTodayCalls){
+        $StatsTodayCalls = (int) ($fresultsStatsTodayCalls['count'] ?? 0);
     }
     $callsST = $StatsTodayCalls;
     $dataStatsToday['callsST'] = $callsST;
@@ -114,14 +126,14 @@
     // Hours
     $queryStatsTodayHours = "SELECT val.agent_log_id , (sum(pause_sec)+sum(wait_sec)+sum(talk_sec)+sum(dispo_sec))/3600 as hours FROM `asteriskV4`.`vicidial_agent_log` val LEFT OUTER JOIN `asteriskV4`.`vicidial_campaigns` vc ON ( val.campaign_id = vc.campaign_id ) WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate};";
     $resultStatsTodayHours = $astDB->rawQuery($queryStatsTodayHours);
-    $hoursST = 0; 
+    $hoursST = 0;
     $callsHourST = 0;
-    foreach ($resultStatsTodayHours as $fresultsStatsTodayHours){
-        $hoursST += $fresultsStatsTodayHours['hours'];
+    foreach ((is_array($resultStatsTodayHours) ? $resultStatsTodayHours : []) as $fresultsStatsTodayHours){
+        $hoursST += (float) ($fresultsStatsTodayHours['hours'] ?? 0);
     }
 
     $hoursST = round($hoursST, 2);
-    $callsHourST = round($callsST / $hoursST, 2);
+    $callsHourST = ($hoursST > 0) ? round($callsST / $hoursST, 2) : 0;
     $dataStatsToday['hoursST'] = $hoursST;
     $dataStatsToday['callsHourST'] = $callsHourST;
     // $dataStatsToday['queryhoursST'] = $queryStatsTodayHours;
@@ -130,7 +142,7 @@
     $resultStatsTodayContactHour = $astDB->rawQuery($queryStatsTodayContactHour);
     $contactsHourST = 0;
     $contactST = $astDB->getRowCount();
-    $contactsHourST = round($contactST / $hoursST, 2);
+    $contactsHourST = ($hoursST > 0) ? round($contactST / $hoursST, 2) : 0;
     $dataStatsToday['contactST'] = $contactST;
     $dataStatsToday['contactsHourST'] = $contactsHourST;
     // $dataStatsToday['querycontactST'] = $queryStatsTodayContactHour;
@@ -138,8 +150,8 @@
     $queryStatsTodaySales = "SELECT DISTINCT val.agent_log_id, val.*, val.user FROM `asteriskV4`.`vicidial_log` vl,`asteriskV4`.`vicidial_agent_log` val WHERE 1 {$locationQueryStatsShort} {$campaignQuery} AND {$queryDate} AND val.status IN ('SALE','RESIDENCE' ,'SUBSCRIBER','CORPORATE','STATUS');";
     $resultStatsTodaySales = $astDB->rawQuery($queryStatsTodaySales);
     $salesST = $astDB->getRowCount();
-    $salesHourST = round($salesST / $hoursST, 2);
-    $conversionST = round(($salesST / $contactST) * 100, 2);
+    $salesHourST = ($hoursST > 0) ? round($salesST / $hoursST, 2) : 0;
+    $conversionST = ($contactST > 0) ? round(($salesST / $contactST) * 100, 2) : 0;
     $dataStatsToday['salesST'] = $salesST;
     $dataStatsToday['salesHourST'] = $salesHourST;
     $dataStatsToday['conversionST'] = $conversionST;
@@ -154,40 +166,41 @@
     // Getting Data for Campaign Stats
         $CampStatsstatuses = getStatuses($astDB, $campaign_id);
         // Calls
-        $queryStatsCalls = "SELECT COUNT(DISTINCT val.agent_log_id) as count, vu.user_id 
+        $queryStatsCalls = "SELECT COUNT(DISTINCT val.agent_log_id) as count, vu.user_id
             FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
             WHERE val.lead_id IS NOT NULL {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsCalls = $astDB->rawQuery($queryStatsCalls);
-        foreach ($resultStatsCalls as $fresultsStatsCalls){
-            $StatsCalls = $fresultsStatsCalls['count'];
+        $StatsCalls = 0;
+        foreach ((is_array($resultStatsCalls) ? $resultStatsCalls : []) as $fresultsStatsCalls){
+            $StatsCalls = (int) ($fresultsStatsCalls['count'] ?? 0);
         }
         $callsCST = $StatsCalls;
         $dataStatsCampaign['callsCST'] = $callsCST;
         // $dataStatsCampaign['querycallsCST'] = $queryStatsCalls;
         // Hours
-        $queryStatsHours = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id 
+        $queryStatsHours = "SELECT DISTINCT val.agent_log_id, val.*, vu.user_id
             FROM `asteriskV4`.`vicidial_agent_log` val
             INNER JOIN `asteriskV4`.`vicidial_users` vu ON vu.user=val.user
             INNER JOIN `asteriskV4`.`vicidial_campaigns` vc ON vc.campaign_id=val.campaign_id
             LEFT JOIN `goautodialV4`.`users` gu ON gu.name=vu.user
-            WHERE {$dateQueryTotal} {$campaignQuery} {$locationQueryCampaignStats} 
+            WHERE {$dateQueryTotal} {$campaignQuery} {$locationQueryCampaignStats}
             GROUP BY val.agent_log_id, val.campaign_id;";
         $resultStatsHours = $astDB->rawQuery($queryStatsHours);
         $hoursCST = 0;
         $callsHourCST = 0;
-        foreach ($resultStatsHours as $fresultsStatsHours){
-            $hoursCST += $fresultsStatsHours['pause_sec'];
-            $hoursCST += $fresultsStatsHours['wait_sec'];
-            $hoursCST += $fresultsStatsHours['talk_sec'];
-            $hoursCST += $fresultsStatsHours['dispo_sec'];
+        foreach ((is_array($resultStatsHours) ? $resultStatsHours : []) as $fresultsStatsHours){
+            $hoursCST += (int) ($fresultsStatsHours['pause_sec'] ?? 0);
+            $hoursCST += (int) ($fresultsStatsHours['wait_sec'] ?? 0);
+            $hoursCST += (int) ($fresultsStatsHours['talk_sec'] ?? 0);
+            $hoursCST += (int) ($fresultsStatsHours['dispo_sec'] ?? 0);
             // $hoursCST += $fresultsStatsHours['dead_sec'];
         }
 
         $hoursCST = round($hoursCST / 3600, 2);
-        $callsHourCST = round($callsCST / $hoursCST, 2);
+        $callsHourCST = ($hoursCST > 0) ? round($callsCST / $hoursCST, 2) : 0;
         $dataStatsCampaign['hoursCST'] = $hoursCST;
         $dataStatsCampaign['callsHourCST'] = $callsHourCST;
         // $dataStatsCampaign['queryhoursCST'] = $queryStatsHours;
@@ -201,7 +214,7 @@
         $resultStatsContactHour = $astDB->rawQuery($queryStatsContactHour);
         $contactsHourCST = 0;
         $contactsCST = $astDB->getRowCount();
-        $contactsHourCST = round($contactsCST / $hoursCST, 2);
+        $contactsHourCST = ($hoursCST > 0) ? round($contactsCST / $hoursCST, 2) : 0;
         $dataStatsCampaign['contactsCST'] = $contactsCST;
         $dataStatsCampaign['contactsHourCST'] = $contactsHourCST;
         // $dataStatsCampaign['querycontactsCST'] = $queryStatsContactHour;
@@ -214,8 +227,8 @@
             WHERE val.status IN ('$CampStatsstatuses') {$locationQueryCampaignStats} {$campaignQuery} AND {$dateQueryTotal};";
         $resultStatsSales = $astDB->rawQuery($queryStatsSales);
         $salesCST = $astDB->getRowCount();
-        $salesHourCST = round($sales / $hoursCST, 2);
-        $conversionCST = round($salesCST / $contactsCST * 100, 2);
+        $salesHourCST = ($hoursCST > 0) ? round($salesCST / $hoursCST, 2) : 0;
+        $conversionCST = ($contactsCST > 0) ? round($salesCST / $contactsCST * 100, 2) : 0;
         $dataStatsCampaign['salesCST'] = $salesCST;
         $dataStatsCampaign['salesHourCST'] = $salesHourCST;
         $dataStatsCampaign['conversionCST'] = $conversionCST;
@@ -224,7 +237,7 @@
 
 
     $apiresults = [
-        "result" => "success", 
+        "result" => "success",
         "newLeadsCounter" => $dataNewLeads,
         "oldLeadsCounter" => $dataOldLeads,
         "statsToday" => $dataStatsToday,
@@ -249,51 +262,54 @@
     }
 
     function getStatuses($dbase, $campaign_id="all"){
+        $sstatuses = [];
+        $cstatuses = [];
+
         if($campaign_id == "all"){
-            //$queryStatuses = "SELECT status FROM vicidial_statuses WHERE sale='Y';";
             $dbase->where('sale', 'Y');
             $resultStatuses = $dbase->get('vicidial_statuses', null, 'status');
-            foreach ($resultStatuses as $fresultsStatuses){
-                $status = $fresultsStatuses['status'];
-                $sstatuses[$status] = $fresultsStatuses['status'];
+            foreach ((is_array($resultStatuses) ? $resultStatuses : []) as $fresultsStatuses){
+                $status = $fresultsStatuses['status'] ?? '';
+                if ($status !== '') {
+                    $sstatuses[$status] = $status;
+                }
             }
-            $sstatuses = implode("','", $sstatuses);
-            //$queryCStatuses = "SELECT status FROM vicidial_campaign_statuses WHERE sale='Y';";
+
             $dbase->where('sale', 'Y');
             $resultCStatuses = $dbase->get('vicidial_campaign_statuses', null, 'status');
-            foreach ($resultCStatuses as $fresultsCStatuses){
-                $status = $fresultsCStatuses['status'];
-                $cstatuses[$status] = $fresultsCStatuses['status'];
+            foreach ((is_array($resultCStatuses) ? $resultCStatuses : []) as $fresultsCStatuses){
+                $status = $fresultsCStatuses['status'] ?? '';
+                if ($status !== '') {
+                    $cstatuses[$status] = $status;
+                }
             }
         }else{
-            $queryStatuses = "SELECT status 
-                FROM vicidial_statuses 
-                WHERE sale='Y' 
-                AND cam_category IN (SELECT vicidial_campaign_definitions.id FROM vicidial_campaign_definitions, vicidial_campaigns WHERE vicidial_campaigns.campaign_def = vicidial_campaign_definitions.code AND vicidial_campaigns.campaign_id = '$campaign_id');";
+            $safeCampaign = $dbase->escape($campaign_id);
+            $queryStatuses = "SELECT status
+                FROM vicidial_statuses
+                WHERE sale='Y'
+                AND cam_category IN (SELECT vicidial_campaign_definitions.id FROM vicidial_campaign_definitions, vicidial_campaigns WHERE vicidial_campaigns.campaign_def = vicidial_campaign_definitions.code AND vicidial_campaigns.campaign_id = '$safeCampaign');";
             $resultStatuses = $dbase->rawQuery($queryStatuses);
-            foreach ($resultStatuses as $fresultsStatuses){
-                $status = $fresultsStatuses['status'];
-                $sstatuses[$status] = $fresultsStatuses['status'];
+            foreach ((is_array($resultStatuses) ? $resultStatuses : []) as $fresultsStatuses){
+                $status = $fresultsStatuses['status'] ?? '';
+                if ($status !== '') {
+                    $sstatuses[$status] = $status;
+                }
             }
-            $sstatuses = implode("','", $sstatuses);
-            $queryCStatuses = "SELECT vicidial_campaign_statuses.status FROM vicidial_campaign_statuses WHERE vicidial_campaign_statuses.sale='Y' AND vicidial_campaign_statuses.campaign_id = '$campaign_id';";
+
+            $queryCStatuses = "SELECT vicidial_campaign_statuses.status FROM vicidial_campaign_statuses WHERE vicidial_campaign_statuses.sale='Y' AND vicidial_campaign_statuses.campaign_id = '$safeCampaign';";
             $resultCStatuses = $dbase->rawQuery($queryCStatuses);
-            foreach ($resultCStatuses as $fresultsCStatuses){
-                $status = $fresultsCStatuses['status'];
-                $cstatuses[$status] = $fresultsCStatuses['status'];
+            foreach ((is_array($resultCStatuses) ? $resultCStatuses : []) as $fresultsCStatuses){
+                $status = $fresultsCStatuses['status'] ?? '';
+                if ($status !== '') {
+                    $cstatuses[$status] = $status;
+                }
             }
-        }
-        $cstatuses = implode("','", $cstatuses);
-        if($cstatuses !== '')
-        {
-            $statuses = "{$sstatuses}','{$cstatuses}";
-        }
-        else
-        {
-            $statuses = ($sstatuses !== '' && strlen($cstatuses) < 1) ? $sstatuses : $cstatuses;
         }
 
-        return $statuses;
+        $sstatuses = implode("','", $sstatuses);
+        $cstatuses = implode("','", $cstatuses);
+        return ($cstatuses !== '') ? "{$sstatuses}','{$cstatuses}" : $sstatuses;
     }
 
 ?>

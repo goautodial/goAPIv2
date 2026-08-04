@@ -62,27 +62,36 @@ if (empty($goUser) || is_null($goUser)) {
         ->where("pass_hash", $goPass)
         ->getOne("vicidial_users", "user,user_level");
 
-    $goapiaccess									= $astDB->getRowCount();
-    $userlevel										= $fresults["user_level"];
+    		$goapiaccess									= $astDB->getRowCount();
+    		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+    		$ul = '';
+    		$uli = '';
 
-    if ($goapiaccess > 0 && $userlevel > 7) {
-        if (is_array($allowed_campaigns)) {
+    		if ($goapiaccess > 0 && $userlevel > 7) {
+    			if (is_array($allowed_campaigns)) {
             if (strtoupper((string) $log_group) !== 'ADMIN') {
                 //$allowed_campaigns	= allowed_campaigns($log_group, $goDB, $astDB);
-                $stringv = implode(",", $allowed_campaigns);
-                $ul = "and campaign_id IN ($stringv)";
+                				$campaignFilter = array_filter($allowed_campaigns, static fn($camp) => (string) $camp !== '');
+                				if ($campaignFilter !== []) {
+                					$stringv = "'" . implode("','", $campaignFilter) . "'";
+                					$ul = "and campaign_id IN ($stringv)";
+                				}
 
                 $getIngroups                        = $astDB->where('user_group', $log_group)
                     //->orWhere("user_group", "---ALL---")
                     ->get('vicidial_inbound_groups', NULL, ['group_id']);
 
                 $ingroups                           = [];
-                foreach ($getIngroups as $fresults) {
-                    $ingroups[]                     = $fresults['group_id'];
-                }
+                				foreach ((is_array($getIngroups) ? $getIngroups : []) as $fresults) {
+                					if (($fresults['group_id'] ?? '') !== '') {
+                						$ingroups[]                     = $fresults['group_id'];
+                					}
+                				}
 
-                $stringvi                           = implode(",", $ingroups);
-                $uli                                = "and campaign_id IN ('$stringvi')";
+                				if ($ingroups !== []) {
+                					$stringvi                           = "'" . implode("','", $ingroups) . "'";
+                					$uli                                = "and campaign_id IN ($stringvi)";
+                				}
 
             }
 

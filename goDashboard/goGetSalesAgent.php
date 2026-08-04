@@ -37,10 +37,10 @@
 /** @var string $log_ip */
 
 
-    $fromDate 											= (empty($fromDate) ? date("Y-m-d") : "");
-    $toDate 											= (empty($toDate) ? date("Y-m-d") : "");
-    $campaignID											= (empty($campaignID) ? 'ALL' : $astDB->escape($_REQUEST['campaign_id']));
-    
+    $fromDate 											= $astDB->escape(($_REQUEST['fromDate'] ?? date("Y-m-d")));
+    $toDate 											= $astDB->escape(($_REQUEST['toDate'] ?? date("Y-m-d")));
+    $campaignID											= $astDB->escape(($_REQUEST['campaign_id'] ?? 'ALL'));
+
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -65,11 +65,11 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			$cols 										= [
 				"user",
 				"full_name",
@@ -81,10 +81,16 @@
 					//->where('amount', 0, '>')
 					->groupBy('user')
 					->get('go_sales_count', null, $cols);
-				
-			return [
+
+			$apiresults = [
 				"result"									=> "success",
 				"amount"									=> $sql_sales,
+			];
+		} else {
+			$err_msg 									= error_handle("10001");
+			$apiresults 								= [
+				"code" 									=> "10001",
+				"result" 								=> $err_msg
 			];
 		}
 	}

@@ -39,16 +39,22 @@
 /** @var string $log_user */
 /** @var string|false $log_group */
 /** @var string $log_ip */
+/** @var string $VARDB_user */
+/** @var string $VARDB_pass */
+/** @var string $VARDB_database */
 
 
     $fromDate 										= $astDB->escape(($_REQUEST['fromDate'] ?? ''));
     $toDate 										= $astDB->escape(($_REQUEST['toDate'] ?? ''));
     $campaignID 									= $astDB->escape(($_REQUEST['campaignID'] ?? ''));
-    
+    $user_level 									= isset($user_level) ? (int) $user_level : 0;
+    $slaveDBip 									= '';
+
     $dispo_stats = "";
-    if(isset($_REQUEST['statuses']))
-    $dispo_stats = $astDB->escape(($_REQUEST['statuses'] ?? ''));
-    
+    if(isset($_REQUEST['statuses'])) {
+        $dispo_stats = $astDB->escape(($_REQUEST['statuses'] ?? ''));
+    }
+
     if (empty($fromDate)) {
         $fromDate 									= date("Y-m-d")." 00:00:00";
     }
@@ -89,8 +95,8 @@
 			->where('setting', 'slave_db_ip')
 			->where('context', 'creamy')
 			->getOne('settings', 'value');
-		$slaveDBip 									= $rslt['value'];
-		
+		$slaveDBip 									= is_array($rslt) ? ($rslt['value'] ?? '') : '';
+
 		if (!empty($slaveDBip)) {
 			$astDB 									= new MySQLiDB($slaveDBip, $VARDB_user, $VARDB_pass, $VARDB_database);
 
@@ -99,9 +105,9 @@
 				echo "Debugging Error: " . $astDB->getLastError() . PHP_EOL;
 				exit;
 				//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
-			}			
+			}
 		}
-		
+
 		if ($dispo_stats != NULL) {
 			$ul 									= " AND status = '$dispo_stats' ";
 		} else {
@@ -117,7 +123,7 @@
 		$TOPsorted_output = "";
 		$number = 1;
 
-		foreach ($query as $row) {
+		foreach ((is_array($query) ? $query : []) as $row) {
 
 			$TOPsorted_output .= '<tr>';
 			$TOPsorted_output .= '<td nowrap>'.$row['lead_id'].'</td>';
@@ -139,7 +145,7 @@
 			//$number++;
 		}
 
-		return [
+		$apiresults = [
 		    "result" 		=> "success",
 		    "inbound_query" 	=> $inbound_report_query,
 		    //"debug_value" 	=> $alex,
