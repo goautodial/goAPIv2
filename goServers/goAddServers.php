@@ -36,7 +36,7 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
- 
+
     ### POST or GET Variables
 	$server_id 											= $astDB->escape(($_REQUEST['server_id'] ?? ''));
 	$server_description 								= $astDB->escape(($_REQUEST['server_description'] ?? ''));
@@ -45,10 +45,11 @@
 	$asterisk_version 									= $astDB->escape(($_REQUEST['asterisk_version'] ?? ''));
 	$max_vicidial_trunks 								= $astDB->escape(($_REQUEST['max_vicidial_trunks'] ?? ''));
 	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
+	$ip_address 										= $log_ip ?? '';
 	$local_gmt 											= "-5.00";
 	$defActive 											= ["Y","N"];
-	
-    ### ERROR CHECKING 
+
+    ### ERROR CHECKING
 	if (empty ($goUser) || is_null ($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -72,25 +73,25 @@
 	} elseif (!in_array($active, (is_array($defActive) ? $defActive : [])) && $active != null) {
 		$err_msg 										= error_handle("41006", "active");
 		$apiresults 									= [
-			"code" 											=> "41006", 
+			"code" 											=> "41006",
 			"result" 										=> $err_msg
 		];
 		//$apiresults = array("result" => "Error: Default value for active is Y or N only.");
-	} else {					
+	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -100,32 +101,32 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
+				}
 			}
-		
+
 			$astDB->where("server_id", $server_id);
 			$astDB->orWhere("server_ip", $server_ip);
 			$astDB->get("servers");
-			
+
 			if ($astDB->count > 0) {
 				$apiresults 							= [
 					"result" 								=> "Error: Add failed, Server already already exist!"
 				];
 			} else {
 				$data 									= [
-					"server_id"		 						=> $server_id, 
+					"server_id"		 						=> $server_id,
 					"server_description" 					=> $server_description,
-					"server_ip"								=> $server_ip, 
-					"active"								=> $active, 
-					"asterisk_version"						=> $asterisk_version, 
-					"max_vicidial_trunks"					=> $max_vicidial_trunks, 
+					"server_ip"								=> $server_ip,
+					"active"								=> $active,
+					"asterisk_version"						=> $asterisk_version,
+					"max_vicidial_trunks"					=> $max_vicidial_trunks,
 					"local_gmt"								=> $local_gmt,
 					"user_group"							=> $user_group
 				];
-				
+
 				$query 									= $astDB->insert("servers", $data);
 				$log_id 								= log_action($goDB, "ADD", $log_user, $ip_address, "Added New Server: $server_id", $log_group, $astDB->getLastQuery());
-				
+
 				if($query){
 					$apiresults 						= [
 						"result" 							=> "success",
@@ -136,13 +137,13 @@
 						"result" 							=> "Error: Add failed, check your details"
 					];
 				}
-			} 	
+			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

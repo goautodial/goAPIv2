@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-    
+
 	include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -36,10 +36,11 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
-	$call_time_id 										= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
 
-    // ERROR CHECKING 
+	$call_time_id 										= $astDB->escape(($_REQUEST['call_time_id'] ?? ''));
+	$ip_address 										= $log_ip ?? '';
+
+    // ERROR CHECKING
 	if (empty ($goUser) || is_null ($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -58,15 +59,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {    
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -76,7 +77,7 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					}
-				}					
+				}
 			}
 
 			$astDB->where("call_time_id", $call_time_id);
@@ -84,7 +85,7 @@
 
 			if ($astDB->count > 0) {
 				$astDB->where("call_time_id", $call_time_id);
-				$deleteQuery 							= $astDB->delete("vicidial_call_times");				
+				$deleteQuery 							= $astDB->delete("vicidial_call_times");
 				$log_id 								= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted Calltime ID: $call_time_id", $log_group, $astDB->getLastQuery());
 
 				if ($deleteQuery) {
@@ -102,10 +103,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

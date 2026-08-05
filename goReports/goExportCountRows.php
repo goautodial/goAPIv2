@@ -4,7 +4,7 @@
  * @brief       API for Agent Time Details Reports
  * @copyright   Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author      Alexander Jim Abenoja 
+ * @author      Alexander Jim Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it AND/or modify
@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
 	include_once(__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -36,7 +36,7 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
+
 	$campaigns 		= $astDB->escape(($_REQUEST['campaigns'] ?? ''));
 	$inbounds 		= $astDB->escape(($_REQUEST['inbounds'] ?? ''));
 	$lists 			= $astDB->escape(($_REQUEST['lists'] ?? ''));
@@ -45,30 +45,36 @@
 	$per_call_notes = $astDB->escape(($_REQUEST['per_call_notes'] ?? ''));
 	$rec_location 	= $astDB->escape(($_REQUEST['rec_location'] ?? ''));
 	$log_group 		= go_get_groupid($session_user, $astDB);
-	$fromDate = $astDB->escape(($_REQUEST['fromDate'] ?? ''));        
+	$fromDate = $astDB->escape(($_REQUEST['fromDate'] ?? ''));
 	$toDate = $astDB->escape(($_REQUEST['toDate'] ?? ''));
-	
+
 	$limit = $astDB->escape(($_REQUEST['limit'] ?? ''));
 	$offset = $astDB->escape(($_REQUEST['offset'] ?? ''));
 
 	if (empty($fromDate))
 		$fromDate = date("Y-m-d")." 00:00:00";
-	if (empty($toDate)) 
+	if (empty($toDate))
 		$toDate = date("Y-m-d")." 23:59:59";
-        
+
 	if (!empty($campaigns) && $campaigns != NULL)
 	    $campaigns = explode(",",$campaigns);
 	if (!empty($inbounds))
 	    $inbounds = explode(",",$inbounds);
-	if (!empty($lists))	
+	if (!empty($lists))
 	    $lists = explode(",",$lists);
-	if (!empty($dispo_stats))	
+	if (!empty($dispo_stats))
 	    $dispo_stats = explode(",",$dispo_stats);
-	
+
 	$campaign_SQL = "";
 	$group_SQL = "";
 	$list_SQL = "";
 	$status_SQL = "";
+	$status_SQL_vcl = "";
+	$closer_camp = "";
+	$array_camp = [];
+	$array_list = [];
+	$query = "";
+	$row_count = 0;
 
 	$campaign_ct = (is_countable($campaigns) ? count($campaigns) : 0);
 	$group_ct = (is_countable($inbounds) ? count($inbounds) : 0);
@@ -80,9 +86,9 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess = $astDB->getRowCount();
-		$userlevel = $fresults["user_level"];
+		$userlevel = is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
 
 		$i = 0;
 		//$array_campaign = Array();
@@ -93,7 +99,7 @@
 			//array_push($array_campaign, $campaigns[$i]);
 			$i++;
 		}
-		
+
 		if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))) {
 			$campaign_SQL = "";
 			// $i = 0;
@@ -101,37 +107,37 @@
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-    
-            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-            if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+
+	            $allowed_campaigns = is_array($allowed_camps) ? ($allowed_camps['allowed_campaigns'] ?? '') : '';
+	            if (!preg_match("/ALL-CAMPAIGN/", (string) $allowed_campaigns)) {
                 $allowed_campaigns = explode(" ", trim($allowed_campaigns));
                 $astDB->where('campaign_id', $allowed_campaigns, 'in');
             }
-            
+
             $SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-                        
-            foreach($SELECTQuery as $camp_val){
-                $array_camp[] = $camp_val["campaign_id"];
-            }
-            
+
+	            foreach((is_array($SELECTQuery) ? $SELECTQuery : []) as $camp_val){
+	                $array_camp[] = $camp_val["campaign_id"] ?? '';
+	            }
+
 			$imp_camp = implode("','", $array_camp);
 			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				if ($log_group !== 'SUPERVISOR') {
 					$campaign_SQL = "AND vl.campaign_id IN('$imp_camp')";
 				}
 			}
-				
+
 		}else{
 			$campaign_SQL = preg_replace("/,$/i",'',$campaign_SQL);
 			$campaign_SQL = "AND vl.campaign_id IN($campaign_SQL)";
 		}
 
 		$RUNcampaign = 1;
-		
+
 	} else {
 		$RUNcampaign = 0;
 	}
-	
+
 	if (!empty($inbounds)) {
 		$i=0;
 		if (in_array("ALL", (is_array($inbounds) ? $inbounds : []))) {
@@ -141,39 +147,39 @@
                 $astDB->where('user_group', $log_group);
             }
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-			
-            $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-            if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
+
+	            $allowed_campaigns = is_array($allowed_camps) ? ($allowed_camps['allowed_campaigns'] ?? '') : '';
+	            if (!preg_match("/ALL-CAMPAIGNS/", (string) $allowed_campaigns)) {
                 $allowed_campaigns_exploded = explode(" ", trim($allowed_campaigns));
                 $astDB->where('campaign_id', $allowed_campaigns_exploded, 'in');
             }
 
-            $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-            foreach($allowed_campaigns as $camp_val){
-                $array_camp[] = $camp_val["campaign_id"];
-            }
+	            $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+	            foreach((is_array($allowed_campaigns) ? $allowed_campaigns : []) as $camp_val){
+	                $array_camp[] = $camp_val["campaign_id"] ?? '';
+	            }
 
             $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
                 ->orderBy("campaign_id")
                 ->get("vicidial_campaigns", NULL, "closer_campaigns");
-            foreach($closer_campaigns as $row){
-                if(!empty($row['closer_campaigns'])){
-                    $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
-                    $closer_camp .= " ".$trimmed_cc;
-                }
-            }
-			
+	            foreach((is_array($closer_campaigns) ? $closer_campaigns : []) as $row){
+	                if(!empty($row['closer_campaigns'])){
+	                    $trimmed_cc = rtrim((string) $row['closer_campaigns'], " - ");
+	                    $closer_camp .= " ".$trimmed_cc;
+	                }
+	            }
+
 			if (strtoupper((string) $log_group) !== 'ADMIN') {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
 			}
 
 			$ingroups_query = $astDB->get("vicidial_inbound_groups", NULL, "group_id");
-			foreach ($ingroups_query as $row) {
-				$closer_camp .= " ".$row["group_id"];
+			foreach ((is_array($ingroups_query) ? $ingroups_query : []) as $row) {
+				$closer_camp .= " ".($row["group_id"] ?? '');
 			}
 
-            $explodedCloserCamps = explode(" ", ltrim((string) $closer_camp));
+            				$explodedCloserCamps = array_filter(explode(" ", ltrim((string) $closer_camp)), static fn($value) => (string) $value !== '');
 			$group_SQL = "'".implode("','",$explodedCloserCamps)."'";
 
 			$i=1;
@@ -187,22 +193,22 @@
 				}
 				$i++;
 			}
-		
+
 			$group_SQL 								= preg_replace("/,$/i",'',$group_SQL);
 		}
 		if ($group_ct > 0) {
 			$group_SQL 							= "AND vcl.campaign_id IN($group_SQL)";
 		}
-		
+
 		$RUNgroup								=$i;
 	} else {
 		$RUNgroup								= 0;
 	}
-	
+
 	if (!empty($lists)) {
 		//$list_SQL 								= "";
 		$list_SQL								= implode("','", $lists);
-		
+
 		//$i										= 0;
 		//$array_list 							= Array();
 		//while ($i < $list_ct) {
@@ -211,10 +217,10 @@
 		//	//array_push($array_list, $lists[$i]);
 		//	$i++;
 		//}
-		
+
 		if (in_array("ALL", (is_array($lists) ? $lists : []))) {
 			$list_SQL 							= "";
-			
+
 			if (in_array("ALL", (is_array($campaigns) ? $campaigns : []))) {
 				$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 				$array_list = $SELECTQuery;
@@ -222,11 +228,11 @@
 				$i									= 0;
 				while ($i < $campaign_ct) {
 					$camp_id = $campaigns[$i];
-					$astDB->WHERE("campaign_id", $camp_id);
+					$astDB->where("campaign_id", $camp_id);
 					$SELECTQuery = $astDB->get("vicidial_lists", null, "list_id");
 					//$query_list = mysqli_query($astDB,"SELECT list_id FROM vicidial_lists WHERE campaign_id = '$camp_id';");
 					$array_list = $SELECTQuery;
-					
+
 					$i++;
 				}
 			}
@@ -243,7 +249,7 @@
 			//}
 		}
 	}
-	
+
 	if (!empty($dispo_stats)) {
 		$i= 0;
 		//$array_status 							= Array();
@@ -254,16 +260,17 @@
 			//array_push($array_status, $dispo_stats[$i]);
 			$i++;
 		}
-		
+
 		if ( (in_array("ALL", (is_array($dispo_stats) ? $dispo_stats : []))) ) {
 			$status_SQL 						= "";
 		} else {
 			$status_SQL 						= preg_replace("/,$/i",'',$status_SQL);
-			$status_SQL 						= "AND vl.status IN ($status_SQL)";
+			$status_SQL_vcl 					= "AND vcl.status IN ($status_SQL)";
 			$status_SQL_2 						= "AND vu.status IN ($status_SQL)";
+			$status_SQL 						= "AND vl.status IN ($status_SQL)";
 		}
 	}
-	
+
 	// if ($log_group !== "ADMIN") {
 	// 	if ($log_group !== 'SUPERVISOR') {
 	// 		$stringv 								= go_getall_allowed_users($log_group);
@@ -274,73 +281,72 @@
 	// }  else{
 		$user_group_SQL 						= "";
 	// }
-	
+
 	$export_fields_SQL 							= "";
-	
+
 	$duration_sql = "vl.length_in_sec as call_duration,";
 	$duration_sql2 = "vcl.length_in_sec as call_duration,";
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
 		$query = "SELECT count(vl.user) as row_count
-            FROM vicidial_log vl 
-            LEFT JOIN vicidial_list vi 
-            ON vi.lead_id=vl.lead_id 
-            LEFT JOIN vicidial_users vu 
-            ON vu.user=vl.user 
-            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-            $list_SQL $campaign_SQL 
-            $user_group_SQL $status_SQL 
+            FROM vicidial_log vl
+            LEFT JOIN vicidial_list vi
+            ON vi.lead_id=vl.lead_id
+            LEFT JOIN vicidial_users vu
+            ON vu.user=vl.user
+            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            $list_SQL $campaign_SQL
+            $user_group_SQL $status_SQL
             order by vl.call_date";
 	}
-	
+
 	if ($RUNgroup > 0 && $RUNcampaign < 1) {
 		$query	= "SELECT count(vcl.user) as row_count
-            FROM vicidial_closer_log vcl 
+            FROM vicidial_closer_log vcl
             LEFT JOIN vicidial_list vi
             ON vcl.lead_id = vi.lead_id
-            LEFT JOIN vicidial_users vu 
+            LEFT JOIN vicidial_users vu
             ON vcl.user = vu.user
             WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
-            AND vi.lead_id = vcl.lead_id 
-            $list_SQL $group_SQL 
-            $user_group_SQL $status_SQL 
-            order by vcl.call_date";
+            AND vi.lead_id = vcl.lead_id
+	            $list_SQL $group_SQL
+	            $user_group_SQL $status_SQL_vcl
+	            order by vcl.call_date";
 	}
 	if ($RUNcampaign > 0 && $RUNgroup > 0) {
 		$query = "SELECT SUM(t.row_count) as row_count FROM
             ((SELECT count(vl.user) as row_count
-            FROM vicidial_log vl 
-            LEFT JOIN vicidial_list vi 
-            ON vi.lead_id=vl.lead_id 
-            LEFT JOIN vicidial_users vu 
-            ON vu.user=vl.user 
-            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-            $list_SQL $campaign_SQL 
-            $user_group_SQL $status_SQL 
+            FROM vicidial_log vl
+            LEFT JOIN vicidial_list vi
+            ON vi.lead_id=vl.lead_id
+            LEFT JOIN vicidial_users vu
+            ON vu.user=vl.user
+            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            $list_SQL $campaign_SQL
+            $user_group_SQL $status_SQL
             order by vl.call_date
             ) UNION (
             SELECT count(vcl.user) as row_count
-            FROM vicidial_closer_log vcl 
+            FROM vicidial_closer_log vcl
             LEFT JOIN vicidial_list vi
             ON vcl.lead_id = vi.lead_id
-            LEFT JOIN vicidial_users vu 
+            LEFT JOIN vicidial_users vu
             ON vcl.user = vu.user
             WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
-            AND vi.lead_id = vcl.lead_id 
-            $list_SQL $group_SQL 
-            $user_group_SQL $status_SQL 
-            order by vcl.call_date)) t";
+            AND vi.lead_id = vcl.lead_id
+	            $list_SQL $group_SQL
+	            $user_group_SQL $status_SQL_vcl
+	            order by vcl.call_date)) t";
     }
-	$results = $astDB->rawQuery($query);
+	$results = ($query !== '') ? $astDB->rawQuery($query) : [];
 
-	foreach($results as $result){
-		$row_count = intval($result['row_count']);
+	foreach((is_array($results) ? $results : []) as $result){
+		$row_count = intval($result['row_count'] ?? 0);
 	}
-	
+
 	$apiresults = [
-		"result" => "success", 
+		"result" => "success",
 		"query" => $query,
 		"row_count" => $row_count
 	];
 ?>
-

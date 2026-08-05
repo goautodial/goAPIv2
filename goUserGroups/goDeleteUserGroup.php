@@ -36,10 +36,11 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
- 
+
     // POST or GET Variables
 	$user_group 										= $astDB->escape(($_REQUEST['user_group'] ?? ''));
-	
+	$ip_address 										= $log_ip ?? '';
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -53,25 +54,25 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
 		];
-	} elseif (empty($user_group) || is_null($user_group)) { 
+	} elseif (empty($user_group) || is_null($user_group)) {
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for User Group."
-		]; 
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
@@ -79,42 +80,42 @@
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
-				}				
+				}
 			}
-			
+
 			$astDB->where("user_group", $user_group);
-			$fresults 									= $astDB->getOne("vicidial_user_groups", "user_group");	
-		
+			$fresults 									= $astDB->getOne("vicidial_user_groups", "user_group");
+
 			if($astDB->count > 0) {
-				$dataUserGroup 							= $fresults["user_group"];
-							
+				$dataUserGroup 							= is_array($fresults) ? ($fresults["user_group"] ?? '') : '';
+
 				if ($dataUserGroup) {
 					$astDB->where("user_group", $dataUserGroup);
 					$astDB->where("user_group", "ADMIN", "!=");
-					$astDB->delete("vicidial_user_groups");				
+					$astDB->delete("vicidial_user_groups");
 					$log_id 							= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $astDB->getLastQuery());
 
 					$goDB->where("user_group", $dataUserGroup);
 					$goDB->where("user_group", "ADMIN", "!=");
-					$goDB->delete("user_access_group");				
+					$goDB->delete("user_access_group");
 					$log_id 							= log_action($goDB, 'DELETE', $log_user, $ip_address, "Deleted User Group: $dataUserGroup", $log_group, $goDB->getLastQuery());
-					
+
 					$apiresults 						= [
 						"result" 							=> "success",
 						"data"								=> [$astDB->getLastQuery(), $goDB->getLastQuery()]
-					];								
+					];
 				} else {
 					$err_msg 							= error_handle("10010");
 					$apiresults 						= [
-						"code" 								=> "10010", 
+						"code" 								=> "10010",
 						"result" 								=> $err_msg
 					];
 					//$apiresults = array("result" => "Error: SQL Query error or not allowed query.");
-				}			
+				}
 			} else {
 				$err_msg 								= error_handle("41004", "user_group. Does not exist");
 				$apiresults 							= [
-					"code" 									=> "41004", 
+					"code" 									=> "41004",
 					"result" 								=> $err_msg
 				];
 				//$apiresults = array("result" => "Error: User Group doesn't exist.");
@@ -122,10 +123,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

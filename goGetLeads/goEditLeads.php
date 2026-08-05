@@ -5,7 +5,7 @@
  * @copyright 	Copyright (C) 2018 GOautodial Inc.
  * @author     	Alexander Abenoja
  * @author     	Chris Lomuntad
- * @author		Demian Lizandro A. Biscocho 
+ * @author		Demian Lizandro A. Biscocho
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -62,11 +62,13 @@
 	$is_customer 										= $astDB->escape(($_REQUEST["is_customer"] ?? ''));
 	$user_id 											= $astDB->escape(($_REQUEST["user_id"] ?? ''));
 	$user 												= $astDB->escape(($_REQUEST["user"] ?? ''));
-	$avatar 											= $astDB->escape(($_REQUEST["avatar"] ?? '')); //base64 encoded	
+	$avatar 											= $astDB->escape(($_REQUEST["avatar"] ?? '')); //base64 encoded
+	$web_form_address 								= $astDB->escape(($_REQUEST["web_form_address"] ?? ''));
 	$defGender 											= ["M", "F", "U"];
-    $custom_fields                                      = ($_REQUEST["custom_fields"] ?? '');
-	
-	// ERROR CHECKING 
+	    $custom_fields                                      = ($_REQUEST["custom_fields"] ?? []);
+		$custom_fields 									= is_array($custom_fields) ? $custom_fields : [];
+
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -82,43 +84,43 @@
 	} elseif (empty($lead_id) || is_null($lead_id)) {
 		$err_msg 										= error_handle("40001");
 		$apiresults 									= [
-			"code" 											=> "40001", 
-			"result" 										=> $err_msg 
+			"code" 											=> "40001",
+			"result" 										=> $err_msg
 		];
 	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $first_name) && !empty($first_name)) {
 		$err_msg 										= error_handle("41004", "first_name");
 		$apiresults 									= [
-			"code" 											=> "41004", 
+			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
 	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $middle_initial) && !empty($middle_initial)) {
 		$err_msg 										= error_handle("41004", "middle_initial");
 		$apiresults 									= [
-			"code" 											=> "41004", 
+			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
 	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $last_name) && !empty($last_name)) {
 		$err_msg 										= error_handle("41004", "last_name");
 		$apiresults 									= [
-			"code" 											=> "41004", 
+			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
 	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $phone_number) && !empty($phone_number)) {
 		$err_msg 										= error_handle("41004", "phone_number");
 		$apiresults 									= [
-			"code" 											=> "41004", 
+			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
 	} elseif (!in_array($gender, (is_array($defGender) ? $defGender : [])) && $gender != null) {
 		$err_msg 										= error_handle("41006", "gender");
 		$apiresults 									= [
-			"code" 											=> "41006", 
+			"code" 											=> "41006",
 			"result" 										=> $err_msg
 		];
-	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $web_form_address)) {
+	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", (string) $web_form_address)) {
 		$err_msg 										= error_handle("41004", "web_form_address");
 		$apiresults 									= [
-			"code" 											=> "41004", 
+			"code" 											=> "41004",
 			"result" 										=> $err_msg
 		];
 	} else {
@@ -127,15 +129,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// check lead_id if it exists
 			$astDB->where("lead_id", $lead_id);
 			$fresultsv 									= $astDB->get("vicidial_list");
-			
+
 			if ($astDB->count > 0) {
 				foreach ($fresultsv as $fresults) {
 					$data_first_name 					= $fresults["first_name"];
@@ -157,7 +159,7 @@
 					$data_title 						= $fresults["title"];
 					$data_status 						= $fresults["status"];
 				}
-				
+
 				if (empty($first_name))
 					$first_name 						= $data_first_name;
 				if  (empty($middle_initial))
@@ -194,7 +196,7 @@
 					$title								= $data_title;
 				if (empty($status))
 					$status								= $data_status;
-					
+
 				$data									= [
 					"first_name"							=> $first_name,
 					"middle_initial"						=> $middle_initial,
@@ -219,30 +221,38 @@
 
 				$astDB->where("lead_id", $lead_id);
 				$astDB->update("vicidial_list", $data);
-                
+
                 if (!empty($custom_fields)) {
+                    $cf_data = [];
                     foreach ($custom_fields as $field => $value) {
-                        $cf_data[$field] = $astDB->escape($value);
+                        if ((string) $field !== '') {
+                            $cf_data[$field] = $astDB->escape($value);
+                        }
                     }
-                    
-                    $astDB->where("lead_id", $lead_id);
-                    $rslt = $astDB->get("custom_{$list_id}");
-                    
-                    if ($astDB->count > 0) {
+
+                    $customTable = "custom_" . preg_replace('/\D+/', '', (string) $list_id);
+                    $customTableExists = ($customTable !== 'custom_') ? $astDB->rawQuery("SHOW TABLES LIKE '$customTable'") : [];
+
+                    if (!empty($cf_data) && is_array($customTableExists) && count($customTableExists) > 0) {
                         $astDB->where("lead_id", $lead_id);
-                        $astDB->update("custom_{$list_id}", $cf_data);
-                    } else {
-                        $cf_data["lead_id"] = $lead_id;
-                        $astDB->insert("custom_{$list_id}", $cf_data);
+                        $rslt = $astDB->get($customTable);
+
+                        if ($astDB->count > 0) {
+                            $astDB->where("lead_id", $lead_id);
+                            $astDB->update($customTable, $cf_data);
+                        } else {
+                            $cf_data["lead_id"] = $lead_id;
+                            $astDB->insert($customTable, $cf_data);
+                        }
                     }
                 }
-				
+
 				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
-					
+
 				// check if existing customer
 				$goDB->where("lead_id", $lead_id);
 				$goDB->getOne("go_customers", "lead_id");
-								
+
 				if ($goDB->count < 1) {
 					if ($is_customer > 0) {
 						$datago                                         = [
@@ -272,17 +282,17 @@
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id. Doesn't exist");
 				$apiresults 							= [
-					"code" 									=> "41004", 
+					"code" 									=> "41004",
 					"result" 								=> $err_msg
 				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

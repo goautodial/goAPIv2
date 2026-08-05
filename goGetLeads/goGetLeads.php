@@ -50,10 +50,22 @@
 	$goVarLimit 										= $astDB->escape(($_REQUEST["goVarLimit"] ?? ''));
 	$start_date										= $astDB->escape(($_REQUEST["start_date"] ?? ''));
 	$end_date                                                                           	= $astDB->escape(($_REQUEST["end_date"] ?? ''));
-	$limit 												= 1000;	
+	$limit 												= 1000;
+	$goVarLimit 										= is_numeric($goVarLimit) ? (int) $goVarLimit : 0;
 	$list_ids											= [];
+	$listids											= [];
+	$list_ids_filter								= "1=1";
+	$list_ids_filter2								= "";
+	$search_filter2									= "";
+	$filterDispo2									= "";
+	$filterAddress2								= "";
+	$filterCity2									= "";
+	$filterState2								= "";
+	$date_filter2									= "";
+	$dataLeadid = $dataListid = $dataFirstName = $dataMiddleInitial = $dataLastName = $dataPhoneNumber = $dataDispo = $dataLastCallTime = [];
+	$dataLeadid2 = $dataListid2 = $dataFirstName2 = $dataMiddleInitial2 = $dataLastName2 = $dataPhoneNumber2 = $dataDispo2 = $dataLastCallTime2 = [];
 
-	// ERROR CHECKING 
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -78,52 +90,51 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level,user_group");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		$usergroup										= $fresults["user_group"];
-        
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
+		$usergroup										= is_array($fresults) ? ($fresults["user_group"] ?? '') : '';
+
         $tenant                                         = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
-		
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
             $astDB->where('user_group', $log_group);
             $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+            $allowed_campaigns = is_array($allowed_camps) ? ($allowed_camps['allowed_campaigns'] ?? '') : '';
 
-            if ($tenant) {
-                // $astDB->where("user_group", $usergroup);
-                $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-                    $allowed_campaigns = explode(" ", trim($allowed_campaigns));
-                    $astDB->where('campaign_id', $allowed_campaigns, 'in');
-                }
-            } else {
-                if (strtoupper((string) $usergroup) !== 'ADMIN') {
-                    if ($user_level < 9) {
-                        // $astDB->where("user_group", $usergroup);
-                        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-                        if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
-                            $allowed_campaigns = explode(" ", trim($allowed_campaigns));
-                            $astDB->where('campaign_id', $allowed_campaigns, 'in');
-                        }
-                    }
-                }
-            }
-            $SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-            $testLastQuery = $astDB->getLastQuery();
-            $array_camp = [];
-            foreach($SELECTQuery as $camp_val){
-                $array_camp[] 						= $camp_val["campaign_id"];
-            }
-            
+			            if ($tenant) {
+			                // $astDB->where("user_group", $usergroup);
+			                if (!preg_match("/ALL-CAMPAIGN/", (string) $allowed_campaigns)) {
+			                    $allowed_campaigns = explode(" ", trim((string) $allowed_campaigns));
+			                    $astDB->where('campaign_id', $allowed_campaigns, 'in');
+			                }
+			            } else {
+			                if (strtoupper((string) $usergroup) !== 'ADMIN') {
+			                    if ($userlevel < 9) {
+			                        // $astDB->where("user_group", $usergroup);
+			                        if (!preg_match("/ALL-CAMPAIGN/", (string) $allowed_campaigns)) {
+			                            $allowed_campaigns = explode(" ", trim((string) $allowed_campaigns));
+			                            $astDB->where('campaign_id', $allowed_campaigns, 'in');
+			                        }
+			                    }
+			                }
+			            }
+	            $SELECTQuery 							= $astDB->get("vicidial_campaigns", NULL, "campaign_id");
+	            $testLastQuery = $astDB->getLastQuery();
+	            $array_camp = [];
+	            foreach((is_array($SELECTQuery) ? $SELECTQuery : []) as $camp_val){
+	                $array_camp[] 						= $camp_val["campaign_id"] ?? '';
+	            }
+
 			if (is_array($array_camp)) {
 				$listids								= $astDB
 				->where("campaign_id", $array_camp, "IN")
 				->get("vicidial_lists", NULL, "list_id");
 			}
-	
+
 			if ($astDB->count > 0){
-				foreach ($listids as $listid) {
-					$list_ids[]							= $listid["list_id"];
+				foreach ((is_array($listids) ? $listids : []) as $listid) {
+					$list_ids[]							= $listid["list_id"] ?? '';
 				}
 
                 if (!in_array(998, (is_array($list_ids) ? $list_ids : [])) || !in_array(999, (is_array($list_ids) ? $list_ids : []))) {
@@ -131,7 +142,7 @@
                     $list_ids[] = 999;
                 }
 			}
-            
+
             $search_filter = "";
 			if (!empty($search)) {
 				// $astDB->where("phone_number", "%$search%", "LIKE");
@@ -163,7 +174,7 @@
 				// $astDB->where("address1", "%$address_filter%", "LIKE");
 				// $astDB->orWhere("address2", "%$address_filter%", "LIKE");
 			}
-			
+
             $filterCity = "";
 			if (!empty($city_filter)) {
 				$filterCity = "AND city LIKE '%$city_filter%'";
@@ -191,7 +202,7 @@
 			if ($goVarLimit > 0) {
 				$limit 									= $goVarLimit;
 			}
-			
+
             if ((is_countable($list_ids) ? count($list_ids) : 0) < 1) {
                 $list_ids = ["-1"];
             }
@@ -202,47 +213,47 @@
                 $list_ids_filter = "list_id IN ($list_ids_string)";
                 $list_ids_filter2 = "AND vl.list_id IN ($list_ids_string)";
             }
-            
+
 			// $fresultsv 									= $astDB->get("vicidial_list", $limit, array("lead_id", "list_id", "first_name", "middle_initial", "last_name", "phone_number", "status", "last_local_call_time"));
             // $fresultsv_query                            = "SELECT lead_id, list_id, first_name, middle_initial, last_name, phone_number, status FROM vicidial_list WHERE $list_ids_filter $date_filter $filterDispo $filterCity $filterState $search_filter $filterAddress LIMIT $limit;";
-            $fresultsv_query = "(SELECT lead_id, 
-                            list_id, 
-                            first_name, 
-                            middle_initial, 
-                            last_name, 
-                            phone_number, 
-                            status 
-                            FROM 
-                            vicidial_list 
-                            WHERE $list_ids_filter $date_filter $filterDispo $filterCity $filterState $search_filter $filterAddress 
-                            LIMIT $limit) 
-                            UNION 
-                            (SELECT vl.lead_id, 
-                            vi.list_id, 
-                            vi.first_name, 
-                            vi.middle_initial, 
-                            vi.last_name, 
-                            vl.phone_number, 
-                            vl.status 
-                            FROM vicidial_log vl, vicidial_list vi 
+            $fresultsv_query = "(SELECT lead_id,
+                            list_id,
+                            first_name,
+                            middle_initial,
+                            last_name,
+                            phone_number,
+                            status
+                            FROM
+                            vicidial_list
+                            WHERE $list_ids_filter $date_filter $filterDispo $filterCity $filterState $search_filter $filterAddress
+                            LIMIT $limit)
+                            UNION
+                            (SELECT vl.lead_id,
+                            vi.list_id,
+                            vi.first_name,
+                            vi.middle_initial,
+                            vi.last_name,
+                            vl.phone_number,
+                            vl.status
+                            FROM vicidial_log vl, vicidial_list vi
                             WHERE vl.lead_id=vi.lead_id $list_ids_filter2 $date_filter2 $filterDispo2 $filterCity2 $filterState2 $search_filter2 $filterAddress
                             LIMIT $limit)";
             $fresultsv                                  = $astDB->rawQuery($fresultsv_query);
-			
+
 			// GET CUSTOMER LIST
 			$fresultsvgo 								= $goDB->get("go_customers", null, "lead_id");
 			$lead_ids_go								= [];
-			
-			foreach ($fresultsvgo as $fresultsgo) {
+
+			foreach ((is_array($fresultsvgo) ? $fresultsvgo : []) as $fresultsgo) {
 				$lead_id_go								= $fresultsgo["lead_id"];
-				
+
 				$lead_ids_go[] = $lead_id_go;
 			}
-			
+
 			$datago 									= [];
 			$data 										= [];
-			
-			foreach ($fresultsv as $fresults) {
+
+			foreach ((is_array($fresultsv) ? $fresultsv : []) as $fresults) {
 				if (in_array($fresults['lead_id'], (is_array($lead_ids_go) ? $lead_ids_go : []))) {
 					$dataLeadid[] 						= $fresults['lead_id'];
 					$dataListid[] 						= $fresults['list_id'];
@@ -252,7 +263,7 @@
 					$dataPhoneNumber[] 					= $fresults['phone_number'];
 					$dataDispo[] 						= $fresults['status'];
 					// $dataLastCallTime[] 				= $fresults['last_local_call_time'];
-					
+
 					$datago[] = $fresults;
 				} else {
                         $dataLeadid2[] 						= $fresults['lead_id'];
@@ -263,34 +274,34 @@
                         $dataPhoneNumber2[] 				= $fresults['phone_number'];
                         $dataDispo2[] 						= $fresults['status'];
                         // $dataLastCallTime2[] 				= $fresults['last_local_call_time'];
-                    
+
                         $data[] = $fresults;
 				}
 			}
-			
+
 			if ($search_customers) {
 				$apiresults 							= [
-					"result" 								=> "success", 
-					"lead_id" 								=> $dataLeadid, 
-					"list_id" 								=> $dataListid, 
-					"first_name" 							=> $dataFirstName, 
-					"middle_initial" 						=> $dataMiddleInitial, 
-					"last_name" 							=> $dataLastName, 
-					"phone_number" 							=> $dataPhoneNumber, 
-					"status" 								=> $dataDispo, 
-					"last_call_time" 						=> $dataLastCallTime, 
+					"result" 								=> "success",
+					"lead_id" 								=> $dataLeadid,
+					"list_id" 								=> $dataListid,
+					"first_name" 							=> $dataFirstName,
+					"middle_initial" 						=> $dataMiddleInitial,
+					"last_name" 							=> $dataLastName,
+					"phone_number" 							=> $dataPhoneNumber,
+					"status" 								=> $dataDispo,
+					"last_call_time" 						=> $dataLastCallTime,
 					"data" 									=> $datago
 				];
 			} else {
 				$apiresults 							= [
-					"result" 								=> "success", 
-					"lead_id" 								=> $dataLeadid2, 
-					"list_id" 								=> $dataListid2, 
-					"first_name" 							=> $dataFirstName2, 
-					"middle_initial" 						=> $dataMiddleInitial2, 
-					"last_name" 							=> $dataLastName2, 
-					"phone_number" 							=> $dataPhoneNumber2, 
-					"status" 								=> $dataDispo2, 
+					"result" 								=> "success",
+					"lead_id" 								=> $dataLeadid2,
+					"list_id" 								=> $dataListid2,
+					"first_name" 							=> $dataFirstName2,
+					"middle_initial" 						=> $dataMiddleInitial2,
+					"last_name" 							=> $dataLastName2,
+					"phone_number" 							=> $dataPhoneNumber2,
+					"status" 								=> $dataDispo2,
 					"last_call_time" 						=> $dataLastCallTime2,
 					"data" 									=> $data
 				];
@@ -298,10 +309,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

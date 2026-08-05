@@ -474,7 +474,8 @@
 	$result = json_decode(json_encode($result), true);
 
 	//OUTPUT DATA HEADER//
-	$csv_header = array_keys($result[0]);
+	$result = is_array($result) ? $result : [];
+	$csv_header = (isset($result[0]) && is_array($result[0])) ? array_keys($result[0]) : [];
 
 	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $csv_header);
 
@@ -490,7 +491,7 @@
 	if ($custom_fields == "Y")	{
 	//    for ($i = 0 ; $i < (is_countable($array_list) ? count($array_list) : 0); $i++) {
 	//		$list_id = $array_list[$i];
-		foreach ($array_list as $list) {
+		foreach ((is_array($array_list) ? $array_list : []) as $list) {
 			$list_id = is_array($list) ? ($list['list_id'] ?? '') : $list;
 			$list_id = preg_replace('/[^0-9]/', '', (string) $list_id);
 			if ($list_id === '') {
@@ -521,7 +522,7 @@
 		//$keys 										= array_keys($active_list_fields);
 
 		//for ($i = 0; $i < (is_countable($keys) ? count($keys) : 0); $i++) {
-		foreach ($active_list_fields as $fields) {
+		foreach ((is_array($active_list_fields) ? $active_list_fields : []) as $fields) {
 			//$list_id 								= $keys[$i];
 			//for ($x = 0; $x < count($active_list_fields[$list_id]);$x++) {
 			foreach ($fields as $field) {

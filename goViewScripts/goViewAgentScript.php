@@ -21,6 +21,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var string $log_user */
+/** @var string|false $log_group */
+/** @var string $log_ip */
+
 if (isset($_GET["lead_id"]))	{$lead_id=$astDB->escape($_GET["lead_id"]);}
 	elseif (isset($_POST["lead_id"]))	{$lead_id=$astDB->escape($_POST["lead_id"]);}
 	$vendor_id = isset($_GET["vendor_id"]) || isset($_POST["vendor_id"]) ? $_GET["vendor_id"] ?? $_POST["vendor_id"] : "";
@@ -191,6 +197,32 @@ if (isset($_GET["user_group"]))				{$user_group=$astDB->escape($_GET["user_group
 if (isset($_GET["web_vars"]))			{$web_vars=$astDB->escape($_GET["web_vars"]);}
 	elseif (isset($_POST["web_vars"]))	{$web_vars=$astDB->escape($_POST["web_vars"]);}
 
+$goAgentScriptVars = [
+	'lead_id', 'vendor_id', 'vendor_lead_code', 'gmt_offset_now', 'phone_code', 'phone_number', 'title', 'first_name', 'middle_initial', 'last_name',
+	'address1', 'address2', 'address3', 'city', 'state', 'province', 'postal_code', 'country_code', 'gender', 'date_of_birth',
+	'alt_phone', 'email', 'security_phrase', 'comments', 'user', 'pass', 'campaign', 'phone_login', 'original_phone_login', 'phone_pass',
+	'fronter', 'closer', 'group', 'channel_group', 'SQLdate', 'epoch', 'uniqueid', 'customer_zap_channel', 'customer_server_ip', 'server_ip',
+	'SIPexten', 'session_id', 'phone', 'parked_by', 'dispo', 'dialed_number', 'dialed_label', 'source_id', 'rank', 'owner',
+	'camp_script', 'in_script', 'script_width', 'script_height', 'fullname', 'recording_filename', 'recording_id', 'user_custom_one',
+	'user_custom_two', 'user_custom_three', 'user_custom_four', 'user_custom_five', 'preset_number_a', 'preset_number_b', 'preset_number_c',
+	'preset_number_d', 'preset_number_e', 'preset_number_f', 'preset_dtmf_a', 'preset_dtmf_b', 'did_id', 'did_extension', 'did_pattern',
+	'did_description', 'closecallid', 'xfercallid', 'agent_log_id', 'ScrollDIV', 'ignore_list_script', 'CF_uses_custom_fields', 'entry_list_id',
+	'call_id', 'user_group', 'web_vars', 'length_in_sec', 'format', 'ACTION', 'query_date', 'list_id', 'list_name', 'list_description',
+	'script_name', 'script_text', 'call_script', 'form_field_value'
+];
+foreach ($goAgentScriptVars as $goAgentScriptVar) {
+	if (!isset($$goAgentScriptVar)) {
+		$$goAgentScriptVar = '';
+	}
+}
+$goAgentScripts = '';
+$non_latin = 0;
+$timeclock_end_of_day = '';
+$agentonly_callback_campaign_lock = '';
+$ScrollDIV = is_numeric($ScrollDIV) ? (int) $ScrollDIV : 0;
+$ignore_list_script = is_numeric($ignore_list_script) ? (int) $ignore_list_script : 0;
+$script_height = is_numeric($script_height) ? (int) $script_height : 0;
+$CF_uses_custom_fields = (string) $CF_uses_custom_fields;
 
 header ("Content-type: text/html; charset=utf-8");
 header ("Cache-Control: no-cache, must-revalidate");  // HTTP/1.1
@@ -202,7 +234,7 @@ $NOW_DATE = date("Y-m-d");
 $NOW_TIME = date("Y-m-d H:i:s");
 $CIDdate = date("mdHis");
 $ENTRYdate = date("YmdHis");
-$MT[0]='';
+$MT = [''];
 $agents='@agents';
 $script_height -= 20;
 
@@ -213,23 +245,23 @@ $IFRAME=0;
 //$stmt = "SELECT use_non_latin,timeclock_end_of_day,agentonly_callback_campaign_lock FROM system_settings;";
 $rslt = $astDB->getOne('system_settings', 'use_non_latin,timeclock_end_of_day,agentonly_callback_campaign_lock');
 $qm_conf_ct = $astDB->getRowCount();
-if ($qm_conf_ct > 0) {
-	$non_latin =							$rslt['use_non_latin'];
-	$timeclock_end_of_day =					$rslt['timeclock_end_of_day'];
-	$agentonly_callback_campaign_lock =		$rslt['agentonly_callback_campaign_lock'];
+if ($qm_conf_ct > 0 && is_array($rslt)) {
+	$non_latin =							$rslt['use_non_latin'] ?? 0;
+	$timeclock_end_of_day =					$rslt['timeclock_end_of_day'] ?? '';
+	$agentonly_callback_campaign_lock =		$rslt['agentonly_callback_campaign_lock'] ?? '';
 }
 ##### END SETTINGS LOOKUP #####
 ###########################################
 
 if ($non_latin < 1) {
 	$user = preg_replace("/[^-_0-9a-zA-Z]/","",(string) $user);
-	$pass = preg_replace("/[^\.-_0-9a-zA-Z]/","",$pass);
+	$pass = preg_replace("/[^\.-_0-9a-zA-Z]/","",(string) $pass);
 	$length_in_sec = preg_replace("/[^0-9]/","",(string) $length_in_sec);
 	$phone_code = preg_replace("/[^0-9]/","",(string) $phone_code);
 	$phone_number = preg_replace("/[^0-9]/","",(string) $phone_number);
 } else {
 	$user = preg_replace("/\'|\"|\\\\|;/","",(string) $user);
-	$pass = preg_replace("/\'|\"|\\\\|;/","",$pass);
+	$pass = preg_replace("/\'|\"|\\\\|;/","",(string) $pass);
 }
 
 
@@ -281,12 +313,12 @@ else
 
 $ignore_list_script_override = 'N';
 //$stmt = "SELECT ignore_list_script_override FROM vicidial_inbound_groups where group_id='$group';";
-$astDB->where('group_id', $group);
-$rslt = $astDB->getOne('vicidial_inbound_groups', 'ignore_list_script_override');
-$ilso_ct = $astDB->getRowCount();
-if ($ilso_ct > 0) {
-	$ignore_list_script_override =		$rslt['ignore_list_script_override'];
-}
+	$astDB->where('group_id', $group);
+	$rslt = $astDB->getOne('vicidial_inbound_groups', 'ignore_list_script_override');
+	$ilso_ct = $astDB->getRowCount();
+	if ($ilso_ct > 0 && is_array($rslt)) {
+		$ignore_list_script_override =		$rslt['ignore_list_script_override'] ?? 'N';
+	}
 if ($ignore_list_script_override == 'Y')
 	{$ignore_list_script = 1;}
 
@@ -296,12 +328,12 @@ if ($ignore_list_script < 1) {
 	//$queryGetlist_id = "SELECT list_id FROM vicidial_list WHERE lead_id='$lead_id';";
     $astDB->where('lead_id', $lead_id);
 	$qrslt = $astDB->getOne('vicidial_list', 'list_id');
-	$list_id = $qrslt['list_id'];
+	$list_id = is_array($qrslt) ? ($qrslt['list_id'] ?? $list_id) : $list_id;
 
 	//$stmt="SELECT agent_script_override from vicidial_lists where list_id='$list_id';";
     $astDB->where('list_id', $list_id);
 	$rslt = $astDB->getOne('vicidial_lists', 'agent_script_override');
-	$agent_script_override =		$rslt['agent_script_override'];
+	$agent_script_override =		is_array($rslt) ? ($rslt['agent_script_override'] ?? '') : '';
 	if ((string) $agent_script_override !== '')
 		{$call_script = $agent_script_override;}
 }
@@ -312,20 +344,23 @@ if ($ignore_list_script < 1) {
 $astDB->where('vl.list_id', $list_id);
 $astDB->join('vicidial_campaigns vc', 'vc.campaign_id=vl.campaign_id', 'LEFT');
 $gsrslt = $astDB->getOne('vicidial_lists vl', 'vc.campaign_script');
-$call_script = $gsrslt['campaign_script'];
+$campaign_script = is_array($gsrslt) ? ($gsrslt['campaign_script'] ?? '') : '';
+if ((string) $campaign_script !== '') {
+	$call_script = $campaign_script;
+}
 
 
 //$stmt="SELECT list_name,list_description from vicidial_lists where list_id='$list_id';";
 $astDB->where('list_id', $list_id);
 $rslt = $astDB->getOne('vicidial_lists', 'list_name,list_description');
-$list_name =			$rslt['list_name'];
-$list_description =		$rslt['list_description'];
+$list_name =			is_array($rslt) ? ($rslt['list_name'] ?? '') : '';
+$list_description =		is_array($rslt) ? ($rslt['list_description'] ?? '') : '';
 
 //$stmt="SELECT script_name,script_text from vicidial_scripts where script_id='$call_script';";
 $astDB->where('script_id', $call_script);
 $rslt = $astDB->getOne('vicidial_scripts', 'script_name,script_text');
-$script_name =		$rslt['script_name'];
-$script_text =		stripslashes($rslt['script_text']);
+$script_name =		is_array($rslt) ? ($rslt['script_name'] ?? '') : '';
+$script_text =		is_array($rslt) ? stripslashes((string) ($rslt['script_text'] ?? '')) : '';
 
 if (preg_match("/iframe\ssrc/i",$script_text)) {
 	$IFRAME = 1;
@@ -355,13 +390,13 @@ if (preg_match("/iframe\ssrc/i",$script_text)) {
 	$alt_phone = preg_replace('/\s/i','+',(string) $alt_phone);
 	$email = preg_replace('/\s/i','+',(string) $email);
 	$security_phrase = preg_replace('/\s/i','+',(string) $security_phrase);
-	$comments = preg_replace('/\s/i','+',$comments);
-	$user = preg_replace('/\s/i','+',$user);
-	$pass = preg_replace('/\s/i','+',$pass);
+	$comments = preg_replace('/\s/i','+',(string) $comments);
+	$user = preg_replace('/\s/i','+',(string) $user);
+	$pass = preg_replace('/\s/i','+',(string) $pass);
 	$campaign = preg_replace('/\s/i','+',(string) $campaign);
 	$phone_login = preg_replace('/\s/i','+',(string) $phone_login);
 	$original_phone_login = preg_replace('/\s/i','+',(string) $original_phone_login);
-	$phone_pass = preg_replace('/\s/i','+',$phone_pass);
+	$phone_pass = preg_replace('/\s/i','+',(string) $phone_pass);
 	$fronter = preg_replace('/\s/i','+',(string) $fronter);
 	$closer = preg_replace('/\s/i','+',(string) $closer);
 	$group = preg_replace('/\s/i','+',(string) $group);
@@ -385,7 +420,7 @@ if (preg_match("/iframe\ssrc/i",$script_text)) {
 	$camp_script = preg_replace('/\s/i','+',(string) $camp_script);
 	$in_script = preg_replace('/\s/i','+',(string) $in_script);
 	$script_width = preg_replace('/\s/i','+',(string) $script_width);
-	$script_height = preg_replace('/\s/i','+',$script_height);
+	$script_height = preg_replace('/\s/i','+',(string) $script_height);
 	$fullname = preg_replace('/\s/i','+',(string) $fullname);
 	$recording_filename = preg_replace('/\s/i','+',(string) $recording_filename);
 	$recording_id = preg_replace('/\s/i','+',(string) $recording_id);
@@ -406,7 +441,7 @@ if (preg_match("/iframe\ssrc/i",$script_text)) {
 	$did_extension = preg_replace('/\s/i','+',(string) $did_extension);
 	$did_pattern = preg_replace('/\s/i','+',(string) $did_pattern);
 	$did_description = preg_replace('/\s/i','+',(string) $did_description);
-	$web_vars = preg_replace('/\s/i','+',$web_vars);
+	$web_vars = preg_replace('/\s/i','+',(string) $web_vars);
 }
 
 $script_text = preg_replace('/--A--lead_id--B--/i',"$lead_id",$script_text);
@@ -502,9 +537,10 @@ if ($CF_uses_custom_fields == 'Y') {
     $astDB->where('field_label', ['vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner'], 'not in');
 	$rslt = $astDB->get('vicidial_lists_fields', null, 'field_label,field_type');
 	$cffn_ct = $astDB->getRowCount();
-	foreach ($rslt as $row) {
-		$field_name_id = $row['field_label'];
+	foreach ((is_array($rslt) ? $rslt : []) as $row) {
+		$field_name_id = $row['field_label'] ?? '';
 		$field_name_tag = "--A--" . $field_name_id . "--B--";
+		$form_field_value = '';
 		if (isset($_GET["$field_name_id"]))				{$form_field_value=$astDB->escape($_GET["$field_name_id"]);}
 			elseif (isset($_POST["$field_name_id"]))	{$form_field_value=$astDB->escape($_POST["$field_name_id"]);}
 		$script_text = preg_replace("/$field_name_tag/i","$form_field_value",(string) $script_text);
@@ -518,11 +554,11 @@ $script_text = stripslashes((string) $script_text);
 //$goAgentScripts .=  "<!-- IFRAME$IFRAME -->\n";
 //$goAgentScripts .=  "<!-- $script_id -->\n";
 $goAgentScripts .=  "<TABLE WIDTH=100%><TR><TD>\n";
-if ( $IFRAME < 1 && $ScrollDIV > 0 || preg_match("/IGNORENOSCROLL/i",$script_text) )
+if ( $IFRAME < 1 && $ScrollDIV > 0 || preg_match("/IGNORENOSCROLL/i", (string) $script_text) )
 	{$goAgentScripts .=   "<div id=\"NewScriptContents\">";}
 $goAgentScripts .=  "<center><B>$script_name</B></center><BR>\n";
 $goAgentScripts .=  "$script_text\n";
-if ( $IFRAME < 1 && $ScrollDIV > 0 || preg_match("/IGNORENOSCROLL/i",$script_text) )
+if ( $IFRAME < 1 && $ScrollDIV > 0 || preg_match("/IGNORENOSCROLL/i", (string) $script_text) )
 	{$goAgentScripts .=  "</div>";}
 $goAgentScripts .=  "</TD></TR></TABLE>\n";
 

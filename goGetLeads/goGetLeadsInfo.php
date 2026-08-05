@@ -39,6 +39,13 @@
 
 	    $lead_id 											= isset($_REQUEST['lead_id']) ? $astDB->escape($_REQUEST['lead_id']) : '';
 	$limit 												= (isset($_REQUEST['limit'])) ? $astDB->escape($_REQUEST['limit']) : 100;
+	$limit 												= is_numeric($limit) ? (int) $limit : 100;
+	$fresultsc 										= [];
+	$vlog_call_date = $vlog_length_in_sec = $vlog_status = $vlog_user = $vlog_campaign_id = $vlog_list_id = $vlog_term_reason = $vlog_phone_number = [];
+	$vclog_call_date = $vclog_length_in_sec = $vclog_status = $vclog_user = $vclog_campaign_id = $vclog_list_id = $vclog_queue_seconds = $vclog_term_reason = [];
+	$alog_event_time = $alog_campaign_id = $alog_agent_log_id = $alog_pause_sec = $alog_wait_sec = $alog_talk_sec = $alog_dispo_sec = $alog_status = $alog_user_group = $alog_sub_status = [];
+	$rlog_start_time = $rlog_start_epoch = $rlog_end_epoch = $rlog_length_in_sec = $rlog_recording_id = $rlog_filename = $rlog_location = $rlog_user = [];
+	$custom_fields_values 						= [];
 
 	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
@@ -67,12 +74,12 @@
 			->getOne("vicidial_users", "user,user_level");
 
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
+		$userlevel										= is_array($fresults) ? ($fresults["user_level"] ?? 0) : 0;
 
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			$astDB->where('lead_id', $lead_id);
 			$fresults 									= $astDB->getOne('vicidial_list');
-			$list_id 									= $fresults['list_id'];
+			$list_id 									= is_array($fresults) ? ($fresults['list_id'] ?? '') : '';
 			$is_customer 								= 0;
 
 			if ($astDB->count > 0) {
@@ -82,7 +89,7 @@
 				$is_customer 							= $goDB->getRowCount();
 			}
 
-			$data 										= empty($fresultsc) ? $fresults : array_merge($fresults, $fresultsc) ;
+			$data 										= empty($fresultsc) ? (is_array($fresults) ? $fresults : []) : array_merge((is_array($fresults) ? $fresults : []), (is_array($fresultsc) ? $fresultsc : [])) ;
 
 			if (!empty($data)) {
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
@@ -105,9 +112,9 @@
 				$astDB->orderBy("call_date", "DESC");
 				$vlog_query		 						= $astDB->get("vicidial_log", $limit, "*");
 
-				foreach ($vlog_query as $vlog_fetch) {
+				foreach ((is_array($vlog_query) ? $vlog_query : []) as $vlog_fetch) {
 					$vlog_call_date[] 					= $vlog_fetch['call_date'];
-					$vlog_length_in_sec[] 				= gmdate("H:i:s", $vlog_fetch['length_in_sec']);
+					$vlog_length_in_sec[] 				= gmdate("H:i:s", (int) ($vlog_fetch['length_in_sec'] ?? 0));
 					$vlog_status[] 						= $vlog_fetch['status'];
 					$vlog_user[] 						= $vlog_fetch['user'];
 					$vlog_campaign_id[] 				= $vlog_fetch['campaign_id'];
@@ -143,9 +150,9 @@
 				$astDB->orderBy("call_date", "DESC");
 				$vclog_query		 					= $astDB->get("vicidial_closer_log", $limit, "*");
 
-				foreach ($vclog_query as $vclog_fetch) {
+				foreach ((is_array($vclog_query) ? $vclog_query : []) as $vclog_fetch) {
 					$vclog_call_date[] 					= $vclog_fetch['call_date'];
-					$vclog_length_in_sec[] 				= gmdate("H:i:s", $vclog_fetch['length_in_sec']);
+					$vclog_length_in_sec[] 				= gmdate("H:i:s", (int) ($vclog_fetch['length_in_sec'] ?? 0));
 					$vclog_status[] 					= $vclog_fetch['status'];
 					$vclog_user[] 						= $vclog_fetch['user'];
 					$vclog_campaign_id[] 				= $vclog_fetch['campaign_id'];
@@ -181,7 +188,7 @@
 				$astDB->orderBy("event_time", "DESC");
 				$alog_query		 						= $astDB->get("vicidial_agent_log", $limit, "*");
 
-				foreach ($alog_query as $alog_fetch) {
+				foreach ((is_array($alog_query) ? $alog_query : []) as $alog_fetch) {
 					$alog_event_time[] 					= $alog_fetch['event_time'];
 					$alog_campaign_id[] 				= $alog_fetch['campaign_id'];
 					$alog_agent_log_id[] 				= $alog_fetch['agent_log_id'];
@@ -212,9 +219,9 @@
 					->orderBy("start_time", "DESC")
 					->get("recording_log", $limit, "*");
 
-				foreach ($rlog_query as $rlog_fetch) {
+				foreach ((is_array($rlog_query) ? $rlog_query : []) as $rlog_fetch) {
 					$rlog_start_time[] 					= $rlog_fetch['start_time'];
-					$rlog_length_in_sec[] 				= gmdate("H:i:s", $rlog_fetch['length_in_sec']);
+					$rlog_length_in_sec[] 				= gmdate("H:i:s", (int) ($rlog_fetch['length_in_sec'] ?? 0));
 					$rlog_start_epoch[] 				= $rlog_fetch['start_epoch'];
 					$rlog_end_epoch[] 					= $rlog_fetch['end_epoch'];
 					$rlog_recording_id[] 				= $rlog_fetch['recording_id'];
@@ -253,22 +260,27 @@
 				$astDB->orderBy('field_rank,field_order', 'DESC');
 				$cfl_query								= $astDB->get('vicidial_lists_fields');
 				if ($astDB->count > 0) {
-					foreach ($cfl_query as $row) {
+					foreach ((is_array($cfl_query) ? $cfl_query : []) as $row) {
 						$custom_fields[] = $row;
-						$list_fields[] = $row['field_label'];
+						$list_fields[] = $row['field_label'] ?? '';
 					}
 				}
 
+				$list_fields 						= array_filter($list_fields, static fn($field) => (string) $field !== '');
 				$fields 								= implode(",", $list_fields);
+				$tableName 							= "custom_" . preg_replace('/\D+/', '', (string) $list_id);
+				$customTableExists 				= ($tableName !== 'custom_') ? $astDB->rawQuery("SHOW TABLES LIKE '$tableName'") : [];
 
-				$cf_query								= $astDB
-					->where("lead_id", $lead_id)
-					->getOne("custom_$list_id", $fields);
+				if ($fields !== '' && is_array($customTableExists) && count($customTableExists) > 0) {
+					$cf_query								= $astDB
+						->where("lead_id", $lead_id)
+						->getOne($tableName, $fields);
 
-				if ($astDB->count > 0) {
-					foreach ($cf_query as $field => $value) {
-						//if($CF_fetch[$x] !== NULL)
-						$custom_fields_values[$field] 		=  str_replace(",", " | ", $value);
+					if ($astDB->count > 0) {
+						foreach ((is_array($cf_query) ? $cf_query : []) as $field => $value) {
+							//if($CF_fetch[$x] !== NULL)
+							$custom_fields_values[$field] 		=  str_replace(",", " | ", (string) $value);
+						}
 					}
 				}
 
