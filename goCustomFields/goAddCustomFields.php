@@ -25,7 +25,8 @@
 
     $list_id            = preg_replace('/[^0-9]/', '', (string) ($_REQUEST['list_id'] ?? ''));
     $list_id            = $astDB->escape($list_id);
-    $field_label        = str_replace(" ","_",trim(($_REQUEST['field_label'] ?? '')));
+    $field_label        = str_replace(" ","_",trim((string) ($_REQUEST['field_label'] ?? '')));
+    $field_label        = preg_replace('/[^A-Za-z0-9_]/', '', (string) $field_label);
     $field_name         = ($_REQUEST['field_name'] ?? '');
     $field_description  = ($_REQUEST['field_description'] ?? '');
     $field_rank         = ($_REQUEST['field_rank'] ?? '');
@@ -35,6 +36,9 @@
     $field_size         = ($_REQUEST['field_size'] ?? '');
     $field_max          = ($_REQUEST['field_max'] ?? '');
     $field_default      = ($_REQUEST['field_default'] ?? '');
+    if ($field_type === 'SCRIPT' && trim((string) $field_options) === '' && trim((string) $field_default) !== '') {
+        $field_options = $field_default;
+    }
     $field_required     = ($_REQUEST['field_required'] ?? '');
     $multi_position     = ($_REQUEST['field_option_position'] ?? '');
     $name_position      = ($_REQUEST['field_position'] ?? '');
@@ -48,7 +52,8 @@
 
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
 
-    if ( strlen($field_label) < 1 || strlen((string) $field_name) < 2 || strlen((string) $field_size) < 1 ) {
+    $typeRequiresSize = in_array($field_type, ['TEXT', 'AREA'], true);
+    if ( strlen($field_label) < 1 || !preg_match('/^[A-Za-z0-9_]+$/', (string) $field_label) || strlen((string) $field_name) < 2 || ($typeRequiresSize && strlen((string) $field_size) < 1) ) {
 		$err_msg = error_handle("40001");
 		$apiresults = ["code" => "40001", "result" => $err_msg];
         //$apiresults = array("result" => "ERROR: You must enter a field label, field name and field size  - ".$list_id." | ".$field_label." | ".$field_name." | ".$field_size);
@@ -73,21 +78,23 @@
 	            } */
 
 	            if (!$tableExists) {
-                $field_sql .= "CREATE TABLE custom_$list_id (lead_id INT(9) UNSIGNED PRIMARY KEY NOT NULL, $field_label ";
+                $field_sql .= "CREATE TABLE `custom_$list_id` (`lead_id` INT(9) UNSIGNED PRIMARY KEY NOT NULL, `$field_label` ";
 	            }else{
-	                $field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+	                $field_sql .= "ALTER TABLE `custom_$list_id` ADD `$field_label` ";
 	            }
 
             if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
-                $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                $field_options_array = explode("\n", str_replace("\r\n", "\n", (string) ($field_options ?? '')));
                 $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                 $te=0;
                 while ($te < $field_options_count)
                     {
-                    if (preg_match("/,/",$field_options_array[$te]))
+                    $optionLine = trim((string) $field_options_array[$te]);
+                    if ($optionLine !== '')
                         {
-                        $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
+                        $field_options_value_array = explode(",", $optionLine, 2);
+                        $field_options_value = str_replace(" ", "_", trim((string) $field_options_value_array[0]));
+                        $field_options_ENUM .= "'" . $astDB->escape($field_options_value) . "',";
                         }
                     $te++;
                    }
@@ -101,15 +108,17 @@
 
 
             if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
-                $field_options_array = explode("\n", (string) ($field_options ?? ''));
+                $field_options_array = explode("\n", str_replace("\r\n", "\n", (string) ($field_options ?? '')));
                 $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
                 $te=0;
                 while ($te < $field_options_count)
                     {
-                    if (preg_match("/,/",$field_options_array[$te]))
+                    $optionLine = trim((string) $field_options_array[$te]);
+                    if ($optionLine !== '')
                         {
-                        $field_options_value_array = explode(",",$field_options_array[$te]);
-                        $field_options_ENUM .= "'".str_replace(" ","_",$field_options_value_array[0]."',");
+                        $field_options_value_array = explode(",", $optionLine, 2);
+                        $field_options_value = str_replace(" ", "_", trim((string) $field_options_value_array[0]));
+                        $field_options_ENUM .= "'" . $astDB->escape($field_options_value) . "',";
                         }
                     $te++;
                    }
@@ -140,7 +149,7 @@
             }
 
             if ( !empty($field_default) && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
-                $field_sql .= "DEFAULT '$field_default'";
+                $field_sql .= "DEFAULT '" . $astDB->escape($field_default) . "'";
             }
 
             if ( empty($field_default) ) {
