@@ -76,6 +76,7 @@ if (isset($_GET['goSecurity'])) { $security_phrase = $astDB->escape($_GET['goSec
 
 if (isset($_GET['goCustomFields'])) { $custom_fields = $astDB->escape($_GET['goCustomFields']); }
     else if (isset($_POST['goCustomFields'])) { $custom_fields = $astDB->escape($_POST['goCustomFields']); }
+$province = $province ?? '';
 
 $MT[0] = '';
 $errormsg = 0;
@@ -131,10 +132,10 @@ if ($is_logged_in) {
 			$comments = preg_replace("/--AMP--/i", '&', $comments);
 			$comments = preg_replace("/--QUES--/i", '?', $comments);
 			$comments = preg_replace("/--POUND--/i", '#', $comments);
-			
+
 			$address1 = preg_replace("/\r/i", '', (string) $address1);
 			$address1 = preg_replace("/\n/i", '!N', $address1);
-			
+
 			$address2 = preg_replace("/\r/i", '', (string) $address2);
 			$address2 = preg_replace("/\n/i", '!N', $address2);
 
@@ -170,7 +171,7 @@ if ($is_logged_in) {
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update('vicidial_list', $updateData);
 		}
-		
+
 		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && (string) $custom_fields !== '')) {
 			$custom_fields = explode(',', $custom_fields);
 			$fields = [];
@@ -178,49 +179,49 @@ if ($is_logged_in) {
 			foreach($custom_fields as $label) {
 				if (isset($_GET[$label])) { $fields[$label] = $astDB->escape($_GET[$label]); }
 					else if (isset($_POST[$label])) { $fields[$label] = $astDB->escape($_POST[$label]); }
-				
+
 				$fields[$label] = preg_replace("/\r/i", '', $fields[$label]);
 				$fields[$label] = preg_replace("/\n/i", '!N', $fields[$label]);
 				$fields[$label] = preg_replace("/--AMP--/i", '&', $fields[$label]);
 				$fields[$label] = preg_replace("/--QUES--/i", '?', $fields[$label]);
 				$fields[$label] = preg_replace("/--POUND--/i", '#', $fields[$label]);
-				
+
 				if ((string) $fields[$label] !== '') {
 					$custom_fields_SQL .= "$label,";
 				}
 			}
 			$custom_fields_SQL = trim($custom_fields_SQL, ",");
-			
+
 			$astDB->where('lead_id', $lead_id);
 			$rslt = $astDB->getOne('vicidial_list', 'list_id');
 			$list_id = $rslt['list_id'];
 			$custom_listid = "custom_{$list_id}";
-			
+
 			$astDB->has($custom_listid);
 			$lastError = $astDB->getLastError();
 			if (strlen((string) $lastError) < 1) {
 				$astDB->where('lead_id', $lead_id);
 				$rslt = $astDB->getOne($custom_listid);
 				$lead_exist = $astDB->getRowCount();
-				
+
 				if ($lead_exist) {
 					$astDB->where('lead_id', $lead_id);
 					$astDB->update($custom_listid, $fields);
-					
+
                     $custom_last_SQL = $astDB->getLastQuery();
 					$update_success = $astDB->getRowCount();
 				} else {
 					$fields['lead_id'] = $lead_id;
-					
+
 					$astDB->insert($custom_listid, $fields);
-                    
+
                     $custom_last_SQL = $astDB->getLastQuery();
 					$lastError = $astDB->getLastError();
 					$insert_success = $astDB->getRowCount();
 				}
 			}
 		}
-		
+
 		$random = (random_int(1000000, 9999999) + 10000000);
 		//$stmt="UPDATE vicidial_live_agents set random_id='$random' where user='$user' and server_ip='$server_ip';";
         $astDB->where('user', $user);
@@ -235,7 +236,7 @@ if ($is_logged_in) {
             $errno = strlen((string) $astDB->getLastError());
 			$retry_count++;
 		}
-        
+
         $APIResult = [ "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError, "last_query" => $custom_last_SQL ];
     }
 } else {

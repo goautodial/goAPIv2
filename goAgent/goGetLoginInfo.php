@@ -36,16 +36,16 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
+
 	$log_user 										= $session_user;
 	$log_group 										= go_get_groupid($session_user, $astDB);
 	$log_ip 										= $astDB->escape(($_REQUEST['log_ip'] ?? ''));
-	
+
 	$user 											= $astDB->escape(($_REQUEST['goUserID'] ?? ''));
 	$isPBP 											= $astDB->escape(($_REQUEST['isPBP'] ?? ''));
 	$campaign	 									= $astDB->escape(($_REQUEST['goCampaign'] ?? ''));
 
-	$SIP_server ??= 'kamailio';
+	$SIP_server = $SIP_server ?? 'kamailio';
 
 	if (empty($log_user) || is_null($log_user)) {
 		$APIResult 									= [
@@ -57,21 +57,21 @@
 			"code" 										=> "40001",
 			"result" 									=> $err_msg
 		];
-    } else {    
-		$is_logged_in 								= check_agent_login($astDB, $user);			
+    } else {
+		$is_logged_in 								= check_agent_login($astDB, $user);
 		$forever_stop 								= 0;
-		$HKuser_level 								= 1;						
+		$HKuser_level 								= 1;
 		$user_abb 									= "{$user}{$user}{$user}{$user}";
-		
+
 		$data 										= [
 			'is_logged_in' 								=> $is_logged_in
 		];
-		
+
 		while (strlen((string) $user_abb) > 4 && $forever_stop < 200) {
-			$user_abb 								= preg_replace("/^\./i","",(string) $user_abb);   
+			$user_abb 								= preg_replace("/^\./i","",(string) $user_abb);
 			$forever_stop++;
-		}	
-			
+		}
+
 			$default_settings 						= [
 				'LCAe' 									=> [],
 				'LCAc' 									=> [],
@@ -345,7 +345,7 @@
 				'threeway_cid' 							=> '',
 				'nextdial_seconds' 						=> 3
 			];
-			
+
 		$cols										= "
 			user,
 			pass,
@@ -379,13 +379,13 @@
 			agent_call_log_view_override,
 			agent_choose_blended,
 			agent_lead_search_override,
-			preset_contact_search		
+			preset_contact_search
 		";
-		
+
 		$userinfo 									= $astDB
 			->where('user', $user)
 			->getOne('vicidial_users', $cols);
-			
+
 		if ($userinfo) {
 			$user_name 								= $userinfo['user'];
 			$pass_hash								= $userinfo['pass_hash'];
@@ -393,26 +393,26 @@
 			$phone_login							= $userinfo['phone_login'];
 			$phone_pass								= $userinfo['phone_pass'];
 			$user_level								= $userinfo['user_level'];
-			
+
 			$pass_hash_enabled						= $astDB->getOne('system_settings', 'pass_hash_enabled');
-		
+
 			// if pass_hash_enabled
 			if ($pass_hash_enabled) {
 				$userinfo['pass'] 					= $pass_hash;
 			}
 
 			$U_scheduled_callbacks 					= $userinfo['scheduled_callbacks'];
-			unset($userinfo['scheduled_callbacks']);		
-			
+			unset($userinfo['scheduled_callbacks']);
+
 			$userinfo['user_closer_campaigns'] 		= $userinfo['closer_campaigns'];
 			unset($userinfo['closer_campaigns']);
-		
+
 			$data 									= array_merge($data, [
-				'user_info' 							=> $userinfo 
+				'user_info' 							=> $userinfo
 			]);
-		
-			$usergroup 								= get_settings('usergroup', $astDB, $user_group);	
-			
+
+			$usergroup 								= get_settings('usergroup', $astDB, $user_group);
+
 			if (!empty($phone_login)) {
 				$cols								= "
 					extension,
@@ -494,14 +494,14 @@
 					webphone_dialpad,
 					phone_ring_timeout,
 					on_hook_agent,
-					webphone_auto_answer					
+					webphone_auto_answer
 				";
-				
+
 				$phoneinfo 							= $astDB
 					->where('login', $phone_login)
 					->where('active', 'Y')
 					->getOne('phones', $cols);
-				
+
 				if (!$phoneinfo) {
 					$phoneinfo 						= [
 						'extension' 					=> '',
@@ -575,22 +575,22 @@
 						'webphone_auto_answer' 			=> ''
 					];
 				}
-				
+
 				$asterisk_version 					= $astDB
 					->where('server_ip', $phoneinfo['server_ip'])
 					->getValue('servers', 'asterisk_version');
 				//$asterisk_version = $query['asterisk_version'];
-				
+
 				$extension 							= $phoneinfo['extension'];
 				$protocol 							= $phoneinfo['protocol'];
 				$dialplan_number					= $phoneinfo['dialplan_number'];
 				$ext_context						= $phoneinfo['ext_context'];
-				
+
 				if ($protocol == 'EXTERNAL') {
 					$protocol 						= 'Local';
 					$extension 						= "$dialplan_number@$ext_context";
 				}
-				
+
 				if (preg_match("/Zap/i", (string) $protocol)) {
 					if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", (string) $asterisk_version)) {
 						$do_nothing 				= 1;
@@ -598,21 +598,21 @@
 						$protocol					= 'DAHDI';
 					}
 				}
-				
+
 				$SIP_user 							= "$protocol/$extension";
 				$SIP_user_DiaL 						= "$protocol/$extension";
 				$qm_extension 						= $extension;
-				
+
 				if (preg_match('/8300/', (string) $dialplan_number) && strlen((string) $dialplan_number) < 5 && $protocol == 'Local') {
 					$SIP_user 						= "$protocol/$extension$phone_login";
 					$qm_extension 					= "$extension$phone_login";
 				}
-				
+
 				$data 								= array_merge($data, [
-					'phone_info' 						=> $phoneinfo 
+					'phone_info' 						=> $phoneinfo
 				]);
-			}	
-			
+			}
+
 			$cols									= "
 				use_non_latin,
 				vdc_header_date_format,
@@ -633,22 +633,22 @@
 				default_language,
 				vicidial_agent_disable,
 				allow_sipsak_messages,
-				default_local_gmt			
+				default_local_gmt
 			";
-			
+
 			$systeminfo 							= $astDB->getOne('system_settings', $cols);
-			
+
 			$data 									= array_merge($data, [
-				'system_info' 							=> $systeminfo 
+				'system_info' 							=> $systeminfo
 			]);
-			
+
 			$nextdial_secondsSQL 					= '';
 			$nextResult 							= $astDB->rawQuery("SHOW COLUMNS FROM `vicidial_campaigns` LIKE 'nextdial_seconds'");
-			
+
 			if ($nextResult) {
 				$nextdial_secondsSQL 				= ",nextdial_seconds";
 			}
-			
+
 			$cols									= "
 				campaign_id,
 				park_ext,
@@ -755,9 +755,9 @@
 				in_group_dial,
 				in_group_dial_select,
 				pause_after_next_call,
-				owner_populate{$nextdial_secondsSQL}			
+				owner_populate{$nextdial_secondsSQL}
 			";
-			
+
 			if (isset($campaign) && (string) $campaign !== '') {
 				$astDB->where('campaign_id', $campaign);
 			} else {
@@ -768,18 +768,18 @@
 					$astDB->orderBy('campaign_id', 'desc');
 				}
 			}
-			
+
 			$campinfo 								= $astDB->getOne('vicidial_campaigns', $cols);
-			
+
 			if ($campinfo) {
 				$rslt 								= $astDB
 					->where('campaign_id', $campinfo['campaign_id'])
 					->orderBy('pause_code', 'asc')
 					->get('vicidial_pause_codes', null, 'pause_code,pause_code_name,billable');
-				
+
 				$pause_codes_ct 					= $astDB->getRowCount();
 				$pause_codes						= [];
-				
+
 				if ($astDB->count > 0) {
 					foreach ($rslt as $row) {
 						$pause 						= $row['pause_code'];
@@ -790,9 +790,9 @@
 						//    {$VARCBstatusesLIST .= " {$status}";}
 						$pause_codes = is_array($pause_codes) ? $pause_codes : [];
 						ksort($pause_codes);
-					}			
+					}
 				}
-				
+
 				$VARingroups 						= [];
 				$VARingroup_handlers 				= [];
 				$VARphonegroups 					= [];
@@ -800,11 +800,11 @@
 				$INgrpCT 							= 0;
 				$EMAILgrpCT 						= 0;
 				$PHONEgrpCT 						= 0;
-				
+
 				if ( ($campinfo['campaign_allow_inbound'] == 'Y') && ($campinfo['dial_method'] != 'MANUAL') ) {
 					$closer_campaigns 				= preg_replace("/^ | -$/", "", $campinfo['closer_campaigns']);
 					$closer_campaigns 				= explode(" ", (string) ($closer_campaigns ?? ''));
-					
+
 					//$stmt="select group_id,group_handling from vicidial_inbound_groups where active = 'Y' and group_id IN($closer_campaigns) order by group_id limit 800;";
 					$rslt 							= $astDB
 						->where('active', 'Y')
@@ -813,26 +813,26 @@
 						->get('vicidial_inbound_groups', 500, 'group_id,group_handling');
 
 					$closer_ct 						= $astDB->getRowCount();
-					
+
 					if ($closer_ct) {
 						foreach ($rslt as $row) {
 							$INgrpCT++;
 							$VARingroups[$row['group_id']] 					= $row['group_id'];
 							$VARingroup_handlers[$row['group_handling']] 	= $row['group_id'];
-							
+
 							if ($row['group_handling'] == "EMAIL") { // Make a list of ingroups for email handling groups and one for phones, so there is no overlap
 								$VARemailgroups[$row['group_id']] = $VARingroups[$row['group_id']];
 							} else {
 								$VARphonegroups[$row['group_id']] = $VARingroups[$row['group_id']];
-							}						
+							}
 						}
 					}
-					
+
 					/*while ($INgrpCT < $closer_ct) {
 						$row 							= $rslt[$INgrpCT];
 						$VARingroups[$row['group_id']] 	= $row['group_id'];
 						$VARingroup_handlers[$row['group_handling']] = $row['group_id']; // PHONE OR EMAIL - this is important
-						
+
 						if ($row['group_handling']=="EMAIL") { // Make a list of ingroups for email handling groups and one for phones, so there is no overlap
 							$VARemailgroups[$row['group_id']] = $VARingroups[$row['group_id']];
 							$EMAILgrpCT++;
@@ -840,9 +840,9 @@
 							$VARphonegroups[$row['group_id']] = $VARingroups[$row['group_id']];
 							$PHONEgrpCT++;
 						}
-						
+
 						$VARingroups = is_array($VARingroups) ? $VARingroups : [];
-						
+
 						ksort($VARingroups);
 						asort($VARingroup_handlers);
 						$VARemailgroups = is_array($VARemailgroups) ? $VARemailgroups : [];
@@ -852,36 +852,36 @@
 						$INgrpCT++;
 					}*/
 				}
-				
-				$xfer_groups 						= preg_replace("/^ | -$/", "", $campinfo['xfer_groups']);
+
+				$xfer_groups 						= preg_replace("/^ | -$/", "", (string) ($campinfo['xfer_groups'] ?? ''));
 				$xfer_groups 						= explode(" ", (string) ($xfer_groups ?? ''));
 				$XFgrpCT 							= 0;
 				$VARxferGroups 						= [];
 				$VARxferGroupsNames 				= [];
 				$default_xfer_group_name 			= '';
-				
+
 				if ($campinfo['allow_closers'] == 'Y') {
 					$result 						= $astDB
 						->where('active', 'Y')
 						->where('group_id', $xfer_groups, 'IN')
 						->orderBy('group_id', 'asc')
 						->get('vicidial_inbound_groups', 500, 'group_id,group_name');
-					
-					$xfer_ct 						= $astDB->getRowCount();			
+
+					$xfer_ct 						= $astDB->getRowCount();
 					$XFgrpCT 						= 0;
-					
+
 					if ($astDB->count > 0) {
 						foreach ($result as $row) {
 							$XFgrpCT++;
 							$VARxferGroups[$row['group_id']] 		= $row['group_id'];
 							$VARxferGroupsNames[$row['group_name']] = $row['group_id'];
-							
+
 							if ($row['group_id'] == "{$campinfo['default_xfer_group']}") {
 								$default_xfer_group_name = $row['group_name'];
-							}						
+							}
 						}
 					}
-					
+
 					/*while ($XFgrpCT < $xfer_ct) {
 						$row 							= $result[$XFgrpCT];
 						$VARxferGroups[$row['group_id']] = $row['group_id'];
@@ -889,14 +889,14 @@
 						$VARxferGroups = is_array($VARxferGroups) ? $VARxferGroups : [];
 						ksort($VARxferGroups);
 						asort($VARxferGroupsNames);
-						
+
 						if ($row['group_id'] == "{$campinfo['default_xfer_group']}") {
 							$default_xfer_group_name 	= $row['group_name'];
 						}
 						$XFgrpCT++;
 					}*/
 				}
-				
+
 				$campaign_hotkeys 					= get_settings('hotkeys', $astDB, $campinfo['campaign_id']);
 				$hotkeys 							= '';
 				$hotkeysInfo 						= '';
@@ -913,14 +913,14 @@
 				$campinfo['hotkeys'] 					= $hotkeys;
 				$campinfo['hotkeys_content'] 			= $hotkeysInfo;
 				$default_settings['HK_statuses_camp'] 	= $hotkeysCnt;
-				
+
 				$quick_transfer_button_enabled 			= 0;
 				$quick_transfer_button_locked 			= 0;
-				
+
 				if (preg_match("/IN_GROUP|PRESET_1|PRESET_2|PRESET_3|PRESET_4|PRESET_5/", $campinfo['quick_transfer_button'])) {
 					$quick_transfer_button_enabled 		= 1;
 				}
-				
+
 				if (preg_match("/LOCKED/", $campinfo['quick_transfer_button'])) {
 					$quick_transfer_button_locked 		= 1;
 				}
@@ -929,16 +929,16 @@
 				$custom_3way_button_transfer_park 		= 0;
 				$custom_3way_button_transfer_view 		= 0;
 				$custom_3way_button_transfer_contacts 	= 0;
-				
+
 				if (preg_match("/PRESET_|FIELD_/", $campinfo['custom_3way_button_transfer'])) {
 					$custom_3way_button_transfer_enabled = 1;
 				}
-				
+
 				if (preg_match("/PARK_/",$campinfo['custom_3way_button_transfer'])) {
 					$custom_3way_button_transfer_park 	= 1;
 					$custom_3way_button_transfer_enabled = 1;
 				}
-				
+
 				if (preg_match("/VIEW_PRESET/",$campinfo['custom_3way_button_transfer'])) {
 					$custom_3way_button_transfer_view 	= 1;
 					$custom_3way_button_transfer_enabled = 1;
@@ -947,47 +947,47 @@
 					$custom_3way_button_transfer_contacts = 1;
 					$custom_3way_button_transfer_enabled = 1;
 				}
-				
+
 				$status_display_CALLID 					= 0;
 				$status_display_LEADID 					= 0;
 				$status_display_LISTID 					= 0;
-				
+
 				if (preg_match("/CALLID/", $campinfo['status_display_fields'])) {
 					$status_display_CALLID 				= 1;
 				}
-				
+
 				if (preg_match("/LEADID/", $campinfo['status_display_fields'])) {
 					$status_display_LEADID 				= 1;
 				}
-				
+
 				if (preg_match("/LISTID/", $campinfo['status_display_fields'])) {
 					$status_display_LISTID 				= 1;
 				}
-				
+
 				$AllowManualQueueCalls 					= 1;
 				$AllowManualQueueCallsChoice 			= 0;
-				
+
 				if ($campinfo['api_manual_dial'] == 'QUEUE') {
 					$AllowManualQueueCalls 				= 0;
 					$AllowManualQueueCallsChoice 		= 1;
 				}
-				
+
 				if ($campinfo['manual_preview_dial'] == 'DISABLED') {
 					$manual_dial_preview 						= 0;
 				}
-				
+
 				if ($campinfo['manual_dial_override'] == 'ALLOW_ALL') {
 					$userinfo['agentcall_manual'] 				= 1;
 				}
-				
+
 				if ($campinfo['manual_dial_override'] == 'DISABLE_ALL') {
 					$userinfo['agentcall_manual'] 				= 0;
 				}
-				
+
 				if ($systeminfo['user_territories_active'] < 1) {
 					$campinfo['agent_select_territories'] 		= 0;
 				}
-				
+
 				if (preg_match("/Y/", $campinfo['agent_select_territories'])) {
 					$campinfo['agent_select_territories'] 		= 1;
 				} else {
@@ -1027,31 +1027,31 @@
 				if (preg_match("/Y/", $campinfo['pause_after_each_call'])) {
 					$default_settings['dispo_check_all_pause'] 	= 1;
 				}
-				
+
 				$C_scheduled_callbacks 							= $campinfo['scheduled_callbacks'];
 				unset($campinfo['scheduled_callbacks']);
-				
+
 				$addedCB_Columns						= '';
 				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'enable_callback_alert'");
 				if ($cbRslt) {
 					$addedCB_Columns 				   .= ",enable_callback_alert,cb_noexpire,cb_sendemail";
 				}
-				
+
 				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'manual_dial_min_digits'");
 				if ($cbRslt) {
 					$addedCB_Columns 				   .= ",manual_dial_min_digits";
 				}
-				
+
 				$cbRslt 								= $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'default_country_code'");
 				if ($cbRslt) {
 					$addedCB_Columns 				   .= ",default_country_code";
 				}
-				
+
 				$cols									= "custom_fields_launch,custom_fields_list_id,url_tab_first_title,url_tab_first_url,url_tab_second_title,url_tab_second_url";
-				
+
 				$goDB->where('campaign_id', $campinfo['campaign_id']);
 				$rslt 									= $goDB->getOne('go_campaigns', "{$cols}{$addedCB_Columns}");
-				
+
 				$campinfo['custom_fields_launch'] 		= 'ONCALL';
 				$campinfo['custom_fields_list_id'] 		= '';
 				$campinfo['url_tab_first_title'] 		= '';
@@ -1063,7 +1063,7 @@
 				$campinfo['cb_sendemail'] 				= 0;
 				$campinfo['manual_dial_min_digits'] 	= 6;
 				$campinfo['default_country_code']	= '';
-				
+
 				if ($goDB->count > 0) {
 					$campinfo['custom_fields_launch'] 	= $rslt['custom_fields_launch'];
 					$campinfo['custom_fields_list_id'] 	= $rslt['custom_fields_list_id'];
@@ -1077,61 +1077,61 @@
 					$campinfo['manual_dial_min_digits'] = $rslt['manual_dial_min_digits'];
 					$campinfo['default_country_code'] = $rslt['default_country_code'];
 				}
-				
+
 				$goDB->where('setting', 'timezone');
 				$creamy = $goDB->getOne('settings', 'value');
 				$default_settings['timezone'] = $creamy['value'];
-				
+
 				$default_group_alias_cid 				= '';
 				$default_group_alias 					= $campinfo['default_group_alias'];
-				
+
 				if (strlen($default_group_alias) > 1) {
 					$astDB->where('group_alias_id', $default_group_alias);
 					$rslt 								= $astDB->get('group_alias', null, 'caller_id_number');
 					$VDIG_cidnum_ct 					= $astDB->getRowCount();
-					
+
 					if ($VDIG_cidnum_ct > 0) {
 						$row 							= $rslt[0];
 						$default_group_alias_cid 		= $row['caller_id_number'];
 					}
 				}
-				
+
 				$default_settings['default_group_alias_cid'] 	= $default_group_alias_cid;
 				$default_settings['LIVE_caller_id_number'] 		= $default_group_alias_cid;
 
 				$default_web_vars 						= '';
-				
+
 				$rslt 									= $astDB
 					->where('campaign_id', $campinfo['campaign_id'])
 					->where('user', $user_name)
 					->get('vicidial_campaign_agents', null, 'group_web_vars');
-					
+
 				$VDIG_cidogwv 							= $astDB->getRowCount();
-				
+
 				if ($VDIG_cidogwv > 0) {
 					$row 								= $rslt[0];
 					$default_web_vars 					= $row['group_web_vars'];
 				}
-				
+
 				$default_settings['default_web_vars'] 	= $default_web_vars;
 				$default_settings['LIVE_web_vars'] 		= $default_web_vars;
 
-				$data 									= array_merge($data, [ 
-					'camp_info' 							=> $campinfo 
-				]);				
+				$data 									= array_merge($data, [
+					'camp_info' 							=> $campinfo
+				]);
 			}
-			
+
 			$rslt 									= $astDB
 				->where('user', $user_name)
 				->orderBy('agent_log_id', 'desc')
 				->getOne('vicidial_agent_log', 'agent_log_id');
-				
+
 			$agent_log_id 							= $rslt['agent_log_id'];
-			
+
 			$rslt 									= $astDB
 				->where('user', $user_name)
 				->getOne('vicidial_session_data', 'session_name,conf_exten,server_ip');
-			
+
 			$session_name 							= $rslt['session_name'];
 			$session_id 							= $rslt['conf_exten'];
 			$server_ip 								= $rslt['server_ip'];
@@ -1139,31 +1139,31 @@
 			$VARCBstatusesLIST 						= '';
 			$statuses_ct 							= 0;
 			$statuses 								= [];
-			
+
 			if ($isPBP !== 'Y') {
 				##### grab the statuses that can be used for dispositioning by an agent
 				$query 								= $astDB
 					->where('selectable', 'Y')
 					->orderBy('status')
 					->get('vicidial_statuses', 500, 'status,status_name,scheduled_callback');
-				
+
 				$statuses_ct 						= $astDB->getRowCount();
-				
+
 				if ($astDB->count > 0) {
 					foreach ($query as $row) {
 						$status 					= $row['status'];
 						$status_name 				= $row['status_name'];
 						$scheduled_callback 		= $row['scheduled_callback'];
-						
+
 						$statuses[$status]			= "{$status_name}";
-						
+
 						if ($scheduled_callback == 'Y') {
 							$VARCBstatusesLIST 		.= " {$status}";
 						}
 					}
 				}
 			}
-			
+
 			if (isset($campaign) && (string) $campaign !== '') {
 				##### grab the campaign-specific statuses that can be used for dispositioning by an agent
 				$query 								= $astDB
@@ -1171,34 +1171,34 @@
 					->where('campaign_id', $campaign)
 					->orderBy('status')
 					->get('vicidial_campaign_statuses', 500, 'status,status_name,scheduled_callback');
-				
+
 				$statuses_camp_ct 					= $astDB->getRowCount();
-				
+
 				if ($astDB->count > 0) {
 					foreach ($query as $row) {
 						$status 					= $row['status'];
 						$status_name 				= $row['status_name'];
 						$scheduled_callback 		= $row['scheduled_callback'];
-						
+
 						$statuses[$status] 			= "{$status_name}";
-						
+
 						if ($scheduled_callback == 'Y') {
 							$VARCBstatusesLIST 		.= " {$status}";
 						}
-					}				
+					}
 				}
 
 				//ksort($statuses);
 				$statuses_ct += $statuses_camp_ct;
 				//$testVal 							= $astDB->getLastQuery();
 			}
-			
+
 			$statuses = is_array($statuses) ? $statuses : [];
-			
+
 			ksort($statuses); // Sorting of disposition statuses
-			
+
 			$VARCBstatusesLIST 						.= " ";
-			
+
 			$default_settings['quick_transfer_button_enabled'] 			= $quick_transfer_button_enabled;
 			$default_settings['quick_transfer_button_locked'] 			= $quick_transfer_button_locked;
 			$default_settings['custom_3way_button_transfer_enabled'] 	= $custom_3way_button_transfer_enabled;
@@ -1238,38 +1238,38 @@
 			$default_settings['status_display_LISTID'] 					= $status_display_LISTID;
 			$default_settings['AllowManualQueueCalls'] 					= $AllowManualQueueCalls;
 			$default_settings['AllowManualQueueCallsChoice'] 			= $AllowManualQueueCallsChoice;
-			
+
 			if ($campinfo['display_queue_count'] == 'N') {
 				$default_settings['callholdstatus'] 	= 0;
 			}
-			
+
 			if ($campinfo['alt_number_dialing'] == 'Y') {
 				$default_settings['alt_phone_dialing'] 	= 1;
 			} else {
 				$default_settings['alt_phone_dialing'] 	= 0;
 				$default_settings['DefaultALTDial'] 	= 0;
 			}
-			
+
 			if ($userinfo['phone_login'] == 'nophone' || $phoneinfo['on_hook_agent'] == 'Y') {
 				$default_settings['no_empty_session_warnings'] = 1;
 			}
-			
+
 			if ( $phoneinfo['enable_sipsak_messages'] > 0 && $systeminfo['allow_sipsak_messages'] > 0 && preg_match("/SIP/i", (string) $protocol) ) {
 				$default_settings['enable_sipsak'] = 1;
 			}
-			
+
 			if (strlen((string) $usergroup->agent_status_viewable_groups) > 2)
 				{$default_settings['agent_status_view'] = 1;}
-			
+
 			if ($usergroup->agent_status_view_time == 'Y')
 				{$default_settings['agent_status_view_time'] = 1;}
-			
+
 			if ($C_scheduled_callbacks == 'Y' && $U_scheduled_callbacks == '1') {
 				$default_settings['scheduled_callbacks'] = 1;
 			}
-			
-			$data 										= array_merge($data, [ 
-				'default_settings' 							=> $default_settings 
+
+			$data 										= array_merge($data, [
+				'default_settings' 							=> $default_settings
 			]);
 
 			$rslt 										= $astDB
@@ -1277,31 +1277,31 @@
 				->join('vicidial_country_iso_tld', 'country=iso3', 'left')
 				->groupBy('country_code,country')
 				->get('vicidial_phone_codes', null, 'country_code,country,tld,country_name');
-			
+
 			$country_code 								= [];
-			
+
 			if ($astDB->count > 0) {
 				foreach ($rslt as $country) {
 					$country_id 						= "{$country['country']}_{$country['country_code']}";
 					$country_code[$country_id]['code'] 	= htmlentities(addslashes($country['country_code']));
 					$country_code[$country_id]['tld'] 	= htmlentities(addslashes($country['tld']));
 					$country_code[$country_id]['name'] 	= htmlentities(addslashes($country['country_name']));
-				}			
-			}			
-			
-			$data 									= array_merge($data, [ 
-				'country_codes' 						=> $country_code 
+				}
+			}
+
+			$data 									= array_merge($data, [
+				'country_codes' 						=> $country_code
 			]);
-			
-			$APIResult 							= [ 
-				"result" 								=> "success", 
-				"data" 									=> $data 
-				//"test" 								=> $testVal 
+
+			$APIResult 							= [
+				"result" 								=> "success",
+				"data" 									=> $data
+				//"test" 								=> $testVal
 			];
 		} else {
-			$APIResult 							= [ 
-				"result" 								=> "error", 
-				"message" 								=> "User ID $user does NOT exist." 
+			$APIResult 							= [
+				"result" 								=> "error",
+				"message" 								=> "User ID $user does NOT exist."
 			];
 		}
 	}

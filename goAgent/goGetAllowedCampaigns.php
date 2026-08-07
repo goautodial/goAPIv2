@@ -20,10 +20,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+$astDB = $astDB ?? null;
+$goUser = $goUser ?? '';
+
+if (!$astDB) {
+    $APIResult = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
 $hasLocation = $astDB->escape(($_REQUEST['has_location'] ?? ''));
 
 $agent = get_settings('user', $astDB, $goUser);
 $camp_list = [];
+$allowed_camps = '';
 
 $astDB->where('extension', $agent->phone_login);
 $astDB->where('active', 'Y');
@@ -34,13 +44,13 @@ if ($phoneExist > 0) {
     // Getting Allowed Campigns
     $astDB->where('user_group', $agent->user_group);
     $query = $astDB->getOne('vicidial_user_groups', "REPLACE(TRIM(allowed_campaigns),' -','') AS allowed_campaigns");
-    
+
     // Get Campaign List
     if (!preg_match("/ALL-CAMPAIGNS/", $query['allowed_campaigns'])) {
         $cl = str_replace(" ", "','", $query['allowed_campaigns']);
         $allowed_camps = "campaign_id IN ('$cl') AND";
     }
-    
+
     if ($hasLocation) {
         $astDB->where('user', $goUser);
         $query = $astDB->get('vicidial_campaign_agents', null, 'campaign_id');
@@ -49,17 +59,17 @@ if ($phoneExist > 0) {
             $camps[] = $row['campaign_id'];
         }
         $camps = implode("','", $camps);
-        
+
         $allowed_camps = "campaign_id IN ('$camps') AND";
     }
-    
+
     $result = $astDB->rawQuery("SELECT campaign_id,campaign_name FROM vicidial_campaigns WHERE $allowed_camps active='Y' AND (campaign_vdad_exten NOT IN ('8366', '8373') OR survey_method='AGENT_XFER') ORDER BY campaign_id");
     //$camp_list = "<option value=''>".$lh->translationFor('select_a_campaign')."</option>";
     foreach ($result as $camp) {
         //$camp_list .= "<option value='{$camp['campaign_id']}'>{$camp['campaign_name']}</option>";
         $camp_list[$camp['campaign_id']] = $camp['campaign_name'];
     }
-    
+
     if ((is_countable($camp_list) ? count($camp_list) : 0)) {
         $camp_list = is_array($camp_list) ? $camp_list : [];
         ksort($camp_list);

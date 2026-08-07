@@ -36,20 +36,20 @@ $goVersion = "4.0";
 include_once(__DIR__ . '/includes/XMLParser.php');
 
 ### Check if DB variables are not set ###
-$VARDB_server ??= "localhost";
-$VARDB_user ??= "asterisku";
-$VARDB_pass ??= "asterisku1234";
-$VARDB_database ??= "asterisk";
+$VARDB_server = $VARDB_server ?? "localhost";
+$VARDB_user = $VARDB_user ?? "asterisku";
+$VARDB_pass = $VARDB_pass ?? "asterisku1234";
+$VARDB_database = $VARDB_database ?? "asterisk";
 
-$VARDBgo_server ??= "localhost";
-$VARDBgo_user ??= "goautodialu";
-$VARDBgo_pass ??= "goautodialu1234";
-$VARDBgo_database ??= "goautodial";
+$VARDBgo_server = $VARDBgo_server ?? "localhost";
+$VARDBgo_user = $VARDBgo_user ?? "goautodialu";
+$VARDBgo_pass = $VARDBgo_pass ?? "goautodialu1234";
+$VARDBgo_database = $VARDBgo_database ?? "goautodial";
 
-$VARDBgokam_server ??= "localhost";
-$VARDBgokam_user ??= "kamailiou";
-$VARDBgokam_pass ??= "kamailiou1234";
-$VARDBgokam_database ??= "kamailio";
+$VARDBgokam_server = $VARDBgokam_server ?? "localhost";
+$VARDBgokam_user = $VARDBgokam_user ?? "kamailiou";
+$VARDBgokam_pass = $VARDBgokam_pass ?? "kamailiou1234";
+$VARDBgokam_database = $VARDBgokam_database ?? "kamailio";
 ### End of DB variables ###
 
 $astDB = new MySQLiDB($VARDB_server, $VARDB_user, $VARDB_pass, $VARDB_database);
@@ -136,22 +136,26 @@ $SIPserver ??= 'kamailio'; // Put 'asterisk' if not using 'kamailio'.
 ### Check Credentials ###
 $path = getcwd();
 $files = scandir($path);
-foreach ($files as $file) {
-    if ($file !== "." && $file !== "..") {
-        $fileName = str_replace('.php', '', $file);
-        if (!preg_match('/^(index|goAPI|includes)$/', $fileName)) {
-            $fileList[] = $fileName;
+$actionsList = [];
+if (is_array($files)) {
+    foreach ($files as $file) {
+        if ($file !== "." && $file !== "..") {
+            $fileName = str_replace('.php', '', $file);
+            if (!preg_match('/^(index|goAPI|includes)$/', $fileName)) {
+                $actionsList[] = $fileName;
+            }
         }
     }
 }
-$actions = implode('|', $fileList);
+$actions = implode('|', $actionsList);
 if (isset($goAction) && $goAction != "") {
     if (preg_match("/$actions/", (string) $goAction)) {
         $system = get_settings('system', $astDB);
         //$bcrypt = (isset($bcrypt)) ? $bcrypt : 0;
-        $bcrypt = (strlen($goPass) > 30) ? 1 : 0;
+        $goPassString = (string) ($goPass ?? '');
+        $bcrypt = (preg_match('/^\$2[ayb]\$\d{2}\$/', $goPassString) || strlen($goPassString) >= 30) ? 1 : 0;
         $err_message = "Login incorrect, please try again";
-        $auth_message = user_authorization($astDB, $goUser, $goPass, '', 1, $bcrypt, 0);
+        $auth_message = user_authorization($astDB, $goUser, $goPassString, '', 1, $bcrypt, 0);
         if ($auth_message == 'GOOD')
             {$auth = 1;}
         if ($auth_message == 'LOCK')

@@ -20,44 +20,61 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    $list_id        = $astDB->escape(($_REQUEST['list_id'] ?? ''));
-    $field_label    = str_replace(" ","_",trim((string) $astDB->escape(($_REQUEST['field_label'] ?? ''))));
-    $field_id       = $astDB->escape(($_REQUEST['field_id'] ?? ''));
-    
-    $selectTable = "SHOW TABLES LIKE 'custom_$list_id'";
-    $queryResult = $astDB->rawQuery($selectTable);
-    $countResult = $astDB->getRowCount();
-    
-    if($countResult > 0){
-        //$selectColumns = "SHOW COLUMNS FROM `custom_$list_id` LIKE '$field_label';";
-        //$queryResult1 = $astDB->rawQuery($selectColumns);
-        //$countResult1 = $astDB->getRowCount();
-        $astDB->where('field_label', $field_label);
-        $astDB->where('field_id', $field_id);
-        $astDB->where('list_id', $list_id);
-        $queryResult1 = $astDB->getOne('vicidial_lists_fields');
-        $countResult1 = $astDB->getRowCount();
-        
-        if($countResult1 > 0 && $field_label != "lead_id"){
-            $table_name = 'custom_'.$list_id;
 
-            $astDB->where('field_label', $field_label);
-            $astDB->where('field_id', $field_id);
-            $astDB->where('list_id', $list_id);
-            $queryDeleteCF = $astDB->delete('vicidial_lists_fields');
-            
-            if($queryDeleteCF){
-              $astDB->dropColumnFromTable($table_name, $field_label);
+/** @var MySQLiDB $astDB */
 
-              $apiresults = ["result" => "success"];
-            }else{
-              $apiresults = ["result" => "Error: Custom Field does not exist"];
-            }
-        }else{
-            $apiresults = ["result" => "Error: $field_label does not exist"];
-        }
-    }else{
-        $apiresults = ["result" => "Error: List does not exist"];
+$list_id = preg_replace('/\D+/', '', (string) ($_REQUEST['list_id'] ?? ''));
+$list_id = $astDB->escape($list_id);
+$field_label = str_replace(' ', '_', trim((string) ($_REQUEST['field_label'] ?? '')));
+$field_label = preg_replace('/[^A-Za-z0-9_]/', '', (string) $field_label);
+$field_label = $astDB->escape($field_label);
+$field_id = $astDB->escape(($_REQUEST['field_id'] ?? ''));
+$table_name = 'custom_' . $list_id;
+
+if ($list_id === '' || $field_label === '' || $field_id === '') {
+    $apiresults = ["result" => "Error: Custom Field does not exist"];
+    return;
+}
+
+$tableResult = $astDB->rawQuery("SHOW TABLES LIKE '$table_name'");
+$tableExists = is_array($tableResult) && count($tableResult) > 0;
+
+if (!$tableExists) {
+    $apiresults = ["result" => "Error: List does not exist"];
+    return;
+}
+
+$astDB->where('field_label', $field_label);
+$astDB->where('field_id', $field_id);
+$astDB->where('list_id', $list_id);
+$fieldResult = $astDB->getOne('vicidial_lists_fields');
+$fieldExists = $astDB->getRowCount() > 0;
+
+if (!$fieldExists || $field_label === 'lead_id') {
+    $apiresults = ["result" => "Error: $field_label does not exist"];
+    return;
+}
+
+$astDB->where('field_label', $field_label);
+$astDB->where('field_id', $field_id);
+$astDB->where('list_id', $list_id);
+$queryDeleteCF = $astDB->delete('vicidial_lists_fields');
+
+if (!$queryDeleteCF) {
+    $apiresults = ["result" => "Error: Custom Field does not exist"];
+    return;
+}
+
+$columnResult = $astDB->rawQuery("SHOW COLUMNS FROM `$table_name` LIKE '$field_label'");
+if (is_array($columnResult) && count($columnResult) > 0) {
+    try {
+        $astDB->dropColumnFromTable($table_name, $field_label);
+    } catch (Throwable $exception) {
+        error_log("Delete custom field failed for $table_name.$field_label: " . $exception->getMessage());
+        $apiresults = ["result" => "Error: Unable to delete custom field column $field_label"];
+        return;
     }
+}
 
+$apiresults = ["result" => "success"];
 ?>

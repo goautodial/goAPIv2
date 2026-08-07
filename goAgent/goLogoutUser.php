@@ -21,12 +21,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+/** @var MySQLiDB|null $kamDB */
+$astDB = $astDB ?? null;
+$kamDB = $kamDB ?? null;
+$goUser = $goUser ?? '';
+$SIPserver = $SIPserver ?? 'kamailio';
+
+if (!$astDB || !$kamDB) {
+    $APIResult = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
 $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
 $user_group = $agent->user_group;
-$phone_login ??= $agent->phone_login;
-$phone_pass ??= $agent->phone_pass;
+$phone_login = $phone_login ?? $agent->phone_login;
+$phone_pass = $phone_pass ?? $agent->phone_pass;
+$NOW_TIME = $NOW_TIME ?? date('Y-m-d H:i:s');
+$StarTtimE = $StarTtimE ?? date('U');
+$no_delete_sessions = 0;
+$LogoutKickAll = 0;
+$server_ip = '';
+$session_name = '';
+$ext_context = '';
+$agent_log_id = '';
+$use_webrtc = 0;
+$conf_exten = '';
 
 if (isset($_GET['goNoDeleteSession'])) { $no_delete_sessions = $astDB->escape($_GET['goNoDeleteSession']); }
     else if (isset($_POST['goNoDeleteSession'])) { $no_delete_sessions = $astDB->escape($_POST['goNoDeleteSession']); }
@@ -47,26 +69,26 @@ if (isset($_GET['goUseWebRTC'])) { $use_webrtc = $astDB->escape($_GET['goUseWebR
 //$stmtA="SELECT conf_engine FROM servers WHERE server_ip='$server_ip';";
 $astDB->where('server_ip', $server_ip);
 $query = $astDB->getOne('servers','conf_engine');
-$conf_engine = $query['conf_engine'];
+$conf_engine = $query['conf_engine'] ?? '';
 $conf_table = "vicidial_conferences";
 
 ### Check if the agent's phone_login is currently connected
 $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
 
-if ($sipIsLoggedIn) {
+if ($sipIsLoggedIn || $use_webrtc) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
-    
+
     $astDB->where('server_ip', $phone_settings->server_ip);
     $query = $astDB->getOne('servers', 'asterisk_version');
     $asterisk_version = $query['asterisk_version'];
-    
+
     $extension = $phone_settings->extension;
     $protocol = $phone_settings->protocol;
     if ($protocol == 'EXTERNAL') {
         $protocol = 'Local';
         $extension = "{$phone_settings->dialplan_number}@{$phone_settings->ext_context}";
     }
-    
+
     if (preg_match("/Zap/i", (string) $protocol)) {
         if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", (string) $asterisk_version)) {
             $do_nothing = 1;
@@ -74,9 +96,9 @@ if ($sipIsLoggedIn) {
             $protocol = 'DAHDI';
         }
     }
-    
+
     $server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
-    
+
     ##### check to see if the user has a conf extension already, this happens if they previously exited uncleanly
     $SIP_user = "{$protocol}/{$extension}";
     if ( preg_match('/8300/', (string) $phone_settings->dialplan_number) && strlen((string) $phone_settings->dialplan_number) < 5 && $protocol == 'Local' ) {
@@ -92,19 +114,53 @@ if ($sipIsLoggedIn) {
     $astDB->where('server_ip', $server_ip);
     $query = $astDB->getOne("$conf_table", 'conf_exten');
     $prev_login_ct = $astDB->getRowCount();
-    
+
     $i=0;
     while ($i < $prev_login_ct) {
-        $conf_exten = $query['conf_exten'];
+        $conf_exten = $query['conf_exten'] ?? '';
         $i++;
     }
-    
+
+    $wcs_delete = 0;
+    $gas_delete = 0;
+    $vla_delete = 0;
+    $vlia_delete = 0;
+
+    // Always clear web/UI session rows for this agent logout. Legacy cleanup was
+    // gated by conf_exten, but missing conference data can leave stale sessions
+    // that make the next login look like a duplicate active dialer session.
+    $astDB->where('server_ip', $server_ip);
+    if ((string) $session_name !== '') {
+        $astDB->where('session_name', $session_name);
+    } else {
+        $astDB->where('extension', $extension);
+        $astDB->where('program', 'vicidial');
+    }
+    $astDB->delete('web_client_sessions');
+    $wcs_delete = $astDB->getRowCount();
+
+    $astDB->where('sess_agent_user', $user);
+    if ((string) $phone_login !== '') {
+        $astDB->where('sess_agent_phone', $phone_login);
+    }
+    $astDB->delete('go_agent_sessions');
+    $gas_delete = $astDB->getRowCount();
+
+    $astDB->where('server_ip', $server_ip);
+    $astDB->where('user', $user);
+    $astDB->delete('vicidial_live_agents');
+    $vla_delete = $astDB->getRowCount();
+
+    $astDB->where('user', $user);
+    $astDB->delete('vicidial_live_inbound_agents');
+    $vlia_delete = $astDB->getRowCount();
+
     if ((string) $conf_exten !== '') {
         $astDB->where('server_ip', $server_ip);
         $astDB->where('user', $user);
         $query = $astDB->getOne('vicidial_live_agents', 'campaign_id');
         $campaign = $query['campaign_id'];
-        
+
 		if ($no_delete_sessions < 1) {
 			##### Remove the reservation on the vicidial_conferences meetme room
 			//$stmt="UPDATE vicidial_conferences set extension='' where server_ip='$server_ip' and conf_exten='$conf_exten';";
@@ -120,11 +176,11 @@ if ($sipIsLoggedIn) {
         $astDB->where('session_name', $session_name);
         $rslt = $astDB->delete('web_client_sessions');
 		$wcs_delete = $astDB->getRowCount();
-		
+
 		$astDB->where('sess_agent_user', $user);
 		$rslt = $astDB->delete('go_agent_sessions');
 		$gas_delete = $astDB->getRowCount();
-        
+
         ##### Hangup the client phone
         $astDB->where('server_ip', $server_ip);
         $astDB->where('channel', "$protocol/$extension%", 'like');
@@ -157,7 +213,7 @@ if ($sipIsLoggedIn) {
             ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
         }
-        
+
 		if ($LogoutKickAll > 0) {
 			$local_DEF = 'Local/5555';
 			$local_AMP = '@';
@@ -188,9 +244,9 @@ if ($sipIsLoggedIn) {
             ];
             $rslt = $astDB->insert('vicidial_manager', $insertData);
 		}
-        
+
         sleep(1);
-        
+
         $astDB->where('server_ip', $server_ip);
         $astDB->where('user', $user);
         $query = $astDB->delete('vicidial_live_agents');
@@ -204,17 +260,17 @@ if ($sipIsLoggedIn) {
 			$retry_count++;
 		}
 		$vla_delete = $astDB->getRowCount();
-        
+
 		#### agent session ######
         //$stmtagent = "DELETE FROM `go_agent_sessions` WHERE `sess_agent_user` = '$user'";
         $astDB->where('sess_agent_user', $user);
         $rslt = $astDB->delete('go_agent_sessions');
-        
+
         ##### Delete the vicidial_live_inbound_agents records for this session
         $astDB->where('user', $user);
         $query = $astDB->delete('vicidial_live_inbound_agents');
         $vlia_delete = $astDB->getRowCount();
-        
+
 		$pause_sec = 0;
 		//$stmt = "SELECT pause_epoch,pause_sec,wait_epoch,talk_epoch,dispo_epoch,agent_log_id from vicidial_agent_log where agent_log_id >= '$agent_log_id' and user='$user' order by agent_log_id desc limit 1;";
         $astDB->where('agent_log_id', $agent_log_id, '>=');
@@ -222,7 +278,7 @@ if ($sipIsLoggedIn) {
         $astDB->orderBy('agent_log_id', 'desc');
         $rslt = $astDB->getOne('vicidial_agent_log', 'pause_epoch,pause_sec,wait_epoch,talk_epoch,dispo_epoch,agent_log_id');
 		$VDpr_ct = $astDB->getRowCount();
-		if ( $VDpr_ct > 0 && strlen($rslt['talk_epoch'] < 5) && strlen($rslt['dispo_epoch'] < 5) ) {
+		if ( $VDpr_ct > 0 && strlen((string) ($rslt['talk_epoch'] ?? '')) < 5 && strlen((string) ($rslt['dispo_epoch'] ?? '')) < 5 ) {
 			$agent_log_id = $rslt['agent_log_id'];
 			$pause_sec = (($StarTtimE - $rslt['pause_epoch']) + $rslt['pause_sec']);
 
@@ -252,16 +308,38 @@ if ($sipIsLoggedIn) {
         $result = 'success';
         $message = "User {$user} has been logged out";
     } else {
-        $result = 'error';
-        $message = "User {$user} is not logged in";
+        if (($wcs_delete + $gas_delete + $vla_delete + $vlia_delete) > 0) {
+            $result = 'success';
+            $message = "User {$user} has been logged out";
+        } else {
+            $result = 'error';
+            $message = "User {$user} is not logged in";
+        }
     }
-    
+
     $APIResult = [ "result" => $result, "message" => $message ];
 } else {
-    $message = "SIP exten '{$phone_login}' is NOT connected";
-    if (strlen((string) $phone_login) < 1) {
-        $message = "User '$user' does NOT have any phone extension assigned.";
+    // If SIP is already disconnected, still remove stale UI/API session rows so
+    // a subsequent login is not blocked by old state.
+    $astDB->where('sess_agent_user', $user);
+    if ((string) $phone_login !== '') {
+        $astDB->where('sess_agent_phone', $phone_login);
     }
-    $APIResult = [ "result" => "error", "message" => $message ];
+    $astDB->delete('go_agent_sessions');
+    $gas_delete = $astDB->getRowCount();
+
+    $astDB->where('user', $user);
+    $astDB->delete('vicidial_live_inbound_agents');
+    $vlia_delete = $astDB->getRowCount();
+
+    if (($gas_delete + $vlia_delete) > 0) {
+        $APIResult = [ "result" => "success", "message" => "User {$user} has been logged out" ];
+    } else {
+        $message = "SIP exten '{$phone_login}' is NOT connected";
+        if (strlen((string) $phone_login) < 1) {
+            $message = "User '$user' does NOT have any phone extension assigned.";
+        }
+        $APIResult = [ "result" => "error", "message" => $message ];
+    }
 }
 ?>

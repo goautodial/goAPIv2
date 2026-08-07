@@ -24,6 +24,7 @@
 //
 //$agent = get_settings('user', $astDB, $goUser);
 $settings = get_settings('system', $astDB);
+$user_id = '';
 //$user_group = $agent->user_group;
 
 if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP']); }
@@ -76,11 +77,11 @@ if ($cbcount) {
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
-		
+
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
 		$row['campaign_name'] = $xrslt['campaign_name'];
-		
+
 		$cb_all[$x] = $row;
 	}
 }
@@ -101,11 +102,11 @@ if ($cbcount_live) {
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
-		
+
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
 		$row['campaign_name'] = $xrslt['campaign_name'];
-		
+
 		$cb_live[$x] = $row;
 	}
 }
@@ -126,11 +127,11 @@ if ($cbcount_today) {
 		$row['short_entry_time'] = relativeTime($row['entry_time'], 1);
 		$row['long_entry_time'] = relativeTime($row['entry_time'], 6);
 		$row['gmt_offset_now'] = trim($xrslt['gmt_offset_now']);
-		
+
 		$astDB->where('campaign_id', $row['campaign_id']);
 		$xrslt = $astDB->getOne('vicidial_campaigns', 'campaign_name');
 		$row['campaign_name'] = $xrslt['campaign_name'];
-		
+
 		$cb_today[$x] = $row;
 	}
 }

@@ -1441,15 +1441,32 @@
 
         //$passSQL = "pass='$pass'";
 
+        if ($SSpass_hash_enabled > 0 && $bcrypt < 1) {
+            $aDB->where('user', $user);
+            if ($user_option == 'MGR') {
+                $aDB->where('manager_shift_enforcement_override', '1');
+            } else {
+                $aDB->where('user_level', 0, '>');
+            }
+            $aDB->where('active', 'Y');
+            $stored_user = $aDB->getOne('vicidial_users', 'pass_hash');
+            $stored_hash = (string) ($stored_user['pass_hash'] ?? '');
+
+            if ($stored_hash !== '' && preg_match('/^\$2[ayb]\$\d{2}\$/', $stored_hash) && password_verify((string) $pass, $stored_hash)) {
+                $pass_hash = $stored_hash;
+                $bcrypt = 1;
+            }
+        }
+
         $aDB->where('user', $user);
         if ($SSpass_hash_enabled > 0) {
             if ($bcrypt < 1) {
                 //$pass_hash = exec("{$cwd}/bin/bp.pl --pass=$pass");
                 //$pass_hash = preg_replace("/PHASH: |\n|\r|\t| /",'',$pass_hash);
-				$bcryptSalt = substr(base64_encode((string) $SSpass_key), 0, 22);
-				$pass_hash = crypt((string) $pass, sprintf('$2y$%02d$%s', (int) $SSpass_cost, $bcryptSalt));
-				$pass_hash = substr($pass_hash, 29, 31);
-            } else {$pass_hash = $pass;}
+					$bcryptSalt = substr(base64_encode((string) $SSpass_key), 0, 22);
+					$pass_hash = crypt((string) $pass, sprintf('$2y$%02d$%s', (int) $SSpass_cost, $bcryptSalt));
+					$pass_hash = substr($pass_hash, 29, 31);
+            } else if ($pass_hash === '') {$pass_hash = $pass;}
             //$passSQL = "pass_hash='$pass_hash'";
             $aDB->where('pass_hash', $pass_hash);
         } else {

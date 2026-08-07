@@ -204,7 +204,7 @@ if ($is_logged_in) {
             //$stmt="SELECT count(*) FROM vicidial_campaign_statuses where status='$dispo' and scheduled_callback='Y';";
             $astDB->where('status', $dispo);
             $astDB->where('scheduled_callback', 'Y');
-            $rslt = $astDB->where('vicidial_campaign_statuses');
+            $rslt = $astDB->get('vicidial_campaign_statuses');
             $cb_record_ct = $astDB->getRowCount();
             if ($cb_record_ct > 0) {
                 $CBstatus = $cb_record_ct;
@@ -249,6 +249,8 @@ if ($is_logged_in) {
             $owner_populate = $row['owner_populate'];
         }
 
+        $owner_populate = $owner_populate ?? '';
+        $ownerArray = [];
         $ownerSQL = '';
         if ( $owner_populate == 'ENABLED' && (strlen((string) $owner) < 1 || $owner == 'NULL') ) {
             $ownerArray = [ 'owner' => $user ];
@@ -864,11 +866,10 @@ if ($is_logged_in) {
 
         ##### find if script contains recording fields
         //$stmt="SELECT count(*) FROM vicidial_lists WHERE list_id='$list_id' and agent_script_override!='' and agent_script_override IS NOT NULL and agent_script_override!='NONE';";
-        $astDB->where('list_id', $list_id);
-        $astDB->where('agent_script_override', '', '!=');
-        $astDB->where('agent_script_override', null, 'IS NOT');
-        $astDB->where('agent_script_override', 'NONE', '!=');
-        $rslt = $astDB->get('vicidial_lists');
+        $rslt = $astDB->rawQuery(
+            "SELECT * FROM vicidial_lists WHERE list_id = ? AND agent_script_override != '' AND agent_script_override IS NOT NULL AND agent_script_override != 'NONE'",
+            [$list_id]
+        );
         $vls_vc_ct = $astDB->getRowCount();
         if ($vls_vc_ct > 0) {
             $script_recording_delay = 0;
@@ -998,11 +999,11 @@ if ($is_logged_in) {
             'custom_field_types' => $custom_field_types,
             'web_form_address' => $LISTweb_form_address,
             'web_form_address_two' => $LISTweb_form_address_two,
-            'ACcount' => $ACcount,
-            'ACcomments' => $ACcomments,
-            'converted_dial_code' => $converted_dial_code,
-            'call_notes' => $call_notes,
-            'CBcommentsALL' => $CBcommentsALL
+	            'ACcount' => $ACcount,
+	            'ACcomments' => $ACcomments,
+	            'converted_dial_code' => $converted_dial_code ?? '',
+	            'call_notes' => $call_notes,
+	            'CBcommentsALL' => $CBcommentsALL ?? ''
         ];
 
         $wait_sec = 0;

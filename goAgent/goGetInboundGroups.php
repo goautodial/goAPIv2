@@ -20,6 +20,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+$astDB = $astDB ?? null;
+$campaign = $campaign ?? '';
+
+if (!$astDB) {
+    $APIResult = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
+$inbound_groups = [];
+
 $astDB->where('campaign_id', $campaign);
 $query = $astDB->getOne('vicidial_campaigns', 'campaign_allow_inbound,closer_campaigns');
 

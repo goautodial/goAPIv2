@@ -20,6 +20,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+/** @var MySQLiDB|null $goDB */
+$astDB = $astDB ?? null;
+$goDB = $goDB ?? null;
+$goUser = $goUser ?? '';
+$phone_login = $phone_login ?? '';
+$phone_pass = $phone_pass ?? '';
+
+if (!$astDB || !$goDB) {
+    $APIResult = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
+$session_name = '';
+$task = '';
+$is_online = '';
+$check_last_call = 0;
+
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
 if (isset($_GET['goTask'])) { $task = $astDB->escape($_GET['goTask']); }
@@ -37,20 +55,22 @@ if (!isset($task) || (isset($task) && $task === '')) {
         $protocol = 'Local';
         $extension = "{$phone_settings->dialplan_number}@{$phone_settings->ext_context}";
     }
-    
+
     $astDB->where('sess_agent_user', $goUser);
     $astDB->where('sess_agent_phone', $phone_login);
     $astDB->where('sess_agent_status', 'INUSE');
     $rslt = $astDB->getOne('go_agent_sessions');
     $go_agent_sessions = $astDB->getRowCount();
-    
+
     $astDB->where('extension', $extension);
     $astDB->where('server_ip', $phone_settings->server_ip);
-    $astDB->where('session_name', $session_name);
+    if ((string) $session_name !== '') {
+        $astDB->where('session_name', $session_name);
+    }
     $astDB->where('program', 'vicidial');
     $rslt = $astDB->getOne('web_client_sessions');
     $web_client_sessions = $astDB->getRowCount();
-    
+
     $last_call_is_not_null = 0;
     $added_message = '';
     if ($check_last_call) {
@@ -59,7 +79,7 @@ if (!isset($task) || (isset($task) && $task === '')) {
         $last_call_is_not_null = $astDB->getRowCount();
         $added_message = " There was a problem with your session. Please re-login or reload your browser.";
     }
-    
+
     $is_logged_in = 0;
     $message = "You have been logged out from the dialer.{$added_message}";
     if ($go_agent_sessions > 0 && $web_client_sessions > 0) {
@@ -82,7 +102,7 @@ if (!isset($task) || (isset($task) && $task === '')) {
         $goDB->where('name', $goUser);
         $rslt = $goDB->update('users', ['online' => $is_online]);
     }
-    
+
     $APIResult = [ "result" => "success", "is_online" => (int)$is_online ];
 }
 ?>
