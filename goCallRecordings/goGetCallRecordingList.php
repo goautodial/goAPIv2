@@ -36,16 +36,16 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
+
 	$limit 	= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 500);
-	
+
 	// POST or GET Variables
 	$requestDataPhone = $astDB->escape(($_REQUEST['requestDataPhone'] ?? ''));
 	$start_filterdate = $astDB->escape(($_REQUEST['start_filterdate'] ?? ''));
 	$end_filterdate = $astDB->escape(($_REQUEST['end_filterdate'] ?? ''));
 	$agent_filter = $astDB->escape(($_REQUEST['agent_filter'] ?? ''));
-	
-	// ERROR CHECKING 
+
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults = [
 			"result" => "Error: goAPI User Not Defined."
@@ -64,15 +64,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$ul										= "AND vl.user_group = '$log_group'";
 			} else {
@@ -85,9 +85,9 @@
 					}
 				} else {
 					$ul 								= "";
-				}				
-			}		
-			
+				}
+			}
+
 			if (!empty($requestDataPhone)) {
 				$sqlPhone 								= "AND (vl.phone_number LIKE '$requestDataPhone%' OR vl.first_name LIKE '$requestDataPhone%' OR last_name LIKE '$requestDataPhone%')";
 			} else{
@@ -107,35 +107,40 @@
 			}
 
 
-			$query 										= "SELECT 
-					CONCAT(vl.first_name,' ',vl.last_name) AS full_name, 
-					rl.vicidial_id, 
-					vl.last_local_call_time, 
-					vl.phone_number, 
-					rl.length_in_sec, 
-					rl.filename, 
-					rl.location, 
-					rl.lead_id, 
-					rl.user, 
-					rl.start_time, 
-					rl.end_time, 
-					rl.recording_id, 
-					rl.b64encoded 
-				FROM recording_log rl, vicidial_list vl 
+			$query 										= "SELECT
+					CONCAT(vl.first_name,' ',vl.last_name) AS full_name,
+					rl.vicidial_id,
+					vl.last_local_call_time,
+					vl.phone_number,
+					vl.status,
+					rl.length_in_sec,
+					rl.filename,
+					rl.location,
+					rl.lead_id,
+					rl.user,
+					rl.start_time,
+					rl.end_time,
+					rl.recording_id,
+					rl.b64encoded
+				FROM recording_log rl, vicidial_list vl
 				WHERE rl.lead_id = vl.lead_id
-				$sqlPhone 
-				$filterdate 
-				$filteragent 
-				$ul 
+				$sqlPhone
+				$filterdate
+				$filteragent
+				$ul
 				ORDER BY rl.start_time DESC
 				LIMIT $limit;";
 
 			$rsltv 										= $astDB->rawQuery($query);
-			
+			$dataLeadId = $dataUniqueid = $dataStatus = $dataUser = $dataPhoneNumber = [];
+			$dataFullName = $dataLastLocalCallTime = $dataStartLastLocalCallTime = [];
+			$dataEndLastLocalCallTime = $dataLocation = $dataRecordingID = $dataB64encoded = [];
+
 			if ($astDB->count > 0) {
 				foreach ($rsltv as $fresults) {
-					$location 							= $fresults['location'];
-					
+					$fresults = is_array($fresults) ? $fresults : [];
+					$location 							= $fresults['location'] ?? '';
+
 					if (strlen((string) $location) > 2) {
 						$URLserver_ip 					= $location;
 						$URLserver_ip 					= preg_replace('/http:\/\//i', '', (string) $URLserver_ip);
@@ -144,17 +149,19 @@
 						//$stmt="SELECT count(*) FROM servers WHERE server_ip='$URLserver_ip';";
 						$astDB->where('server_ip', $URLserver_ip);
 						$astDB->get('servers');
-						
+
+						$original_recording_host = $URLserver_ip;
+
 						if ($astDB->count > 0) {
 							$cols 						= [
 								"recording_web_link",
 								"alt_server_ip",
 								"external_server_ip"
 							];
-							
+
 							$astDB->where('server_ip', $URLserver_ip);
 							$rsltx 					= $astDB->getOne('servers', NULL, $cols);
-							
+
 							if (preg_match("/ALT_IP/i", $rsltx['recording_web_link'])) {
 								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['alt_server_ip']}", (string) $location);
 							}
@@ -162,25 +169,33 @@
 								$location 			= preg_replace("/$URLserver_ip/i", "{$rsltx['external_server_ip']}", (string) $location);
 							}
 						}
+
+						if (preg_match('/^(127\.0\.0\.1|localhost)$/i', (string) $original_recording_host)) {
+							$current_web_host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? ($_SERVER['HTTP_HOST'] ?? '');
+							if ((string) $current_web_host !== '') {
+								$current_scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+								$location = preg_replace('/^https?:\/\/[^\/]+/i', "$current_scheme://$current_web_host", (string) $location);
+							}
+						}
 					}
-					
-					$dataLeadId[] 					= $fresults['lead_id'];
-					$dataUniqueid[] 				= $fresults['vicidial_id'];
-					$dataStatus[] 					= $fresults['status'];
-					$dataUser[] 					= $fresults['user'];
-					$dataPhoneNumber[] 				= $fresults['phone_number'];
-					$dataFullName[] 				= $fresults['full_name'];
-					$dataLastLocalCallTime[] 		= $fresults['last_local_call_time'];
-					$dataStartLastLocalCallTime[] 	= $fresults['start_time'];
-					$dataEndLastLocalCallTime[] 	= $fresults['end_time'];
+
+					$dataLeadId[] 					= $fresults['lead_id'] ?? '';
+					$dataUniqueid[] 				= $fresults['vicidial_id'] ?? '';
+					$dataStatus[] 					= $fresults['status'] ?? '';
+					$dataUser[] 					= $fresults['user'] ?? '';
+					$dataPhoneNumber[] 				= $fresults['phone_number'] ?? '';
+					$dataFullName[] 				= $fresults['full_name'] ?? '';
+					$dataLastLocalCallTime[] 		= $fresults['last_local_call_time'] ?? '';
+					$dataStartLastLocalCallTime[] 	= $fresults['start_time'] ?? '';
+					$dataEndLastLocalCallTime[] 	= $fresults['end_time'] ?? '';
 					$dataLocation[] 				= $location;
-					$dataRecordingID[] 				= $fresults['recording_id'];
-					$dataB64encoded[]				= $fresults['b64encoded'];
-					
+					$dataRecordingID[] 				= $fresults['recording_id'] ?? '';
+					$dataB64encoded[]				= $fresults['b64encoded'] ?? '';
+
 				}
 
 				//$query1 = "SELECT count(*) AS `cnt` FROM recording_log WHERE lead_id='{$fresults['lead_id']}';";
-				$astDB->where('lead_id', $fresults['lead_id']);
+				$astDB->where('lead_id', $fresults['lead_id'] ?? '');
 				$astDB->get('recording_log');
 				$dataCount	 						= $astDB->getRowCount();
 
@@ -212,9 +227,9 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

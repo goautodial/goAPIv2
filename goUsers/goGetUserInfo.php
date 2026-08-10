@@ -281,6 +281,8 @@
 						];
 
 						$onlinedata						= array_merge($yesnocalls, $salestoday, $callstoday);
+						$parked = $parked ?? [];
+						$callerids = $callerids ?? [];
 
 						$apiresults 					= [
 							"result" 						=> "success",

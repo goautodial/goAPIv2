@@ -159,7 +159,7 @@ if ($sipIsLoggedIn || $use_webrtc) {
         $astDB->where('server_ip', $server_ip);
         $astDB->where('user', $user);
         $query = $astDB->getOne('vicidial_live_agents', 'campaign_id');
-        $campaign = $query['campaign_id'];
+        $campaign = $query['campaign_id'] ?? ($campaign ?? '');
 
 		if ($no_delete_sessions < 1) {
 			##### Remove the reservation on the vicidial_conferences meetme room

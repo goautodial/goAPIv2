@@ -37,6 +37,7 @@
 /** @var string $log_ip */
 
     include_once (__DIR__ . "/../licensed-conf.php");
+    $VARSERVTYPE = $VARSERVTYPE ?? '';
 
     // POST or GET Variables
     $userid 											= $astDB->escape(($_REQUEST['user_id'] ?? ''));

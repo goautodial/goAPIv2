@@ -103,6 +103,7 @@
 								}
 
 								if ($agents['dispo_epoch'] < 1) {
+									$updatethis = is_array($updatethis ?? null) ? $updatethis : [];
 									$agents['talk_sec'] = ($thedate-$agents['talk_epoch']);
 									$updatefields 		= array_merge([
 										'dispo_epoch'		=> $thedate,
@@ -120,6 +121,7 @@
 							}
 						}
 
+						$updatefieldsc = '';
 						foreach ($updatefields as $xkey => $xvalue) {
 							$updatefieldsc 				.= $xkey."="."'".$xvalue."',";
 						}
@@ -132,7 +134,7 @@
 					##### Hangup existing channels
 					$StarTtimE = date("U");
 					$NOW_TIME = date("Y-m-d H:i:s");
-					$extension = $Vliveagent['extension'];
+					$extension = $Vliveagent['extension'] ?? '';
 					$astDB->where('server_ip', $agents['server_ip']);
 					$astDB->where('channel', "$extension%", 'like');
 					$astDB->orderBy('channel');

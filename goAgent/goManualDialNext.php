@@ -93,7 +93,7 @@ if ($sipIsLoggedIn) {
         else if (isset($_POST['goManualDialCallTimeCheck'])) { $manual_dial_call_time_check = $astDB->escape($_POST['goManualDialCallTimeCheck']); }
     if (isset($_GET['goAgentLogID'])) { $agent_log_id = $astDB->escape($_GET['goAgentLogID']); }
         else if (isset($_POST['goAgentLogID'])) { $agent_log_id = $astDB->escape($_POST['goAgentLogID']); }
-    
+
     if (!isset($agent_dialed_number[3])) {
         $agent_dialed_number = $phone_number;
     }
@@ -102,7 +102,7 @@ if ($sipIsLoggedIn) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     //$server_ip = $phone_settings->server_ip;
     //$ext_context = $phone_settings->ext_context;
-    
+
     $campaign_settings = get_settings('campaign', $astDB, $campaign);
     //$dial_timeout = $campaign_settings->dial_timeout;
     //$dial_prefix = $campaign_settings->dial_prefix;
@@ -114,26 +114,28 @@ if ($sipIsLoggedIn) {
     $manual_dial_list_id = $campaign_settings->manual_dial_list_id;
     //$dial_method = $campaign_settings->dial_method;
     //$manual_dial_call_time_check = $campaign_settings->manual_dial_call_time_check;
-    
+
     $errmsg = 0;
     $override_phone = 0;
-    
+    $CBleadIDset = 0;
+    $CBcommentsALL = '';
+
     if ((string) $manual_dial_list_id !== '') {
         $list_id = $manual_dial_list_id;
     }
-    
+
     //$nocall_dial_flag = 'DISABLED';
-    
+
     $astDB->where('server_ip', $server_ip);
     $query = $astDB->getOne('servers', 'asterisk_version,local_gmt');
-    $asterisk_version = $query['asterisk_version'];
-    $gmt_recs = count($query['local_gmt']);
+    $asterisk_version = $query['asterisk_version'] ?? '';
+    $DBSERVER_GMT = $query['local_gmt'] ?? '';
+    $gmt_recs = (strlen((string) $DBSERVER_GMT) > 0) ? 1 : 0;
     if ($gmt_recs > 0) {
-        $DBSERVER_GMT = $query['local_gmt'];
         if ((string) $DBSERVER_GMT !== '')
             {$SERVER_GMT = $DBSERVER_GMT;}
         if ($isdst)
-            {$SERVER_GMT++;} 
+            {$SERVER_GMT++;}
     } else {
         $SERVER_GMT = date("O");
         $SERVER_GMT = preg_replace("/\+/i", "", (string) $SERVER_GMT);
@@ -142,14 +144,14 @@ if ($sipIsLoggedIn) {
     }
     $LOCAL_GMT_OFF = $SERVER_GMT;
     $LOCAL_GMT_OFF_STD = $SERVER_GMT;
-    
+
     $extension = $phone_settings->extension;
     $protocol = $phone_settings->protocol;
     if ($protocol == 'EXTERNAL') {
         $protocol = 'Local';
         $extension = "{$phone_settings->dialplan_number}@{$phone_settings->ext_context}";
     }
-    
+
     if (preg_match("/Zap/i", (string) $protocol)) {
         if (preg_match("/^1\.0|^1\.2|^1\.4\.1|^1\.4\.20|^1\.4\.21/i", (string) $asterisk_version)) {
             $do_nothing = 1;
@@ -157,7 +159,7 @@ if ($sipIsLoggedIn) {
             $protocol = 'DAHDI';
         }
     }
-    
+
     $SIP_user = "{$protocol}/{$extension}";
     $qm_extension = "$extension";
     if ( preg_match('/8300/', (string) $phone_settings->dialplan_number) && strlen((string) $phone_settings->dialplan_number) < 5 && $protocol == 'Local' ) {
@@ -174,22 +176,22 @@ if ($sipIsLoggedIn) {
     if ($rslt == "CONFBRIDGE") {
         $conf_table = "vicidial_confbridges";
     }
-    
+
     $astDB->where('extension', $SIP_user);
     $astDB->where('server_ip', $server_ip);
     $query = $astDB->getOne("$conf_table", 'conf_exten');
     $conf_exten = $query['conf_exten'];
-    
+
     $astDB->where('extension', $extension);
     $astDB->where('server_ip', $phone_settings->server_ip);
     $astDB->where('program', 'vicidial');
     $query = $astDB->getOne('web_client_sessions', 'session_name');
     $session_name = $query['session_name'];
-    
+
     $astDB->where('user', $user);
     $query = $astDB->getOne('vicidial_live_agents', 'agent_log_id');
     $agent_log_id = $query['agent_log_id'];
-    
+
     $astDB->where('phone_number', $phone_number);
     $astDB->where('lead_id', $lead_id);
     $query = $astDB->getOne('vicidial_list');
@@ -229,7 +231,7 @@ if ($sipIsLoggedIn) {
             $calls_today = '0';
         }
         $calls_today++;
-    
+
         $script_recording_delay = 0;
         ##### find if script contains recording fields
         $query = $astDB->rawQuery("SELECT * FROM vicidial_scripts vs,vicidial_campaigns vc WHERE campaign_id='$campaign' and vs.script_id=vc.campaign_script and script_text LIKE \"%--A--recording_%\";");
@@ -237,19 +239,19 @@ if ($sipIsLoggedIn) {
         if ($vs_vc_ct > 0) {
             $script_recording_delay = $vs_vc_ct;
         }
-        
+
         $mdmdRslt = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'manual_dial_min_digits'");
         if ($goDB->getRowCount() > 0) {
             $goDB->where('campaign_id', $campaign);
             $rslt = $goDB->getOne('go_campaigns', 'manual_dial_min_digits');
             $manual_dial_min_digits = $rslt['manual_dial_min_digits'];
         }
-    
+
         ### check if this is a callback, if it is, skip the grabbing of a new lead and mark the callback as INACTIVE
         if ( strlen((string) $callback_id) > 0 && strlen((string) $lead_id) > 0 ) {
             $affected_rows = 1;
             $CBleadIDset = 1;
-            
+
             $astDB->where('callback_id', $callback_id);
             $query = $astDB->update('vicidial_callbacks', ['status'=>'INACTIVE']);
         }
@@ -257,7 +259,7 @@ if ($sipIsLoggedIn) {
         else if ((string) $lead_id !== '') {
             $affected_rows = 1;
             $CBleadIDset = 1;
-        
+
             if (strlen((string) $phone_number) >= $manual_dial_min_digits)
                 {$override_dial_number = $phone_number;}
         } else {
@@ -280,13 +282,13 @@ if ($sipIsLoggedIn) {
                     $pulldate0 = "$year-$mon-$mday $hour:$min:$sec";
                     $inSD = $pulldate0;
                     $dsec = ( ( ($hour * 3600) + ($min * 60) ) + $sec );
-        
+
                     $postalgmt = '';
                     $postal_code = '';
                     $state = '';
                     if (strlen((string) $phone_code)<1)
                         {$phone_code = '1';}
-        
+
                     $local_call_time = '24hours';
                     ##### gather local call time setting from campaign
                     $astDB->where('campaign_id', $campaign);
@@ -296,32 +298,32 @@ if ($sipIsLoggedIn) {
                         $row = $rslt[0];
                         $local_call_time = $row['local_call_time'];
                     }
-        
+
                     ### get current gmt_offset of the phone_number
                     $USarea = substr((string) $phone_number, 0, 3);
                     $gmt_offset = lookup_gmt($astDB, $phone_code, $USarea, $state, $LOCAL_GMT_OFF_STD, $Shour, $Smin, $Ssec, $Smon, $Smday, $Syear, $postalgmt, $postal_code);
-        
+
                     $dialable = dialable_gmt($astDB, $local_call_time, $gmt_offset, $state);
-                    
+
                     if ($dialable < 1) {
                         ### purge from the dial queue and api
                         $astDB->where('phone_number', $phone_number);
                         $astDB->where('user', $user);
                         $rslt = $astDB->delete('vicidial_manual_dial_queue');
                         $VMDQaffected_rows = $astDB->getRowCount();
-        
+
                         //$stmt = "UPDATE vicidial_live_agents set external_dial='' where user='$user';";
                         $astDB->where('user', $user);
                         $rslt = $astDB->update('vicidial_live_agents', ['external_dial'=>'']);
                         $VLAEDaffected_rows = $astDB->getRowCount();
-        
+
                         $message = "OUTSIDE OF LOCAL CALL TIME   $VMDQaffected_rows|$VLAEDaffected_rows";
                         $errmsg++;
                         //$APIResult = array( "result" => "error", "message" => $message );
                         //exit;
                     }
                 }
-        
+
                 if (preg_match("/DNC/", (string) $manual_dial_filter)) {
                     if (preg_match("/AREACODE/",(string) $use_internal_dnc)) {
                         $phone_number_areacode = substr((string) $phone_number, 0, 3);
@@ -334,7 +336,7 @@ if ($sipIsLoggedIn) {
                     }
                     $rslt = $astDB->get('vicidial_dnc');
                     $dnc_ct = $astDB->getRowCount();
-                    
+
                     if ($dnc_ct > 0) {
                         ### purge from the dial queue and api
                         //$stmt = "DELETE from vicidial_manual_dial_queue where phone_number='$phone_number' and user='$user';";
@@ -342,12 +344,12 @@ if ($sipIsLoggedIn) {
                         $astDB->where('user', $user);
                         $rslt = $astDB->delete('vicidial_manual_dial_queue');
                         $VMDQaffected_rows = $astDB->getRowCount();
-        
+
                         //$stmt = "UPDATE vicidial_live_agents set external_dial='' where user='$user';";
                         $astDB->where('user', $user);
                         $rslt = $astDB->update('vicidial_live_agents', ['external_dial'=>'']);
                         $VLAEDaffected_rows = $astDB->getRowCount();
-        
+
                         $message = "DNC NUMBER";
                         $errmsg++;
                         //$APIResult = array( "result" => "error", "message" => $message );
@@ -361,7 +363,7 @@ if ($sipIsLoggedIn) {
                         $use_other_campaign_dnc = $row['use_other_campaign_dnc'];
                         $temp_campaign_id = $campaign;
                         if ((string) $use_other_campaign_dnc !== '') {$temp_campaign_id = $use_other_campaign_dnc;}
-        
+
                         if (preg_match("/AREACODE/",(string) $use_campaign_dnc)) {
                             $phone_number_areacode = substr((string) $phone_number, 0, 3);
                             $phone_number_areacode .= "XXXXXXX";
@@ -381,12 +383,12 @@ if ($sipIsLoggedIn) {
                             $astDB->where('user', $user);
                             $rslt = $astDB->delete('vicidial_manual_dial_queue');
                             $VMDQaffected_rows = $astDB->getRowCount();
-        
+
                             //$stmt = "UPDATE vicidial_live_agents set external_dial='' where user='$user';";
                             $astDB->where('user', $user);
                             $rslt = $astDB->update('vicidial_live_agents', ['external_dial'=>'']);
                             $VLAEDaffected_rows = $astDB->getRowCount();
-        
+
                             $message = "DNC NUMBER";
                             $errmsg++;
                             //$APIResult = array( "result" => "error", "message" => $message );
@@ -412,32 +414,32 @@ if ($sipIsLoggedIn) {
                                     $camp_lists .= $rowx['list_id'].",";
                                 }
                             } else {
-                                if (preg_match("/N/", $rowx['active'])) 
+                                if (preg_match("/N/", $rowx['active']))
                                     {$inactive_lists++;}
                             }
                         }
                     }
                     $camp_lists = preg_replace("/.$/i","",$camp_lists);
                     $camp_lists = explode(",", $camp_lists);
-        
+
                     //$stmt="SELECT count(*) FROM vicidial_list where phone_number='$phone_number' and list_id IN($camp_lists);";
                     $astDB->where('phone_number', $phone_number);
                     $astDB->where('list_id', $camp_lists, 'IN');
                     $rslt = $astDB->get('vicidial_list');
                     $listCnt = $astDB->getRowCount();
-                    
+
                     if ($listCnt < 1) {
                         ### purge from the dial queue and api
                         //$stmt = "DELETE from vicidial_manual_dial_queue where phone_number='$phone_number' and user='$user';";
                         $astDB->where('phone_number', $phone_number);
                         $astDB->where('user', $user);
                         $VMDQaffected_rows = $astDB->delete('vicidial_manual_dial_queue');
-        
+
                         //$stmt = "UPDATE vicidial_live_agents set external_dial='' where user='$user';";
                         $astDB->where('user', $user);
                         $rslt = $astDB->update('vicidial_live_agents', ['external_dial'=>'']);
                         $VLAEDaffected_rows = $astDB->getRowCount();
-        
+
                         $message = "NUMBER NOT IN CAMPLISTS";
                         $errmsg++;
                         //$APIResult = array( "result" => "error", "message" => $message );
@@ -459,7 +461,7 @@ if ($sipIsLoggedIn) {
                         $rslt = $astDB->rawQuery($stmt);
                         $row = $rslt[0];
                         $allowed_campaigns = str_replace(" ", "','", $row['allowed_camps']);
-                        
+
                         // Get allowed campaigns and list ids for the tenant
                         $campaign_SQL = "";
                         if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
@@ -468,7 +470,7 @@ if ($sipIsLoggedIn) {
                         $stmt="SELECT list_id,manual_dial_list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
                         $rslt = $astDB->rawQuery($stmt);
                         $Xct = $astDB->getRowCount();
-                        
+
                         if ($Xct > 0) {
                             //for ($i=0;$i<$Xct;$i++) {
                             //    $Xrow = mysql_fetch_row($rslt);
@@ -487,7 +489,7 @@ if ($sipIsLoggedIn) {
                             //$list_idSQL = "AND list_id IN ('$list_ids')";
                             $astDB->where('list_id', $list_ids, 'IN');
                         }
-                        
+
                         //$stmt="SELECT lead_id FROM vicidial_list where phone_number='$phone_number' $list_idSQL order by modify_date desc LIMIT 1;";
                         $astDB->where('phone_number', $phone_number);
                         $astDB->orderBy('modify_date', 'desc');
@@ -567,7 +569,7 @@ if ($sipIsLoggedIn) {
                     $affected_rows = $astDB->getRowCount();
                 } else {
                     ### figure out what the next lead that should be dialed is
-        
+
                     ##########################################################
                     ### BEGIN find the next lead to dial without looking in the hopper
                     ##########################################################
@@ -583,14 +585,14 @@ if ($sipIsLoggedIn) {
                             $pmin = (gmdate("i", time() + $pzone));
                             $phour = ( (gmdate("G", time() + $pzone)) * 100);
                             $pday = gmdate("w", time() + $pzone);
-                            $tz = sprintf("%.2f", $p);	
+                            $tz = sprintf("%.2f", $p);
                             $GMT_gmt[$g] = "$tz";
                             $GMT_day[$g] = "$pday";
                             $GMT_hour[$g] = ($phour + $pmin);
                             $p -= 0.25;
                             $g++;
                         }
-    
+
                         //$stmt="SELECT call_time_id,call_time_name,call_time_comments,ct_default_start,ct_default_stop,ct_sunday_start,ct_sunday_stop,ct_monday_start,ct_monday_stop,ct_tuesday_start,ct_tuesday_stop,ct_wednesday_start,ct_wednesday_stop,ct_thursday_start,ct_thursday_stop,ct_friday_start,ct_friday_stop,ct_saturday_start,ct_saturday_stop,ct_state_call_times FROM vicidial_call_times where call_time_id='$local_call_time';";
                         $astDB->where('call_time_id', $local_call_time);
                         $rowx = $astDB->get('vicidial_call_times', null, 'call_time_id,call_time_name,call_time_comments,ct_default_start,ct_default_stop,ct_sunday_start,ct_sunday_stop,ct_monday_start,ct_monday_stop,ct_tuesday_start,ct_tuesday_stop,ct_wednesday_start,ct_wednesday_stop,ct_thursday_start,ct_thursday_stop,ct_friday_start,ct_friday_stop,ct_saturday_start,ct_saturday_stop,ct_state_call_times');
@@ -611,7 +613,7 @@ if ($sipIsLoggedIn) {
                         $Gct_saturday_start =	$rowx['ct_saturday_start'];
                         $Gct_saturday_stop =	$rowx['ct_saturday_stop'];
                         $Gct_state_call_times = $rowx['ct_state_call_times'];
-    
+
                         $ct_states = '';
                         $ct_state_gmt_SQL = '';
                         $ct_srs=0;
@@ -643,9 +645,9 @@ if ($sipIsLoggedIn) {
                                 $Gsct_friday_stop =			$row['sct_friday_stop'];
                                 $Gsct_saturday_start =		$row['sct_saturday_start'];
                                 $Gsct_saturday_stop =		$row['sct_saturday_stop'];
-        
+
                                 $ct_states .= "'$Gstate_call_time_state',";
-    
+
                                 $r=0;
                                 $state_gmt='';
                                 while($r < $g) {
@@ -717,7 +719,7 @@ if ($sipIsLoggedIn) {
                                 $state_gmt = "$state_gmt'99'";
                                 $ct_state_gmt_SQL .= "or (state='$Gstate_call_time_state' and gmt_offset_now IN($state_gmt)) ";
                             }
-    
+
                             $b++;
                         }
                         if (strlen($ct_states)>2) {
@@ -726,7 +728,7 @@ if ($sipIsLoggedIn) {
                         } else {
                             $ct_statesSQL = "";
                         }
-    
+
                         $r = 0;
                         $default_gmt = '';
                         while($r < $g) {
@@ -795,10 +797,10 @@ if ($sipIsLoggedIn) {
                             }
                             $r++;
                         }
-    
+
                         $default_gmt = "$default_gmt'99'";
                         $all_gmtSQL = "(gmt_offset_now IN($default_gmt) $ct_statesSQL) $ct_state_gmt_SQL";
-        
+
                         $dial_statuses = preg_replace("/ -$/","",$dial_statuses);
                         $Dstatuses = explode(" ", (string) ($dial_statuses ?? ''));
                         $Ds_to_print = ((is_countable($Dstatuses) ? count($Dstatuses) : 0));
@@ -810,7 +812,7 @@ if ($sipIsLoggedIn) {
                         }
                         $Dsql = preg_replace("/,$/","",(string) $Dsql);
                         if (strlen((string) $Dsql) < 2) {$Dsql = "''";}
-        
+
                         $DLTsql='';
                         if ($drop_lockout_time > 0) {
                             $DLseconds = ($drop_lockout_time * 3600);
@@ -818,12 +820,12 @@ if ($sipIsLoggedIn) {
                             $DLseconds = intval("$DLseconds");
                             $DLTsql = "and ( ( (status IN('DROP','XDROP')) and (last_local_call_time < CONCAT(DATE_ADD(NOW(), INTERVAL -$DLseconds SECOND),' ',CURTIME()) ) ) or (status NOT IN('DROP','XDROP')) )";
                         }
-    
+
                         $CCLsql='';
                         if ($call_count_limit > 0) {
                             $CCLsql = "and (called_count < $call_count_limit)";
                         }
-        
+
                         //$stmt="SELECT lead_filter_sql FROM vicidial_lead_filters where lead_filter_id='$lead_filter_id';";
                         $astDB->where('lead_filter_id', $lead_filter_id);
                         $rslt = $astDB->get('vicidial_lead_filters', null, 'lead_filter_sql');
@@ -833,7 +835,7 @@ if ($sipIsLoggedIn) {
                             $fSQL = "and ({$row['lead_filter_sql']})";
                             $fSQL = preg_replace('/\\\\/','',(string) $fSQL);
                         }
-    
+
                         //$stmt="SELECT list_id FROM vicidial_lists where campaign_id='$campaign' and active='Y';";
                         $astDB->where('campaign_id', $campaign);
                         $astDB->where('active', 'Y');
@@ -848,7 +850,7 @@ if ($sipIsLoggedIn) {
                         }
                         $camp_lists = preg_replace("/.$/i", "", $camp_lists);
                         if (strlen($camp_lists) < 4) {$camp_lists = "''";}
-    
+
                         //$stmt="SELECT user_group,territory FROM vicidial_users where user='$user';";
                         $astDB->where('user', $user);
                         $rslt = $astDB->get('vicidial_users', null, 'user_group,territory');
@@ -858,7 +860,7 @@ if ($sipIsLoggedIn) {
                             $user_group =	$row['user_group'];
                             $territory =	$row['territory'];
                         }
-    
+
                         $adooSQL = '';
                         if (preg_match("/TERRITORY/i",(string) $agent_dial_owner_only)) {
                             $agent_territories = '';
@@ -871,7 +873,7 @@ if ($sipIsLoggedIn) {
                                 $row = $rslt[0];
                                 $agent_choose_territories = $row['agent_choose_territories'];
                             }
-        
+
                             if ($agent_choose_territories < 1) {
                                 //$stmt="SELECT territory from vicidial_user_territories where user='$user';";
                                 $astDB->where('user', $user);
@@ -900,7 +902,7 @@ if ($sipIsLoggedIn) {
                                     $searchownerSQL = " and owner IN('$agent_territories')";
                                 }
                             }
-        
+
                             $adooSQL = $searchownerSQL;
                         }
                         if (preg_match("/USER/i",(string) $agent_dial_owner_only)) {$adooSQL = "and owner='$user'";}
@@ -910,7 +912,7 @@ if ($sipIsLoggedIn) {
                             $blankSQL = "and ( ($adooSQLa) or (owner='') or (owner is NULL) )";
                             $adooSQL = $blankSQL;
                         }
-    
+
                         if ($lead_order_randomize == 'Y') {
                             $last_order = "RAND()";
                         } else {
@@ -920,7 +922,7 @@ if ($sipIsLoggedIn) {
                             if ($lead_order_secondary == 'CALLTIME_ASCEND') {$last_order = "last_local_call_time asc";}
                             if ($lead_order_secondary == 'CALLTIME_DESCEND') {$last_order = "last_local_call_time desc";}
                         }
-    
+
                         $order_stmt = '';
                         if (preg_match("/DOWN/i",(string) $lead_order)) {$order_stmt = 'order by lead_id asc';}
                         if (preg_match("/UP/i",(string) $lead_order)) {$order_stmt = 'order by lead_id desc';}
@@ -939,15 +941,15 @@ if ($sipIsLoggedIn) {
                         if (preg_match("/DOWN OWNER/i",(string) $lead_order)) {$order_stmt = "order by owner, $last_order";}
                         if (preg_match("/UP TIMEZONE/i",(string) $lead_order)) {$order_stmt = "order by gmt_offset_now desc, $last_order";}
                         if (preg_match("/DOWN TIMEZONE/i",(string) $lead_order)) {$order_stmt = "order by gmt_offset_now, $last_order";}
-        
+
                         $stmt="UPDATE vicidial_list SET user='QUEUE$user' where called_since_last_reset='N' and user NOT LIKE \"QUEUE%\" and status IN($Dsql) and list_id IN($camp_lists) and ($all_gmtSQL) $CCLsql $DLTsql $fSQL $adooSQL $order_stmt LIMIT 1;";
                         $rslt = $astDB->rawQuery($stmt);
                         $affected_rows = $astDB->getRowCount();
-        
+
                     #	$fp = fopen ("./DNNdebug_log.txt", "a");
                     #	fwrite ($fp, "$NOW_TIME|$campaign|$lead_id|$agent_dialed_number|$user|M|$MqueryCID||$province|$affected_rows|$stmt|\n");
                     #	fclose($fp);
-    
+
                         if ($affected_rows > 0) {
                             //$stmt="SELECT lead_id,list_id,gmt_offset_now,state,entry_list_id,vendor_lead_code FROM vicidial_list where user='QUEUE$user' order by modify_date desc LIMIT 1;";
                             $QUEUEuser = "QUEUE{$user}";
@@ -963,7 +965,7 @@ if ($sipIsLoggedIn) {
                                 $state =			$row['state'];
                                 $entry_list_id =	$row['entry_list_id'];
                                 $vendor_lead_code = $row['vendor_lead_code'];
-        
+
                                 //$stmt = "INSERT INTO vicidial_hopper SET lead_id='$lead_id',campaign_id='$campaign',status='QUEUE',list_id='$list_id',gmt_offset_now='$gmt_offset_now',state='$state',alt_dial='MAIN',user='$user',priority='0',source='Q',vendor_lead_code='$vendor_lead_code';";
                                 $insertData = [
                                     'lead_id' => $lead_id,
@@ -989,7 +991,7 @@ if ($sipIsLoggedIn) {
                 }
             }
         }
-    
+
         if ($affected_rows > 0 && $errmsg < 1) {
             if (!$CBleadIDset) {
                 ##### grab the lead_id of the reserved user in vicidial_hopper
@@ -1004,7 +1006,7 @@ if ($sipIsLoggedIn) {
                     $lead_id = $row['lead_id'];
                 }
             }
-    
+
             ##### grab the data from vicidial_list for the lead_id
             //$stmt="SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id FROM vicidial_list where lead_id='$lead_id' LIMIT 1;";
             $astDB->where('lead_id', $lead_id);
@@ -1066,10 +1068,10 @@ if ($sipIsLoggedIn) {
             if ( strlen((string) $agent_dialed_type) < 3 || strlen((string) $agent_dialed_number) < $manual_dial_min_digits ) {
                 if (strlen((string) $agent_dialed_type) < 3)
                     {$agent_dialed_type = 'MAIN';}
-                    
+
                 if ($campaign_settings->alt_number_dialing == 'Y')
                     {$agent_dialed_type = 'ALT';}
-                    
+
                 if ($phone_number !== '' && strlen((string) $phone_number) > 3) {
                     $agent_dialed_number = $phone_number;
                 } else if ($agent_dialed_type == 'ALT' && (strlen((string) $phone_number) <= 3 || strlen((string) $phone_number) < $manual_dial_min_digits)) {
@@ -1081,7 +1083,7 @@ if ($sipIsLoggedIn) {
                     {$agent_dialed_number = $alt_phone;}
                 if ($agent_dialed_type == 'ADDR3')
                     {$agent_dialed_number = $address3;}
-                
+
                 if (strlen((string) $agent_dialed_number) <= 3 || strlen((string) $agent_dialed_number) < $manual_dial_min_digits) {
                     $agent_dialed_number = $orig_phone;
                 }
@@ -1105,17 +1107,17 @@ if ($sipIsLoggedIn) {
                 $USarea = substr((string) $agent_dialed_number, 0, 3);
                 $PHONEgmt_offset = lookup_gmt($astDB, $phone_code, $USarea, $state, $LOCAL_GMT_OFF_STD, $Shour, $Smin, $Ssec, $Smon, $Smday, $Syear, $postalgmtNOW, $postal_code);
                 $PHONEdialable = dialable_gmt($astDB, $local_call_time, $PHONEgmt_offset, $state);
-    
+
                 $postalgmtNOW = 'POSTAL';
                 $POSTgmt_offset = lookup_gmt($astDB, $phone_code, $USarea, $state, $LOCAL_GMT_OFF_STD, $Shour, $Smin, $Ssec, $Smon, $Smday, $Syear, $postalgmtNOW, $postal_code);
                 $POSTdialable = dialable_gmt($astDB, $local_call_time, $POSTgmt_offset, $state);
-    
+
             #	$post_phone_time_diff_alert_message = "$POSTgmt_offset|$POSTdialable   ---   $PHONEgmt_offset|$PHONEdialable|$USarea";
                 $post_phone_time_diff_alert_message = '';
-    
+
                 if ($PHONEgmt_offset != $POSTgmt_offset) {
                     $post_phone_time_diff_alert_message .= "Phone and Post Code Time Zone Mismatch! ";
-    
+
                     if ($post_phone_time_diff_alert == 'OUTSIDE_CALLTIME_ONLY') {
                         $post_phone_time_diff_alert_message = '';
                         if ($PHONEdialable < 1)
@@ -1126,7 +1128,7 @@ if ($sipIsLoggedIn) {
                 }
                 if ( in_array($post_phone_time_diff_alert, ['OUTSIDE_CALLTIME_PHONE', 'OUTSIDE_CALLTIME_POSTAL', 'OUTSIDE_CALLTIME_BOTH']) )
                     {$post_phone_time_diff_alert_message = '';}
-    
+
                 if ( $post_phone_time_diff_alert == 'OUTSIDE_CALLTIME_PHONE' || $post_phone_time_diff_alert == 'OUTSIDE_CALLTIME_BOTH' ) {
                     if ($PHONEdialable < 1)
                         {$post_phone_time_diff_alert_message .= " Phone Area Code Outside Dialable Zone $PHONEgmt_offset ";}
@@ -1137,15 +1139,15 @@ if ($sipIsLoggedIn) {
                 }
             }
             ##### END check for postal_code and phone time zones if alert enabled
-    
-    
+
+
             ##### if lead is a callback, grab the callback comments
             $CBentry_time =		'';
             $CBcallback_time =	'';
             $CBuser =			'';
             $CBcomments =		'';
             $CBstatus =			0;
-    
+
             //$stmt="SELECT count(*) FROM vicidial_statuses where status='$dispo' and scheduled_callback='Y';";
             $astDB->where('status', $dispo);
             $astDB->where('scheduled_callback', 'Y');
@@ -1177,13 +1179,13 @@ if ($sipIsLoggedIn) {
                     $CBuser =			trim("{$row['user']}");
                     $CBcomments =		trim("{$row['comments']}");
                     $CBack_id =		    trim("{$row['callback_id']}");
-                    
+
                     $astDB->where('callback_id', $CBack_id);
                     $astDB->where('user', $user);
                     $astDB->where('status', 'INACTIVE', '!=');
                     $query = $astDB->update('vicidial_callbacks', ['status'=>'INACTIVE']);
                 }
-                
+
                 $astDB->where('lead_id', $lead_id);
                 $astDB->orderBy('entry_time', 'asc');
                 $rslt = $astDB->get('vicidial_callbacks', null, 'entry_time,comments,user');
@@ -1200,7 +1202,7 @@ if ($sipIsLoggedIn) {
                     }
                 }
             }
-    
+
             //$stmt = "SELECT local_gmt FROM servers where active='Y' limit 1;";
             $astDB->where('active', 'Y');
             $rslt = $astDB->getOne('servers', 'local_gmt');
@@ -1213,7 +1215,7 @@ if ($sipIsLoggedIn) {
             }
             $LLCT_DATE_offset = ($local_gmt - $gmt_offset_now);
             $LLCT_DATE = date("Y-m-d H:i:s", mktime(date("H")-$LLCT_DATE_offset, date("i"), date("s"), date("m"), date("d"), date("Y")));
-    
+
             if (preg_match('/Y/', (string) $called_since_last_reset)) {
                 $called_since_last_reset = preg_replace('/Y/', '', (string) $called_since_last_reset);
                 if (strlen((string) $called_since_last_reset) < 1)
@@ -1223,7 +1225,7 @@ if ($sipIsLoggedIn) {
             } else {
                 $called_since_last_reset = 'Y';
             }
-            
+
             $updateData = [
                 'status' => 'INCALL',
                 'called_since_last_reset' => $called_since_last_reset,
@@ -1239,28 +1241,28 @@ if ($sipIsLoggedIn) {
             //$stmt = "UPDATE vicidial_list set status='INCALL', called_since_last_reset='$called_since_last_reset', called_count='$called_count',user='$user',last_local_call_time='$LLCT_DATE'$ownerSQL where lead_id='$lead_id';";
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update('vicidial_list', $updateData);
-    
+
             if (!$CBleadIDset) {
                 ### delete the lead from the hopper
                 //$stmt = "DELETE FROM vicidial_hopper where lead_id='$lead_id';";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->delete('vicidial_hopper');
             }
-    
+
             //$stmt="UPDATE vicidial_agent_log set lead_id='$lead_id',comments='MANUAL' where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             //$astDB->where('uniqueid', 'INACTIVE', '!=');
             //$rslt = $astDB->update('vicidial_agent_log', array('lead_id'=>$lead_id, 'comments'=>'MANUAL'));
             $rslt = $astDB->update('vicidial_agent_log', ['comments'=>'MANUAL']);
-    
+
             //$stmt="UPDATE vicidial_lists set list_lastcalldate=NOW() where list_id='$list_id';";
             $astDB->where('list_id', $list_id);
             $rslt = $astDB->update('vicidial_lists', ['list_lastcalldate'=>'NOW()']);
-    
+
             $campaign_cid_override = '';
             $LISTweb_form_address = '';
             $LISTweb_form_address_two = '';
-            
+
             ### check if there is a list_id override
             if (strlen((string) $list_id) > 1) {
                 //$stmt = "SELECT campaign_cid_override,web_form_address,web_form_address_two FROM vicidial_lists where list_id='$list_id';";
@@ -1274,8 +1276,8 @@ if ($sipIsLoggedIn) {
                     $LISTweb_form_address_two =	$row['web_form_address_two'] ?? '';
                 }
             }
-    
-            ### if preview dialing, do not send the call	
+
+            ### if preview dialing, do not send the call
             if ( strlen((string) $preview) < 1 || $preview == 'NO' || strlen((string) $dial_ingroup) > 1 ) {
                 ### prepare variables to place manual call from VICIDiaL
                 $CCID_on = 0;
@@ -1297,26 +1299,26 @@ if ($sipIsLoggedIn) {
                     $CCID = "$campaign_cid_override";
                     $CCID_on++;
                 }
-                
+
                 $dynRslt = $goDB->rawQuery("SHOW COLUMNS FROM `go_campaigns` LIKE 'dynamic_cid'");
                 if ($goDB->getRowCount() > 0) {
                     $goDB->where('campaign_id', $campaign);
                     $rslt = $goDB->getOne('go_campaigns', 'dynamic_cid');
                     $dynCID = $rslt['dynamic_cid'];
-                    
+
                     if ($dynCID === 'Y') {
                         $astDB->where('phone_number', $phone_number);
                         $astDB->where('lead_id', $lead_id);
                         $rslt = $astDB->getOne('vicidial_list', 'security_phrase');
                         $dynamic_cid = $rslt['security_phrase'];
-                        
+
                         if (strlen((string) $dynamic_cid) > 6) {
                             $CCID = "$dynamic_cid";
                             $CCID_on++;
                         }
                     }
                 }
-                
+
                 ### check for custom cid use
                 $use_custom_cid = 0;
                 $temp_CID = '';
@@ -1351,15 +1353,15 @@ if ($sipIsLoggedIn) {
                     }
                     if ($use_custom_cid == 'Y')
                         {$temp_CID = preg_replace("/\D/", '', (string) $security);}
-                    if (strlen((string) $temp_CID) > 6) 
+                    if (strlen((string) $temp_CID) > 6)
                         {$CCID = "$temp_CID";   $CCID_on++;}
                 }
-    
+
                 if (preg_match("/x/i", (string) $dial_prefix)) {$Local_out_prefix = '';}
-    
+
                 $PADlead_id = sprintf("%010s", $lead_id);
                 while (strlen((string) $PADlead_id) > 10) {$PADlead_id = substr("$PADlead_id", 1);}
-    
+
                 ### check for extension append in campaign
                 $use_eac = 0;
                 //$stmt = "SELECT count(*) FROM vicidial_campaigns where extension_appended_cidname='Y' and campaign_id='$campaign';";
@@ -1370,7 +1372,7 @@ if ($sipIsLoggedIn) {
                 if ($eacid_ct > 0) {
                     $use_eac =	$eacid_ct;
                 }
-    
+
                 # Create unique calleridname to track the call: MmddhhmmssLLLLLLLLLL
                 $MqueryCID = "M$CIDdate$PADlead_id";
                 $EAC = '';
@@ -1378,14 +1380,14 @@ if ($sipIsLoggedIn) {
                     $eac_extension = preg_replace("/SIP\/|IAX2\/|Zap\/|DAHDI\/|Local\//", '', (string) $eac_phone);
                     $EAC=" $eac_extension";
                 }
-    
+
                 ### whether to omit phone_code or not
                 if (preg_match('/Y/i', (string) $omit_phone_code)) {
                     $Ndialstring = "$Local_out_prefix$agent_dialed_number";
                 } else {
                     $Ndialstring = "$Local_out_prefix$phone_code$agent_dialed_number";
                 }
-    
+
                 if ( $usegroupalias > 0 && strlen((string) $account) > 1 ) {
                     $RAWaccount = $account;
                     $account = "Account: $account";
@@ -1395,9 +1397,9 @@ if ($sipIsLoggedIn) {
                     $account = '';
                     $variable = '';
                 }
-    
+
                 $dial_channel = "{$local_DEF}{$conf_exten}{$local_AMP}{$ext_context}{$Local_persist}";
-    
+
                 $preset_name='';
                 if (strlen((string) $dial_ingroup) > 1) {
                     ### look for a dial-ingroup cid
@@ -1413,10 +1415,10 @@ if ($sipIsLoggedIn) {
                         $CCID = "$dial_ingroup_cid";
                         $CCID_on++;
                     }
-    
+
                     $preset_name = 'DIG';
                     $MqueryCID = "Y$CIDdate$PADlead_id";
-                    
+
                     $loop_ingroup_dial_prefix = '8305888888888888';
                     $dial_wait_seconds = '4';	# 1 digit only
                     if ($nocall_dial_flag == 'ENABLED') {
@@ -1425,20 +1427,20 @@ if ($sipIsLoggedIn) {
                     } else {
                         $Ndialstring = "{$loop_ingroup_dial_prefix}{$dial_wait_seconds}{$Ndialstring}";
                     }
-    
+
     #				$dial_ingroup_dialstring = "90009*$dial_ingroup" . "**$lead_id" . "**$agent_dialed_number" . "*$user" . "*$user" . "**1*$conf_exten";
     #				$dial_channel = "$local_DEF$dial_ingroup_dialstring$local_AMP$ext_context$Local_persist";
-    
+
                     $dial_channel = "{$local_DEF}{$Ndialstring}{$local_AMP}{$ext_context}{$Local_persist}";
-    
+
                     $dial_wait_seconds = '0';	# 1 digit only
                     $dial_ingroup_dialstring = "90009*{$dial_ingroup}" . "**{$lead_id}" . "**{$agent_dialed_number}" . "*{$user}" . "*{$user}" . "**1*{$conf_exten}";
                     $Ndialstring = "{$loop_ingroup_dial_prefix}{$dial_wait_seconds}{$dial_ingroup_dialstring}";
                 }
-    
+
                 if ($CCID_on) {$CIDstring = "\"$MqueryCID$EAC\" <$CCID>";}
                 else {$CIDstring = "$MqueryCID$EAC";}
-    
+
                 ### insert the call action into the vicidial_manager table to initiate the call
                 #	$stmt = "INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$MqueryCID','Exten: $conf_exten','Context: $ext_context','Channel: $local_DEF$Local_out_prefix$phone_code$phone_number$local_AMP$ext_context','Priority: 1','Callerid: $CIDstring','Timeout: $Local_dial_timeout','','','','');";
                 //$stmt = "INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$MqueryCID','Exten: $Ndialstring','Context: $ext_context','Channel: $dial_channel','Priority: 1','Callerid: $CIDstring','Timeout: $Local_dial_timeout','$account','$variable','','');";
@@ -1464,7 +1466,7 @@ if ($sipIsLoggedIn) {
                     'cmd_line_k' => ''
                 ];
                 $astDB->insert('vicidial_manager', $insertData);
-    
+
                 ### log outbound call in the dial log
                 //$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$MqueryCID',lead_id='$lead_id',server_ip='$server_ip',call_date='$NOW_TIME',extension='$Ndialstring',channel='$dial_channel', timeout='$Local_dial_timeout',outbound_cid='$CIDstring',context='$ext_context';";
                 $insertData = [
@@ -1479,7 +1481,7 @@ if ($sipIsLoggedIn) {
                     'context' => $ext_context
                 ];
                 $rslt = $astDB->insert('vicidial_dial_log', $insertData);
-    
+
                 ### Skip logging and list overrides if dial in-group is used
                 if (strlen((string) $dial_ingroup) < 1) {
                     //$stmt = "INSERT INTO vicidial_auto_calls (server_ip,campaign_id,status,lead_id,callerid,phone_code,phone_number,call_time,call_type) values('$server_ip','$campaign','XFER','$lead_id','$MqueryCID','$phone_code','$agent_dialed_number','$NOW_TIME','OUT')";
@@ -1496,7 +1498,7 @@ if ($sipIsLoggedIn) {
                     ];
                     $rslt = $astDB->insert('vicidial_auto_calls', $insertData);
                 }
-    
+
                 ### update the agent status to INCALL in vicidial_live_agents
                 //$stmt = "UPDATE vicidial_live_agents set status='INCALL',last_call_time='$NOW_TIME',callerid='$MqueryCID',lead_id='$lead_id',comments='MANUAL',calls_today='$calls_today',external_hangup=0,external_status='',external_pause='',external_dial='',last_state_change='$NOW_TIME' where user='$user' and server_ip='$server_ip';";
                 $updateData = [
@@ -1515,13 +1517,13 @@ if ($sipIsLoggedIn) {
                 $astDB->where('user', $user);
                 $astDB->where('server_ip', $server_ip);
                 $rslt = $astDB->update('vicidial_live_agents', $updateData);
-    
+
                 ### update calls_today count in vicidial_campaign_agents
                 //$stmt = "UPDATE vicidial_campaign_agents set calls_today='$calls_today' where user='$user' and campaign_id='$campaign';";
                 $astDB->where('user', $user);
                 $astDB->where('campaign_id', $campaign);
                 $rslt = $astDB->update('vicidial_campaign_agents', ['calls_today'=>$calls_today]);
-    
+
                 if ($agent_dialed_number > 0) {
                     //$stmt = "INSERT INTO user_call_log (user,call_date,call_type,server_ip,phone_number,number_dialed,lead_id,callerid,group_alias_id,preset_name) values('$user','$NOW_TIME','$agent_dialed_type','$server_ip','$agent_dialed_number','$Ndialstring','$lead_id','$CCID','$RAWaccount','$preset_name')";
                     $insertData = [
@@ -1538,7 +1540,7 @@ if ($sipIsLoggedIn) {
                     ];
                     $astDB->insert('user_call_log', $insertData);
                 }
-    
+
                 ### Skip logging and list overrides if dial in-group is used
                 if (strlen((string) $dial_ingroup) < 1) {
                     $val_pause_epoch = 0;
@@ -1552,11 +1554,11 @@ if ($sipIsLoggedIn) {
                         $val_pause_epoch =	$row['pause_epoch'];
                         $val_pause_sec = ($StarTtimE - $val_pause_epoch);
                     }
-    
+
                     //$stmt="UPDATE vicidial_agent_log set pause_sec='$val_pause_sec',wait_epoch='$StarTtimE' where agent_log_id='$agent_log_id';";
                     $astDB->where('agent_log_id', $agent_log_id);
                     $rslt = $astDB->update('vicidial_agent_log', ['pause_sec'=>$val_pause_sec,'wait_epoch'=>$StarTtimE]);
-    
+
                     #############################################
                     ##### START QUEUEMETRICS LOGGING LOOKUP #####
                     //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id,queuemetrics_pe_phone_append,queuemetrics_socket,queuemetrics_socket_url FROM system_settings;";
@@ -1576,7 +1578,7 @@ if ($sipIsLoggedIn) {
                     }
                     ##### END QUEUEMETRICS LOGGING LOOKUP #####
                     ###########################################
-    
+
                     if ($enable_queuemetrics_logging > 0) {
                         $data4SQL = '';
                         $data4SS = '';
@@ -1593,26 +1595,26 @@ if ($sipIsLoggedIn) {
                             $data4SQL = ",data4='{$row['queuemetrics_phone_environment']}{$pe_append}'";
                             $data4SS = "&data4={$row['queuemetrics_phone_environment']}{$pe_append}";
                         }
-    
+
                         $linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
-    
+
                         # UNPAUSEALL
                         $stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='NONE',queue='NONE',agent='Agent/$user',verb='UNPAUSEALL',serverid='$queuemetrics_log_id' $data4SQL;";
                         $rslt = $linkB->rawQuery($stmt);
                         $affected_rows = $linkB->getRowCount();
-    
+
                         # CALLOUTBOUND (formerly ENTERQUEUE)
                         $stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$MqueryCID',queue='$campaign',agent='NONE',verb='CALLOUTBOUND',data2='$agent_dialed_number',serverid='$queuemetrics_log_id' $data4SQL;";
                         $rslt = $linkB->rawQuery($stmt);
                         $affected_rows = $linkB->getRowCount();
-    
+
                         # CONNECT
                         $stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$MqueryCID',queue='$campaign',agent='Agent/$user',verb='CONNECT',data1='0',serverid='$queuemetrics_log_id' $data4SQL;";
                         $rslt = $linkB->rawQuery($stmt);
                         $affected_rows = $linkB->getRowCount();
-    
+
                         $linkB->__destruct();
-    
+
                         if ( $queuemetrics_socket == 'CONNECT_COMPLETE' && strlen((string) $queuemetrics_socket_url) > 10 ) {
                             $socket_send_data_begin = '?';
                             $socket_send_data = "time_id=$StarTtimE&call_id=$MqueryCID&queue=$campaign&agent=Agent/$user&verb=CONNECT&data1=0$data4SS";
@@ -1623,7 +1625,7 @@ if ($sipIsLoggedIn) {
                         }
                     }
                 }
-    
+
                 ### Check for List ID override settings
                 $VDCL_xferconf_a_number = '';
                 $VDCL_xferconf_b_number = '';
@@ -1642,7 +1644,7 @@ if ($sipIsLoggedIn) {
                     $VDCL_xferconf_d_number =	$row['xferconf_d_number'] ?? '';
                     $VDCL_xferconf_e_number =	$row['xferconf_e_number'] ?? '';
                 }
-    
+
                 ##### check if system is set to generate logfile for transfers
                 //$stmt="SELECT enable_agc_xfer_log FROM system_settings;";
                 $rslt = $astDB->get('system_settings', null, 'enable_agc_xfer_log');
@@ -1660,8 +1662,8 @@ if ($sipIsLoggedIn) {
                     fclose($fp);
                 }
             }
-    
-    
+
+
             ##### find if script contains recording fields
             //$stmt = "SELECT count(*) AS cnt FROM vicidial_lists WHERE list_id='$list_id' and agent_script_override!='' and agent_script_override IS NOT NULL and agent_script_override!='NONE';";
             $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM vicidial_lists WHERE list_id='$list_id' and agent_script_override!='' and agent_script_override IS NOT NULL and agent_script_override!='NONE';");
@@ -1680,7 +1682,7 @@ if ($sipIsLoggedIn) {
                     }
                 }
             }
-    
+
             if ((string) $list_id !== '') {
                 //$stmt = "SELECT xferconf_a_number,xferconf_b_number,xferconf_c_number,xferconf_d_number,xferconf_e_number from vicidial_lists where list_id='$list_id';";
                 $astDB->where('list_id', $list_id);
@@ -1699,7 +1701,7 @@ if ($sipIsLoggedIn) {
                     if ((string) $row['xferconf_e_number'] !== '')
                         {$VDCL_xferconf_e_number =	$row['xferconf_e_number'];}
                 }
-                
+
                 $custom_field_names = '|';
                 $custom_field_names_SQL = '';
                 $custom_field_values = '----------';
@@ -1740,22 +1742,22 @@ if ($sipIsLoggedIn) {
                     }
                 }
             }
-    
-    
+
+
             $comments = preg_replace("/\r/i", '', $comments);
             $comments = preg_replace("/\n/i", '!N!', $comments);
-    
+
             $address1 = preg_replace("/\r/i", '', (string) $address1);
             $address1 = preg_replace("/\n/i", '!N!', (string) $address1);
-    
+
             $address2 = preg_replace("/\r/i", '', (string) $address2);
             $address2 = preg_replace("/\n/i", '!N!', (string) $address2);
-            
+
             $astDB->where('lead_id', $lead_id);
             $astDB->orderBy('notesid', 'desc');
             $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
             $call_notes = $CNotes['call_notes'] ?? '';
-            
+
             $LeaD_InfO = [
                 'MqueryCID' => $MqueryCID ?? "",
                 'lead_id' => $lead_id,
@@ -1813,7 +1815,7 @@ if ($sipIsLoggedIn) {
                 'call_notes' => $call_notes,
                 'CBcommentsALL' => $CBcommentsALL
             ];
-    
+
             $APIResult = [ "result" => "success", "data" => $LeaD_InfO ];
         } else {
             if ($errmsg < 1) {

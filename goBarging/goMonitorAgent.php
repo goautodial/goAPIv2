@@ -20,6 +20,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+/** @var MySQLiDB|null $goDB */
+$astDB = $astDB ?? null;
+$goDB = $goDB ?? null;
+$goUser = $goUser ?? '';
+
+if (!$astDB || !$goDB) {
+    $apiresults = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
+$source = '';
+$function = '';
+$agent = '';
+$phone_login = '';
+$session_id = '';
+$server_ip = '';
+$stage = '';
+$ip_address = '';
+$message = '';
+$data = [];
+$wAction = 'monitored';
+$user_group = '';
 
 if (isset($_GET['goSource'])) { $source = $astDB->escape($_GET['goSource']); }
     else if (isset($_POST['goSource'])) { $source = $astDB->escape($_POST['goSource']); }
@@ -50,17 +73,17 @@ if ($is_logged_in) {
         $apiresults = [ "result" => "error", "message" => "$result_reason - $source" ];
 	} else {
         $hasError = 0;
-        
+
         $astDB->where('user', $goUser);
         $astDB->where('active', 'Y');
         $rslt = $astDB->getOne('vicidial_users', 'api_list_restrict,api_allowed_functions,user_group');
 		$user_group = $rslt['user_group'];
-        
+
 		if ( (!preg_match("/ $function /", $rslt['api_allowed_functions'])) && (!preg_match("/ALL_FUNCTIONS/", $rslt['api_allowed_functions'])) ) {
 			$apiresults = [ "result" => "error", "message" => "User does NOT have permission to use this function" ];
 			$hasError = 1;
 		}
-        
+
         if ($hasError < 1) {
             //$stmt="SELECT count(*) from vicidial_users where user='$user' and vdc_agent_api_access='1' and user_level > 6 and active='Y';";
             $astDB->where('user', $goUser);
@@ -87,7 +110,7 @@ if ($is_logged_in) {
                 $astDB->where('server_ip', $server_ip);
                 $rslt = $astDB->get("$conf_table");
                 $session_exists = $astDB->getRowCount();
-    
+
                 if ($session_exists < 1) {
                     $apiresults = [ "result" => "error", "message" => "Invalid Session ID", "session_id" => $session_id, "server_ip" => $server_ip, "user" => $goUser ];
                     $hasError = 1;
@@ -96,7 +119,7 @@ if ($is_logged_in) {
                     $astDB->where('login', $phone_login);
                     $rslt = $astDB->get('phones');
                     $phone_exists = $astDB->getRowCount();
-    
+
                     if ( ($phone_exists < 1) && ($source != 'queuemetrics') ) {
                         $apiresults = [ "result" => "error", "message" => "Invalid Phone Login", "phone_login" => $phone_login, "user" => $goUser ];
                         $hasError = 1;
@@ -118,7 +141,7 @@ if ($is_logged_in) {
                             $monitor_server_ip =$row['server_ip'];
                             $outbound_cid =		$row['outbound_cid'];
                         }
-    
+
                         $S = '*';
                         $D_s_ip = explode('.', (string) $server_ip);
                         if (strlen($D_s_ip[0])<2) {$D_s_ip[0] = "0$D_s_ip[0]";}
@@ -130,14 +153,15 @@ if ($is_logged_in) {
                         if (strlen($D_s_ip[3])<2) {$D_s_ip[3] = "0$D_s_ip[3]";}
                         if (strlen($D_s_ip[3])<3) {$D_s_ip[3] = "0$D_s_ip[3]";}
                         $monitor_dialstring = "$D_s_ip[0]$S$D_s_ip[1]$S$D_s_ip[2]$S$D_s_ip[3]$S";
-    
+
+                        $StarTtimE = $StarTtimE ?? date('U');
                         $PADuser = sprintf("%08s", $goUser);
                         while (strlen($PADuser) > 8) {$PADuser = substr("$PADuser", 0, -1);}
                         $BMquery = "BM$StarTtimE$PADuser";
-                        
+
                         $rslt = $astDB->getOne('system_settings', 'agent_whisper_enabled');
                         $agent_whisper_enabled = $rslt['agent_whisper_enabled'];
-    
+
                         if ( (preg_match('/MONITOR/', (string) $stage)) || (strlen((string) $stage) < 1) ) {
                             $stage = '0';
                             if ($rsltvc == "CONFBRIDGE") {
@@ -165,7 +189,7 @@ if ($is_logged_in) {
                                 $stage = '0';
                             }
                         }
-    
+
                         ### insert a new lead in the system with this phone number
                         //$stmt = "INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$monitor_server_ip','','Originate','$BMquery','Channel: Local/$monitor_dialstring$stage$session_id@default','Context: default','Exten: $dialplan_number','Priority: 1','Callerid: \"VC Blind Monitor\" <$outbound_cid>','','','','','');";
                         $insertData = [
@@ -193,7 +217,7 @@ if ($is_logged_in) {
                         $affected_rows = $astDB->getRowCount();
                         if ($affected_rows > 0) {
                             $man_id = $astDB->getInsertId();
-    
+
                             //$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$BMquery',lead_id='0',server_ip='$monitor_server_ip',call_date='$NOW_TIME',extension='$dialplan_number',channel='Local/$monitor_dialstring$stage$session_id@default',timeout='0',outbound_cid='\"VC Blind Monitor\" <$outbound_cid>',context='default';";
                             $insertData = [
                                 'caller_code' => $BMquery,
@@ -207,7 +231,7 @@ if ($is_logged_in) {
                                 'context' => 'default'
                             ];
                             $rslt = $astDB->insert('vicidial_dial_log', $insertData);
-    
+
                             ##### BEGIN log visit to the vicidial_report_log table #####
                             $endMS = microtime();
                             $startMSary = explode(" ", (string) ($startMS ?? ''));
@@ -229,7 +253,7 @@ if ($is_logged_in) {
                             ];
                             $rslt = $astDB->insert('vicidial_report_log', $insertData);
                             ##### END log visit to the vicidial_report_log table #####
-    
+
                             $message = "Blind monitor has been launched";
                             $data = [
                                 'phone_login' => $phone_login,
@@ -243,10 +267,10 @@ if ($is_logged_in) {
                     }
                 }
             }
-            
+
             if ($hasError < 1) {
 				$log_id = log_action($goDB, $action, $goUser, $ip_address, "{$goUser} {$wAction} in to {$agent}'s call", $user_group);
-				
+
                 $apiresults = [ "result" => "success", "message" => $message, "data" => $data ];
             }
         }

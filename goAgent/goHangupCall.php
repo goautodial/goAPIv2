@@ -51,6 +51,16 @@ if (isset($_GET['goLogCampaign'])) { $log_campaign = $astDB->escape($_GET['goLog
 if (isset($_GET['goQMExtension'])) { $qm_extension = $astDB->escape($_GET['goQMExtension']); }
     else if (isset($_POST['goQMExtension'])) { $qm_extension = $astDB->escape($_POST['goQMExtension']); }
 
+$server_ip = $server_ip ?? ($phone_settings->server_ip ?? '');
+$call_server_ip = $call_server_ip ?? $server_ip;
+$auto_dial_level = $auto_dial_level ?? 0;
+$stage = $stage ?? '';
+$CallCID = $CallCID ?? '';
+$queryCID = $queryCID ?? '';
+$channel = $channel ?? '';
+$exten = $exten ?? '';
+$seconds = $seconds ?? 0;
+
 $user = $agent->user;
 
 if ($is_logged_in) {
@@ -65,7 +75,7 @@ if ($is_logged_in) {
         $APIResult = [ "result" => "error", "message" => "Channel '{$channel}' is NOT valid or queryCID '{$queryCID}' is NOT valid. Hangup command not inserted." ];
     } else {
         if (strlen((string) $call_server_ip) < 7) {$call_server_ip = $server_ip;}
-        
+
         if ( $auto_dial_level > 0 && strlen((string) $CallCID) > 2 && strlen((string) $exten) > 2 && $seconds > 0) {
             //$stmt="SELECT count(*) FROM vicidial_auto_calls where channel='$channel' and callerid='$CalLCID';";
             $astDB->where('channel', $channel);
@@ -75,7 +85,7 @@ if ($is_logged_in) {
             if ($auto_calls_ct == 0) {
                 //echo "Call $CalLCID $channel is not live on $call_server_ip, Checking Live Channel...\n";
                 $errmsg = "Call {$CallCID} {$channel} is NOT live on {$call_server_ip}, Checking live channel...";
-    
+
                 //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel' and extension LIKE \"%$exten\";";
                 $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM live_channels WHERE server_ip = '$call_server_ip' AND channel='$channel' AND extension LIKE \"%$exten\";");
                 if ($rslt[0]['cnt'] == 0) {
@@ -98,7 +108,7 @@ if ($is_logged_in) {
                 //echo "$stmt\n";
             }
         }
-    
+
         if ($channel_live === 1) {
             if ( strlen((string) $CallCID) > 15 && $seconds > 0) {
                 //$stmt="SELECT count(*) FROM vicidial_auto_calls where callerid='$CalLCID';";
@@ -144,7 +154,7 @@ if ($is_logged_in) {
                                 $CLuniqueid =			$rslt['uniqueid'];
                                 $CLqueue_position =		$rslt['queue_position'];
                             }
-    
+
                             $CLstage = preg_replace("/.*-/", '', (string) $CLstage);
                             if (strlen($CLstage) < 1) {$CLstage = 0;}
 
@@ -157,7 +167,7 @@ if ($is_logged_in) {
                             if ($VAC_cc_ct > 0) {
                                 $caller_complete	= $VAC_cc_ct;
                             }
-    
+
                             if ($caller_complete < 1) {
                                 $time_id = 0;
                                 //$stmt="SELECT time_id from queue_log where call_id='$CalLCID' and verb IN('ENTERQUEUE','CALLOUTBOUND') and queue='$CLcampaign_id';";
@@ -170,9 +180,9 @@ if ($is_logged_in) {
                                     $time_id	= $VAC_eq_ct;
                                 }
                                 $StarTtime = date("U");
-                                if ($time_id > 100000) 
+                                if ($time_id > 100000)
                                     {$seconds = ($StarTtime - $time_id);}
-    
+
                                 $data4SQL = '';
                                 $data4SS = '';
                                 //$stmt="SELECT queuemetrics_phone_environment FROM vicidial_campaigns where campaign_id='$log_campaign' and queuemetrics_phone_environment!='';";
@@ -204,14 +214,14 @@ if ($is_logged_in) {
                                     'data3' => $CLqueue_position,
                                     'serverid' => $queuemetrics_log_id
                                 ];
-                                
+
                                 if (is_array($data4SQL)) {
                                     $insertData = array_merge($insertData, $data4SQL);
                                 }
                                 //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtime',call_id='$CalLCID',queue='$CLcampaign_id',agent='Agent/$user',verb='COMPLETEAGENT',data1='$CLstage',data2='$secondS',data3='$CLqueue_position',serverid='$queuemetrics_log_id' $data4SQL;";
                                 $rslt = $qmDB->insert('queue_log', $insertData);
                                 $affected_rows = $qmDB->getRowCount();
-    
+
                                 if ( $queuemetrics->queuemetrics_socket == 'CONNECT_COMPLETE' && strlen((string) $queuemetrics->queuemetrics_socket_url) > 10 ) {
                                     $socket_send_data_begin='?';
                                     $socket_send_data = "time_id=$StarTtime&call_id=$CallCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$secondS&data3=$CLqueue_position$data4SS";
@@ -227,7 +237,7 @@ if ($is_logged_in) {
                     }
                 }
             }
-    
+
             //$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$call_server_ip','','Hangup','$queryCID','Channel: $channel','','','','','','','','','');";
             $insertData = [
                 'man_id' => '',

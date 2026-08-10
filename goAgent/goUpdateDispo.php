@@ -541,11 +541,11 @@ if ($is_logged_in) {
 			$astDB->where('uniqueid', $uniqueid);
 			$astDB->where('user', $user);
 			$astDB->orderBy('call_date', 'desc');
-			$rslt = $astDB->getOne('vicidial_closer_log', 'campaign_id,closercallid');
+			$rslt = $astDB->getOne('vicidial_closer_log', 'campaign_id,closecallid');
 			$VDCL_cn_ct = $astDB->getRowCount();
 			if ($VDCL_cn_ct > 0) {
 				$VDADchannel_group = $rslt['campaign_id'];
-				$vicidial_id = $rslt['closercallid'];
+				$vicidial_id = $rslt['closecallid'];
 			} else {$vicidial_id = $uniqueid;}
 
 			# Insert into vicidial_call_notes

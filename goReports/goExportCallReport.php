@@ -88,7 +88,7 @@
 	$status_ct = (is_countable($dispo_stats) ? count($dispo_stats) : 0);
 
 	$array_camp = [];
-	$closer_camp = [];
+	$closer_camp = '';
 	$active_list_fields = [];
 	$uniqueid2 = '';
 	$csv_row = "";
@@ -189,16 +189,21 @@
             }
 
             $allowed_campaigns = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-            foreach($allowed_campaigns as $camp_val){
-                $array_camp[] = $camp_val["campaign_id"];
+            $array_camp = [];
+            foreach((is_array($allowed_campaigns) ? $allowed_campaigns : []) as $camp_val){
+                $campaign_id = is_array($camp_val) ? ($camp_val["campaign_id"] ?? '') : '';
+                if ((string) $campaign_id !== '') {
+                    $array_camp[] = $campaign_id;
+                }
             }
 
             $closer_campaigns = $astDB->where("campaign_id", $array_camp, "in")
                 ->orderBy("campaign_id")
                 ->get("vicidial_campaigns", NULL, "closer_campaigns");
-            foreach($closer_campaigns as $row){
-                if(!empty($row['closer_campaigns'])){
-                    $trimmed_cc = rtrim($row['closer_campaigns'], " - ");
+            foreach((is_array($closer_campaigns) ? $closer_campaigns : []) as $row){
+                $row_closer_campaigns = is_array($row) ? ($row['closer_campaigns'] ?? '') : '';
+                if((string) $row_closer_campaigns !== ''){
+                    $trimmed_cc = rtrim((string) $row_closer_campaigns, " - ");
                     $closer_camp .= " ".$trimmed_cc;
                 }
             }
@@ -209,8 +214,11 @@
 			}
 
 			$ingroups_query = $astDB->get("vicidial_inbound_groups", NULL, "group_id");
-			foreach ($ingroups_query as $row) {
-				$closer_camp .= " ".$row["group_id"];
+			foreach ((is_array($ingroups_query) ? $ingroups_query : []) as $row) {
+				$group_id = is_array($row) ? ($row["group_id"] ?? '') : '';
+				if ((string) $group_id !== '') {
+					$closer_camp .= " ".$group_id;
+				}
 			}
 
             $explodedCloserCamps = explode(" ", ltrim((string) $closer_camp));

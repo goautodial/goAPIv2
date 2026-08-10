@@ -20,6 +20,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB|null $astDB */
+$astDB = $astDB ?? null;
+$goUser = $goUser ?? '';
+
+if (!$astDB) {
+    $APIResult = ["result" => "error", "message" => "Invalid API context"];
+    return;
+}
+
 $is_logged_in = check_agent_login($astDB, $goUser);
 
 $agent = get_settings('user', $astDB, $goUser);
@@ -192,10 +201,25 @@ if (isset($_GET['session_name'])) { $session_name = $astDB->escape($_GET['sessio
     else if (isset($_POST['session_name'])) { $session_name = $astDB->escape($_POST['session_name']); }
 if (isset($_GET['goUserCustomFields'])) { $CF_uses_custom_fields = $astDB->escape($_GET['goUserCustomFields']); }
     else if (isset($_POST['goUserCustomFields'])) { $CF_uses_custom_fields = $astDB->escape($_POST['goUserCustomFields']); }
-    
+
 if (isset($_GET['isPBP'])) { $isPBP = $astDB->escape($_GET['isPBP']); }
     else if (isset($_POST['isPBP'])) { $isPBP = $astDB->escape($_POST['isPBP']); }
 
+$ignore_list_script = $ignore_list_script ?? 0;
+$vendor_lead_code = $vendor_lead_code ?? '';
+$script_width = $script_width ?? '';
+$script_height = $script_height ?? '';
+$preset_number_f = $preset_number_f ?? '';
+$CF_uses_custom_fields = $CF_uses_custom_fields ?? 'N';
+$isPBP = $isPBP ?? '';
+$IFRAME = $IFRAME ?? 0;
+$script_id = $script_id ?? '';
+$ScrollDIV = $ScrollDIV ?? 0;
+$go_camp_script = $go_camp_script ?? '';
+$in_script = $in_script ?? '';
+$camp_script = $camp_script ?? '';
+$list_name = $list_name ?? '';
+$list_description = $list_description ?? '';
 
 if ($is_logged_in) {
     if (strlen((string) $in_script) < 1) {
@@ -207,39 +231,39 @@ if ($is_logged_in) {
     }
     else
         {$call_script = $in_script;}
-    
+
     $ignore_list_script_override = 'N';
     //$stmt = "SELECT ignore_list_script_override FROM vicidial_inbound_groups where group_id='$group';";
     $astDB->where('group_id', $group);
     $rslt = $astDB->getOne('vicidial_inbound_groups', 'ignore_list_script_override');
     $ilso_ct = $astDB->getRowCount();
-    if ($ilso_ct > 0) {
-        $ignore_list_script_override = $rslt['ignore_list_script_override'];
+    if ($ilso_ct > 0 && is_array($rslt)) {
+        $ignore_list_script_override = $rslt['ignore_list_script_override'] ?? 'N';
     }
     if ($ignore_list_script_override == 'Y')
         {$ignore_list_script = 1;}
-    
+
     if ($ignore_list_script < 1) {
         //$stmt="SELECT agent_script_override from vicidial_lists where list_id='$list_id';";
         $astDB->where('list_id', $list_id);
         $rslt = $astDB->getOne('vicidial_lists', 'agent_script_override');
-        $agent_script_override = $rslt['agent_script_override'];
+        $agent_script_override = is_array($rslt) ? ($rslt['agent_script_override'] ?? '') : '';
         if ((string) $agent_script_override !== '')
             {$call_script = $agent_script_override;}
     }
-    
+
     //$stmt="SELECT list_name,list_description from vicidial_lists where list_id='$list_id';";
     $astDB->where('list_id', $list_id);
     $rslt = $astDB->getOne('vicidial_lists', 'list_name,list_description');
-    $list_name =			$rslt['list_name'];
-    $list_description =		$rslt['list_description'];
-    
+    $list_name =			is_array($rslt) ? ($rslt['list_name'] ?? '') : '';
+    $list_description =		is_array($rslt) ? ($rslt['list_description'] ?? '') : '';
+
     //$stmt="SELECT script_name,script_text from vicidial_scripts where script_id='$call_script';";
     $astDB->where('script_id', $call_script);
     $rslt = $astDB->getOne('vicidial_scripts', 'script_name,script_text');
-    $script_name =		$rslt['script_name'];
-    $script_text =		stripslashes($rslt['script_text']);
-    
+    $script_name =		is_array($rslt) ? ($rslt['script_name'] ?? '') : '';
+    $script_text =		stripslashes((string) (is_array($rslt) ? ($rslt['script_text'] ?? '') : ''));
+
     if (preg_match("/iframe\ssrc/i", $script_text)) {
         $IFRAME = 1;
         $lead_id = preg_replace('/\s/i', '+', (string) $lead_id);
@@ -321,7 +345,7 @@ if ($is_logged_in) {
         $did_description = preg_replace('/\s/i', '+', (string) $did_description);
         $web_vars = preg_replace('/\s/i', '+', $web_vars);
     }
-    
+
     $script_text = preg_replace('/--A--lead_id--B--/i', "$lead_id", $script_text);
     $script_text = preg_replace('/--A--vendor_id--B--/i', "$vendor_id", (string) $script_text);
     $script_text = preg_replace('/--A--vendor_lead_code--B--/i', "$vendor_lead_code", (string) $script_text);
@@ -406,7 +430,7 @@ if ($is_logged_in) {
     $script_text = preg_replace('/--A--call_id--B--/i', "$call_id", (string) $script_text);
     $script_text = preg_replace('/--A--user_group--B--/i', "$user_group", (string) $script_text);
     $script_text = preg_replace('/--A--web_vars--B--/i', "$web_vars", (string) $script_text);
-    
+
     if ($CF_uses_custom_fields == 'Y') {
         ### find the names of all custom fields, if any
         //$stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
@@ -415,16 +439,29 @@ if ($is_logged_in) {
         $astDB->where('field_label', ['vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner'], 'not in');
         $rslt = $astDB->get('vicidial_lists_fields', null, 'field_label,field_type');
         $cffn_ct = $astDB->getRowCount();
+        $custom_table = 'custom_' . preg_replace('/[^0-9]/', '', (string) $entry_list_id);
+        $custom_table_exists = false;
+        if ($custom_table !== 'custom_') {
+            $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '" . $astDB->escape($custom_table) . "'");
+            $custom_table_exists = is_array($tableCheck) && count($tableCheck) > 0;
+        }
         $d = 0;
         while ($cffn_ct > $d) {
-            $row = $rslt[$d];
-            $field_name_id = $row['field_label'];
+            $row = is_array($rslt) ? ($rslt[$d] ?? []) : [];
+            $field_name_id = $row['field_label'] ?? '';
+            if ($field_name_id === '') {
+                $d++;
+                continue;
+            }
             $field_name_tag = "--A--" . $field_name_id . "--B--";
-            
-            $astDB->where('lead_id', $lead_id);
-            $cRow = $astDB->getOne("custom_{$entry_list_id}");
-            $form_field_value = $cRow["$field_name_id"];
-            
+
+            $form_field_value = '';
+            if ($custom_table_exists) {
+                $astDB->where('lead_id', $lead_id);
+                $cRow = $astDB->getOne($custom_table);
+                $form_field_value = is_array($cRow) ? ($cRow[$field_name_id] ?? '') : '';
+            }
+
             //if (isset($_GET["$field_name_id"]))				{$form_field_value = $_GET["$field_name_id"];}
             //    else if (isset($_POST["$field_name_id"]))	{$form_field_value = $_POST["$field_name_id"];}
             $script_text = preg_replace("/$field_name_tag/i", "$form_field_value", (string) $script_text);
@@ -432,12 +469,12 @@ if ($is_logged_in) {
             $d++;
         }
     }
-    
+
     if ($isPBP !== 'Y') {
         $script_text = preg_replace("/\n/i", "<BR style='clear: both;'>", (string) $script_text);
     }
     $script_text = stripslashes((string) $script_text);
-    
+
     $scriptHtml  = '';
     $scriptHtml .= "<!-- IFRAME$IFRAME -->\n";
     $scriptHtml .= "<!-- $script_id -->\n";
@@ -454,7 +491,7 @@ if ($is_logged_in) {
     if ( $IFRAME < 1 && $ScrollDIV > 0 || preg_match("/IGNORENOSCROLL/i", $script_text) )
         {$scriptHtml .= "</div>";}
     $scriptHtml .= "</TD></TR></TABLE>\n";
-    
+
     $APIResult = [ "result" => "success", "content" => $scriptHtml ];
 } else {
     $APIResult = [ "result" => "error", "message" => "Agent '$goUser' is currently NOT logged in" ];

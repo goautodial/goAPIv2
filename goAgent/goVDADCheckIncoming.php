@@ -348,12 +348,12 @@ if ($is_logged_in) {
                 //$stmt = "SELECT campaign_id,closecallid,xfercallid from vicidial_closer_log where lead_id = '$lead_id' order by call_date desc limit 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->orderBy('call_date', 'desc');
-                $rslt = $astDB->getOne('vicidial_closer_log', 'campaign_id,closercallid,xfercallid');
+                $rslt = $astDB->getOne('vicidial_closer_log', 'campaign_id,closecallid,xfercallid');
                 $VDCL_mvac_ct = $astDB->getRowCount();
                 if ($VDCL_mvac_ct > 0) {
                     $row = $rslt;
                     $VDADchannel_group = $row['campaign_id'];
-                    $INclosecallid = $row['closercallid'];
+                    $INclosecallid = $row['closecallid'];
                     $INxfercallid = $row['xfercallid'];
                 }
             }
@@ -498,17 +498,18 @@ if ($is_logged_in) {
             //$stmt = "UPDATE vicidial_closer_log SET user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' WHERE lead_id='$lead_id' ORDER BY closecallid DESC LIMIT 1;";
             $rslt = $astDB->rawQuery("UPDATE vicidial_closer_log SET user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' WHERE lead_id='$lead_id' ORDER BY closecallid DESC LIMIT 1;");
 
+            $closecallid = $closecallid ?? '';
             if (strlen((string) $closecallid)<1) {
                 //$stmt = "SELECT closecallid,xfercallid from vicidial_closer_log where lead_id='$lead_id' and user='$user' and list_id='$list_id' order by call_date desc limit 1;";
                 $astDB->where('lead_id', $lead_id);
                 $astDB->where('user', $user);
                 $astDB->where('list_id', $list_id);
                 $astDB->orderBy('call_date', 'desc');
-                $rslt = $astDB->getOne('vicidial_closer_log', 'closercallid,xfercallid');
+                $rslt = $astDB->getOne('vicidial_closer_log', 'closecallid,xfercallid');
                 $VDCL_mvac_ct = $astDB->getRowCount();
                 if ($VDCL_mvac_ct > 0) {
                     $row = $rslt;
-                    $INclosecallid =    $row['closercallid'];
+                    $INclosecallid =    $row['closecallid'];
                     $INxfercallid =     $row['xfercallid'];
                 }
             }

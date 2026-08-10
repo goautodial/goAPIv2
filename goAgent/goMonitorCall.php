@@ -76,7 +76,7 @@ if ($is_logged_in) {
 			{$SQLfile = "";}
 		else
 			{$SQLfile = "File: $filename";}
-	
+
 		$row = '';
 		$rowx = '';
 		$channel_live = 1;
@@ -124,7 +124,7 @@ if ($is_logged_in) {
                     'cmd_line_k' => ''
                 ];
 				$rslt = $astDB->insert('vicidial_manager', $insertData);
-	
+
 				if ($ACTION == "Monitor") {
 					//$stmt = "INSERT INTO recording_log (channel,server_ip,extension,start_time,start_epoch,filename,lead_id,user) values('$channel','$server_ip','$exten','$NOW_TIME','$StarTtimE','$filename','$lead_id','$user')";
 					$insertData = [
@@ -138,7 +138,7 @@ if ($is_logged_in) {
 						'user' => $user
 					];
 					$rslt = $astDB->insert('recording_log', $insertData);
-	
+
 					//$stmt="SELECT recording_id FROM recording_log where filename='$filename'";
 					//$astDB->where('filename', $filename);
 					//$rslt = $astDB->get('recording_log', null, 'recording_id');
@@ -155,7 +155,7 @@ if ($is_logged_in) {
 						$length_in_sec = ($StarTtimE - $start_time);
 						$length_in_min = ($length_in_sec / 60);
 						$length_in_min = sprintf("%8.2f", $length_in_min);
-	
+
 						//$stmt = "UPDATE recording_log set end_time='$NOW_TIME',end_epoch='$StarTtimE',length_in_sec=$length_in_sec,length_in_min='$length_in_min' where filename='$filename'";
 						$updateData = [
 							'end_time' => $NOW_TIME,
@@ -167,7 +167,7 @@ if ($is_logged_in) {
 						$rslt = $astDB->update('recording_log', $updateData);
 					}
 				}
-				
+
 				$APIResult = [ "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id ];
 			}
 		}
@@ -181,13 +181,13 @@ if ($is_logged_in) {
 		$rowx='';
 		$channel_live = 1;
 		$uniqueidSQL = '';
-	
+
 		if ( (strlen((string) $exten) < 3) || (strlen((string) $channel) < 4) || (strlen((string) $filename) < 8) ) {
 			$channel_live = 0;
 			$APIResult = [ "result" => "error", "message" => "Either the channel, exten or filename is NOT valid, $ACTION command not inserted" ];
 		} else {
 			$VDvicidial_id = '';
-	
+
 			if ($ACTION=="MonitorConf") {
 				//$stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$filename','Channel: $channel','Context: $ext_context','Exten: $exten','Priority: $ext_priority','Callerid: $filename','','','','','');";
 				$insertData = [
@@ -212,7 +212,7 @@ if ($is_logged_in) {
                     'cmd_line_k' => ''
                 ];
 				$rslt = $astDB->insert('vicidial_manager', $insertData);
-	
+
 				//$stmt = "INSERT INTO recording_log (channel,server_ip,extension,start_time,start_epoch,filename,lead_id,user) values('$channel','$server_ip','$exten','$NOW_TIME','$StarTtimE','$filename','$lead_id','$user')";
 				$insertData = [
 					'channel' => $channel,
@@ -229,13 +229,13 @@ if ($is_logged_in) {
 				if ($RLaffected_rows > 0) {
 					$recording_id = $astDB->getInsertId();
 				}
-	
+
 				if ($FROMvdc == 'YES') {
 					##### update vla record with recording_id
 					//$stmt = "UPDATE vicidial_live_agents SET external_recording='$recording_id' where user='$user';";
 					$astDB->where('user', $user);
 					$rslt = $astDB->update('vicidial_live_agents', ['external_recording' => $recording_id]);
-	
+
 					##### get call type from vicidial_live_agents table
 					$VLA_inOUT = 'NONE';
 					//$stmt="SELECT comments FROM vicidial_live_agents where user='$user' order by last_update_time desc limit 1;";
@@ -249,14 +249,14 @@ if ($is_logged_in) {
 					}
 					if ($VLA_inOUT == 'INBOUND') {
 						$four_hours_ago = date("Y-m-d H:i:s", mktime(date("H")-4,date("i"),date("s"),date("m"),date("d"),date("Y")));
-	
+
 						##### look for the vicidial ID in the vicidial_closer_log table
 						//$stmt="SELECT closecallid FROM vicidial_closer_log where lead_id='$lead_id' and user='$user' and call_date > \"$four_hours_ago\" order by closecallid desc limit 1;";
 						$astDB->where('lead_id', $lead_id);
 						$astDB->where('user', $user);
 						$astDB->where('call_date', $four_hours_ago, '>');
-						$astDB->orderBy('closercallid', 'desc');
-						$rslt = $astDB->getOne('vicidial_closer_log', 'closercallid AS vicidial_id');
+						$astDB->orderBy('closecallid', 'desc');
+						$rslt = $astDB->getOne('vicidial_closer_log', 'closecallid AS vicidial_id');
 					} else {
 						##### look for the vicidial ID in the vicidial_log table
 						//$stmt="SELECT uniqueid FROM vicidial_log where uniqueid='$uniqueid' and lead_id='$lead_id';";
@@ -268,7 +268,7 @@ if ($is_logged_in) {
 					if ($VM_mancall_ct > 0) {
 						$row = $rslt;
 						$VDvicidial_id = $row['vicidial_id'];
-	
+
 						//$stmt = "UPDATE recording_log SET vicidial_id='$VDvicidial_id' where recording_id='$recording_id';";
 						$astDB->where('recording_id', $recording_id);
 						$rslt = $astDB->update('recording_log', ['vicidial_id' => $VDvicidial_id]);
@@ -280,31 +280,31 @@ if ($is_logged_in) {
 			else {
 				if ($uniqueid == 'IN') {
 					$four_hours_ago = date("Y-m-d H:i:s", mktime(date("H")-4,date("i"),date("s"),date("m"),date("d"),date("Y")));
-	
+
 					### find the value to put in the vicidial_id field if this was an inbound call
 					//$stmt="SELECT closecallid from vicidial_closer_log where lead_id='$lead_id' and call_date > \"$four_hours_ago\" order by call_date desc limit 1;";
 					$astDB->where('lead_id', $lead_id);
 					$astDB->where('call_date', $four_hours_ago, '>');
 					$astDB->orderBy('call_date', 'desc');
-					$rslt = $astDB->getOne('vicidial_closer_log', 'closercallid');
+					$rslt = $astDB->getOne('vicidial_closer_log', 'closecallid');
 					$VAC_qm_ct = $astDB->getRowCount();
 					if ($VAC_qm_ct > 0) {
 						$row = $rslt;
-						$uniqueidSQL	= $row['closercallid'];
+						$uniqueidSQL	= $row['closecallid'];
 					}
 				} else {
 					if (strlen((string) $uniqueid) > 8) {
 						$uniqueidSQL	= $uniqueid;
 					}
 				}
-	
+
 				if ($FROMvdc=='YES') {
 					##### update vla recording record to blank
 					//$stmt = "UPDATE vicidial_live_agents SET external_recording='' where user='$user';";
 					$astDB->where('user', $user);
 					$rslt = $astDB->update('vicidial_live_agents', ['external_recording' => '']);
 				}
-				
+
 				//$stmt="SELECT recording_id,start_epoch FROM recording_log where filename='$filename'";
 				$astDB->where('filename', $filename);
 				$rslt = $astDB->get('recording_log', null, 'recording_id,start_epoch');
@@ -316,7 +316,7 @@ if ($is_logged_in) {
 					$length_in_sec = ($StarTtimE - $start_time);
 					$length_in_min = ($length_in_sec / 60);
 					$length_in_min = sprintf("%8.2f", $length_in_min);
-	
+
 					//$stmt = "UPDATE recording_log set end_time='$NOW_TIME',end_epoch='$StarTtimE',length_in_sec=$length_in_sec,length_in_min='$length_in_min' $uniqueidSQL where filename='$filename'";
 					$updateData = [
 						'end_time' => $NOW_TIME,
@@ -328,8 +328,8 @@ if ($is_logged_in) {
 					$astDB->where('filename', $filename);
 					$rslt = $astDB->update('recording_log', $updateData);
 				}
-	
-				# find and hang up all recordings going on in this conference # and extension = '$exten' 
+
+				# find and hang up all recordings going on in this conference # and extension = '$exten'
 				$stmt="SELECT channel FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$channel%\" and (channel LIKE \"%,1\" or channel LIKE \"%;1\");";
 				$rslt = $astDB->rawQuery($stmt);
 			#	$rec_count = intval(mysql_num_rows($rslt) / 2);
@@ -368,7 +368,7 @@ if ($is_logged_in) {
 					$i++;
 				}
 			}
-			
+
 			$APIResult = [ "result" => "success", "message" => "$ACTION command sent for Channel $channel on $server_ip", "filename" => $filename, "recording_id" => $recording_id, "rec_message" => "RECORDING WILL LAST UP TO 60 MINUTES" ];
 		}
 	}

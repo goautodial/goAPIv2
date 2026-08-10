@@ -237,6 +237,8 @@ if ($is_logged_in) {
 			$retry_count++;
 		}
 
+        $lastError = $lastError ?? '';
+        $custom_last_SQL = $custom_last_SQL ?? '';
         $APIResult = [ "result" => "success", "message" => "Lead $lead_id information has$DO_NOT_UPDATE_text been updated", "last_error" => $lastError, "last_query" => $custom_last_SQL ];
     }
 } else {
