@@ -432,6 +432,22 @@ if ($is_logged_in) {
     $script_text = preg_replace('/--A--web_vars--B--/i', "$web_vars", (string) $script_text);
 
     if ($CF_uses_custom_fields == 'Y') {
+        if (!function_exists('go_quote_custom_field_identifier')) {
+            function go_quote_custom_field_identifier($field)
+            {
+                return '`' . str_replace('`', '``', (string) $field) . '`';
+            }
+        }
+        if (!function_exists('go_get_custom_field_row')) {
+            function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+            {
+                if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+                    return [];
+                }
+                $rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+                return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+            }
+        }
         ### find the names of all custom fields, if any
         //$stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
         $astDB->where('list_id', $entry_list_id);
@@ -445,28 +461,28 @@ if ($is_logged_in) {
             $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '" . $astDB->escape($custom_table) . "'");
             $custom_table_exists = is_array($tableCheck) && count($tableCheck) > 0;
         }
-        $d = 0;
-        while ($cffn_ct > $d) {
-            $row = is_array($rslt) ? ($rslt[$d] ?? []) : [];
-            $field_name_id = $row['field_label'] ?? '';
-            if ($field_name_id === '') {
-                $d++;
-                continue;
+        $custom_field_labels = [];
+        foreach ((is_array($rslt) ? $rslt : []) as $row) {
+            $field_name_id = is_array($row) ? ($row['field_label'] ?? '') : '';
+            if ((string) $field_name_id !== '') {
+                $custom_field_labels[] = $field_name_id;
             }
-            $field_name_tag = "--A--" . $field_name_id . "--B--";
+        }
 
-            $form_field_value = '';
-            if ($custom_table_exists) {
-                $astDB->where('lead_id', $lead_id);
-                $cRow = $astDB->getOne($custom_table);
-                $form_field_value = is_array($cRow) ? ($cRow[$field_name_id] ?? '') : '';
-            }
+        $custom_row = [];
+        if ($custom_table_exists && count($custom_field_labels) > 0) {
+            $custom_fields_sql = implode(',', array_map('go_quote_custom_field_identifier', $custom_field_labels));
+            $custom_row = go_get_custom_field_row($astDB, $custom_table, $custom_fields_sql, $lead_id);
+        }
+
+        foreach ($custom_field_labels as $field_name_id) {
+            $field_name_tag = "--A--" . $field_name_id . "--B--";
+            $form_field_value = is_array($custom_row) ? ($custom_row[$field_name_id] ?? '') : '';
 
             //if (isset($_GET["$field_name_id"]))				{$form_field_value = $_GET["$field_name_id"];}
             //    else if (isset($_POST["$field_name_id"]))	{$form_field_value = $_POST["$field_name_id"];}
             $script_text = preg_replace("/$field_name_tag/i", "$form_field_value", (string) $script_text);
-            //if ($DB) {echo "$d|$field_name_id|$field_name_tag|$form_field_value|<br>\n";}
-            $d++;
+            //if ($DB) {echo "$field_name_id|$field_name_tag|$form_field_value|<br>\n";}
         }
     }
 

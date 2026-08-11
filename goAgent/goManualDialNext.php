@@ -119,6 +119,10 @@ if ($sipIsLoggedIn) {
     $override_phone = 0;
     $CBleadIDset = 0;
     $CBcommentsALL = '';
+    $agent_dialed_type = $agent_dialed_type ?? '';
+    $agent_dialed_number = $agent_dialed_number ?? '';
+    $agent_dialed_type = $agent_dialed_type ?? '';
+    $agent_dialed_number = $agent_dialed_number ?? '';
 
     if ((string) $manual_dial_list_id !== '') {
         $list_id = $manual_dial_list_id;
@@ -1702,6 +1706,23 @@ if ($sipIsLoggedIn) {
                         {$VDCL_xferconf_e_number =	$row['xferconf_e_number'];}
                 }
 
+                if (!function_exists('go_quote_custom_field_identifier')) {
+                    function go_quote_custom_field_identifier($field)
+                    {
+                        return '`' . str_replace('`', '``', (string) $field) . '`';
+                    }
+                }
+                if (!function_exists('go_get_custom_field_row')) {
+                    function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+                    {
+                        if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+                            return [];
+                        }
+                        $rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+                        return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+                    }
+                }
+
                 $custom_field_names = '|';
                 $custom_field_names_SQL = '';
                 $custom_field_values = '----------';
@@ -1713,20 +1734,25 @@ if ($sipIsLoggedIn) {
                 $d = 0;
                 while ($cffn_ct > $d) {
                     $row = $rslt[$d];
-                    $custom_field_names .=	"{$row['field_label']}|";
-                    $custom_field_names_SQL .=	"{$row['field_label']},";
-                    $custom_field_types .=	"{$row['field_type']}|";
+                    $field_label = is_array($row) ? ($row['field_label'] ?? '') : '';
+                    if ((string) $field_label === '') {
+                        $d++;
+                        continue;
+                    }
+                    $custom_field_names .=	"{$field_label}|";
+                    $custom_field_names_SQL .=	go_quote_custom_field_identifier($field_label) . ",";
+                    $custom_field_types .=	(is_array($row) ? ($row['field_type'] ?? '') : '') . "|";
                     $custom_field_values .=	"----------";
-                    $custom_field[$d] = $row['field_label'];
+                    $custom_field[$d] = $field_label;
                     $d++;
                 }
                 if ($cffn_ct > 0) {
                     $custom_field_names_SQL = preg_replace("/.$/i", "", (string) $custom_field_names_SQL);
                     ### find the values of the named custom fields
                     //$stmt = "SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' limit 1;";
-                    $astDB->where('lead_id', $lead_id);
-                    $rslt = $astDB->getOne("custom_{$entry_list_id}", "$custom_field_names_SQL");
-                    $cffv_ct = $astDB->getRowCount();
+                    $custom_entry_list_id = preg_replace('/[^0-9]/', '', (string) $entry_list_id);
+                    $rslt = go_get_custom_field_row($astDB, "custom_{$custom_entry_list_id}", $custom_field_names_SQL, $lead_id);
+                    $cffv_ct = is_array($rslt) && count($rslt) > 0 ? 1 : 0;
                     if ($cffv_ct > 0) {
                         $row = $rslt;
                         $custom_field_values = '----------';
@@ -1734,7 +1760,7 @@ if ($sipIsLoggedIn) {
                         $d = 0;
                         while ($custom_field_ct > $d) {
                             $idx = $custom_field[$d];
-                            $custom_field_values .=	"$row[$idx]----------";
+                            $custom_field_values .=	(string) ($row[$idx] ?? '') . "----------";
                             $d++;
                         }
                         $custom_field_values = preg_replace("/\n/", " ", $custom_field_values);

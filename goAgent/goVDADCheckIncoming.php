@@ -613,6 +613,8 @@ if ($is_logged_in) {
                     }
                 }
 
+                $VDCL_group_web_vars = $VDCL_group_web_vars ?? '';
+
                 //$stmt = "SELECT group_web_vars from vicidial_inbound_group_agents where group_id='$VDADchannel_group' and user='$user';";
                 $astDB->where('group_id', $VDADchannel_group);
                 $astDB->where('user', $user);
@@ -883,8 +885,26 @@ if ($is_logged_in) {
             }
         }
 
+        if (!function_exists('go_quote_custom_field_identifier')) {
+            function go_quote_custom_field_identifier($field)
+            {
+                return '`' . str_replace('`', '``', (string) $field) . '`';
+            }
+        }
+        if (!function_exists('go_get_custom_field_row')) {
+            function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+            {
+                if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+                    return [];
+                }
+                $rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+                return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+            }
+        }
+
         $custom_field_names = '|';
         $custom_field_names_SQL = '';
+        $custom_field_labels = [];
         $custom_field_values = '----------';
         $custom_field_types = '|';
         ### find the names of all custom fields, if any
@@ -895,24 +915,36 @@ if ($is_logged_in) {
         $rslt = $astDB->get('vicidial_lists_fields', null, 'field_label,field_type');
         $cffn_ct = $astDB->getRowCount();
         if ($cffn_ct > 0) {
-            foreach ($rslt as $row) {
-                $custom_field_names .=	"{$row['field_label']}|";
-                $custom_field_names_SQL .=	"{$row['field_label']},";
-                $custom_field_types .=	"{$row['field_type']}|";
+            foreach ((is_array($rslt) ? $rslt : []) as $row) {
+                $field_label = is_array($row) ? ($row['field_label'] ?? '') : '';
+                if ((string) $field_label === '') {
+                    continue;
+                }
+                $custom_field_labels[] = $field_label;
+                $custom_field_names .=	"{$field_label}|";
+                $custom_field_names_SQL .=	go_quote_custom_field_identifier($field_label) . ",";
+                $custom_field_types .=	(is_array($row) ? ($row['field_type'] ?? '') : '') . "|";
                 $custom_field_values .=	"----------";
             }
-            $custom_field_names_SQL = preg_replace("/.$/i", "", $custom_field_names_SQL);
+            $custom_field_names_SQL = rtrim($custom_field_names_SQL, ',');
             ### find the values of the named custom fields
             //$stmt = "SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' limit 1;";
-            $astDB->where('lead_id', $lead_id);
-            $rslt = $astDB->getOne("custom_{$entry_list_id}", "$custom_field_names_SQL");
-            $cffv_ct = $astDB->getRowCount();
+            if ($custom_field_names_SQL === '') {
+                $cffv_ct = 0;
+                $rslt = [];
+            } else {
+                $custom_entry_list_id = preg_replace('/[^0-9]/', '', (string) $entry_list_id);
+                $rslt = go_get_custom_field_row($astDB, "custom_{$custom_entry_list_id}", $custom_field_names_SQL, $lead_id);
+                $cffv_ct = is_array($rslt) && count($rslt) > 0 ? 1 : 0;
+            }
             if ($cffv_ct > 0) {
                 $custom_field_values = '----------';
                 if (is_array($rslt)) {
                 	$row = $rslt;
-                    $custom_field_values .=	"{$row}----------";
-                                }
+                    foreach ($custom_field_labels as $field_label) {
+                        $custom_field_values .= (string) ($row[$field_label] ?? '') . "----------";
+                    }
+                }
                 $custom_field_values = preg_replace("/\n/", " ", $custom_field_values);
                 $custom_field_values = preg_replace("/\r/", "", (string) $custom_field_values);
             }
@@ -1157,11 +1189,12 @@ if ($is_logged_in) {
             $VDCL_start_call_url = preg_replace('/--A--user_group--B--/i', urlencode(trim($user_group)), $VDCL_start_call_url);
 
             if (strlen($custom_field_names) > 2) {
-                $custom_field_names = preg_replace("/^\||\|$/", '', $custom_field_names);
-                $custom_field_names = preg_replace("/\|/", ",", (string) $custom_field_names);
-                $custom_field_names_ARY = explode(',', (string) $custom_field_names);
+                $custom_field_names_clean = preg_replace("/^\||\|$/", '', (string) $custom_field_names);
+                $custom_field_names_ARY = array_values(array_filter(explode('|', (string) $custom_field_names_clean), static function ($field) {
+                    return (string) $field !== '';
+                }));
                 $custom_field_names_ct = (is_countable($custom_field_names_ARY) ? count($custom_field_names_ARY) : 0);
-                $custom_field_names_SQL = $custom_field_names;
+                $custom_field_names_SQL = implode(',', array_map('go_quote_custom_field_identifier', $custom_field_names_ARY));
 
                 ##### BEGIN grab the data from custom table for the lead_id
                 //$stmt="SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' LIMIT 1;";
@@ -1171,10 +1204,9 @@ if ($is_logged_in) {
                 $rslt = [];
                 if ($custom_entry_list_id !== '') {
                     $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_table}'");
-                    if (is_array($tableCheck) && count($tableCheck) > 0) {
-                        $astDB->where('lead_id', $lead_id);
-                        $rslt = $astDB->getOne($custom_table, "{$custom_field_names_SQL}");
-                        $list_lead_ct = $astDB->getRowCount();
+                    if (is_array($tableCheck) && count($tableCheck) > 0 && $custom_field_names_SQL !== '') {
+                        $rslt = go_get_custom_field_row($astDB, $custom_table, $custom_field_names_SQL, $lead_id);
+                        $list_lead_ct = is_array($rslt) && count($rslt) > 0 ? 1 : 0;
                     }
                 }
                 if ($list_lead_ct > 0 && is_array($rslt)) {

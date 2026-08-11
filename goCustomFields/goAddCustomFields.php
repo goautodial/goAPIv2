@@ -27,30 +27,41 @@
     $list_id            = $astDB->escape($list_id);
     $field_label        = str_replace(" ","_",trim((string) ($_REQUEST['field_label'] ?? '')));
     $field_label        = preg_replace('/[^A-Za-z0-9_]/', '', (string) $field_label);
-    $field_name         = ($_REQUEST['field_name'] ?? '');
-    $field_description  = ($_REQUEST['field_description'] ?? '');
-    $field_rank         = ($_REQUEST['field_rank'] ?? '');
-    $field_help         = $_REQUEST['field_help'] ?? "";
-    $field_type         = ($_REQUEST['field_type'] ?? '');
-    $field_options      = ($_REQUEST['field_options'] ?? '');
-    $field_size         = ($_REQUEST['field_size'] ?? '');
-    $field_max          = ($_REQUEST['field_max'] ?? '');
-    $field_default      = ($_REQUEST['field_default'] ?? '');
+    $field_name         = (string) ($_REQUEST['field_name'] ?? '');
+    $field_description  = (string) ($_REQUEST['field_description'] ?? '');
+    $field_rank         = (string) ($_REQUEST['field_rank'] ?? '');
+    $field_help         = (string) ($_REQUEST['field_help'] ?? "");
+    $field_type         = (string) ($_REQUEST['field_type'] ?? '');
+    $field_options      = (string) ($_REQUEST['field_options'] ?? '');
+    $field_size         = (string) ($_REQUEST['field_size'] ?? '');
+    $field_max          = (string) ($_REQUEST['field_max'] ?? '');
+    $field_default      = (string) ($_REQUEST['field_default'] ?? '');
     if ($field_type === 'SCRIPT' && trim((string) $field_options) === '' && trim((string) $field_default) !== '') {
         $field_options = $field_default;
     }
-    $field_required     = ($_REQUEST['field_required'] ?? '');
-    $multi_position     = ($_REQUEST['field_option_position'] ?? '');
-    $name_position      = ($_REQUEST['field_position'] ?? '');
-    $field_order        = ($_REQUEST['field_order'] ?? '');
+    $field_required     = (string) ($_REQUEST['field_required'] ?? '');
+    $multi_position     = (string) ($_REQUEST['field_option_position'] ?? '');
+    $name_position      = (string) ($_REQUEST['field_position'] ?? '');
+    $field_order        = (string) ($_REQUEST['field_order'] ?? '');
 
     $goUser = ($_REQUEST['goUser'] ?? '');
-    $ip_address = $astDB->escape(($_REQUEST['hostname'] ?? ''));
-    $log_user = $astDB->escape(($_REQUEST['log_user'] ?? ''));
-    $log_group = $astDB->escape(($_REQUEST['log_group'] ?? ''));
+    $ip_address = $astDB->escape((string) ($_REQUEST['hostname'] ?? ''));
+    $log_user = $astDB->escape((string) ($_REQUEST['log_user'] ?? ''));
+    $log_group = $astDB->escape((string) ($_REQUEST['log_group'] ?? ''));
 
 
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
+    $valid_field_types = ['SELECT', 'RADIO', 'MULTI', 'CHECKBOX', 'TEXT', 'AREA', 'DATE', 'TIME', 'DISPLAY', 'SCRIPT'];
+
+    if (!in_array($field_type, $valid_field_types, true)) {
+        $apiresults = ["result" => "Error: Invalid custom field type."];
+        return;
+    }
+
+    $field_size = is_numeric($field_size) ? (int) $field_size : 1;
+    $field_max = is_numeric($field_max) ? (int) $field_max : 1;
+    if ($field_size < 1) { $field_size = 1; }
+    if ($field_max < 1) { $field_max = 1; }
 
     $typeRequiresSize = in_array($field_type, ['TEXT', 'AREA'], true);
     if ( strlen($field_label) < 1 || !preg_match('/^[A-Za-z0-9_]+$/', (string) $field_label) || strlen((string) $field_name) < 2 || ($typeRequiresSize && strlen((string) $field_size) < 1) ) {
@@ -84,22 +95,27 @@
 	            }
 
             if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
-                $field_options_array = explode("\n", str_replace("\r\n", "\n", (string) ($field_options ?? '')));
-                $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
-                $te=0;
-                while ($te < $field_options_count)
-                    {
-                    $optionLine = trim((string) $field_options_array[$te]);
-                    if ($optionLine !== '')
-                        {
-                        $field_options_value_array = explode(",", $optionLine, 2);
-                        $field_options_value = str_replace(" ", "_", trim((string) $field_options_value_array[0]));
-                        $field_options_ENUM .= "'" . $astDB->escape($field_options_value) . "',";
-                        }
-                    $te++;
-                   }
+                $field_options_array = explode("\n", str_replace("\r\n", "\n", $field_options));
+                $enumValues = [];
 
-                $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
+                foreach ($field_options_array as $optionLine) {
+                    $optionLine = trim((string) $optionLine);
+                    if ($optionLine === '') {
+                        continue;
+                    }
+
+                    $field_options_value_array = explode(",", $optionLine, 2);
+                    $field_options_value = str_replace(" ", "_", trim((string) ($field_options_value_array[0] ?? '')));
+                    if ($field_options_value !== '') {
+                        $enumValues[] = "'" . $astDB->escape($field_options_value) . "'";
+                    }
+                }
+
+                $field_options_ENUM = implode(',', $enumValues);
+                if ($field_options_ENUM === '') {
+                    $apiresults = ["result" => "Error: SELECT and RADIO custom fields require at least one option."];
+                    return;
+                }
                 $fieldcatch = $field_options_ENUM;
                 $field_cost = strlen($field_options_ENUM);
                 if ($field_cost < 1) {$field_cost=1;};
@@ -108,21 +124,23 @@
 
 
             if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ){
-                $field_options_array = explode("\n", str_replace("\r\n", "\n", (string) ($field_options ?? '')));
-                $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
-                $te=0;
-                while ($te < $field_options_count)
-                    {
-                    $optionLine = trim((string) $field_options_array[$te]);
-                    if ($optionLine !== '')
-                        {
-                        $field_options_value_array = explode(",", $optionLine, 2);
-                        $field_options_value = str_replace(" ", "_", trim((string) $field_options_value_array[0]));
-                        $field_options_ENUM .= "'" . $astDB->escape($field_options_value) . "',";
-                        }
-                    $te++;
-                   }
-                $field_options_ENUM = preg_replace("/.$/",'',(string) $field_options_ENUM);
+                $field_options_array = explode("\n", str_replace("\r\n", "\n", $field_options));
+                $enumValues = [];
+
+                foreach ($field_options_array as $optionLine) {
+                    $optionLine = trim((string) $optionLine);
+                    if ($optionLine === '') {
+                        continue;
+                    }
+
+                    $field_options_value_array = explode(",", $optionLine, 2);
+                    $field_options_value = str_replace(" ", "_", trim((string) ($field_options_value_array[0] ?? '')));
+                    if ($field_options_value !== '') {
+                        $enumValues[] = "'" . $astDB->escape($field_options_value) . "'";
+                    }
+                }
+
+                $field_options_ENUM = implode(',', $enumValues);
                 $field_cost = strlen($field_options_ENUM);
                 if ($field_cost < 1) {$field_cost=1;};
                 $field_sql .= "VARCHAR($field_cost) ";
@@ -152,19 +170,20 @@
                 $field_sql .= "DEFAULT '" . $astDB->escape($field_default) . "'";
             }
 
-            if ( empty($field_default) ) {
-                $field_sql .="";
-            }
-
 	            if (!$tableExists){
 	                $field_sql .= ");";
 	            }else{
 	                $field_sql .= ";";
 	            }
 
-            if ( ($field_type=='DISPLAY') || ($field_type=='SCRIPT') || (preg_match("/\|$field_label\|/",$vicidial_list_fields)) ){
-                //do nothing
+            if ( ($field_type=='DISPLAY') || ($field_type=='SCRIPT') || (preg_match("/\|" . preg_quote($field_label, '/') . "\|/", $vicidial_list_fields)) ){
+                // Metadata-only field; no custom table column is needed.
             }else{
+                if (trim($field_sql) === '') {
+                    $apiresults = ["result" => "Error: Invalid custom field type."];
+                    return;
+                }
+
                 $stmtCUSTOM="$field_sql";
                 $rslt = $astDB->rawQuery($stmtCUSTOM);
             }

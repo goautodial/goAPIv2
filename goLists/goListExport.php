@@ -77,11 +77,11 @@
 			->getOne("vicidial_users", "user,user_level");
 
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
+		$userlevel										= is_array($fresults) ? (int) ($fresults["user_level"] ?? 0) : 0;
 
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			$fetch 										= $astDB->getOne('system_settings', 'custom_fields_enabled');
-			$custom_fields_enabled 						= $fetch["custom_fields_enabled"];
+			$custom_fields_enabled 						= is_array($fetch) ? (int) ($fetch["custom_fields_enabled"] ?? 0) : 0;
 			$added_custom_SQL  							= "";
 			$added_custom_SQL2 							= "";
 			$added_custom_SQL3  						= "";
@@ -97,22 +97,23 @@
 				if ($custom_list_id !== '') {
 					$tableCheck 						= $astDB->rawQuery("SHOW TABLES LIKE '{$custom_table}'");
 					if (is_array($tableCheck) && count($tableCheck) > 0) {
-						$cllist_query 					= "SHOW COLUMNS FROM $custom_table;";
+						$cllist_query 					= "SHOW COLUMNS FROM `$custom_table`;";
 						$cllist 						= $astDB->rawQuery($cllist_query);
 						$clcount 						= $astDB->getRowCount();
 					}
 				}
 
 				foreach ((is_array($cllist) ? $cllist : []) as $clrow) {
-					if ($clrow['Field'] != 'lead_id') {
-						$header_columns 				.= ",ct.".$clrow['Field'];
+					$fieldName = is_array($clrow) ? (string) ($clrow['Field'] ?? '') : '';
+					if ($fieldName !== '' && $fieldName != 'lead_id' && preg_match('/^[A-Za-z0-9_]+$/', $fieldName)) {
+						$header_columns 				.= ",ct.`".$fieldName."`";
 					}
 				}
 
 				if ($clcount > 0) {
-					$added_custom_SQL  					= ", $custom_table ct";
+					$added_custom_SQL  					= ", `$custom_table` ct";
 					$added_custom_SQL2 					= "AND vl.lead_id=ct.lead_id";
-					$added_custom_SQL3  				= "$custom_table ct";
+					$added_custom_SQL3  				= "`$custom_table` ct";
 					$added_custom_SQL4 					= "vl.lead_id=ct.lead_id";
 				}
 			}
@@ -163,7 +164,7 @@
 				"header" 									=> $header,
 				"row" 										=> $csv_row,
 				"query" 									=> $stmt,
-				"query_custom_list" 						=> $custom_table
+				"query_custom_list" 						=> $custom_table ?? ''
 			];
 		} else {
 			$err_msg 									= error_handle("10001");

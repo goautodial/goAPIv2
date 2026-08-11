@@ -1061,22 +1061,43 @@ if ($is_logged_in) {
 			$dispo_call_url = preg_replace('/--A--call_notes--B--/i', "$url_call_notes", $dispo_call_url);
 
 			if (strlen($FORMcustom_field_names) > 2) {
-				$custom_field_names = preg_replace("/^\||\|$/", '', $FORMcustom_field_names);
-				$custom_field_names = preg_replace("/\|/", ",", $custom_field_names);
-				$custom_field_names_ARY = explode(',', $custom_field_names);
+				if (!function_exists('go_quote_custom_field_identifier')) {
+					function go_quote_custom_field_identifier($field)
+					{
+						return '`' . str_replace('`', '``', (string) $field) . '`';
+					}
+				}
+				if (!function_exists('go_get_custom_field_row')) {
+					function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+					{
+						if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+							return [];
+						}
+						$rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+						return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+					}
+				}
+				$custom_field_names = preg_replace("/^\||\|$/", '', (string) $FORMcustom_field_names);
+				$custom_field_names_ARY = array_values(array_filter(explode('|', (string) $custom_field_names), static function ($field) {
+					return (string) $field !== '';
+				}));
 				$custom_field_names_ct = (is_countable($custom_field_names_ARY) ? count($custom_field_names_ARY) : 0);
-				$custom_field_names_SQL = $custom_field_names;
+				$custom_field_names_SQL = implode(',', array_map('go_quote_custom_field_identifier', $custom_field_names_ARY));
 
 				##### BEGIN grab the data from custom table for the lead_id
 				//$stmt="SELECT $custom_field_names_SQL FROM custom_$entry_list_id where lead_id='$lead_id' LIMIT 1;";
-				$astDB->where('lead_id', $lead_id);
-				$rslt = $astDB->getOne("custom_{$entry_list_id}", "{$custom_field_names_SQL}");
-				$list_lead_ct = $astDB->getRowCount();
+				$list_lead_ct = 0;
+				$rslt = [];
+				if ($custom_field_names_SQL !== '') {
+					$custom_entry_list_id = preg_replace('/[^0-9]/', '', (string) $entry_list_id);
+					$rslt = go_get_custom_field_row($astDB, "custom_{$custom_entry_list_id}", $custom_field_names_SQL, $lead_id);
+					$list_lead_ct = is_array($rslt) && count($rslt) > 0 ? 1 : 0;
+				}
 				if ($list_lead_ct > 0) {
 					$o = 0;
 					while ($custom_field_names_ct > $o) {
 						$field_name_id =		$custom_field_names_ARY[$o];
-						$form_field_value =		urlencode(trim("{$rslt[$field_name_id]}"));
+						$form_field_value =		urlencode(trim((string) ($rslt[$field_name_id] ?? '')));
 						$field_name_tag =		"--A--" . $field_name_id . "--B--";
 						$dispo_call_url = preg_replace("/$field_name_tag/i", "$form_field_value", $dispo_call_url);
 						$o++;

@@ -38,17 +38,37 @@ include_once (__DIR__ . "/goAPI.php");
 $lead_id = '';
 $custom_info = [];
 
-if (isset($_GET['goLeadID'])) { $lead_id = $astDB->escape($_GET['goLeadID']); }
-    else if (isset($_POST['goLeadID'])) { $lead_id = $astDB->escape($_POST['goLeadID']); }
+if (isset($_GET['goLeadID'])) { $lead_id = $astDB->escape((string) $_GET['goLeadID']); }
+    else if (isset($_POST['goLeadID'])) { $lead_id = $astDB->escape((string) $_POST['goLeadID']); }
 
 $system_settings = get_settings('system', $astDB);
+
+if (!function_exists('go_quote_custom_field_identifier')) {
+    function go_quote_custom_field_identifier($field)
+    {
+        return '`' . str_replace('`', '``', (string) $field) . '`';
+    }
+}
+if (!function_exists('go_get_custom_field_row')) {
+    function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+    {
+        if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+            return [];
+        }
+        $rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+        return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+    }
+}
+
+$custom_info = [];
 
 if (isset($lead_id) && $lead_id !== '') {
     $astDB->where('lead_id', $lead_id);
     $lead_info = $astDB->getOne('vicidial_list', 'lead_id,list_id,title,first_name,middle_initial,last_name,phone_number,alt_phone,email,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,status,user,comments');
     $leadIDExist = $astDB->getRowCount();
 
-    if (($system_settings->custom_fields_enabled ?? 0) > 0) {
+    $custom_fields_enabled = is_object($system_settings) ? (int) ($system_settings->custom_fields_enabled ?? 0) : 0;
+    if ($custom_fields_enabled > 0) {
         $astDB->where('lead_id', $lead_id);
         $rslt = $astDB->getOne('vicidial_list', 'list_id');
         $list_id = is_array($rslt) ? ($rslt['list_id'] ?? '') : '';
@@ -59,16 +79,16 @@ if (isset($lead_id) && $lead_id !== '') {
             $tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_listid}'");
             if (is_array($tableCheck) && count($tableCheck) > 0) {
             $CFields = [];
-            $rslt = $astDB->rawQuery("SHOW COLUMNS FROM $custom_listid;");
+            $rslt = $astDB->rawQuery("SHOW COLUMNS FROM `$custom_listid`;");
             foreach ((is_array($rslt) ? $rslt : []) as $field) {
-                if ($field['Field'] == 'lead_id') continue;
-                $CFields[] = $field['Field'];
+                $field_name = is_array($field) ? ($field['Field'] ?? '') : '';
+                if ($field_name == 'lead_id' || $field_name === '') continue;
+                $CFields[] = go_quote_custom_field_identifier($field_name);
             }
             $CFields = implode(',', $CFields);
 
             if ($CFields !== '') {
-                $astDB->where('lead_id', $lead_id);
-                $custom_info = $astDB->getOne($custom_listid, $CFields) ?: [];
+                $custom_info = go_get_custom_field_row($astDB, $custom_listid, $CFields, $lead_id);
             }
             }
         }

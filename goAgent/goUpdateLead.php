@@ -24,8 +24,10 @@ $is_logged_in = check_agent_login($astDB, $goUser);
 
 $agent = get_settings('user', $astDB, $goUser);
 $system_settings = get_settings('system', $astDB);
-$phone_settings = get_settings('phone', $astDB, $agent->phone_login, $agent->phone_pass);
-$user = $agent->user;
+$agent_phone_login = is_object($agent) ? ($agent->phone_login ?? '') : '';
+$agent_phone_pass = is_object($agent) ? ($agent->phone_pass ?? '') : '';
+$phone_settings = get_settings('phone', $astDB, $agent_phone_login, $agent_phone_pass);
+$user = is_object($agent) ? ($agent->user ?? '') : '';
 
 if (isset($_GET['goSessionName'])) { $session_name = $astDB->escape($_GET['goSessionName']); }
     else if (isset($_POST['goSessionName'])) { $session_name = $astDB->escape($_POST['goSessionName']); }
@@ -76,12 +78,43 @@ if (isset($_GET['goSecurity'])) { $security_phrase = $astDB->escape($_GET['goSec
 
 if (isset($_GET['goCustomFields'])) { $custom_fields = $astDB->escape($_GET['goCustomFields']); }
     else if (isset($_POST['goCustomFields'])) { $custom_fields = $astDB->escape($_POST['goCustomFields']); }
+
+$session_name = $session_name ?? '';
+$server_ip = $server_ip ?? '';
+$vendor_lead_code = $vendor_lead_code ?? '';
+$phone_number = $phone_number ?? '';
+$lead_id = $lead_id ?? '';
+$title = $title ?? '';
+$first_name = $first_name ?? '';
+$middle_initial = $middle_initial ?? '';
+$last_name = $last_name ?? '';
+$address1 = $address1 ?? '';
+$address2 = $address2 ?? '';
+$address3 = $address3 ?? '';
+$city = $city ?? '';
+$state = $state ?? '';
 $province = $province ?? '';
+$postal_code = $postal_code ?? '';
+$country_code = $country_code ?? '';
+$gender = $gender ?? '';
+$date_of_birth = $date_of_birth ?? '';
+$comments = $comments ?? '';
+$alt_phone = $alt_phone ?? '';
+$email = $email ?? '';
+$security_phrase = $security_phrase ?? '';
+$custom_fields = $custom_fields ?? '';
 
 $MT[0] = '';
 $errormsg = 0;
 $DO_NOT_UPDATE = 0;
+$DO_NOT_UPDATEphone = 0;
 $DO_NOT_UPDATE_text = '';
+$disable_alter_custdata = '';
+$disable_alter_custphone = '';
+$alter_custdata_override = '';
+$alter_custphone_override = '';
+$lastError = '';
+$custom_last_SQL = '';
 
 if ($is_logged_in) {
 	if ( (strlen((string) $phone_number) < 1) || (strlen((string) $lead_id) < 1) ) {
@@ -172,52 +205,79 @@ if ($is_logged_in) {
             $rslt = $astDB->update('vicidial_list', $updateData);
 		}
 
-		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && (string) $custom_fields !== '')) {
-			$custom_fields = explode(',', $custom_fields);
+		$custom_fields_enabled = is_object($system_settings) ? (int) ($system_settings->custom_fields_enabled ?? 0) : 0;
+		if ($custom_fields_enabled > 0 && (string) $custom_fields !== '') {
+			$requested_custom_fields = array_values(array_filter(array_map('trim', explode(',', (string) $custom_fields)), static function ($label) {
+				return (string) $label !== '';
+			}));
 			$fields = [];
-			$custom_fields_SQL = '';
-			foreach($custom_fields as $label) {
-				if (isset($_GET[$label])) { $fields[$label] = $astDB->escape($_GET[$label]); }
-					else if (isset($_POST[$label])) { $fields[$label] = $astDB->escape($_POST[$label]); }
-
-				$fields[$label] = preg_replace("/\r/i", '', $fields[$label]);
-				$fields[$label] = preg_replace("/\n/i", '!N', $fields[$label]);
-				$fields[$label] = preg_replace("/--AMP--/i", '&', $fields[$label]);
-				$fields[$label] = preg_replace("/--QUES--/i", '?', $fields[$label]);
-				$fields[$label] = preg_replace("/--POUND--/i", '#', $fields[$label]);
-
-				if ((string) $fields[$label] !== '') {
-					$custom_fields_SQL .= "$label,";
-				}
-			}
-			$custom_fields_SQL = trim($custom_fields_SQL, ",");
 
 			$astDB->where('lead_id', $lead_id);
 			$rslt = $astDB->getOne('vicidial_list', 'list_id');
-			$list_id = $rslt['list_id'];
+			$list_id = is_array($rslt) ? preg_replace('/[^0-9]/', '', (string) ($rslt['list_id'] ?? '')) : '';
 			$custom_listid = "custom_{$list_id}";
 
-			$astDB->has($custom_listid);
-			$lastError = $astDB->getLastError();
-			if (strlen((string) $lastError) < 1) {
-				$astDB->where('lead_id', $lead_id);
-				$rslt = $astDB->getOne($custom_listid);
-				$lead_exist = $astDB->getRowCount();
+			if ($list_id !== '') {
+				$tableCheck = $astDB->rawQuery("SHOW TABLES LIKE '{$custom_listid}'");
+				if (is_array($tableCheck) && count($tableCheck) > 0) {
+					$table_columns = [];
+					$columns = $astDB->rawQuery("SHOW COLUMNS FROM {$custom_listid}");
+					foreach ((is_array($columns) ? $columns : []) as $column) {
+						$column_name = is_array($column) ? ($column['Field'] ?? '') : '';
+						if ((string) $column_name !== '') {
+							$table_columns[$column_name] = true;
+						}
+					}
 
-				if ($lead_exist) {
-					$astDB->where('lead_id', $lead_id);
-					$astDB->update($custom_listid, $fields);
+					$valid_field_meta = [];
+					$astDB->where('list_id', $list_id);
+					$astDB->where('field_label', $requested_custom_fields, 'in');
+					$meta_rows = $astDB->get('vicidial_lists_fields', null, 'field_label');
+					foreach ((is_array($meta_rows) ? $meta_rows : []) as $meta_row) {
+						$field_label = is_array($meta_row) ? (string) ($meta_row['field_label'] ?? '') : '';
+						if ($field_label !== '' && isset($table_columns[$field_label])) {
+							$valid_field_meta[$field_label] = $meta_row;
+						}
+					}
 
-                    $custom_last_SQL = $astDB->getLastQuery();
-					$update_success = $astDB->getRowCount();
-				} else {
-					$fields['lead_id'] = $lead_id;
+					foreach ($requested_custom_fields as $label) {
+						if (!isset($valid_field_meta[$label])) {
+							continue;
+						}
 
-					$astDB->insert($custom_listid, $fields);
+						$value = '';
+						if (array_key_exists($label, $_GET)) {
+							$value = $astDB->escape((string) $_GET[$label]);
+						} else if (array_key_exists($label, $_POST)) {
+							$value = $astDB->escape((string) $_POST[$label]);
+						}
 
-                    $custom_last_SQL = $astDB->getLastQuery();
-					$lastError = $astDB->getLastError();
-					$insert_success = $astDB->getRowCount();
+						$value = preg_replace("/\r/i", '', (string) $value);
+						$value = preg_replace("/\n/i", '!N', (string) $value);
+						$value = preg_replace("/--AMP--/i", '&', (string) $value);
+						$value = preg_replace("/--QUES--/i", '?', (string) $value);
+						$value = preg_replace("/--POUND--/i", '#', (string) $value);
+						$fields[$label] = $value;
+
+
+					}
+
+					if (count($fields) > 0) {
+						$astDB->where('lead_id', $lead_id);
+						$rslt = $astDB->getOne($custom_listid, 'lead_id');
+						$lead_exist = $astDB->getRowCount();
+
+						if ($lead_exist) {
+							$astDB->where('lead_id', $lead_id);
+							$astDB->update($custom_listid, $fields);
+							$custom_last_SQL = $astDB->getLastQuery();
+						} else {
+							$fields['lead_id'] = $lead_id;
+							$astDB->insert($custom_listid, $fields);
+							$custom_last_SQL = $astDB->getLastQuery();
+							$lastError = $astDB->getLastError();
+						}
+					}
 				}
 			}
 		}

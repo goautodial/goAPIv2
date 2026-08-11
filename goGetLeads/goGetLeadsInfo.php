@@ -262,7 +262,10 @@
 				if ($astDB->count > 0) {
 					foreach ((is_array($cfl_query) ? $cfl_query : []) as $row) {
 						$custom_fields[] = $row;
-						$list_fields[] = $row['field_label'] ?? '';
+						$fieldLabel = (string) ($row['field_label'] ?? '');
+						if ($fieldLabel !== '' && preg_match('/^[A-Za-z0-9_]+$/', $fieldLabel)) {
+							$list_fields[] = '`' . str_replace('`', '``', $fieldLabel) . '`';
+						}
 					}
 				}
 

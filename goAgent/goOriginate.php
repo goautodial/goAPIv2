@@ -61,6 +61,10 @@ if (isset($_GET['goAlertCID'])) { $alertCID = $astDB->escape($_GET['goAlertCID']
 if (isset($_GET['goCallVariables'])) { $call_variables = $astDB->escape($_GET['goCallVariables']); }
     else if (isset($_POST['goCallVariables'])) { $call_variables = $astDB->escape($_POST['goCallVariables']); }
 
+$RAWaccount = '';
+$agent_dialed_type = $agent_dialed_type ?? '';
+$agent_dialed_number = $agent_dialed_number ?? '';
+
 $user = $agent->user;
 
 if ($is_logged_in) {
@@ -114,7 +118,7 @@ if ($is_logged_in) {
             $rslt = $astDB->insert('vicidial_manager', $insertData);
 
             $APIResult = [ "result" => "success", "message" => "Originate command sent for Exten $exten Channel $channel on $server_ip.", "account" => $account, "variable" => $variable ];
-    
+
             ### log outbound call in the dial log
             //$stmt = "INSERT INTO vicidial_dial_log SET caller_code='$queryCID',lead_id='$lead_id',server_ip='$server_ip',call_date='$NOW_TIME',extension='$exten',channel='$channel',timeout='0',outbound_cid='$outCID',context='$ext_context';";
             $insertData = [
@@ -129,11 +133,11 @@ if ($is_logged_in) {
                 'context' => $ext_context
             ];
             $rslt = $astDB->insert('vicidial_dial_log', $insertData);
-    
+
             if ($agent_dialed_number > 0) {
                 if (strlen((string) $lead_id) < 1) {$lead_id = '0';}
                 $customer_hungup = '';
-                if ( $stage > 0 && preg_match("/3WAY/", (string) $agent_dialed_type) ) 
+                if ( $stage > 0 && preg_match("/3WAY/", (string) $agent_dialed_type) )
                     {$customer_hungup = 'BEFORE_CALL';}
                 //$stmt = "INSERT INTO user_call_log (user,call_date,call_type,server_ip,phone_number,number_dialed,lead_id,callerid,group_alias_id,preset_name,campaign_id,customer_hungup) values('$user','$NOW_TIME','$agent_dialed_type','$server_ip','$exten','$channel','$lead_id','$outbound_cid','$RAWaccount','$preset_name','$campaign','$customer_hungup')";
                 $insertData = [
@@ -151,7 +155,7 @@ if ($is_logged_in) {
                     'customer_hungup' => $customer_hungup
                 ];
                 $rslt = $astDB->insert('user_call_log', $insertData);
-    
+
                 if ((string) $preset_name !== ''){
                     //$stmt = "SELECT count(*) from vicidial_xfer_stats where campaign_id='$campaign' and preset_name='$preset_name';";
                     $astDB->where('campaign_id', $campaign);

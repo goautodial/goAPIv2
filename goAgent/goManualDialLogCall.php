@@ -55,6 +55,7 @@ if (isset($_GET['goChannel'])) { $channel = $astDB->escape($_GET['goChannel']); 
     else if (isset($_POST['goChannel'])) { $channel = $astDB->escape($_POST['goChannel']); }
 if (isset($_GET['goStartEpoch'])) { $start_epoch = $astDB->escape($_GET['goStartEpoch']); }
     else if (isset($_POST['goStartEpoch'])) { $start_epoch = $astDB->escape($_POST['goStartEpoch']); }
+$start_epoch = $start_epoch ?? 0;
 if (isset($_GET['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_GET['goAutoDialLevel']); }
     else if (isset($_POST['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_POST['goAutoDialLevel']); }
 if (isset($_GET['goStopRecAfterEachCall'])) { $VDstop_rec_after_each_call = $astDB->escape($_GET['goStopRecAfterEachCall']); }
@@ -96,7 +97,39 @@ if (isset($_GET['goALTNumStatus'])) { $alt_num_status = $astDB->escape($_GET['go
 if (isset($_GET['goQMExtension'])) { $qm_extension = $astDB->escape($_GET['goQMExtension']); }
     else if (isset($_POST['goQMExtension'])) { $qm_extension = $astDB->escape($_POST['goQMExtension']); }
 
+$session_name = $session_name ?? '';
+$agent_log_id = $agent_log_id ?? '';
+$server_ip = $server_ip ?? '';
+$stage = $stage ?? '';
+$uniqueid = $uniqueid ?? '';
+$lead_id = $lead_id ?? '';
+$list_id = $list_id ?? '';
+$length_in_sec = $length_in_sec ?? 0;
+$phone_code = $phone_code ?? '';
+$phone_number = $phone_number ?? '';
+$exten = $exten ?? '';
+$extension = $extension ?? '';
+$channel = $channel ?? '';
+$auto_dial_level = $auto_dial_level ?? 0;
+$VDstop_rec_after_each_call = $VDstop_rec_after_each_call ?? 0;
+$conf_silent_prefix = $conf_silent_prefix ?? '';
+$protocol = $protocol ?? '';
+$ext_context = $ext_context ?? '';
+$conf_exten = $conf_exten ?? '';
+$user_abb = $user_abb ?? '';
+$inOUT = $inOUT ?? '';
+$alt_dial = $alt_dial ?? '';
+$agentchannel = $agentchannel ?? '';
+$conf_dialed = $conf_dialed ?? 0;
+$leaving_threeway = $leaving_threeway ?? 0;
+$hangup_all_non_reserved = $hangup_all_non_reserved ?? 0;
+$blind_transfer = $blind_transfer ?? 0;
+$dial_method = $dial_method ?? '';
+$alt_num_status = $alt_num_status ?? 0;
+$qm_extension = $qm_extension ?? '';
+
 $user = $agent->user;
+$user_group = $agent->user_group ?? '';
 $server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
 $VDCL_ingroup_recording_override = '';
@@ -106,7 +139,23 @@ $MT[0] = '';
 $row = '';
 $rowx = '';
 $vidSQL = '';
+$lidSQL = '';
 $VDterm_reason = '';
+$VDvicidial_id = '';
+$VDcampaign_id = '';
+$VDstatus = '';
+$VDqueue_position = '';
+$VDIDselect = '';
+$VD_alt_dnc_count = 0;
+$VD_altdial_active = '';
+$VD_altdial_phone = '';
+$VD_altdial_id = '';
+$CLstage = 0;
+$CLqueue_position = 1;
+$caller_complete = 0;
+$agent_complete = 0;
+$data4SQL = '';
+$data4SS = '';
 $testOutput = '';
 
 if ($is_logged_in) {
@@ -155,10 +204,37 @@ if ($is_logged_in) {
                     'user_group' => $user_group,
                     'alt_dial' => $alt_dial
                 ];
-                $astDB->insert('vicidial_log', $insertData);
-                $DUPerrno = $astDB->getLastError();
-                if ((string) $DUPerrno !== '')
-                    {$manualVLexistsDUP = 1;}
+                $stmt = "
+                    INSERT INTO vicidial_log
+                    (uniqueid,lead_id,list_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,comments,processed,user_group,alt_dial)
+                    VALUES
+                    (?,?,?,?,?,?,'INCALL',?,?,?,'MANUAL','N',?,?)
+                    ON DUPLICATE KEY UPDATE
+                        lead_id = VALUES(lead_id),
+                        list_id = VALUES(list_id),
+                        campaign_id = VALUES(campaign_id),
+                        phone_code = VALUES(phone_code),
+                        phone_number = VALUES(phone_number),
+                        user = VALUES(user),
+                        comments = 'MANUAL',
+                        processed = 'N',
+                        user_group = VALUES(user_group),
+                        alt_dial = VALUES(alt_dial)
+                ";
+                $rslt = $astDB->rawQuery($stmt, [
+                    $uniqueid,
+                    $lead_id,
+                    $list_id,
+                    $campaign,
+                    $NOW_TIME,
+                    $StarTtimE,
+                    $phone_code,
+                    $phone_number,
+                    $user,
+                    $user_group,
+                    $alt_dial
+                ]);
+                $manualVLexistsDUP = 0;
                 $affected_rows = $astDB->getRowCount();
             }
             if ( $manualVLexists > 0 || $manualVLexistsDUP > 0 ) {
@@ -957,7 +1033,37 @@ if ($is_logged_in) {
                         'user_group' => $user_group,
                         'alt_dial' => $alt_dial
                     ];
-                    $rslt = $astDB->insert('vicidial_log', $insertData);
+                    $stmt = "
+                        INSERT INTO vicidial_log
+                        (uniqueid,lead_id,list_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,comments,processed,user_group,alt_dial)
+                        VALUES
+                        (?,?,?,?,?,?,'DONEM',?,?,?,'MANUAL','N',?,?)
+                        ON DUPLICATE KEY UPDATE
+                            lead_id = VALUES(lead_id),
+                            list_id = VALUES(list_id),
+                            campaign_id = VALUES(campaign_id),
+                            status = 'DONEM',
+                            phone_code = VALUES(phone_code),
+                            phone_number = VALUES(phone_number),
+                            user = VALUES(user),
+                            comments = 'MANUAL',
+                            processed = 'N',
+                            user_group = VALUES(user_group),
+                            alt_dial = VALUES(alt_dial)
+                    ";
+                    $rslt = $astDB->rawQuery($stmt, [
+                        $uniqueid,
+                        $lead_id,
+                        $list_id,
+                        $campaign,
+                        $NOW_TIME,
+                        $StarTtimE,
+                        $phone_code,
+                        $phone_number,
+                        $user,
+                        $user_group,
+                        $alt_dial
+                    ]);
                     $affected_rows = $astDB->getRowCount();
 
                     if ($affected_rows > 0) {

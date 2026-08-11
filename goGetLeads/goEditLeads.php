@@ -225,8 +225,9 @@
                 if (!empty($custom_fields)) {
                     $cf_data = [];
                     foreach ($custom_fields as $field => $value) {
-                        if ((string) $field !== '') {
-                            $cf_data[$field] = $astDB->escape($value);
+                        $field = (string) $field;
+                        if ($field !== '' && preg_match('/^[A-Za-z0-9_]+$/', $field)) {
+                            $cf_data[$field] = $astDB->escape((string) $value);
                         }
                     }
 

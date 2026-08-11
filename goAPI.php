@@ -86,7 +86,7 @@
 	##### getting timezone ######
     $goDB->where('setting', 'timezone');
     $rslt = $goDB->getOne('settings', 'value');
-    $tz = $rslt['value'];
+    $tz = is_array($rslt) ? ($rslt['value'] ?? '') : '';
 	if (!empty($tz)) {
         ini_set('date.timezone', $tz);
         date_default_timezone_set($tz);
@@ -98,6 +98,7 @@
 
     //$query_settings = "SELECT pass_hash_enabled FROM system_settings";
     $system_settings = $astDB->getOne("system_settings", "pass_hash_enabled,pass_cost,pass_key");
+    $system_settings = is_array($system_settings) ? $system_settings : [];
 
     //$query_user = "SELECT user,pass FROM vicidial_users WHERE user='$goUser'";
     //$rslt=mysqli_query($link, $query_user);

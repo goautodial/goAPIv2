@@ -28,90 +28,118 @@
    #### Written by: Noel Umandap                    ####
    #### License: AGPLv2                             ####
    #####################################################
-    $list_id            = $astDB->escape(($_REQUEST['list_id'] ?? ''));
-    $field_id           = $astDB->escape(($_REQUEST['field_id'] ?? ''));
-    $field_label        = str_replace(" ","_",trim((string) $astDB->escape(($_REQUEST['field_label'] ?? ''))));
-    $field_label_old    = str_replace(" ","_",trim((string) $astDB->escape(($_REQUEST['field_label_old'] ?? ''))));
-    $field_name         = $astDB->escape(($_REQUEST['field_name'] ?? ''));
-    $field_description  = ($_REQUEST['field_description'] ?? '');
-    $field_rank         = $astDB->escape(($_REQUEST['field_rank'] ?? ''));
-    $field_help         = (isset($_REQUEST['field_help'])) ? $astDB->escape($_REQUEST['field_help']):"";
-    $field_type         = $astDB->escape(($_REQUEST['field_type'] ?? ''));
-    $field_options      = ($_REQUEST['field_options'] ?? '');
-    $field_size         = $astDB->escape(($_REQUEST['field_size'] ?? ''));
-    $field_max          = $astDB->escape(($_REQUEST['field_max'] ?? ''));
-    $field_default      = $astDB->escape(($_REQUEST['field_default'] ?? ''));
-    $field_required     = $astDB->escape(($_REQUEST['field_required'] ?? ''));
-    $multi_position     = $astDB->escape(($_REQUEST['field_option_position'] ?? ''));
-    $name_position      = $astDB->escape(($_REQUEST['field_position'] ?? ''));
-    $field_order        = $astDB->escape(($_REQUEST['field_order'] ?? ''));
-	
+    $list_id            = preg_replace('/\D+/', '', (string) ($_REQUEST['list_id'] ?? ''));
+    $list_id            = $astDB->escape($list_id);
+    $field_id           = $astDB->escape((string) ($_REQUEST['field_id'] ?? ''));
+    $field_label        = str_replace(" ","_", trim((string) ($_REQUEST['field_label'] ?? '')));
+    $field_label        = $astDB->escape((string) preg_replace('/[^A-Za-z0-9_]/', '', $field_label));
+    $field_label_old    = str_replace(" ","_", trim((string) ($_REQUEST['field_label_old'] ?? '')));
+    $field_label_old    = $astDB->escape((string) preg_replace('/[^A-Za-z0-9_]/', '', $field_label_old));
+    $field_name         = $astDB->escape((string) ($_REQUEST['field_name'] ?? ''));
+    $field_description  = (string) ($_REQUEST['field_description'] ?? '');
+    $field_rank         = $astDB->escape((string) ($_REQUEST['field_rank'] ?? ''));
+    $field_help         = $astDB->escape((string) ($_REQUEST['field_help'] ?? ''));
+    $field_type         = $astDB->escape((string) ($_REQUEST['field_type'] ?? ''));
+    $field_options      = (string) ($_REQUEST['field_options'] ?? '');
+    $field_size         = $astDB->escape((string) ($_REQUEST['field_size'] ?? ''));
+    $field_max          = $astDB->escape((string) ($_REQUEST['field_max'] ?? ''));
+    $field_default      = $astDB->escape((string) ($_REQUEST['field_default'] ?? ''));
+    $field_required     = $astDB->escape((string) ($_REQUEST['field_required'] ?? ''));
+    $multi_position     = $astDB->escape((string) ($_REQUEST['field_option_position'] ?? ''));
+    $name_position      = $astDB->escape((string) ($_REQUEST['field_position'] ?? ''));
+    $field_order        = $astDB->escape((string) ($_REQUEST['field_order'] ?? ''));
+
 	$ip_address			= $astDB->escape(($_REQUEST['hostname'] ?? ''));
 	$log_user			= $astDB->escape(($_REQUEST['log_user'] ?? ''));
 	$log_group			= $astDB->escape(($_REQUEST['log_group'] ?? ''));
-    
+
     $vicidial_list_fields = '|lead_id|vendor_lead_code|source_id|list_id|gmt_offset_now|called_since_last_reset|phone_code|phone_number|title|first_name|middle_initial|last_name|address1|address2|address3|city|state|province|postal_code|country_code|gender|date_of_birth|alt_phone|email|security_phrase|comments|called_count|last_local_call_time|rank|owner|';
+
+    if ($list_id === '' || $field_id === '' || $field_label === '') {
+        $apiresults = ["result" => "Error: List or Field does not exist."];
+        return;
+    }
+
+    if ($field_label_old === '') {
+        $field_label_old = $field_label;
+    }
+
     $field_sql='';
     if($field_label_old != $field_label){
-        $field_sql .= "ALTER TABLE custom_$list_id CHANGE $field_label_old $field_label ";
+        $field_sql .= "ALTER TABLE `custom_$list_id` CHANGE `$field_label_old` `$field_label` ";
     }else{
-		$goCheckSQL = "SHOW COLUMNS FROM custom_$list_id LIKE '$field_label' ";
+		$goCheckSQL = "SHOW COLUMNS FROM `custom_$list_id` LIKE '$field_label' ";
 		$goCheckrslt = $astDB->rawQuery($goCheckSQL);
 		$countGoCheckrslt = $astDB->getRowCount();
-	
+
 		if($countGoCheckrslt > 0) {
-			$field_sql .= "ALTER TABLE custom_$list_id MODIFY $field_label ";
+			$field_sql .= "ALTER TABLE `custom_$list_id` MODIFY `$field_label` ";
 		} else {
-			$field_sql .= "ALTER TABLE custom_$list_id ADD $field_label ";
+			$field_sql .= "ALTER TABLE `custom_$list_id` ADD `$field_label` ";
 		}
     }
-    
+
     $field_options_ENUM='';
 	$field_cost=1;
-    
+    $fieldcatch='';
+    $field_max = is_numeric($field_max) ? (int) $field_max : 1;
+    if ($field_max < 1) { $field_max = 1; }
+
     if ( $field_type == 'SELECT' || $field_type == 'RADIO' ) {
-        $field_options_array = explode("\n", (string) ($field_options ?? ''));
-        $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
-        
-        $te=0;
-        
-        while ($te < $field_options_count) {
-            if (preg_match("/,/",$field_options_array[$te]))
-                {
-                $field_options_value_array = explode(",",$field_options_array[$te]);
-                $field_options_ENUM .= str_replace(" ","_","'$field_options_value_array[0]',");
-                }
-            $te++;
+        $field_options_array = explode("\n", str_replace("\r\n", "\n", $field_options));
+        $enumValues = [];
+
+        foreach ($field_options_array as $optionLine) {
+            $optionLine = trim((string) $optionLine);
+            if ($optionLine === '') {
+                continue;
+            }
+
+            $field_options_value_array = explode(",", $optionLine, 2);
+            $field_options_value = str_replace(" ", "_", trim((string) ($field_options_value_array[0] ?? '')));
+            if ($field_options_value !== '') {
+                $enumValues[] = "'" . $astDB->escape($field_options_value) . "'";
+            }
         }
-        
-        $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
-        
-        $field_cost = strlen((string) $field_options_ENUM);
+
+        $field_options_ENUM = implode(',', $enumValues);
+        if ($field_options_ENUM === '') {
+            $apiresults = ["result" => "Error: SELECT and RADIO custom fields require at least one option."];
+            return;
+        }
+        $fieldcatch = $field_options_ENUM;
+        $field_cost = strlen($field_options_ENUM);
         if ($field_cost < 1) {$field_cost=1;};
         $field_sql .= "ENUM($field_options_ENUM) ";
     }
-    
+
     if ( $field_type == 'MULTI' || $field_type == 'CHECKBOX' ) {
-        $field_options_array = explode("\n", (string) ($field_options ?? ''));
-        $field_options_count = (is_countable($field_options_array) ? count($field_options_array) : 0);
-        $te=0;
-        while ($te < $field_options_count) {
-            if (preg_match("/,/",$field_options_array[$te]))
-                {
-                $field_options_value_array = explode(",",$field_options_array[$te]);
-                $field_options_ENUM .= str_replace(" ","_","'$field_options_value_array[0]',");
-                }
-            $te++;
+        $field_options_array = explode("\n", str_replace("\r\n", "\n", $field_options));
+        $enumValues = [];
+
+        foreach ($field_options_array as $optionLine) {
+            $optionLine = trim((string) $optionLine);
+            if ($optionLine === '') {
+                continue;
+            }
+
+            $field_options_value_array = explode(",", $optionLine, 2);
+            $field_options_value = str_replace(" ", "_", trim((string) ($field_options_value_array[0] ?? '')));
+            if ($field_options_value !== '') {
+                $enumValues[] = "'" . $astDB->escape($field_options_value) . "'";
+            }
         }
-        $field_options_ENUM = preg_replace("/.$/",'',$field_options_ENUM);
-        $field_cost = strlen((string) $field_options_ENUM);
+
+        $field_options_ENUM = implode(',', $enumValues);
+        $field_cost = strlen($field_options_ENUM);
+        if ($field_cost < 1) {$field_cost=1;};
         $field_sql .= "VARCHAR($field_cost) ";
     }
 
     if ($field_type=='TEXT') {
         $field_sql .= "VARCHAR($field_max) ";
     }
-    
+
     if ($field_type=='AREA') {
         $field_sql .= "TEXT ";
     }
@@ -123,26 +151,23 @@
     if ($field_type=='TIME') {
         $field_sql .= "TIME ";
     }
-    
-    if ( !empty($field_default) && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){ 
-        if(empty($field_default)) {
-            $field_sql .=";";
-        } else { 
-            $field_sql .= "default '$field_default' ";
-        }
+
+    if ( !empty($field_default) && $field_type != 'AREA' && $field_type != 'DATE' && $field_type != 'TIME' ){
+        $field_sql .= "default '$field_default' ";
     }
-    
-    if ( empty($field_default) ) {
-        $field_sql .="";  
-    }
-    
-    if ( ($field_type == 'DISPLAY') || ($field_type == 'SCRIPT') || (preg_match("/\|$field_label\|/", $vicidial_list_fields)) ) {
-        //  do nothing      
+
+    if ( ($field_type == 'DISPLAY') || ($field_type == 'SCRIPT') || (preg_match("/\|" . preg_quote($field_label, '/') . "\|/", $vicidial_list_fields)) ) {
+        // Metadata-only field; no custom table column is needed.
     } else {
-        $stmtCUSTOM="$field_sql";
+        if (trim($field_sql) === '') {
+            $apiresults = ["result" => "Error: Invalid custom field type."];
+            return;
+        }
+
+        $stmtCUSTOM = $field_sql;
 		$rslt = $astDB->rawQuery($stmtCUSTOM);
     }
-    
+
     $data_cf = [
         'field_label'       => $field_label,
         'field_name'        => $field_name,
@@ -164,13 +189,13 @@
     $astDB->where('field_id', $field_id);
     $cfUpdate = $astDB->update('vicidial_lists_fields', $data_cf);
     $updateQuery = $astDB->getLastQuery();
-    
+
     if($cfUpdate){
 		$log_id = log_action($goDB, 'MODIFY', $log_user, $ip_address, "Modified the custom fields for List ID: $list_id", $log_group, $updateQuery);
-		
+
         $apiresults = ["result" => "success"];
     }else{
         $apiresults = ["result" => "Error: List or Field does not exist."];
     }
-    
+
 ?>

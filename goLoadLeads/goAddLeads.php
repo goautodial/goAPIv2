@@ -156,9 +156,9 @@ include_once (__DIR__ . "/goAPI.php");
             }
 
             $system_settings = get_settings('system', $astDB);
-            $use_non_latin = $system_settings->use_non_latin ?? 0;
-            $admin_web_directory = $system_settings->admin_web_directory ?? '';
-            $custom_fields_enabled = $system_settings->custom_fields_enabled ?? 0;
+            $use_non_latin = is_object($system_settings) ? ($system_settings->use_non_latin ?? 0) : 0;
+            $admin_web_directory = is_object($system_settings) ? ($system_settings->admin_web_directory ?? '') : '';
+            $custom_fields_enabled = is_object($system_settings) ? (int) ($system_settings->custom_fields_enabled ?? 0) : 0;
 
             if ($custom_fields_enabled > 0) {
                 $tablecount_to_print=0;
@@ -186,9 +186,9 @@ include_once (__DIR__ . "/goAPI.php");
 
                         $fields_list = '';
                         $o = 0;
-                        foreach ($rslt as $rowx) {
-                            $A_field_label[$o] =    $rowx['field_label'];
-                            $A_field_type[$o] =     $rowx['field_type'];
+                        foreach ((is_array($rslt) ? $rslt : []) as $rowx) {
+                            $A_field_label[$o] =    $rowx['field_label'] ?? '';
+                            $A_field_type[$o] =     $rowx['field_type'] ?? '';
                             $A_field_value[$o] =    '';
                             $o++;
                         }
@@ -287,29 +287,32 @@ include_once (__DIR__ . "/goAPI.php");
                         if ($tablecount_to_print > 0) {
                             if ($fieldscount_to_print > 0) {
                                 $o=0;
-                                while ($fields_to_print > $o) {
-                                    $A_field_value[$o] =    '';
-                                    $field_name_id = $A_field_label[$o] . "_field";
+	                                while ($fields_to_print > $o) {
+	                                    $A_field_value[$o] = '';
+	                                    $field_label = (string) ($A_field_label[$o] ?? '');
+	                                    $field_type = (string) ($A_field_type[$o] ?? '');
+	                                    $field_name_id = $field_label . "_field";
 
-                                    #if ($DB>0) {echo "$A_field_label[$o]|$A_field_type[$o]\n";}
+	                                    #if ($DB>0) {echo "$field_label|$field_type\n";}
 
-                                    if ( $A_field_type[$o] != 'DISPLAY' && $A_field_type[$o] != 'SCRIPT' ) {
-                                        if (!preg_match("/\|$A_field_label[$o]\|/",$vicidial_list_fields)) {
-                                            if (isset($_GET["$field_name_id"])) {$form_field_value=$_GET["$field_name_id"];}
-                                            elseif (isset($_POST["$field_name_id"])) {$form_field_value=$_POST["$field_name_id"];}
+	                                    if ($field_label !== '' && $field_type != 'DISPLAY' && $field_type != 'SCRIPT') {
+	                                        if (!preg_match("/\|" . preg_quote($field_label, '/') . "\|/", $vicidial_list_fields)) {
+	                                            $form_field_value = null;
+	                                            if (isset($_GET[$field_name_id])) {$form_field_value = $_GET[$field_name_id];}
+	                                            elseif (isset($_POST[$field_name_id])) {$form_field_value = $_POST[$field_name_id];}
 
-                                            $form_field_value = $form_field_value ?? null;
-                                            if ($form_field_value !== null && $form_field_value >= 0) {
-                                                $A_field_value[$o] =    $row[$form_field_value];
-                                                # replace ' " ` \ ; with nothing
-                                                $A_field_value[$o] =    preg_replace($field_regx, "", $A_field_value[$o]);
+	                                            if ($form_field_value !== null && is_numeric($form_field_value) && (int) $form_field_value >= 0) {
+	                                                $field_index = (int) $form_field_value;
+	                                                $A_field_value[$o] = (string) ($row[$field_index] ?? '');
+	                                                # replace ' " ` \ ; with nothing
+	                                                $A_field_value[$o] = preg_replace($field_regx, "", $A_field_value[$o]);
 
-                                                $custom_SQL .= "$A_field_label[$o]='$A_field_value[$o]',";
-                                            }
-                                        }
-                                    }
-                                    $o++;
-                                }
+	                                                $custom_SQL .= "`$field_label`='" . $astDB->escape($A_field_value[$o]) . "',";
+	                                            }
+	                                        }
+	                                    }
+	                                    $o++;
+	                                }
                             }
                         }
                     }
@@ -464,7 +467,8 @@ include_once (__DIR__ . "/goAPI.php");
 
                             $multistmt='';
 
-                            $custom_SQL_query = "INSERT INTO custom_$list_id_override SET lead_id='$lead_id',$custom_SQL;";
+                            $custom_table = 'custom_' . preg_replace('/\D+/', '', (string) $list_id_override);
+                            $custom_SQL_query = "INSERT INTO `$custom_table` SET lead_id='$lead_id',$custom_SQL;";
                             $rslt = $astDB->rawQuery($custom_SQL_query);
                         } else {
                             if ($multi_insert_counter > 8) {

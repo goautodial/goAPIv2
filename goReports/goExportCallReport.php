@@ -497,6 +497,23 @@
 		array_splice($csv_header, $ee_key, 1);
 	}
 	if ($custom_fields == "Y")	{
+		if (!function_exists('go_quote_custom_field_identifier')) {
+			function go_quote_custom_field_identifier($field)
+			{
+				return '`' . str_replace('`', '``', (string) $field) . '`';
+			}
+		}
+		if (!function_exists('go_get_custom_field_row')) {
+			function go_get_custom_field_row($astDB, $custom_table, $select_fields, $lead_id)
+			{
+				if (!preg_match('/^custom_\d+$/', (string) $custom_table) || (string) $select_fields === '') {
+					return [];
+				}
+				$rows = $astDB->rawQuery("SELECT {$select_fields} FROM `{$custom_table}` WHERE lead_id = ? LIMIT 1", [$lead_id]);
+				return (is_array($rows) && isset($rows[0]) && is_array($rows[0])) ? $rows[0] : [];
+			}
+		}
+
 	//    for ($i = 0 ; $i < (is_countable($array_list) ? count($array_list) : 0); $i++) {
 	//		$list_id = $array_list[$i];
 		foreach ((is_array($array_list) ? $array_list : []) as $list) {
@@ -640,14 +657,14 @@
 			//$keys = array_keys($active_list_fields); // list of active custom lists
 
 			//for ($i = 0 ; $i < (is_countable($keys) ? count($keys) : 0); $i++) {
-			foreach ($active_list_fields as $list_id => $fields) {
+			foreach ((is_array($active_list_fields) ? $active_list_fields : []) as $list_id => $fields) {
 			    //$list_id = $keys[$i];
 			    //$fields = implode(",", $active_list_fields[$list_id]);
-				$fields = implode(",", $fields);
+				$field_list = is_array($fields) ? $fields : [];
+				$select_fields = implode(",", array_map('go_quote_custom_field_identifier', $field_list));
 
-				if ("custom_".$list_id_spec === $list_id) {
-					$astDB->where("lead_id", $lead_id);
-					$fetch_CF = $astDB->getOne($list_id, $fields);
+				if ("custom_".$list_id_spec === $list_id && $select_fields !== '') {
+					$fetch_CF = go_get_custom_field_row($astDB, $list_id, $select_fields, $lead_id);
 	//				$test[] = $fetch_CF;
 
 					//$query_row_sql = "SELECT $fields FROM $list_id WHERE lead_id ='$lead_id';";

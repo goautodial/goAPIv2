@@ -35,11 +35,11 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-	
+
 	ini_set('memory_limit','1024M');
 	ini_set('upload_max_filesize', '6000M');
 	ini_set('post_max_size', '6000M');
-	
+
 	$goDupcheck = $astDB->escape(($_REQUEST["goDupcheck"] ?? ''));
 	$jsonDataRequest = json_decode(($_REQUEST['jsonData'] ?? ''), true);
 	$jsonDataPost = (array) json_decode(file_get_contents('php://input'), TRUE);
@@ -49,19 +49,23 @@
 	}else{
 		$jsonData = $jsonDataPost;
 	}
-	$list_id = $jsonData['list_id'];
-	$leads = $jsonData['leads'];
+	$list_id = preg_replace('/\D+/', '', (string) ($jsonData['list_id'] ?? ''));
+	$leads = is_array($jsonData['leads'] ?? null) ? $jsonData['leads'] : [];
 	$baseFields = ["lead_id", "entry_date", "status", "vendor_lead_code", "list_id", "gmt_offset_now", "phone_code", "phone_number", "title", "first_name", "middle_initial", "last_name", "address1", "address2", "address3", "city", "state", "province", "postal_code", "country_code", "gender", "date_of_birth", "alt_phone", "email", "security_phrase", "comments", "entry_list_id"];
 
 	$resultOfInserts = [];
 	$leadsNotSaved = [];
 
 	//$queryGetCustomFields = "SELECT column_name FROM information_schema.columns WHERE table_name='custom_$list_id';";
+	$customFields = [];
 	$astDB->where('table_name', "custom_$list_id");
 	$sqlCF = $astDB->get('information_schema.columns', null, 'column_name');
 
-	foreach ($sqlCF as $fresults){
-		$customFields[] = $fresults['column_name'];
+	foreach ((is_array($sqlCF) ? $sqlCF : []) as $fresults){
+		$columnName = is_array($fresults) ? (string) ($fresults['column_name'] ?? '') : '';
+		if ($columnName !== '' && preg_match('/^[A-Za-z0-9_]+$/', $columnName)) {
+			$customFields[] = $columnName;
+		}
 	}
 	foreach($leads as $lead){
 		$leadsFields = $lead['fields'];
@@ -70,68 +74,71 @@
 		$insertCustomFields = [];
 		$insertCustomValues = [];
 		$lead_id = "";
-		$phone_number = ''; 
+		$phone_number = '';
 		$phone_code = '';
 		$state = '';
 		$postal_code = '';
-		foreach($leadsFields as $fields){
-			if(in_array($fields['FieldName'], (is_array($baseFields) ? $baseFields : [])) && $fields['FieldType'] != "custom"){
-				$insertFields[] = $fields['FieldName'];
-				if($fields['FieldName'] == "phone_code"){
-					if(!empty($fields['FieldValue'])){
-						$insertValues[] = $fields['FieldValue'];
-						$phone_code = $fields['FieldValue'];
+		foreach((is_array($leadsFields) ? $leadsFields : []) as $fields){
+			$fieldName = (string) ($fields['FieldName'] ?? '');
+			$fieldType = (string) ($fields['FieldType'] ?? '');
+			$fieldValue = (string) ($fields['FieldValue'] ?? '');
+			if(in_array($fieldName, (is_array($baseFields) ? $baseFields : [])) && $fieldType != "custom"){
+				$insertFields[] = $fieldName;
+				if($fieldName == "phone_code"){
+					if($fieldValue !== ''){
+						$insertValues[] = $fieldValue;
+						$phone_code = $fieldValue;
 					}else{
 						$insertValues[] = 1;
 						$phone_code = '';
 					}
 				}else{
-					$insertValues[] = $fields['FieldValue'];
+					$insertValues[] = $fieldValue;
 				}
 
-				if($fields['FieldName'] == "state"){
-					if(!empty($fields['FieldValue'])){
-						$state = $fields['FieldValue'];
+				if($fieldName == "state"){
+					if($fieldValue !== ''){
+						$state = $fieldValue;
 					}else{
 						$state = '';
 					}
 				}
 
-				if($fields['FieldName'] == "phone_number"){
-					if(!empty($fields['FieldValue'])){
-						$phone_number = $fields['FieldValue'];
+				if($fieldName == "phone_number"){
+					if($fieldValue !== ''){
+						$phone_number = $fieldValue;
 					}else{
 						$phone_number = '';
 					}
 				}
 
-				if($fields['FieldName'] == "postal_code"){
-					if(!empty($fields['FieldValue'])){
-						$postal_code = $fields['FieldValue'];
+				if($fieldName == "postal_code"){
+					if($fieldValue !== ''){
+						$postal_code = $fieldValue;
 					}else{
 						$postal_code = '';
 					}
 				}
 			}else{
-				if(in_array($fields['FieldName'], (is_array($customFields) ? $customFields : []))){
-					$insertCustomFields[] = $fields['FieldName'];
-					$insertCustomValues[] = $fields['FieldValue'];
+				if(in_array($fieldName, (is_array($customFields) ? $customFields : []), true)){
+					$insertCustomFields[] = '`' . str_replace('`', '``', $fieldName) . '`';
+					$insertCustomValues[] = $astDB->escape($fieldValue);
 				}
-				
+
 			}
 
-			if($fields['FieldName'] == "lead_id"){
-				$lead_id = $fields['FieldValue'];
+			if($fieldName == "lead_id"){
+				$lead_id = $fieldValue;
 			}
 		}
 		$USarea = substr((string) $phone_number, 0, 3);
 		$gmt_offset = lookup_gmt($astDB, $phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmt,$postal_code);
-		if(str_contains($insertFields, 'gmt_offset_now')){
+		if(!in_array('gmt_offset_now', $insertFields, true)){
 			$insertFields[] = "gmt_offset_now";
 			$insertValues[] = $gmt_offset;
 		}
 
-	// ARRAY TO STRING 
+	// ARRAY TO STRING
 	/*
 		// Base fields and values
 		$insertFields = implode(",", $insertFields);
@@ -149,7 +156,7 @@
     		$phone_code_field = ", `phone_code`";
     		$phone_code_value = ", '1'";
     	}
-    	*/	
+    	*/
 
 	/* RAWQUERY INSERT FAIL
     	$insertListQuery = "INSERT INTO vicidial_list (`list_id`, `status`, $insertFields{$phone_code_field}) VALUES ('$list_id', 'NEW', $insertValues{$phone_code_value});";
@@ -180,7 +187,9 @@
 
     	if($insertCustomFields !== [] && $insertCustomValues !== []){
     		// insert to custom_$list_id
-	    	$insertCustomFieldQuery = "INSERT INTO custom_$list_id(`lead_id`, $insertCustomFields) VALUES('$LastID', $insertCustomValues);";
+    		$insertCustomFields = implode(',', $insertCustomFields);
+    		$insertCustomValues = "'" . implode("','", $insertCustomValues) . "'";
+    		$insertCustomFieldQuery = "INSERT INTO `custom_$list_id`(`lead_id`, $insertCustomFields) VALUES('$LastID', $insertCustomValues);";
 	    	$resultInsertCustomField = $astDB->rawQuery($insertCustomFieldQuery);
 	    	// array_push($resultOfInserts, $insertCustomFieldQuery);
 	    	// array_push($resultOfInserts, $resultInsertCustomField);
