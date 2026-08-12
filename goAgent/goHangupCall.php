@@ -60,6 +60,7 @@ $queryCID = $queryCID ?? '';
 $channel = $channel ?? '';
 $exten = $exten ?? '';
 $seconds = $seconds ?? 0;
+$errmsg = '';
 
 $user = $agent->user;
 
@@ -115,7 +116,7 @@ if ($is_logged_in) {
                 $astDB->where('callerid', $CallCID);
                 $rslt = $astDB->get('vicidial_auto_calls');
                 $auto_call_ct = $astDB->getRowCount();
-                if ($auto_calls_ct > 0) {
+                if ($auto_call_ct > 0) {
                     #############################################
                     ##### START QUEUEMETRICS LOGGING LOOKUP #####
                     //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id,queuemetrics_pe_phone_append,queuemetrics_socket,queuemetrics_socket_url FROM system_settings;";
@@ -123,6 +124,8 @@ if ($is_logged_in) {
                     ##### END QUEUEMETRICS LOGGING LOOKUP #####
                     ###########################################
                     if ($queuemetrics->enable_queuemetrics_logging > 0) {
+                        $caller_connect = 0;
+                        $caller_complete = 0;
                         $qmDB = new MySQLiDB($queuemetrics->queuemetrics_server_ip, $queuemetrics->queuemetrics_login, $queuemetrics->queuemetrics_pass, $queuemetrics->queuemetrics_dbname);
 
                         //$stmt="SELECT count(*) from queue_log where call_id='$CalLCID' and verb='CONNECT';";
@@ -212,7 +215,7 @@ if ($is_logged_in) {
                                     'data1' => $CLstage,
                                     'data2' => $seconds,
                                     'data3' => $CLqueue_position,
-                                    'serverid' => $queuemetrics_log_id
+                                    'serverid' => $queuemetrics->queuemetrics_log_id
                                 ];
 
                                 if (is_array($data4SQL)) {
@@ -224,7 +227,7 @@ if ($is_logged_in) {
 
                                 if ( $queuemetrics->queuemetrics_socket == 'CONNECT_COMPLETE' && strlen((string) $queuemetrics->queuemetrics_socket_url) > 10 ) {
                                     $socket_send_data_begin='?';
-                                    $socket_send_data = "time_id=$StarTtime&call_id=$CallCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$secondS&data3=$CLqueue_position$data4SS";
+                                    $socket_send_data = "time_id=$StarTtime&call_id=$CallCID&queue=$CLcampaign_id&agent=Agent/$user&verb=COMPLETEAGENT&data1=$CLstage&data2=$seconds&data3=$CLqueue_position$data4SS";
                                     if (preg_match("/\?/",(string) $queuemetrics->queuemetrics_socket_url))
                                         {$socket_send_data_begin='&';}
                                     ### send queue_log data to the queuemetrics_socket_url ###

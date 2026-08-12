@@ -20,6 +20,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** @var MySQLiDB $astDB */
+/** @var MySQLiDB $goDB */
+/** @var MySQLiDB $kamDB */
+/** @var string $goUser */
+/** @var string $phone_login */
+/** @var string $phone_pass */
+/** @var string $SIPserver */
+
 $agent = get_settings('user', $astDB, $goUser);
 
 $user = $agent->user;
@@ -33,7 +41,7 @@ $sipIsLoggedIn = check_sip_login($kamDB, $phone_login, $SIPserver);
 if ($sipIsLoggedIn) {
     if (isset($_GET['goCallbackID'])) { $callback_id = $astDB->escape($_GET['goCallbackID']); }
         else if (isset($_POST['goCallbackID'])) { $callback_id = $astDB->escape($_POST['goCallbackID']); }
-	
+
 	$astDB->where('callback_id', $callback_id);
 	$rslt = $astDB->getOne('vicidial_callbacks', 'lead_id');
 	$lead_id = $rslt['lead_id'];
@@ -57,7 +65,7 @@ if ($sipIsLoggedIn) {
 		//);
 		//$astDB->where('lead_id', $lead_id);
 		//$rslt = $astDB->update('vicidial_list', $updateData);
-		
+
 		$callback_time = date("Y-m-d H:i:s", strtotime('+6 hours'));
 		$updateData = [
 			'status' => 'ACTIVE',
@@ -67,7 +75,7 @@ if ($sipIsLoggedIn) {
 		];
 		$astDB->where('callback_id', $callback_id);
 		$rslt = $astDB->update('vicidial_callbacks', $updateData);
-		
+
 		// Add Callback to events
 		$CB30minsEarly = date("Y-m-d H:i:s", strtotime("-30 minutes", strtotime($callback_time)));
 		$cbtime = date("h:i A", strtotime($callback_time));
@@ -76,7 +84,6 @@ if ($sipIsLoggedIn) {
 		$insertData = [
 			'user_id' => $agent->user_id,
 			'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
-			'description' => '',
 			'all_day' => 0,
 			'start_date' => $CB30minsEarly,
 			'end_date' => $callback_time,

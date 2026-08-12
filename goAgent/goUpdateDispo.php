@@ -522,7 +522,6 @@ if ($is_logged_in) {
 			$insertData = [
 				'user_id' => $agent->user_id,
 				'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
-				'description' => '',
 				'all_day' => 0,
 				'start_date' => $CB30minsEarly,
 				'end_date' => $CallBackDatETimE,

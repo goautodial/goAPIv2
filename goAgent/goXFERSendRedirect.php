@@ -79,6 +79,39 @@ if (isset($_GET['goPresetName'])) { $preset_name = $astDB->escape($_GET['goPrese
 if (isset($_GET['goCallCID'])) { $CallCID = $astDB->escape($_GET['goCallCID']); }
     else if (isset($_POST['goCallCID'])) { $CallCID = $astDB->escape($_POST['goCallCID']); }
 
+$ACTION = $ACTION ?? '';
+$server_ip = $server_ip ?? '';
+$session_name = $session_name ?? '';
+$channel = $channel ?? '';
+$exten = $exten ?? '';
+$extension = $extension ?? '';
+$extenName = $extenName ?? '';
+$ext_context = $ext_context ?? '';
+$ext_priority = $ext_priority ?? '';
+$auto_dial_level = $auto_dial_level ?? 0;
+$uniqueid = $uniqueid ?? '';
+$lead_id = $lead_id ?? '';
+$seconds = $seconds ?? 0;
+$session_id = $session_id ?? '';
+$nodeletevdac = $nodeletevdac ?? 0;
+$call_server_ip = $call_server_ip ?? $server_ip;
+$queryCID = $queryCID ?? '';
+$extrachannel = $extrachannel ?? '';
+$phone_code = $phone_code ?? '';
+$phone_number = $phone_number ?? '';
+$filename = $filename ?? '';
+$agentchannel = $agentchannel ?? '';
+$protocol = $protocol ?? '';
+$parkedby = $parkedby ?? '';
+$preset_name = $preset_name ?? '';
+$CallCID = $CallCID ?? '';
+$campaign = $campaign ?? '';
+$stage = $stage ?? '';
+$message = '';
+$result = 'error';
+$StarTtimE = date("U");
+$WeBRooTWritablE = $WeBRooTWritablE ?? 0;
+
 $NOWnum = date("YmdHis");
 
 if ($is_logged_in) {
@@ -116,7 +149,7 @@ if ($is_logged_in) {
                 //$stmt = "UPDATE vicidial_closer_log SET end_epoch='$StarTtimE', length_in_sec=(queue_seconds + $seconds), status='XFER' WHERE lead_id='$lead_id' AND call_date > \"$four_hours_ago\" ORDER BY start_epoch DESC LIMIT 1;";
                 $rslt = $astDB->rawQuery("UPDATE vicidial_closer_log SET end_epoch='$StarTtimE', length_in_sec=(queue_seconds + $seconds), status='XFER' WHERE lead_id='$lead_id' AND call_date > \"$four_hours_ago\" ORDER BY start_epoch DESC LIMIT 1;");
             }
-    
+
             //$stmt = "UPDATE vicidial_log set end_epoch='$StarTtimE', length_in_sec='$seconds',status='XFER' where uniqueid='$uniqueid';";
             $updateData = [
                 'end_epoch' => $StarTtimE,
@@ -125,13 +158,13 @@ if ($is_logged_in) {
             ];
             $astDB->where('uniqueid', $uniqueid);
             $rslt = $astDB->update('vicidial_log', $updateData);
-    
+
             if ($nodeletevdac < 1) {
                 //$stmt = "DELETE from vicidial_auto_calls where uniqueid='$uniqueid';";
                 $astDB->where('uniqueid', $uniqueid);
                 $rslt = $astDB->delete('vicidial_auto_calls');
             }
-    
+
             if ((string) $preset_name !== '') {
                 //$stmt = "INSERT INTO user_call_log (user,call_date,call_type,server_ip,phone_number,number_dialed,lead_id,preset_name,campaign_id) values('$user','$NOW_TIME','BLIND_XFER','$server_ip','$exten','$channel','$lead_id','$preset_name','$campaign')";
                 $insertData = [
@@ -146,7 +179,7 @@ if ($is_logged_in) {
                     'campaign_id' => $campaign
                 ];
                 $rslt = $astDB->insert('user_call_log', $insertData);
-    
+
                 //$stmt = "SELECT count(*) from vicidial_xfer_stats where campaign_id='$campaign' and preset_name='$preset_name';";
                 $astDB->where('campaign_id', $campaign);
                 $astDB->where('preset_name', $preset_name);
@@ -165,11 +198,11 @@ if ($is_logged_in) {
                     $rslt = $astDB->insert('vicidial_xfer_stats', $insertData);
                 }
             }
-    
+
             $ACTION = "Redirect";
         }
     }
-    
+
     if ($ACTION == "RedirectToPark") {
         if ( strlen((string) $channel) < 3 || strlen((string) $queryCID) < 15 || strlen((string) $exten) < 1 || strlen((string) $extenName) < 1 || strlen((string) $ext_context) < 1 || strlen((string) $ext_priority) < 1 || strlen((string) $parkedby) < 1 ) {
             $channel_live = 0;
@@ -209,8 +242,8 @@ if ($is_logged_in) {
                 'user' => $user,
                 'lead_id' => $lead_id
             ];
-            $rslt = $astDB->insert('park_log', $insertData);    
-    
+            $rslt = $astDB->insert('park_log', $insertData);
+
             #############################################
             ##### START QUEUEMETRICS LOGGING LOOKUP #####
             //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id FROM system_settings;";
@@ -231,7 +264,7 @@ if ($is_logged_in) {
             ###########################################
             if ($enable_queuemetrics_logging > 0) {
                 $linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
-    
+
                 $time_id = 0;
                 //$stmt="SELECT time_id,queue,agent from queue_log where call_id='$CallCID' and verb='CONNECT' order by time_id desc limit 1;";
                 $linkB->where('call_id', $CallCID);
@@ -245,9 +278,9 @@ if ($is_logged_in) {
                     $agent =	$rslt['agent'];
                 }
                 $StarTtimE = date("U");
-                if ($time_id > 100000) 
+                if ($time_id > 100000)
                     {$seconds = ($StarTtimE - $time_id);}
-    
+
                 if ($VAC_eq_ct > 0) {
                     //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$CallCID',queue='$queue',agent='Agent/$user',verb='CALLERONHOLD',data1='PARK',serverid='$queuemetrics_log_id';";
                     $insertData = [
@@ -265,12 +298,12 @@ if ($is_logged_in) {
                 }
             }
         }
-    
+
         //$stmt="UPDATE vicidial_live_agents SET external_park='' where user='$user';";
         $astDB->where('user', $user);
         $rslt = $astDB->update('vicidial_live_agents', [ 'external_park' => '' ]);
     }
-    
+
     if ($ACTION == "RedirectFromPark") {
         if ( strlen((string) $channel) < 3 || strlen((string) $queryCID) < 15 || strlen((string) $exten) < 1 || strlen((string) $ext_context) < 1 || strlen((string) $ext_priority) < 1 ) {
             $channel_live=0;
@@ -288,7 +321,7 @@ if ($is_logged_in) {
             $astDB->where('channel', $channel);
             $rslt = $astDB->delete('parked_channels');
             $ACTION = "Redirect";
-    
+
             $parked_sec = 0;
             //$stmt = "SELECT UNIX_TIMESTAMP(parked_time) FROM park_log where uniqueid='$uniqueid' and server_ip='$server_ip' and extension='$CallCID' and (parked_sec < 1 or grab_time is NULL) order by parked_time desc limit 1;";
             $astDB->where('uniqueid', $uniqueid);
@@ -300,7 +333,7 @@ if ($is_logged_in) {
             $VAC_pl_ct = $astDB->getRowCount();
             if ($VAC_pl_ct > 0) {
                 $parked_sec	= ($StarTtimE - $rslt['parked_time']);
-    
+
                 //$stmt = "UPDATE park_log SET status='GRABBED',grab_time='$NOW_TIME',parked_sec='$parked_sec' where uniqueid='$uniqueid' and server_ip='$server_ip' and extension='$CallCID' order by parked_time desc limit 1;";
                 $updateData = [
                     'status' => 'GRABBED',
@@ -312,7 +345,7 @@ if ($is_logged_in) {
                 $astDB->where('extension', $CallCID);
                 $astDB->orderBy('parked_time', 'desc');
                 $rslt = $astDB->update('park_log', $updateData, 1);
-    
+
                 #############################################
                 ##### START QUEUEMETRICS LOGGING LOOKUP #####
                 //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id FROM system_settings;";
@@ -333,7 +366,7 @@ if ($is_logged_in) {
                 ###########################################
                 if ($enable_queuemetrics_logging > 0) {
                     $linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
-    
+
                     $time_id = 0;
                     //$stmt="SELECT time_id,queue,agent from queue_log where call_id='$CallCID' and verb='CONNECT' order by time_id desc limit 1;";
                     $astDB->where('call_id', $CallCID);
@@ -347,9 +380,9 @@ if ($is_logged_in) {
                         $agent =	$rslt['agent'];
                     }
                     $StarTtimE = date("U");
-                    if ($time_id > 100000) 
+                    if ($time_id > 100000)
                         {$seconds = ($StarTtimE - $time_id);}
-    
+
                     if ($VAC_eq_ct > 0) {
                         //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$CallCID',queue='$queue',agent='Agent/$user',verb='CALLEROFFHOLD',data1='$parked_sec',data2='PARK',serverid='$queuemetrics_log_id';";
                         $insertData = [
@@ -369,12 +402,12 @@ if ($is_logged_in) {
                 }
             }
         }
-    
+
         //$stmt="UPDATE vicidial_live_agents SET external_park='' where user='$user';";
         $astDB->where('user', $user);
         $rslt = $astDB->update('vicidial_live_agents', [ 'external_park' => '' ]);
     }
-    
+
     if ($ACTION == "RedirectToParkIVR") {
         if ( strlen((string) $channel) < 3 || strlen((string) $queryCID) < 15 || strlen((string) $exten) < 1 || strlen((string) $extenName) < 1 || strlen((string) $ext_context) < 1 || strlen((string) $ext_priority) < 1 || strlen((string) $parkedby) < 1 ) {
             $channel_live = 0;
@@ -404,7 +437,7 @@ if ($is_logged_in) {
             //$stmt = "UPDATE vicidial_auto_calls SET extension='PARK_IVR' where callerid='$CallCID' limit 1;";
             $astDB->where('callerid', $CallCID);
             $rslt = $astDB->update('vicidial_auto_calls', [ 'extension' => 'PARK_IVR' ], 1);
-    
+
             //$stmt = "INSERT INTO park_log SET uniqueid='$uniqueid',status='IVRPARKED',channel='$channel',channel_group='$campaign',server_ip='$server_ip',parked_time='$NOW_TIME',parked_sec=0,extension='$CallCID',user='$user',lead_id='$lead_id';";
             $insertData = [
                 'uniqueid' => $uniqueid,
@@ -419,7 +452,7 @@ if ($is_logged_in) {
                 'lead_id' => $lead_id
             ];
             $rslt = $astDB->insert('park_log', $insertData);
-    
+
             #############################################
             ##### START QUEUEMETRICS LOGGING LOOKUP #####
             //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id FROM system_settings;";
@@ -440,7 +473,7 @@ if ($is_logged_in) {
             ###########################################
             if ($enable_queuemetrics_logging > 0) {
                 $linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
-    
+
                 $time_id = 0;
                 //$stmt="SELECT time_id,queue,agent from queue_log where call_id='$CallCID' and verb='CONNECT' order by time_id desc limit 1;";
                 $linkB->where('call_id', $CallCID);
@@ -454,9 +487,9 @@ if ($is_logged_in) {
                     $agent =	$rslt['agent'];
                 }
                 $StarTtimE = date("U");
-                if ($time_id > 100000) 
+                if ($time_id > 100000)
                     {$seconds = ($StarTtimE - $time_id);}
-    
+
                 if ($VAC_eq_ct > 0) {
                     //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$CallCID',queue='$queue',agent='Agent/$user',verb='CALLERONHOLD',data1='IVRPARK',serverid='$queuemetrics_log_id';";
                     $insertData = [
@@ -474,12 +507,12 @@ if ($is_logged_in) {
                 }
             }
         }
-    
+
         //$stmt="UPDATE vicidial_live_agents SET external_park='' where user='$user';";
         $astDB->where('user', $user);
         $rslt = $astDB->update('vicidial_live_agents', [ 'external_park' => '' ]);
     }
-    
+
     if ($ACTION == "RedirectFromParkIVR") {
         if ( strlen((string) $channel) < 3 || strlen((string) $queryCID) < 15 || strlen((string) $exten) < 1 || strlen((string) $ext_context) < 1 || strlen((string) $ext_priority) < 1 ) {
             $channel_live = 0;
@@ -497,11 +530,11 @@ if ($is_logged_in) {
             $astDB->where('channel', $channel);
             $rslt = $astDB->delete('parked_channels');
             $ACTION = "Redirect";
-    
+
             //$stmt = "UPDATE vicidial_auto_calls SET extension='' where callerid='$CallCID' limit 1;";
             $astDB->where('callerid', $CallCID);
             $rslt = $astDB->update('vicidial_auto_calls', [ 'extension' => '' ], 1);
-    
+
             $parked_sec = 0;
             //$stmt = "SELECT UNIX_TIMESTAMP(parked_time) FROM park_log where uniqueid='$uniqueid' and server_ip='$server_ip' and extension='$CallCID' and (parked_sec < 1 or grab_time is NULL) order by parked_time desc limit 1;";
             $astDB->where('uniqueid', $uniqueid);
@@ -513,7 +546,7 @@ if ($is_logged_in) {
             $VAC_pl_ct = $astDB->getRowCount();
             if ($VAC_pl_ct > 0) {
                 $parked_sec	= ($StarTtimE - $rslt['parked_time']);
-    
+
                 //$stmt = "UPDATE park_log SET status='GRABBEDIVR',grab_time='$NOW_TIME',parked_sec='$parked_sec' where uniqueid='$uniqueid' and server_ip='$server_ip' and extension='$CallCID' order by parked_time desc limit 1;";
                 $updateData = [
                     'status' => 'GRABBEDIVR',
@@ -525,7 +558,7 @@ if ($is_logged_in) {
                 $astDB->where('extension', $CallCID);
                 $astDB->orderBy('parked_time', 'desc');
                 $rslt = $astDB->update('park_log', $updateData, 1);
-    
+
                 #############################################
                 ##### START QUEUEMETRICS LOGGING LOOKUP #####
                 //$stmt = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id FROM system_settings;";
@@ -546,7 +579,7 @@ if ($is_logged_in) {
                 ###########################################
                 if ($enable_queuemetrics_logging > 0) {
                     $linkB = new MySQLiDB("$queuemetrics_server_ip", "$queuemetrics_login", "$queuemetrics_pass", "$queuemetrics_dbname");
-    
+
                     $time_id = 0;
                     //$stmt="SELECT time_id,queue,agent from queue_log where call_id='$CallCID' and verb='CONNECT' order by time_id desc limit 1;";
                     $linkB->where('call_id', $CallCID);
@@ -560,9 +593,9 @@ if ($is_logged_in) {
                         $agent =	$rslt['agent'];
                     }
                     $StarTtimE = date("U");
-                    if ($time_id > 100000) 
+                    if ($time_id > 100000)
                         {$seconds = ($StarTtimE - $time_id);}
-    
+
                     if ($VAC_eq_ct > 0) {
                         //$stmt = "INSERT INTO queue_log SET partition='P01',time_id='$StarTtimE',call_id='$CallCID',queue='$queue',agent='Agent/$user',verb='CALLEROFFHOLD',data1='$parked_sec',data2='IVRPARK',serverid='$queuemetrics_log_id';";
                         $insertData = [
@@ -582,12 +615,12 @@ if ($is_logged_in) {
                 }
             }
         }
-    
+
         //$stmt="UPDATE vicidial_live_agents SET external_park='' where user='$user';";
         $astDB->where('user', $user);
         $rslt = $astDB->update('vicidial_live_agents', [ 'external_park' => '' ]);
     }
-    
+
     if ($ACTION == "RedirectName") {
         if ( (strlen((string) $channel) < 3) || (strlen((string) $queryCID) < 15)  || (strlen((string) $extenName) < 1)  || (strlen((string) $ext_context) < 1)  || (strlen((string) $ext_priority) < 1) ) {
             $channel_live = 0;
@@ -612,7 +645,7 @@ if ($is_logged_in) {
             }
         }
     }
-    
+
     if ($ACTION == "RedirectNameVmail") {
         if ( strlen((string) $channel) < 3 || (strlen((string) $queryCID) < 15 || strlen((string) $extenName) < 1 || strlen((string) $exten) < 1 || strlen((string) $ext_context) < 1 || strlen((string) $ext_priority) < 1) ) {
             $channel_live = 0;
@@ -639,7 +672,7 @@ if ($is_logged_in) {
             }
         }
     }
-    
+
     if ($ACTION == "RedirectXtraCXNeW") {
         $DBout = '';
         $row = '';
@@ -681,7 +714,7 @@ if ($is_logged_in) {
                 if ($row_ct > 1) {
                     //$stmtB="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
                     $rslt = $astDB->rawQuery("UPDATE $conf_table set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
-    
+
                     //$stmtC="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('extension', "$protocol/$extension$NOWnum");
@@ -689,21 +722,21 @@ if ($is_logged_in) {
                     $rslt = $astDB->get("$conf_table", null, 'conf_exten');
                     $row = $rslt[0];
                     $exten = $row['conf_exten'];
-    
+
                     if ( (preg_match("/^8300/i", (string) $extension)) && ($protocol == 'Local') ) {
                         $extension = "$extension$user";
                     }
-    
+
                     //$stmtD="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('conf_exten', $exten);
                     $rslt = $astDB->update("$conf_table", ['extension' => "$protocol/$extension"], 1);
-    
+
                     //$stmtE="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('conf_exten', $session_id);
                     $rslt = $astDB->update("$conf_table", ['leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"]);
-    
+
                     $queryCID = "CXAR24$NOWnum";
                     //$stmtF="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
                     $insertData = [
@@ -728,27 +761,27 @@ if ($is_logged_in) {
                         'cmd_line_k' => ''
                     ];
                     $rslt = $astDB->insert('vicidial_manager', $insertData);
-    
+
                     //$stmtG="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('user', $user);
                     $rslt = $astDB->update('vicidial_live_agents', ['conf_exten' => $exten]);
                     $lastSQL = $astDB->getLastQuery();
-    
+
                     if ($auto_dial_level < 1) {
                         //$stmtH = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
                         $astDB->where('lead_id', $lead_id);
                         $astDB->where('callerid', 'M%', 'like');
                         $rslt = $astDB->delete('vicidial_auto_calls');
                     }
-    
+
                 //	$fp = fopen ("./vicidial_debug_3way.txt", "a");
                 //	fwrite ($fp, "$NOW_TIME|$filename|\n|$stmtA|\n|$stmtB|\n|$stmtC|\n|$stmtD|\n|$stmtE|\n|$stmtF|\n|$stmtG|\n|$stmtH|\n\n");
                 //	fclose($fp);
-    
+
                     //echo "NeWSessioN|$exten|\n";
                     //echo "|$stmtG|\n";
-                    
+
                     $APIResult = [ "result" => "success", "new_session" => $exten, 'sql' => "$lastSQL" ];
                     $exitThis = 1;
                 } else {
@@ -757,10 +790,10 @@ if ($is_logged_in) {
                     //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                 }
             }
-    
+
             if ($exitThis < 1) {
                 if (strlen((string) $call_server_ip) < 7) {$call_server_ip = $server_ip;}
-        
+
                 //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
                 $astDB->where('server_ip', $call_server_ip);
                 $astDB->where('channel', $channel);
@@ -776,7 +809,7 @@ if ($is_logged_in) {
                         $channel_liveX = 0;
                         $message .= "Channel $channel is not live on $call_server_ip, Redirect command not inserted\n";
                         //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
-                    }	
+                    }
                 }
                 //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
                 $astDB->where('server_ip', $server_ip);
@@ -793,7 +826,7 @@ if ($is_logged_in) {
                         $channel_liveY = 0;
                         $message .= "Channel $channel is not live on $server_ip, Redirect command not inserted\n";
                         //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $server_ip";}
-                    }	
+                    }
                 }
                 if ( ($channel_liveX === 1) && ($channel_liveY === 1) ) {
                     //$stmt="SELECT count(*) FROM vicidial_live_agents where lead_id='$lead_id' and user!='$user';";
@@ -890,7 +923,7 @@ if ($is_logged_in) {
                     }
                     //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Changed to Redirect: $channel on $server_ip";}
                 }
-        
+
                 if (preg_match("/SECOND|FIRST|DEBUG/",(string) $filename)) {
                     if ($WeBRooTWritablE > 0) {
                         //$fp = fopen ("./vicidial_debug.txt", "a");
@@ -901,7 +934,7 @@ if ($is_logged_in) {
             }
         }
     }
-    
+
     if ($ACTION == "RedirectXtraNeW") {
         if ($channel == "$extrachannel") {
             $ACTION = "Redirect";
@@ -946,7 +979,7 @@ if ($is_logged_in) {
                     if ($row_ct > 1) {
                         //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;";
                         $rslt = $astDB->rawQuery("UPDATE $conf_table set extension='$protocol/$extension$NOWnum', leave_3way='0' where server_ip='$server_ip' and ((extension='') or (extension is null)) and conf_exten != '$session_id' limit 1;");
-    
+
                         //$stmt="SELECT conf_exten from vicidial_conferences where server_ip='$server_ip' and extension='$protocol/$extension$NOWnum' and conf_exten != '$session_id';";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('extension', "$protocol/$extension$NOWnum");
@@ -954,17 +987,17 @@ if ($is_logged_in) {
                         $rslt = $astDB->get("$conf_table", null, 'conf_exten');
                         $row = $rslt[0];
                         $exten = $row['conf_exten'];
-    
+
                         //$stmt="UPDATE vicidial_conferences set extension='$protocol/$extension' where server_ip='$server_ip' and conf_exten='$exten' limit 1;";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('conf_exten', $exten);
                         $rslt = $astDB->update("$conf_table", ['extension' => "$protocol/$extension"], 1);
-    
+
                         //$stmt="UPDATE vicidial_conferences set leave_3way='1', leave_3way_datetime='$NOW_TIME', extension='3WAY_$user' where server_ip='$server_ip' and conf_exten='$session_id';";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('conf_exten', $session_id);
                         $rslt = $astDB->update("$conf_table", ['leave_3way' => 1, 'leave_3way_datetime' => $NOW_TIME, 'extension' => "3WAY_$user"]);
-    
+
                         $queryCID = "CXAR23$NOWnum";
                         //$stmtB="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Redirect','$queryCID','Channel: $agentchannel','Context: $ext_context','Exten: $exten','Priority: 1','CallerID: $queryCID','','','','','');";
                         $insertData = [
@@ -990,19 +1023,19 @@ if ($is_logged_in) {
                         ];
                         $rslt = $astDB->insert('vicidial_manager', $insertData);
                         $lastSQL = $astDB->getLastQuery();
-    
+
                         //$stmt="UPDATE vicidial_live_agents set conf_exten='$exten' where server_ip='$server_ip' and user='$user';";
                         $astDB->where('server_ip', $server_ip);
                         $astDB->where('user', $user);
                         $rslt = $astDB->update('vicidial_live_agents', ['conf_exten' => $exten]);
-    
+
                         if ($auto_dial_level < 1) {
                             //$stmt = "DELETE from vicidial_auto_calls where lead_id='$lead_id' and callerid LIKE \"M%\";";
                             $astDB->where('lead_id', $lead_id);
                             $astDB->where('callerid', 'M%', 'like');
                             $rslt = $astDB->delete('vicidial_auto_calls');
                         }
-    
+
                         $APIResult = [ "result" => "success", "new_session" => $exten, 'sql' => "$lastSQL" ];
                         $exitThis = 1;
                     } else {
@@ -1011,10 +1044,10 @@ if ($is_logged_in) {
                         //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "Cannot find empty conference on $server_ip";}
                     }
                 }
-    
+
                 if ($exitThis < 1) {
                     if (strlen((string) $call_server_ip) < 7) {$call_server_ip = $server_ip;}
-        
+
                     //$stmt="SELECT count(*) FROM live_channels where server_ip = '$call_server_ip' and channel='$channel';";
                     $astDB->where('server_ip', $call_server_ip);
                     $astDB->where('channel', $channel);
@@ -1032,7 +1065,7 @@ if ($is_logged_in) {
                             //if (preg_match("/SECOND|FIRST|DEBUG/",$filename)) {$DBout .= "$channel is not live on $call_server_ip";}
                         }
                     }
-                    
+
                     //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$extrachannel';";
                     $astDB->where('server_ip', $server_ip);
                     $astDB->where('channel', $extrachannel);
@@ -1154,7 +1187,7 @@ if ($is_logged_in) {
                             $channel = $extrachannel;
                         }
                     }
-        
+
                     if (preg_match("/SECOND|FIRST|DEBUG/", (string) $filename)) {
                         if ($WeBRooTWritablE > 0) {
                             //$fp = fopen ("./vicidial_debug.txt", "a");
@@ -1166,14 +1199,14 @@ if ($is_logged_in) {
             }
         }
     }
-    
+
     if ($ACTION == "Redirect") {
         ### for manual dial VICIDIAL calls send the second attempt to transfer the call
         if ($stage == "2NDXfeR") {
             $local_DEF = 'Local/';
             $local_AMP = '@';
             $hangup_channel_prefix = "$local_DEF$session_id$local_AMP$ext_context";
-    
+
             //$stmt="SELECT count(*) FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$hangup_channel_prefix%\";";
             $astDB->where('server_ip', $server_ip);
             $astDB->where('channel', "$hangup_channel_prefix%", 'like');
@@ -1190,7 +1223,7 @@ if ($is_logged_in) {
                 $queryCID = preg_replace("/^./i","Q", (string) $queryCID);
             }
         }
-    
+
         $row = '';
         $rowx = '';
         $channel_live = 1;
@@ -1206,7 +1239,7 @@ if ($is_logged_in) {
             $APIResult = [ "result" => "error", "message" => $message ];
         } else {
             if (strlen((string) $call_server_ip) > 6) {$server_ip = $call_server_ip;}
-            
+
             //$stmt="SELECT count(*) FROM live_channels where server_ip = '$server_ip' and channel='$channel';";
             $astDB->where('server_ip', $server_ip);
             $astDB->where('channel', $channel);
@@ -1248,12 +1281,12 @@ if ($is_logged_in) {
                     'cmd_line_k' => ''
                 ];
                 $rslt = $astDB->insert('vicidial_manager', $insertData);
-    
+
                 $result = 'success';
                 $message .= "Redirect command sent for Channel $channel on $server_ip\n";
             }
         }
-        
+
         $APIResult = [ "result" => "$result", "message" => $message ];
     }
 } else {

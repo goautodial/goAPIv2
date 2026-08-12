@@ -39,7 +39,7 @@ if ($sipIsLoggedIn) {
         else if (isset($_POST['goCallbackComment'])) { $callback_comments = $astDB->escape($_POST['goCallbackComment']); }
     if (isset($_GET['goCallbackOnly'])) { $callback_only = $astDB->escape($_GET['goCallbackOnly']); }
         else if (isset($_POST['goCallbackOnly'])) { $callback_only = $astDB->escape($_POST['goCallbackOnly']); }
-	
+
 	$astDB->where('callback_id', $callback_id);
 	$rslt = $astDB->getOne('vicidial_callbacks', 'lead_id');
 	$lead_id = $rslt['lead_id'];
@@ -63,7 +63,7 @@ if ($sipIsLoggedIn) {
 		];
 		$astDB->where('callback_id', $callback_id);
 		$rslt = $astDB->update('vicidial_callbacks', $updateData);
-		
+
 		// Check Callback Lists
 		$updateData = [
 			'callback_time' => $callback_date,
@@ -71,7 +71,7 @@ if ($sipIsLoggedIn) {
 		];
 		$goDB->where('callback_id', $callback_id);
 		$rslt = $goDB->update('go_callback_lists', $updateData);
-		
+
 		// Add Callback to events
 		$CB30minsEarly = date("Y-m-d H:i:s", strtotime("-30 minutes", strtotime($callback_date)));
 		$cbtime = date("h:i A", strtotime($callback_date));
@@ -80,7 +80,6 @@ if ($sipIsLoggedIn) {
 		$insertData = [
 			'user_id' => $agent->user_id,
 			'title' => "CALLBACK -- Call ".$rslt['phone_number']." around ".$cbtime,
-			'description' => $callback_comments,
 			'all_day' => 0,
 			'start_date' => $CB30minsEarly,
 			'end_date' => $callback_date,
