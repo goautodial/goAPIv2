@@ -154,24 +154,31 @@ if( strlen((string) $session_name) < 12 || !isset($session_name) ) {
                         $astDB->where('user', $user);
                         $astDB->where('server_ip', $server_ip);
                         $rslt = $astDB->getOne('vicidial_live_agents', 'status,campaign_id,closer_campaigns');
-                        $Alogin = $rslt['status'];
-                        $Acampaign = $rslt['campaign_id'];
-                        $AccampSQL = $rslt['closer_campaigns'];
-                        $AccampSQL = preg_replace('/\s\-/', '', (string) $AccampSQL);
-                        $AccampSQL = preg_replace('/\s/', "','", $AccampSQL);
-                        if (preg_match('/AGENTDIRECT/i', $AccampSQL)) {
-                            $AccampSQL = preg_replace('/AGENTDIRECT/i', '', $AccampSQL);
-                            $ADsql = "OR ( (campaign_id LIKE \"%AGENTDIRECT%\") AND (agent_only='$user') )";
+
+                        if (is_array($rslt)) {
+                            $Alogin = $rslt['status'];
+                            $Acampaign = $rslt['campaign_id'];
+                            $AccampSQL = $rslt['closer_campaigns'];
+                            $AccampSQL = preg_replace('/\s\-/', '', (string) $AccampSQL);
+                            $AccampSQL = preg_replace('/\s/', "','", $AccampSQL);
+                            if (preg_match('/AGENTDIRECT/i', $AccampSQL)) {
+                                $AccampSQL = preg_replace('/AGENTDIRECT/i', '', $AccampSQL);
+                                $ADsql = "OR ( (campaign_id LIKE \"%AGENTDIRECT%\") AND (agent_only='$user') )";
+                            }
+
+                            ### grab the number of calls being placed from this server and campaign
+                            $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status IN('LIVE') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) $ADsql)");
+                            $RingCalls = $astDB->getRowCount();
+                            $RingCalls = "Calls in Queue: $RingCalls";
+
+                            ### grab the number of calls being placed from this server and campaign
+                            $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status NOT IN('XFER') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) );");
+                            $DiaLCalls = $astDB->getRowCount();
+                        } else {
+                            $Alogin = 'N';
+                            $RingCalls = 'N';
+                            $DiaLCalls = 'N';
                         }
-
-                        ### grab the number of calls being placed from this server and campaign
-                        $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status IN('LIVE') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) $ADsql)");
-                        $RingCalls = $astDB->getRowCount();
-                        $RingCalls = "Calls in Queue: $RingCalls";
-
-                        ### grab the number of calls being placed from this server and campaign
-                        $rslt = $astDB->rawQuery("SELECT * FROM vicidial_auto_calls WHERE status NOT IN('XFER') AND ( (campaign_id='$Acampaign') OR (campaign_id IN('$AccampSQL')) );");
-                        $DiaLCalls = $astDB->getRowCount();
                     } else {
                         $Alogin = 'N';
                         $RingCalls = 'N';

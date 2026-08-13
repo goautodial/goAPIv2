@@ -898,8 +898,8 @@
 				}
 
 				$campaign_hotkeys 					= get_settings('hotkeys', $astDB, $campinfo['campaign_id']);
-				$hotkeys 							= '';
-				$hotkeysInfo 						= '';
+				$hotkeys 							= [];
+				$hotkeysInfo 						= [];
 				$hotkeysCnt 						= 0;
 				//$hotkeysContent = "<dl class='dl-horizontal'>";
 				foreach ($campaign_hotkeys as $row) {
