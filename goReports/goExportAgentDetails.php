@@ -366,7 +366,7 @@
 					}
 				}
 
-				$pause_sec_ct 							= $astDB
+				$pause_sec_rows 						= $astDB
 					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 					->where("pause_sec", 0, ">")
 					->where("pause_sec", 65000, "<")
@@ -374,9 +374,10 @@
 					->groupBy("user, sub_status")
 					->orderBy("user", "DESC", ["sub_status"])
 					->get("vicidial_agent_log", 1000, "user, SUM(pause_sec) as pause_sec, sub_status");
+				$pause_sec_ct 							= is_countable($pause_sec_rows) ? count($pause_sec_rows) : 0;
 
 				if ($astDB->count > 0) {
-					foreach ((is_array($pause_sec_ct) ? $pause_sec_ct : []) as $row) {
+					foreach ((is_array($pause_sec_rows) ? $pause_sec_rows : []) as $row) {
 						$currentPCUser = $row['user'] ?? '';
 						$currentPauseSec = $row['pause_sec'] ?? 0;
 						$currentSubStatus = $row['sub_status'] ?? '';

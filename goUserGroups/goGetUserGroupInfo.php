@@ -36,10 +36,10 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-		
+
     // POST or GET Variables
-    $user_group 										= $astDB->escape(($_REQUEST["user_group"] ?? ''));	
-    
+    $user_group 										= $astDB->escape(($_REQUEST["user_group"] ?? ''));
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -53,25 +53,25 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Session User Not Defined."
 		];
-	} elseif (empty($user_group) || is_null($user_group)) { 
+	} elseif (empty($user_group) || is_null($user_group)) {
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for User Group."
-		]; 
+		];
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= is_array($fresults) ? (int) ($fresults["user_level"] ?? 0) : 0;
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 			} else {
@@ -79,37 +79,37 @@
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
-				}	
-			}	
-		
+				}
+			}
+
 			$cols										= [
-				"user_group", 
-				"group_name", 
-				"allowed_campaigns", 
-				"forced_timeclock_login", 
-				"shift_enforcement", 
+				"user_group",
+				"group_name",
+				"allowed_campaigns",
+				"forced_timeclock_login",
+				"shift_enforcement",
 				"admin_viewable_groups"
 			];
-			
+
 			$query 										= $astDB
 				->where("user_group", $user_group)
 				->orderBy("user_group","asc")
 				->getOne("vicidial_user_groups", $cols);
-			
+
 			$querygo 									= $goDB
 				->where("user_group", $user_group)
-				->getOne("user_access_group", "group_level,permissions");		
-			
+				->getOne("user_access_group", "group_level,permissions");
+
 			if ($goDB->count > 0) {
 				$data 									= array_merge($query, $querygo);
 			} else {
 				$data									= $query;
 			}
-			
-			
+
+
 			if ($astDB->count > 0) {
 				$apiresults 							= [
-					"result" 								=> "success", 
+					"result" 								=> "success",
 					"data" 									=> $data
 				];
 			} else {
@@ -120,10 +120,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

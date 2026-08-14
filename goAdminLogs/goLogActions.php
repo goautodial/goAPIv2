@@ -1,7 +1,7 @@
 <?php
 /**
  * @file        goAddUserGroup.php
- * @brief       API to add new User Group 
+ * @brief       API to add new User Group
  * @copyright   Copyright (C) GOautodial Inc.
  * @author      Christopher Lomuntad  <chris@goautodial.com>
  *
@@ -19,8 +19,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
     include_once (__DIR__ . "/../goFunctions.php");
+
+global $astDB, $goDB;
+
+if (!isset($astDB, $goDB)) {
+    $APIResult = ["result" => "error", "message" => "Database connection is not available."];
+    return;
+}
+
+$definedVariables = get_defined_vars();
+$action = '';
+$user = $definedVariables['log_user'] ?? '';
+$ip_address = $definedVariables['log_ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '');
+$details = '';
+$user_group = $definedVariables['log_group'] ?? '';
+$db_query = '';
+$NOW_TIME = $definedVariables['NOW_TIME'] ?? date('Y-m-d H:i:s');
 
 if (isset($_GET['action'])) { $action = $astDB->escape($_GET['action']); }
     else if (isset($_POST['action'])) { $action = $astDB->escape($_POST['action']); }
@@ -39,22 +55,24 @@ if ($user === 'sess_expired') {
     $goDB->where('ip_address', $ip_address);
     $goDB->where('action', 'LOGIN');
     $goDB->orderBy('event_date', 'desc');
-    $rslt = $goDB->getOne('go_action_logs', 'user', 'user_group');
-    
-    $user = $rslt['user'];
-    $user_group = $rslt['user_group'];
+    $rslt = $goDB->getOne('go_action_logs', 'user,user_group');
+    $lastLogin = is_array($rslt) ? $rslt : [];
+
+    $user = $lastLogin['user'] ?? $user;
+    $user_group = $lastLogin['user_group'] ?? $user_group;
     $details = "Session expired on user $user";
-    
-    if ($user_group == 'AGENTS') {
+
+    if ($user_group === 'AGENTS') {
         $NOW = date("Y-m-d H:i:s");
         $NOWepoch = date("U");
-        
+
         $astDB->where('user', $user);
         $astDB->where('event', 'LOGIN');
         $astDB->orderBy('event_date', 'desc');
         $sessRslt = $astDB->getOne('vicidial_user_log', 'campaign_id');
-        $campaign = $sessRslt['campaign_id'];
-        
+        $campaignLog = is_array($sessRslt) ? $sessRslt : [];
+        $campaign = $campaignLog['campaign_id'] ?? '';
+
         $insertData = [
             "user" => $user,
             "event" => 'AUTO-LOGOUT',
