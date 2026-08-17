@@ -37,6 +37,12 @@
 
 
 	$groupId = go_get_groupid($goUser, $astDB);
+	$userInfo = $astDB
+		->where('user', $goUser)
+		->getOne('vicidial_users', 'user_level');
+	$userlevel = (int) ($userInfo['user_level'] ?? 0);
+	$dataLeadFilterID = [];
+	$dataLeadFilterName = [];
 
 	// if (!checkIfTenant($groupId, $goDB)) {
 	// 	//$ul = "";

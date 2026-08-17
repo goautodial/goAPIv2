@@ -36,7 +36,7 @@ include_once (__DIR__ . "/goAPI.php");
 /** @var string $log_ip */
 
 
-$allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
+$allowed_campaigns									= array_values(array_filter((array) allowed_campaigns($log_group, $goDB, $astDB), static fn($campaign) => (string) $campaign !== ''));
 
 // ERROR CHECKING
 if (empty($goUser) || is_null($goUser)) {
@@ -59,11 +59,22 @@ if (empty($goUser) || is_null($goUser)) {
         ->getOne("vicidial_users", "user,user_level");
 
     $goapiaccess									= $astDB->getRowCount();
-    $userlevel										= $fresults["user_level"];
+    $userlevel										= (int) ($fresults["user_level"] ?? 0);
 
     if ($goapiaccess > 0 && $userlevel > 7) {
         if (is_array($allowed_campaigns)) {
             if (strtoupper((string) $log_group) !== 'ADMIN') {
+                if ($allowed_campaigns === []) {
+                    $apiresults = [
+                        "result" => "success",
+                        "data" => [[
+                            "totalAgentsCall" => 0,
+                            "totalAgentsPaused" => 0,
+                            "totalAgentsWaitCalls" => 0
+                        ]]
+                    ];
+                    return;
+                }
                 $astDB->where("campaign_id", $allowed_campaigns, "IN");
             }
 

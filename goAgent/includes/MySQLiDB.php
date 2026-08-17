@@ -1079,9 +1079,17 @@ class MySQLiDB {
                     if (is_object ($val)) {
                         $comparison .= $this->_buildPair("", $val);
                     } else {
-                        foreach ($val as $v) {
+                        $values = is_array($val) ? $val : [$val];
+                        $values = array_values($values);
+
+                        if ($values === []) {
                             $comparison .= ' ?,';
-                            $this->_bindParam($v);
+                            $this->_bindParam(strtolower((string) $key) === 'in' ? '__MYSQLIDB_EMPTY_IN__' : '__MYSQLIDB_EMPTY_NOT_IN__');
+                        } else {
+                            foreach ($values as $v) {
+                                $comparison .= ' ?,';
+                                $this->_bindParam($v);
+                            }
                         }
                     }
                     $this->_query .= rtrim($comparison, ',').' ) ';

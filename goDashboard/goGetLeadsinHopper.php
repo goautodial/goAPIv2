@@ -5,7 +5,7 @@
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
  * @author     	Chris Lomuntad
- * @author     	Jeremiah Sebastian Samatra 
+ * @author     	Jeremiah Sebastian Samatra
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -37,10 +37,10 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
- 
+
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
-	// ERROR CHECKING 
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -59,31 +59,37 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
 			$campaignsArr								= [];
-			
-			foreach ($campaigns["campaign_id"] as $value) {
-				$campaignsArr[] = $value;
+
+			foreach (($campaigns["campaign_id"] ?? []) as $value) {
+				if ((string) $value !== '') {
+					$campaignsArr[] = $value;
+				}
 			}
-			
+
+			if ($campaignsArr === []) {
+				$apiresults = ["result" => "success", "data" => 0];
+				return;
+			}
 			$astDB->where("campaign_id", $campaignsArr, "IN");
 			$data										= $astDB->getValue("vicidial_hopper", "count(*)");
-			
+
 			$apiresults 								= [
-				"result" 									=> "success", 
+				"result" 									=> "success",
 				"data" 										=> $data
 			];
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-		
+
 ?>

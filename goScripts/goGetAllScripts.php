@@ -3,7 +3,7 @@
  * @file 		goGetAllScripts.php
  * @brief 		API to get all scripts
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
- * @author      Demian Lizandro A. Biscocho 
+ * @author      Demian Lizandro A. Biscocho
  * @author     	Alexander Jim Abenoja
  *
  * @par <b>License</b>:
@@ -35,8 +35,13 @@
 /** @var string $log_user */
 /** @var string|false $log_group */
 /** @var string $log_ip */
-	 
- 
+
+
+	$dataScriptID 									= [];
+	$dataScriptName 								= [];
+	$dataActive 									= [];
+	$dataUserGroup 								= [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -56,15 +61,15 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -78,11 +83,11 @@
 					$astDB->where('script_id', '^script', 'REGEXP');
 				}
 			}
-		
+
 			// getting script count
 			$astDB->orderBy('script_id', 'desc');
 			$resultGetScript							= $astDB->getOne('vicidial_scripts', 'script_id');
-			
+
 			// condition
 			if ($resultGetScript) {
 				if ( preg_match("/^script/i", $resultGetScript['script_id']) ) {
@@ -96,7 +101,7 @@
 				// return data
 				$script_num 							= (!empty($last_pl) ? max($last_pl) : 0);
 				$script_num += 1;
-				
+
 				if ($script_num < 100) {
 					if ($script_num < 10) {
 						$script_num			 			= "00".$script_num;
@@ -104,7 +109,7 @@
 						$script_num 					= "0".$script_num;
 					}
 				}
-				
+
 				if ($log_group !== "ADMIN") {
 					$script_num 						= "$log_group".$script_num;
 				}else{
@@ -118,7 +123,7 @@
 					$script_num 						= "script001";
 				}
 			}
-				
+
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
@@ -128,20 +133,20 @@
 						$astDB->where("user_group", $log_group);
 						$astDB->orWhere("user_group", "---ALL---");
 					//}
-				}					
+				}
 			}
-			
+
 			$scripts 									= $astDB->get('vicidial_scripts');
-			
+
 			if ($astDB->count > 0) {
 				foreach ($scripts as $script) {
 					$dataScriptID[] 					= $script['script_id'];
 					$dataScriptName[] 					= $script['script_name'];
 					$dataActive[] 						= $script['active'];
 					$dataUserGroup[] 					= $script['user_group'];
-				}		
-			} 
-			
+				}
+			}
+
 			$apiresults 								= [
 				"result" 									=> "success",
 				"script_id" 								=> $dataScriptID,
@@ -153,9 +158,9 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 

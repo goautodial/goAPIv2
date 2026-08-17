@@ -36,11 +36,11 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
- 
+
 	//$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 	$agentstatus										= "PAUSED";
 
-	// ERROR CHECKING 
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -59,11 +59,13 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
 		if ($goapiaccess > 0 && $userlevel > 7) {
+			$camps = '';
+			$campaigns = [];
 			//get all allowed campaigns
             $userGroupCamps                             = $astDB->where("user_group", $log_group)
                 ->get("vicidial_user_groups", null, ['allowed_campaigns']);
@@ -78,38 +80,42 @@
 
                 foreach ($campQuery as $key) {
                     $campaigns[]    = $key["campaign_id"];
-                }   
-            } else {
-                $trimCamps  = trim($camps, " -");
-                $campaigns = explode(" ", (string) ($trimCamps ?? ''));
-            }
+                }
+	            } else {
+	                $trimCamps  = trim($camps, " -");
+	                $campaigns = array_values(array_filter(explode(" ", (string) ($trimCamps ?? '')), static fn($campaign) => (string) $campaign !== ''));
+	            }
 
-			if (is_array($campaigns)) {
+				if (is_array($campaigns)) {
+					if ($campaigns === []) {
+						$apiresults = ["result" => "success", "data" => 0];
+						return;
+					}
 				// if (strtoupper($log_group) != 'ADMIN') {
 				// 	if ($userlevel < 8) {
                 //         $astDB->where("user_group", $log_group);
 				// 	}
 				// }
-                
+
 				$data									= $astDB
 					->where("campaign_id", $campaigns, "IN")
 					->where("status", [$agentstatus], "IN")
 					->getValue("vicidial_live_agents", "count(*)");
 
 				$testquery = $astDB->getLastQuery();
-				
+
 				$apiresults 							= [
-					"result" 								=> "success", 
+					"result" 								=> "success",
 					"data" 									=> $data
-				];	
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

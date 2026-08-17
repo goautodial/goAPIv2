@@ -39,8 +39,12 @@
 
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-		
-	// ERROR CHECKING 
+	$dataCampID 										= [];
+	$dataStatName 									= [];
+	$dataStat 										= [];
+	$custom_dispo 									= [];
+
+	// ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
 			"result" 										=> "Error: goAPI User Not Defined."
@@ -63,87 +67,84 @@
         $astDB->where('user_group', $log_group);
         $allowed_camps                                  = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
 		$allowed_campaigns                              = $allowed_camps['allowed_campaigns'];
-        
+
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {    
-			if (is_array($campaigns)) {			
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			if (is_array($campaigns)) {
 				$cols 									= [
-					"status", 
-					"status_name", 
+					"status",
+					"status_name",
 					"campaign_id"
 				];
-			
+
 				$cols2 = ["status", "status_name"];
-                
+
 				if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
                     $camps_allowed = explode(" ", trim($allowed_campaigns));
                     $astDB->where("campaign_id", $camps_allowed, "IN");
                 }
 				$astDB->groupBy("status");
-				$astDB->orderBy("status", "asc");			
+				$astDB->orderBy("status", "asc");
 				$result 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
-                
+
 				if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
                     $camps_allowed = explode(" ", trim($allowed_campaigns));
                     $astDB->where("campaign_id", $camps_allowed, "IN");
                 }
-				$astDB->orderBy("status", "asc");			
+				$astDB->orderBy("status", "asc");
 				$result2 								= $astDB->get("vicidial_campaign_statuses", NULL, $cols);
-				
+
                 $astDB->orderBy("status", "asc");
                 $result3                                = $astDB->get("vicidial_statuses", NULL, $cols2);
-		
-				if ($astDB->count > 0) {
-					//GET CAMPAIGN STATUSES
-					foreach ($result as $fresults) {
-						$dataStat[] 					= $fresults["campaign_id"];			
-						$dataStatName[] 				= $fresults["status"];
-						$dataCampID[] 					= $fresults["status_name"];
-					}
-                    
-					foreach ($result2 as $fresults) {
+
+				//GET CAMPAIGN STATUSES
+				foreach ($result as $fresults) {
+					$dataStat[] 					= $fresults["campaign_id"];
+					$dataStatName[] 				= $fresults["status"];
+					$dataCampID[] 					= $fresults["status_name"];
+				}
+
+				foreach ($result2 as $fresults) {
                         $cCamp                          = $fresults["campaign_id"];
                         $cStatus                        = $fresults["status"];
-                        $custom_dispo[$cCamp][$cStatus] = $fresults["status_name"];;
-					}
-					
-					//GET SYSTEM STATUSES
-					foreach ($result3 as $fresults) {
+                        $custom_dispo[$cCamp][$cStatus] = $fresults["status_name"];
+				}
+
+				//GET SYSTEM STATUSES
+				foreach ($result3 as $fresults) {
                         $dataStat[]                     = $fresults["status"];
                         $dataStatName[]                 = $fresults["status_name"];
                     }
 
-					$apiresults 						= [
-						"result" 						=> "success", 
-						"campaign_id" 					=> $dataCampID, 
-						"status_name" 					=> $dataStatName, 
-						"status" 						=> $dataStat,
+				$apiresults 						= [
+					"result" 						=> "success",
+					"campaign_id" 					=> $dataCampID,
+					"status_name" 					=> $dataStatName,
+					"status" 						=> $dataStat,
                         "custom_dispo"                  => $custom_dispo
-					];			
-				}	 		
+				];
 			} else {
 				$err_msg 								= error_handle("10108", "status. No campaigns available");
 				$apiresults								= [
-					"code" 									=> "10108", 
+					"code" 									=> "10108",
 					"result" 								=> $err_msg
 				];
-			}    
+			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
-?>
 
+?>

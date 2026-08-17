@@ -39,7 +39,16 @@
 
 
 	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
-	
+	$dataListId 									= [];
+	$dataListName 									= [];
+	$dataActive 									= [];
+	$dataListLastcallDate 						= [];
+	$dataTally 									= [];
+	$dataCFCount 									= [];
+	$dataCampaignId 								= [];
+	$dataCampaignName 							= [];
+	$lists 											= [];
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -65,20 +74,20 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {    
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			if (is_array($campaigns)) {
 				//$astDB->where("vicidial_lists.campaign_id", $campaigns, "IN");
 				$campaign_ids							= implode("','", $campaigns);
 				//$campaign_ids							= str_replace(",", "','", $campaign_ids);
-								
+
 				// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 				// every time we need to filter out requests
 				$tenant									= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-                
+
                 $astDB->where('user_group', $log_group);
                 $allowed_camps                          = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
                 $allowed_campaigns                      = $allowed_camps['allowed_campaigns'];
@@ -86,23 +95,23 @@
 					$campaign_ids                       = explode(" ", trim($allowed_campaigns));
                     $campaign_ids						= implode("','", $campaign_ids);
                 }
-				
+
 				if ($tenant) {
 					$ul									= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
 				} else {
 					$ul									= "";
-					
+
 					if (strtoupper((string) $log_group) !== 'ADMIN') {
 						//if ($userlevel > 8) {
 							$ul							= "WHERE vicidial_lists.campaign_id IN ('$campaign_ids')";
 						//}
-					}					
+					}
 				}
-				
-				$query 									= "SELECT vicidial_lists.list_id, vicidial_lists.list_name, vicidial_lists.list_description, (SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally, (SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active, vicidial_lists.list_lastcalldate, vicidial_lists.campaign_id, vicidial_lists.reset_time, vicidial_campaigns.campaign_name FROM vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $ul ORDER by list_id;";			
+
+				$query 									= "SELECT vicidial_lists.list_id, vicidial_lists.list_name, vicidial_lists.list_description, (SELECT count(*) as tally FROM vicidial_list WHERE list_id = vicidial_lists.list_id) as tally, (SELECT count(*) as counter FROM vicidial_lists_fields WHERE list_id = vicidial_lists.list_id) as cf_count, vicidial_lists.active, vicidial_lists.list_lastcalldate, vicidial_lists.campaign_id, vicidial_lists.reset_time, vicidial_campaigns.campaign_name FROM vicidial_lists LEFT JOIN vicidial_campaigns ON vicidial_lists.campaign_id=vicidial_campaigns.campaign_id $ul ORDER by list_id;";
 				$rsltv 									= $astDB->rawQuery($query);
                 //$testSQL                                = $query;
-				
+
 				foreach ($rsltv as $fresults) {
 					$dataListId[] 						= $fresults['list_id'];
 					$dataListName[] 					= $fresults['list_name'];
@@ -113,23 +122,22 @@
 					$dataCampaignId[] 					= $fresults['campaign_id'];
 					$dataCampaignName[] 				= $fresults['campaign_name'];
 				}
-				
+
 				#get next list id
 				//$query2 = "SELECT list_id from vicidial_lists WHERE list_id NOT IN ('999', '998') order by list_id;";
 				$astDB->where('list_id', ['999','998'], 'not in');
 				$astDB->orderBy('list_id', 'desc');
 				$rsltv2 								= $astDB->get('vicidial_lists', null, 'list_id');
-				
+
 				foreach ($rsltv2 as $fetch_lists){
 					$lists[] 							=  $fetch_lists['list_id'];
 				}
-				
+
 				$max_list 								= (!empty($lists) ? max($lists) : 0);
-				$min_list 								= min($lists);
-				
+
 				if ($max_list >= 99999999) {
 					for($i=1;$i < $max_list;$i++){
-						if(!in_array($i, (is_array($lists['list_id']) ? $lists['list_id'] : []))){
+						if(!in_array($i, $lists)){
 							$next_list 					= $i;
 							$i 							= $max_list;
 						}
@@ -137,34 +145,34 @@
 				} else {
 					$next_list 							= $max_list + 1;
 				}
-				
+
 				$apiresults 							= [
 					"result" 								=> "success",
 					"list_id" 								=> $dataListId,
 					"list_name" 							=> $dataListName,
-					"active" 								=> $dataActive, 
+					"active" 								=> $dataActive,
 					"list_lastcalldate" 					=> $dataListLastcallDate,
 					"tally" 								=> $dataTally,
 					"cf_count"								=> $dataCFCount,
-					"campaign_id" 							=> $dataCampaignId, 
-					"next_listID" 							=> $next_list, 
+					"campaign_id" 							=> $dataCampaignId,
+					"next_listID" 							=> $next_list,
 					"campaign_name" 						=> $dataCampaignName,
                     //"test_SQL"                              => $testSQL
 				];
 			} else {
 				$err_msg 								= error_handle("40001");
 				$apiresults 							= [
-					"code" 									=> "40001", 
+					"code" 									=> "40001",
 					"result" 								=> $err_msg
 				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

@@ -5,7 +5,7 @@
  * @copyright 	Copyright (c) 2026 GOautodial Inc.
  * @author		Demian Lizandro Biscocho
  * @author		Jeremiah Sebastian Samatra
- * @author     	Chris Lomuntad 
+ * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ include_once (__DIR__ . "/goAPI.php");
 /** @var string $log_ip */
 
 
-$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+$campaigns 											= array_values(array_filter((array) allowed_campaigns($log_group, $goDB, $astDB), static fn($campaign) => (string) $campaign !== ''));
 $NOW 												= date("Y-m-d");
 
 // ERROR CHECKING
@@ -62,18 +62,24 @@ if (empty($goUser) || is_null($goUser)) {
 		->getOne("vicidial_users", "user,user_level");
 
 	$goapiaccess									= $astDB->getRowCount();
-	$userlevel										= $fresults["user_level"];
+	$userlevel										= (int) ($fresults["user_level"] ?? 0);
 
 	if ($goapiaccess > 0 && $userlevel > 7) {
 		if (is_array($campaigns)) {
 			if ($log_group !== "ADMIN") {
-				$astDB->where("campaign_id", $campaigns, "IN");
+				if ($campaigns === []) {
+					$data_out = 0;
+				} else {
+					$astDB->where("campaign_id", $campaigns, "IN");
+				}
 			}
 
 			//$astDB->where("campaign_id", $campaigns, "IN");
-			$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
-			$astDB->where("status", ["DROP", "IVRXFR"], "IN");
-			$data_out 								= $astDB->getValue("vicidial_log", "count(lead_id)");
+			if (!isset($data_out)) {
+				$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
+				$astDB->where("status", ["DROP", "IVRXFR"], "IN");
+				$data_out 								= $astDB->getValue("vicidial_log", "count(lead_id)");
+			}
 
 			$getIngroups                        	= $astDB->where('user_group', $log_group)
 				->get('vicidial_inbound_groups', NULL, ['group_id']);
@@ -84,13 +90,19 @@ if (empty($goUser) || is_null($goUser)) {
 			}
 
 			if ($log_group !== "ADMIN") {
-				$astDB->where("campaign_id", $ingroups, "IN");
+				if ($ingroups === []) {
+					$data_in = 0;
+				} else {
+					$astDB->where("campaign_id", $ingroups, "IN");
+				}
 			}
 			//$astDB->where("campaign_id", $campaigns, "IN");
-			$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
-			$astDB->where("status", ["XDROP", "TIMEOT", "NANQUE", "PDROP", "MAXCAL", "INBND"], "IN");
+			if (!isset($data_in)) {
+				$astDB->where("call_date", ["$NOW 00:00:00", "$NOW 23:59:59"], "BETWEEN");
+				$astDB->where("status", ["XDROP", "TIMEOT", "NANQUE", "PDROP", "MAXCAL", "INBND"], "IN");
 
-			$data_in 								= $astDB->getValue("vicidial_closer_log", "count(lead_id)");
+				$data_in 								= $astDB->getValue("vicidial_closer_log", "count(lead_id)");
+			}
 			$data 									= intval($data_out) + intval($data_in);
 
 			$apiresults 							= [
@@ -107,5 +119,5 @@ if (empty($goUser) || is_null($goUser)) {
 		];
 	}
 }
-	
+
 ?>

@@ -55,9 +55,9 @@
 		];
 	} else {
         $astDB->where('user_group', $log_group);
-        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
+	        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
+	        $allowed_campaigns = (string) ($allowed_camps['allowed_campaigns'] ?? '');
+	        $allowed_campaigns = array_values(array_filter(explode(" ", trim($allowed_campaigns)), static fn($campaign) => (string) $campaign !== ''));
 
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
@@ -66,9 +66,40 @@
 			->getOne("vicidial_users", "user,user_level");
 
 		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
 
 		if ($goapiaccess > 0 && $userlevel > 7) {
+			$dataGo 								= [];
+			$dataPCs 								= [];
+			$cols 									= [
+				"channel as 'pc_channel'",
+				"server_ip as 'pc_server_ip'",
+				"channel_group as 'pc_channel_group'",
+				"extension as 'pc_extension'",
+				"parked_by as 'pc_parked_by'",
+				"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
+			];
+
+			$resultsPCs								= $astDB
+				->where("channel", 0, ">")
+				->get("parked_channels", NULL, $cols);
+
+			if ($resultsPCs) {
+				foreach ($resultsPCs as $resultsPC) {
+					$dataPCs[] = $resultsPC;
+				}
+			}
+
+			$hasAllCampaigns = preg_match("/ALL-CAMPAIGNS/", (string) ($allowed_camps['allowed_campaigns'] ?? ''));
+			if (strtoupper((string) $log_group) !== 'ADMIN' && !$hasAllCampaigns && $allowed_campaigns === []) {
+				$apiresults = [
+					"result" => "success",
+					"data" => [],
+					"dataGo" => [],
+					"parked" => $dataPCs
+				];
+				return;
+			}
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
@@ -82,7 +113,7 @@
 					if ($userlevel > 8) {
 						$astDB->orWhere("user_group", "---ALL---");
 					} else {
-						if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
+						if (!preg_match("/ALL-CAMPAIGNS/", (string) ($allowed_camps['allowed_campaigns'] ?? '')) && $allowed_campaigns !== []) {
 							$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
 						}
 					}
@@ -97,19 +128,6 @@
 					$dataGo[] = $fresultsGo;
 				}
 			}
-
-			$cols 										= [
-				"channel as 'pc_channel'",
-				"server_ip as 'pc_server_ip'",
-				"channel_group as 'pc_channel_group'",
-				"extension as 'pc_extension'",
-				"parked_by as 'pc_parked_by'",
-				"UNIX_TIMESTAMP(parked_time) as 'pc_parked_time'"
-			];
-
-			$resultsPCs									= $astDB
-				->where("channel", 0, ">")
-				->get("parked_channels", NULL, $cols);
 
 			$tableQuery 								= "SHOW tables LIKE 'online'";
 			$checkTable 								= $astDB->rawQuery($tableQuery);
@@ -168,10 +186,10 @@
 				}
 
                 $campaignFilters = '';
-                if (!preg_match("/ALL-CAMPAIGNS/", $allowed_camps['allowed_campaigns'])) {
-                    $allowedCampaigns = implode("','", $allowed_campaigns);
-                    $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
-                }
+	                if (!preg_match("/ALL-CAMPAIGNS/", (string) ($allowed_camps['allowed_campaigns'] ?? '')) && $allowed_campaigns !== []) {
+	                    $allowedCampaigns = implode("','", $allowed_campaigns);
+	                    $campaignFilters = "vla.campaign_id IN ('$allowedCampaigns') AND";
+	                }
                 $defaultUsers = implode("','", DEFAULT_USERS);
 
                 $online_fields = ", ol.conference as 'ol_conference', ol.name as 'ol_callerid'";
@@ -196,14 +214,6 @@
                 $onlineAgents = $astDB->rawQuery($SQLquery);
 				$queryoa = $SQLquery; //$astDB->getLastQuery();
 				if ($astDB->count > 0) {
-					$dataPCs 							= [];
-
-					if ($resultsPCs) {
-						foreach ($resultsPCs as $resultsPC) {
-							$dataPCs[] = $resultsPC;
-						}
-					}
-
 					$apiresults 						= [
 						"result" 							=> "success",
 						//"query" 							=> $astDB->getLastQuery(),

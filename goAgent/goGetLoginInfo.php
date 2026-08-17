@@ -1064,26 +1064,26 @@
 				$campinfo['manual_dial_min_digits'] 	= 6;
 				$campinfo['default_country_code']	= '';
 
-				if ($goDB->count > 0) {
-					$campinfo['custom_fields_launch'] 	= $rslt['custom_fields_launch'];
-					$campinfo['custom_fields_list_id'] 	= $rslt['custom_fields_list_id'];
-					$campinfo['url_tab_first_title'] 	= $rslt['url_tab_first_title'];
-					$campinfo['url_tab_first_url'] 		= $rslt['url_tab_first_url'];
-					$campinfo['url_tab_second_title'] 	= $rslt['url_tab_second_title'];
-					$campinfo['url_tab_second_url'] 	= $rslt['url_tab_second_url'];
-					$campinfo['enable_callback_alert'] 	= $rslt['enable_callback_alert'];
-					$campinfo['cb_noexpire'] 			= $rslt['cb_noexpire'];
-					$campinfo['cb_sendemail'] 			= $rslt['cb_sendemail'];
-					$campinfo['manual_dial_min_digits'] = $rslt['manual_dial_min_digits'];
-					$campinfo['default_country_code'] = $rslt['default_country_code'];
+				if (is_array($rslt)) {
+					$campinfo['custom_fields_launch'] 	= $rslt['custom_fields_launch'] ?? $campinfo['custom_fields_launch'];
+					$campinfo['custom_fields_list_id'] 	= $rslt['custom_fields_list_id'] ?? $campinfo['custom_fields_list_id'];
+					$campinfo['url_tab_first_title'] 	= $rslt['url_tab_first_title'] ?? $campinfo['url_tab_first_title'];
+					$campinfo['url_tab_first_url'] 		= $rslt['url_tab_first_url'] ?? $campinfo['url_tab_first_url'];
+					$campinfo['url_tab_second_title'] 	= $rslt['url_tab_second_title'] ?? $campinfo['url_tab_second_title'];
+					$campinfo['url_tab_second_url'] 	= $rslt['url_tab_second_url'] ?? $campinfo['url_tab_second_url'];
+					$campinfo['enable_callback_alert'] 	= $rslt['enable_callback_alert'] ?? $campinfo['enable_callback_alert'];
+					$campinfo['cb_noexpire'] 			= $rslt['cb_noexpire'] ?? $campinfo['cb_noexpire'];
+					$campinfo['cb_sendemail'] 			= $rslt['cb_sendemail'] ?? $campinfo['cb_sendemail'];
+					$campinfo['manual_dial_min_digits'] = $rslt['manual_dial_min_digits'] ?? $campinfo['manual_dial_min_digits'];
+					$campinfo['default_country_code'] = $rslt['default_country_code'] ?? $campinfo['default_country_code'];
 				}
 
 				$goDB->where('setting', 'timezone');
 				$creamy = $goDB->getOne('settings', 'value');
-				$default_settings['timezone'] = $creamy['value'];
+				$default_settings['timezone'] = $creamy['value'] ?? '';
 
 				$default_group_alias_cid 				= '';
-				$default_group_alias 					= $campinfo['default_group_alias'];
+				$default_group_alias 					= $campinfo['default_group_alias'] ?? '';
 
 				if (strlen($default_group_alias) > 1) {
 					$astDB->where('group_alias_id', $default_group_alias);
@@ -1126,15 +1126,15 @@
 				->orderBy('agent_log_id', 'desc')
 				->getOne('vicidial_agent_log', 'agent_log_id');
 
-			$agent_log_id 							= $rslt['agent_log_id'];
+			$agent_log_id 							= (int) ($rslt['agent_log_id'] ?? 0);
 
 			$rslt 									= $astDB
 				->where('user', $user_name)
 				->getOne('vicidial_session_data', 'session_name,conf_exten,server_ip');
 
-			$session_name 							= $rslt['session_name'];
-			$session_id 							= $rslt['conf_exten'];
-			$server_ip 								= $rslt['server_ip'];
+			$session_name 							= $rslt['session_name'] ?? '';
+			$session_id 							= $rslt['conf_exten'] ?? '';
+			$server_ip 								= $rslt['server_ip'] ?? '';
 
 			$VARCBstatusesLIST 						= '';
 			$statuses_ct 							= 0;

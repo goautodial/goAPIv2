@@ -128,7 +128,7 @@
     function go_getall_allowed_users($groupId) {
         include(__DIR__ . "/goDBasterisk.php");
         /** @var MySQLiDB $astDB */
-		$allowed_users = "";
+		$allowed_users = "'__NO_ALLOWED_USERS__'";
 		$users = [];
 
         if ($groupId=='ADMIN' || $groupId=='admin') {
@@ -177,28 +177,33 @@
         return $fresults ?: 0;
     }
 
-    function go_getall_allowed_campaigns($groupId, $dbase)
+    function go_getall_allowed_campaigns($groupId, $dbase = null)
     {
-		/*$groupId = $this->go_get_groupid();
-			if (!is_null($tenant)) {
-					$groupId = $tenant;
-			}*/
-		date('Y-m-d');
-		//$query = "select trim(allowed_campaigns) as qresult from vicidial_user_groups where user_group='$groupId'";
+		global $astDB;
+		$dbase ??= $astDB;
+
+		if (!$dbase) {
+			return "'__NO_ALLOWED_CAMPAIGNS__'";
+		}
+
 		$dbase->where('user_group', $groupId);
 		$resultsu = $dbase->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS qresult');
 
-		if($dbase->getRowCount() > 0){
-			$fresults = $resultsu['qresult'];
-			$allowedCampaigns = explode(",",str_replace("",',',rtrim(ltrim(str_replace('-','',$fresults)))));
-
-			$allAllowedCampaigns = implode("",$allowedCampaigns);
-			//$allAllowedCampaigns = "'".str_replace(" ", "','",$allAllowedCampaigns)."'";
-		}else{
-			$allAllowedCampaigns = '';
+		if (!is_array($resultsu)) {
+			return "'__NO_ALLOWED_CAMPAIGNS__'";
 		}
 
-		return $allAllowedCampaigns;
+		$allowedCampaigns = trim((string) ($resultsu['qresult'] ?? ''));
+		if (preg_match('/ALL-CAMPAIGNS/', $allowedCampaigns)) {
+			return "'ALLCAMPAIGNS'";
+		}
+
+		$campaigns = preg_split('/[\s,]+/', str_replace('-', ' ', $allowedCampaigns), -1, PREG_SPLIT_NO_EMPTY);
+		if (empty($campaigns)) {
+			return "'__NO_ALLOWED_CAMPAIGNS__'";
+		}
+
+		return "'" . implode("','", $campaigns) . "'";
     }
 
     function allowed_campaigns($log_group, $goDB, $astDB, $type=null) {

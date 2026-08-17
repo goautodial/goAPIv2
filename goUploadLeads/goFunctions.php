@@ -35,7 +35,7 @@
     function go_getall_allowed_users($groupId) {
         include_once(__DIR__ . "/goDBasterisk.php");
         /** @var MySQLiDB $astDB */
-        $allowed_users = '';
+        $allowed_users = "'__NO_ALLOWED_USERS__'";
 
         if ($groupId !== 'ADMIN' && $groupId !== 'admin') {
             $astDB->where('user_group', $groupId);
@@ -77,14 +77,21 @@
                 ->where('user_group', $groupId)
                 ->getOne('vicidial_user_groups', 'TRIM(allowed_campaigns) AS qresult');
 
-            if(is_array($row) && isset($row['qresult'])){
-                $fresults = $row['qresult'];
-                $allowedCampaigns = preg_split('/[\s,]+/', str_replace('-', ' ', trim((string) $fresults)), -1, PREG_SPLIT_NO_EMPTY);
-                $allAllowedCampaigns = is_array($allowedCampaigns) ? implode("','", $allowedCampaigns) : '';
-            }else{
-                $allAllowedCampaigns = '';
+            if (!is_array($row)) {
+                return "'__NO_ALLOWED_CAMPAIGNS__'";
             }
-            return $allAllowedCampaigns;
+
+            $allowedCampaigns = trim((string) ($row['qresult'] ?? ''));
+            if (preg_match('/ALL-CAMPAIGNS/', $allowedCampaigns)) {
+                return "'ALLCAMPAIGNS'";
+            }
+
+            $campaigns = preg_split('/[\s,]+/', str_replace('-', ' ', $allowedCampaigns), -1, PREG_SPLIT_NO_EMPTY);
+            if (empty($campaigns)) {
+                return "'__NO_ALLOWED_CAMPAIGNS__'";
+            }
+
+            return "'" . implode("','", $campaigns) . "'";
       }
 
 

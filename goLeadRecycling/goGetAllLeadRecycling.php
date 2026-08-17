@@ -37,7 +37,13 @@
 /** @var string $log_ip */
 
 
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$campaigns 											= array_values(array_filter((array) allowed_campaigns($log_group, $goDB, $astDB), static fn($campaign) => (string) $campaign !== ''));
+		$recycle_id 										= [];
+		$campaign_id 									= [];
+		$status 											= [];
+		$attempt_delay 									= [];
+		$attempt_maximum 								= [];
+		$active 											= [];
 
     ### ERROR CHECKING
 	if (empty($goUser) || is_null($goUser)) {
@@ -58,12 +64,24 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
-		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
-			if (is_array($campaigns)) {	
+
+			$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= (int) ($fresults["user_level"] ?? 0);
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
+			if (is_array($campaigns)) {
+				if ($campaigns === []) {
+					$apiresults = [
+						"result" => "success",
+						"recycle_id" => $recycle_id,
+						"campaign_id" => $campaign_id,
+						"status" => $status,
+						"attempt_delay" => $attempt_delay,
+						"attempt_maximum" => $attempt_maximum,
+						"active" => $active
+					];
+					return;
+				}
 				$astDB->where("campaign_id", $campaigns, "IN");
 				$astDB->orderBy("campaign_id", "desc");
 				$rsltv 									= $astDB->get('vicidial_lead_recycle');
@@ -77,16 +95,16 @@
 						$attempt_maximum[] 				= $fresults['attempt_maximum'];
 						$active[] 						= $fresults['active'];
 					}
-					
+
 					$apiresults 						= [
-						"result" 							=> "success", 
+						"result" 							=> "success",
 						"recycle_id" 						=> $recycle_id,
 						"campaign_id"						=> $campaign_id,
 						"status"							=> $status,
 						"attempt_delay"						=> $attempt_delay,
 						"attempt_maximum"					=> $attempt_maximum,
 						"active"							=> $active
-					];        
+					];
 				} else {
 					$apiresults 						= [
 						"result" 							=> "No data available."
@@ -95,17 +113,17 @@
 			} else {
 				$err_msg 								= error_handle("10108", "status. No campaigns available");
 				$apiresults								= [
-					"code" 									=> "10108", 
+					"code" 									=> "10108",
 					"result" 								=> $err_msg
-				];		
+				];
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

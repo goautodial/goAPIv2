@@ -38,7 +38,7 @@ include_once (__DIR__ . "/goAPI.php");
 /** @var string $log_ip */
 
 
-$allowed_campaigns									= allowed_campaigns($log_group, $goDB, $astDB);
+$allowed_campaigns									= array_values(array_filter((array) allowed_campaigns($log_group, $goDB, $astDB), static fn($campaign) => (string) $campaign !== ''));
 $type												= (isset($_REQUEST["type"])) ? $astDB->escape($_REQUEST['type']) : "all";
 $NOW 												= date("Y-m-d");
 
@@ -63,7 +63,7 @@ if (empty($goUser) || is_null($goUser)) {
 		->getOne("vicidial_users", "user,user_level");
 
 	$goapiaccess									= $astDB->getRowCount();
-	$userlevel										= $fresults["user_level"];
+	$userlevel										= (int) ($fresults["user_level"] ?? 0);
 
 	if ($goapiaccess > 0 && $userlevel > 7) {
 		if (is_array($allowed_campaigns)) {
@@ -71,6 +71,10 @@ if (empty($goUser) || is_null($goUser)) {
 				case "outbound":
 
 				if ($log_group !== "ADMIN") {
+					if ($allowed_campaigns === []) {
+						$data = 0;
+						break;
+					}
 					$astDB->where("campaign_id", $allowed_campaigns, "IN");
 				}
 				//->where("length_in_sec", array('>' => 0))
@@ -93,6 +97,10 @@ if (empty($goUser) || is_null($goUser)) {
 				}
 
 				if ($log_group !== "ADMIN") {
+					if ($ingroups === []) {
+						$data = 0;
+						break;
+					}
 					$astDB->where("campaign_id", $ingroups, "IN");
 				}
 

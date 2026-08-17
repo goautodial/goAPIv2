@@ -215,9 +215,7 @@
 				//}
 			}
 
-			if ($sstatuses !== []) {
-				$sstatuses 									= implode("','",$sstatuses);
-			}
+			$sstatuses 									= ($sstatuses !== []) ? implode("','", $sstatuses) : '';
 
 			$Qstatus									= $astDB
 				->where("sale", "Y")
@@ -237,9 +235,7 @@
 				//}
 			}
 
-			if ($cstatuses !== []) {
-				$cstatuses 								= implode("','",$cstatuses);
-			}
+			$cstatuses 								= ($cstatuses !== []) ? implode("','", $cstatuses) : '';
 
 
 			if ((string) $sstatuses !== '' && (string) $cstatuses !== '') {
@@ -625,10 +621,20 @@
 
 						if(!in_array($user, (is_array($Suser) ? $Suser : []))){
 							$Suser[] = $user;
+							$userIndex = count($Suser) - 1;
+							$Swait[$userIndex] = 0;
+							$Stalk[$userIndex] = 0;
+							$Sdispo[$userIndex] = 0;
+							$Spause[$userIndex] = 0;
+							$Sdead[$userIndex] = 0;
+							$Scustomer[$userIndex] = 0;
+							$Scalls[$userIndex] = 0;
+							$Sstatuses[$userIndex] = '';
+							$TOPsortTALLY[$userIndex] = 0;
 							// array_push($nameARY, $name);
 							foreach ($agenttotalcalls as $call){
 							   if($call['user'] == $user){
-								$Scalls[] = $call['calls'];
+								$Scalls[$userIndex] = $call['calls'];
 							   }
 							}
 						}
@@ -697,6 +703,15 @@
 				$rowId							= 1;
 				foreach($Suser as $users){
 				//while ( ($m < $uc) AND ($m < 50000) ) {
+					$Swait[$m] = $Swait[$m] ?? 0;
+					$Stalk[$m] = $Stalk[$m] ?? 0;
+					$Sdispo[$m] = $Sdispo[$m] ?? 0;
+					$Spause[$m] = $Spause[$m] ?? 0;
+					$Sdead[$m] = $Sdead[$m] ?? 0;
+					$Scustomer[$m] = $Scustomer[$m] ?? 0;
+					$Scalls[$m] = $Scalls[$m] ?? 0;
+					$Sstatuses[$m] = $Sstatuses[$m] ?? '';
+					$TOPsortTALLY[$m] = $TOPsortTALLY[$m] ?? 0;
 					$SstatusesHTML						= "";
 					$SstatusesFILE						= "";
 					$Stime[$m] 							= ($Swait[$m] + $Stalk[$m] + $Sdispo[$m] + $Spause[$m]);
@@ -784,7 +799,7 @@
 
 					$timeclock_ct						= $astDB
 						->where("event", "AUTOLOGOUT")
-						->where("user", $user[$m])
+						->where("user", $Suser[$m])
 						->where("date_format(event_date, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
 						->getValue("vicidial_timeclock_log", "count(*)");
 
