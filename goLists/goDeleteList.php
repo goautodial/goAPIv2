@@ -20,7 +20,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-	
+
     include_once (__DIR__ . "/goAPI.php");
 
 /** @var MySQLiDB $astDB */
@@ -36,12 +36,12 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-        
+
     // POST or GET Variables
     $list_ids 											= ($_REQUEST['list_id'] ?? '');
 	//$action 											= strtolower($astDB->escape(($_REQUEST['action'] ?? '')));
 	$action												= "delete_selected";
-    
+
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= [
@@ -58,61 +58,61 @@
 	} elseif (empty($list_ids) || is_null($list_ids)) {
 		$err_msg 										= error_handle("10107");
 		$apiresults 									= [
-			"code" 											=> "10107", 
+			"code" 											=> "10107",
 			"result" 										=> $err_msg
-		]; 
+		];
 	} elseif ($action === "delete_selected") {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			foreach ($list_ids as $list_id) {
 				$listid									= $list_id;
-				
+
 				$astDB->where('list_id', $listid);
 				$astDB->getOne('vicidial_lists', 'list_id');
-				
+
 				if ($astDB->count > 0) {
 					$astDB->where('list_id', $listid);
 					$astDB->delete('vicidial_lists');
-					
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
-					
+
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $listid", $log_group, $astDB->getLastQuery());
+
 					$astDB->where('list_id', $listid);
 					$astDB->delete('vicidial_list');
-					
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
-					
+
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $listid", $log_group, $astDB->getLastQuery());
+
 					$astDB->where('list_id', $listid);
-					$astDB->delete('vicidial_lists_fields', 1);					
-			
-					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $dataListID", $log_group, $astDB->getLastQuery());
-					
+					$astDB->delete('vicidial_lists_fields', 1);
+
+					$log_id 							= log_action($goDB, 'DELETE', $log_user, $log_ip, "Deleted List ID: $listid", $log_group, $astDB->getLastQuery());
+
 					$apiresults 						= [
 						"result" 							=> "success"
 					];
-				} else {				
+				} else {
 					$apiresults 						= [
 						"result" 							=> "Error: List doesn't exist."
 					];
 				}
 			}
-			
+
 			$apiresults 								= [
 				"result" 									=> "success"
-			];			
+			];
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
 
