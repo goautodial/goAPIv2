@@ -56,6 +56,7 @@ if (isset($_GET['goChannel'])) { $channel = $astDB->escape($_GET['goChannel']); 
 if (isset($_GET['goStartEpoch'])) { $start_epoch = $astDB->escape($_GET['goStartEpoch']); }
     else if (isset($_POST['goStartEpoch'])) { $start_epoch = $astDB->escape($_POST['goStartEpoch']); }
 $start_epoch = $start_epoch ?? 0;
+$start_epoch = ctype_digit((string) $start_epoch) ? (int) $start_epoch : 0;
 if (isset($_GET['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_GET['goAutoDialLevel']); }
     else if (isset($_POST['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_POST['goAutoDialLevel']); }
 if (isset($_GET['goStopRecAfterEachCall'])) { $VDstop_rec_after_each_call = $astDB->escape($_GET['goStopRecAfterEachCall']); }
@@ -297,7 +298,7 @@ if ($is_logged_in) {
             $log_no_enter = 1;
         } else {
             $term_reason = 'NONE';
-            if ($start_epoch < 1000) {
+            if ($start_epoch < 1000000000 || $start_epoch > (int) $StarTtimE) {
                 if ($VLA_inOUT == 'INBOUND') {
                     $four_hours_ago = date("Y-m-d H:i:s", mktime(date("H")-4,date("i"),date("s"),date("m"),date("d"),date("Y")));
 

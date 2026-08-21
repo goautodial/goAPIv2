@@ -41,6 +41,22 @@
 /** @var string $VARDB_database */
 
 
+if (!function_exists('go_format_call_duration')) {
+function go_format_call_duration($seconds): string
+{
+	if (!is_numeric($seconds) || (float) $seconds < 0) {
+		return '00:00:00';
+	}
+
+	$totalSeconds = (int) floor((float) $seconds);
+	$hours = intdiv($totalSeconds, 3600);
+	$minutes = intdiv($totalSeconds % 3600, 60);
+	$remainingSeconds = $totalSeconds % 60;
+
+	return sprintf('%02d:%02d:%02d', $hours, $minutes, $remainingSeconds);
+}
+}
+
 	$campaigns 		= $astDB->escape(($_REQUEST['campaigns'] ?? ''));
 	$inbounds 		= $astDB->escape(($_REQUEST['inbounds'] ?? ''));
 	$lists 			= $astDB->escape(($_REQUEST['lists'] ?? ''));
@@ -566,7 +582,7 @@
 		$lead_id = $row["lead_id"];
 		$uniqueid = $row["uniqueid"];
 		$list_id_spec = $row["list_id"];
-		$row["call_duration"] = gmdate("H:i:s",$row["call_duration"]);
+		$row["call_duration"] = go_format_call_duration($row["call_duration"]);
 
 		if ($per_call_notes == "Y") {
 			$astDB->where("lead_id", $lead_id);
