@@ -401,16 +401,6 @@
 				$k										= 0;
 				$uc										= 0;
 
-				if ($tenant) {
-					$astDB->where("user_group", $log_group);
-				} else {
-					if (strtoupper((string) $log_group) !== 'ADMIN') {
-						if ($user_level < 9) {
-							$astDB->where("user_group", $log_group);
-						}
-					}
-				}
-
 				if ("ALL" === strtoupper((string) $campaignID)) {
 					$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
 
@@ -491,9 +481,13 @@
                                       "SUM(dead_sec) as dead_sec",
                                 ];
 
-                                $agent_time_ct = $astDB
-                                    ->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-                                    ->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
+                                				if ($tenant || (strtoupper((string) $log_group) !== 'ADMIN' && $user_level < 9)) {
+                                    					$astDB->where("vu.user_group", $log_group);
+                                    				}
+
+                                    				$agent_time_ct = $astDB
+                                    					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
+                                    					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", [$fromDate, $toDate], "BETWEEN")
                                     ->where("campaign_id", $array_camp, "IN")
                                     //->where("status != 'LAGGED'")
                                     ->where("(pause_sec > 0 OR wait_sec > 0 OR talk_sec > 0 OR dispo_sec > 0 OR dead_sec > 0)")
