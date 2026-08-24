@@ -36,10 +36,10 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-		
+
 	### POST or GET Variables
 	$server_id 											= $astDB->escape(($_REQUEST['server_id'] ?? ''));
-	
+
     ### Check Server ID if its null or empty
 	if (empty ($goUser) || is_null ($goUser)) {
 		$apiresults 									= [
@@ -57,40 +57,38 @@
 		$apiresults 									= [
 			"result" 										=> "Error: Set a value for Server ID not less than 3 characters."
 		];
-	} else {		
+	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
-				$astDB->orWhere("user_group", "---ALL---");
+				$astDB->where("user_group", [$log_group, "---ALL---"], "IN");
 			} else {
 				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
-						$astDB->where("user_group", $log_group);
-						$astDB->orWhere("user_group", "---ALL---");
+						$astDB->where("user_group", [$log_group, "---ALL---"], "IN");
 					}
-				}					
+				}
 			}
 
 			$astDB->where("server_id", $server_id);
 			$rsltv 										= $astDB->getOne('servers');
 			$log_id 									= log_action($goDB, "VIEW", $log_user, $log_ip, "Viewed server ID: $server_id", $astDB->getLastQuery());
-			
+
 			if ($rsltv) {
 				$apiresults 							= [
-					"result" 								=> "success", 
+					"result" 								=> "success",
 					"data" 									=> $rsltv
 				];
 			} else {
@@ -101,10 +99,10 @@
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
 	}
-	
+
 ?>

@@ -36,7 +36,7 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-    
+
 	$limit 												= (isset($_REQUEST['limit']) ? $astDB->escape($_REQUEST['limit']) : 1000);
 
 	// Error Checking
@@ -58,31 +58,29 @@
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
 			->getOne("vicidial_users", "user,user_level");
-		
+
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+
+		if ($goapiaccess > 0 && $userlevel > 7) {
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-			
+
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
-				$astDB->orWhere("user_group", "---ALL---");
+				$astDB->where("user_group", [$log_group, "---ALL---"], "IN");
 			} else {
 				if (strtoupper((string) $log_group) !== 'ADMIN') {
 					//if ($userlevel > 8) {
-						$astDB->where("user_group", $log_group);
-						$astDB->orWhere("user_group", "---ALL---");
+						$astDB->where("user_group", [$log_group, "---ALL---"], "IN");
 					//}
-				}					
+				}
 			}
 
 			$cols 										= ["menu_id", "menu_name", "menu_prompt", "menu_timeout"];
 			$astDB->where("menu_id", "defaultlog", "!=");
 			$selectQuery 								= $astDB->get("vicidial_call_menu", $limit, $cols);
-			
+
 			foreach($selectQuery as $fresults) {
 				$dataMenuId[] 							= $fresults['menu_id'];
 				$dataMenuName[] 						= $fresults['menu_name'];
@@ -91,18 +89,18 @@
 			}
 
 			$apiresults 								= [
-				"result" 									=> "success", 
-				"menu_id" 									=> $dataMenuId, 
-				"menu_name" 								=> $dataMenuName, 
-				"menu_prompt" 								=> $dataMenuPrompt, 
+				"result" 									=> "success",
+				"menu_id" 									=> $dataMenuId,
+				"menu_name" 								=> $dataMenuName,
+				"menu_prompt" 								=> $dataMenuPrompt,
 				"menu_timeout" 								=> $dataMenuTimeout
 			];
 		} else {
 			$err_msg 									= error_handle("10001");
 			$apiresults 								= [
-				"code" 										=> "10001", 
+				"code" 										=> "10001",
 				"result" 									=> $err_msg
-			];		
+			];
 		}
-	}			
+	}
 ?>
