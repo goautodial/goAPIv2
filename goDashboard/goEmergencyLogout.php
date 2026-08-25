@@ -82,6 +82,8 @@
 					//$agents =  mysqli_fetch_array($agentlog, MYSQLI_ASSOC);
 
 					if ($astDB->getRowCount() > 0) {
+						$updatefields = [];
+
 						if ($agents['wait_epoch'] < 1 || ($agents['status'] == 'PAUSE' && $agents['dispo_epoch'] < 1) ) {
 							$agents['pause_sec'] 		= (($thedate-$agents['pause_epoch'])+$agents['pause_sec']);
 							$updatefields 				= [
@@ -121,14 +123,10 @@
 							}
 						}
 
-						$updatefieldsc = '';
-						foreach ($updatefields as $xkey => $xvalue) {
-							$updatefieldsc 				.= $xkey."="."'".$xvalue."',";
+						if ($updatefields !== []) {
+							$astDB->where('agent_log_id', $agents['agent_log_id']);
+							$rslt4 = $astDB->update('vicidial_agent_log', $updatefields, 1);
 						}
-
-						//$query4 = "UPDATE vicidial_agent_log SET ".rtrim($updatefieldsc, ",")." WHERE agent_log_id='".$agents['agent_log_id']."' LIMIT 1;";
-						$astDB->where('agent_log_id', $agents['agent_log_id']);
-						$rslt4  						= $astDB->update('vicidial_agent_log', $updatefields, 1);
 					}
 
 					##### Hangup existing channels

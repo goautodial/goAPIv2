@@ -133,6 +133,8 @@
 			$log_id 					= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified Voicemail ID: $voicemail_id", $log_group, $astDB->getLastQuery());
 
 			if ($q_update) {
+				rebuildconfQuery($astDB);
+
 				$apiresults 			= [
 					"result" 				=> "success",
 					"data" 					=> $q_update
