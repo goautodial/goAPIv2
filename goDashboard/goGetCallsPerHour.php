@@ -75,6 +75,8 @@ if (empty($goUser) || is_null($goUser)) {
                 				if ($campaignFilter !== []) {
                 					$stringv = "'" . implode("','", $campaignFilter) . "'";
                 					$ul = "and campaign_id IN ($stringv)";
+                				} else {
+                					$ul = 'and 1 = 0';
                 				}
 
                 $getIngroups                        = $astDB->where('user_group', $log_group)
@@ -91,6 +93,8 @@ if (empty($goUser) || is_null($goUser)) {
                 				if ($ingroups !== []) {
                 					$stringvi                           = "'" . implode("','", $ingroups) . "'";
                 					$uli                                = "and campaign_id IN ($stringvi)";
+                				} else {
+                					$uli                                = 'and 1 = 0';
                 				}
 
             }
