@@ -71,6 +71,10 @@ if (isset($_GET['goCustomFieldNames'])) { $FORMcustom_field_names = $astDB->esca
     else if (isset($_POST['goCustomFieldNames'])) { $FORMcustom_field_names = $astDB->escape($_POST['goCustomFieldNames']); }
 if (isset($_GET['goCallNotes'])) { $call_notes = $astDB->escape($_GET['goCallNotes']); }
     else if (isset($_POST['goCallNotes'])) { $call_notes = $astDB->escape($_POST['goCallNotes']); }
+if (isset($_GET['goRecordingID'])) { $recording_id = $astDB->escape($_GET['goRecordingID']); }
+    else if (isset($_POST['goRecordingID'])) { $recording_id = $astDB->escape($_POST['goRecordingID']); }
+if (isset($_GET['goRecordingFilename'])) { $recording_filename = $astDB->escape($_GET['goRecordingFilename']); }
+    else if (isset($_POST['goRecordingFilename'])) { $recording_filename = $astDB->escape($_POST['goRecordingFilename']); }
 if (isset($_GET['goQMDispoCode'])) { $qm_dispo_code = $astDB->escape($_GET['goQMDispoCode']); }
     else if (isset($_POST['goQMDispoCode'])) { $qm_dispo_code = $astDB->escape($_POST['goQMDispoCode']); }
 if (isset($_GET['goEmailEnabled'])) { $email_enabled = $astDB->escape($_GET['goEmailEnabled']); }
@@ -78,6 +82,8 @@ if (isset($_GET['goEmailEnabled'])) { $email_enabled = $astDB->escape($_GET['goE
 
 $format = $format ?? '';
 $MDnextCID = $MDnextCID ?? '';
+$recording_id = $recording_id ?? '';
+$recording_filename = $recording_filename ?? '';
 $WeBRooTWritablE = $WeBRooTWritablE ?? 0;
 
 $MT[0] = '';
@@ -1090,6 +1096,8 @@ if ($is_logged_in) {
 			$dispo_call_url = preg_replace('/--A--call_id--B--/i', urlencode(trim((string) $MDnextCID)), $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--user_group--B--/i', urlencode(trim($user_group)), $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--call_notes--B--/i', "$url_call_notes", $dispo_call_url);
+			$dispo_call_url = preg_replace('/--A--recording_id--B--/i', urlencode(trim((string) $recording_id)), $dispo_call_url);
+			$dispo_call_url = preg_replace('/--A--recording_filename--B--/i', urlencode(trim((string) $recording_filename)), $dispo_call_url);
 
 			if (strlen($FORMcustom_field_names) > 2) {
 				if (!function_exists('go_quote_custom_field_identifier')) {
@@ -1165,7 +1173,13 @@ if ($is_logged_in) {
 			### send dispo_call_url ###
 			$httpContext = stream_context_create([
 				'http' => [
-					'ignore_errors' => true
+					'method' => 'POST',
+					'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
+						. "Content-Length: 0\r\n"
+						. "Connection: close\r\n",
+					'content' => '',
+					'ignore_errors' => true,
+					'timeout' => 10
 				]
 			]);
 			$SCUfile = file($dispo_call_url, false, $httpContext);
