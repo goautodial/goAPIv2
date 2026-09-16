@@ -811,6 +811,38 @@ if ($is_logged_in) {
 		### BEGIN Issue Dispo Call URL if defined
 		############################################
 		if (strlen((string) $dispo_call_url) > 7) {
+			$security = $security ?? '';
+			$pass = $pass ?? '';
+			$phone_login = $phone_login ?? '';
+			$original_phone_login = $original_phone_login ?? '';
+			$phone_pass = $phone_pass ?? '';
+			$fronter = $fronter ?? '';
+			$VDADchannel_group = $VDADchannel_group ?? '';
+			$SQLdate = $SQLdate ?? '';
+			$epoch = $epoch ?? '';
+			$customer_zap_channel = $customer_zap_channel ?? '';
+			$customer_server_ip = $customer_server_ip ?? '';
+			$SIPexten = $SIPexten ?? '';
+			$session_id = $session_id ?? '';
+			$phone = $phone ?? '';
+			$parked_by = $parked_by ?? '';
+			$dialed_number = $dialed_number ?? '';
+			$dialed_label = $dialed_label ?? '';
+			$camp_script = $camp_script ?? '';
+			$in_script = $in_script ?? '';
+			$fullname = $fullname ?? '';
+			$user_custom_one = $user_custom_one ?? '';
+			$user_custom_two = $user_custom_two ?? '';
+			$user_custom_three = $user_custom_three ?? '';
+			$user_custom_four = $user_custom_four ?? '';
+			$user_custom_five = $user_custom_five ?? '';
+			$DID_id = $DID_id ?? '';
+			$DID_extension = $DID_extension ?? '';
+			$DID_pattern = $DID_pattern ?? '';
+			$DID_description = $DID_description ?? '';
+			$INclosecallid = $INclosecallid ?? '';
+			$INxfercallid = $INxfercallid ?? '';
+			$url_call_notes = $url_call_notes ?? '';
 			$talk_time = 0;
 			$talk_time_ms = 0;
 			$talk_time_min = 0;
@@ -873,7 +905,7 @@ if ($is_logged_in) {
 				}
 				if (strlen((string) $status_name) < 1) {$status_name = $dispo_choice;}
 			}
-			$dispo_name = urlencode(trim((string) $status_name));
+			$dispo_name = urlencode(trim((string) ($status_name ?? $dispo_choice)));
 
 			if (preg_match('/--A--call_notes/i', (string) $dispo_call_url)) {
 				if (strlen($call_notes) > 1)
@@ -1007,7 +1039,7 @@ if ($is_logged_in) {
 			$dispo_call_url = preg_replace('/--A--date_of_birth--B--/i', "$date_of_birth", $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--alt_phone--B--/i', "$alt_phone", $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--email--B--/i', "$email", $dispo_call_url);
-			$dispo_call_url = preg_replace('/--A--security_phrase--B--/i', "$security_phrase", $dispo_call_url);
+			$dispo_call_url = preg_replace('/--A--security_phrase--B--/i', "$security", $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--comments--B--/i', "$comments", $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--user--B--/i', "$user", $dispo_call_url);
 			$dispo_call_url = preg_replace('/--A--pass--B--/i', "$pass", $dispo_call_url);
@@ -1131,12 +1163,17 @@ if ($is_logged_in) {
 			$URLstart_sec = date("U");
 
 			### send dispo_call_url ###
-			$SCUfile = file("$dispo_call_url");
+			$httpContext = stream_context_create([
+				'http' => [
+					'ignore_errors' => true
+				]
+			]);
+			$SCUfile = file($dispo_call_url, false, $httpContext);
 
 			### update url log entry
 			$URLend_sec = date("U");
 			$URLdiff_sec = ($URLend_sec - $URLstart_sec);
-			$SCUfile_contents = implode("", $SCUfile);
+			$SCUfile_contents = is_array($SCUfile) ? implode("", $SCUfile) : '';
 			$SCUfile_contents = preg_replace('/;/','',$SCUfile_contents);
 			$SCUfile_contents = addslashes((string) $SCUfile_contents);
 			//$stmt = "UPDATE vicidial_url_log SET response_sec='$URLdiff_sec',url_response='$SCUfile_contents' where url_log_id='$url_id';";

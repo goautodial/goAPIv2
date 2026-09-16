@@ -226,15 +226,12 @@
 			} else {
 				//$campaign_id  = $astDB->escape( $campaign_id);
 				$campaign_desc 								= str_replace( '+',' ',$campaign_name );
-				$SQLdate 									= date( "Y-m-d H:i:s" );
-				$NOW 										= date( "Y-m-d" );
+				$SQLdate 								    = date( "Y-m-d H:i:s" );
+				$NOW 									    = date( "Y-m-d" );
+				$tenant 									= checkIfTenant($log_group, $goDB) ? 1 : 0;
 
 				// Outbound Campaign here
 				if ( $campaign_type == "OUTBOUND" ) {
-					// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
-					// every time we need to filter out requests
-					$tenant									=  (checkIfTenant($log_group, $goDB)) ? 1 : 0;
-
 					if ($tenant) {
 						$tenant_id 							= "$log_group";
 					} else {
@@ -404,6 +401,7 @@
 						'campaign_script' 						=> $script
 					];
 
+					$astDB->startTransaction();
 					$q_insertInbound 						= $astDB->insert( 'vicidial_campaigns', $data_inbound );
 					$q_insertVCS 							= $astDB->insert( 'vicidial_campaign_stats', ['campaign_id' => $campaign_id] );
 					$log_id 								= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
@@ -491,14 +489,19 @@
 								case "IVR":
 
 								$menuID 							= $call_route_text;
-								$data_VCM 							= [
-									'menu_id' 							=> $menuID,
-									'menu_name' 						=> $menuID.' Inbound Call Menu',
-									'user_group' 						=> $tenant_id
-								];
+								$astDB->where('menu_id', $menuID);
+								$existingCallMenu 					= $astDB->getOne('vicidial_call_menu', 'menu_id');
 
-								$astDB->insert( 'vicidial_call_menu', $data_VCM );
-								$log_id 							= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
+								if (!$existingCallMenu) {
+									$data_VCM 						= [
+										'menu_id' 							=> $menuID,
+										'menu_name' 							=> $menuID.' Inbound Call Menu',
+										'user_group' 							=> $tenant_id
+									];
+
+									$astDB->insert('vicidial_call_menu', $data_VCM);
+									$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
+								}
 
 								if ( $resultDID ) {
 									$update_VID 					= [
@@ -528,8 +531,8 @@
 										'filter_list_id' 				=> $list_id,
 										'filter_campaign_id' 			=> $campaign_id,
 										'server_ip' 					=> $serverIP,
-										'menu_id' 						=> 'defaultlog',
-										'user_group' 					=> $tenant_id
+										'menu_id' 							=> $menuID,
+										'user_group' 							=> $tenant_id
 									];
 
 									$astDB->insert( 'vicidial_inbound_dids', $data_vid );
@@ -603,9 +606,6 @@
 							$astDB->update( 'vicidial_campaigns', ['campaign_allow_inbound' => 'Y'] );
 							$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
 
-							$astDB->where( 'user', $userID);
-							$astDB->update( 'vicidial_campaigns', ['modify_inbound_dids' => 1] );
-							$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery() );
 						}
 
 						$SQLdate 							= date( "Y-m-d H:i:s" );
@@ -619,6 +619,7 @@
 
 						$goDB->insert( 'go_campaigns', $datago_campaign );
 						$log_id 							= log_action( $goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $goDB->getLastQuery() );
+						$astDB->commit();
 
 						$apiresults 						= [
 							"result" 							=> "success"
@@ -840,16 +841,20 @@
 
 											case "IVR":
 
-											$menuID 							= "$call_route_text";
+											$menuID 								= $call_route_text;
+											$astDB->where('menu_id', $menuID);
+											$existingCallMenu 						= $astDB->getOne('vicidial_call_menu', 'menu_id');
 
-											$data_VCM 							= [
-												'menu_id' 							=> $menuID,
-												'menu_name' 						=> $menuID.' Inbound Call Menu',
-												'user_group' 						=> $tenant_id
-											];
+											if (!$existingCallMenu) {
+												$data_VCM 						= [
+													'menu_id' 							=> $menuID,
+													'menu_name' 							=> $menuID.' Inbound Call Menu',
+													'user_group' 							=> $tenant_id
+												];
 
-											$astDB->insert('vicidial_call_menu', $data_VCM);
-											$log_id 							= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
+												$astDB->insert('vicidial_call_menu', $data_VCM);
+												$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
+											}
 
 											if ($resultDID) {
 												$update_VID 					= [
@@ -880,8 +885,8 @@
 													'filter_list_id' 				=> $list_id,
 													'filter_campaign_id' 			=> $campaign_id,
 													'server_ip' 					=> $serverIP,
-													'menu_id' 						=> 'defaultlog',
-													'user_group' 					=> $tenant_id
+													'menu_id' 								=> $menuID,
+													'user_group' 								=> $tenant_id
 												];
 
 												$astDB->insert('vicidial_inbound_dids', $data_vid);
@@ -952,10 +957,7 @@
 										}
                                     $astDB->where('campaign_id', $campaign_id);
                                     $astDB->update('vicidial_campaigns', ['campaign_allow_inbound' => 'Y']);
-                                    $log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
-                                    $astDB->where('user', $userID);
-                                    $astDB->update('vicidial_campaigns', ['modify_inbound_dids' => 1]);
-                                    $log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
+	                                    $log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
                                     $SQLdate 						= date("Y-m-d H:i:s");
 									$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
 
