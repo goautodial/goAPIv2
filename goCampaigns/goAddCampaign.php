@@ -427,7 +427,7 @@
 						if ( $callRoute != null ) {
 							// Call Route
 							$didDesc 						= $campaign_id." ".$campaign_type." DID";
-							$didPattern 					= $call_route_text;
+							$didPattern 					= $did_pattern;
 
 							$astDB->where( 'did_pattern', $did_pattern );
 							$resultDID 						= $astDB->getOne( 'vicidial_inbound_dids', 'did_pattern' );
@@ -782,7 +782,7 @@
 								if ( $q_insertBlended ) {
 									// Call Route
                                     $didDesc 			= $campaign_id." ".$campaign_type." DID";
-                                    $didPattern 		= $call_route_text;
+                                    $didPattern 		= $did_pattern;
                                     $astDB->where( 'did_pattern', $did_pattern );
                                     $resultDID 			= $astDB->getOne( 'vicidial_inbound_dids', 'did_pattern' );
                                     $serverIP 			= $_SERVER['REMOTE_ADDR'];
@@ -959,7 +959,7 @@
                                     $astDB->update('vicidial_campaigns', ['campaign_allow_inbound' => 'Y']);
 	                                    $log_id 									= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Blended Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
                                     $SQLdate 						= date("Y-m-d H:i:s");
-									$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $insertQuery);
+									$log_id 						= log_action($goDB, 'ADD', $log_user, $log_ip, "Added a New Inbound Campaign: $campaign_id", $log_group, $astDB->getLastQuery());
 
 									$datago_campaign 				= [
 										'campaign_id' 					=> $campaign_id,
@@ -1066,6 +1066,9 @@
 									$wavfile_size 				= $_FILES['uploaded_wav']['size'];
 									$WeBServeRRooT				= '/var/lib/asterisk';
 									$sounds_web_directory 		= 'sounds';
+									if (!isset($path_sounds) || empty($path_sounds)) {
+										$path_sounds 				= $WeBServeRRooT . '/' . $sounds_web_directory;
+									}
 									if ( !empty($wavfile_name) ) {
 										$wavfile_name                           = substr( (string) $wavfile_name, 0, -4 );
 										$wavfile_name				= preg_replace( "/ /",'', "go_".$wavfile_name );
@@ -1193,6 +1196,8 @@
 										}
 
 										while ($user_exist);
+
+																					$countAll 					= $astDB->count;
 
 										$pass 						= substr( str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10 );
 										$survey_method 				= "EXTENSION";
@@ -1589,6 +1594,18 @@
 						}
 
 						// Dispositions Copy
+						$dataStat = [];
+						$dataStatName = [];
+						$dataCampID = [];
+						$dataSelectable = [];
+						$dataHumanAns = [];
+						$dataCategory = [];
+						$dataSale = [];
+						$dataDNC = [];
+						$dataCustContact = [];
+						$dataNI = [];
+						$dataUnworkable = [];
+						$dataScheduled = [];
 						$astDB->where("campaign_id", $copy_from_campaign);
 						$result = $astDB->get("vicidial_campaign_statuses", NULL);
 
@@ -1667,6 +1684,10 @@
 						}
 
 						// Hotkeys Copy
+						$dataStatus = [];
+						$dataHotkey = [];
+						$dataStatusName = [];
+						$dataSelectableHotkey = [];
 						$hotkeys = $astDB
 							->where("campaign_id", $copy_from_campaign)
 							->orderBy("hotkey")
@@ -1710,6 +1731,9 @@
 						}
 
 						// Pause Code Copy
+						$dataPC = [];
+						$dataPCN = [];
+						$dataBill = [];
 						$astDB->where('campaign_id', $campaign_id);
 						$astDB->orderBy('pause_code');
 						$pauseCodes 								= $astDB->get('vicidial_pause_codes', NULL);
