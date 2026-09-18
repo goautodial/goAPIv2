@@ -461,12 +461,12 @@
 										'did_description' 				=> $didDesc,
 										'did_active' 					=> 'Y',
 										'did_route' 					=> 'IN_GROUP',
-										'user_route_settings_ingroup' 	=> 'AGENTDIRECT',
+										'user_route_settings_ingroup' 	=> $call_route_text,
 										'campaign_id' 					=> $campaign_id,
 										'record_call' 					=> 'N',
 										'filter_list_id' 				=> $list_id,
 										'filter_campaign_id' 			=> $campaign_id,
-										'group_id' 						=> 'AGENTDIRECT',
+										'group_id' 						=> $call_route_text,
 										'server_ip' 					=> $serverIP,
 										'user_group' 					=> $tenant_id
 									];
@@ -814,12 +814,12 @@
 													'did_description' 				=> $didDesc,
 													'did_active' 					=> 'Y',
 													'did_route' 					=> 'IN_GROUP',
-													'user_route_settings_ingroup' 	=> 'AGENTDIRECT',
+													'user_route_settings_ingroup' 	=> $call_route_text,
 													'campaign_id' 					=> $campaign_id,
 													'record_call' 					=> 'N',
 													'filter_list_id' 				=> $list_id,
 													'filter_campaign_id' 			=> $campaign_id,
-													'group_id' 						=> 'AGENTDIRECT',
+													'group_id' 						=> $call_route_text,
 													'server_ip' 					=> $serverIP,
 													'user_group' 					=> $tenant_id
 												];
