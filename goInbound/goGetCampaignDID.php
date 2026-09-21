@@ -36,18 +36,18 @@
 /** @var string|false $log_group */
 /** @var string $log_ip */
 
-    
+
     $campaign_id = ($_REQUEST['campaign_id'] ?? '');
-    
+
     if(empty($campaign_id)){
         $apiresults = ["result" => "Error: Set a value for campaign_id."];
     }else{
-        $cols = ["did_id", "did_pattern", "did_description", "did_actived", "did_route"];
+        $cols = ["did_id", "did_pattern", "did_description", "did_active", "did_route"];
         $astDB->where("campaign_id", $campaign_id);
         $query =  $astDB->get("vicidial_inbound_dids", NULL, $cols);
 
         //$query = "SELECT did_id,did_pattern,did_description,did_active,did_route FROM vicidial_inbound_dids WHERE campaign_id = '$campaign_id' ORDER BY did_pattern";
-        
+
         foreach($query as $fresults){
             $dataDidID[]            = $fresults['did_id'];
             $dataDidPattern[]       =  $fresults['did_pattern'];
@@ -65,5 +65,5 @@
                     ];
     }
 
-    
+
 ?>
