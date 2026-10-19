@@ -48,7 +48,7 @@ $user = $agent->user;
 if ($is_logged_in) {
 	$MT[0] = '';
 	$call_good = 0;
-    
+
 	if (strlen((string) $MDnextCID) < 18) {
 		//echo "NO\n";
 		//echo "MDnextCID $MDnextCID is not valid\n";
@@ -157,7 +157,7 @@ if ($is_logged_in) {
                     'talk_epoch' => $StarTtimE,
                     'lead_id' => $lead_id,
                 ];
-                
+
                 if (is_array($dead_epochSQL)) {
                     $updateData = array_merge( $updateData, $dead_epochSQL );
                 }
@@ -168,10 +168,12 @@ if ($is_logged_in) {
                 $astDB->where('callerid', $MDnextCID);
                 $rslt = $astDB->update('vicidial_auto_calls', [ 'uniqueid' => $uniqueid, 'channel' => $channel ]);
             }
-            
-			//$stmt="UPDATE call_log set uniqueid='$uniqueid',channel='$channel' where caller_code='$MDnextCID';";
+
+			//$stmt="UPDATE call_log set uniqueid='$uniqueid',channel='$channel' where caller_code='$MDnextCID' and server_ip='$server_ip' order by start_time desc limit 1;";
             $astDB->where('caller_code', $MDnextCID);
-            $rslt = $astDB->update('call_log', [ 'uniqueid' => $uniqueid, 'channel' => $channel ]);
+            $astDB->where('server_ip', $server_ip);
+            $astDB->orderBy('start_time', 'desc');
+            $rslt = $astDB->update('call_log', [ 'uniqueid' => $uniqueid, 'channel' => $channel ], 1);
 
 			//echo "$call_output";
             $APIResult = [ "result" => "success", "lookCID" => "", "data" => $call_output ];
