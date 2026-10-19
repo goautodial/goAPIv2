@@ -294,7 +294,7 @@
             ON vi.lead_id=vl.lead_id
             LEFT JOIN vicidial_users vu
             ON vu.user=vl.user
-            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate'
             $list_SQL $campaign_SQL
             $user_group_SQL $status_SQL
             order by vl.call_date";
@@ -307,7 +307,7 @@
             ON vcl.lead_id = vi.lead_id
             LEFT JOIN vicidial_users vu
             ON vcl.user = vu.user
-            WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            WHERE vcl.call_date BETWEEN '$fromDate' AND '$toDate'
             AND vi.lead_id = vcl.lead_id
 	            $list_SQL $group_SQL
 	            $user_group_SQL $status_SQL_vcl
@@ -321,18 +321,18 @@
             ON vi.lead_id=vl.lead_id
             LEFT JOIN vicidial_users vu
             ON vu.user=vl.user
-            WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate'
             $list_SQL $campaign_SQL
             $user_group_SQL $status_SQL
             order by vl.call_date
-            ) UNION (
+            ) UNION ALL (
             SELECT count(vcl.user) as row_count
             FROM vicidial_closer_log vcl
             LEFT JOIN vicidial_list vi
             ON vcl.lead_id = vi.lead_id
             LEFT JOIN vicidial_users vu
             ON vcl.user = vu.user
-            WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            WHERE vcl.call_date BETWEEN '$fromDate' AND '$toDate'
             AND vi.lead_id = vcl.lead_id
 	            $list_SQL $group_SQL
 	            $user_group_SQL $status_SQL_vcl

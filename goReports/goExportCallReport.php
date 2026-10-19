@@ -363,8 +363,8 @@ function go_format_call_duration($seconds): string
             LEFT JOIN vicidial_list vi
             ON vi.lead_id=vl.lead_id
             LEFT JOIN vicidial_users vu
-            ON vu.user=vl.user
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            			ON vu.user=vl.user
+			WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate'
 			$list_SQL $campaign_SQL
 			$user_group_SQL $status_SQL_vl
 			order by vl.call_date
@@ -377,8 +377,8 @@ function go_format_call_duration($seconds): string
             LEFT JOIN vicidial_list vi
             ON vi.lead_id=vcl.lead_id
             LEFT JOIN vicidial_users vu
-            ON vu.user=vcl.user
-			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+            			ON vu.user=vcl.user
+			WHERE vcl.call_date BETWEEN '$fromDate' AND '$toDate'
 			$list_SQL $group_SQL
 			$user_group_SQL_2 $status_SQL_vcl
 			order by vcl.call_date
@@ -430,7 +430,7 @@ function go_format_call_duration($seconds): string
                 ON vi.lead_id=vl.lead_id
                 LEFT JOIN vicidial_users vu
                 ON vu.user=vl.user
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+			WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate'
 			$list_SQL
 			$campaign_SQL
 			$user_group_SQL_2
@@ -482,7 +482,7 @@ function go_format_call_duration($seconds): string
                 ON vi.lead_id=vcl.lead_id
                 LEFT JOIN vicidial_users vu
                 ON vu.user=vcl.user
-			WHERE (date_format(vcl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+			WHERE vcl.call_date BETWEEN '$fromDate' AND '$toDate'
 			$list_SQL
 			$group_SQL
 			$user_group_SQL_2
@@ -499,6 +499,7 @@ function go_format_call_duration($seconds): string
 
 	//OUTPUT DATA HEADER//
 	$result = is_array($result) ? $result : [];
+	$resultCount = count($result);
 	$csv_header = (isset($result[0]) && is_array($result[0])) ? array_keys($result[0]) : [];
 
 	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $csv_header);
@@ -730,6 +731,7 @@ function go_format_call_duration($seconds): string
 		"result" => "success",
 		"header" => $csv_header,
 		"rows" 	=> $csv_row,
+		"row_count" => $resultCount,
 		"query" => $query
 	];
 ?>
