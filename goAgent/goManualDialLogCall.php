@@ -1473,10 +1473,34 @@ if ($is_logged_in) {
 
             ### update vicidial_carrier_log to match uniqueIDs
             $beginUNIQUEID = preg_replace("/\..*/", "", (string) $uniqueid);
-            //$stmt="UPDATE vicidial_carrier_log set uniqueid='$uniqueid' where lead_id='$lead_id' and uniqueid LIKE \"$beginUNIQUEID%\";";
-            $astDB->where('lead_id', $lead_id);
-            $astDB->where('uniqueid', "$beginUNIQUEID%", 'like');
-            $rslt = $astDB->update('vicidial_carrier_log', ['uniqueid' => $uniqueid]);
+
+            $astDB->where('uniqueid', $uniqueid);
+            $carrierLogExists = $astDB->has('vicidial_carrier_log');
+
+            if (!$carrierLogExists) {
+                $astDB->where('lead_id', $lead_id);
+                $astDB->where('server_ip', $server_ip);
+                $astDB->where('uniqueid', "$beginUNIQUEID%", 'like');
+                $astDB->orderBy('call_date', 'desc');
+                $carrierLog = $astDB->getOne('vicidial_carrier_log', 'uniqueid');
+
+                if ($astDB->getRowCount() > 0) {
+                    try {
+                        $astDB->where('uniqueid', $carrierLog['uniqueid']);
+                        $astDB->where('server_ip', $server_ip);
+                        $rslt = $astDB->update('vicidial_carrier_log', ['uniqueid' => $uniqueid], 1);
+                    } catch (mysqli_sql_exception $exception) {
+                        if ((int) $exception->getCode() !== 1062) {
+                            throw $exception;
+                        }
+
+                        error_log(
+                            "Manual dial carrier-log uniqueid collision for lead {$lead_id} on {$server_ip}: " .
+                            "{$carrierLog['uniqueid']} -> {$uniqueid}"
+                        );
+                    }
+                }
+            }
 
 	            ### if queuemetrics_dispo_pause dispo tag is enabled, log it here
 	            $queuemetrics_dispo_pause = $queuemetrics_dispo_pause ?? '';
