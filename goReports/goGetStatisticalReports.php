@@ -21,7 +21,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-    include_once(__DIR__ . "/goAPI.php");
+    	include_once(__DIR__ . "/goAPI.php");
+
+	// Keep PHP from applying a shorter default while large report aggregates run.
+	// This does not override FPM, Apache, or reverse-proxy request limits.
+	if (function_exists('set_time_limit')) {
+		set_time_limit(120);
+	}
 
 /** @var MySQLiDB $astDB */
 /** @var MySQLiDB $goDB */
