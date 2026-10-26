@@ -1182,7 +1182,33 @@ if ($is_logged_in) {
 					'timeout' => 10
 				]
 			]);
-			$SCUfile = file($dispo_call_url, false, $httpContext);
+
+			error_log("Dispo URL request started for uniqueid {$uniqueid}: {$dispo_call_url}");
+			$dispoCallError = '';
+			set_error_handler(function ($severity, $message) use (&$dispoCallError) {
+				$dispoCallError = $message;
+				return true;
+			});
+			try {
+				$SCUfile = file($dispo_call_url, false, $httpContext);
+			} catch (Throwable $exception) {
+				$SCUfile = false;
+				$dispoCallError = $exception->getMessage();
+			} finally {
+				restore_error_handler();
+			}
+
+			$dispoHttpStatus = '';
+			if (isset($http_response_header[0]) && preg_match('/^HTTP\/\S+\s+(\d{3})/', $http_response_header[0], $statusMatches)) {
+				$dispoHttpStatus = $statusMatches[1];
+			}
+			if ($SCUfile === false) {
+				error_log("Dispo URL request failed for uniqueid {$uniqueid}: {$dispo_call_url}. Error: {$dispoCallError}");
+			} elseif ($dispoHttpStatus !== '' && ((int) $dispoHttpStatus < 200 || (int) $dispoHttpStatus >= 300)) {
+				error_log("Dispo URL request returned HTTP {$dispoHttpStatus} for uniqueid {$uniqueid}: {$dispo_call_url}");
+			} else {
+				error_log("Dispo URL request succeeded" . ($dispoHttpStatus !== '' ? " with HTTP {$dispoHttpStatus}" : '') . " for uniqueid {$uniqueid}: {$dispo_call_url}");
+			}
 
 			### update url log entry
 			$URLend_sec = date("U");
