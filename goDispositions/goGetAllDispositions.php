@@ -107,9 +107,9 @@
 
 				//GET CAMPAIGN STATUSES
 				foreach ($result as $fresults) {
-					$dataStat[] 					= $fresults["campaign_id"];
-					$dataStatName[] 				= $fresults["status"];
-					$dataCampID[] 					= $fresults["status_name"];
+					$dataStat[] 					= $fresults["status"];
+					$dataStatName[] 				= $fresults["status_name"];
+					$dataCampID[] 					= $fresults["campaign_id"];
 				}
 
 				foreach ($result2 as $fresults) {
