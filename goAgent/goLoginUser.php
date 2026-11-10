@@ -101,6 +101,21 @@ if ($sipIsLoggedIn || $use_webrtc) {
     }
 
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
+
+    // The browser check is informational only; enforce this again on the
+    // login endpoint before it can create another conference/session row.
+    $astDB->where('(sess_agent_user = ? OR sess_agent_phone = ?)', [$user, $phone_login]);
+    $astDB->where('sess_agent_status', 'INUSE');
+    $activeSession = $astDB->getOne('go_agent_sessions', 'agent_session_id');
+    if ($activeSession) {
+        $APIResult = [
+            'result' => 'error',
+            'message' => 'You are already logged in, please log out of your other session first',
+            'auth_message' => 'ERRDUPLICATE'
+        ];
+        return;
+    }
+
     $campaign_settings = get_settings('campaign', $astDB, $campaign);
     $system_settings = get_settings('system', $astDB);
     $usergroup = get_settings('usergroup', $astDB, $VU_user_group);
