@@ -1144,11 +1144,12 @@ if ($is_logged_in) {
 				}
 			}
 
-			//$stmt="UPDATE vicidial_log_extended set dispo_url_processed='Y' where uniqueid='$uniqueid';";
+			//$stmt="UPDATE vicidial_log_extended set dispo_url_processed='Y' where uniqueid='$uniqueid' and caller_code='$MDnextCID';";
 			$updateData = [
 				'dispo_url_processed' => 'Y'
 			];
 			$astDB->where('uniqueid', $uniqueid);
+			$astDB->where('caller_code', $MDnextCID);
 			$rslt = $astDB->update('vicidial_log_extended', $updateData);
 			$vle_update = $astDB->getRowCount();
 
