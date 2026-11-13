@@ -58,6 +58,24 @@
 
 	//$queryGetCustomFields = "SELECT column_name FROM information_schema.columns WHERE table_name='custom_$list_id';";
 	$customFields = [];
+
+	// Match the CSV uploader's timezone inputs before calculating lead GMT offsets.
+	$isdst = date('I');
+	$query = $astDB->getOne('servers', 'local_gmt');
+	$serverGmt = is_array($query) ? ($query['local_gmt'] ?? '') : '';
+	if ($serverGmt !== '') {
+		$LOCAL_GMT_OFF_STD = (float) $serverGmt + ($isdst ? 1 : 0);
+	} else {
+		$LOCAL_GMT_OFF_STD = (float) date('Z') / 3600;
+	}
+	$Shour = (int) date('H');
+	$Smin = (int) date('i');
+	$Ssec = (int) date('s');
+	$Smon = (int) date('m');
+	$Smday = (int) date('d');
+	$Syear = (int) date('Y');
+	$postalgmt = '';
+
 	$astDB->where('table_name', "custom_$list_id");
 	$sqlCF = $astDB->get('information_schema.columns', null, 'column_name');
 

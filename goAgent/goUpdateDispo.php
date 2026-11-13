@@ -80,11 +80,20 @@ if (isset($_GET['goQMDispoCode'])) { $qm_dispo_code = $astDB->escape($_GET['goQM
 if (isset($_GET['goEmailEnabled'])) { $email_enabled = $astDB->escape($_GET['goEmailEnabled']); }
     else if (isset($_POST['goEmailEnabled'])) { $email_enabled = $astDB->escape($_POST['goEmailEnabled']); }
 
-$format = $format ?? '';
-$MDnextCID = $MDnextCID ?? '';
-$recording_id = $recording_id ?? '';
-$recording_filename = $recording_filename ?? '';
-$WeBRooTWritablE = $WeBRooTWritablE ?? 0;
+	// Optional disposition fields may be omitted by older Agent Dialer clients.
+	$format = $format ?? '';
+	$list_id = $list_id ?? '';
+	$email_enabled = $email_enabled ?? 0;
+	$CallBackLeadStatus = $CallBackLeadStatus ?? '';
+	$use_internal_dnc = $use_internal_dnc ?? '';
+	$use_campaign_dnc = $use_campaign_dnc ?? '';
+	$uniqueid = trim((string) ($uniqueid ?? ''));
+	$call_notes = $call_notes ?? '';
+	$FORMcustom_field_names = $FORMcustom_field_names ?? '';
+	$MDnextCID = $MDnextCID ?? '';
+	$recording_id = $recording_id ?? '';
+	$recording_filename = $recording_filename ?? '';
+	$WeBRooTWritablE = $WeBRooTWritablE ?? 0;
 
 $MT[0] = '';
 $MAN_vl_insert = 0;
@@ -399,10 +408,13 @@ if ($is_logged_in) {
 		$astDB->where('agent_log_id', $agent_log_id, '<=');
 		$astDB->where('lead_id', $lead_id);
 		$astDB->orderBy('agent_log_id', 'desc');
-		$rslt = $astDB->getOne('vicidial_agent_log', 'dispo_epoch,dispo_sec,talk_epoch,wait_epoch,lead_id,comments,agent_log_id');
+		$rslt = $astDB->getOne('vicidial_agent_log', 'dispo_epoch,dispo_sec,talk_epoch,wait_epoch,lead_id,comments,agent_log_id,uniqueid');
 		$VDpr_ct = $astDB->getRowCount();
 		if ($VDpr_ct > 0) {
 			$agent_log_id = $rslt['agent_log_id'];
+			if ($uniqueid === '' && !empty($rslt['uniqueid'])) {
+				$uniqueid = (string) $rslt['uniqueid'];
+			}
 			$updateData = [
 				'status' => $log_dispo_choice,
 				'uniqueid' => $uniqueid
@@ -816,7 +828,7 @@ if ($is_logged_in) {
 		############################################
 		### BEGIN Issue Dispo Call URL if defined
 		############################################
-		if (strlen((string) $dispo_call_url) > 7) {
+		if (strlen((string) $dispo_call_url) > 7 && strlen($uniqueid) > 0) {
 			$security = $security ?? '';
 			$pass = $pass ?? '';
 			$phone_login = $phone_login ?? '';
