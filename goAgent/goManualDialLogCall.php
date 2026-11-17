@@ -1425,6 +1425,7 @@ if ($is_logged_in) {
                 'dispo_epoch' => $StarTtimE,
                 'uniqueid' => $uniqueid
             ];
+            $lead_id_commentsSQL = [];
             //$stmt = "SELECT talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
             $astDB->where('agent_log_id', $agent_log_id);
             $rslt = $astDB->get('vicidial_agent_log', null, 'talk_epoch,talk_sec,wait_sec,wait_epoch,lead_id,comments,dead_epoch');
@@ -1451,7 +1452,6 @@ if ($is_logged_in) {
                 $talk_sec = (($StarTtimE - $row['talk_epoch']) + $row['talk_sec']);
                 $updateData['talk_sec'] = $talk_sec;
                 if ( ( ($auto_dial_level < 1) || (preg_match('/^M/', (string) $MDnextCID)) ) && (preg_match('/INBOUND_MAN/', (string) $dial_method)) ) {
-                    $lead_id_commentsSQL = [];
 	                    if ( preg_match("/NULL/i", (string) ($row['comments'] ?? '')) || strlen((string) ($row['comments'] ?? '')) < 1 ) {
                         //$lead_id_commentsSQL .= ",comments='MANUAL'";
                         $lead_id_commentsSQL['comments'] = 'MANUAL';
