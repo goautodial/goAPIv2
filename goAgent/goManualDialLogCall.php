@@ -1451,17 +1451,14 @@ if ($is_logged_in) {
                 $talk_sec = (($StarTtimE - $row['talk_epoch']) + $row['talk_sec']);
                 $updateData['talk_sec'] = $talk_sec;
                 if ( ( ($auto_dial_level < 1) || (preg_match('/^M/', (string) $MDnextCID)) ) && (preg_match('/INBOUND_MAN/', (string) $dial_method)) ) {
+                    $lead_id_commentsSQL = [];
 	                    if ( preg_match("/NULL/i", (string) ($row['comments'] ?? '')) || strlen((string) ($row['comments'] ?? '')) < 1 ) {
                         //$lead_id_commentsSQL .= ",comments='MANUAL'";
-                        $lead_id_commentsSQL = [
-                            'comments' => 'MANUAL'
-                        ];
+                        $lead_id_commentsSQL['comments'] = 'MANUAL';
                     }
 	                    if ( (preg_match("/NULL/i", (string) ($row['lead_id'] ?? ''))) || (($row['lead_id'] ?? 0) < 1) || (strlen((string) ($row['lead_id'] ?? '')) < 1) ) {
                         //$lead_id_commentsSQL .= ",lead_id='$lead_id'";
-                        $lead_id_commentsSQL = [
-                            'lead_id' => $lead_id
-                        ];
+                        $lead_id_commentsSQL['lead_id'] = $lead_id;
                     }
                     $updateData = array_merge($updateData, $lead_id_commentsSQL);
                 }

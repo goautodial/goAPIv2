@@ -327,11 +327,11 @@ if ($is_logged_in) {
 				$rslt = $astDB->delete('vicidial_auto_calls');
 
 				//$stmt="UPDATE vicidial_live_agents set ring_callerid='' where ring_callerid='$MDnextCID';";
-				$updateData = [
-					'ring_callerid' => ''
-				];
-				$astDB->where('ring_callerid', $MDnextCID);
-				$rslt = $astDB->update('vicidial_live_agents', $updateData);
+				$ringCallerIdColumn = $astDB->rawQuery("SHOW COLUMNS FROM `vicidial_live_agents` LIKE 'ring_callerid'");
+				if (is_array($ringCallerIdColumn) && count($ringCallerIdColumn) > 0) {
+					$astDB->where('ring_callerid', $MDnextCID);
+					$rslt = $astDB->update('vicidial_live_agents', ['ring_callerid' => '']);
+				}
 			} else {
 				//$stmt="UPDATE vicidial_log set status='$log_dispo_choice' where lead_id='$lead_id' and user='$user' and call_date > \"$four_hours_ago\" order by uniqueid desc limit 1;";
 				$updateData = [
@@ -1156,30 +1156,36 @@ if ($is_logged_in) {
 				}
 			}
 
-			//$stmt="UPDATE vicidial_log_extended set dispo_url_processed='Y' where uniqueid='$uniqueid' and caller_code='$MDnextCID';";
-			$updateData = [
-				'dispo_url_processed' => 'Y'
-			];
-			$astDB->where('uniqueid', $uniqueid);
-			$astDB->where('caller_code', $MDnextCID);
-			$rslt = $astDB->update('vicidial_log_extended', $updateData);
-			$vle_update = $astDB->getRowCount();
+			$url_id = 0;
+			$vle_update = 0;
+			if ($uniqueid !== '') {
+				//$stmt="UPDATE vicidial_log_extended set dispo_url_processed='Y' where uniqueid='$uniqueid' and caller_code='$MDnextCID';";
+				$updateData = [
+					'dispo_url_processed' => 'Y'
+				];
+				$astDB->where('uniqueid', $uniqueid);
+				$astDB->where('caller_code', $MDnextCID);
+				$rslt = $astDB->update('vicidial_log_extended', $updateData);
+				$vle_update = $astDB->getRowCount();
 
-			### insert a new url log entry
-			$SQL_log = "$dispo_call_url";
-			$SQL_log = preg_replace('/;/', '', $SQL_log);
-			$SQL_log = addslashes($SQL_log);
-			//$stmt = "INSERT INTO vicidial_url_log SET uniqueid='$uniqueid',url_date='$NOW_TIME',url_type='dispo',url='$SQL_log',url_response='';";
-			$insertData = [
-				'uniqueid' => $uniqueid,
-				'url_date' => $NOW_TIME,
-				'url_type' => 'dispo',
-				'url' => $SQL_log,
-				'url_response' => ''
-			];
-			$rslt = $astDB->insert('vicidial_url_log', $insertData);
-			$affected_rows = $astDB->getRowCount();
-			$url_id = $astDB->getInsertId();
+				### insert a new url log entry
+				$SQL_log = "$dispo_call_url";
+				$SQL_log = preg_replace('/;/', '', $SQL_log);
+				$SQL_log = addslashes($SQL_log);
+				//$stmt = "INSERT INTO vicidial_url_log SET uniqueid='$uniqueid',url_date='$NOW_TIME',url_type='dispo',url='$SQL_log',url_response='';";
+				$insertData = [
+					'uniqueid' => $uniqueid,
+					'url_date' => $NOW_TIME,
+					'url_type' => 'dispo',
+					'url' => $SQL_log,
+					'url_response' => ''
+				];
+				$rslt = $astDB->insert('vicidial_url_log', $insertData);
+				$affected_rows = $astDB->getRowCount();
+				$url_id = $astDB->getInsertId();
+			} else {
+				error_log("Skipping disposition URL audit log because no uniqueid is available for lead {$lead_id}");
+			}
 
 			$URLstart_sec = date("U");
 
@@ -1224,19 +1230,21 @@ if ($is_logged_in) {
 			}
 
 			### update url log entry
-			$URLend_sec = date("U");
-			$URLdiff_sec = ($URLend_sec - $URLstart_sec);
-			$SCUfile_contents = is_array($SCUfile) ? implode("", $SCUfile) : '';
-			$SCUfile_contents = preg_replace('/;/','',$SCUfile_contents);
-			$SCUfile_contents = addslashes((string) $SCUfile_contents);
-			//$stmt = "UPDATE vicidial_url_log SET response_sec='$URLdiff_sec',url_response='$SCUfile_contents' where url_log_id='$url_id';";
-			$updateData = [
-				'response_sec' => $URLdiff_sec,
-				'url_response' => $SCUfile_contents
-			];
-			$astDB->where('url_log_id', $url_id);
-			$rslt = $astDB->update('vicidial_url_log', $updateData);
-			$affected_rows = $astDB->getRowCount();
+			if ($url_id > 0) {
+				$URLend_sec = date("U");
+				$URLdiff_sec = ($URLend_sec - $URLstart_sec);
+				$SCUfile_contents = is_array($SCUfile) ? implode("", $SCUfile) : '';
+				$SCUfile_contents = preg_replace('/;/','',$SCUfile_contents);
+				$SCUfile_contents = addslashes((string) $SCUfile_contents);
+				//$stmt = "UPDATE vicidial_url_log SET response_sec='$URLdiff_sec',url_response='$SCUfile_contents' where url_log_id='$url_id';";
+				$updateData = [
+					'response_sec' => $URLdiff_sec,
+					'url_response' => $SCUfile_contents
+				];
+				$astDB->where('url_log_id', $url_id);
+				$rslt = $astDB->update('vicidial_url_log', $updateData);
+				$affected_rows = $astDB->getRowCount();
+			}
 
 			//$stmt = "SELECT enable_vtiger_integration FROM system_settings;";
 			$rslt = $astDB->getOne('system_settings', 'enable_vtiger_integration');

@@ -37,6 +37,7 @@
 /** @var string $log_ip */
 
 
+    $session_user = $astDB->escape($_REQUEST['session_user'] ?? '');
 	$log_user 										= $session_user;
 	$log_group 										= go_get_groupid($session_user, $astDB);
 	$log_ip 										= $astDB->escape(($_REQUEST['log_ip'] ?? ''));

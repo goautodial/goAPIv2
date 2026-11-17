@@ -72,6 +72,11 @@ if ($sipIsLoggedIn) {
     if (isset($_GET['goOldCID'])) { $old_CID = $astDB->escape($_GET['goOldCID']); }
         else if (isset($_POST['goOldCID'])) { $old_CID = $astDB->escape($_POST['goOldCID']); }
 
+    $old_CID ??= '';
+    $dial_timeout ??= 0;
+    $campaign_cid ??= '';
+    $usegroupalias ??= 0;
+    $omit_phone_code ??= '';
 
 	$MT[0] = '';
 	$channel_live = 1;
@@ -330,6 +335,7 @@ $temp_CID = '';
 				$account = "Account: $account";
 				$variable = "Variable: usegroupalias=1";
 			} else {
+				$RAWaccount = '';
 				$account = '';
 				$variable = '';
 			}
