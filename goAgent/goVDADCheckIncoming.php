@@ -37,8 +37,35 @@ if (isset($_GET['goServerIP'])) { $server_ip = $astDB->escape($_GET['goServerIP'
 $user = $agent->user;
 $server_ip = ((string) $server_ip !== '') ? $server_ip : $phone_settings->server_ip;
 
+$VDADchannel_group = '';
+$VDCL_group_name = '';
+$VDCL_group_color = '';
+$VDCL_group_web = '';
+$VDCL_fronter_display = '';
+$VDCL_ingroup_script = '';
+$VDCL_campaign_script = '';
+$VDCL_get_call_launch = '';
+$VDCL_xferconf_a_dtmf = '';
+$VDCL_xferconf_a_number = '';
+$VDCL_xferconf_b_dtmf = '';
+$VDCL_xferconf_b_number = '';
+$VDCL_xferconf_c_number = '';
+$VDCL_xferconf_d_number = '';
+$VDCL_xferconf_e_number = '';
+$VDCL_default_xfer_group = '';
 $VDCL_ingroup_recording_override = '';
 $VDCL_ingroup_rec_filename = '';
+$VDCL_default_group_alias = '';
+$VDCL_group_web_vars = '';
+$VDCL_group_web_two = '';
+$VDCL_timer_action = '';
+$VDCL_timer_action_message = '';
+$VDCL_timer_action_seconds = '';
+$VDCL_start_call_url = '';
+$VDCL_dispo_call_url = '';
+$VDCL_uniqueid_status_display = '';
+$VDCL_uniqueid_status_prefix = '';
+$VDCL_timer_action_destination = '';
 $Ctype = 'A';
 $MT[0] = '';
 $row = '';
@@ -612,8 +639,6 @@ if ($is_logged_in) {
                         }
                     }
                 }
-
-                $VDCL_group_web_vars = $VDCL_group_web_vars ?? '';
 
                 //$stmt = "SELECT group_web_vars from vicidial_inbound_group_agents where group_id='$VDADchannel_group' and user='$user';";
                 $astDB->where('group_id', $VDADchannel_group);
