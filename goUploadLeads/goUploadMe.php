@@ -128,11 +128,59 @@
 	$Syear = date('Y');
 	$postalgmt = '';
 	$goDUPLists = [];
+	$hasMappedCustomFields = false;
+	$autoLeadMapping = false;
+	$autoLeadMappingIndexes = [];
+
+	if (!empty($lead_mapping)) {
+		$leadMappingData = explode(',', ($_REQUEST['lead_mapping_data'] ?? ''));
+		$leadMappingFields = explode(',', ($_REQUEST['lead_mapping_fields'] ?? ''));
+		$standardMappingFields = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
+		$mappedCustomFields = [];
+
+		foreach ($leadMappingFields as $index => $fieldName) {
+			$mappedColumn = $leadMappingData[$index] ?? '';
+			if (!in_array($fieldName, $standardMappingFields, true) && $mappedColumn !== '' && $mappedColumn !== '.') {
+				$mappedCustomFields[] = $fieldName;
+			}
+		}
+
+		if (!empty($mappedCustomFields) && goCheckCustomFieldsName($astDB, $theList, 'lead_id,' . implode(',', $mappedCustomFields)) !== 'success') {
+			$apiresults = [
+				'result' => 'error',
+				'message' => 'The selected list is not configured for the mapped custom fields.',
+				'duplicates' => []
+			];
+			return;
+		}
+	}
+
 	//die($theList."<br>".$thefile."<br>".$csv_file);
 	if (($handle = fopen($csv_file, "r")) !== FALSE) {
 		$getHeder = fgetcsv($handle, escape: '\\');
 		//$goInsertSuccess = 0;
 		//$array 21 last column
+
+		// Recognize files exported by this application and map their standard
+		// fields by header name, rather than treating their system columns as
+		// custom upload fields.
+		$headerIndexes = [];
+		foreach ((is_array($getHeder) ? $getHeder : []) as $headerIndex => $headerName) {
+			$headerIndexes[trim((string) $headerName)] = $headerIndex;
+		}
+		$exportSignature = ['lead_id', 'entry_date', 'list_id', 'phone_number'];
+		$isSystemExport = empty($lead_mapping);
+		foreach ($exportSignature as $headerName) {
+			if (!array_key_exists($headerName, $headerIndexes)) {
+				$isSystemExport = false;
+				break;
+			}
+		}
+		if ($isSystemExport) {
+			$autoLeadMapping = true;
+			$lead_mapping = 'auto';
+			$autoLeadMappingIndexes = $headerIndexes;
+		}
 
 		//for custom fields start GLOBAL varaibles
 		$goCountTheHeader = (is_countable($getHeder) ? count($getHeder) : 0);
@@ -167,6 +215,12 @@
 			$goGetCheckcustomFieldNamesCorrect = goCheckCustomFieldsName($astDB, $theList, $goGetLastCustomFiledsNameWithLeadID);
 			if($goGetCheckcustomFieldNamesCorrect != "success") {
 				fclose($handle);
+				$apiresults = [
+					'result' => 'error',
+					'message' => 'This file cannot be imported as-is. Use Lead Mapping or upload an import-ready CSV with phone_number as the first column.',
+					'duplicates' => []
+				];
+				return;
 			}
 		}
 		//end for custom fields start GLOBAL varaibles
@@ -220,17 +274,54 @@
 
 			// LEAD MAPPING -- CUSTOMIZATION!!!!!
 			if(!empty($lead_mapping)){
-				$lead_mapping_data = explode(",",($_REQUEST["lead_mapping_data"] ?? ''));
-				$lead_mapping_fields = explode(",", ($_REQUEST["lead_mapping_fields"] ?? ''));
 				$standard_fields = ["Phone","VendorLeadCode","PhoneCode","Title","FirstName","MiddleInitial","LastName","Address1","Address2","Address3","City","State","Province","PostalCode","CountryCode","Gender","DateOfBirth","AltPhone","Email","SecurityPhrase","Comments"];
+				if ($autoLeadMapping) {
+					$exportFieldMapping = [
+						'Phone' => 'phone_number',
+						'VendorLeadCode' => 'vendor_lead_code',
+						'PhoneCode' => 'phone_code',
+						'Title' => 'title',
+						'FirstName' => 'first_name',
+						'MiddleInitial' => 'middle_initial',
+						'LastName' => 'last_name',
+						'Address1' => 'address1',
+						'Address2' => 'address2',
+						'Address3' => 'address3',
+						'City' => 'city',
+						'State' => 'state',
+						'Province' => 'province',
+						'PostalCode' => 'postal_code',
+						'CountryCode' => 'country_code',
+						'Gender' => 'gender',
+						'DateOfBirth' => 'date_of_birth',
+						'AltPhone' => 'alt_phone',
+						'Email' => 'email',
+						'SecurityPhrase' => 'security_phrase',
+						'Comments' => 'comments'
+					];
+					$lead_mapping_fields = [];
+					$lead_mapping_data = [];
+					foreach ($exportFieldMapping as $mappingField => $exportField) {
+						if (array_key_exists($exportField, $autoLeadMappingIndexes)) {
+							$lead_mapping_fields[] = $mappingField;
+							$lead_mapping_data[] = $autoLeadMappingIndexes[$exportField];
+						}
+					}
+				} else {
+					$lead_mapping_data = explode(",",($_REQUEST["lead_mapping_data"] ?? ''));
+					$lead_mapping_fields = explode(",", ($_REQUEST["lead_mapping_fields"] ?? ''));
+				}
                 $counter = (is_countable($lead_mapping_fields) ? count($lead_mapping_fields) : 0);
 				// MAKE MAP FIELDS AN INDEX OF MAP DATA & SEPARATE STANDARD FROM CUSTOM ARRAYS
 
 				for($l=0; $l < $counter;$l++){
 					if(in_array($lead_mapping_fields[$l], (is_array($standard_fields) ? $standard_fields : [])))
 						$standard_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
-					else
+					else {
 						$custom_array[$lead_mapping_fields[$l]] = $lead_mapping_data[$l];
+						if(($lead_mapping_data[$l] ?? '') !== '' && ($lead_mapping_data[$l] ?? '') !== '.')
+							$hasMappedCustomFields = true;
+					}
 				}
 				//set default values to none
 				$phone_number = "";
@@ -370,7 +461,7 @@
 						$goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
 
 						# start set query for custom fields
-						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
+						if(!empty($lead_mapping) && $hasMappedCustomFields){ // LEAD MAPPING CUSTOMIZATION
 							$goCustomKeyData = [];
 							$goCustomValuesData = [];
 							$goCustomUpdateData = [];
@@ -402,7 +493,7 @@
 								ON DUPLICATE KEY UPDATE $goCustomUpdate";
 							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
-						}elseif($goCountTheHeader > 21) {
+						}elseif($goCountTheHeader > 21 && empty($lead_mapping)) {
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
@@ -437,7 +528,7 @@
 									ON DUPLICATE KEY UPDATE $goCustomUpdate";
 								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 							}
-						}// end set query for custom fields
+							}// end set query for custom fields
 						$goCountInsertedLeads++;
 					}else{
 						$duplicates++;
@@ -511,7 +602,7 @@
 							$goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
 
 							# start set query for custom fields
-							if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
+							if(!empty($lead_mapping) && $hasMappedCustomFields){ // LEAD MAPPING CUSTOMIZATION
 								$goCustomKeyData = [];
 								$goCustomValuesData = [];
 								$goCustomUpdateData = [];
@@ -544,7 +635,7 @@
 								$goQueryCustomFields = "INSERT INTO `custom_$theList`(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDDUPCAMP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 								$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
-							}elseif($goCountTheHeader > 21) {
+							}elseif($goCountTheHeader > 21 && empty($lead_mapping)) {
 								$goShowCustomFields = "DESC custom_$list_id;";
 								$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 								$countResultrsltgoShowCustomFields = $astDB->getRowCount();
@@ -656,7 +747,7 @@
 						$goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
 						$alex["insertquery"] = $astDB->getLastQuery();
 						# start set query for custom fields
-						if(!empty($lead_mapping) && !empty($custom_array)){ // LEAD MAPPING CUSTOMIZATION
+						if(!empty($lead_mapping) && $hasMappedCustomFields){ // LEAD MAPPING CUSTOMIZATION
 							$goCustomKeyData = [];
 							$goCustomValuesData = [];
 							$goCustomUpdateData = [];
@@ -688,7 +779,7 @@
 
 							$goQueryCustomFields = "INSERT INTO `custom_$theList`(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDDUPLIST', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
 							$rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
-						}elseif($goCountTheHeader > 21) {
+						}elseif($goCountTheHeader > 21 && empty($lead_mapping)) {
 							$goShowCustomFields = "DESC custom_$list_id;";
 							$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 							$countResultrsltgoShowCustomFields = $astDB->getRowCount();
@@ -789,7 +880,7 @@
 					$alex["error_insert"] = $astDB->getLastError();
 
 					# start set query for custom fields
-					if(!empty($lead_mapping) && !empty($custom_array)){ //LEAD MAPPING CUSTOMIZATION
+					if(!empty($lead_mapping) && $hasMappedCustomFields){ //LEAD MAPPING CUSTOMIZATION
 						$goCustomKeyData = [];
 						$goCustomValuesData = [];
 						$goCustomUpdateData = [];
@@ -822,7 +913,7 @@
 						$goQueryCustomFields = "INSERT INTO `custom_$theList`(lead_id, $custom_keyValues) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
                         $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
-					}elseif($goCountTheHeader > 21) {
+					}elseif($goCountTheHeader > 21 && empty($lead_mapping)) {
 						$goShowCustomFields = "DESC custom_$list_id;";
 						$rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
 						$countResultrsltgoShowCustomFields = $astDB->getRowCount();
