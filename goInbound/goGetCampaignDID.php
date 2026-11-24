@@ -42,6 +42,12 @@
     if(empty($campaign_id)){
         $apiresults = ["result" => "Error: Set a value for campaign_id."];
     }else{
+        $dataDidID = [];
+        $dataDidPattern = [];
+        $dataDidDescription = [];
+        $dataActive = [];
+        $dataDidRoute = [];
+
         $cols = ["did_id", "did_pattern", "did_description", "did_active", "did_route"];
         $astDB->where("campaign_id", $campaign_id);
         $query =  $astDB->get("vicidial_inbound_dids", NULL, $cols);
